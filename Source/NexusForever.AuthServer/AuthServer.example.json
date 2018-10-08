@@ -1,0 +1,15 @@
+{
+    "Network": {
+        "Host": "0.0.0.0",
+        "Port": 23115
+    },
+    "Database": {
+        "Auth": {
+            "Host": "127.0.0.1",
+            "Port": 3306,
+            "Username": "nexusforever",
+            "Password": "nexusforever",
+            "Database": "nexus_forever_auth"
+        }
+    }
+}

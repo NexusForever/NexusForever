@@ -1,0 +1,29 @@
+{
+    "Network": {
+        "Host": "0.0.0.0",
+        "Port": 24000
+    },
+    "Database": {
+        "Auth": {
+            "Host": "127.0.0.1",
+            "Port": 3306,
+            "Username": "nexusforever",
+            "Password": "nexusforever",
+            "Database": "nexus_forever_auth"
+        },
+        "Character": {
+            "Host": "127.0.0.1",
+            "Port": 3306,
+            "Username": "nexusforever",
+            "Password": "nexusforever",
+            "Database": "nexus_forever_character"
+        },
+        "World": {
+            "Host": "127.0.0.1",
+            "Port": 3306,
+            "Username": "nexusforever",
+            "Password": "nexusforever",
+            "Database": "nexus_forever_world"
+        }
+    }
+}
