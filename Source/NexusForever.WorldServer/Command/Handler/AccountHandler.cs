@@ -22,5 +22,20 @@ namespace NexusForever.WorldServer.Command.Handler
                 log.Error(exception);
             }
         }
+
+        [CommandHandler("accountdelete")]
+        public static void HandleAccountDelete(WorldSession session, string[] parameters)
+        {
+            try
+            {
+                //var command = uint.Parse(parameters[0]);
+                AuthDatabase.DeleteAccount(parameters[0]);
+                log.Info($"Account {parameters[0]} succesfully removed!");
+            }
+            catch (Exception exception)
+            {
+                log.Error(exception);
+            }
+        }
     }
 }
