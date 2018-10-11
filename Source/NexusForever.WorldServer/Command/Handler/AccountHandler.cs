@@ -22,5 +22,21 @@ namespace NexusForever.WorldServer.Command.Handler
                 log.Error(exception);
             }
         }
+
+        [CommandHandler("accountdelete")]
+        public static void HandleAccountDelete(WorldSession session, string[] parameters)
+        {
+            try
+            {
+                if (AuthDatabase.DeleteAccount(parameters[0]))
+                    log.Info($"Account {parameters[0]} succesfully removed!");
+                else
+                    log.Error($"Cannot find account with Email : {parameters[0]}");
+            }
+            catch (Exception exception)
+            {
+                log.Error(exception);
+            }
+        }
     }
 }

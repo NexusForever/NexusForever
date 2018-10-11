@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -58,6 +59,23 @@ namespace NexusForever.Shared.Database.Auth
 
                 context.SaveChanges();
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static bool DeleteAccount(string email)
+        {
+            // Thanks Rawaho!
+            using (var context = new AuthContext())
+            {
+                Account account = context.Account.SingleOrDefault(a => a.Email == email);
+                if (account == null)
+                    return false;
+
+                context.Account.Remove(account);
+                return context.SaveChanges() > 0;
+            };
         }
 
         /// <summary>
