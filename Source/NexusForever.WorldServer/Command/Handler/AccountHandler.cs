@@ -28,9 +28,10 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             try
             {
-                //var command = uint.Parse(parameters[0]);
-                AuthDatabase.DeleteAccount(parameters[0]);
-                log.Info($"Account {parameters[0]} succesfully removed!");
+                if (AuthDatabase.DeleteAccount(parameters[0]))
+                    log.Info($"Account {parameters[0]} succesfully removed!");
+                else
+                    log.Error($"Cannot find account with Email : {parameters[0]}");
             }
             catch (Exception exception)
             {
