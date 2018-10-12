@@ -79,21 +79,21 @@ namespace NexusForever.Shared.Network
             WriteBits((uint)value, bits);
         }
 
-        public unsafe void Write(float value, uint bits = 32)
+        public void Write(float value, uint bits = 32)
         {
             if (bits > sizeof(float) * 8)
                 throw new ArgumentException();
 
-            WriteBits(*(uint*)&value, bits);
-        }
+			WriteBits((uint)BitConverter.SingleToInt32Bits(value), bits);
+		}
 
-        public unsafe void Write(double value, uint bits = 64u)
+        public void Write(double value, uint bits = 64u)
         {
             if (bits > sizeof(double) * 8)
                 throw new ArgumentException();
 
-            WriteBits(*(ulong*)&value, bits);
-        }
+			WriteBits((ulong)BitConverter.DoubleToInt64Bits(value), bits);
+		}
 
         public void Write(ulong value, uint bits = 64)
         {
