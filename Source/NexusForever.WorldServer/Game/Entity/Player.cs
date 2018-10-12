@@ -167,8 +167,12 @@ namespace NexusForever.WorldServer.Game.Entity
 			if (Map != null && Map.Entry.Id == entry.Id)
 			{
 				// Appended by Xan.
-				TeleportTo(x, y, z); //Run the no-world teleport function.
-				return; //Stop the function from going the rest of the way.
+				//THIS DOES NOT WORK YET!!!
+				//TO DO: Make EnqueueRelocate method replicate to client. After that happens, this will work.
+				//For now I have disabled this as a result of ^
+				
+				//TeleportTo(x, y, z); //Run the no-world teleport function.
+				//return; //Stop the function from going the rest of the way.
 			}
 
 			pendingFarTeleport = new PendingFarTeleport(worldId, x, y, z);
