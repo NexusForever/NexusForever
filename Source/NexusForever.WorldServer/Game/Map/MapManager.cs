@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
@@ -35,7 +35,26 @@ namespace NexusForever.WorldServer.Game.Map
             }
         }
 
-        public static void Update(double lastTick)
+		/// <summary>
+		/// Appended by Xan.
+		/// Move an existing <see cref="GridEntity"/> to another location on the map.
+		/// </summary>
+		public static void MoveExistingInMap(GridEntity entity, ushort worldId, Vector3 vector3)
+		{
+			WorldEntry entry = GameTableManager.World.GetEntry(worldId);
+			if (entry == null)
+				throw new ArgumentException();
+
+			if (maps.TryGetValue(worldId, out BaseMap map))
+				map.EnqueueRelocate(entity, vector3);
+			else {
+				var newMap = new BaseMap(entry);
+				newMap.EnqueueRelocate(entity, vector3);
+				maps.Add(worldId, newMap);
+			}
+		}
+
+		public static void Update(double lastTick)
         {
             if (maps.Count == 0)
                 return;
