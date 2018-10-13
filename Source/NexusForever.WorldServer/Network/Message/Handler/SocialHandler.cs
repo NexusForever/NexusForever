@@ -1,12 +1,14 @@
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 using System;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class SocialHandler
     {
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         public static readonly string CommandPrefix = "!";
 
@@ -22,7 +24,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     handler?.Invoke(session, parameters);
                 } catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    log.Warn(e.Message);
                 }
             }
         }
