@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -28,7 +28,7 @@ namespace NexusForever.Shared.Network
             stream.WriteByte(bitValue);
 
             bitPosition = 0;
-            bitValue    = 0;
+            bitValue = 0;
         }
 
         public void Write(bool value)
@@ -84,16 +84,16 @@ namespace NexusForever.Shared.Network
             if (bits > sizeof(float) * 8)
                 throw new ArgumentException();
 
-			WriteBits((uint)BitConverter.SingleToInt32Bits(value), bits);
-		}
+            WriteBits((uint)BitConverter.SingleToInt32Bits(value), bits);
+        }
 
         public void Write(double value, uint bits = 64u)
         {
             if (bits > sizeof(double) * 8)
                 throw new ArgumentException();
 
-			WriteBits((ulong)BitConverter.DoubleToInt64Bits(value), bits);
-		}
+            WriteBits((ulong)BitConverter.DoubleToInt64Bits(value), bits);
+        }
 
         public void Write(ulong value, uint bits = 64)
         {
