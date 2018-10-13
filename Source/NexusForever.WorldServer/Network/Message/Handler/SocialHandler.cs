@@ -6,11 +6,11 @@ using NexusForever.WorldServer.Network.Message.Model;
 namespace NexusForever.WorldServer.Network.Message.Handler {
     public static class SocialHandler {
 
-        public static readonly string commandPrefix = "!";
+        public static readonly string CommandPrefix = "!";
 
         [MessageHandler(GameMessageOpcode.ClientChat)]
         public static void HandleChat(WorldSession session, ClientChat chat) {
-            if (chat.Message.StartsWith(commandPrefix)) {
+            if (chat.Message.StartsWith(CommandPrefix)) {
                 try {
                     CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
                     CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
