@@ -1,5 +1,5 @@
-﻿using NexusForever.Shared.Database.World.Model;
-using NexusForever.Shared.Network.Message;
+﻿using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;

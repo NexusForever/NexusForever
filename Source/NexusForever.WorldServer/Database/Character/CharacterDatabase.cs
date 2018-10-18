@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using NexusForever.Shared.Database.Character.Model;
+using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Entity;
+using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 
-namespace NexusForever.Shared.Database.Character
+namespace NexusForever.WorldServer.Database.Character
 {
     public static class CharacterDatabase
     {
@@ -12,6 +14,12 @@ namespace NexusForever.Shared.Database.Character
         {
             using (var context = new CharacterContext())
                 return context.Character.DefaultIfEmpty().Max(s => s.Id);
+        }
+
+        public static ulong GetNextItemId()
+        {
+            using (var context = new CharacterContext())
+                return context.Item.DefaultIfEmpty().Max(s => s.Id);
         }
 
         public static async Task<List<Model.Character>> GetCharacters(uint accountId)
@@ -22,15 +30,28 @@ namespace NexusForever.Shared.Database.Character
                     .Where(c => c.AccountId == accountId)
                         .Include(c => c.CharacterAppearance)
                         .Include(c => c.CharacterCustomisation)
+                        .Include(c => c.Item)
                     .ToListAsync();
             }
         }
 
-        public static async Task CreateCharacter(Model.Character character)
+        public static async Task CreateCharacter(Model.Character character, IEnumerable<ItemEntity> items)
         {
             using (var context = new CharacterContext())
             {
                 context.Character.Add(character);
+                foreach (var item in items)
+                    item.Save(context);
+
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task SavePlayer(Player player)
+        {
+            using (var context = new CharacterContext())
+            {
+                player.Save(context);
                 await context.SaveChangesAsync();
             }
         }

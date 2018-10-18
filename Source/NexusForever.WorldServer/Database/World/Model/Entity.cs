@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NexusForever.Shared.Database.World.Model
+namespace NexusForever.WorldServer.Database.World.Model
 {
     public partial class Entity
     {

@@ -16,11 +16,16 @@
         Server00F1                      = 0x00F1,
         Server0104                      = 0x0104, // Galactic Archive
         ServerCharacter                 = 0x010F, // single character
-        Server0111                      = 0x0111,
+        ServerItemAdd                   = 0x0111,
         ServerCharacterList             = 0x0117,
         ServerMountUnlocked             = 0x0129,
+        ServerItemDelete                = 0x0148,
+        ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
         Server0169                      = 0x0169, // ability book related
+        ClientItemSplit                 = 0x017D,
+        ServerItemStackCountUpdate      = 0x017F,
+        ClientItemMove                  = 0x0182,
         ClientEntitySelect              = 0x0185,
         ServerFlightPathUpdate          = 0x0188,
         ServerPlayerTitleUpdate         = 0x018B,
@@ -35,6 +40,7 @@
         ClientEncrypted                 = 0x0244,
         ServerCombatLog                 = 0x0247,
         ClientCharacterCreate           = 0x025B,
+        ServerPlayerCreate              = 0x025E,
         ClientPacked                    = 0x025C, // the same as ClientEncrypted except the contents isn't encrypted?
         ServerEntityCreate              = 0x0262,
         ClientCharacterDelete           = 0x0352,
@@ -44,6 +50,8 @@
         ServerRealmEncrypted            = 0x03DC,
         ServerRealmInfo                 = 0x03DB,
         Server0497                      = 0x0497, // guild info
+        ServerItemSwap                  = 0x0568,
+        ServerItemMove                  = 0x0569,
         ClientHelloRealm                = 0x058F,
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
@@ -64,6 +72,7 @@
         ServerEntityDestory             = 0x088C, // 0x8A5??
         Server08B3                      = 0x08B3,
         ServerVendor                    = 0x090B,
+        ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
         ServerAccountEntitlements       = 0x0968
     }

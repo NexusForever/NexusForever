@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public uint CreatureId { get; }
         public VendorInfo VendorInfo { get; }
 
-        public NonPlayer(Shared.Database.World.Model.Entity entity)
+        public NonPlayer(Database.World.Model.Entity entity)
             : base(EntityType.NonPlayer)
         {
             CreatureId  = entity.Creature;

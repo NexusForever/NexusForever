@@ -1,9 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using NexusForever.Shared.Database.World.Model;
+using NexusForever.WorldServer.Database.World.Model;
 
-namespace NexusForever.Shared.Database.World
+namespace NexusForever.WorldServer.Database.World
 {
     public static class WorldDatabase
     {

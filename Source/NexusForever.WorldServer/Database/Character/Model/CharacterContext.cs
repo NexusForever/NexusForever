@@ -1,8 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using NexusForever.Shared.Database;
 
-namespace NexusForever.Shared.Database.Character.Model
+namespace NexusForever.WorldServer.Database.Character.Model
 {
     public partial class CharacterContext : DbContext
     {
@@ -18,6 +19,7 @@ namespace NexusForever.Shared.Database.Character.Model
         public virtual DbSet<Character> Character { get; set; }
         public virtual DbSet<CharacterAppearance> CharacterAppearance { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual DbSet<Item> Item { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -117,6 +119,55 @@ namespace NexusForever.Shared.Database.Character.Model
                     .WithMany(p => p.CharacterCustomisation)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_customisation_id__character_id");
+            });
+
+            modelBuilder.Entity<Item>(entity =>
+            {
+                entity.ToTable("item");
+
+                entity.HasIndex(e => e.OwnerId)
+                    .HasName("FK__item_ownerId__character_id");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.BagIndex)
+                    .HasColumnName("bagIndex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Charges)
+                    .HasColumnName("charges")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Durability)
+                    .HasColumnName("durability")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ExpirationTimeLeft)
+                    .HasColumnName("expirationTimeLeft")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ItemId)
+                    .HasColumnName("itemId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Location)
+                    .HasColumnName("location")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.OwnerId)
+                    .HasColumnName("ownerId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.StackCount)
+                    .HasColumnName("stackCount")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Owner)
+                    .WithMany(p => p.Item)
+                    .HasForeignKey(d => d.OwnerId)
+                    .HasConstraintName("FK__item_ownerId__character_id");
             });
         }
     }

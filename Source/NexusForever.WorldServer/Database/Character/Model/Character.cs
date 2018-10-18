@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NexusForever.Shared.Database.Character.Model
+namespace NexusForever.WorldServer.Database.Character.Model
 {
     public partial class Character
     {
@@ -9,6 +9,7 @@ namespace NexusForever.Shared.Database.Character.Model
         {
             CharacterAppearance = new HashSet<CharacterAppearance>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
+            Item = new HashSet<Item>();
         }
 
         public ulong Id { get; set; }
@@ -22,5 +23,6 @@ namespace NexusForever.Shared.Database.Character.Model
 
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public ICollection<Item> Item { get; set; }
     }
 }

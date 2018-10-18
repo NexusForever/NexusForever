@@ -2,11 +2,12 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Game.Map;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public abstract class GridEntity
+    public abstract class GridEntity : IUpdate
     {
         // arbitrary
         private const float VisionRange = 32.0f;

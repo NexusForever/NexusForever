@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NexusForever.Shared.Database.Character.Model
+namespace NexusForever.WorldServer.Database.Character.Model
 {
     public partial class CharacterAppearance
     {

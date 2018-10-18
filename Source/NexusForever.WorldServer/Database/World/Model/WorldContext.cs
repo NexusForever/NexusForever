@@ -1,8 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using NexusForever.Shared.Database;
 
-namespace NexusForever.Shared.Database.World.Model
+namespace NexusForever.WorldServer.Database.World.Model
 {
     public partial class WorldContext : DbContext
     {
