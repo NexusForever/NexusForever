@@ -197,11 +197,11 @@ namespace NexusForever.Shared.GameTable
         public T GetEntry(ulong id)
         {
             if (id >= header.MaxId)
-                throw new GameTableException("Invalid id for this GameTable!");
+                return null;
 
             int lookupId = lookup[id];
             if (lookupId == -1)
-                throw new GameTableException("Invalid id for this GameTable!");
+                return null;
 
             return Entries[lookupId];
         }

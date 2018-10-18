@@ -20,6 +20,7 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<Item2TypeEntry> ItemType { get; private set; }
         public static GameTable<ItemDisplaySourceEntryEntry> ItemDisplaySource { get; private set; }
         public static GameTable<WorldEntry> World { get; private set; }
+        public static GameTable<EmotesEntry> Emotes { get; private set; }
 
         public static void Initialise()
         {
@@ -39,6 +40,7 @@ namespace NexusForever.Shared.GameTable
                 ItemType               = new GameTable<Item2TypeEntry>("tbl\\Item2Type.tbl");
                 ItemDisplaySource      = new GameTable<ItemDisplaySourceEntryEntry>("tbl\\ItemDisplaySourceEntry.tbl");
                 World                  = new GameTable<WorldEntry>("tbl\\World.tbl");
+                Emotes                 = new GameTable<EmotesEntry>("tbl\\Emotes.tbl");
             }
             catch (Exception exception)
             {

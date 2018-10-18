@@ -74,6 +74,7 @@
         ServerVendor                    = 0x090B,
         ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
+        ServerEmote                     = 0x093C,
         ServerAccountEntitlements       = 0x0968
     }
 }
