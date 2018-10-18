@@ -171,8 +171,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 // create a temporary inventory to create starting gear
                 var inventory = new Inventory(character.Id, creationEntry);
                 var items = inventory
-                    .First()
-                    .Select(m => m);
+                    .SelectMany(b => b)
+                    .Select(i => i);
 
                 // TODO: actually error check this
                 session.EnqueueEvent(new TaskEvent(CharacterDatabase.CreateCharacter(character, items),
