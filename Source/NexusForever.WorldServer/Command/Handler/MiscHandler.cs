@@ -1,6 +1,6 @@
+using System.Numerics;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network;
-using System.Numerics;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

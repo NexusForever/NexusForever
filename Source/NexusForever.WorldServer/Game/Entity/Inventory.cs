@@ -47,13 +47,21 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             characterId = owner;
 
-            // only need the equipped bag for character creation
-            var pair = AssetManager.InventoryLocationCapacities
-                .SingleOrDefault(c => c.Key == InventoryLocation.Equipped);
-            bags.Add(pair.Key, new Bag(pair.Key, pair.Value));
+            foreach ((InventoryLocation location, uint defaultCapacity) in AssetManager.InventoryLocationCapacities)
+                bags.Add(location, new Bag(location, defaultCapacity));
 
             foreach (uint itemId in creationEntry.ItemIds.Where(i => i != 0u))
-                ItemCreate(itemId);
+            {
+                Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+                if (itemEntry == null)
+                    throw new ArgumentNullException();
+
+                Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(itemEntry.Item2TypeId);
+                if (typeEntry.ItemSlotId == 0)
+                    ItemCreate(itemEntry, 1u);
+                else
+                    ItemCreate(itemEntry);
+            }
         }
 
         public void Update(double lastTick)
@@ -96,9 +104,20 @@ namespace NexusForever.WorldServer.Game.Entity
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
+            ItemCreate(itemEntry);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Item"/> in the first available <see cref="EquippedItem"/> bag index.
+        /// </summary>
+        public void ItemCreate(Item2Entry itemEntry)
+        {
+            if (itemEntry == null)
+                throw new ArgumentNullException();
+
             Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(itemEntry.Item2TypeId);
             if (typeEntry.ItemSlotId == 0)
-                throw new ArgumentException($"Item {itemId} isn't equippable!");
+                throw new ArgumentException($"Item {itemEntry.Id} isn't equippable!");
 
             Bag bag = GetBag(InventoryLocation.Equipped);
             Debug.Assert(bag != null);
@@ -124,13 +143,24 @@ namespace NexusForever.WorldServer.Game.Entity
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
+            ItemCreate(itemEntry, count);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
+        /// </summary>
+        public void ItemCreate(Item2Entry itemEntry, uint count)
+        {
+            if (itemEntry == null)
+                throw new ArgumentNullException();
+
             Bag bag = GetBag(InventoryLocation.Inventory);
             Debug.Assert(bag != null);
 
             // update any existing stacks before creating new items
             if (itemEntry.MaxStackCount > 1)
             {
-                foreach (Item item in bag.Where(i => i.Entry.Id == itemId))
+                foreach (Item item in bag.Where(i => i.Entry.Id == itemEntry.Id))
                 {
                     uint stackCount = Math.Min(itemEntry.MaxStackCount - item.StackCount, itemEntry.MaxStackCount);
                     ItemStackCountUpdate(item, item.StackCount + stackCount);
@@ -148,14 +178,17 @@ namespace NexusForever.WorldServer.Game.Entity
                 var item = new Item(characterId, itemEntry, Math.Min(count, itemEntry.MaxStackCount));
                 AddItem(item, InventoryLocation.Inventory, bagIndex);
 
-                player.Session.EnqueueMessageEncrypted(new ServerItemAdd
+                if (!player?.IsLoading ?? false)
                 {
-                    InventoryItem = new InventoryItem
+                    player.Session.EnqueueMessageEncrypted(new ServerItemAdd
                     {
-                        Item   = item.BuildNetworkItem(),
-                        Reason = 49
-                    }
-                });
+                        InventoryItem = new InventoryItem
+                        {
+                            Item = item.BuildNetworkItem(),
+                            Reason = 49
+                        }
+                    });
+                }
 
                 count -= item.StackCount;
             }
