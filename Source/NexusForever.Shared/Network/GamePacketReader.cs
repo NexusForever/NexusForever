@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -47,7 +47,7 @@ namespace NexusForever.Shared.Network
             if (currentBitPosition > 7)
             {
                 currentBitPosition = 0;
-                currentBitValue    = (byte)stream.ReadByte();
+                currentBitValue = (byte)stream.ReadByte();
             }
 
             return ((currentBitValue >> currentBitPosition) & 1) != 0;
@@ -103,22 +103,22 @@ namespace NexusForever.Shared.Network
             return (int)ReadBits(bits);
         }
 
-        public unsafe float ReadSingle(uint bits = 32u)
+        public float ReadSingle(uint bits = 32u)
         {
             if (bits > sizeof(float) * 8)
                 throw new ArgumentException();
 
-            ulong value = ReadBits(bits);
-            return *(float*)&value;
+            int value = (int)ReadBits(bits);
+            return BitConverter.Int32BitsToSingle(value);
         }
 
-        public unsafe double ReadDouble(uint bits = 64u)
+        public double ReadDouble(uint bits = 64u)
         {
             if (bits > sizeof(double) * 8)
                 throw new ArgumentException();
 
-            ulong value = ReadBits(bits);
-            return *(double*)&value;
+            long value = (long)ReadBits(bits);
+            return BitConverter.Int64BitsToDouble(value);
         }
 
         public ulong ReadULong(uint bits = 64u)
