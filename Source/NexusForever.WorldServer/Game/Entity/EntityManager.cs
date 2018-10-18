@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.Shared.Database.World;
-using NexusForever.Shared.Database.World.Model;
+using NexusForever.WorldServer.Database.World;
+using NexusForever.WorldServer.Database.World.Model;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity

@@ -1,29 +1,65 @@
-using NexusForever.Shared.Database.Character.Model;
+using System;
+using System.Numerics;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Database;
+using NexusForever.WorldServer.Database.Character;
+using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Numerics;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class Player : WorldEntity
+    public class Player : WorldEntity, ISaveCharacter
     {
+        // TODO: move this to the config file
+        private const double SaveDuration = 60d;
+
+        public ulong CharacterId { get; }
+        public string Name { get; }
+        public Sex Sex { get; }
+        public Race Race { get; }
+        public Class Class { get; }
+
+        public byte Level
+        {
+            get => level;
+            set
+            {
+                level = value;
+                saveMask &= PlayerSaveMask.Level;
+            }
+        }
+
+        private byte level;
+
+        public Inventory Inventory { get; }
         public WorldSession Session { get; }
-        public Character Character { get; }
+
+        private double timeToSave = SaveDuration;
+        private PlayerSaveMask saveMask;
 
         private PendingFarTeleport pendingFarTeleport;
 
-        public Player(WorldSession session, Character character)
+        public Player(WorldSession session, Character model)
             : base(EntityType.Player)
         {
-            Session = session;
-            Character = character;
+            CharacterId = model.Id;
+            Name        = model.Name;
+            Sex         = (Sex)model.Sex;
+            Race        = (Race)model.Race;
+            Class       = (Class)model.Class;
+            Level       = model.Level;
+
+            Inventory   = new Inventory(this, model);
+            Session     = session;
 
             // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
@@ -34,41 +70,72 @@ namespace NexusForever.WorldServer.Game.Entity
             Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
             Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
 
-            foreach (CharacterAppearance appearance in Character.CharacterAppearance)
-            {
-                ItemSlot slot = (ItemSlot)appearance.Slot;
-                VisibleItems.Add(slot, new VisibleItem(slot, appearance.DisplayId));
-            }
+            foreach (ItemVisual itemVisual in Inventory.GetItemVisuals())
+                itemVisuals.Add(itemVisual.Slot, itemVisual);
 
-            VisibleItems.Add(ItemSlot.WeaponPrimary, new VisibleItem(ItemSlot.WeaponPrimary, 7815));
+            // character appearance is also 'equipped'
+            foreach (CharacterAppearance appearance in model.CharacterAppearance)
+            {
+                ItemSlot itemSlot = (ItemSlot)appearance.Slot;
+                itemVisuals.Add(itemSlot, new ItemVisual
+                {
+                    Slot      = itemSlot,
+                    DisplayId = appearance.DisplayId
+                });
+            }
+        }
+
+        public override void Update(double lastTick)
+        {
+            timeToSave -= lastTick;
+            if (timeToSave <= 0d)
+            {
+                Session.EnqueueEvent(new TaskEvent(CharacterDatabase.SavePlayer(this),
+                    () =>
+                {
+                    Session.CanProcessPackets = true;
+                    timeToSave = SaveDuration;
+                }));
+
+                // prevent packets from being processed until asynchronous player save task is complete
+                Session.CanProcessPackets = false;
+            }
         }
 
         protected override IEntityModel BuildEntityModel()
         {
             return new PlayerEntityModel
             {
-                Id = Character.Id,
+                Id       = CharacterId,
                 Unknown8 = 358,
-                Name = Character.Name,
-                Race = (Race)Character.Race,
-                Class = (Class)Character.Class,
-                Sex = (Sex)Character.Sex
+                Name     = Name,
+                Race     = Race,
+                Class    = Class,
+                Sex      = Sex
             };
         }
 
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
+            IsLoading = true;
+
             Session.EnqueueMessageEncrypted(new ServerChangeWorld
             {
-                WorldId = (ushort)map.Entry.Id,
+                WorldId  = (ushort)map.Entry.Id,
                 Position = new Position(vector)
             });
 
-            //TEMP FROM XAN: Set default spawn location somewhere else. Edit vector input?
-            //Don't bother with it yet.
-
             base.OnAddToMap(map, guid, vector);
 
+            SendPacketsAfterAddToMap();
+
+            Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
+
+            IsLoading = false;
+        }
+
+        private void SendPacketsAfterAddToMap()
+        {
             Session.EnqueueMessageEncrypted(new ServerPathLog());
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new Server0636
@@ -77,7 +144,27 @@ namespace NexusForever.WorldServer.Game.Entity
                 Unknown4 = true,
             });
 
-            Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
+            var playerCreate = new ServerPlayerCreate
+            {
+                FactionData = new ServerPlayerCreate.Faction
+                {
+                    FactionId = 166
+                }
+            };
+
+            foreach (Bag bag in Inventory)
+            {
+                foreach (Item item in bag)
+                {
+                    playerCreate.Inventory.Add(new InventoryItem
+                    {
+                        Item   = item.BuildNetworkItem(),
+                        Reason = 49
+                    });
+                }
+            }
+
+            Session.EnqueueMessageEncrypted(playerCreate);
         }
 
         public override void OnRemoveFromMap()
@@ -100,7 +187,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Session.EnqueueMessageEncrypted(new ServerPlayerChanged
                 {
-                    Guid = entity.Guid,
+                    Guid     = entity.Guid,
                     Unknown1 = 1
                 });
             }
@@ -110,8 +197,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 Session.EnqueueMessageEncrypted(new Server08B3
                 {
                     MountGuid = mount.Guid,
-                    Unknown0 = 0,
-                    Unknown1 = true
+                    Unknown0  = 0,
+                    Unknown1  = true
                 });
 
                 // sets mount nameplate to show owner instead of creatures
@@ -125,7 +212,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Session.EnqueueMessageEncrypted(new Server0934
                 {
                     MountGuid = mount.Guid,
-                    Faction = 166
+                    Faction   = 166
                 });
             }
         }
@@ -152,11 +239,33 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (Map != null && Map.Entry.Id == entry.Id)
             {
-                //To do still.
+                // TODO: don't remove player from map if it's the same as destination
             }
 
             pendingFarTeleport = new PendingFarTeleport(worldId, x, y, z);
             RemoveFromMap();
+        }
+
+        public void Save(CharacterContext context)
+        {
+            if (saveMask != PlayerSaveMask.None)
+            {
+                var model = new Character
+                {
+                    Id = CharacterId
+                };
+
+                EntityEntry<Character> entity = context.Attach(model);
+                if ((saveMask & PlayerSaveMask.Level) != 0)
+                {
+                    model.Level = Level;
+                    entity.Property(p => p.Level).IsModified = true;
+                }
+
+                saveMask = PlayerSaveMask.None;
+            }
+
+            Inventory.Save(context);
         }
     }
 }

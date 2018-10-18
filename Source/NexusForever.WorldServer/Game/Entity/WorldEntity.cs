@@ -6,6 +6,7 @@ using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -15,23 +16,27 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Dictionary<Stat, StatValue> Stats { get; } = new Dictionary<Stat, StatValue>();
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
-        public Dictionary<ItemSlot, VisibleItem> VisibleItems { get; } = new Dictionary<ItemSlot, VisibleItem>();
 
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
         public ushort Faction1 { get; protected set; }
         public ushort Faction2 { get; protected set; }
 
+        public bool IsLoading { get; protected set; }
+
+        protected Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
+
         protected WorldEntity(EntityType type)
         {
             Type = type;
         }
 
+        protected abstract IEntityModel BuildEntityModel();
+
         public override void Update(double lastTick)
         {
-        }
 
-        protected abstract IEntityModel BuildEntityModel();
+        }
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
@@ -59,7 +64,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         }
                     }
                 },
-                VisibleItems = VisibleItems.Values.ToList(),
+                VisibleItems = itemVisuals.Values.ToList(),
                 Properties   = Properties.Values.ToList(),
                 Faction1    = 166,
                 Faction2    = 166,
@@ -84,7 +89,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Enqueue broadcast of <see cref="IWritable"/> to all visible <see cref="Player"/>'s in range.
         /// </summary>
-        public void EnqueueToVisible(IWritable message)
+        public void EnqueueToVisible(IWritable message, bool includeSelf = false)
         {
             foreach (WorldEntity entity in visibleEntities)
             {
@@ -92,7 +97,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (player == null)
                     continue;
 
-                if (player == this)
+                if (!includeSelf && player == this)
                     continue;
 
                 player.Session.EnqueueMessageEncrypted(message);

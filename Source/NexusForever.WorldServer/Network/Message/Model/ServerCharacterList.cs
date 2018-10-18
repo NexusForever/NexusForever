@@ -3,6 +3,7 @@ using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -37,8 +38,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public Class Class { get; set; }
             public uint Faction { get; set; }
             public uint Level { get; set; }
-            public List<VisibleItem> Appearance { get; } = new List<VisibleItem>();
-            public List<VisibleItem> Gear { get; } = new List<VisibleItem>();
+            public List<ItemVisual> Appearance { get; } = new List<ItemVisual>();
+            public List<ItemVisual> Gear { get; } = new List<ItemVisual>();
             public ushort WorldId { get; set; }
             public ushort WorldZoneId { get; set; }
             public ushort Unknown38 { get; set; }
@@ -63,11 +64,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write(Level);
 
                 writer.Write(Appearance.Count);
-                foreach (VisibleItem item in Appearance)
+                foreach (ItemVisual item in Appearance)
                     item.Write(writer);
 
                 writer.Write(Gear.Count);
-                foreach (VisibleItem item in Gear)
+                foreach (ItemVisual item in Gear)
                     item.Write(writer);
 
                 writer.Write(WorldId, 15);
