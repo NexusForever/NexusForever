@@ -1,6 +1,10 @@
-﻿using NexusForever.Shared.Network.Message;
+﻿using System;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -15,6 +19,27 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
                 handler?.Invoke(session, parameters);
             }
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientEmote)]
+        public static void HandleEmote(WorldSession session, ClientEmote emote)
+        {
+            uint emoteId = emote.EmoteId;
+            uint standState = 0;
+            if (emoteId != 0)
+            {                
+                EmotesEntry entry = GameTableManager.Emotes.GetEntry(emoteId);
+                if (entry == null)                
+                    throw (new InvalidPacketValueException("HandleEmote: Invalid EmoteId"));
+
+                standState = entry.StandState;
+            }
+            session.Player.EnqueueToVisible(new ServerEmote
+            {
+                Guid = session.Player.Guid,
+                StandState = standState,
+                EmoteId = emoteId
+            });
         }
     }
 }
