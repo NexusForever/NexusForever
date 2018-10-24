@@ -13,7 +13,6 @@ namespace NexusForever.WorldServer.Command
     public static class CommandManager
     {
         private static ImmutableDictionary<string, CommandHandlerDelegate> commandHandlers;
-
         public static void Initialise()
         {
             var handlers = new Dictionary<string, CommandHandlerDelegate>();
