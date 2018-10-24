@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using NexusForever.Shared.Configuration;
 
 namespace NexusForever.Shared
 {
@@ -16,5 +18,25 @@ namespace NexusForever.Shared
         {
             return BitConverter.ToString(value).Replace("-", "");
         }
+
+        public static DbContextOptionsBuilder UseConfiguration(this DbContextOptionsBuilder optionsBuilder, IDatabaseConfiguration databaseConfiguration, DatabaseType databaseType)
+        {
+            var connectionString = databaseConfiguration.GetConnectionString(databaseType);
+            switch (connectionString.Provider)
+            {
+                case DatabaseProvider.MySql:
+                    optionsBuilder.UseMySql(connectionString.ConnectionString);
+                    break;
+                case DatabaseProvider.MicrosoftSqlServer:
+                    optionsBuilder.UseSqlServer(connectionString.ConnectionString);
+                    break;
+                default:
+                    throw new NotSupportedException($"The requested database provider: {connectionString.Provider:G} is not supported.");
+            }
+
+            return optionsBuilder;
+        }
     }
+
+
 }

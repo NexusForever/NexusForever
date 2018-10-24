@@ -11,6 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="AuthServer.example.mssql.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="AuthServer.example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

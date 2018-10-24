@@ -1,0 +1,12 @@
+{
+    "Network": {
+        "Host": "0.0.0.0",
+        "Port": 23115
+    },
+    "Database": {
+        "Auth": {
+          "Provider":  "MicrosoftSqlServer",
+          "ConnectionString": "Server=(localdb)\\mssqllocaldb;Database=NexusForeverAuth;Trusted_Connection=True;MultipleActiveResultSets=true"
+        }
+    }
+}
