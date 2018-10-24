@@ -2,10 +2,10 @@
 using System.Net.Sockets;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth.Model;
-using NexusForever.Shared.Database.Character.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.Shared.Network.Message.Model;
+using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
 

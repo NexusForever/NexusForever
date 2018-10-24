@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using NexusForever.Shared.Database.World.Model;
+using NexusForever.WorldServer.Database.World.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {

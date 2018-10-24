@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
-using NexusForever.Shared.Database.World;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
 
@@ -44,7 +44,7 @@ namespace NexusForever.WorldServer.Game.Map
 
         private void CacheEntitySpawns()
         {
-            foreach (Shared.Database.World.Model.Entity entity in WorldDatabase.GetEntities((ushort)Entry.Id))
+            foreach (var entity in WorldDatabase.GetEntities((ushort)Entry.Id))
             {
                 // TODO: cache spawns by grid, only spawn when grid is loaded
                 // (int X, int Z) coord = GetGridCoord(vector);

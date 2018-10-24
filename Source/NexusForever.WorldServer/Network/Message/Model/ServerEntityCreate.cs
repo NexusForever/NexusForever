@@ -5,6 +5,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -101,7 +102,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint Unknown68 { get; set; }
         public Dictionary<EntityCommand, IEntityCommand> Commands { get; set; } = new Dictionary<EntityCommand, IEntityCommand>();
         public List<PropertyValue> Properties { get; set; } = new List<PropertyValue>();
-        public List<VisibleItem> VisibleItems { get; set; } = new List<VisibleItem>();
+        public List<ItemVisual> VisibleItems { get; set; } = new List<ItemVisual>();
         public List<UnknownStructure88> Unknown88 { get; } = new List<UnknownStructure88>();
         public uint Unknown8C { get; set; }
         public ushort Faction1 { get; set; }

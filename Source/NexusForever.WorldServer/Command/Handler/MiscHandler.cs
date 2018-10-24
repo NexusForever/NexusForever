@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network;
 
@@ -9,11 +9,18 @@ namespace NexusForever.WorldServer.Command.Handler
         [CommandHandler("teleport")]
         public static void HandleTeleport(WorldSession session, string[] parameters)
         {
-            session.Player.TeleportTo(ushort.Parse(parameters[0]), float.Parse(parameters[1]), float.Parse(parameters[2]), float.Parse(parameters[3]));
+            if (parameters.Length == 4)
+            {
+                session.Player.TeleportTo(ushort.Parse(parameters[0]), float.Parse(parameters[1]), float.Parse(parameters[2]), float.Parse(parameters[3]));
+            } else if (parameters.Length == 3)
+            {
+                //Just grab their current map and use the new coords.
+                session.Player.TeleportTo((ushort)session.Player.Map.Entry.Id, float.Parse(parameters[0]), float.Parse(parameters[1]), float.Parse(parameters[2]));
+            }
         }
 
-        [CommandHandler("mounttest")]
-        public static void HandleTest(WorldSession session, string[] parameters)
+        [CommandHandler("mount")]
+        public static void HandleMount(WorldSession session, string[] parameters)
         {
             var mount = new Mount(session.Player);
             var vector = new Vector3(session.Player.Position.X, session.Player.Position.Y, session.Player.Position.Z);

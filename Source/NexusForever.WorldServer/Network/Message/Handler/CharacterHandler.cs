@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
-using NexusForever.Shared.Database.Character;
-using NexusForever.Shared.Database.Character.Model;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Database.Character;
+using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -90,9 +90,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Unknown38   = 358
                     };
 
-                    foreach (CharacterAppearance appearance in character.CharacterAppearance)
-                        listCharacter.Appearance.Add(new VisibleItem((ItemSlot)appearance.Slot, appearance.DisplayId));
+                    // create a temporary inventory to show equipped gear
+                    var inventory = new Inventory(null, character);
+                    foreach (ItemVisual itemVisual in inventory.GetItemVisuals())
+                        listCharacter.Gear.Add(itemVisual);
 
+                    foreach (CharacterAppearance appearance in character.CharacterAppearance)
+                    {
+                        listCharacter.Appearance.Add(new ItemVisual
+                        {
+                            Slot      = (ItemSlot)appearance.Slot,
+                            DisplayId = appearance.DisplayId
+                        });
+                    }
+                        
                     foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
                     {
                         listCharacter.Labels.Add(customisation.Label);
@@ -125,7 +136,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 var character = new Character
                 {
                     AccountId = session.Account.Id,
-                    Id        = AssetManager.NextCharacterId++,
+                    Id        = AssetManager.NextCharacterId,
                     Name      = characterCreate.Name,
                     Race      = (byte)creationEntry.RaceId,
                     Sex       = (byte)creationEntry.Sex,
@@ -157,8 +168,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
                 }
 
+                // create a temporary inventory to create starting gear
+                var inventory = new Inventory(character.Id, creationEntry);
+                var items = inventory
+                    .SelectMany(b => b)
+                    .Select(i => i);
+
                 // TODO: actually error check this
-                session.EnqueueEvent(new TaskEvent(CharacterDatabase.CreateCharacter(character),
+                session.EnqueueEvent(new TaskEvent(CharacterDatabase.CreateCharacter(character, items),
                     () =>
                 {
                     session.Characters.Add(character);

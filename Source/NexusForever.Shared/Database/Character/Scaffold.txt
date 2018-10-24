@@ -1,4 +1,0 @@
-﻿Scaffold-DbContext "server=localhost;port=3306;user=nexusforever;password=nexusforever;database=nexus_forever_character" -Project NexusForever.Shared -OutputDir ".\Database\Character\Model" -Context "CharacterContext" -f Pomelo.EntityFrameworkCore.MySql
-if (!optionsBuilder.IsConfigured)
-    optionsBuilder.UseMySql($"server={DatabaseManager.Config.Character.Host};port={DatabaseManager.Config.Character.Port};user={DatabaseManager.Config.Character.Username};"
-        + $"password={DatabaseManager.Config.Character.Password};database={DatabaseManager.Config.Character.Database}");
