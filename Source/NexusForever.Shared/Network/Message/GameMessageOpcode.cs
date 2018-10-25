@@ -45,6 +45,7 @@
         ServerEntityCreate              = 0x0262,
         ClientCharacterDelete           = 0x0352,
         ClientEmote                     = 0x037E,
+        Client038C                      = 0x038C,
         Server03AA                      = 0x03AA, // friendship account related
         Server03BE                      = 0x03BE, // friendship related
         ServerRealmEncrypted            = 0x03DC,
@@ -63,6 +64,7 @@
         ServerRealmMessages             = 0x0763,
         ClientRealmList                 = 0x07A4,
         ClientCharacterList             = 0x07E0,
+        Client07E3                      = 0x07E3,
         ClientVendor                    = 0x07EA,
         ClientCharacterSelect           = 0x07DD,
         ClientStorefrontRequestCatalog  = 0x082D,
@@ -74,6 +76,7 @@
         ServerVendor                    = 0x090B,
         ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
+        Client0938                      = 0x0938,
         ServerEmote                     = 0x093C,
         ServerAccountEntitlements       = 0x0968
     }

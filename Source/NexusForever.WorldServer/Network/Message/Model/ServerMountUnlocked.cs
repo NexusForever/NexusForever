@@ -6,11 +6,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerMountUnlocked, MessageDirection.Server)]
     public class ServerMountUnlocked : IWritable
     {
-        public uint SpellId { get; set; }
+        public uint CreatureId { get; set; }
 
+        /// @TODO : Fix client crash
         public void Write (GamePacketWriter writer)
         {
-            writer.Write(SpellId, 18);
+            writer.Write(CreatureId, 18);
         }
     }
 }
