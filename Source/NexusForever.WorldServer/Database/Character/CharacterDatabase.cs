@@ -31,6 +31,7 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterAppearance)
                         .Include(c => c.CharacterCustomisation)
                         .Include(c => c.Item)
+                        .Include(c => c.CharacterBone)
                     .ToListAsync();
             }
         }

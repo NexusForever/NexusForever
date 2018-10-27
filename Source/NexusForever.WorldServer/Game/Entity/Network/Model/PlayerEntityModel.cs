@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public string Unknown30 { get; set; }
         public byte Unknown34 { get; set; }
         public List<ulong> Unknown3C { get; } = new List<ulong>();
-        public List<uint> Unknown44 { get; } = new List<uint>();
+        public List<float> Bones { get; set; } = new List<float>();
         public byte Unknown48 { get; set; }
         public byte Unknown4C { get; set; }
         public ushort Unknown50 { get; set; }
@@ -40,8 +40,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
 
             writer.Write((byte)Unknown3C.Count, 5);
             Unknown3C.ForEach(e => writer.Write(e));
-            writer.Write((byte)Unknown44.Count, 6);
-            Unknown44.ForEach(e => writer.Write(e));
+            writer.Write(Bones.Count, 6);
+            Bones.ForEach(e => writer.Write(e));
 
             writer.Write(Unknown48, 3);
             writer.Write(Unknown4C);
