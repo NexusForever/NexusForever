@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Network.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -13,9 +14,9 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public string Realm { get; set; }
             public uint Unknown2 { get; set; }
             public uint Unknown3 { get; set; }
-            public byte Type { get; set; }
-            public byte Status { get; set; }
-            public byte Population { get; set; }
+            public RealmType Type { get; set; }
+            public RealmStatus Status { get; set; }
+            public RealmPopulation Population { get; set; }
             public uint Unknown7 { get; set; }
 
             // struct

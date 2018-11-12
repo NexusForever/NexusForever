@@ -33,9 +33,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     Unknown0   = 1,
                     Realm      = server.Model.Name,
-                    Type       = server.Model.Type,
-                    Status     = 4,
-                    Population = 0
+                    Type       = (RealmType)server.Model.Type,
+                    Status     = RealmStatus.Up,
+                    Population = RealmPopulation.Low
                 });
             }
 
