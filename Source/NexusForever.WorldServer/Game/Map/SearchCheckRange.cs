@@ -14,7 +14,7 @@ namespace NexusForever.WorldServer.Game.Map
             this.radius = radius;
         }
 
-        public bool CheckEntity(GridEntity entity)
+        public virtual bool CheckEntity(GridEntity entity)
         {
             return Vector3.Distance(vector, entity.Position) < radius;
         }

@@ -5,9 +5,15 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
+using System.Linq;
+using NexusForever.WorldServer.Database.Character;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -32,6 +38,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     log.Warn(e.Message);
                 }
+            }
+            else
+            {
+                SocialManager.HandleClientChat(session, chat);
             }
         }
 

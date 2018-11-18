@@ -15,6 +15,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Game.Social;
 
 namespace NexusForever.WorldServer
 {
@@ -48,6 +49,7 @@ namespace NexusForever.WorldServer
             ServerManager.Initialise();
 
             MessageManager.Initialise();
+            SocialManager.Initialise();
             CommandManager.Initialise();
             NetworkManager<WorldSession>.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Network);
 
