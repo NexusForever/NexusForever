@@ -75,6 +75,8 @@
         ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
         ServerEmote                     = 0x093C,
+        ClientWhoRequest                = 0x0959,
+        ServerWhoResponse               = 0x095A,
         ServerAccountEntitlements       = 0x0968
     }
 }
