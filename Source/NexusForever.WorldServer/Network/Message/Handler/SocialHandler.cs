@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
@@ -51,6 +53,30 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 Guid = session.Player.Guid,
                 StandState = standState,
                 EmoteId = emoteId
+            });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientWhoRequest)]
+        public static void HandleWhoRequest(WorldSession session, ClientWhoRequest request)
+        {
+            List<ServerWhoResponse.WhoPlayer> players = new List<ServerWhoResponse.WhoPlayer>
+            {
+                new ServerWhoResponse.WhoPlayer
+                {
+                    Name = session.Player.Name,
+                    Level = session.Player.Level,
+                    Race = session.Player.Race,
+                    Class = session.Player.Class,
+                    Path = Path.Scientist,
+                    Faction = Faction.Dominion,
+                    Sex = session.Player.Sex,
+                    Zone = 1417
+                }
+            };
+
+            session.EnqueueMessageEncrypted(new ServerWhoResponse
+            {
+                Players = players
             });
         }
     }
