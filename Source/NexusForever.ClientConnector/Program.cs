@@ -8,7 +8,7 @@ namespace NexusForever.ClientConnector
 {
     internal static class Program
     {
-        public static string jsonFile = "config.json";
+        private const string jsonFile = "config.json";
 
         [DllImport("kernel32.dll")]
         static extern bool CreateProcess(
@@ -24,35 +24,38 @@ namespace NexusForever.ClientConnector
             out PROCESS_INFORMATION lpProcessInformation
         );
 
-        static void Main()
+        public static void Main()
         {
             if (!File.Exists(jsonFile))
             {
-                Console.WriteLine("Type in your host name : ");
-                string auth = Console.ReadLine();
+                Console.Write("Type in your host name: ");
+                string hostName = Console.ReadLine();
 
                 ClientConfiguration clientConfig = new ClientConfiguration
                 {
-                    HostName = auth
+                    HostName = hostName
                 };
 
                 File.WriteAllText(jsonFile, JsonConvert.SerializeObject(clientConfig));
-                Main();
+
+                LaunchClient(hostName);
             }
             else
             {
-                var file = File.ReadAllText(jsonFile);
                 ConfigurationManager<ClientConfiguration>.Initialise(jsonFile);
-                ClientConfiguration auth = JsonConvert.DeserializeObject<ClientConfiguration>(file);
-
-                STARTUPINFO si = new STARTUPINFO();
-                PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
-
-                CreateProcess(
-                    "WildStar64.exe",
-                    $"/auth {auth.HostName} /authNc {auth.HostName} /lang en /patcher {auth.HostName} /SettingsKey WildStar /realmDataCenterId 9",
-                IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, null, ref si, out pi);
+                LaunchClient(ConfigurationManager<ClientConfiguration>.Config.HostName);
             }
+        }
+
+        private static void LaunchClient(string hostName)
+        {
+            STARTUPINFO si = new STARTUPINFO();
+            PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
+
+            CreateProcess(
+                "WildStar64.exe",
+                $"/auth {hostName} /authNc {hostName} /lang en /patcher {hostName} /SettingsKey WildStar /realmDataCenterId 9",
+                IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, null, ref si, out pi);
         }
     }
 }
