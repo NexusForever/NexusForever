@@ -24,19 +24,20 @@ namespace NexusForever.ClientConnector
             out PROCESS_INFORMATION lpProcessInformation
         );
 
-        static void Main(string[] args)
+        static void Main()
         {
-            if(!File.Exists(jsonFile))
+            if (!File.Exists(jsonFile))
             {
                 Console.WriteLine("Type in your host name : ");
                 string auth = Console.ReadLine();
 
                 ClientConfiguration clientConfig = new ClientConfiguration
                 {
-                    hostname = auth
+                    HostName = auth
                 };
 
                 File.WriteAllText(jsonFile, JsonConvert.SerializeObject(clientConfig));
+                Main();
             }
             else
             {
@@ -49,7 +50,7 @@ namespace NexusForever.ClientConnector
 
                 CreateProcess(
                     "WildStar64.exe",
-                    $"/auth {auth.hostname} /authNc {auth.hostname} /lang en /patcher {auth.hostname} /SettingsKey WildStar /realmDataCenterId 9",
+                    $"/auth {auth.HostName} /authNc {auth.HostName} /lang en /patcher {auth.HostName} /SettingsKey WildStar /realmDataCenterId 9",
                 IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, null, ref si, out pi);
             }
         }

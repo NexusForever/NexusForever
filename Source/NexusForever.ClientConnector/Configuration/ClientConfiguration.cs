@@ -2,6 +2,6 @@
 {
     public class ClientConfiguration
     {
-        public string hostname { get; set; }
+        public string HostName { get; set; }
     }
 }
