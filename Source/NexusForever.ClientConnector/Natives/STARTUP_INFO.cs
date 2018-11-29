@@ -2,14 +2,6 @@
 
 namespace NexusForever.ClientConnector
 {
-    public struct PROCESS_INFORMATION
-    {
-        public IntPtr hProcess;
-        public IntPtr hThread;
-        public uint dwProcessId;
-        public uint dwThreadId;
-    }
-
     public struct STARTUPINFO
     {
         public uint cb;
@@ -30,12 +22,5 @@ namespace NexusForever.ClientConnector
         public IntPtr hStdInput;
         public IntPtr hStdOutput;
         public IntPtr hStdError;
-    }
-
-    public struct SECURITY_ATTRIBUTES
-    {
-        public int length;
-        public IntPtr lpSecurityDescriptor;
-        public bool bInheritHandle;
     }
 }

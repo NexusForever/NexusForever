@@ -1,10 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using NexusForever.ClientConnector.Configuration;
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace NexusForever.ClientConnector
 {
-    class Program
+    internal static class Program
     {
+        public static string jsonFile = "config.json";
+
         [DllImport("kernel32.dll")]
         static extern bool CreateProcess(
             string lpApplicationName,
@@ -21,16 +26,32 @@ namespace NexusForever.ClientConnector
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Type in your host name : ");
-            string auth = Console.ReadLine();
+            if(!File.Exists(jsonFile))
+            {
+                Console.WriteLine("Type in your host name : ");
+                string auth = Console.ReadLine();
 
-            STARTUPINFO si = new STARTUPINFO();
-            PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
+                ClientConfiguration clientConfig = new ClientConfiguration
+                {
+                    hostname = auth
+                };
 
-            CreateProcess(
-                "WildStar64.exe",
-                $"/auth {auth} /authNc {auth} /lang en /patcher {auth} /SettingsKey WildStar /realmDataCenterId 9",
-            IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, null, ref si, out pi);
+                File.WriteAllText(jsonFile, JsonConvert.SerializeObject(clientConfig));
+            }
+            else
+            {
+                var file = File.ReadAllText(jsonFile);
+                ConfigurationManager<ClientConfiguration>.Initialise(jsonFile);
+                ClientConfiguration auth = JsonConvert.DeserializeObject<ClientConfiguration>(file);
+
+                STARTUPINFO si = new STARTUPINFO();
+                PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
+
+                CreateProcess(
+                    "WildStar64.exe",
+                    $"/auth {auth.hostname} /authNc {auth.hostname} /lang en /patcher {auth.hostname} /SettingsKey WildStar /realmDataCenterId 9",
+                IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, null, ref si, out pi);
+            }
         }
     }
 }
