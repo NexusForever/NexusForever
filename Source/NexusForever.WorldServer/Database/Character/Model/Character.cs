@@ -8,6 +8,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public Character()
         {
             CharacterAppearance = new HashSet<CharacterAppearance>();
+            CharacterBone = new HashSet<CharacterBone>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
             Item = new HashSet<Item>();
         }
@@ -22,6 +23,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public DateTime CreateTime { get; set; }
 
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }
+        public ICollection<CharacterBone> CharacterBone { get; set; }
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
         public ICollection<Item> Item { get; set; }
     }

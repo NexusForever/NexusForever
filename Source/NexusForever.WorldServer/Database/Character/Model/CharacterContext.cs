@@ -18,6 +18,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
         public virtual DbSet<Character> Character { get; set; }
         public virtual DbSet<CharacterAppearance> CharacterAppearance { get; set; }
+        public virtual DbSet<CharacterBone> CharacterBone { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<Item> Item { get; set; }
 
@@ -95,6 +96,30 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterAppearance)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_appearance_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterBone>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.BoneIndex });
+
+                entity.ToTable("character_bone");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.BoneIndex)
+                    .HasColumnName("boneIndex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Bone)
+                    .HasColumnName("bone")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterBone)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK_character_bone_id__character_id");
             });
 
             modelBuilder.Entity<CharacterCustomisation>(entity =>

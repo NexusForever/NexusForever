@@ -33,9 +33,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     Unknown0   = 1,
                     Realm      = server.Model.Name,
-                    Type       = server.Model.Type,
-                    Status     = 4,
-                    Population = 0
+                    Type       = (RealmType)server.Model.Type,
+                    Status     = RealmStatus.Up,
+                    Population = RealmPopulation.Low
                 });
             }
 
@@ -110,6 +110,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         listCharacter.Values.Add(customisation.Value);
                     }
 
+                    foreach (CharacterBone bone in character.CharacterBone.OrderBy(bone => bone.BoneIndex))
+                    {
+                        listCharacter.Bones.Add(bone.Bone);
+                    }
+
                     serverCharacterList.Characters.Add(listCharacter);
                 }
 
@@ -165,6 +170,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     {
                         Slot      = (byte)entry.ItemSlotId,
                         DisplayId = (ushort)entry.ItemDisplayId
+                    });
+                }
+
+                for(int i = 0; i < characterCreate.Bones.Count; ++i)
+                {
+                    character.CharacterBone.Add(new CharacterBone
+                    {
+                        BoneIndex = (byte)(i),
+                        Bone = characterCreate.Bones[i]
                     });
                 }
 

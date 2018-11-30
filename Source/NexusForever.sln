@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{F11199
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.WorldServer", "NexusForever.WorldServer\NexusForever.WorldServer.csproj", "{775E278A-6EED-4E11-B484-8538593CE0A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.ClientConnector", "NexusForever.ClientConnector\NexusForever.ClientConnector.csproj", "{D6201763-C0A1-4725-88E3-DCB3C35F5F73}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +39,10 @@ Global
 		{775E278A-6EED-4E11-B484-8538593CE0A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{775E278A-6EED-4E11-B484-8538593CE0A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{775E278A-6EED-4E11-B484-8538593CE0A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6201763-C0A1-4725-88E3-DCB3C35F5F73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6201763-C0A1-4725-88E3-DCB3C35F5F73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6201763-C0A1-4725-88E3-DCB3C35F5F73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6201763-C0A1-4725-88E3-DCB3C35F5F73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +52,7 @@ Global
 		{A8B9F746-9958-4366-9CC8-E863D6D1E13B} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{9314BDC7-A74D-4C47-88FD-A4E28B109253} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{775E278A-6EED-4E11-B484-8538593CE0A8} = {F11199C0-850A-4DA7-A71B-C597581970D6}
+		{D6201763-C0A1-4725-88E3-DCB3C35F5F73} = {96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D83B735-7E6A-4C1A-83C4-DD80682C2859}
