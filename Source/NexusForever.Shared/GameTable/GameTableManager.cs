@@ -30,18 +30,18 @@ namespace NexusForever.Shared.GameTable
 
             try
             {
-                CharacterCreation      = new GameTable<CharacterCreationEntry>("tbl" + Path.DirectorySeparatorChar + "CharacterCreation.tbl");
-                CharacterCustomization = new GameTable<CharacterCustomizationEntry>("tbl" + Path.DirectorySeparatorChar + "CharacterCustomization.tbl");
-                Creature2              = new GameTable<Creature2Entry>("tbl" + Path.DirectorySeparatorChar + "Creature2.tbl");
-                Creature2ArcheType     = new GameTable<Creature2ArcheTypeEntry>("tbl" + Path.DirectorySeparatorChar + "Creature2ArcheType.tbl");
-                Creature2Difficulty    = new GameTable<Creature2DifficultyEntry>("tbl" + Path.DirectorySeparatorChar + "Creature2Difficulty.tbl");
-                Creature2Tier          = new GameTable<Creature2TierEntry>("tbl" + Path.DirectorySeparatorChar + "Creature2Tier.tbl");
-                CreatureLevel          = new GameTable<CreatureLevelEntry>("tbl" + Path.DirectorySeparatorChar + "CreatureLevel.tbl");
-                Item                   = new GameTable<Item2Entry>("tbl" + Path.DirectorySeparatorChar + "Item2.tbl");
-                ItemType               = new GameTable<Item2TypeEntry>("tbl" + Path.DirectorySeparatorChar + "Item2Type.tbl");
-                ItemDisplaySource      = new GameTable<ItemDisplaySourceEntryEntry>("tbl" + Path.DirectorySeparatorChar + "ItemDisplaySourceEntry.tbl");
-                World                  = new GameTable<WorldEntry>("tbl" + Path.DirectorySeparatorChar + "World.tbl");
-                Emotes                 = new GameTable<EmotesEntry>("tbl" + Path.DirectorySeparatorChar + "Emotes.tbl");
+                CharacterCreation      = new GameTable<CharacterCreationEntry>("tbl/CharacterCreation.tbl");
+                CharacterCustomization = new GameTable<CharacterCustomizationEntry>("tbl/CharacterCustomization.tbl");
+                Creature2              = new GameTable<Creature2Entry>("tbl/Creature2.tbl");
+                Creature2ArcheType     = new GameTable<Creature2ArcheTypeEntry>("tbl/Creature2ArcheType.tbl");
+                Creature2Difficulty    = new GameTable<Creature2DifficultyEntry>("tbl/Creature2Difficulty.tbl");
+                Creature2Tier          = new GameTable<Creature2TierEntry>("tbl/Creature2Tier.tbl");
+                CreatureLevel          = new GameTable<CreatureLevelEntry>("tbl/CreatureLevel.tbl");
+                Item                   = new GameTable<Item2Entry>("tbl/Item2.tbl");
+                ItemType               = new GameTable<Item2TypeEntry>("tbl/Item2Type.tbl");
+                ItemDisplaySource      = new GameTable<ItemDisplaySourceEntryEntry>("tbl/ItemDisplaySourceEntry.tbl");
+                World                  = new GameTable<WorldEntry>("tbl/World.tbl");
+                Emotes                 = new GameTable<EmotesEntry>("tbl/Emotes.tbl");
             }
             catch (Exception exception)
             {
