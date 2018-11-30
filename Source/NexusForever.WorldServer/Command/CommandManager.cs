@@ -22,19 +22,19 @@ namespace NexusForever.WorldServer.Command
             {
                 foreach (MethodInfo method in type.GetMethods())
                 {
-                    CommandHandlerAttribute attribute = method.GetCustomAttribute<CommandHandlerAttribute>();
-                    if (attribute == null)
-                        continue;
+                    IEnumerable<CommandHandlerAttribute> attributes = method.GetCustomAttributes<CommandHandlerAttribute>();
+                    foreach(CommandHandlerAttribute att in attributes)
+                    {
+                        ParameterInfo[] parameterInfo = method.GetParameters();
 
-                    ParameterInfo[] parameterInfo = method.GetParameters();
+                        #region Debug
+                        Debug.Assert(parameterInfo.Length == 2);
+                        Debug.Assert(typeof(WorldSession) == parameterInfo[0].ParameterType);
+                        Debug.Assert(typeof(string[]) == parameterInfo[1].ParameterType);
+                        #endregion
 
-                    #region Debug
-                    Debug.Assert(parameterInfo.Length == 2);
-                    Debug.Assert(typeof(WorldSession) == parameterInfo[0].ParameterType);
-                    Debug.Assert(typeof(string[]) == parameterInfo[1].ParameterType);
-                    #endregion
-
-                    handlers.Add(attribute.Command, (CommandHandlerDelegate)Delegate.CreateDelegate(typeof(CommandHandlerDelegate), method));
+                        handlers.Add(att.Command, (CommandHandlerDelegate)Delegate.CreateDelegate(typeof(CommandHandlerDelegate), method));
+                    }
                 }
             }
 
