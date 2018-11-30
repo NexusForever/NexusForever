@@ -2,7 +2,7 @@
 
 namespace NexusForever.WorldServer.Command
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)] // In case of commands like additem/itemadd
     public class CommandHandlerAttribute : Attribute
     {
         public string Command { get; set; }
