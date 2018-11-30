@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Game
         private static ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
         private static ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
-        private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySources;
+        private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
         public static void Initialise()
         {
@@ -93,7 +93,7 @@ namespace NexusForever.WorldServer.Game
         private static void CacheItemDisplaySourceEntries()
         {
             var entries = new Dictionary<uint, List<ItemDisplaySourceEntryEntry>>();
-            foreach (ItemDisplaySourceEntryEntry entry in GameTableManager.ItemDisplaySource.Entries)
+            foreach (ItemDisplaySourceEntryEntry entry in GameTableManager.ItemDisplaySourceEntry.Entries)
             {
                 if (!entries.ContainsKey(entry.ItemSourceId))
                     entries.Add(entry.ItemSourceId, new List<ItemDisplaySourceEntryEntry>());
@@ -101,7 +101,7 @@ namespace NexusForever.WorldServer.Game
                 entries[entry.ItemSourceId].Add(entry);
             }
 
-            itemDisplaySources = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
+            itemDisplaySourcesEntry = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace NexusForever.WorldServer.Game
         /// </summary>
         public static ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
         {
-            return itemDisplaySources.TryGetValue(itemSource, out ImmutableList<ItemDisplaySourceEntryEntry> entries) ? entries : null;
+            return itemDisplaySourcesEntry.TryGetValue(itemSource, out ImmutableList<ItemDisplaySourceEntryEntry> entries) ? entries : null;
         }
     }
 }
