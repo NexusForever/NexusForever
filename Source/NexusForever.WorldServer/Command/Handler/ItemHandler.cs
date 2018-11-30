@@ -1,4 +1,5 @@
-﻿using NexusForever.WorldServer.Network;
+﻿using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
