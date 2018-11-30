@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth.Model;
+using System.ComponentModel.DataAnnotations;
 
 namespace NexusForever.Shared.Database.Auth
 {
@@ -45,6 +46,8 @@ namespace NexusForever.Shared.Database.Auth
         /// </summary>
         public static void CreateAccount(string email, string password)
         {
+            if (!new EmailAddressAttribute().IsValid(email))
+		 throw new ArgumentException();
             using (var context = new AuthContext())
             {
                 byte[] s = RandomProvider.GetBytes(16u);
