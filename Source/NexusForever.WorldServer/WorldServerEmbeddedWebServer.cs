@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Handler;
 using NLog.Web;
 
@@ -20,12 +21,6 @@ namespace NexusForever.WorldServer
             })
             .UseNLog()
             .UseUrls($"http://localhost:5000")
-            .PreferHostingUrls(false) // Can override in XXX.json
-            .ConfigureServices(services =>
-            {
-                services.AddSingleton<ICommandHandler, MountCommand>()
-                    .AddSingleton<ICommandHandler, AccountCommandHandler>()
-                    .AddSingleton<ICommandHandler, TeleportHandler>();
-            });
+            .PreferHostingUrls(false); // Can override in XXX.json
     }
 }

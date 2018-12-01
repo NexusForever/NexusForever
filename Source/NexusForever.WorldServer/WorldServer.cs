@@ -17,6 +17,7 @@ using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
 using Microsoft.AspNetCore.Hosting;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Command.Handler;
 
 namespace NexusForever.WorldServer

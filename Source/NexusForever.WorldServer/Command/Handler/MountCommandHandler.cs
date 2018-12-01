@@ -1,14 +1,17 @@
 using System.Numerics;
 using Microsoft.Extensions.Logging;
+using NexusForever.WorldServer.Command.Attributes;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-    public class MountCommand : NamedCommand
+    [Name("Mounts")]
+    public class MountCommandHandler : NamedCommand
     {
         
-        public MountCommand(ILogger<MountCommand> logger) : base("mount", true, logger)
+        public MountCommandHandler(ILogger<MountCommandHandler> logger) : base("mount", true, logger)
         {
 
         }

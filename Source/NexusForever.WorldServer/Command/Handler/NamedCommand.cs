@@ -1,17 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     public abstract class NamedCommand : CommandHandlerBase
     {
-        protected NamedCommand(string commandName, bool requiresSession, ILogger logger) : base(logger)
+        protected NamedCommand(IEnumerable<string> commandNames, bool requiresSession, ILogger logger) : base(logger)
         {
-            CommandName = commandName;
+            CommandNames = commandNames.ToImmutableArray();
             RequiresSession = requiresSession;
         }
+
+        protected NamedCommand(string commandName, bool requiresSession, ILogger logger) : this(new[] { commandName }, requiresSession, logger)
+        {
+
+        }
+
+        public override IEnumerable<string> GetCommands()
+        {
+            return CommandNames;
+        }
+
         public override int Order { get; } = 100;
         public virtual string HelpText { get; }
         public bool SupportsHelp => !string.IsNullOrWhiteSpace(HelpText);
@@ -45,9 +59,10 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             if (RequiresSession && session.Session == null) return false;
             ParseCommand(input, out var command, out _);
-            return string.Equals(command, CommandName, StringComparison.OrdinalIgnoreCase);
+            return CommandNames.Any(i => string.Equals(command, i, StringComparison.OrdinalIgnoreCase));
         }
-
+        public ImmutableArray<string> CommandNames { get; }
+        [Obsolete("Please user CommandNames instead", true)]
         public string CommandName { get; }
         public bool RequiresSession { get; }
 

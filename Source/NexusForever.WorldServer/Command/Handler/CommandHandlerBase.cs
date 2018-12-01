@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -22,6 +24,7 @@ namespace NexusForever.WorldServer.Command.Handler
             parameters = split.Skip(1).ToArray();
         }
 
+        public abstract IEnumerable<string> GetCommands();
         public abstract void Handle(CommandContext session, string text);
         public abstract bool Handles(CommandContext session, string input);
     }

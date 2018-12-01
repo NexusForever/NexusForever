@@ -4,13 +4,16 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using NexusForever.WorldServer.Command.Attributes;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
+    [Name("Teleport")]
     public class TeleportHandler : NamedCommand
     {
-        public TeleportHandler(ILogger<TeleportHandler> logger) : base("teleport", true, logger)
+        public TeleportHandler(ILogger<TeleportHandler> logger) : base(new[] { "teleport", "port" }, true, logger)
         {
         }
 

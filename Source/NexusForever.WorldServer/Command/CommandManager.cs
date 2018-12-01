@@ -8,6 +8,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Command.Handler;
 using NexusForever.WorldServer.Network;
 using Microsoft.Extensions.DependencyInjection;
+using NexusForever.WorldServer.Command.Contexts;
 
 namespace NexusForever.WorldServer.Command
 {
@@ -53,6 +54,14 @@ namespace NexusForever.WorldServer.Command
             }
 
             return false;
+        }
+
+        public static void RegisterServices(IServiceCollection services)
+        {
+            services.AddSingleton<ICommandHandler, MountCommandHandler>()
+                .AddSingleton<ICommandHandler, AccountCommandHandler>()
+                .AddSingleton<ICommandHandler, TeleportHandler>()
+                .AddSingleton<ICommandHandler, HelpCommandHandler>();
         }
     }
 }

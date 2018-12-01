@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NexusForever.WorldServer.Command.Handler
+﻿namespace NexusForever.WorldServer.Command.Contexts
 {
     public class ConsoleCommandContext : CommandContext
     {

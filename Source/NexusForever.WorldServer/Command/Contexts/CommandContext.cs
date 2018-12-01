@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Network;
 
-namespace NexusForever.WorldServer.Command.Handler
+namespace NexusForever.WorldServer.Command.Contexts
 {
     public abstract class CommandContext
     {

@@ -6,6 +6,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using NexusForever.WorldServer.Command.Attributes;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -16,39 +18,42 @@ namespace NexusForever.WorldServer.Command.Handler
         public override string HelpText => _dynamicHelpText;
         private delegate void SubCommandHandler(CommandContext context, string subCommand, string[] parameters);
         private readonly ImmutableDictionary<string, SubCommandHandler> _subCommands;
-        protected CommandCategory(string categoryName, bool requiresSession, ILogger logger) : base(categoryName, requiresSession, logger)
+        protected CommandCategory(string categoryName, bool requiresSession, ILogger logger) : this(new[] { categoryName }, requiresSession, logger) { }
+        protected CommandCategory(IEnumerable<string> categoryNames, bool requiresSession, ILogger logger) : base(categoryNames, requiresSession, logger)
         {
             StringBuilder helpBuilder = new StringBuilder();
-            helpBuilder.AppendLine(categoryName);
             helpBuilder.AppendLine("--- sub commands");
-            
+
             Dictionary<string, SubCommandHandler> commandHandlers = new Dictionary<string, SubCommandHandler>(StringComparer.OrdinalIgnoreCase);
             foreach (MethodInfo method in GetType().GetMethods().Where(i => !i.IsStatic && !i.IsAbstract))
             {
-                var attribute = method.GetCustomAttribute<SubCommandHandlerAttribute>();
-                if (attribute == null)
-                    continue;
-
-                ParameterInfo[] parameterInfo = method.GetParameters();
-
-                #region Debug
-                Debug.Assert(parameterInfo.Length == 3);
-                Debug.Assert(typeof(CommandContext) == parameterInfo[0].ParameterType);
-                Debug.Assert(typeof(string) == parameterInfo[1].ParameterType);
-                Debug.Assert(typeof(string[]) == parameterInfo[2].ParameterType);
-                #endregion
-
-
-                helpBuilder.Append($"   {attribute.Command} - ");
-                if (string.IsNullOrWhiteSpace(attribute.HelpText))
+                // Support for multiple attributes.
+                foreach (var attribute in method.GetCustomAttributes<SubCommandHandlerAttribute>())
                 {
-                    helpBuilder.AppendLine("No help available.");
+                    if (attribute == null)
+                        continue;
+
+                    ParameterInfo[] parameterInfo = method.GetParameters();
+
+                    #region Debug
+                    Debug.Assert(parameterInfo.Length == 3);
+                    Debug.Assert(typeof(CommandContext) == parameterInfo[0].ParameterType);
+                    Debug.Assert(typeof(string) == parameterInfo[1].ParameterType);
+                    Debug.Assert(typeof(string[]) == parameterInfo[2].ParameterType);
+                    #endregion
+
+
+                    helpBuilder.Append($"   {attribute.Command} - ");
+                    if (string.IsNullOrWhiteSpace(attribute.HelpText))
+                    {
+                        helpBuilder.AppendLine("No help available.");
+                    }
+                    else
+                    {
+                        helpBuilder.AppendLine(attribute.HelpText);
+                    }
+                    commandHandlers.Add(attribute.Command, (SubCommandHandler)Delegate.CreateDelegate(typeof(SubCommandHandler), this, method));
                 }
-                else
-                {
-                    helpBuilder.AppendLine(attribute.HelpText);
-                }
-                commandHandlers.Add(attribute.Command, (SubCommandHandler)Delegate.CreateDelegate(typeof(SubCommandHandler), this, method));
             }
 
             _subCommands = commandHandlers.ToImmutableDictionary();
