@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public CurrencyTypeEntry Entry { get; set; }
         public ulong Id { get; }
-        private ulong count;
+        private ulong amount;
         private CurrencySaveMask saveMask;
         private ulong characterId;
 
@@ -26,15 +26,15 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
-        public ulong Count
+        public ulong Amount
         {
-            get => count;
+            get => amount;
             set
             {
                 if (Entry.CapAmount > 0 && value > Entry.CapAmount)
                     throw new ArgumentOutOfRangeException();
-                saveMask |= CurrencySaveMask.Count;
-                count = value;
+                saveMask |= CurrencySaveMask.Amount;
+                amount = value;
             }
         }
 
@@ -43,10 +43,10 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Currency(CurrencyModel model)
         {
-            characterId = model.Id;
+            characterId = model.CharacterId;
             Id = model.CurrencyId;
             Entry = GameTableManager.CurrencyType.GetEntry(model.CurrencyId);
-            Count = model.Count;
+            Amount = model.Amount;
 
             saveMask = CurrencySaveMask.None;
         }
@@ -59,7 +59,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Id = entry.Id;
             characterId = owner;
             Entry = entry;
-            Count = count;
+            Amount = amount;
 
             saveMask = CurrencySaveMask.Create;
         }
@@ -75,9 +75,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 // Currency doesn't exist in database, all infomation must be saved
                 context.Add(new CharacterCurrency
                 {
-                    Id = CharacterId,
+                    CharacterId = CharacterId,
                     CurrencyId = (byte)Entry.Id,
-                    Count = Count,
+                    Amount = Amount,
                 });
             }
             else
@@ -85,16 +85,16 @@ namespace NexusForever.WorldServer.Game.Entity
                 // Currency already exists in database, save only data that has been modified
                 var model = new CharacterCurrency
                 {
-                    Id = CharacterId,
+                    CharacterId = CharacterId,
                     CurrencyId = (byte)Entry.Id,
                 };
 
                 // could probably clean this up with reflection, works for the time being
                 EntityEntry<CharacterCurrency> entity = context.Attach(model);
-                if ((saveMask & CurrencySaveMask.Count) != 0)
+                if ((saveMask & CurrencySaveMask.Amount) != 0)
                 {
-                    model.Count = Count;
-                    entity.Property(p => p.Count).IsModified = true;
+                    model.Amount = Amount;
+                    entity.Property(p => p.Amount).IsModified = true;
                 }
             }
 

@@ -197,25 +197,25 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
             modelBuilder.Entity<CharacterCurrency>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.CurrencyId });
+                entity.HasKey(e => new { e.CharacterId, e.CurrencyId });
 
                 entity.ToTable("character_currency");
 
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
+                entity.Property(e => e.CharacterId)
+                    .HasColumnName("characterId")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.CurrencyId)
                     .HasColumnName("currencyId")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.Count)
-                    .HasColumnName("count")
+                entity.Property(e => e.Amount)
+                    .HasColumnName("amount")
                     .HasDefaultValueSql("'0'");
 
                 entity.HasOne(d => d.IdNavigation)
                     .WithMany(p => p.CharacterCurrency)
-                    .HasForeignKey(d => d.Id)
+                    .HasForeignKey(d => d.CharacterId)
                     .HasConstraintName("FK_character_currency_id__character_id");
             });
 

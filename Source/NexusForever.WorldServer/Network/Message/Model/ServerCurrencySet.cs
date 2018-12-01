@@ -7,14 +7,14 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ServerPlayerCurrencyChanged : IWritable
     {
         public byte CurrencyId { get; set; }
-        public ulong Count { get; set; }
+        public ulong Amount { get; set; }
         public uint Unknown1 { get; set; } = 0;
         public uint Unknown2 { get; set; } = 0;
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CurrencyId - 1, 5);
-            writer.Write(Count);
+            writer.Write(Amount);
             writer.Write(Unknown1);
             writer.Write(Unknown2);
         }

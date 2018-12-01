@@ -185,7 +185,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
                 {
                     CurrencyId = (byte)currency.Id,
-                    Count = currency.Count,
+                    Amount = currency.Amount,
                 });
             }
         }

@@ -8,12 +8,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ClientVendorSell : IReadable
     {
         public ItemLocation ItemLocation { get; } = new ItemLocation();
-        public uint Count { get; private set; }
+        public uint Quantity { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
             ItemLocation.Read(reader);
-            Count = (uint)reader.ReadInt();
+            Quantity = (uint)reader.ReadInt();
         }
     }
 }
