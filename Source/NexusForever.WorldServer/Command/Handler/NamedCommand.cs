@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Command.Handler
         public sealed override void Handle(CommandContext session, string text)
         {
             ParseCommand(text, out var command, out var parameters);
-            if (SupportsHelp && parameters.Length > 0 && IsHelpRequest(parameters[0]))
+            if (SupportsHelp && (parameters.Length == 0 || IsHelpRequest(parameters[0])))
             {
                 GetHelp(session);
                 return;
@@ -57,9 +57,9 @@ namespace NexusForever.WorldServer.Command.Handler
 
         public override bool Handles(CommandContext session, string input)
         {
-            if (RequiresSession && session.Session == null) return false;
-            ParseCommand(input, out var command, out _);
-            return CommandNames.Any(i => string.Equals(command, i, StringComparison.OrdinalIgnoreCase));
+            //if (RequiresSession && session.Session == null) return false;
+            ParseCommand(input, out var command, out var parameters);
+            return CommandNames.Any(i => string.Equals(command, i, StringComparison.OrdinalIgnoreCase)) && ((parameters.Length == 0 || IsHelpRequest(parameters[0])) || (RequiresSession && session.Session != null) || !RequiresSession);
         }
         public ImmutableArray<string> CommandNames { get; }
         [Obsolete("Please user CommandNames instead", true)]
