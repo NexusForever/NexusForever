@@ -79,6 +79,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             float costMultiplier = vendorPurchase.VendorItemQty * VendorInfo.BuyPriceMultiplier;
             Currency currency0 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId0);
             Currency currency1 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId1);
+            ulong calculatedCost0 = (ulong)(itemEntry.CurrencyAmount0 * costMultiplier);
+            ulong calculatedCost1 = (ulong)(itemEntry.CurrencyAmount1 * costMultiplier);
 
             if (currency0 != null && currency0.Count < itemEntry.CurrencyAmount0 * costMultiplier)
                 return;
@@ -87,10 +89,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 return;
 
             if (currency0 != null)
-                session.Player.CurrencyManager.CurrencySubtractCount(currency0.Entry, (uint)(itemEntry.CurrencyAmount0 * costMultiplier));
+                session.Player.CurrencyManager.CurrencySubtractCount(currency0.Entry, calculatedCost0);
 
             if (currency1 != null)
-                session.Player.CurrencyManager.CurrencySubtractCount(currency1.Entry, (uint)(itemEntry.CurrencyAmount1 * costMultiplier));
+                session.Player.CurrencyManager.CurrencySubtractCount(currency1.Entry, calculatedCost1);
 
             var item = new Game.Entity.Item(session.Player.CharacterId, itemEntry, Math.Min(1, itemEntry.MaxStackCount));
             session.Player.Inventory.ItemCreate(itemEntry.Id, vendorPurchase.VendorItemQty * itemEntry.BuyFromVendorStackCount);
@@ -115,12 +117,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             float sellMultiplier = VendorInfo.SellPriceMultiplier * vendorSell.Count;
             Currency currency0 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId0);
             Currency currency1 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId1);
+            ulong calculatedCost0 = (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier);
+            ulong calculatedCost1 = (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier);
+
 
             if (currency0 != null)
-                session.Player.CurrencyManager.CurrencyAddCount((byte)itemEntry.CurrencyTypeId0, (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier));
+                session.Player.CurrencyManager.CurrencyAddCount((byte)itemEntry.CurrencyTypeId0, calculatedCost0);
 
             if (currency1 != null)
-                session.Player.CurrencyManager.CurrencyAddCount((byte)itemEntry.CurrencyTypeId1, (uint)(itemEntry.CurrencyAmount1SellToVendor * sellMultiplier));
+                session.Player.CurrencyManager.CurrencyAddCount((byte)itemEntry.CurrencyTypeId1, calculatedCost1);
         }
     }
 }
