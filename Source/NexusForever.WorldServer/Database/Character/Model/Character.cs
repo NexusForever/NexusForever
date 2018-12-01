@@ -11,6 +11,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterBone = new HashSet<CharacterBone>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
             Item = new HashSet<Item>();
+            CharacterCurrency = new HashSet<CharacterCurrency>();
         }
 
         public ulong Id { get; set; }
@@ -26,5 +27,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public ICollection<CharacterBone> CharacterBone { get; set; }
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
         public ICollection<Item> Item { get; set; }
+        public ICollection<CharacterCurrency> CharacterCurrency { get; set; }
     }
 }

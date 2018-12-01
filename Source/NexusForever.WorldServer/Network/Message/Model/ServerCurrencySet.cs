@@ -1,6 +1,5 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -14,7 +13,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(CurrencyId, 5);
+            writer.Write(CurrencyId - 1, 5);
             writer.Write(Count);
             writer.Write(Unknown1);
             writer.Write(Unknown2);

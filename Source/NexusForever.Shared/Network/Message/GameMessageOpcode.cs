@@ -13,7 +13,7 @@
         ClientVendorPurchase            = 0x00BE,
         ClientCharacterLogout           = 0x00BF,
         ServerCharacterCreate           = 0x00DC,
-        ServerCurrencyGainText          = 0x00DD,
+        ServerChannelUpdateLoot         = 0x00DD,
         Server00F1                      = 0x00F1,
         Server0104                      = 0x0104, // Galactic Archive
         ServerCharacter                 = 0x010F, // single character

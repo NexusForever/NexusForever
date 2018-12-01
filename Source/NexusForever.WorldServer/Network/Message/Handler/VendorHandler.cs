@@ -71,47 +71,26 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (VendorInfo == null)
                 return;
 
-            uint itemId = 0;
-            for (int x = 0; x < VendorInfo.Items.Count; x++)
-            {
-                if (VendorInfo.Items[x].Index == vendorPurchase.VendorIndex)
-                {
-                    itemId = VendorInfo.Items[x].ItemId;
-                    break;
-                }
-            }
-            if (itemId == 0)
+            EntityVendorItem vendorItem = VendorInfo.GetItemAtIndex(vendorPurchase.VendorIndex);
+            if (vendorItem == null)
                 return;
 
-            Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+            Item2Entry itemEntry = GameTableManager.Item.GetEntry(vendorItem.ItemId);
             float costMultiplier = vendorPurchase.VendorItemQty * VendorInfo.BuyPriceMultiplier;
+            Currency currency0 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId0);
+            Currency currency1 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId1);
 
-            if (session.Player.Currencies[itemEntry.CurrencyTypeId0] < (itemEntry.CurrencyAmount0 * costMultiplier))
+            if (currency0 != null && currency0.Count < itemEntry.CurrencyAmount0 * costMultiplier)
                 return;
 
-            if (session.Player.Currencies[itemEntry.CurrencyTypeId1] < (itemEntry.CurrencyAmount1 * costMultiplier))
+            if (currency1 != null && currency1.Count < itemEntry.CurrencyAmount1 * costMultiplier)
                 return;
 
-            if (itemEntry.CurrencyTypeId0 > 0)
-            {
-                session.EnqueueMessageEncrypted(new ServerCurrencySet
-                {
-                    CurrencyId = (byte)((itemEntry.CurrencyTypeId0 & 0xFF) - 1),
-                    Count = session.Player.Currencies[itemEntry.CurrencyTypeId0] - (uint)(itemEntry.CurrencyAmount0 * costMultiplier)
-                });
-            }
+            if (currency0 != null)
+                session.Player.CurrencyManager.CurrencySubtractCount(currency0.Entry, (uint)(itemEntry.CurrencyAmount0 * costMultiplier));
 
-            if (itemEntry.CurrencyTypeId1 > 0)
-            {
-                session.EnqueueMessageEncrypted(new ServerCurrencySet
-                {
-                    CurrencyId = (byte)((itemEntry.CurrencyTypeId1 & 0xFF) - 1),
-                    Count = session.Player.Currencies[itemEntry.CurrencyTypeId0] - (uint)(itemEntry.CurrencyAmount1 * costMultiplier)
-                });
-            }
-
-            session.Player.Currencies[itemEntry.CurrencyTypeId0] -= (uint)(itemEntry.CurrencyAmount0 * costMultiplier);
-            session.Player.Currencies[itemEntry.CurrencyTypeId1] -= (uint)(itemEntry.CurrencyAmount1 * costMultiplier);
+            if (currency1 != null)
+                session.Player.CurrencyManager.CurrencySubtractCount(currency1.Entry, (uint)(itemEntry.CurrencyAmount1 * costMultiplier));
 
             var item = new Game.Entity.Item(session.Player.CharacterId, itemEntry, Math.Min(1, itemEntry.MaxStackCount));
             session.Player.Inventory.ItemCreate(itemEntry.Id, vendorPurchase.VendorItemQty * itemEntry.BuyFromVendorStackCount);
@@ -126,7 +105,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (VendorInfo == null)
                 return;
 
-
             Item2Entry itemEntry = session.Player.Inventory.GetItemFromLocation(vendorSell.ItemLocation).Entry;
 
             if (itemEntry == null)
@@ -135,27 +113,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
 
             float sellMultiplier = VendorInfo.SellPriceMultiplier * vendorSell.Count;
+            Currency currency0 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId0);
+            Currency currency1 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId1);
 
-            if (itemEntry.CurrencyTypeId0SellToVendor > 0)
-            {
-                session.EnqueueMessageEncrypted(new ServerCurrencySet
-                {
-                    CurrencyId = (byte)((itemEntry.CurrencyTypeId0SellToVendor & 0xFF) - 1),
-                    Count = session.Player.Currencies[itemEntry.CurrencyTypeId0SellToVendor] + (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier)
-                });
-            }
+            if (currency0 != null)
+                session.Player.CurrencyManager.CurrencyAddCount((byte)itemEntry.CurrencyTypeId0, (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier));
 
-            if (itemEntry.CurrencyTypeId1 > 0)
-            {
-                session.EnqueueMessageEncrypted(new ServerCurrencySet
-                {
-                    CurrencyId = (byte)((itemEntry.CurrencyTypeId1SellToVendor & 0xFF) - 1),
-                    Count = session.Player.Currencies[itemEntry.CurrencyTypeId0SellToVendor] + (uint)(itemEntry.CurrencyAmount1SellToVendor * sellMultiplier)
-                });
-            }
-
-            session.Player.Currencies[itemEntry.CurrencyTypeId0SellToVendor] += (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier);
-            session.Player.Currencies[itemEntry.CurrencyTypeId0SellToVendor] += (uint)(itemEntry.CurrencyAmount1SellToVendor * sellMultiplier);
+            if (currency1 != null)
+                session.Player.CurrencyManager.CurrencyAddCount((byte)itemEntry.CurrencyTypeId1, (uint)(itemEntry.CurrencyAmount1SellToVendor * sellMultiplier));
         }
     }
 }

@@ -394,7 +394,6 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<WorldZoneEntry> WorldZone { get; private set; }
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
-        
 
         public static void Initialise()
         {
@@ -413,6 +412,7 @@ namespace NexusForever.Shared.GameTable
                 Creature2OutfitGroupEntry         = new GameTable<Creature2OutfitGroupEntryEntry>("tbl/Creature2OutfitGroupEntry.tbl");
                 Creature2Tier                     = new GameTable<Creature2TierEntry>("tbl/Creature2Tier.tbl");
                 CreatureLevel                     = new GameTable<CreatureLevelEntry>("tbl/CreatureLevel.tbl");
+                CurrencyType                      = new GameTable<CurrencyTypeEntry>("tbl/CurrencyType.tbl");
                 Emotes                            = new GameTable<EmotesEntry>("tbl/Emotes.tbl");
                 Faction2                          = new GameTable<Faction2Entry>("tbl/Faction2.tbl");
                 Item                              = new GameTable<Item2Entry>("tbl/Item2.tbl");
@@ -420,7 +420,6 @@ namespace NexusForever.Shared.GameTable
                 ItemDisplaySourceEntry            = new GameTable<ItemDisplaySourceEntryEntry>("tbl/ItemDisplaySourceEntry.tbl");
                 UnitRace                          = new GameTable<UnitRaceEntry>("tbl/UnitRace.tbl");
                 World                             = new GameTable<WorldEntry>("tbl/World.tbl");
-        
             }
             catch (Exception exception)
             {
@@ -493,7 +492,6 @@ namespace NexusForever.Shared.GameTable
                 Creature2OutfitInfo               = new GameTable<Creature2OutfitInfoEntry>("tbl/Creature2OutfitInfo.tbl");
                 Creature2OverrideProperties       = new GameTable<Creature2OverridePropertiesEntry>("tbl/Creature2OverrideProperties.tbl");
                 Creature2Resist                   = new GameTable<Creature2ResistEntry>("tbl/Creature2Resist.tbl");
-                //broken CurrencyType             = new GameTable<CurrencyTypeEntry>("tbl/CurrencyType.tbl");
                 CustomerSurvey                    = new GameTable<CustomerSurveyEntry>("tbl/CustomerSurvey.tbl");
                 CustomizationParameter            = new GameTable<CustomizationParameterEntry>("tbl/CustomizationParameter.tbl");
                 CustomizationParameterMap         = new GameTable<CustomizationParameterMapEntry>("tbl/CustomizationParameterMap.tbl");
