@@ -1,4 +1,6 @@
-﻿namespace NexusForever.WorldServer.Command.Contexts
+﻿using NexusForever.WorldServer.Network;
+
+namespace NexusForever.WorldServer.Command.Contexts
 {
     public class ConsoleCommandContext : CommandContext
     {
