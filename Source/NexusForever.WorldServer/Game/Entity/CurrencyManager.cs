@@ -49,7 +49,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         /// <summary>
         /// Create a new <see cref="CharacterCurrency"/>.
-        /// </summary>Count
+        /// </summary>
         public Currency CurrencyCreate(CurrencyTypeEntry currencyEntry, ulong amount = 0)
         {
             if (currencyEntry == null)
