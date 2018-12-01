@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Database.World.Model;
 
 namespace NexusForever.WorldServer
 {
@@ -20,6 +23,9 @@ namespace NexusForever.WorldServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
+            services.AddScoped<AuthContext>();
+            services.AddScoped<WorldContext>();
+            services.AddScoped<CharacterContext>();
         }
 
 

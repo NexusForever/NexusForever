@@ -19,12 +19,13 @@ namespace NexusForever.WorldServer
                 logging.SetMinimumLevel(LogLevel.Trace);
             })
             .UseNLog()
+            .UseUrls($"http://localhost:5000")
+            .PreferHostingUrls(false) // Can override in XXX.json
             .ConfigureServices(services =>
             {
                 services.AddSingleton<ICommandHandler, MountCommand>()
                     .AddSingleton<ICommandHandler, AccountCommandHandler>()
                     .AddSingleton<ICommandHandler, TeleportHandler>();
-
             });
     }
 }

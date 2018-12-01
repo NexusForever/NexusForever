@@ -49,6 +49,7 @@
         Server03BE                      = 0x03BE, // friendship related
         ServerRealmEncrypted            = 0x03DC,
         ServerRealmInfo                 = 0x03DB,
+        ClientCheat                     = 0x03E0,
         Server0497                      = 0x0497, // guild info
         ServerItemSwap                  = 0x0568,
         ServerItemMove                  = 0x0569,
