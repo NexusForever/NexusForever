@@ -74,7 +74,7 @@
         ServerEntityDestory             = 0x088C, // 0x8A5??
         Server08B3                      = 0x08B3,
         ServerVendor                    = 0x090B,
-        ServerCurrencySet               = 0x0919,
+        ServerPlayerCurrencyChanged     = 0x0919,
         ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
         ServerEmote                     = 0x093C,
