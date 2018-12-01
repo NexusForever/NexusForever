@@ -23,7 +23,7 @@
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
-        ClientVendorSell                = 0x0166,
+        ClientSellItemToVendor          = 0x0166,
         Server0169                      = 0x0169, // ability book related
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,

@@ -99,7 +99,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
 
-        [MessageHandler(GameMessageOpcode.ClientVendorSell)]
+        [MessageHandler(GameMessageOpcode.ClientSellItemToVendor)]
         public static void HandleVendorSell(WorldSession session, ClientVendorSell vendorSell)
         {
             VendorInfo VendorInfo = session.Player.SelectedVendorInfo;
