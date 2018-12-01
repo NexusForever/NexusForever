@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.AspNetCore;
 using NLog;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
@@ -15,6 +16,8 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
+using Microsoft.AspNetCore.Hosting;
+using NexusForever.WorldServer.Command.Handler;
 
 namespace NexusForever.WorldServer
 {
@@ -36,49 +39,41 @@ namespace NexusForever.WorldServer
             log.Info("Initialising...");
 
             ConfigurationManager<WorldServerConfiguration>.Initialise("WorldServer.json");
-
-            DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
-
-            GameTableManager.Initialise();
-
-            EntityManager.Initialise();
-            EntityCommandManager.Initialise();
-
-            AssetManager.Initialise();
-            ServerManager.Initialise();
-
-            MessageManager.Initialise();
-            CommandManager.Initialise();
-            NetworkManager<WorldSession>.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Network);
-
-            WorldManager.Initialise(lastTick =>
+            using (var webHost = WorldServerEmbeddedWebServer
+                .Initialize(ConfigurationManager<WorldServerConfiguration>.Configuration)
+                .Build())
             {
-                NetworkManager<WorldSession>.Update(lastTick);
-                MapManager.Update(lastTick);
-            });
+                // Expose ASP.NET Core DI outside of ASP.NET Core.
+                DependencyInjection.Initialize(webHost.Services);
 
-            log.Info("Ready!");
+                DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
 
-            while (true)
-            {
-                Console.Write(">> ");
-                string line = Console.ReadLine();
-                CommandManager.ParseCommand(line, out string command, out string[] parameters);
+                GameTableManager.Initialise();
 
-                CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
-                if (handler != null)
+                EntityManager.Initialise();
+                EntityCommandManager.Initialise();
+
+                AssetManager.Initialise();
+                ServerManager.Initialise();
+
+                MessageManager.Initialise();
+                CommandManager.Initialise();
+                NetworkManager<WorldSession>.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Network);
+                WorldManager.Initialise(lastTick =>
                 {
-                    try
-                    {
-                        handler.Invoke(null, parameters);
-                    }
-                    catch (Exception exception)
-                    {
-                        log.Error(exception);
-                    }
+                    NetworkManager<WorldSession>.Update(lastTick);
+                    MapManager.Update(lastTick);
+                });
+                webHost.Start();
+                log.Info("Ready!");
+
+                while (true)
+                {
+                    Console.Write(">> ");
+                    string line = Console.ReadLine();
+                    if (!CommandManager.HandleCommand(new ConsoleCommandContext(), line, false))
+                        Console.WriteLine("Invalid command");
                 }
-                else
-                    Console.WriteLine("Invalid command!");
             }
         }
     }

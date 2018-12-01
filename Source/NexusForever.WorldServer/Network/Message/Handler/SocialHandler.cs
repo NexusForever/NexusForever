@@ -24,9 +24,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 try
                 {
-                    CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
-                    CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
-                    handler?.Invoke(session, parameters);
+                    CommandManager.HandleCommand(session, chat.Message, true);
+                    //CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
+                    //CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
+                    //handler?.Invoke(session, parameters);
                 }
                 catch (Exception e)
                 {

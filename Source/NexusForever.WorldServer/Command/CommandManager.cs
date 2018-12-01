@@ -4,53 +4,55 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using NexusForever.Shared.Configuration;
+using NexusForever.WorldServer.Command.Handler;
 using NexusForever.WorldServer.Network;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NexusForever.WorldServer.Command
 {
-    public delegate void CommandHandlerDelegate(WorldSession session, string[] parameters);
-
     public static class CommandManager
     {
-        private static ImmutableDictionary<string, CommandHandlerDelegate> commandHandlers;
 
+        private static IServiceProvider Services => DependencyInjection.ServiceProvider;
         public static void Initialise()
         {
-            var handlers = new Dictionary<string, CommandHandlerDelegate>();
-
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            // Force init now for singletons.
+            using (var scope = Services.CreateScope())
             {
-                foreach (MethodInfo method in type.GetMethods())
+                scope.ServiceProvider.GetServices<ICommandHandler>();
+            }
+        }
+
+        public static bool HandleCommand(WorldSession session, string commandText, bool isFromChat)
+        {
+            return HandleCommand(new WorldSessionCommandContext(session), commandText, isFromChat);
+        }
+        public static bool HandleCommand(CommandContext session, string commandText, bool isFromChat)
+        {
+            if (isFromChat)
+            {
+                if (!commandText.StartsWith("!"))
                 {
-                    CommandHandlerAttribute attribute = method.GetCustomAttribute<CommandHandlerAttribute>();
-                    if (attribute == null)
-                        continue;
+                    return false;
+                }
 
-                    ParameterInfo[] parameterInfo = method.GetParameters();
+                commandText = commandText.Substring(1);
+            }
 
-                    #region Debug
-                    Debug.Assert(parameterInfo.Length == 2);
-                    Debug.Assert(typeof(WorldSession) == parameterInfo[0].ParameterType);
-                    Debug.Assert(typeof(string[]) == parameterInfo[1].ParameterType);
-                    #endregion
-
-                    handlers.Add(attribute.Command, (CommandHandlerDelegate)Delegate.CreateDelegate(typeof(CommandHandlerDelegate), method));
+            using (var scope = Services.CreateScope())
+            {
+                foreach (var command in scope.ServiceProvider.GetServices<ICommandHandler>().OrderBy(i => i.Order))
+                {
+                    if (command.Handles(session, commandText))
+                    {
+                        command.Handle(session, commandText);
+                        return true;
+                    }
                 }
             }
 
-            commandHandlers = handlers.ToImmutableDictionary();
-        }
-
-        public static void ParseCommand(string value, out string command, out string[] parameters)
-        {
-            string[] split = value.TrimStart('!').Split(' ');
-            command    = split[0];
-            parameters = split.Skip(1).ToArray();
-        }
-
-        public static CommandHandlerDelegate GetCommandHandler(string command)
-        {
-            return commandHandlers.TryGetValue(command, out CommandHandlerDelegate handler) ? handler : null;
+            return false;
         }
     }
 }
