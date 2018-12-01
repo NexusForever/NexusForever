@@ -13,6 +13,7 @@
         ClientVendorPurchase            = 0x00BE,
         ClientCharacterLogout           = 0x00BF,
         ServerCharacterCreate           = 0x00DC,
+        ServerCurrencyGainText          = 0x00DD,
         Server00F1                      = 0x00F1,
         Server0104                      = 0x0104, // Galactic Archive
         ServerCharacter                 = 0x010F, // single character
@@ -22,6 +23,7 @@
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
+        ClientVendorSell                = 0x0166,
         Server0169                      = 0x0169, // ability book related
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
@@ -72,6 +74,7 @@
         ServerEntityDestory             = 0x088C, // 0x8A5??
         Server08B3                      = 0x08B3,
         ServerVendor                    = 0x090B,
+        ServerCurrencySet               = 0x0919,
         ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
         ServerEmote                     = 0x093C,

@@ -30,6 +30,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Race Race { get; }
         public Class Class { get; }
         public List<float> Bones { get; }
+        public ulong[] Currencies { get;  }
 
         public byte Level
         {
@@ -45,11 +46,13 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public Inventory Inventory { get; }
         public WorldSession Session { get; }
+        public VendorInfo SelectedVendorInfo { get; set; }
 
         private double timeToSave = SaveDuration;
         private PlayerSaveMask saveMask;
 
         private PendingFarTeleport pendingFarTeleport;
+
 
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
@@ -61,6 +64,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Class       = (Class)model.Class;
             Level       = model.Level;
             Bones       = new List<float>();
+            Currencies  = new ulong[16];
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -92,6 +96,10 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Bones.Add(bone.Bone);
             }
+
+            // temp
+            for (int x = 0; x < Currencies.Length; x++)
+                Currencies[x] = ulong.MaxValue;
         }
 
         public override void Update(double lastTick)
