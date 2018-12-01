@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -15,12 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Web.Services">
-      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.1\System.Web.Services.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
