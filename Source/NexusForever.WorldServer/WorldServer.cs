@@ -67,7 +67,16 @@ namespace NexusForever.WorldServer
 
                 CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
                 if (handler != null)
-                    handler.Invoke(null, parameters);
+                {
+                    try
+                    {
+                        handler.Invoke(null, parameters);
+                    }
+                    catch (Exception exception)
+                    {
+                        log.Error(exception);
+                    }
+                }
                 else
                     Console.WriteLine("Invalid command!");
             }

@@ -1,4 +1,6 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Game.Events;
@@ -27,6 +29,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
+        public List<float> Bones { get; }
 
         public byte Level
         {
@@ -57,6 +60,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Race        = (Race)model.Race;
             Class       = (Class)model.Class;
             Level       = model.Level;
+            Bones       = new List<float>();
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -82,6 +86,11 @@ namespace NexusForever.WorldServer.Game.Entity
                     Slot      = itemSlot,
                     DisplayId = appearance.DisplayId
                 });
+            }
+
+            foreach(CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
+            {
+                Bones.Add(bone.Bone);
             }
         }
 
@@ -111,7 +120,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 Name     = Name,
                 Race     = Race,
                 Class    = Class,
-                Sex      = Sex
+                Sex      = Sex,
+                Bones    = Bones
             };
         }
 
