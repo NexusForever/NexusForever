@@ -77,7 +77,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             currency.Count = count;
             
-            player.Session.EnqueueMessageEncrypted(new ServerCurrencySet
+            player.Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
             {
                 CurrencyId = (byte)currency.Id,
                 Count = currency.Count,

@@ -3,8 +3,8 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCurrencySet, MessageDirection.Server)]
-    public class ServerCurrencySet : IWritable
+    [Message(GameMessageOpcode.ServerPlayerCurrencyChanged, MessageDirection.Server)]
+    public class ServerPlayerCurrencyChanged : IWritable
     {
         public byte CurrencyId { get; set; }
         public ulong Count { get; set; }

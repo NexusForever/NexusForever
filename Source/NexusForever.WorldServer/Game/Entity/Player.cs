@@ -182,7 +182,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (Currency currency in CurrencyManager)
             {
-                Session.EnqueueMessageEncrypted(new ServerCurrencySet
+                Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
                 {
                     CurrencyId = (byte)currency.Id,
                     Count = currency.Count,
