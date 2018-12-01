@@ -40,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Currency CurrencyCreate(byte currencyId, ulong count = 0)
         {
-            CurrencyTypeEntry currencyEntry = GameTableManager.Currency.GetEntry(currencyId);
+            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
             if (currencyEntry == null)
                 return null;
 
@@ -89,7 +89,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void CurrencyAddCount(byte currencyId, ulong count)
         {
-            CurrencyTypeEntry currencyEntry = GameTableManager.Currency.GetEntry(currencyId);
+            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
@@ -120,7 +120,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void CurrencySubtractCount(byte currencyId, ulong count)
         {
-            CurrencyTypeEntry currencyEntry = GameTableManager.Currency.GetEntry(currencyId);
+            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
