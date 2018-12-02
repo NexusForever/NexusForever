@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
@@ -24,9 +26,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 try
                 {
-                    CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
-                    CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
-                    handler?.Invoke(session, parameters);
+                    CommandManager.HandleCommand(session, chat.Message, true);
+                    //CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
+                    //CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
+                    //handler?.Invoke(session, parameters);
                 }
                 catch (Exception e)
                 {
@@ -41,9 +44,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             uint emoteId = emote.EmoteId;
             uint standState = 0;
             if (emoteId != 0)
-            {                
+            {
                 EmotesEntry entry = GameTableManager.Emotes.GetEntry(emoteId);
-                if (entry == null)                
+                if (entry == null)
                     throw (new InvalidPacketValueException("HandleEmote: Invalid EmoteId"));
 
                 standState = entry.StandState;

@@ -1,56 +1,61 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Shared.Configuration;
+using NexusForever.WorldServer.Command.Handler;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Command.Contexts;
 
 namespace NexusForever.WorldServer.Command
 {
-    public delegate void CommandHandlerDelegate(WorldSession session, string[] parameters);
-
     public static class CommandManager
     {
-        private static ImmutableDictionary<string, CommandHandlerDelegate> commandHandlers;
+        private static IServiceProvider Services => DependencyInjection.ServiceProvider;
 
         public static void Initialise()
         {
-            var handlers = new Dictionary<string, CommandHandlerDelegate>();
+            // Force init now for singletons.
+            using (var scope = Services.CreateScope())
+                scope.ServiceProvider.GetServices<ICommandHandler>();
+        }
 
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+        public static bool HandleCommand(WorldSession session, string commandText, bool isFromChat)
+        {
+            return HandleCommand(new WorldSessionCommandContext(session), commandText, isFromChat);
+        }
+
+        public static bool HandleCommand(CommandContext session, string commandText, bool isFromChat)
+        {
+            if (isFromChat)
             {
-                foreach (MethodInfo method in type.GetMethods())
+                if (!commandText.StartsWith("!"))
+                    return false;
+
+                commandText = commandText.Substring(1);
+            }
+
+            using (IServiceScope scope = Services.CreateScope())
+            {
+                foreach (ICommandHandler command in scope.ServiceProvider.GetServices<ICommandHandler>().OrderBy(i => i.Order))
                 {
-                    CommandHandlerAttribute attribute = method.GetCustomAttribute<CommandHandlerAttribute>();
-                    if (attribute == null)
+                    if (!command.Handles(session, commandText))
                         continue;
 
-                    ParameterInfo[] parameterInfo = method.GetParameters();
-
-                    #region Debug
-                    Debug.Assert(parameterInfo.Length == 2);
-                    Debug.Assert(typeof(WorldSession) == parameterInfo[0].ParameterType);
-                    Debug.Assert(typeof(string[]) == parameterInfo[1].ParameterType);
-                    #endregion
-
-                    handlers.Add(attribute.Command, (CommandHandlerDelegate)Delegate.CreateDelegate(typeof(CommandHandlerDelegate), method));
+                    command.Handle(session, commandText);
+                    return true;
                 }
             }
 
-            commandHandlers = handlers.ToImmutableDictionary();
+            return false;
         }
 
-        public static void ParseCommand(string value, out string command, out string[] parameters)
+        public static void RegisterServices(IServiceCollection services)
         {
-            string[] split = value.TrimStart('!').Split(' ');
-            command    = split[0];
-            parameters = split.Skip(1).ToArray();
-        }
-
-        public static CommandHandlerDelegate GetCommandHandler(string command)
-        {
-            return commandHandlers.TryGetValue(command, out CommandHandlerDelegate handler) ? handler : null;
+            services.AddSingleton<ICommandHandler, MountCommandHandler>()
+                .AddSingleton<ICommandHandler, AccountCommandHandler>()
+                .AddSingleton<ICommandHandler, TeleportHandler>()
+                .AddSingleton<ICommandHandler, HelpCommandHandler>()
+                .AddSingleton<ICommandHandler, ItemCommandHandler>();
         }
     }
 }
