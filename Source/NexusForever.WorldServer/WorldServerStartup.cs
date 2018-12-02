@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,11 +12,12 @@ namespace NexusForever.WorldServer
 {
     public class WorldServerStartup
     {
+        public IConfiguration Configuration { get; }
+
         public WorldServerStartup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -29,8 +28,6 @@ namespace NexusForever.WorldServer
             services.AddScoped<WorldContext>();
             services.AddScoped<CharacterContext>();
         }
-
-
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)

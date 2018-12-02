@@ -1,10 +1,9 @@
-﻿using NexusForever.WorldServer.Network;
-
-namespace NexusForever.WorldServer.Command.Contexts
+﻿namespace NexusForever.WorldServer.Command.Contexts
 {
     public class ConsoleCommandContext : CommandContext
     {
-        public ConsoleCommandContext() : base(null)
+        public ConsoleCommandContext()
+            : base(null)
         {
         }
     }

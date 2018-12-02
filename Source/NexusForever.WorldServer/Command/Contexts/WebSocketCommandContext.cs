@@ -10,7 +10,9 @@ namespace NexusForever.WorldServer.Command.Contexts
     public class WebSocketCommandContext : CommandContext
     {
         public WebSocket Socket { get; }
-        public WebSocketCommandContext(WebSocket socket) : base(null)
+
+        public WebSocketCommandContext(WebSocket socket)
+            : base(null)
         {
             Socket = socket;
         }

@@ -5,16 +5,18 @@ namespace NexusForever.WorldServer.Command.Contexts
 {
     public abstract class CommandContext
     {
+        public WorldSession Session { get; set; }
+
         protected CommandContext(WorldSession session)
         {
             Session = session;
         }
-        public WorldSession Session { get; set; }
 
         public virtual void SendError(ILogger logger, string text)
         {
             logger.LogWarning(text);
         }
+
         public virtual void SendMessage(ILogger logger, string text)
         {
             logger.LogInformation(text);

@@ -10,15 +10,14 @@ namespace NexusForever.WorldServer.Command.Handler
     [Name("Mounts")]
     public class MountCommandHandler : NamedCommand
     {
-        
-        public MountCommandHandler(ILogger<MountCommandHandler> logger) : base("mount", true, logger)
+        public MountCommandHandler(ILogger<MountCommandHandler> logger)
+            : base("mount", true, logger)
         {
-
         }
 
         protected override void HandleCommand(CommandContext context, string command, string[] parameters)
         {
-            var session = context.Session;
+            WorldSession session = context.Session;
             var mount = new Mount(session.Player);
             var vector = new Vector3(session.Player.Position.X, session.Player.Position.Y, session.Player.Position.Z);
             session.Player.Map.EnqueueAdd(mount, vector);

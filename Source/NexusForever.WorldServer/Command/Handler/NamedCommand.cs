@@ -4,21 +4,21 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Command.Contexts;
-using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     public abstract class NamedCommand : CommandHandlerBase
     {
-        protected NamedCommand(IEnumerable<string> commandNames, bool requiresSession, ILogger logger) : base(logger)
+        protected NamedCommand(IEnumerable<string> commandNames, bool requiresSession, ILogger logger)
+            : base(logger)
         {
             CommandNames = commandNames.ToImmutableArray();
             RequiresSession = requiresSession;
         }
 
-        protected NamedCommand(string commandName, bool requiresSession, ILogger logger) : this(new[] { commandName }, requiresSession, logger)
+        protected NamedCommand(string commandName, bool requiresSession, ILogger logger)
+            : this(new[] { commandName }, requiresSession, logger)
         {
-
         }
 
         public override IEnumerable<string> GetCommands()
@@ -44,23 +44,26 @@ namespace NexusForever.WorldServer.Command.Handler
 
         private bool IsHelpRequest(string text)
         {
-            string[] helpVerbs = new[]
-            {
+            string[] helpVerbs = {
                 "help",
                 "?"
             };
-            if (helpVerbs.Any(i => string.Equals(i, text, StringComparison.OrdinalIgnoreCase))) return true;
-            return false;
+
+            return helpVerbs.Any(i => string.Equals(i, text, StringComparison.OrdinalIgnoreCase));
         }
 
         protected abstract void HandleCommand(CommandContext session, string command, string[] parameters);
 
         public override bool Handles(CommandContext session, string input)
         {
-            //if (RequiresSession && session.Session == null) return false;
+            /*if (RequiresSession && session.Session == null)
+                return false;*/
+
             ParseCommand(input, out var command, out var parameters);
-            return CommandNames.Any(i => string.Equals(command, i, StringComparison.OrdinalIgnoreCase)) && ((parameters.Length == 0 || IsHelpRequest(parameters[0])) || (RequiresSession && session.Session != null) || !RequiresSession);
+            return CommandNames.Any(i => string.Equals(command, i, StringComparison.OrdinalIgnoreCase))
+                   && ((parameters.Length == 0 || IsHelpRequest(parameters[0])) || (RequiresSession && session.Session != null) || !RequiresSession);
         }
+
         public ImmutableArray<string> CommandNames { get; }
         [Obsolete("Please user CommandNames instead", true)]
         public string CommandName { get; }

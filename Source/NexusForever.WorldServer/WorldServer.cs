@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using Microsoft.AspNetCore;
 using NLog;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
@@ -16,9 +15,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
-using Microsoft.AspNetCore.Hosting;
 using NexusForever.WorldServer.Command.Contexts;
-using NexusForever.WorldServer.Command.Handler;
 
 namespace NexusForever.WorldServer
 {
@@ -65,6 +62,7 @@ namespace NexusForever.WorldServer
                     NetworkManager<WorldSession>.Update(lastTick);
                     MapManager.Update(lastTick);
                 });
+
                 webHost.Start();
                 log.Info("Ready!");
 

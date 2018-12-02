@@ -5,7 +5,8 @@ namespace NexusForever.WorldServer.Command.Contexts
 {
     public class WorldSessionCommandContext : CommandContext
     {
-        public WorldSessionCommandContext(WorldSession session) : base(session)
+        public WorldSessionCommandContext(WorldSession session)
+            : base(session)
         {
         }
 

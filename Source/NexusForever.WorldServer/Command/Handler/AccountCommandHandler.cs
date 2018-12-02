@@ -1,16 +1,15 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NexusForever.Shared.Database.Auth;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
-using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Name("Account Management")]
     public class AccountCommandHandler : CommandCategory
     {
-        public AccountCommandHandler(ILogger<AccountCommandHandler> logger) : base(new[] { "acc", "account" }, false, logger) { }
+        public AccountCommandHandler(ILogger<AccountCommandHandler> logger)
+            : base(new[] { "acc", "account" }, false, logger) { }
 
         [SubCommandHandler("create", "email password - Create a new account")]
         public void HandleAccountCreate(CommandContext context, string subCommand, string[] parameters)

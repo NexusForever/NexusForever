@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Command.Handler;
 using NLog.Web;
 
 namespace NexusForever.WorldServer

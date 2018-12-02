@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 using NexusForever.WorldServer.Command.Contexts;
-using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

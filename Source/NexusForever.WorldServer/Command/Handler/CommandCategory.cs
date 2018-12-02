@@ -8,18 +8,21 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
-using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     public abstract class CommandCategory : NamedCommand
     {
-        private readonly string _dynamicHelpText;
-        public override string HelpText => _dynamicHelpText;
+        public override string HelpText { get; }
+
         private delegate void SubCommandHandler(CommandContext context, string subCommand, string[] parameters);
-        private readonly ImmutableDictionary<string, SubCommandHandler> _subCommands;
-        protected CommandCategory(string categoryName, bool requiresSession, ILogger logger) : this(new[] { categoryName }, requiresSession, logger) { }
-        protected CommandCategory(IEnumerable<string> categoryNames, bool requiresSession, ILogger logger) : base(categoryNames, requiresSession, logger)
+        private readonly ImmutableDictionary<string, SubCommandHandler> subCommands;
+
+        protected CommandCategory(string categoryName, bool requiresSession, ILogger logger)
+            : this(new[] { categoryName }, requiresSession, logger) { }
+
+        protected CommandCategory(IEnumerable<string> categoryNames, bool requiresSession, ILogger logger)
+            : base(categoryNames, requiresSession, logger)
         {
             StringBuilder helpBuilder = new StringBuilder();
             helpBuilder.AppendLine("--- sub commands");
@@ -42,29 +45,25 @@ namespace NexusForever.WorldServer.Command.Handler
                     Debug.Assert(typeof(string[]) == parameterInfo[2].ParameterType);
                     #endregion
 
-
                     helpBuilder.Append($"   {attribute.Command} - ");
                     if (string.IsNullOrWhiteSpace(attribute.HelpText))
-                    {
                         helpBuilder.AppendLine("No help available.");
-                    }
                     else
-                    {
                         helpBuilder.AppendLine(attribute.HelpText);
-                    }
+
                     commandHandlers.Add(attribute.Command, (SubCommandHandler)Delegate.CreateDelegate(typeof(SubCommandHandler), this, method));
                 }
             }
 
-            _subCommands = commandHandlers.ToImmutableDictionary();
-            _dynamicHelpText = helpBuilder.ToString();
+            subCommands = commandHandlers.ToImmutableDictionary();
+            HelpText = helpBuilder.ToString();
         }
 
         protected sealed override void HandleCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length > 0)
             {
-                _subCommands.TryGetValue(parameters[0], out var commandCallback);
+                subCommands.TryGetValue(parameters[0], out var commandCallback);
                 commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray());
             }
             // TODO
