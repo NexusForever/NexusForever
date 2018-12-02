@@ -146,6 +146,9 @@ namespace NexusForever.Shared.Network
                 && packet.Opcode != GameMessageOpcode.ClientEntityCommand)
                 log.Trace($"Received packet {packet.Opcode}(0x{packet.Opcode:X}).");
 
+            //FIXME workaround for now...
+            Heartbeat.OnHeartbeat();
+
             using (var stream = new MemoryStream(packet.Data))
             using (var reader = new GamePacketReader(stream))
             {
