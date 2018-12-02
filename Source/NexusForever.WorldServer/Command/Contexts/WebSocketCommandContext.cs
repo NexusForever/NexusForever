@@ -2,7 +2,9 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace NexusForever.WorldServer.Command.Contexts
@@ -17,38 +19,34 @@ namespace NexusForever.WorldServer.Command.Contexts
             Socket = socket;
         }
 
-        public override void SendError(ILogger logger, string text)
+        public override async Task SendErrorAsync(ILogger logger, string text)
         {
-            base.SendError(logger, text);
-            SendWebSocketMessage(text, "error");
+            await base.SendErrorAsync(logger, text);
+            await SendWebSocketMessage(logger, text, "error");
         }
 
-        public override void SendMessage(ILogger logger, string text)
+        public override async Task SendMessageAsync(ILogger logger, string text)
         {
-            base.SendMessage(logger, text);
-            SendWebSocketMessage(text, "info");
+            await base.SendMessageAsync(logger, text);
+            await SendWebSocketMessage(logger, text, "info");
         }
 
-        private void SendWebSocketMessage(string text, string type)
+        private async Task SendWebSocketMessage(ILogger logger, string text, string type)
         {
             if (Socket.State == WebSocketState.Open)
             {
-                var message = JObject.FromObject(new {text, type}).ToString(Newtonsoft.Json.Formatting.None);
-                var messageBytes = Encoding.UTF8.GetBytes(message);
-                
-                Socket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true,
-                    CancellationToken.None).ContinueWith(
-                    async i =>
-                    {
-                        try
-                        {
-                            await i.ConfigureAwait(false);
-                        }
-                        catch
-                        {
-                            // Ignored.
-                        }
-                    });
+                string message = JObject.FromObject(new {text, type}).ToString(Formatting.None);
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+                try
+                {
+                    await Socket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true,
+                        CancellationToken.None).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to send {type} message to websocket client, message was: {message}",
+                        type, text);
+                }
             }
         }
     }

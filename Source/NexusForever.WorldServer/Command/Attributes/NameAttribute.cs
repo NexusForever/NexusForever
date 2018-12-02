@@ -2,6 +2,7 @@
 
 namespace NexusForever.WorldServer.Command.Attributes
 {
+
     public class NameAttribute : Attribute
     {
         public string Name { get; }

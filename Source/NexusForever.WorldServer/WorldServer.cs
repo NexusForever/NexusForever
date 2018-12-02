@@ -34,16 +34,16 @@ namespace NexusForever.WorldServer
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
             Console.Title = Title;
-            log.Info("Initialising...");
+            
 
             ConfigurationManager<WorldServerConfiguration>.Initialise("WorldServer.json");
             using (var webHost = WorldServerEmbeddedWebServer
-                .Initialize(ConfigurationManager<WorldServerConfiguration>.Configuration)
+                .Initialize(SharedConfiguration.Configuration)
                 .Build())
             {
                 // Expose ASP.NET Core DI outside of ASP.NET Core.
                 DependencyInjection.Initialize(webHost.Services);
-
+                log.Info("Initialising...");
                 DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
 
                 GameTableManager.Initialise();

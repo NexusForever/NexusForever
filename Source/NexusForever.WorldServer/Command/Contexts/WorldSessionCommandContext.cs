@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Contexts
@@ -10,16 +11,18 @@ namespace NexusForever.WorldServer.Command.Contexts
         {
         }
 
-        public override void SendError(ILogger logger, string text)
+        public override Task SendErrorAsync(ILogger logger, string text)
         {
-            base.SendError(logger, text);
+            base.SendErrorAsync(logger, text);
             // TODO: Send player a chat message.
+            return Task.CompletedTask;
         }
 
-        public override void SendMessage(ILogger logger, string text)
+        public override Task SendMessageAsync(ILogger logger, string text)
         {
-            base.SendMessage(logger, text);
+            base.SendMessageAsync(logger, text);
             // TODO: Send player a chat message.
+            return Task.CompletedTask;
         }
     }
 }
