@@ -77,10 +77,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 SetProperty((Property)i, values[i]);
             }
             Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)level));
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, (uint)values[7] ));
-            Stats.Add(Stat.Shield, new StatValue(Stat.Shield, (uint)values[41] ));
+            Stats.Add(Stat.Health, new StatValue(Stat.Health, (uint)GetPropertyValue(Property.BaseHealth)));
+            Stats.Add(Stat.Shield, new StatValue(Stat.Shield, (uint)GetPropertyValue(Property.ShieldCapacityMax)));
 
-            //log.Trace($"health: {values[7]}, level: {level}");
             // FIXME not done
         }
     }
