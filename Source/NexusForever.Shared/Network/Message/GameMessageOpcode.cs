@@ -10,6 +10,9 @@
         ServerAuthEncrypted             = 0x0076,
         ServerCharacterLogoutStart      = 0x0092,
         ServerChangeWorld               = 0x00AD,
+        ServerBuybackItemsUpdated       = 0x00BA,
+        ClientBuybackItemFromVendor     = 0x00BB,
+        ServerBuybackItemRemoved        = 0x00BD,
         ClientVendorPurchase            = 0x00BE,
         ClientCharacterLogout           = 0x00BF,
         ClientLogout                    = 0x00C0,
@@ -24,6 +27,7 @@
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
+        ClientSellItemToVendor          = 0x0166,
         Server0169                      = 0x0169, // ability book related
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
