@@ -48,6 +48,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public CurrencyManager CurrencyManager { get; }
         public WorldSession Session { get; }
         public VendorInfo SelectedVendorInfo { get; set; }
+        public Dictionary<uint, BuybackItem> BuybackItems = new Dictionary<uint, BuybackItem>();
+        public uint highestBuybackId = 0;
 
         private double timeToSave = SaveDuration;
         private PlayerSaveMask saveMask;
