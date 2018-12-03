@@ -12,7 +12,7 @@
         ServerChangeWorld               = 0x00AD,
         ServerBuybackItemsUpdated       = 0x00BA,
         ClientBuybackItemFromVendor     = 0x00BB,
-        ServerBuybackItemRemoved         = 0x00BD,
+        ServerBuybackItemRemoved        = 0x00BD,
         ClientVendorPurchase            = 0x00BE,
         ClientCharacterLogout           = 0x00BF,
         ServerCharacterCreate           = 0x00DC,
