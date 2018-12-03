@@ -268,10 +268,22 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO
         }
 
+        public Item GetItemFromLocation(ItemLocation itemLocation)
+        {
+            Bag bag = GetBag(itemLocation.Location);
+            if (bag == null)
+                throw new InvalidPacketValueException();
+
+            Item item = bag.GetItem(itemLocation.BagIndex);
+            if (item == null)
+                throw new InvalidPacketValueException();
+            return item;
+        }
+
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
-        public void ItemDelete(ItemLocation from)
+        public Item ItemDelete(ItemLocation from)
         {
             Bag srcBag = GetBag(from.Location);
             if (srcBag == null)
@@ -289,6 +301,8 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Guid = srcItem.Guid
             });
+
+            return srcItem;
         }
 
         /// <summary>

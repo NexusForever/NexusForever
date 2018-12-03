@@ -97,5 +97,44 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             var item = new Game.Entity.Item(session.Player.CharacterId, itemEntry, Math.Min(1, itemEntry.MaxStackCount));
             session.Player.Inventory.ItemCreate(itemEntry.Id, vendorPurchase.VendorItemQty * itemEntry.BuyFromVendorStackCount);
         }
+
+
+        [MessageHandler(GameMessageOpcode.ClientSellItemToVendor)]
+        public static void HandleVendorSell(WorldSession session, ClientVendorSell vendorSell)
+        {
+            VendorInfo VendorInfo = session.Player.SelectedVendorInfo;
+
+            if (VendorInfo == null)
+                return;
+
+            Item2Entry itemEntry = session.Player.Inventory.GetItemFromLocation(vendorSell.ItemLocation).Entry;
+
+            if (itemEntry == null)
+                return;
+
+            float sellMultiplier = VendorInfo.SellPriceMultiplier * vendorSell.Quantity;
+            Currency currency0 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId0);
+            Currency currency1 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId1);
+            ulong calculatedCost0 = (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier);
+            ulong calculatedCost1 = (uint)(itemEntry.CurrencyAmount1SellToVendor * sellMultiplier);
+
+            if (currency0 == null)
+                currency0 = session.Player.CurrencyManager.GetCurrency(1);
+            if (currency1 == null)
+                currency1 = session.Player.CurrencyManager.GetCurrency(1);
+
+
+            // TODO Insert calculation for cost here
+            if (calculatedCost0 == 0 && calculatedCost1 == 0)
+                calculatedCost0 = 1;
+
+            Item soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
+
+            if (currency0 != null)
+                session.Player.CurrencyManager.CurrencyAddAmount((byte)currency0.Entry.Id, calculatedCost0);
+
+            if (currency1 != null)
+                session.Player.CurrencyManager.CurrencyAddAmount((byte)currency1.Entry.Id, calculatedCost1);
+        }
     }
 }
