@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerVendor, MessageDirection.Server)]
-    public class ServerVendor : IWritable
+    [Message(GameMessageOpcode.ServerVendorItemsUpdated, MessageDirection.Server)]
+    public class ServerVendorItemsUpdated : IWritable
     {
         public class Category : IWritable
         {

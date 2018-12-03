@@ -16,6 +16,7 @@ using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using System.Collections.Specialized;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -47,6 +48,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public CurrencyManager CurrencyManager { get; }
         public WorldSession Session { get; }
         public VendorInfo SelectedVendorInfo { get; set; }
+        public SortedDictionary<uint, BuybackItem> BuybackItems = new SortedDictionary<uint, BuybackItem>();
+        public uint highestBuybackId = 0;
 
         private double timeToSave = SaveDuration;
         private PlayerSaveMask saveMask;
