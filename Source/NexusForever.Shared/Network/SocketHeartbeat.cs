@@ -13,7 +13,7 @@
 
         public void OnHeartbeat()
         {
-            timeToFlatline = 300d;
+            timeToFlatline = 3600d;
         }
 
         public void Update(double lastTick)
