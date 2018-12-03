@@ -19,6 +19,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<Character> Character { get; set; }
         public virtual DbSet<CharacterAppearance> CharacterAppearance { get; set; }
         public virtual DbSet<CharacterBone> CharacterBone { get; set; }
+        public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<Item> Item { get; set; }
 
@@ -120,6 +121,30 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterBone)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK_character_bone_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterCurrency>(entity =>
+            {
+                entity.HasKey(e => new { e.CharacterId, e.CurrencyId });
+
+                entity.ToTable("character_currency");
+
+                entity.Property(e => e.CharacterId)
+                    .HasColumnName("characterId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CurrencyId)
+                    .HasColumnName("currencyId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Amount)
+                    .HasColumnName("amount")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.CharacterCurrency)
+                    .HasForeignKey(d => d.CharacterId)
+                    .HasConstraintName("FK_character_currency_id__character_id");
             });
 
             modelBuilder.Entity<CharacterCustomisation>(entity =>
