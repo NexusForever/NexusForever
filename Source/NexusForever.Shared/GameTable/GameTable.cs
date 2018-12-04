@@ -1,12 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using NexusForever.Shared.Configuration;
 
 namespace NexusForever.Shared.GameTable
 {
+    public static class GameTableFactory
+    {
+        public static GameTable<T> Load<T>(string fileName) where T : class, new()
+        {
+            var path = SharedConfiguration.Configuration.GetValue<string>("GameTablePath", "tbl");
+            return new GameTable<T>(Path.Combine(path, fileName));
+        }
+
+        public static TextTable LoadText(string fileName)
+        {
+            var path = SharedConfiguration.Configuration.GetValue<string>("GameTablePath", "tbl");
+            return new TextTable(Path.Combine(path, fileName));
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct TextHeader
+    {
+        public uint Id;
+        public uint Offset;
+    }
+    public class TextEntry
+    {
+        public TextEntry(Language language, uint id, string text)
+        {
+            Id = id;
+            Language = Language;
+            Text = text;
+        }
+        public uint Id { get; private set; }
+        public Language Language { get; private set; }
+        public string Text { get; private set; }
+    }
+    public class TextTable
+    {
+
+        public TextEntry[] Entries { get; private set; }
+
+        private readonly TextTableHeader header;
+        private class TupleComparer : IComparer<Tuple<uint, int>>
+        {
+            public int Compare(Tuple<uint, int> x, Tuple<uint, int> y)
+            {
+                return x.Item1.CompareTo(y.Item1);
+            }
+        }
+
+        public TextTable(string path)
+        {
+            using (var stream = File.OpenRead(path))
+            using (var reader = new BinaryReader(stream, Encoding.Unicode))
+            {
+                // header
+                ReadOnlySpan<TextTableHeader> headerSpan = MemoryMarshal.Cast<byte, TextTableHeader>(
+                    reader.ReadBytes(Marshal.SizeOf<TextTableHeader>()));
+
+                header = headerSpan[0];
+                var entryStart = (ulong)Marshal.SizeOf<TextTableHeader>() + header.RecordOffset;
+                stream.Position = (long)entryStart;
+                // fields
+                //stream.Position = Marshal.SizeOf<GameTableHeader>() + (int)header.FieldOffset;
+                //ReadOnlySpan<GameTableField> fields = MemoryMarshal.Cast<byte, GameTableField>(
+                //    reader.ReadBytes(Marshal.SizeOf<GameTableField>() * (int)header.FieldCount));
+
+                // optimisation to prevent too much CPU time being spent on GetCustomAttribute for large tables
+                var entrySize = Marshal.SizeOf<TextHeader>();
+                List<TextHeader> entries = new List<TextHeader>();
+                for (ulong x = 0; x < header.RecordCount; x++)
+                {
+                    ReadOnlySpan<TextHeader> textHeader = MemoryMarshal.Cast<byte, TextHeader>(reader.ReadBytes(entrySize));
+                    entries.Add(textHeader[0]);
+                }
+
+                List<TextEntry> final = new List<TextEntry>();
+                foreach (TextHeader entry in entries)
+                {
+                    stream.Position = (long)((ulong)Marshal.SizeOf<TextTableHeader>() + header.NameOffset + (entry.Offset * 2));
+                    StringBuilder textBuilder = new StringBuilder();
+                    while (reader.PeekChar() != '\0')
+                    {
+                        textBuilder.Append(reader.ReadChar());
+                    }
+
+                    final.Add(new TextEntry(header.Language, entry.Id, textBuilder.ToString()));
+                }
+
+                Entries = final.ToArray();
+                Index = entries.Select((item, index) => Tuple.Create(item.Id, index)).ToList();
+                Index.Sort(new TupleComparer());
+                #region DEBUG
+                Debug.Assert(GetText((uint) 1) == "Cancel");
+                #endregion
+                //var attributeCache = new Dictionary<FieldInfo, GameTableFieldArrayAttribute>();
+
+                //foreach (FieldInfo modelField in typeof(T).GetFields())
+                //{
+                //    GameTableFieldArrayAttribute attribute = modelField.GetCustomAttribute<GameTableFieldArrayAttribute>();
+                //    attributeCache.Add(modelField, attribute);
+                //}
+
+                //ValidateModelFields(fields, attributeCache);
+
+                //ReadEntries(reader, fields, attributeCache);
+                //ReadLookupTable(reader);
+            }
+            
+        }
+        List<Tuple<uint, int>> Index {get;}
+
+        public string GetText(uint id)
+        {
+            var index = Index.BinarySearch(Tuple.Create(id, 0), new TupleComparer());
+            if(index < 0) return null;
+            return Entries[Index[index].Item2].Text;
+        }
+    }
+
     public class GameTable<T> where T : class, new()
     {
         public T[] Entries { get; private set; }
