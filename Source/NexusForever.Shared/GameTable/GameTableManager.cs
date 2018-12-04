@@ -553,6 +553,35 @@ namespace NexusForever.Shared.GameTable
             }
         }
 
+        private static Task LoadGameTableAsync(PropertyInfo property, string fileName)
+        {
+            async Task SetPropertyOnCompletion(Task<object> task)
+            {
+                property.SetValue(null, await task);
+            }
+
+            if (property.PropertyType.IsGenericType &&
+                property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
+            {
+
+                return Task.Factory.StartNew<object>(() =>
+                        GameTableFactory.Load(property.PropertyType.GetGenericArguments().Single(), fileName))
+                    .ContinueWith(SetPropertyOnCompletion);
+            }
+            else if (property.PropertyType == typeof(TextTable))
+            {
+                return Task.Factory.StartNew<object>(() => GameTableFactory.LoadText(fileName))
+                    .ContinueWith(SetPropertyOnCompletion);
+            }
+            else
+            {
+                throw new Exception($"Unknown game table type {property.PropertyType}");
+            }
+        }
+
+
+
+
         public static void Initialise()
         {
             log.Info("Loading GameTables...");
