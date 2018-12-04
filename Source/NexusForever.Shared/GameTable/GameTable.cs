@@ -118,7 +118,8 @@ namespace NexusForever.Shared.GameTable
                 T entry = new T();
 
                 int fieldIndex = 0;
-                foreach (FieldInfo modelField in typeof(T).GetFields())
+                FieldInfo[] typeFields = typeof(T).GetFields();
+                foreach (FieldInfo modelField in typeFields)
                 {
                     GameTableFieldArrayAttribute attribute = attributeCache[modelField];
                     if (attribute != null)
@@ -175,6 +176,10 @@ namespace NexusForever.Shared.GameTable
 
                                 modelField.SetValue(entry, reader.ReadWideString());
                                 reader.BaseStream.Position = position;
+
+                                if (fieldIndex < typeFields.Length - 1)
+                                    if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
+                                        reader.BaseStream.Position += 4;
                                 break;
                             }
                         }

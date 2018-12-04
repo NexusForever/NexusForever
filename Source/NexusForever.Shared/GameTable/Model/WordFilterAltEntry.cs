@@ -1,6 +1,6 @@
 namespace NexusForever.Shared.GameTable.Model
 {
-    public class WordFilterChinaEntry
+    public class WordFilterAltEntry
     {
         public uint Id;
         public string Filter;

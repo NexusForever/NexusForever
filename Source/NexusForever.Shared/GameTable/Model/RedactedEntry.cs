@@ -1,6 +1,6 @@
 namespace NexusForever.Shared.GameTable.Model
 {
-    public class MTXCategoryEntry
+    public class RedactedEntry
     {
         public uint Id;
         public string IdString;
