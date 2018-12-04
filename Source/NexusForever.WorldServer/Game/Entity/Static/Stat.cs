@@ -5,6 +5,6 @@
         Health  = 0,
         Dash  = 9,
         Level = 10,
-	Shield = 20,
+        Shield = 20,
     }
 }
