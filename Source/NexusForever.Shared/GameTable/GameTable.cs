@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -12,41 +13,55 @@ namespace NexusForever.Shared.GameTable
 
         private readonly GameTableHeader header;
         private int[] lookup;
+        private static Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache;
+
+        static GameTable()
+        {
+            attributeCache = new Dictionary<FieldInfo, GameTableFieldArrayAttribute>();
+            foreach (FieldInfo modelField in typeof(T).GetFields())
+            {
+                GameTableFieldArrayAttribute attribute = modelField.GetCustomAttribute<GameTableFieldArrayAttribute>();
+                attributeCache.Add(modelField, attribute);
+            }
+
+            headerSize = Marshal.SizeOf<GameTableHeader>();
+            tableFieldSize = Marshal.SizeOf<GameTableField>();
+            bufferSize = tableFieldSize * 16;
+            if (bufferSize < 1024) bufferSize = 1024;
+            if (bufferSize > 16 * 1024) bufferSize = 16 * 1024;
+        }
+
+        private static readonly int headerSize;
+        private static readonly int tableFieldSize;
+        private static readonly int bufferSize;
 
         public GameTable(string path)
         {
-            using (var stream = File.OpenRead(path))
+            using (var stream = new BufferedStream(File.OpenRead(path), bufferSize))
             using (var reader = new BinaryReader(stream))
             {
                 // header
                 ReadOnlySpan<GameTableHeader> headerSpan = MemoryMarshal.Cast<byte, GameTableHeader>(
-                    reader.ReadBytes(Marshal.SizeOf<GameTableHeader>()));
+                    reader.ReadBytes(headerSize));
 
                 header = headerSpan[0];
 
                 // fields
-                stream.Position = Marshal.SizeOf<GameTableHeader>() + (int)header.FieldOffset;
+                stream.Position = headerSize + (int)header.FieldOffset;
                 ReadOnlySpan<GameTableField> fields = MemoryMarshal.Cast<byte, GameTableField>(
-                    reader.ReadBytes(Marshal.SizeOf<GameTableField>() * (int)header.FieldCount));
+                    reader.ReadBytes(tableFieldSize * (int)header.FieldCount));
 
-                // optimisation to prevent too much CPU time being spent on GetCustomAttribute for large tables
-                var attributeCache = new Dictionary<FieldInfo, GameTableFieldArrayAttribute>();
-                foreach (FieldInfo modelField in typeof(T).GetFields())
-                {
-                    GameTableFieldArrayAttribute attribute = modelField.GetCustomAttribute<GameTableFieldArrayAttribute>();
-                    attributeCache.Add(modelField, attribute);
-                }
 
+                // Should this be debug only?
                 ValidateModelFields(fields, attributeCache);
 
                 ReadEntries(reader, fields, attributeCache);
-                ReadLookupTable(reader);
             }
         }
-
+        
         private void ValidateModelFields(ReadOnlySpan<GameTableField> fields, Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache)
         {
-            FieldInfo[] modelFields = typeof(T).GetFields();
+            FieldInfo[] modelFields = attributeCache.Keys.ToArray();
             if (modelFields.Length != fields.Length)
             {
                 // models with arrays will not have the correct number of fields, compensate for this
@@ -110,15 +125,17 @@ namespace NexusForever.Shared.GameTable
 
         private void ReadEntries(BinaryReader reader, ReadOnlySpan<GameTableField> fields, Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache)
         {
+            var idField = attributeCache.Keys.FirstOrDefault(i => string.Equals(i.Name, "id", StringComparison.OrdinalIgnoreCase));
             Entries = new T[header.RecordCount];
+            lookup = new int[header.MaxId];
             for (int i = 0; i < (int)header.RecordCount; i++)
             {
-                reader.BaseStream.Position = Marshal.SizeOf<GameTableHeader>() + (long)header.RecordOffset + (long)header.RecordSize * i;
+                reader.BaseStream.Position = headerSize + (long)header.RecordOffset + (long)header.RecordSize * i;
 
                 T entry = new T();
 
                 int fieldIndex = 0;
-                FieldInfo[] typeFields = typeof(T).GetFields();
+                FieldInfo[] typeFields = attributeCache.Keys.ToArray();
                 foreach (FieldInfo modelField in typeFields)
                 {
                     GameTableFieldArrayAttribute attribute = attributeCache[modelField];
@@ -165,38 +182,31 @@ namespace NexusForever.Shared.GameTable
                                 modelField.SetValue(entry, reader.ReadUInt64());
                                 break;
                             case DataType.String:
-                            {
-                                uint offset1 = reader.ReadUInt32();
-                                uint offset2 = reader.ReadUInt32();
-                                uint offset3 = Math.Max(offset1, offset2);
+                                {
+                                    uint offset1 = reader.ReadUInt32();
+                                    uint offset2 = reader.ReadUInt32();
+                                    uint offset3 = Math.Max(offset1, offset2);
 
-                                long position = reader.BaseStream.Position;
-                                reader.BaseStream.Position =
-                                    Marshal.SizeOf<GameTableHeader>() + (long) header.RecordOffset + offset3;
+                                    long position = reader.BaseStream.Position;
+                                    reader.BaseStream.Position =
+                                        headerSize + (long)header.RecordOffset + offset3;
 
-                                modelField.SetValue(entry, reader.ReadWideString());
-                                reader.BaseStream.Position = position;
+                                    modelField.SetValue(entry, reader.ReadWideString());
+                                    reader.BaseStream.Position = position;
 
-                                if (fieldIndex < typeFields.Length - 1)
-                                    if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
-                                        reader.BaseStream.Position += 4;
-                                break;
-                            }
+                                    if (fieldIndex < typeFields.Length - 1)
+                                        if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
+                                            reader.BaseStream.Position += 4;
+                                    break;
+                                }
                         }
                     }
                 }
 
+                var id = (uint) idField.GetValue(entry);
                 Entries[i] = entry;
+                lookup[id] = i;
             }
-        }
-
-        private void ReadLookupTable(BinaryReader reader)
-        {
-            reader.BaseStream.Position = Marshal.SizeOf<GameTableHeader>() + (int)header.LookupOffset;
-
-            lookup = new int[header.MaxId];
-            for (int i = 0; i < lookup.Length; i++)
-                lookup[i] = reader.ReadInt32();
         }
 
         public T GetEntry(ulong id)
