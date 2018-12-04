@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,12 @@ namespace NexusForever.WorldServer.Database.Character
         {
             using (var context = new CharacterContext())
                 return context.Item.DefaultIfEmpty().Max(s => s.Id);
+        }
+
+        public static Model.Item GetItemById(ulong Id)
+        {
+            using (var context = new CharacterContext())
+                return context.Item.Where(e => e.Id == Id).First();
         }
 
         public static async Task<List<Model.Character>> GetCharacters(uint accountId)
