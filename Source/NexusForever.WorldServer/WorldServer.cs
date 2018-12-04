@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using NLog;
@@ -10,12 +10,13 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network;
-using NexusForever.WorldServer.Command.Contexts;
 
 namespace NexusForever.WorldServer
 {
@@ -50,11 +51,12 @@ namespace NexusForever.WorldServer
 
                 EntityManager.Initialise();
                 EntityCommandManager.Initialise();
-
+                
                 AssetManager.Initialise();
                 ServerManager.Initialise();
 
                 MessageManager.Initialise();
+                SocialManager.Initialise();
                 CommandManager.Initialise();
                 NetworkManager<WorldSession>.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Network);
                 WorldManager.Initialise(lastTick =>
