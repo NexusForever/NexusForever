@@ -69,18 +69,18 @@ namespace NexusForever.WorldServer.Game.Entity
             int level = new System.Random().Next((int)creature2Entry.MinLevel, (int)creature2Entry.MaxLevel);
             CreatureLevelEntry creatureLevelEntry = GameTableManager.CreatureLevel.GetEntry((ulong)level);
 
-            float[] values = new float[200];
+            float values;
 
             for (uint i = 0u; i < creatureLevelEntry.UnitPropertyValue.Length; i++)
             {
-                values[i] = creatureLevelEntry.UnitPropertyValue[i] * creature2ArcheTypeEntry.UnitPropertyMultiplier[i] * creature2DifficultyEntry.UnitPropertyMultiplier[i] * creature2TierEntry.UnitPropertyMultiplier[i];
-                SetProperty((Property)i, values[i]);
+                values = creatureLevelEntry.UnitPropertyValue[i] * creature2ArcheTypeEntry.UnitPropertyMultiplier[i] * creature2DifficultyEntry.UnitPropertyMultiplier[i] * creature2TierEntry.UnitPropertyMultiplier[i];
+                SetProperty((Property)i, values);
             }
             Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)level));
             Stats.Add(Stat.Health, new StatValue(Stat.Health, (uint)GetPropertyValue(Property.BaseHealth)));
             Stats.Add(Stat.Shield, new StatValue(Stat.Shield, (uint)GetPropertyValue(Property.ShieldCapacityMax)));
 
-            // FIXME not done
+            // FIXME not done, more Stat's to add
         }
     }
 }
