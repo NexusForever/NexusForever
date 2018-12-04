@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
@@ -15,12 +16,13 @@ namespace NexusForever.WorldServer.Command.Handler
         {
         }
 
-        protected override void HandleCommand(CommandContext context, string command, string[] parameters)
+        protected override Task HandleCommandAsync(CommandContext context, string command, string[] parameters)
         {
             WorldSession session = context.Session;
             var mount = new Mount(session.Player);
             var vector = new Vector3(session.Player.Position.X, session.Player.Position.Y, session.Player.Position.Z);
             session.Player.Map.EnqueueAdd(mount, vector);
+            return Task.CompletedTask;
         }
     }
 }

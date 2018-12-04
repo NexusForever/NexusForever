@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Command.Contexts;
 
@@ -9,6 +10,15 @@ namespace NexusForever.WorldServer.Command.Handler
 {
     public abstract class NamedCommand : CommandHandlerBase
     {
+
+        public override int Order { get; } = 100;
+        public virtual string HelpText { get; }
+        public bool SupportsHelp => !string.IsNullOrWhiteSpace(HelpText);
+
+        public ImmutableArray<string> CommandNames { get; }
+
+        public bool RequiresSession { get; }
+
         protected NamedCommand(IEnumerable<string> commandNames, bool requiresSession, ILogger logger)
             : base(logger)
         {
@@ -17,7 +27,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         protected NamedCommand(string commandName, bool requiresSession, ILogger logger)
-            : this(new[] { commandName }, requiresSession, logger)
+            : this(new[] {commandName}, requiresSession, logger)
         {
         }
 
@@ -26,25 +36,22 @@ namespace NexusForever.WorldServer.Command.Handler
             return CommandNames;
         }
 
-        public override int Order { get; } = 100;
-        public virtual string HelpText { get; }
-        public bool SupportsHelp => !string.IsNullOrWhiteSpace(HelpText);
-
-        public sealed override void Handle(CommandContext session, string text)
+        public sealed override async Task HandleAsync(CommandContext session, string text)
         {
-            ParseCommand(text, out var command, out var parameters);
-            if (SupportsHelp && (parameters.Length == 0 || IsHelpRequest(parameters[0])))
+            ParseCommand(text, out string command, out string[] parameters);
+            if (SupportsHelp && parameters.Length != 0 && IsHelpRequest(parameters[0]))
             {
-                GetHelp(session);
+                await SendHelpAsync(session).ConfigureAwait(false);
                 return;
             }
 
-            HandleCommand(session, command, parameters);
+            await HandleCommandAsync(session, command, parameters);
         }
 
         private bool IsHelpRequest(string text)
         {
-            string[] helpVerbs = {
+            string[] helpVerbs =
+            {
                 "help",
                 "?"
             };
@@ -52,27 +59,22 @@ namespace NexusForever.WorldServer.Command.Handler
             return helpVerbs.Any(i => string.Equals(i, text, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected abstract void HandleCommand(CommandContext session, string command, string[] parameters);
+        protected abstract Task HandleCommandAsync(CommandContext session, string command, string[] parameters);
 
-        public override bool Handles(CommandContext session, string input)
+        public override Task<bool> HandlesAsync(CommandContext session, string input)
         {
             /*if (RequiresSession && session.Session == null)
                 return false;*/
 
-            ParseCommand(input, out var command, out var parameters);
-            return CommandNames.Any(i => string.Equals(command, i, StringComparison.OrdinalIgnoreCase))
-                   && ((parameters.Length == 0 || IsHelpRequest(parameters[0])) || (RequiresSession && session.Session != null) || !RequiresSession);
+            ParseCommand(input, out string command, out string[] parameters);
+            return Task.FromResult(CommandNames.Any(i => string.Equals(command, i, StringComparison.OrdinalIgnoreCase))
+                                   && (parameters.Length != 0 && IsHelpRequest(parameters[0]) ||
+                                       RequiresSession && session.Session != null || !RequiresSession));
         }
 
-        public ImmutableArray<string> CommandNames { get; }
-        [Obsolete("Please user CommandNames instead", true)]
-        public string CommandName { get; }
-        public bool RequiresSession { get; }
-
-        public virtual string GetHelp(CommandContext session)
+        public virtual Task SendHelpAsync(CommandContext session)
         {
-            session.SendMessage(Logger, HelpText);
-            return HelpText;
+            return session.SendMessageAsync(Logger, HelpText);
         }
     }
 }

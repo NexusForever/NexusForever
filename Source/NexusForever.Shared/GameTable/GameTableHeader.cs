@@ -2,6 +2,7 @@
 
 namespace NexusForever.Shared.GameTable
 {
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct GameTableHeader
     {

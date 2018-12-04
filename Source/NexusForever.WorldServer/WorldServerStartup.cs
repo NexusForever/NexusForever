@@ -7,6 +7,7 @@ using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.WorldServer.Web.Controllers;
 
 namespace NexusForever.WorldServer
 {
@@ -33,6 +34,12 @@ namespace NexusForever.WorldServer
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             app.UseStaticFiles();
+            app.UseWebSockets(new WebSocketOptions()
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(30),
+                ReceiveBufferSize = 16384
+            });
+            app.UseMiddleware<WebSocketMiddleware>();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
