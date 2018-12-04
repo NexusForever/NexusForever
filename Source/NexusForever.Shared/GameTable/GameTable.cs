@@ -14,7 +14,9 @@ namespace NexusForever.Shared.GameTable
         private readonly GameTableHeader header;
         private int[] lookup;
         private static Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache;
-
+        private const int minimumBufferSize = 1024;
+        private const int maximumBufferSize = 16 * 1024;
+        private const int recordSizeMultiplier = 32; // How many records do we want buffered.
         static GameTable()
         {
             attributeCache = new Dictionary<FieldInfo, GameTableFieldArrayAttribute>();
@@ -26,9 +28,9 @@ namespace NexusForever.Shared.GameTable
 
             headerSize = Marshal.SizeOf<GameTableHeader>();
             tableFieldSize = Marshal.SizeOf<GameTableField>();
-            bufferSize = tableFieldSize * 16;
-            if (bufferSize < 1024) bufferSize = 1024;
-            if (bufferSize > 16 * 1024) bufferSize = 16 * 1024;
+            bufferSize = tableFieldSize * recordSizeMultiplier;
+            if (bufferSize < minimumBufferSize) bufferSize = minimumBufferSize;
+            if (bufferSize > maximumBufferSize) bufferSize = maximumBufferSize;
         }
 
         private static readonly int headerSize;
@@ -58,7 +60,7 @@ namespace NexusForever.Shared.GameTable
                 ReadEntries(reader, fields, attributeCache);
             }
         }
-        
+
         private void ValidateModelFields(ReadOnlySpan<GameTableField> fields, Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache)
         {
             FieldInfo[] modelFields = attributeCache.Keys.ToArray();
@@ -130,7 +132,9 @@ namespace NexusForever.Shared.GameTable
             lookup = new int[header.MaxId];
             for (int i = 0; i < (int)header.RecordCount; i++)
             {
-                reader.BaseStream.Position = headerSize + (long)header.RecordOffset + (long)header.RecordSize * i;
+                long recordStartPosition = headerSize + (long)header.RecordOffset + (long)header.RecordSize * i;
+                if (reader.BaseStream.Position != recordStartPosition)
+                    reader.BaseStream.Position = recordStartPosition;
 
                 T entry = new T();
 
@@ -203,7 +207,7 @@ namespace NexusForever.Shared.GameTable
                     }
                 }
 
-                var id = (uint) idField.GetValue(entry);
+                var id = (uint)idField.GetValue(entry);
                 Entries[i] = entry;
                 lookup[id] = i;
             }
