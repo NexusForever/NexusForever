@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace NexusForever.Shared.GameTable.Model.Text
 {
@@ -26,6 +27,14 @@ namespace NexusForever.Shared.GameTable.Model.Text
         {
             Entries = new TextEntry[0];
             Index = new List<Tuple<uint, int>>();
+        }
+
+        [JsonConstructor]
+        public TextTable(IEnumerable<TextEntry> entries)
+        {
+            Entries = entries.ToArray();
+            Index = new List<Tuple<uint, int>>();
+            BuildIndex();
         }
 
         public TextTable(string path)
@@ -69,8 +78,8 @@ namespace NexusForever.Shared.GameTable.Model.Text
                 }
 
                 Entries = final.ToArray();
-                Index = entries.Select((item, index) => Tuple.Create<uint, int>(item.Id, index)).ToList();
-                Index.Sort(new TupleComparer());
+                Index = new List<Tuple<uint, int>>();
+                BuildIndex();
                 #region DEBUG
                 Debug.Assert(GetText((uint)1) == "Cancel");
                 #endregion
@@ -89,6 +98,13 @@ namespace NexusForever.Shared.GameTable.Model.Text
             }
 
         }
+
+        private void BuildIndex()
+        {
+            Index.AddRange(Entries.Select((item, index) => Tuple.Create<uint, int>(item.Id, index)).ToList());
+            Index.Sort(new TupleComparer());
+        }
+
         List<Tuple<uint, int>> Index { get; }
 
         public string GetText(uint id)

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json;
 
 namespace NexusForever.Shared.GameTable
 {
@@ -11,6 +12,7 @@ namespace NexusForever.Shared.GameTable
     public class GameTable<T> where T : class, new()
     {
         public T[] Entries { get; private set; }
+        public GameTableHeader Header { get => header; }
 
         private readonly GameTableHeader header;
         private int[] lookup;
@@ -37,7 +39,19 @@ namespace NexusForever.Shared.GameTable
         private static readonly int headerSize;
         private static readonly int tableFieldSize;
         private static readonly int bufferSize;
-
+        [JsonConstructor]
+        public GameTable(IEnumerable<T> entries, GameTableHeader header)
+        {
+            Entries = entries.ToArray();
+            this.header = header;
+            lookup = new int[header.MaxId];
+            var idProperty = typeof(T).GetFields().FirstOrDefault(i => string.Equals(i.Name, "id", StringComparison.OrdinalIgnoreCase));
+            foreach (var entry in entries.Select((item, index) => new { item, index }))
+            {
+                var val = (uint)idProperty.GetValue(entry.item);
+                lookup[val] = entry.index;
+            }
+        }
         public GameTable(string path)
         {
             using (var stream = new BufferedStream(File.OpenRead(path), bufferSize))
@@ -128,7 +142,7 @@ namespace NexusForever.Shared.GameTable
 
         private void ReadEntries(BinaryReader reader, ReadOnlySpan<GameTableField> fields, Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache)
         {
-            var idField = attributeCache.Keys.FirstOrDefault(i => string.Equals(i.Name, "id", StringComparison.OrdinalIgnoreCase));
+            FieldInfo idField = attributeCache.Keys.FirstOrDefault(i => string.Equals(i.Name, "id", StringComparison.OrdinalIgnoreCase));
             Entries = new T[header.RecordCount];
             lookup = new int[header.MaxId];
             for (int i = 0; i < (int)header.RecordCount; i++)

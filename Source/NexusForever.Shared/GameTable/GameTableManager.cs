@@ -449,7 +449,7 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
 
-        [GameData("en-US.bin")]
+        [GameData("lang.bin")]
         public static TextTable Text { get; private set; }
 
         private static MemberExpression GetMemberInfo(Expression method)

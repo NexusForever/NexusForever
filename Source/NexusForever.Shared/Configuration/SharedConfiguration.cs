@@ -1,9 +1,20 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace NexusForever.Shared.Configuration
 {
+    public static class Logging
+    {
+        public static ILoggerFactory Factory => DependencyInjection.ServiceProvider.GetRequiredService<ILoggerFactory>();
+
+        public static ILogger GetLogger<T>()
+        {
+            return Factory.CreateLogger<T>();
+        }
+    }
     public static class SharedConfiguration
     {
         public static IConfiguration Configuration { get; private set; }

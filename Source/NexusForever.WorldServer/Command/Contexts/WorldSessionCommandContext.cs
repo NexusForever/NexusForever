@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.WorldServer.Network;
@@ -16,25 +17,29 @@ namespace NexusForever.WorldServer.Command.Contexts
         public override Task SendErrorAsync(ILogger logger, string text)
         {
             base.SendErrorAsync(logger, text);
-            Session.EnqueueMessage(new ServerChat()
-            {
-                Channel = Game.Social.ChatChannel.System,
-                GM = true,
-                Text = text
-            });
+            SendText(text, "Error");
             // TODO: Send player a chat message.
             return Task.CompletedTask;
+        }
+
+        private void SendText(string text, string name = "")
+        {
+            foreach (var line in text.Trim().Split(Environment.NewLine))
+            {
+                Session.EnqueueMessageEncrypted(new ServerChat()
+                {
+                    Guid = Session.Player.Guid,
+                    Channel = Game.Social.ChatChannel.System,
+                    Name = name,
+                    Text = line
+                });
+            }
         }
 
         public override Task SendMessageAsync(ILogger logger, string text)
         {
             base.SendMessageAsync(logger, text);
-            Session.EnqueueMessage(new ServerChat()
-            {
-                Channel = Game.Social.ChatChannel.System,
-                GM = true,
-                Text = "Error: " + text
-            });
+            SendText(text);
             return Task.CompletedTask;
         }
     }
