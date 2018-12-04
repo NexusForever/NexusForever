@@ -452,35 +452,6 @@ namespace NexusForever.Shared.GameTable
         [GameData("lang.bin")]
         public static TextTable Text { get; private set; }
 
-        private static MemberExpression GetMemberInfo(Expression method)
-        {
-            LambdaExpression lambda = method as LambdaExpression;
-            if (lambda == null)
-                throw new ArgumentNullException("method");
-
-            MemberExpression memberExpr = null;
-
-            if (lambda.Body.NodeType == ExpressionType.Convert)
-            {
-                memberExpr =
-                    ((UnaryExpression)lambda.Body).Operand as MemberExpression;
-            }
-            else if (lambda.Body.NodeType == ExpressionType.MemberAccess)
-            {
-                memberExpr = lambda.Body as MemberExpression;
-            }
-
-            if (memberExpr == null)
-                throw new ArgumentException("method");
-
-            return memberExpr;
-        }
-
-        private static PropertyInfo GetProperty(Expression<Func<object>> expression)
-        {
-            return GetMemberInfo(expression).Member as PropertyInfo;
-        }
-
         private const int minimumThreads = 2;
         private const int maximumThreads = 16;
         private static async Task LoadGameTablesAsync()
@@ -581,43 +552,6 @@ namespace NexusForever.Shared.GameTable
                 throw new AggregateException(exceptions);
             }
         }
-
-        private static Task LoadGameTableAsync(PropertyInfo property, string fileName)
-        {
-            async Task SetPropertyOnCompletion(Task<object> task)
-            {
-                property.SetValue(null, await task);
-            }
-
-            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
-            {
-
-                return Task.Factory.StartNew<object>(() => GameTableFactory.Load(property.PropertyType.GetGenericArguments().Single(), fileName))
-                    .ContinueWith(SetPropertyOnCompletion);
-            }
-            else if (property.PropertyType == typeof(TextTable))
-            {
-                return Task.Factory.StartNew<object>(() => GameTableFactory.LoadText(fileName))
-                    .ContinueWith(SetPropertyOnCompletion);
-            }
-            else
-            {
-                throw new Exception($"Unknown game table type {property.PropertyType}");
-            }
-        }
-
-        private static Task LoadGameTableAsync(Expression<Func<object>> propertyExpression, string fileName)
-        {
-            // TODO
-            PropertyInfo property = GetProperty(propertyExpression);
-
-            if (property == null) throw new ArgumentException("Invalid property expression", nameof(propertyExpression));
-
-            return LoadGameTableAsync(property, fileName);
-        }
-
-
-
 
         public static void Initialise()
         {
