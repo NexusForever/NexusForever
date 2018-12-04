@@ -35,6 +35,8 @@
         Server01A3                      = 0x01A3, // AMP
         ServerChatJoin                  = 0x01BC,
         ClientChat                      = 0x01C3,
+        ServerChatAccept                = 0x01C2,
+        ServerChat                      = 0x01C8,
         Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
         ClientPing                      = 0x0241,
         ClientEncrypted                 = 0x0244,

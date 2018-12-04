@@ -7,15 +7,20 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private readonly Vector3 vector;
         private readonly float radius;
+        private readonly GridEntity exclude;
 
-        public SearchCheckRange(Vector3 vector, float radius)
+        public SearchCheckRange(Vector3 vector, float radius, GridEntity exclude = null)
         {
-            this.vector = vector;
-            this.radius = radius;
+            this.vector  = vector;
+            this.radius  = radius;
+            this.exclude = exclude;
         }
 
-        public bool CheckEntity(GridEntity entity)
+        public virtual bool CheckEntity(GridEntity entity)
         {
+            if (exclude != null && entity == exclude)
+                return false;
+
             return Vector3.Distance(vector, entity.Position) < radius;
         }
     }

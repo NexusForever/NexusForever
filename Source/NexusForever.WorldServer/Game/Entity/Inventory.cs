@@ -448,5 +448,15 @@ namespace NexusForever.WorldServer.Game.Entity
                 foreach (Item item in bag)
                     item.Save(context);
         }
+
+        public Item GetItemByGuid(ulong guid)
+        {
+            foreach (Bag bag in bags.Values)
+                foreach (Item item in bag)
+                    if (item.Guid == guid)
+                        return item;
+
+            return null;
+        }
     }
 }
