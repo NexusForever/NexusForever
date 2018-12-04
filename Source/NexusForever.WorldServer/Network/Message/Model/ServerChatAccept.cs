@@ -15,14 +15,13 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             writer.Write(1, 16u); // Result?
             writer.Write(GM);
-            writer.Write(0, 5); // Item count
+            writer.Write(0, 5u); // Item count
 
             writer.WriteStringWide(Name);
             writer.WriteStringWide(RealmName);
 
-
-            writer.Write(Guid, 32);
-            writer.Write(1, 8); // CharacterId
+            writer.Write(Guid);
+            writer.Write(1, 8u); // CharacterId
         }
     }
 }

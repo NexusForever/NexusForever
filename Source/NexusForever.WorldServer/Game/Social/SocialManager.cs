@@ -1,37 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using NexusForever.WorldServer.Database.Character;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Social.Model;
+using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
-using System.Linq;
 
 namespace NexusForever.WorldServer.Game.Social
 {
     public class SocialManager
     {
-        private static readonly float LocalChatDistace = 155;
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-        private static Dictionary<ChatChannel, ChatChannelHandler> ChatChannelHandlers = new Dictionary<ChatChannel, ChatChannelHandler>();
+        private const float LocalChatDistace = 155f;
 
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
+        private static readonly Dictionary<ChatChannel, ChatChannelHandler> chatChannelHandlers
+            = new Dictionary<ChatChannel, ChatChannelHandler>();
+        private static readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories
+            = new Dictionary<ChatFormatType, ChatFormatFactoryDelegate>();
+
+        private delegate IChatFormat ChatFormatFactoryDelegate();
         private delegate void ChatChannelHandler(WorldSession session, ClientChat chat);
 
         public static void Initialise()
         {
-            ChatChannelHandlers.Add(ChatChannel.Say, HandleLocalChat);
-            ChatChannelHandlers.Add(ChatChannel.Yell, HandleLocalChat);
-            ChatChannelHandlers.Add(ChatChannel.Emote, HandleLocalChat);
+            InitialiseChatHandlers();
+            InitialiseChatFormatFactories();
         }
 
+        private static void InitialiseChatHandlers()
+        {
+            IEnumerable<MethodInfo> methods = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .SelectMany(t => t.GetMethods(BindingFlags.NonPublic | BindingFlags.Static));
+
+            foreach (MethodInfo method in methods)
+            {
+                IEnumerable<ChatChannelHandlerAttribute> attributes = method.GetCustomAttributes<ChatChannelHandlerAttribute>();
+                foreach (ChatChannelHandlerAttribute attribute in attributes)
+                {
+                    #region Debug
+                    ParameterInfo[] parameterInfo = method.GetParameters();
+                    Debug.Assert(parameterInfo.Length == 2);
+                    Debug.Assert(typeof(WorldSession) == parameterInfo[0].ParameterType);
+                    Debug.Assert(typeof(ClientChat) == parameterInfo[1].ParameterType);
+                    #endregion
+
+                    ChatChannelHandler @delegate = (ChatChannelHandler)Delegate.CreateDelegate(typeof(ChatChannelHandler), method);
+                    chatChannelHandlers.Add(attribute.ChatChannel, @delegate);
+                }
+            }
+        }
+
+        private static void InitialiseChatFormatFactories()
+        {
+            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                ChatFormatAttribute attribute = type.GetCustomAttribute<ChatFormatAttribute>();
+                if (attribute == null)
+                    continue;
+
+                NewExpression @new = Expression.New(type.GetConstructor(Type.EmptyTypes));
+                ChatFormatFactoryDelegate factory = Expression.Lambda<ChatFormatFactoryDelegate>(@new).Compile();
+                chatFormatFactories.Add(attribute.Type, factory);
+            }
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="IChatFormat"/> model for supplied <see cref="ChatFormatType"/> type.
+        /// </summary>
+        public static IChatFormat GetChatFormatModel(ChatFormatType type)
+        {
+            if (!chatFormatFactories.TryGetValue(type, out ChatFormatFactoryDelegate factory))
+                return null;
+            return factory.Invoke();
+        }
+
+        /// <summary>
+        /// Process and delegate a <see cref="ClientChat"/> message from <see cref="WorldSession"/>, this is called directly from a packet hander.
+        /// </summary>
         public static void HandleClientChat(WorldSession session, ClientChat chat)
         {
-            if(ChatChannelHandlers.ContainsKey(chat.Channel))
-            {
-                ChatChannelHandlers[chat.Channel](session, chat);
-            }
+            if (chatChannelHandlers.ContainsKey(chat.Channel))
+                chatChannelHandlers[chat.Channel](session, chat);
             else
             {
                 log.Info($"ChatChannel {chat.Channel} has no handler implemented.");
@@ -39,8 +97,8 @@ namespace NexusForever.WorldServer.Game.Social
                 session.EnqueueMessageEncrypted(new ServerChat
                 {
                     Channel = ChatChannel.Debug,
-                    Name = "SocialManager",
-                    Text = "Currently not implemented",
+                    Name    = "SocialManager",
+                    Text    = "Currently not implemented",
                 });
             }
         }
@@ -54,77 +112,68 @@ namespace NexusForever.WorldServer.Game.Social
             });
         }
 
+        [ChatChannelHandler(ChatChannel.Say)]
+        [ChatChannelHandler(ChatChannel.Yell)]
+        [ChatChannelHandler(ChatChannel.Emote)]
         private static void HandleLocalChat(WorldSession session, ClientChat chat)
         {
-            ServerChat chatMessage = new ServerChat
+            var serverChat = new ServerChat
             {
-                Guid = session.Player.Guid,
+                Guid    = session.Player.Guid,
                 Channel = chat.Channel,
-                Name = session.Player.Name,
-                Text = chat.Message,
-                LinkedItems = ParseChatLinks(session, chat.LinkItems),
+                Name    = session.Player.Name,
+                Text    = chat.Message,
+                Formats = ParseChatLinks(session, chat).ToList(),
             };
 
             session.Player.Map.Search(
                 session.Player.Position,
                 LocalChatDistace,
-                new SearchCheckRangeExcludeGridEntity(session.Player.Position, LocalChatDistace, session.Player),
+                new SearchCheckRangePlayerOnly(session.Player.Position, LocalChatDistace, session.Player),
                 out List<GridEntity> intersectedEntities
             );
-            
-            foreach (GridEntity entity in intersectedEntities)
-            {
-                if (entity is Player player)
-                {
-                    player.Session.EnqueueMessageEncrypted(chatMessage);
-                }
-            }
 
+            intersectedEntities.ForEach(e => ((Player)e).Session.EnqueueMessageEncrypted(serverChat));
             SendChatAccept(session);            
         }
 
-        public static List<ServerLinkedItemId> ParseChatLinks(WorldSession session, List<ClientChat.ChatLink> chatLinks)
+        private static IEnumerable<ChatFormat> ParseChatLinks(WorldSession session, ClientChat chat)
         {
-            List<ServerLinkedItemId> outgoingList = new List<ServerLinkedItemId>();
-
-            chatLinks.ForEach((chatLink) =>
+            foreach (ChatFormat format in chat.Formats)
             {
-                if (chatLink is ClientChat.ItemGuidChatLink itemGuidChatLink)
+                switch (format.FormatModel)
                 {
-                    var item = session.Player.Inventory.GetItemByGuid(itemGuidChatLink.Guid);
-                    
-                    outgoingList.Add(new ServerLinkedItemId
+                    case ChatFormatItemGuid chatFormatItemGuid:
                     {
-                        StartIndex = chatLink.StartIndex,
-                        EndIndex = chatLink.EndIndex,
-                        ItemId = item.Entry.Id
-                    });                     
-                }
-                else if (chatLink is ClientChat.ItemIdChatLink itemIdChatLink)
-                {
-                    outgoingList.Add(new ServerLinkedItemId
-                    {
-                        StartIndex = chatLink.StartIndex,
-                        EndIndex = chatLink.EndIndex,
-                        ItemId = itemIdChatLink.ItemId
-                    });
-                }
-                else
-                {
-                    log.Info($"Unable to parse link.");
-                }
-            });
+                        var item = session.Player.Inventory.GetItemByGuid(chatFormatItemGuid.Guid);
 
-            return outgoingList;
+                        // TODO: this probably needs to be a full item response
+                        yield return new ChatFormat
+                        {
+                            Type        = ChatFormatType.ItemItemId,
+                            StartIndex  = 0,
+                            StopIndex   = 0,
+                            FormatModel = new ChatFormatItemId
+                            {
+                                ItemId = item.Entry.Id
+                            }
+                        };
+                        break;
+                    }
+                    default:
+                        yield return format;
+                        break;
+                }
+            }
         }
 
         public static void SendMessage(WorldSession session, string message, string name = "", ChatChannel channel = ChatChannel.System)
         {
            session.EnqueueMessageEncrypted(new ServerChat
             {
-                Channel = ChatChannel.System,
-                Name = name,
-                Text = message,
+                Channel = channel,
+                Name    = name,
+                Text    = message,
             });
         }
     }

@@ -1,28 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Social.Static;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    public class ServerLinkedItemId : IWritable
-    {
-        public ushort StartIndex;
-        public ushort EndIndex;
-        public uint ItemId;
-
-        public void Write(GamePacketWriter writer)
-        {
-            writer.Write(ChatLinkType.ItemItemId, 4);
-            writer.Write(StartIndex, 16);
-            writer.Write(EndIndex, 16);
-            writer.Write(ItemId, 18);
-        }
-    }
-
     [Message(GameMessageOpcode.ServerChat, MessageDirection.Server)]
     class ServerChat : IWritable
     {
@@ -44,37 +28,34 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public ulong Guid { get; set; } 
         public string Text { get; set; }
 
-        public List<ServerLinkedItemId> LinkedItems { get; set; } = new List<ServerLinkedItemId>();
+        public List<ChatFormat> Formats { get; set; } = new List<ChatFormat>();
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Channel, 14u);
-            writer.Write((ulong)ChatId, 64);
+            writer.Write(ChatId);
 
             writer.Write(GM);
             writer.Write(Self);
             writer.Write(AutoResponse);
 
-            writer.Write(RealmId, 14);
-            writer.Write(Guid, 64);
+            writer.Write(RealmId, 14u);
+            writer.Write(Guid);
 
             writer.WriteStringWide(Name);
             writer.WriteStringWide(Realm);
             writer.Write(PresenceState, 3);
 
             writer.WriteStringWide(Text);
-            writer.Write(LinkedItems.Count, 5);
+            writer.Write(Formats.Count, 5u);
 
-            LinkedItems.ForEach((linkedItem) =>
-            {
-                linkedItem.Write(writer);
-            });
+            Formats.ForEach(linkedItem => linkedItem.Write(writer));
 
             writer.Write(CrossFaction);
-            writer.Write(0, 16); 
+            writer.Write(0, 16u); 
 
-            writer.Write(Guid, 32); // UnitId?
-            writer.Write(0, 8); // Premium
+            writer.Write(Guid, 32u); // UnitId?
+            writer.Write(0, 8u); // Premium
         }
     }
 }
