@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
+using System.Linq.Expressions;
+using System.Reflection;
 using NexusForever.Shared.GameTable.Model;
 using NLog;
+using System.Threading.Tasks;
 
 namespace NexusForever.Shared.GameTable
 {
@@ -395,6 +398,40 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
         
+        private static MemberExpression GetMemberInfo(Expression method)
+        {
+            LambdaExpression lambda = method as LambdaExpression;
+            if (lambda == null)
+                throw new ArgumentNullException("method");
+
+            MemberExpression memberExpr = null;
+
+            if (lambda.Body.NodeType == ExpressionType.Convert)
+            {
+                memberExpr = 
+                    ((UnaryExpression)lambda.Body).Operand as MemberExpression;
+            }
+            else if (lambda.Body.NodeType == ExpressionType.MemberAccess)
+            {
+                memberExpr = lambda.Body as MemberExpression;
+            }
+
+            if (memberExpr == null)
+                throw new ArgumentException("method");
+
+            return memberExpr;
+        }
+
+        private static PropertyInfo GetProperty(Expression<Func<object>> expression)
+        {
+            return GetMemberInfo(expression).Member as PropertyInfo;
+        }
+
+        private static Task LoadGameTableAsync<T>(Expression<Func<object>> propertyExpression, string fileName)
+        {
+            // TODO
+            return Task.CompletedTask;
+        }
 
         public static void Initialise()
         {
