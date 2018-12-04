@@ -146,7 +146,8 @@ namespace NexusForever.Shared.Network
                 && packet.Opcode != GameMessageOpcode.ClientEntityCommand)
                 log.Trace($"Received packet {packet.Opcode}(0x{packet.Opcode:X}).");
 
-            //FIXME workaround for now...
+            // FIXME workaround for now. possible performance impact. 
+            // ClientPing does not currently work and the session times out after 300s -> this keeps the session alive if -any- client packet is received
             Heartbeat.OnHeartbeat();
 
             using (var stream = new MemoryStream(packet.Data))
