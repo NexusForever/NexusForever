@@ -145,12 +145,17 @@ namespace NexusForever.StsServer.Network
                 writer.Write(" ");
                 writer.Write(packet.StatusCode);
                 writer.Write(" ");
-                writer.WriteLine(packet.Status);
+                writer.Write(" ");
+                writer.Write(packet.Status);
+                writer.Write("\r\n");
 
                 foreach ((string name, string value) in packet.Headers)
-                    writer.WriteLine($"{name}:{value}");
+                {
+                    writer.Write($"{name}:{value}");
+                    writer.Write("\r\n");
+                }
 
-                writer.WriteLine();
+                writer.Write("\r\n");
                 writer.Write(packet.Body);
                 writer.Flush();
 
