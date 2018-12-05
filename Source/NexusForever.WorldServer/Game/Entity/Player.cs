@@ -161,8 +161,9 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = 166
-                }
+                    FactionId = 166,
+                },
+                CurrencyManager = CurrencyManager
             };
 
             foreach (Bag bag in Inventory)
@@ -178,15 +179,6 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             Session.EnqueueMessageEncrypted(playerCreate);
-
-            foreach (Currency currency in CurrencyManager)
-            {
-                Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
-                {
-                    CurrencyId = (byte)currency.Id,
-                    Amount = currency.Amount,
-                });
-            }
         }
 
         public override void OnRemoveFromMap()

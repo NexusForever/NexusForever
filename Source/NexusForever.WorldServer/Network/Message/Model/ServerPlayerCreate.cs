@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
@@ -63,7 +64,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         }
 
         public List<InventoryItem> Inventory { get; } = new List<InventoryItem>();
-        public ulong[] Money { get; } = new ulong[16];
+        public CurrencyManager CurrencyManager { get; set; }
         public uint Xp { get; set; }
         public uint RestBonusXp { get; set; }
         public uint ItemProficiencies { get; set; }
@@ -91,8 +92,14 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Inventory.Count);
             Inventory.ForEach(i => i.Write(writer));
 
-            for (uint i = 0u; i < Money.Length; i++)
-                writer.Write(Money[i]);
+            for (uint i = 1u; i < 17; i++)
+            {
+                Currency currency = CurrencyManager.GetCurrency(i);
+                if (currency != null)
+                    writer.Write(CurrencyManager.GetCurrency(i).Amount);
+                else
+                    writer.Write(0ul);
+            }
 
             writer.Write(Xp);
             writer.Write(RestBonusXp);
