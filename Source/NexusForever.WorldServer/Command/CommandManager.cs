@@ -55,7 +55,8 @@ namespace NexusForever.WorldServer.Command
                 .AddSingleton<ICommandHandler, AccountCommandHandler>()
                 .AddSingleton<ICommandHandler, TeleportHandler>()
                 .AddSingleton<ICommandHandler, HelpCommandHandler>()
-                .AddSingleton<ICommandHandler, ItemCommandHandler>();
+                .AddSingleton<ICommandHandler, ItemCommandHandler>()
+                .AddSingleton<ICommandHandler, PacketHandler>();
         }
     }
 }
