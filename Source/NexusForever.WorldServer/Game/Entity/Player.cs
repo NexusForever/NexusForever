@@ -47,9 +47,9 @@ namespace NexusForever.WorldServer.Game.Entity
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
         public WorldSession Session { get; }
-        public VendorInfo SelectedVendorInfo { get; set; }
+        public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
         public Dictionary<uint, BuybackItem> BuybackItems = new Dictionary<uint, BuybackItem>();
-        public uint highestBuybackId = 0;
+        public uint highestBuybackId = 0; // TODO Clean this implementation
 
         private double timeToSave = SaveDuration;
         private PlayerSaveMask saveMask;

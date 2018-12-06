@@ -128,6 +128,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (calculatedCost0 == 0 && calculatedCost1 == 0)
                 calculatedCost0 = 1;
 
+            // TODO Figure out why this is showing "You deleted [item]"
             Item soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
             BuybackItem buybackItem = new BuybackItem
             {
