@@ -22,11 +22,11 @@ namespace NexusForever.WorldServer
 {
     internal static class WorldServer
     {
-        #if DEBUG
+#if DEBUG
         private const string Title = "NexusForever: World Server (DEBUG)";
-        #else
+#else
         private const string Title = "NexusForever: World Server (RELEASE)";
-        #endif
+#endif
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -35,37 +35,31 @@ namespace NexusForever.WorldServer
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
             Console.Title = Title;
-            log.Info("Initialising...");
+
 
             ConfigurationManager<WorldServerConfiguration>.Initialise("WorldServer.json");
-            using (var webHost = WorldServerEmbeddedWebServer
-                .Initialize(ConfigurationManager<WorldServerConfiguration>.Configuration)
-                .Build())
+            log.Info("Initialising...");
+            DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
+
+            GameTableManager.Initialise();
+
+            EntityManager.Initialise();
+            EntityCommandManager.Initialise();
+
+            AssetManager.Initialise();
+            ServerManager.Initialise();
+
+            MessageManager.Initialise();
+            SocialManager.Initialise();
+            CommandManager.Initialise();
+            NetworkManager<WorldSession>.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Network);
+            WorldManager.Initialise(lastTick =>
             {
-                // Expose ASP.NET Core DI outside of ASP.NET Core.
-                DependencyInjection.Initialize(webHost.Services);
-
-                DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
-
-                GameTableManager.Initialise();
-
-                EntityManager.Initialise();
-                EntityCommandManager.Initialise();
-                
-                AssetManager.Initialise();
-                ServerManager.Initialise();
-
-                MessageManager.Initialise();
-                SocialManager.Initialise();
-                CommandManager.Initialise();
-                NetworkManager<WorldSession>.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Network);
-                WorldManager.Initialise(lastTick =>
-                {
-                    NetworkManager<WorldSession>.Update(lastTick);
-                    MapManager.Update(lastTick);
-                });
-
-                webHost.Start();
+                NetworkManager<WorldSession>.Update(lastTick);
+                MapManager.Update(lastTick);
+            });
+            using (WorldServerEmbeddedWebServer.Initialise())
+            {
                 log.Info("Ready!");
 
                 while (true)

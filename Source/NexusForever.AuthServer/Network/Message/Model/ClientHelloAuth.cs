@@ -65,7 +65,7 @@ namespace NexusForever.AuthServer.Network.Message.Model
         public uint Unknown230 { get; private set; }
         public uint Unknown234 { get; private set; }
         public HardwareInformation Hardware { get; } = new HardwareInformation();
-        public uint Unknown284 { get; private set; }
+        public uint RealmDataCenterId { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
@@ -83,7 +83,7 @@ namespace NexusForever.AuthServer.Network.Message.Model
 
             Hardware.Read(reader);
 
-            Unknown284 = reader.ReadUInt();
+            RealmDataCenterId = reader.ReadUInt();
         }
     }
 }
