@@ -8,6 +8,7 @@ using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.Network;
 using NexusForever.StsServer.Network.Message;
+using NexusForever.StsServer.Network.Message.Model;
 using NexusForever.StsServer.Network.Packet;
 
 namespace NexusForever.StsServer.Network
@@ -31,6 +32,11 @@ namespace NexusForever.StsServer.Network
         public void EnqueueMessageOk(IWritable message)
         {
             EnqueueMessage(200, "OK", message);
+        }
+
+        public void EnqueueMessageError(ServerErrorMessage message)
+        {
+            EnqueueMessage(400, "Bad Request", message);
         }
 
         public void EnqueueMessage(uint statusCode, string status, IWritable message)
@@ -145,12 +151,17 @@ namespace NexusForever.StsServer.Network
                 writer.Write(" ");
                 writer.Write(packet.StatusCode);
                 writer.Write(" ");
-                writer.WriteLine(packet.Status);
+                writer.Write(" ");
+                writer.Write(packet.Status);
+                writer.Write("\r\n");
 
                 foreach ((string name, string value) in packet.Headers)
-                    writer.WriteLine($"{name}:{value}");
+                {
+                    writer.Write($"{name}:{value}");
+                    writer.Write("\r\n");
+                }
 
-                writer.WriteLine();
+                writer.Write("\r\n");
                 writer.Write(packet.Body);
                 writer.Flush();
 

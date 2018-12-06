@@ -151,10 +151,10 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Session.EnqueueMessageEncrypted(new ServerPathLog());
             Session.EnqueueMessageEncrypted(new Server00F1());
-            Session.EnqueueMessageEncrypted(new Server0636
+            Session.EnqueueMessageEncrypted(new ServerMovementControl
             {
-                Unknown0 = 1,
-                Unknown4 = true,
+                Ticket = 1,
+                Immediate = true,
             });
 
             var playerCreate = new ServerPlayerCreate
