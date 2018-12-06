@@ -62,6 +62,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         },
                         new ServerAccountEntitlements.AccountEntitlementInfo
                         {
+                            Entitlement = Entitlement.ChuaWarriorUnlock,
+                            Count       = 1
+                        },
+                        new ServerAccountEntitlements.AccountEntitlementInfo
+                        {
                             Entitlement = Entitlement.AurinEngineerUnlock,
                             Count       = 1
                         }
