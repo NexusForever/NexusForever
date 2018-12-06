@@ -18,9 +18,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -59,11 +56,5 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D83B735-7E6A-4C1A-83C4-DD80682C2859}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
