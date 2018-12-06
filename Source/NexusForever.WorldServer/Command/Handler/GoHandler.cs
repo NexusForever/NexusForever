@@ -8,7 +8,6 @@ namespace NexusForever.WorldServer.Command.Handler
 {
     public class GoHandler : NamedCommand
     {
-
         public GoHandler()
             : base(true, "go")
         {
@@ -21,7 +20,7 @@ namespace NexusForever.WorldServer.Command.Handler
             if (zone == null)
                 await context.SendErrorAsync($"Unknown zone: {zoneName}");
             else
-                context.Session.Player.TeleportTo((ushort) zone.WorldId, zone.Position0, zone.Position1,
+                context.Session.Player.TeleportTo((ushort)zone.WorldId, zone.Position0, zone.Position1,
                     zone.Position2);
         }
     }

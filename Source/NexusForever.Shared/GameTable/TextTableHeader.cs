@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
+using NexusForever.Shared.GameTable.Static;
 
-namespace NexusForever.Shared.GameTable.Model.Text
+namespace NexusForever.Shared.GameTable
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct TextTableHeader

@@ -5,7 +5,6 @@ using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-
     [Name("Teleport")]
     public class TeleportHandler : NamedCommand
     {

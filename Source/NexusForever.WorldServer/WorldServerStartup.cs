@@ -3,12 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database.Auth.Model;
-using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Database.World.Model;
-using NexusForever.WorldServer.Web.Controllers;
+using NexusForever.WorldServer.Web.Middleware;
 
 namespace NexusForever.WorldServer
 {

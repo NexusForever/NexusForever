@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Shared.GameTable.Model.Text
+﻿namespace NexusForever.Shared.GameTable.Static
 {
     public enum Language
     {

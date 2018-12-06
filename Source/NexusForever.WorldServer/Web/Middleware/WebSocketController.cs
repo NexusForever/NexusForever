@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
@@ -7,12 +6,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Contexts;
 
-namespace NexusForever.WorldServer.Web.Controllers
+namespace NexusForever.WorldServer.Web.Middleware
 {
     public class WebSocketMiddleware
     {
@@ -38,51 +36,40 @@ namespace NexusForever.WorldServer.Web.Controllers
                     WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     while (webSocket.CloseStatus == null)
                     {
-                        (WebSocketReceiveResult, ClientMessage) message = await ReceiveObjectAsync<ClientMessage>(webSocket, context.RequestAborted);
-                        if(message.Item1.CloseStatus != null) continue;
-                        await CommandManager.HandleCommandAsync(new WebSocketCommandContext(webSocket), message.Item2.Message, false).ConfigureAwait(false);
+                        (WebSocketReceiveResult result, ClientMessage clientMessage) = await ReceiveObjectAsync<ClientMessage>(webSocket, context.RequestAborted);
+                        if (result.CloseStatus != null)
+                            continue;
+                        await CommandManager.HandleCommandAsync(new WebSocketCommandContext(webSocket), clientMessage.Message, false).ConfigureAwait(false);
                     }
                 }
                 else
-                {
                     context.Response.StatusCode = 400;
-                }
             }
             else
-            {
                 await Next(context);
-            }
         }
 
-        async Task<(WebSocketReceiveResult, T)> ReceiveObjectAsync<T>(WebSocket socket,
+        async Task<(WebSocketReceiveResult result, T obj)> ReceiveObjectAsync<T>(WebSocket socket,
             CancellationToken cancellationToken)
         {
-            (WebSocketReceiveResult, string) result = await ReceiveStringAsync(socket, cancellationToken);
-            if (result.Item1.CloseStatus != null)
-            {
-                return (result.Item1, default(T));
-            }
+            (WebSocketReceiveResult result, string data) result = await ReceiveStringAsync(socket, cancellationToken);
+            if (result.result.CloseStatus != null)
+                return (result.result, default);
 
-            return (result.Item1, JToken.Parse(result.Item2).ToObject<T>());
+            return (result.result, JsonConvert.DeserializeObject<T>(result.data));
         }
 
-        async Task<(WebSocketReceiveResult, string)> ReceiveStringAsync(WebSocket socket,
+        async Task<(WebSocketReceiveResult result, string data)> ReceiveStringAsync(WebSocket socket,
             CancellationToken cancellationToken)
         {
-            WebSocketReceiveResult result; string message;
             (WebSocketReceiveResult result, IEnumerable<byte> data) messageResult = await ReceiveFullMessageAsync(socket, cancellationToken);
-            result = messageResult.result;
-            if (result.CloseStatus != null)
-            {
-                return (result, null);
-            }
+            if (messageResult.result.CloseStatus != null)
+                return (messageResult.result, null);
 
-            message = Encoding.UTF8.GetString(messageResult.data.ToArray());
-
-
-
-            return (result, message);
+            string message = Encoding.UTF8.GetString(messageResult.data.ToArray());
+            return (messageResult.result, message);
         }
+
         async Task<(WebSocketReceiveResult result, IEnumerable<byte> data)> ReceiveFullMessageAsync(
             WebSocket socket, CancellationToken cancellationToken)
         {

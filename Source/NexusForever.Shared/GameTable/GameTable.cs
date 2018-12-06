@@ -1,25 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Newtonsoft.Json;
+using NexusForever.Shared.Network;
 
 namespace NexusForever.Shared.GameTable
 {
-
     public class GameTable<T> where T : class, new()
     {
-        public T[] Entries { get; private set; }
-        public GameTableHeader Header { get => header; }
-
-        private readonly GameTableHeader header;
-        private int[] lookup;
-        private static Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache;
         private const int minimumBufferSize = 1024;
         private const int maximumBufferSize = 16 * 1024;
         private const int recordSizeMultiplier = 32; // How many records do we want buffered.
+
+        public T[] Entries { get; private set; }
+
+        private readonly GameTableHeader header;
+        private int[] lookup;
+
+        private static readonly Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache;
+        private static readonly int headerSize;
+        private static readonly int fieldSize;
+        private static readonly int bufferSize;
+
         static GameTable()
         {
             attributeCache = new Dictionary<FieldInfo, GameTableFieldArrayAttribute>();
@@ -30,53 +35,46 @@ namespace NexusForever.Shared.GameTable
             }
 
             headerSize = Marshal.SizeOf<GameTableHeader>();
-            tableFieldSize = Marshal.SizeOf<GameTableField>();
-            bufferSize = tableFieldSize * recordSizeMultiplier;
-            if (bufferSize < minimumBufferSize) bufferSize = minimumBufferSize;
-            if (bufferSize > maximumBufferSize) bufferSize = maximumBufferSize;
+            fieldSize = Marshal.SizeOf<GameTableField>();
+
+            bufferSize = fieldSize * recordSizeMultiplier;
+            if (bufferSize < minimumBufferSize)
+                bufferSize = minimumBufferSize;
+            if (bufferSize > maximumBufferSize)
+                bufferSize = maximumBufferSize;
         }
 
-        private static readonly int headerSize;
-        private static readonly int tableFieldSize;
-        private static readonly int bufferSize;
-        [JsonConstructor]
-        public GameTable(IEnumerable<T> entries, GameTableHeader header)
-        {
-            Entries = entries.ToArray();
-            this.header = header;
-            lookup = new int[header.MaxId];
-            var idProperty = typeof(T).GetFields().FirstOrDefault(i => string.Equals(i.Name, "id", StringComparison.OrdinalIgnoreCase));
-            foreach (var entry in entries.Select((item, index) => new { item, index }))
-            {
-                var val = (uint)idProperty.GetValue(entry.item);
-                lookup[val] = entry.index;
-            }
-        }
         public GameTable(string path)
         {
-            using (var stream = new BufferedStream(File.OpenRead(path), bufferSize))
+            using (FileStream fileStream = File.OpenRead(path))
+            using (var stream = new BufferedStream(fileStream, bufferSize))
             using (var reader = new BinaryReader(stream))
             {
+                if (reader.BaseStream.Remaining() < Marshal.SizeOf<GameTableHeader>())
+                    throw new InvalidDataException();
+
                 // header
-                ReadOnlySpan<GameTableHeader> headerSpan = MemoryMarshal.Cast<byte, GameTableHeader>(
-                    reader.ReadBytes(headerSize));
+                ReadOnlySpan<GameTableHeader> headerSpan
+                    = MemoryMarshal.Cast<byte, GameTableHeader>(reader.ReadBytes(headerSize));
 
                 header = headerSpan[0];
+
+                if (header.Signature != 0x4454424C)
+                    throw new InvalidDataException();
 
                 // fields
                 stream.Position = headerSize + (int)header.FieldOffset;
                 ReadOnlySpan<GameTableField> fields = MemoryMarshal.Cast<byte, GameTableField>(
-                    reader.ReadBytes(tableFieldSize * (int)header.FieldCount));
+                    reader.ReadBytes(fieldSize * (int)header.FieldCount));
 
+                ValidateModelFields(fields);
 
-                // Should this be debug only?
-                ValidateModelFields(fields, attributeCache);
-
-                ReadEntries(reader, fields, attributeCache);
+                ReadEntries(reader, fields);
             }
         }
 
-        private void ValidateModelFields(ReadOnlySpan<GameTableField> fields, Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache)
+        [Conditional("DEBUG")]
+        private void ValidateModelFields(ReadOnlySpan<GameTableField> fields)
         {
             FieldInfo[] modelFields = attributeCache.Keys.ToArray();
             if (modelFields.Length != fields.Length)
@@ -140,11 +138,14 @@ namespace NexusForever.Shared.GameTable
             }
         }
 
-        private void ReadEntries(BinaryReader reader, ReadOnlySpan<GameTableField> fields, Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache)
+        private void ReadEntries(BinaryReader reader, ReadOnlySpan<GameTableField> fields)
         {
-            FieldInfo idField = attributeCache.Keys.FirstOrDefault(i => string.Equals(i.Name, "id", StringComparison.OrdinalIgnoreCase));
             Entries = new T[header.RecordCount];
+
             lookup = new int[header.MaxId];
+            for (int i = 0; i < lookup.Length; i++)
+                lookup[i] = -1;
+
             for (int i = 0; i < (int)header.RecordCount; i++)
             {
                 long recordStartPosition = headerSize + (long)header.RecordOffset + (long)header.RecordSize * i;
@@ -201,29 +202,31 @@ namespace NexusForever.Shared.GameTable
                                 modelField.SetValue(entry, reader.ReadUInt64());
                                 break;
                             case DataType.String:
-                                {
-                                    uint offset1 = reader.ReadUInt32();
-                                    uint offset2 = reader.ReadUInt32();
-                                    uint offset3 = Math.Max(offset1, offset2);
+                            {
+                                uint offset1 = reader.ReadUInt32();
+                                uint offset2 = reader.ReadUInt32();
+                                uint offset3 = Math.Max(offset1, offset2);
 
-                                    long position = reader.BaseStream.Position;
-                                    reader.BaseStream.Position =
-                                        headerSize + (long)header.RecordOffset + offset3;
+                                long position = reader.BaseStream.Position;
+                                reader.BaseStream.Position =
+                                    headerSize + (long)header.RecordOffset + offset3;
 
-                                    modelField.SetValue(entry, reader.ReadWideString());
-                                    reader.BaseStream.Position = position;
+                                modelField.SetValue(entry, reader.ReadWideString());
+                                reader.BaseStream.Position = position;
 
-                                    if (fieldIndex < typeFields.Length - 1)
-                                        if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
-                                            reader.BaseStream.Position += 4;
-                                    break;
-                                }
+                                if (fieldIndex < typeFields.Length - 1)
+                                    if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
+                                        reader.BaseStream.Position += 4;
+                                break;
+                            }
                         }
                     }
                 }
 
-                var id = (uint)idField.GetValue(entry);
                 Entries[i] = entry;
+
+                // id will always be the first column
+                var id = (uint)typeFields[0].GetValue(entry);
                 lookup[id] = i;
             }
         }
