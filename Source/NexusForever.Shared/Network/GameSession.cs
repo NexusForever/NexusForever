@@ -17,7 +17,7 @@ namespace NexusForever.Shared.Network
         /// </summary>
         public bool CanProcessPackets { get; set; } = true;
 
-        protected PacketCrypt encryption;
+        public PacketCrypt Encryption;
 
         private FragmentedBuffer onDeck;
         private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new ConcurrentQueue<ClientGamePacket>();
@@ -61,21 +61,21 @@ namespace NexusForever.Shared.Network
                 writer.FlushBits();
 
                 byte[] data      = stream.ToArray();
-                byte[] encrypted = encryption.Encrypt(data, data.Length);
+                byte[] encrypted = Encryption.Encrypt(data, data.Length);
                 EnqueueMessage(BuildEncryptedMessage(encrypted));
             }
 
             log.Trace($"Sent packet {opcode}(0x{opcode:X}).");
         }
 
-        protected abstract IWritable BuildEncryptedMessage(byte[] data);
+        public abstract IWritable BuildEncryptedMessage(byte[] data);
 
         public override void OnAccept(Socket newSocket)
         {
             base.OnAccept(newSocket);
 
             ulong key = PacketCrypt.GetKeyFromAuthBuildAndMessage();
-            encryption = new PacketCrypt(key);
+            Encryption = new PacketCrypt(key);
         }
 
         protected override void OnData(byte[] data)
@@ -176,7 +176,7 @@ namespace NexusForever.Shared.Network
         [MessageHandler(GameMessageOpcode.ClientEncrypted)]
         public void HandleEncryptedPacket(ClientEncrypted encrypted)
         {
-            byte[] data = encryption.Decrypt(encrypted.Data, encrypted.Data.Length);
+            byte[] data = Encryption.Decrypt(encrypted.Data, encrypted.Data.Length);
 
             // TODO: research this...
             if (data[0] == 0x8C)

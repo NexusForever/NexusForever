@@ -20,7 +20,7 @@ namespace NexusForever.AuthServer.Network
             });
         }
 
-        protected override IWritable BuildEncryptedMessage(byte[] data)
+        public override IWritable BuildEncryptedMessage(byte[] data)
         {
             return new ServerAuthEncrypted
             {

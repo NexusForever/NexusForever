@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Network
             });
         }
 
-        protected override IWritable BuildEncryptedMessage(byte[] data)
+        public override IWritable BuildEncryptedMessage(byte[] data)
         {
             return new ServerRealmEncrypted
             {
@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Network
         public void SetEncryptionKey(byte[] sessionKey)
         {
             ulong key = PacketCrypt.GetKeyFromTicket(sessionKey);
-            encryption = new PacketCrypt(key);
+            Encryption = new PacketCrypt(key);
         }
     }
 }
