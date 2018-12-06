@@ -58,7 +58,7 @@
         ClientHelloRealm                = 0x058F,
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
-        Server0636                      = 0x0636,
+        ServerMovementControl           = 0x0636,
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
         ServerPathLog                   = 0x06BC,
