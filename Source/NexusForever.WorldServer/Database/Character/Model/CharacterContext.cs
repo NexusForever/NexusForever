@@ -125,12 +125,12 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
             modelBuilder.Entity<CharacterCurrency>(entity =>
             {
-                entity.HasKey(e => new { e.CharacterId, e.CurrencyId });
+                entity.HasKey(e => new { e.Id, e.CurrencyId });
 
                 entity.ToTable("character_currency");
 
-                entity.Property(e => e.CharacterId)
-                    .HasColumnName("characterId")
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.CurrencyId)
@@ -143,7 +143,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.HasOne(d => d.Character)
                     .WithMany(p => p.CharacterCurrency)
-                    .HasForeignKey(d => d.CharacterId)
+                    .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK_character_currency_id__character_id");
             });
 

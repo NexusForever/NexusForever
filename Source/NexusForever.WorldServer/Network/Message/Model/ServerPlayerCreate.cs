@@ -64,7 +64,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         }
 
         public List<InventoryItem> Inventory { get; } = new List<InventoryItem>();
-        public CurrencyManager CurrencyManager { get; set; }
+        public ulong[] Money { get; } = new ulong[16];
         public uint Xp { get; set; }
         public uint RestBonusXp { get; set; }
         public uint ItemProficiencies { get; set; }
@@ -92,14 +92,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Inventory.Count);
             Inventory.ForEach(i => i.Write(writer));
 
-            for (uint i = 1u; i < 17; i++)
-            {
-                Currency currency = CurrencyManager.GetCurrency(i);
-                if (currency != null)
-                    writer.Write(CurrencyManager.GetCurrency(i).Amount);
-                else
-                    writer.Write(0ul);
-            }
+            for (uint i = 0u; i < Money.Length; i++)
+                writer.Write(Money[i]);
 
             writer.Write(Xp);
             writer.Write(RestBonusXp);

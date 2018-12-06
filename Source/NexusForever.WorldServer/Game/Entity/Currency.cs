@@ -13,18 +13,7 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public CurrencyTypeEntry Entry { get; set; }
         public ulong Id { get; }
-        private ulong amount;
-        private CurrencySaveMask saveMask;
-        private ulong characterId;
-
-        public ulong CharacterId
-        {
-            get => characterId;
-            set
-            {
-                characterId = value;
-            }
-        }
+        public ulong CharacterId { get; set; }
 
         public ulong Amount
         {
@@ -38,12 +27,16 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        private ulong amount;
+
+        private CurrencySaveMask saveMask;
+
         /// <summary>
         /// Create a new <see cref="Currency"/> from an existing database model.
         /// </summary>
         public Currency(CurrencyModel model)
         {
-            characterId = model.CharacterId;
+            CharacterId = model.Id;
             Id = model.CurrencyId;
             Entry = GameTableManager.CurrencyType.GetEntry(model.CurrencyId);
             Amount = model.Amount;
@@ -57,13 +50,12 @@ namespace NexusForever.WorldServer.Game.Entity
         public Currency(ulong owner, CurrencyTypeEntry entry, ulong value = 0u)
         {
             Id = entry.Id;
-            characterId = owner;
+            CharacterId = owner;
             Entry = entry;
             Amount = amount;
 
             saveMask = CurrencySaveMask.Create;
         }
-
 
         public void Save(CharacterContext context)
         {
@@ -75,7 +67,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 // Currency doesn't exist in database, all infomation must be saved
                 context.Add(new CharacterCurrency
                 {
-                    CharacterId = CharacterId,
+                    Id = CharacterId,
                     CurrencyId = (byte)Entry.Id,
                     Amount = Amount,
                 });
@@ -85,7 +77,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 // Currency already exists in database, save only data that has been modified
                 var model = new CharacterCurrency
                 {
-                    CharacterId = CharacterId,
+                    Id = CharacterId,
                     CurrencyId = (byte)Entry.Id,
                 };
 

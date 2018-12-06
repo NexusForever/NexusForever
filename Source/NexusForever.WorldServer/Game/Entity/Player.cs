@@ -162,9 +162,15 @@ namespace NexusForever.WorldServer.Game.Entity
                 FactionData = new ServerPlayerCreate.Faction
                 {
                     FactionId = 166,
-                },
-                CurrencyManager = CurrencyManager
+                }
             };
+
+            for (uint i = 1u; i < 17u; i++)
+            {
+                Currency currency = CurrencyManager.GetCurrency(i);
+                if (currency != null)
+                    playerCreate.Money[i - 1] = currency.Amount;
+            }
 
             foreach (Bag bag in Inventory)
             {

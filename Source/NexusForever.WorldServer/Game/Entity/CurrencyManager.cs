@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
@@ -10,11 +10,10 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class CurrencyManager : IUpdate, ISaveCharacter
+    public class CurrencyManager : ISaveCharacter, IEnumerable<Currency>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly ulong characterId;
         private readonly Player player;
         private readonly Dictionary<byte, Currency> currencies = new Dictionary<byte, Currency>();
 
@@ -23,16 +22,10 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public CurrencyManager(Player owner, Character model)
         {
-            characterId = owner?.CharacterId ?? 0ul;
             player = owner;
 
             foreach (var characterCurrency in model.CharacterCurrency)
                 currencies.Add(characterCurrency.CurrencyId, new Currency(characterCurrency));
-        }
-
-        public void Update(double lastTick)
-        {
-            // TODO: tick items with limited lifespans
         }
 
         /// <summary>
@@ -137,7 +130,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (!currencies.TryGetValue((byte)currencyEntry.Id, out Currency currency))
                 throw new ArgumentException($"Cannot create currency {currencyEntry.Id} with a negative amount!");
-            else if (currency.Amount < amount)
+            if (currency.Amount < amount)
                 throw new ArgumentException($"Trying to remove more currency {currencyEntry.Id} than the player has!");
             CurrencyAmountUpdate(currency, currency.Amount - amount);
         }
@@ -152,18 +145,22 @@ namespace NexusForever.WorldServer.Game.Entity
             if (!currencies.TryGetValue(currencyId, out Currency currency))
                 return CurrencyCreate(currencyId);
             return currency;
-
-        }
-        
-        public IEnumerator<Currency> GetEnumerator()
-        {
-            return currencies.Values.GetEnumerator();
         }
 
         public void Save(CharacterContext context)
         {
             foreach (Currency currency in currencies.Values)
                 currency.Save(context);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<Currency> GetEnumerator()
+        {
+            return currencies.Values.GetEnumerator();
         }
     }
 }
