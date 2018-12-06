@@ -44,12 +44,14 @@ namespace NexusForever.WorldServer.Game.Entity
         private byte level;
 
         public Inventory Inventory { get; }
+        public CurrencyManager CurrencyManager { get; }
         public WorldSession Session { get; }
 
         private double timeToSave = SaveDuration;
         private PlayerSaveMask saveMask;
 
         private PendingFarTeleport pendingFarTeleport;
+
 
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
@@ -61,6 +63,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Class       = (Class)model.Class;
             Level       = model.Level;
             Bones       = new List<float>();
+            CurrencyManager = new CurrencyManager(this, model);
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -158,9 +161,16 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = 166
+                    FactionId = 166,
                 }
             };
+
+            for (uint i = 1u; i < 17u; i++)
+            {
+                Currency currency = CurrencyManager.GetCurrency(i);
+                if (currency != null)
+                    playerCreate.Money[i - 1] = currency.Amount;
+            }
 
             foreach (Bag bag in Inventory)
             {
@@ -276,6 +286,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             Inventory.Save(context);
+            CurrencyManager.Save(context);
         }
     }
 }

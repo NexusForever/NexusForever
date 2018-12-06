@@ -160,7 +160,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<CreatureLevelEntry> CreatureLevel { get; private set; }
 
+        [GameData]
         public static GameTable<CurrencyTypeEntry> CurrencyType { get; private set; }
+
         public static GameTable<CustomerSurveyEntry> CustomerSurvey { get; private set; }
         public static GameTable<CustomizationParameterEntry> CustomizationParameter { get; private set; }
         public static GameTable<CustomizationParameterMapEntry> CustomizationParameterMap { get; private set; }
