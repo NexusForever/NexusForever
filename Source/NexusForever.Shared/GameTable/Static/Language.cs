@@ -1,9 +1,9 @@
 ﻿namespace NexusForever.Shared.GameTable.Static
 {
-    public enum Language
+    public enum Language : uint
     {
         English = 1,
-        German,
+        German = 2,
         French,
         Korean
     }

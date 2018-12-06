@@ -1,4 +1,5 @@
-﻿using NexusForever.Shared.Network;
+using NexusForever.Shared.GameTable.Static;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Model
@@ -61,7 +62,7 @@ namespace NexusForever.AuthServer.Network.Message.Model
         public NetworkGuid Unknown208 { get; } = new NetworkGuid();
         public NetworkGuid GameToken { get; } = new NetworkGuid();
         public uint Unknown228 { get; private set; }
-        public uint Unknown22C { get; private set; }
+        public Language Language { get; private set; }
         public uint Unknown230 { get; private set; }
         public uint Unknown234 { get; private set; }
         public HardwareInformation Hardware { get; } = new HardwareInformation();
@@ -77,7 +78,7 @@ namespace NexusForever.AuthServer.Network.Message.Model
             GameToken.Read(reader);
 
             Unknown228 = reader.ReadUInt();
-            Unknown22C = reader.ReadUInt();
+            Language = reader.ReadEnum<Language>(32u);
             Unknown230 = reader.ReadUInt();
             Unknown234 = reader.ReadUInt();
 
