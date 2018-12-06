@@ -6,5 +6,6 @@ namespace NexusForever.WorldServer
     {
         public NetworkConfig Network { get; set; }
         public DatabaseConfig Database { get; set; }
+        public bool UseCache { get; set; } = false;
     }
 }

@@ -1,19 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Contexts;
+using NLog;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     public abstract class CommandHandlerBase : ICommandHandler
     {
-        public ILogger Logger { get; }
+        public ILogger Logger { get; } = LogManager.GetCurrentClassLogger();
+
+
         public abstract int Order { get; }
 
-        protected CommandHandlerBase(ILogger logger)
-        {
-            Logger = logger;
-        }
+        public abstract IEnumerable<string> GetCommands();
+        public abstract Task HandleAsync(CommandContext session, string text);
+        public abstract Task<bool> HandlesAsync(CommandContext session, string input);
 
         protected static void ParseCommand(string value, out string command, out string[] parameters)
         {
@@ -21,9 +23,5 @@ namespace NexusForever.WorldServer.Command.Handler
             command = split[0];
             parameters = split.Skip(1).ToArray();
         }
-
-        public abstract IEnumerable<string> GetCommands();
-        public abstract void Handle(CommandContext session, string text);
-        public abstract bool Handles(CommandContext session, string input);
     }
 }

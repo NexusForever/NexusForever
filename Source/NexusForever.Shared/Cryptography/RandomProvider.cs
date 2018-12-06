@@ -8,7 +8,7 @@ namespace NexusForever.Shared.Cryptography
     {
         public static byte[] GetBytes(uint count)
         {
-            using (var provider = RandomNumberGenerator.Create())
+            using (var provider = new RNGCryptoServiceProvider())
             {
                 byte[] buffer = new byte[count];
                 provider.GetBytes(buffer);

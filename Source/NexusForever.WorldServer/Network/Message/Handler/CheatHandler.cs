@@ -8,20 +8,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class CheatHandler
     {
-        private static Logger Log { get; } = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+
         [MessageHandler(GameMessageOpcode.ClientCheat)]
         public static void HandleCheat(WorldSession session, ClientCheat cheat)
         {
             try
             {
                 CommandManager.HandleCommand(session, cheat.Message, false);
-                //CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
-                //CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
-                //handler?.Invoke(session, parameters);
             }
             catch (Exception e)
             {
-                Log.Warn(e.Message);
+                log.Warn(e.Message);
             }
         }
     }
