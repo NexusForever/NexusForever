@@ -1,22 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using NexusForever.Shared.Configuration;
+using System.Threading.Tasks;
+using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Command.Handler;
 using NexusForever.WorldServer.Network;
-using NexusForever.WorldServer.Command.Contexts;
+using NLog;
 
 namespace NexusForever.WorldServer.Command
 {
     public static class CommandManager
     {
-        private static IServiceProvider Services => DependencyInjection.ServiceProvider;
+        private static readonly List<ICommandHandler> commandHandlers = new List<ICommandHandler>();
+        private static ILogger Logger { get; } = LogManager.GetCurrentClassLogger();
 
         public static void Initialise()
         {
-            // Force init now for singletons.
-            using (var scope = Services.CreateScope())
-                scope.ServiceProvider.GetServices<ICommandHandler>();
+            Type[] types = typeof(CommandManager).Assembly.GetTypes().Where(i =>
+                    typeof(ICommandHandler).IsAssignableFrom(i) &&
+                    i.GetConstructors().Any(x => x.GetParameters().Length == 0 && i.IsPublic) && !i.IsAbstract &&
+                    i.IsClass)
+                .ToArray();
+            foreach (Type type in types)
+                commandHandlers.Add((ICommandHandler) Activator.CreateInstance(type));
+            Logger.Info("Initialised {0} command handlers.", commandHandlers.Count);
+        }
+
+        public static IEnumerable<ICommandHandler> GetCommandHandlers()
+        {
+            return commandHandlers.OrderBy(i => i.Order);
         }
 
         public static bool HandleCommand(WorldSession session, string commandText, bool isFromChat)
@@ -24,7 +36,12 @@ namespace NexusForever.WorldServer.Command
             return HandleCommand(new WorldSessionCommandContext(session), commandText, isFromChat);
         }
 
-        public static bool HandleCommand(CommandContext session, string commandText, bool isFromChat)
+        public static bool HandleCommand(CommandContext context, string commandText, bool isFromChat)
+        {
+            return HandleCommandAsync(context, commandText, isFromChat).GetAwaiter().GetResult();
+        }
+
+        public static async Task<bool> HandleCommandAsync(CommandContext session, string commandText, bool isFromChat)
         {
             if (isFromChat)
             {
@@ -34,28 +51,16 @@ namespace NexusForever.WorldServer.Command
                 commandText = commandText.Substring(1);
             }
 
-            using (IServiceScope scope = Services.CreateScope())
+            foreach (ICommandHandler command in GetCommandHandlers())
             {
-                foreach (ICommandHandler command in scope.ServiceProvider.GetServices<ICommandHandler>().OrderBy(i => i.Order))
-                {
-                    if (!command.Handles(session, commandText))
-                        continue;
+                if (!await command.HandlesAsync(session, commandText))
+                    continue;
 
-                    command.Handle(session, commandText);
-                    return true;
-                }
+                await command.HandleAsync(session, commandText);
+                return true;
             }
 
             return false;
-        }
-
-        public static void RegisterServices(IServiceCollection services)
-        {
-            services.AddSingleton<ICommandHandler, MountCommandHandler>()
-                .AddSingleton<ICommandHandler, AccountCommandHandler>()
-                .AddSingleton<ICommandHandler, TeleportHandler>()
-                .AddSingleton<ICommandHandler, HelpCommandHandler>()
-                .AddSingleton<ICommandHandler, ItemCommandHandler>();
         }
     }
 }

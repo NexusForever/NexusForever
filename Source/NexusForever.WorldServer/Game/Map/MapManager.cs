@@ -45,8 +45,14 @@ namespace NexusForever.WorldServer.Game.Map
             var tasks = new List<Task>();
             foreach (BaseMap map in maps.Values)
                 tasks.Add(Task.Run(() => { map.Update(lastTick); }));
-
-            Task.WaitAll(tasks.ToArray());
+            try
+            {
+                Task.WaitAll(tasks.ToArray());
+            }
+            catch
+            {
+                // ignored.
+            }
 
             sw.Stop();
             if (sw.ElapsedMilliseconds > 10)
