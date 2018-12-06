@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Command.Contexts;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -20,7 +19,6 @@ namespace NexusForever.WorldServer.Command.Handler
         public bool RequiresSession { get; }
 
         protected NamedCommand(bool requiresSession, params string[] commandNames)
-            : base()
         {
             CommandNames = commandNames.ToImmutableArray();
             RequiresSession = requiresSession;

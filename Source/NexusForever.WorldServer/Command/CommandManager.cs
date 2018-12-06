@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using NexusForever.Shared.Configuration;
-using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Command.Handler;
 using NexusForever.WorldServer.Network;
@@ -15,16 +11,18 @@ namespace NexusForever.WorldServer.Command
 {
     public static class CommandManager
     {
-        private static ILogger Logger { get; } = LogManager.GetCurrentClassLogger();
         private static readonly List<ICommandHandler> commandHandlers = new List<ICommandHandler>();
+        private static ILogger Logger { get; } = LogManager.GetCurrentClassLogger();
+
         public static void Initialise()
         {
             Type[] types = typeof(CommandManager).Assembly.GetTypes().Where(i =>
                     typeof(ICommandHandler).IsAssignableFrom(i) &&
-                    i.GetConstructors().Any(x => x.GetParameters().Length == 0 && i.IsPublic) && !i.IsAbstract && i.IsClass)
+                    i.GetConstructors().Any(x => x.GetParameters().Length == 0 && i.IsPublic) && !i.IsAbstract &&
+                    i.IsClass)
                 .ToArray();
             foreach (Type type in types)
-                commandHandlers.Add((ICommandHandler)Activator.CreateInstance(type));
+                commandHandlers.Add((ICommandHandler) Activator.CreateInstance(type));
             Logger.Info("Initialised {0} command handlers.", commandHandlers.Count);
         }
 

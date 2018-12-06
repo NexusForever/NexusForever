@@ -3,7 +3,6 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,7 +24,7 @@ namespace NexusForever.WorldServer.Command.Contexts
             await SendWebSocketMessage(text, "error");
         }
 
-        public override async Task SendMessageAsync( string text)
+        public override async Task SendMessageAsync(string text)
         {
             await base.SendMessageAsync(text);
             await SendWebSocketMessage(text, "info");

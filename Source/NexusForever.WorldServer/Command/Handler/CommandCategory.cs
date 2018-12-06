@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 
@@ -70,8 +69,8 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                await (commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
-                      Task.CompletedTask);
+                await commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
+                      Task.CompletedTask;
             }
             else
                 await SendHelpAsync(context);

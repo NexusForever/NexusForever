@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Command.Handler
     {
 
         public GoHandler()
-            : base( true, "go")
+            : base(true, "go")
         {
         }
 
@@ -19,13 +19,10 @@ namespace NexusForever.WorldServer.Command.Handler
             string zoneName = string.Join(" ", parameters);
             WorldLocation2Entry zone = GameTableManager.LookupZonesByName(zoneName).FirstOrDefault();
             if (zone == null)
-            {
                 await context.SendErrorAsync($"Unknown zone: {zoneName}");
-            }
             else
-            {
-                context.Session.Player.TeleportTo((ushort)zone.WorldId, zone.Position0, zone.Position1, zone.Position2);
-            }
+                context.Session.Player.TeleportTo((ushort) zone.WorldId, zone.Position0, zone.Position1,
+                    zone.Position2);
         }
     }
 }

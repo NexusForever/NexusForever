@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Command.Contexts
             return Task.CompletedTask;
         }
 
-        public virtual Task SendMessageAsync( string text)
+        public virtual Task SendMessageAsync(string text)
         {
             Logger.Info(text);
             return Task.CompletedTask;

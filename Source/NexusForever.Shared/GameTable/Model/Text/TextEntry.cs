@@ -2,14 +2,15 @@
 {
     public class TextEntry
     {
+        public uint Id { get; }
+        public Language Language { get; }
+        public string Text { get; }
+
         public TextEntry(Language language, uint id, string text)
         {
             Id = id;
             Language = Language;
             Text = text;
         }
-        public uint Id { get; private set; }
-        public Language Language { get; private set; }
-        public string Text { get; private set; }
     }
 }

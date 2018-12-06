@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -24,16 +23,14 @@ namespace NexusForever.WorldServer.Command.Contexts
 
         private void SendText(string text, string name = "")
         {
-            foreach (var line in text.Trim().Split(Environment.NewLine))
-            {
-                Session.EnqueueMessageEncrypted(new ServerChat()
+            foreach (string line in text.Trim().Split(Environment.NewLine))
+                Session.EnqueueMessageEncrypted(new ServerChat
                 {
                     Guid = Session.Player.Guid,
-                    Channel = Game.Social.ChatChannel.System,
+                    Channel = ChatChannel.System,
                     Name = name,
                     Text = line
                 });
-            }
         }
 
         public override Task SendMessageAsync(string text)

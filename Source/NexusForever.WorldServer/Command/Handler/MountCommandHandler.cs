@@ -1,6 +1,5 @@
 using System.Numerics;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity;

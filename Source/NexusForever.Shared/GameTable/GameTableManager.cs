@@ -1,36 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Reflection;
+using System.IO;
 using System.Linq;
-using NexusForever.Shared.GameTable.Model;
-using NLog;
+using System.Reflection;
 using System.Threading.Tasks;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.GameTable.Model.Text;
+using NLog;
 
 namespace NexusForever.Shared.GameTable
 {
     public static class GameTableManager
     {
+
+        private const int minimumThreads = 2;
+        private const int maximumThreads = 16;
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         [GameData]
         public static GameTable<AccountCurrencyTypeEntry> AccountCurrencyType { get; private set; }
+
         [GameData]
         public static GameTable<AccountItemEntry> AccountItem { get; private set; }
+
         [GameData]
         public static GameTable<AccountItemCooldownGroupEntry> AccountItemCooldownGroup { get; private set; }
+
         [GameData]
         public static GameTable<AchievementEntry> Achievement { get; private set; }
+
         [GameData]
         public static GameTable<AchievementCategoryEntry> AchievementCategory { get; private set; }
+
         [GameData]
         public static GameTable<AchievementChecklistEntry> AchievementChecklist { get; private set; }
+
         [GameData]
         public static GameTable<AchievementGroupEntry> AchievementGroup { get; private set; }
+
         [GameData]
         public static GameTable<AchievementSubGroupEntry> AchievementSubGroup { get; private set; }
+
         public static GameTable<AchievementTextEntry> AchievementText { get; private set; }
         public static GameTable<ActionBarShortcutSetEntry> ActionBarShortcutSet { get; private set; }
         public static GameTable<ActionSlotPrereqEntry> ActionSlotPrereq { get; private set; }
@@ -51,73 +62,111 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<CCStatesEntry> CCStates { get; private set; }
         public static GameTable<ChallengeEntry> Challenge { get; private set; }
         public static GameTable<ChallengeTierEntry> ChallengeTier { get; private set; }
+
         [GameData]
         public static GameTable<CharacterCreationEntry> CharacterCreation { get; private set; }
+
         public static GameTable<CharacterCreationArmorSetEntry> CharacterCreationArmorSet { get; private set; }
         public static GameTable<CharacterCreationPresetEntry> CharacterCreationPreset { get; private set; }
+
         [GameData]
         public static GameTable<CharacterCustomizationEntry> CharacterCustomization { get; private set; }
+
         public static GameTable<CharacterCustomizationLabelEntry> CharacterCustomizationLabel { get; private set; }
-        public static GameTable<CharacterCustomizationSelectionEntry> CharacterCustomizationSelection { get; private set; }
+
+        public static GameTable<CharacterCustomizationSelectionEntry> CharacterCustomizationSelection
+        {
+            get;
+            private set;
+        }
+
         public static GameTable<CharacterTitleEntry> CharacterTitle { get; private set; }
         public static GameTable<CharacterTitleCategoryEntry> CharacterTitleCategory { get; private set; }
         public static GameTable<ChatChannelEntry> ChatChannel { get; private set; }
         public static GameTable<CinematicEntry> Cinematic { get; private set; }
         public static GameTable<CinematicRaceEntry> CinematicRace { get; private set; }
         public static GameTable<CityDirectionEntry> CityDirection { get; private set; }
+
         [GameData]
         public static GameTable<ClassEntry> Class { get; private set; }
+
         public static GameTable<ClassSecondaryStatBonusEntry> ClassSecondaryStatBonus { get; private set; }
+
         [GameData]
         public static GameTable<ClientEventEntry> ClientEvent { get; private set; }
+
         [GameData]
         public static GameTable<ClientEventActionEntry> ClientEventAction { get; private set; }
+
         [GameData]
         public static GameTable<ClientSideInteractionEntry> ClientSideInteraction { get; private set; }
+
         [GameData]
         public static GameTable<ColorShiftEntry> ColorShift { get; private set; }
+
         [GameData]
         public static GameTable<CombatRewardEntry> CombatReward { get; private set; }
+
         [GameData]
         public static GameTable<CommunicatorMessagesEntry> CommunicatorMessages { get; private set; }
+
         [GameData]
         public static GameTable<ComponentRegionEntry> ComponentRegion { get; private set; }
+
         [GameData]
         public static GameTable<ComponentRegionRectEntry> ComponentRegionRect { get; private set; }
+
         [GameData]
         public static GameTable<CostumeSpeciesEntry> CostumeSpecies { get; private set; }
+
         [GameData]
         public static GameTable<Creature2Entry> Creature2 { get; private set; }
+
         [GameData]
         public static GameTable<Creature2ActionEntry> Creature2Action { get; private set; }
+
         [GameData]
         public static GameTable<Creature2ActionSetEntry> Creature2ActionSet { get; private set; }
+
         [GameData]
         public static GameTable<Creature2ActionTextEntry> Creature2ActionText { get; private set; }
+
         [GameData]
         public static GameTable<Creature2AffiliationEntry> Creature2Affiliation { get; private set; }
+
         [GameData]
         public static GameTable<Creature2ArcheTypeEntry> Creature2ArcheType { get; private set; }
+
         [GameData]
         public static GameTable<Creature2DifficultyEntry> Creature2Difficulty { get; private set; }
+
         [GameData]
         public static GameTable<Creature2DisplayGroupEntryEntry> Creature2DisplayGroupEntry { get; private set; }
+
         [GameData]
         public static GameTable<Creature2DisplayInfoEntry> Creature2DisplayInfo { get; private set; }
+
         [GameData]
         public static GameTable<Creature2ModelInfoEntry> Creature2ModelInfo { get; private set; }
+
         [GameData]
         public static GameTable<Creature2OutfitGroupEntryEntry> Creature2OutfitGroupEntry { get; private set; }
+
         [GameData]
         public static GameTable<Creature2OutfitInfoEntry> Creature2OutfitInfo { get; private set; }
+
         [GameData]
         public static GameTable<Creature2OverridePropertiesEntry> Creature2OverrideProperties { get; private set; }
+
         [GameData]
         public static GameTable<Creature2ResistEntry> Creature2Resist { get; private set; }
+
         [GameData]
         public static GameTable<Creature2TierEntry> Creature2Tier { get; private set; }
+
         [GameData]
         public static GameTable<CreatureLevelEntry> CreatureLevel { get; private set; }
+
         public static GameTable<CurrencyTypeEntry> CurrencyType { get; private set; }
         public static GameTable<CustomerSurveyEntry> CustomerSurvey { get; private set; }
         public static GameTable<CustomizationParameterEntry> CustomizationParameter { get; private set; }
@@ -130,13 +179,17 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<EldanAugmentationEntry> EldanAugmentation { get; private set; }
         public static GameTable<EldanAugmentationCategoryEntry> EldanAugmentationCategory { get; private set; }
         public static GameTable<EmoteSequenceTransitionEntry> EmoteSequenceTransition { get; private set; }
+
         [GameData]
         public static GameTable<EmotesEntry> Emotes { get; private set; }
+
         public static GameTable<EntitlementEntry> Entitlement { get; private set; }
         public static GameTable<EpisodeEntry> Episode { get; private set; }
         public static GameTable<EpisodeQuestEntry> EpisodeQuest { get; private set; }
+
         [GameData]
         public static GameTable<Faction2Entry> Faction2 { get; private set; }
+
         public static GameTable<Faction2RelationshipEntry> Faction2Relationship { get; private set; }
         public static GameTable<FinishingMoveDeathVisualEntry> FinishingMoveDeathVisual { get; private set; }
         public static GameTable<FullScreenEffectEntry> FullScreenEffect { get; private set; }
@@ -175,24 +228,32 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<InputActionEntry> InputAction { get; private set; }
         public static GameTable<InputActionCategoryEntry> InputActionCategory { get; private set; }
         public static GameTable<InstancePortalEntry> InstancePortal { get; private set; }
+
         [GameData("Item2.tbl")]
         public static GameTable<Item2Entry> Item { get; private set; }
+
         public static GameTable<Item2CategoryEntry> Item2Category { get; private set; }
         public static GameTable<Item2FamilyEntry> Item2Family { get; private set; }
+
         [GameData("Item2Type.tbl")]
         public static GameTable<Item2TypeEntry> ItemType { get; private set; }
+
         public static GameTable<ItemBudgetEntry> ItemBudget { get; private set; }
         public static GameTable<ItemColorSetEntry> ItemColorSet { get; private set; }
         public static GameTable<ItemDisplayEntry> ItemDisplay { get; private set; }
+
         [GameData]
         public static GameTable<ItemDisplaySourceEntryEntry> ItemDisplaySourceEntry { get; private set; }
+
         public static GameTable<ItemImbuementEntry> ItemImbuement { get; private set; }
         public static GameTable<ItemImbuementRewardEntry> ItemImbuementReward { get; private set; }
         public static GameTable<ItemProficiencyEntry> ItemProficiency { get; private set; }
         public static GameTable<ItemQualityEntry> ItemQuality { get; private set; }
         public static GameTable<ItemRandomStatEntry> ItemRandomStat { get; private set; }
         public static GameTable<ItemRandomStatGroupEntry> ItemRandomStatGroup { get; private set; }
+
         public static GameTable<ItemRuneInstanceEntry> ItemRuneInstance { get; private set; }
+
         //empty public static GameTable<ItemRuneSlotRandomizationEntry> ItemRuneSlotRandomization { get; private set; }
         public static GameTable<ItemSetEntry> ItemSet { get; private set; }
         public static GameTable<ItemSetBonusEntry> ItemSetBonus { get; private set; }
@@ -212,19 +273,31 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<LootSpellEntry> LootSpell { get; private set; }
         public static GameTable<LuaEventEntry> LuaEvent { get; private set; }
         public static GameTable<MapContinentEntry> MapContinent { get; private set; }
+
         [GameData]
         public static GameTable<MapZoneEntry> MapZone { get; private set; }
+
         public static GameTable<MapZoneHexEntry> MapZoneHex { get; private set; }
         public static GameTable<MapZoneHexGroupEntry> MapZoneHexGroup { get; private set; }
+
         public static GameTable<MapZoneHexGroupEntryEntry> MapZoneHexGroupEntry { get; private set; }
+
         //empty public static GameTable<MapZoneLevelBandEntry> MapZoneLevelBand { get; private set; }
         public static GameTable<MapZoneNemesisRegionEntry> MapZoneNemesisRegion { get; private set; }
         public static GameTable<MapZonePOIEntry> MapZonePOI { get; private set; }
         public static GameTable<MapZoneSpriteEntry> MapZoneSprite { get; private set; }
         public static GameTable<MapZoneWorldJoinEntry> MapZoneWorldJoin { get; private set; }
-        public static GameTable<MatchTypeRewardRotationContentEntry> MatchTypeRewardRotationContent { get; private set; }
+
+        public static GameTable<MatchTypeRewardRotationContentEntry> MatchTypeRewardRotationContent
+        {
+            get;
+            private set;
+        }
+
         public static GameTable<MatchingGameMapEntry> MatchingGameMap { get; private set; }
+
         public static GameTable<MatchingGameTypeEntry> MatchingGameType { get; private set; }
+
         //empty public static GameTable<MatchingMapPrerequisiteEntry> MatchingMapPrerequisite { get; private set; }
         public static GameTable<MatchingRandomRewardEntry> MatchingRandomReward { get; private set; }
         public static GameTable<MaterialDataEntry> MaterialData { get; private set; }
@@ -262,9 +335,21 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PathMissionEntry> PathMission { get; private set; }
         public static GameTable<PathRewardEntry> PathReward { get; private set; }
         public static GameTable<PathScientistCreatureInfoEntry> PathScientistCreatureInfo { get; private set; }
-        public static GameTable<PathScientistDatacubeDiscoveryEntry> PathScientistDatacubeDiscovery { get; private set; }
+
+        public static GameTable<PathScientistDatacubeDiscoveryEntry> PathScientistDatacubeDiscovery
+        {
+            get;
+            private set;
+        }
+
         public static GameTable<PathScientistExperimentationEntry> PathScientistExperimentation { get; private set; }
-        public static GameTable<PathScientistExperimentationPatternEntry> PathScientistExperimentationPattern { get; private set; }
+
+        public static GameTable<PathScientistExperimentationPatternEntry> PathScientistExperimentationPattern
+        {
+            get;
+            private set;
+        }
+
         public static GameTable<PathScientistFieldStudyEntry> PathScientistFieldStudy { get; private set; }
         public static GameTable<PathScientistScanBotProfileEntry> PathScientistScanBotProfile { get; private set; }
         public static GameTable<PathScientistSpecimenSurveyEntry> PathScientistSpecimenSurvey { get; private set; }
@@ -295,12 +380,25 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PublicEventCustomStatEntry> PublicEventCustomStat { get; private set; }
         public static GameTable<PublicEventDepotEntry> PublicEventDepot { get; private set; }
         public static GameTable<PublicEventObjectiveEntry> PublicEventObjective { get; private set; }
-        public static GameTable<PublicEventObjectiveBombDeploymentEntry> PublicEventObjectiveBombDeployment { get; private set; }
-        public static GameTable<PublicEventObjectiveGatherResourceEntry> PublicEventObjectiveGatherResource { get; private set; }
+
+        public static GameTable<PublicEventObjectiveBombDeploymentEntry> PublicEventObjectiveBombDeployment
+        {
+            get;
+            private set;
+        }
+
+        public static GameTable<PublicEventObjectiveGatherResourceEntry> PublicEventObjectiveGatherResource
+        {
+            get;
+            private set;
+        }
+
         public static GameTable<PublicEventObjectiveStateEntry> PublicEventObjectiveState { get; private set; }
         public static GameTable<PublicEventRewardModifierEntry> PublicEventRewardModifier { get; private set; }
         public static GameTable<PublicEventStatDisplayEntry> PublicEventStatDisplay { get; private set; }
+
         public static GameTable<PublicEventTeamEntry> PublicEventTeam { get; private set; }
+
         //empty public static GameTable<PublicEventUnitPropertyModifierEntry> PublicEventUnitPropertyModifier { get; private set; }
         public static GameTable<PublicEventVirtualItemDepotEntry> PublicEventVirtualItemDepot { get; private set; }
         public static GameTable<PublicEventVoteEntry> PublicEventVote { get; private set; }
@@ -315,8 +413,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<QuestGroupEntry> QuestGroup { get; private set; }
         public static GameTable<QuestHubEntry> QuestHub { get; private set; }
         public static GameTable<QuestObjectiveEntry> QuestObjective { get; private set; }
+
         [GameData]
         public static GameTable<RaceEntry> Race { get; private set; }
+
         public static GameTable<RandomPlayerNameEntry> RandomPlayerName { get; private set; }
         public static GameTable<RandomTextLineEntry> RandomTextLine { get; private set; }
         public static GameTable<RandomTextLineSetEntry> RandomTextLineSet { get; private set; }
@@ -345,15 +445,19 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<SoundEventEntry> SoundEvent { get; private set; }
         public static GameTable<SoundImpactEventsEntry> SoundImpactEvents { get; private set; }
         public static GameTable<SoundMusicSetEntry> SoundMusicSet { get; private set; }
+
         public static GameTable<SoundParameterEntry> SoundParameter { get; private set; }
+
         //empty public static GameTable<SoundReplaceEntry> SoundReplace { get; private set; }
         //empty public static GameTable<SoundReplaceDescriptionEntry> SoundReplaceDescription { get; private set; }
         public static GameTable<SoundStatesEntry> SoundStates { get; private set; }
         public static GameTable<SoundSwitchEntry> SoundSwitch { get; private set; }
         public static GameTable<SoundUIContextEntry> SoundUIContext { get; private set; }
         public static GameTable<SoundZoneKitEntry> SoundZoneKit { get; private set; }
+
         [GameData]
         public static GameTable<Spell4Entry> Spell4 { get; private set; }
+
         public static GameTable<Spell4AoeTargetConstraintsEntry> Spell4AoeTargetConstraints { get; private set; }
         public static GameTable<Spell4BaseEntry> Spell4Base { get; private set; }
         public static GameTable<Spell4CCConditionsEntry> Spell4CCConditions { get; private set; }
@@ -418,25 +522,34 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<TutorialLayoutEntry> TutorialLayout { get; private set; }
         public static GameTable<TutorialPageEntry> TutorialPage { get; private set; }
         public static GameTable<UnitProperty2Entry> UnitProperty2 { get; private set; }
+
         [GameData]
         public static GameTable<UnitRaceEntry> UnitRace { get; private set; }
+
         public static GameTable<UnitVehicleEntry> UnitVehicle { get; private set; }
         public static GameTable<VeteranTierEntry> VeteranTier { get; private set; }
         public static GameTable<VirtualItemEntry> VirtualItem { get; private set; }
         public static GameTable<VisualEffectEntry> VisualEffect { get; private set; }
         public static GameTable<VitalEntry> Vital { get; private set; }
         public static GameTable<WaterSurfaceEffectEntry> WaterSurfaceEffect { get; private set; }
+
         [GameData]
         public static GameTable<WindEntry> Wind { get; private set; }
+
         public static GameTable<WindSpawnEntry> WindSpawn { get; private set; }
+
         public static GameTable<WordFilterEntry> WordFilter { get; private set; }
+
         //empty public static GameTable<WordFilterAltEntry> WordFilterAlt { get; private set; }
         [GameData]
         public static GameTable<WorldEntry> World { get; private set; }
+
         public static GameTable<WorldClutterEntry> WorldClutter { get; private set; }
         public static GameTable<WorldLayerEntry> WorldLayer { get; private set; }
+
         [GameData]
         public static GameTable<WorldLocation2Entry> WorldLocation2 { get; private set; }
+
         public static GameTable<WorldSkyEntry> WorldSky { get; private set; }
         public static GameTable<WorldSocketEntry> WorldSocket { get; private set; }
         public static GameTable<WorldWaterEnvironmentEntry> WorldWaterEnvironment { get; private set; }
@@ -444,29 +557,32 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<WorldWaterLayerEntry> WorldWaterLayer { get; private set; }
         public static GameTable<WorldWaterTypeEntry> WorldWaterType { get; private set; }
         public static GameTable<WorldWaterWakeEntry> WorldWaterWake { get; private set; }
+
         [GameData]
         public static GameTable<WorldZoneEntry> WorldZone { get; private set; }
+
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
 
         [GameData("lang.bin")]
         public static TextTable Text { get; private set; }
 
-        private const int minimumThreads = 2;
-        private const int maximumThreads = 16;
+        private static Dictionary<string, List<WorldLocation2Entry>> ZoneLookupTable { get; set; }
+
         private static async Task LoadGameTablesAsync()
         {
             List<Exception> exceptions = new List<Exception>();
-            var loadCount = Environment.ProcessorCount * 2;
+            int loadCount = Environment.ProcessorCount * 2;
             if (loadCount < minimumThreads) loadCount = minimumThreads;
             if (loadCount > maximumThreads) loadCount = maximumThreads;
             List<Task> tasks = new List<Task>();
 
             async Task WaitForNextTaskToFinish()
             {
-                var next = await Task.WhenAny(tasks);
+                Task next = await Task.WhenAny(tasks);
                 tasks.Remove(next);
             }
+
             async Task ExceptionHandler(Task task)
             {
                 try
@@ -488,20 +604,17 @@ namespace NexusForever.Shared.GameTable
                 {
                     fileName = property.Name;
                     if (property.PropertyType == typeof(TextTable))
-                    {
                         fileName = Path.ChangeExtension(fileName, "bin");
-                    }
                     else if (property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
-                    {
                         fileName = Path.ChangeExtension(fileName, "tbl");
-                    }
                 }
+
                 return fileName;
             }
 
             List<PropertyInfo> properties = new List<PropertyInfo>();
             // It's done this way so we load the text first, because it's huge.
-            foreach (var property in typeof(GameTableManager).GetProperties())
+            foreach (PropertyInfo property in typeof(GameTableManager).GetProperties())
             {
                 var attribute = property.GetCustomAttribute<GameDataAttribute>();
                 if (attribute == null) continue;
@@ -511,46 +624,35 @@ namespace NexusForever.Shared.GameTable
                     properties.Add(property);
             }
 
-            foreach (var property in properties)
+            foreach (PropertyInfo property in properties)
             {
                 string fileName = GetFilename(property);
                 if (string.IsNullOrWhiteSpace(fileName))
                 {
                     fileName = property.Name;
                     if (property.PropertyType == typeof(TextTable))
-                    {
                         fileName = Path.ChangeExtension(fileName, "bin");
-                    }
                     else if (property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
-                    {
                         fileName = Path.ChangeExtension(fileName, "tbl");
-                    }
                 }
 
                 //log.Info($"Loading game file {fileName}...");
 
                 DateTime loadStarted = DateTime.Now;
 
-                tasks.Add(LoadGameTableAsync(property, fileName).ContinueWith(ExceptionHandler).ContinueWith(async task =>
-                {
-                    await task;
-                    log.Info("Completed loading {0} in {1}ms", fileName, (DateTime.Now - loadStarted).TotalMilliseconds);
-                }));
-                if (tasks.Count > loadCount)
-                {
-                    await WaitForNextTaskToFinish();
-                }
+                tasks.Add(LoadGameTableAsync(property, fileName).ContinueWith(ExceptionHandler).ContinueWith(
+                    async task =>
+                    {
+                        await task;
+                        log.Info("Completed loading {0} in {1}ms", fileName,
+                            (DateTime.Now - loadStarted).TotalMilliseconds);
+                    }));
+                if (tasks.Count > loadCount) await WaitForNextTaskToFinish();
             }
 
-            while (tasks.Count > 0)
-            {
-                await WaitForNextTaskToFinish();
-            }
+            while (tasks.Count > 0) await WaitForNextTaskToFinish();
 
-            if (exceptions.Count > 0)
-            {
-                throw new AggregateException(exceptions);
-            }
+            if (exceptions.Count > 0) throw new AggregateException(exceptions);
         }
 
         private static Task LoadGameTableAsync(PropertyInfo property, string fileName)
@@ -562,30 +664,20 @@ namespace NexusForever.Shared.GameTable
 
             if (property.PropertyType.IsGenericType &&
                 property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
-            {
-
-                return Task.Factory.StartNew<object>(() =>
+                return Task.Factory.StartNew(() =>
                         GameTableFactory.Load(property.PropertyType.GetGenericArguments().Single(), fileName))
                     .ContinueWith(SetPropertyOnCompletion);
-            }
-            else if (property.PropertyType == typeof(TextTable))
-            {
+            if (property.PropertyType == typeof(TextTable))
                 return Task.Factory.StartNew<object>(() => GameTableFactory.LoadText(fileName))
                     .ContinueWith(SetPropertyOnCompletion);
-            }
-            else
-            {
-                throw new Exception($"Unknown game table type {property.PropertyType}");
-            }
+            throw new Exception($"Unknown game table type {property.PropertyType}");
         }
-
-
 
 
         public static void Initialise()
         {
             log.Info("Loading GameTables...");
-            var sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew();
             Task<TextTable> textLoadTask = null;
             try
             {
@@ -607,10 +699,7 @@ namespace NexusForever.Shared.GameTable
                 log.Fatal(exception);
                 throw;
             }
-            finally
-            {
-                // Placeholder
-            }
+
             log.Info($"Loaded GameTables in {sw.ElapsedMilliseconds}ms.");
         }
 
@@ -622,7 +711,8 @@ namespace NexusForever.Shared.GameTable
 
         private static Dictionary<string, List<WorldLocation2Entry>> CreateTeleportLookups()
         {
-            Dictionary<string, List<WorldLocation2Entry>> index = new Dictionary<string, List<WorldLocation2Entry>>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, List<WorldLocation2Entry>> index =
+                new Dictionary<string, List<WorldLocation2Entry>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (WorldLocation2Entry zone in WorldLocation2.Entries)
             {
@@ -639,17 +729,14 @@ namespace NexusForever.Shared.GameTable
             return index;
         }
 
-        private static void AddObjectToKey(Dictionary<string, List<WorldLocation2Entry>> dictionary, string key, WorldLocation2Entry obj)
+        private static void AddObjectToKey(Dictionary<string, List<WorldLocation2Entry>> dictionary, string key,
+            WorldLocation2Entry obj)
         {
             List<WorldLocation2Entry> entries;
             if (!dictionary.TryGetValue(key, out entries))
-            {
                 dictionary.Add(key, entries = new List<WorldLocation2Entry>());
-            }
 
             entries.Add(obj);
         }
-
-        private static Dictionary<string, List<WorldLocation2Entry>> ZoneLookupTable { get; set; }
     }
 }

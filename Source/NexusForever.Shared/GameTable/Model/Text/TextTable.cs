@@ -12,16 +12,11 @@ namespace NexusForever.Shared.GameTable.Model.Text
     public class TextTable
     {
         public static readonly TextTable Empty = new TextTable();
-        public TextEntry[] Entries { get; private set; }
 
         private readonly TextTableHeader header;
-        private class TupleComparer : IComparer<Tuple<uint, int>>
-        {
-            public int Compare(Tuple<uint, int> x, Tuple<uint, int> y)
-            {
-                return x.Item1.CompareTo(y.Item1);
-            }
-        }
+        public TextEntry[] Entries { get; }
+
+        private List<Tuple<uint, int>> Index { get; }
 
         private TextTable()
         {
@@ -47,32 +42,31 @@ namespace NexusForever.Shared.GameTable.Model.Text
                     reader.ReadBytes(Marshal.SizeOf<TextTableHeader>()));
 
                 header = headerSpan[0];
-                var entryStart = (ulong)Marshal.SizeOf<TextTableHeader>() + header.RecordOffset;
-                stream.Position = (long)entryStart;
+                ulong entryStart = (ulong) Marshal.SizeOf<TextTableHeader>() + header.RecordOffset;
+                stream.Position = (long) entryStart;
                 // fields
                 //stream.Position = Marshal.SizeOf<GameTableHeader>() + (int)header.FieldOffset;
                 //ReadOnlySpan<GameTableField> fields = MemoryMarshal.Cast<byte, GameTableField>(
                 //    reader.ReadBytes(Marshal.SizeOf<GameTableField>() * (int)header.FieldCount));
 
                 // optimisation to prevent too much CPU time being spent on GetCustomAttribute for large tables
-                var entrySize = Marshal.SizeOf<TextHeader>();
+                int entrySize = Marshal.SizeOf<TextHeader>();
                 List<TextHeader> entries = new List<TextHeader>();
                 for (ulong x = 0; x < header.RecordCount; x++)
                 {
-                    ReadOnlySpan<TextHeader> textHeader = MemoryMarshal.Cast<byte, TextHeader>(reader.ReadBytes(entrySize));
+                    ReadOnlySpan<TextHeader> textHeader =
+                        MemoryMarshal.Cast<byte, TextHeader>(reader.ReadBytes(entrySize));
                     entries.Add(textHeader[0]);
                 }
 
                 List<TextEntry> final = new List<TextEntry>();
                 foreach (TextHeader entry in entries)
                 {
-                    stream.Position = (long)((ulong)Marshal.SizeOf<TextTableHeader>() + header.NameOffset + (entry.Offset * 2));
-                    StringBuilder textBuilder = new StringBuilder();
+                    stream.Position = (long) ((ulong) Marshal.SizeOf<TextTableHeader>() + header.NameOffset +
+                                              entry.Offset * 2);
+                    var textBuilder = new StringBuilder();
                     char next;
-                    while ((next = reader.ReadChar()) != '\0')
-                    {
-                        textBuilder.Append(next);
-                    }
+                    while ((next = reader.ReadChar()) != '\0') textBuilder.Append(next);
 
                     final.Add(new TextEntry(header.Language, entry.Id, textBuilder.ToString()));
                 }
@@ -80,9 +74,13 @@ namespace NexusForever.Shared.GameTable.Model.Text
                 Entries = final.ToArray();
                 Index = new List<Tuple<uint, int>>();
                 BuildIndex();
+
                 #region DEBUG
-                Debug.Assert(GetText((uint)1) == "Cancel");
+
+                Debug.Assert(GetText(1) == "Cancel");
+
                 #endregion
+
                 //var attributeCache = new Dictionary<FieldInfo, GameTableFieldArrayAttribute>();
 
                 //foreach (FieldInfo modelField in typeof(T).GetFields())
@@ -96,22 +94,27 @@ namespace NexusForever.Shared.GameTable.Model.Text
                 //ReadEntries(reader, fields, attributeCache);
                 //ReadLookupTable(reader);
             }
-
         }
 
         private void BuildIndex()
         {
-            Index.AddRange(Entries.Select((item, index) => Tuple.Create<uint, int>(item.Id, index)).ToList());
+            Index.AddRange(Entries.Select((item, index) => Tuple.Create(item.Id, index)).ToList());
             Index.Sort(new TupleComparer());
         }
 
-        List<Tuple<uint, int>> Index { get; }
-
         public string GetText(uint id)
         {
-            var index = Index.BinarySearch(Tuple.Create(id, 0), new TupleComparer());
+            int index = Index.BinarySearch(Tuple.Create(id, 0), new TupleComparer());
             if (index < 0) return null;
             return Entries[Index[index].Item2].Text;
+        }
+
+        private class TupleComparer : IComparer<Tuple<uint, int>>
+        {
+            public int Compare(Tuple<uint, int> x, Tuple<uint, int> y)
+            {
+                return x.Item1.CompareTo(y.Item1);
+            }
         }
     }
 }
