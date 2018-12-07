@@ -12,6 +12,7 @@
         ServerChangeWorld               = 0x00AD,
         ClientVendorPurchase            = 0x00BE,
         ClientCharacterLogout           = 0x00BF,
+        ClientLogout                    = 0x00C0,
         ServerCharacterCreate           = 0x00DC,
         ServerChannelUpdateLoot         = 0x00DD,
         Server00F1                      = 0x00F1,
@@ -60,6 +61,7 @@
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
         ServerMovementControl           = 0x0636,
+        ServerClientLogout              = 0x0594,
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
         ServerPathLog                   = 0x06BC,
