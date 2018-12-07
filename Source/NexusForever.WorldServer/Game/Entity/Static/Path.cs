@@ -2,9 +2,9 @@
 {
     public enum Path
     {
-        Soldier,
-        Settler,
-        Scientist,
-        Explorer,
+        Soldier = 0,
+        Settler = 1,
+        Scientist = 2,
+        Explorer = 3,
     }
 }
