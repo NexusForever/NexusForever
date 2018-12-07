@@ -30,6 +30,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
+        public Path Path { get; }
         public List<float> Bones { get; }
 
         public byte Level
@@ -62,6 +63,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Sex         = (Sex)model.Sex;
             Race        = (Race)model.Race;
             Class       = (Class)model.Class;
+            Path        = (Path)model.Path;
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
@@ -137,6 +139,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Race     = Race,
                 Class    = Class,
                 Sex      = Sex,
+                Path     = Path,
                 Bones    = Bones
             };
         }

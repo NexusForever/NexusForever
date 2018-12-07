@@ -12,6 +12,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public Race Race { get; set; }
         public Class Class { get; set; }
         public Sex Sex { get; set; }
+        public Path Path { get; set; }
         public ulong Unknown20 { get; set; }
         public List<uint> Unknown2C { get; } = new List<uint>();
         public string Unknown30 { get; set; }

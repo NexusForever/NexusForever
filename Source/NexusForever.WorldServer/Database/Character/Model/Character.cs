@@ -19,6 +19,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public string Name { get; set; }
         public byte Sex { get; set; }
         public byte Race { get; set; }
+        public byte Path { get; set; }
         public byte Class { get; set; }
         public byte Level { get; set; }
         public ushort FactionId { get; set; }

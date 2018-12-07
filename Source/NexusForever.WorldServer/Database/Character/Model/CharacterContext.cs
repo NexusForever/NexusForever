@@ -86,7 +86,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.WorldId)
-                    .HasColumnName("worldId")
+                    .HasColumnName("worldId");
+
+                entity.Property(e => e.Path)
+                    .HasColumnName("path")
                     .HasDefaultValueSql("'0'");
             });
 

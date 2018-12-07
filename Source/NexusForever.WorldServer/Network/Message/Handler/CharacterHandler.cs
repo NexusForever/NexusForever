@@ -142,7 +142,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     // TODO: Aurin engineer has this
                 }
-
+                Path path = (Path)characterCreate.Path;
+                
                 var character = new Character
                 {
                     AccountId = session.Account.Id,
@@ -151,8 +152,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Race      = (byte)creationEntry.RaceId,
                     Sex       = (byte)creationEntry.Sex,
                     Class     = (byte)creationEntry.ClassId,
-                    Level     = 1,
-                    FactionId = (ushort)creationEntry.FactionId
+                    FactionId = (ushort)creationEntry.FactionId,
+                    Path      = (byte)characterCreate.Path,
+                    Level     = 1
                 };
 
                 // merge seperate label and value lists into a single dictonary
