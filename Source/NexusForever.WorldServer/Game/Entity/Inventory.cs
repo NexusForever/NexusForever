@@ -451,10 +451,8 @@ namespace NexusForever.WorldServer.Game.Entity
                     item.Save(context);
 
             foreach (Item item in deletedItems)
-            {
                 item.Save(context);
-                deletedItems.Remove(item);
-            }
+            deletedItems.Clear();
         }
 
         public Item GetItemByGuid(ulong guid)
