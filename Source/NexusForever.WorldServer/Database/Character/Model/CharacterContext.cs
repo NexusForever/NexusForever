@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Database;
@@ -21,6 +21,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterBone> CharacterBone { get; set; }
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
         public virtual DbSet<Item> Item { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -72,6 +73,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.Sex)
                     .HasColumnName("sex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Title)
+                    .HasColumnName("title")
                     .HasDefaultValueSql("'0'");
             });
 
@@ -169,6 +174,26 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterCustomisation)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_customisation_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterTitle>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Title });
+
+                entity.ToTable("character_title");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Title)
+                    .HasColumnName("title")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.CharacterTitle)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_title_id__character_id");
             });
 
             modelBuilder.Entity<Item>(entity =>

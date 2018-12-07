@@ -45,6 +45,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
+        public TitleManager TitleManager { get; }
         public WorldSession Session { get; }
 
         private double timeToSave = SaveDuration;
@@ -64,6 +65,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            TitleManager = new TitleManager(this, model);
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -124,7 +126,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 Race     = Race,
                 Class    = Class,
                 Sex      = Sex,
-                Bones    = Bones
+                Bones    = Bones,
+                Title    = TitleManager.Active
             };
         }
 
@@ -185,6 +188,8 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             Session.EnqueueMessageEncrypted(playerCreate);
+
+            TitleManager.Update();
         }
 
         public override void OnRemoveFromMap()
@@ -287,6 +292,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             Inventory.Save(context);
             CurrencyManager.Save(context);
+            TitleManager.Save(context);
         }
     }
 }

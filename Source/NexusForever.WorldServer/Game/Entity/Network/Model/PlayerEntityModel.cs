@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public List<float> Bones { get; set; } = new List<float>();
         public byte Unknown48 { get; set; }
         public byte Unknown4C { get; set; }
-        public ushort Unknown50 { get; set; }
+        public ulong Title { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -45,7 +45,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
 
             writer.Write(Unknown48, 3);
             writer.Write(Unknown4C);
-            writer.Write(Unknown50, 14);
+            writer.Write(Title, 14);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterBone = new HashSet<CharacterBone>();
             CharacterCurrency = new HashSet<CharacterCurrency>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
+            CharacterTitle = new HashSet<CharacterTitle>();
             Item = new HashSet<Item>();
         }
 
@@ -22,11 +23,13 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Class { get; set; }
         public byte Level { get; set; }
         public DateTime CreateTime { get; set; }
+        public ulong Title { get; set; }
 
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }
         public ICollection<CharacterBone> CharacterBone { get; set; }
         public ICollection<CharacterCurrency> CharacterCurrency { get; set; }
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public ICollection<CharacterTitle> CharacterTitle { get; set; }
         public ICollection<Item> Item { get; set; }
     }
 }
