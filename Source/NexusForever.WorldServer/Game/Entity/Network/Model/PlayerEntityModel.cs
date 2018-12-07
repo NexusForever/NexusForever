@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public byte Unknown34 { get; set; }
         public List<ulong> Unknown3C { get; } = new List<ulong>();
         public List<float> Bones { get; set; } = new List<float>();
-        public byte Unknown48 { get; set; }
+        public byte PvPEnabled { get; set; } // 0 = off, 1+ = on
         public byte Unknown4C { get; set; }
         public ushort Unknown50 { get; set; }
 
