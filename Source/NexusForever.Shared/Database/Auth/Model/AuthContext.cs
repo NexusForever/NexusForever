@@ -1,6 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using NexusForever.Shared.Configuration;
 
 namespace NexusForever.Shared.Database.Auth.Model
 {
@@ -20,9 +19,9 @@ namespace NexusForever.Shared.Database.Auth.Model
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseMySql($"server={DatabaseManager.Config.Auth.Host};port={DatabaseManager.Config.Auth.Port};user={DatabaseManager.Config.Auth.Username};"
-                    + $"password={DatabaseManager.Config.Auth.Password};database={DatabaseManager.Config.Auth.Database}");
+                optionsBuilder.UseConfiguration(DatabaseManager.Config, DatabaseType.Auth);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

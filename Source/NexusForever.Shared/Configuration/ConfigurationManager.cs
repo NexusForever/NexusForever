@@ -14,4 +14,5 @@ namespace NexusForever.Shared.Configuration
             Config = SharedConfiguration.Configuration.Get<T>();
         }
     }
+
 }
