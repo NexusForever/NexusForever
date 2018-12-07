@@ -45,5 +45,10 @@ namespace NexusForever.WorldServer.Network
             ulong key = PacketCrypt.GetKeyFromTicket(sessionKey);
             encryption = new PacketCrypt(key);
         }
+
+        public void Disconnect()
+        {
+            OnDisconnect();
+        }
     }
 }
