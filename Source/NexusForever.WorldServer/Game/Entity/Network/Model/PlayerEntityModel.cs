@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
             writer.Write(Bones.Count, 6);
             Bones.ForEach(e => writer.Write(e));
 
-            writer.Write(Unknown48, 3);
+            writer.Write(PvPEnabled, 3);
             writer.Write(Unknown4C);
             writer.Write(Unknown50, 14);
         }
