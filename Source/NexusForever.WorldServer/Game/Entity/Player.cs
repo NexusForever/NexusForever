@@ -77,9 +77,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
-            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 4f, 4f));
+            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
             Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
-            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 0.5f, 0.5f));
+            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
 
             foreach (ItemVisual itemVisual in Inventory.GetItemVisuals())
                 itemVisuals.Add(itemVisual.Slot, itemVisual);
