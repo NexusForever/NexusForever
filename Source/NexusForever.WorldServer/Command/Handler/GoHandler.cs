@@ -25,6 +25,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     $"Teleporting to {zone.WorldId} {zone.Position0} {zone.Position1} {zone.Position2}");
                 context.Session.Player.TeleportTo((ushort) zone.WorldId, zone.Position0, zone.Position1,
                     zone.Position2);
+            }
         }
     }
 }
