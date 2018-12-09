@@ -33,7 +33,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public Class Class { get; }
         public List<float> Bones { get; }
 
-        private byte level;
         public byte Level
         {
             get => level;
@@ -44,46 +43,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
-        private float locationX;
-        public float LocationX 
-        {
-            get => locationX;
-            set
-            {
-                locationX = value;
-                saveMask |= PlayerSaveMask.Location;
-            }
-        }
-        private float locationY;
-        public float LocationY
-        {
-            get => locationY;
-            set
-            {
-                locationY = value;
-                saveMask |= PlayerSaveMask.Location;
-            }
-        }
-        private float locationZ;
-        public float LocationZ
-        {
-            get => locationZ;
-            set
-            {
-                locationZ = value;
-                saveMask |= PlayerSaveMask.Location;
-            }
-        }
-        private ushort worldId;
-        public ushort WorldId
-        {
-            get => worldId;
-            set
-            {
-                worldId = value;
-                saveMask |= PlayerSaveMask.Location;
-            }
-        }
+        private byte level;
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
@@ -106,10 +66,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
-            LocationX   = model.LocationX;
-            LocationY   = model.LocationY;
-            LocationZ   = model.LocationZ;
-            WorldId     = model.WorldId;
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -121,9 +77,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
-            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
+            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 4f, 4f));
             Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
-            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
+            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 0.5f, 0.5f));
 
             foreach (ItemVisual itemVisual in Inventory.GetItemVisuals())
                 itemVisuals.Add(itemVisual.Slot, itemVisual);
@@ -194,18 +150,14 @@ namespace NexusForever.WorldServer.Game.Entity
 
             IsLoading = false;
 
-            LocationX = vector.X;
-            LocationY = vector.Y;
-            LocationZ = vector.Z;
-            WorldId  = (ushort)map.Entry.Id;
+            Position = vector;
+            Map.Entry.Id = (ushort)map.Entry.Id;
         }
 
         public override void OnRelocate(Vector3 vector)
         {
             base.OnRelocate(vector);
-            LocationX = vector.X;
-            LocationY = vector.Y;
-            LocationZ = vector.Z;
+            saveMask |= PlayerSaveMask.Location;
         }
 
         private void SendPacketsAfterAddToMap()
@@ -345,16 +297,16 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 if ((saveMask & PlayerSaveMask.Location) != 0)
                 {
-                    model.LocationX = LocationX;
+                    model.LocationX = Position.X;
                     entity.Property(p => p.LocationX).IsModified = true;
 
-                    model.LocationY = LocationY;
+                    model.LocationY = Position.Y;
                     entity.Property(p => p.LocationY).IsModified = true;
 
-                    model.LocationZ = LocationZ;
+                    model.LocationZ = Position.Z;
                     entity.Property(p => p.LocationZ).IsModified = true;
 
-                    model.WorldId = WorldId;
+                    model.WorldId = (ushort)Map.Entry.Id;
                     entity.Property(p => p.WorldId).IsModified = true;
                 }
                 saveMask = PlayerSaveMask.None;
