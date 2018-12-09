@@ -188,8 +188,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
                 //TODO: handle starting locations per race
                 character.LocationX = -7683.809f;
-				character.LocationY = -942.5914f;
-				character.LocationZ = -666.6343f;
+                character.LocationY = -942.5914f;
+                character.LocationZ = -666.6343f;
                 character.WorldId = 870;
 
                 // create a temporary inventory to create starting gear
