@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public class Player : WorldEntity, ISaveCharacter
     {
-	    private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
@@ -52,7 +52,6 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 locationX = value;
                 saveMask |= PlayerSaveMask.Location;
-				log.Info($"set(){saveMask}");
             }
         }
         private float locationY;
@@ -75,8 +74,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask |= PlayerSaveMask.Location;
             }
         }
-		private ushort worldId;
-		public ushort WorldId
+        private ushort worldId;
+        public ushort WorldId
         {
             get => worldId;
             set
@@ -203,10 +202,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnRelocate(Vector3 vector)
         {
-		    base.OnRelocate(vector);
-			LocationX = vector.X;
-			LocationY = vector.Y;
-			LocationZ = vector.Z;
+            base.OnRelocate(vector);
+            LocationX = vector.X;
+            LocationY = vector.Y;
+            LocationZ = vector.Z;
         }
 
         private void SendPacketsAfterAddToMap()
