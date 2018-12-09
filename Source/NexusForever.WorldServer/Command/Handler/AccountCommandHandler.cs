@@ -5,6 +5,7 @@ using NexusForever.WorldServer.Command.Contexts;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
+
     [Name("Account Management")]
     public class AccountCommandHandler : CommandCategory
     {

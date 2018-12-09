@@ -69,8 +69,8 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                await (commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
-                      Task.CompletedTask);
+                await commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
+                      Task.CompletedTask;
             }
             else
                 await SendHelpAsync(context);

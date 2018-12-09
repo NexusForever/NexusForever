@@ -73,7 +73,7 @@ namespace NexusForever.WorldServer.Game.Entity
             };
         }
 
-        protected void SetProperty(Property property, float value, float baseValue = 0.0f)
+        public void SetProperty(Property property, float value, float baseValue = 0.0f)
         {
             if (Properties.ContainsKey(property))
                 Properties[property].Value = value;
@@ -81,7 +81,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Properties.Add(property, new PropertyValue(property, baseValue, value));
         }
 
-        protected float? GetPropertyValue(Property property)
+        public float? GetPropertyValue(Property property)
         {
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
         }
