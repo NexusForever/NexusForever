@@ -73,6 +73,22 @@ namespace NexusForever.WorldServer.Database.Character.Model
                 entity.Property(e => e.Sex)
                     .HasColumnName("sex")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationX)
+                    .HasColumnName("locationX")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationY)
+                    .HasColumnName("locationY")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationZ)
+                    .HasColumnName("locationZ")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
+                    .HasDefaultValueSql("'0'");
             });
 
             modelBuilder.Entity<CharacterAppearance>(entity =>

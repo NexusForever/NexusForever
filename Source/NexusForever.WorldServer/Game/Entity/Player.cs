@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -16,11 +16,13 @@ using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     public class Player : WorldEntity, ISaveCharacter
     {
+	    private static readonly Logger log = LogManager.GetCurrentClassLogger();
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
@@ -31,17 +33,58 @@ namespace NexusForever.WorldServer.Game.Entity
         public Class Class { get; }
         public List<float> Bones { get; }
 
+        private byte level;
         public byte Level
         {
             get => level;
             set
             {
                 level = value;
-                saveMask &= PlayerSaveMask.Level;
+                saveMask |= PlayerSaveMask.Level;
             }
         }
 
-        private byte level;
+        private float locationX;
+        public float LocationX 
+        {
+            get => locationX;
+            set
+            {
+                locationX = value;
+                saveMask |= PlayerSaveMask.Location;
+				log.Info($"set(){saveMask}");
+            }
+        }
+        private float locationY;
+        public float LocationY
+        {
+            get => locationY;
+            set
+            {
+                locationY = value;
+                saveMask |= PlayerSaveMask.Location;
+            }
+        }
+        private float locationZ;
+        public float LocationZ
+        {
+            get => locationZ;
+            set
+            {
+                locationZ = value;
+                saveMask |= PlayerSaveMask.Location;
+            }
+        }
+		private ushort worldId;
+		public ushort WorldId
+        {
+            get => worldId;
+            set
+            {
+                worldId = value;
+                saveMask |= PlayerSaveMask.Location;
+            }
+        }
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
@@ -64,9 +107,15 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            LocationX   = model.LocationX;
+            LocationY   = model.LocationY;
+            LocationZ   = model.LocationZ;
+            WorldId     = model.WorldId;
 
             Inventory   = new Inventory(this, model);
             Session     = session;
+
+            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)Level));
 
             // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
@@ -145,6 +194,19 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
             IsLoading = false;
+
+            LocationX = vector.X;
+            LocationY = vector.Y;
+            LocationZ = vector.Z;
+            WorldId  = (ushort)map.Entry.Id;
+        }
+
+        public override void OnRelocate(Vector3 vector)
+        {
+		    base.OnRelocate(vector);
+			LocationX = vector.X;
+			LocationY = vector.Y;
+			LocationZ = vector.Z;
         }
 
         private void SendPacketsAfterAddToMap()
@@ -282,9 +344,22 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.Level).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Location) != 0)
+                {
+                    model.LocationX = LocationX;
+                    entity.Property(p => p.LocationX).IsModified = true;
+
+                    model.LocationY = LocationY;
+                    entity.Property(p => p.LocationY).IsModified = true;
+
+                    model.LocationZ = LocationZ;
+                    entity.Property(p => p.LocationZ).IsModified = true;
+
+                    model.WorldId = WorldId;
+                    entity.Property(p => p.WorldId).IsModified = true;
+                }
                 saveMask = PlayerSaveMask.None;
             }
-
             Inventory.Save(context);
             CurrencyManager.Save(context);
         }
