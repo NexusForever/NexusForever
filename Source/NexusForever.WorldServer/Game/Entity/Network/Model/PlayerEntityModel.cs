@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
     public class PlayerEntityModel : IEntityModel
     {
         public ulong Id { get; set; }
-        public ushort Unknown8 { get; set; }
+        public ushort RealmId { get; set; }
         public string Name { get; set; }
         public Race Race { get; set; }
         public Class Class { get; set; }
@@ -18,14 +18,14 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public byte Unknown34 { get; set; }
         public List<ulong> Unknown3C { get; } = new List<ulong>();
         public List<float> Bones { get; set; } = new List<float>();
-        public byte PvPEnabled { get; set; } // 0 = off, 1+ = on
+        public PvPFlag PvPFlag { get; set; }
         public byte Unknown4C { get; set; }
         public ushort Unknown50 { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Id);
-            writer.Write(Unknown8, 14);
+            writer.Write(RealmId, 14);
             writer.WriteStringWide(Name);
             writer.Write(Race, 5);
             writer.Write(Class, 5);
@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
             writer.Write(Bones.Count, 6);
             Bones.ForEach(e => writer.Write(e));
 
-            writer.Write(PvPEnabled, 3);
+            writer.Write(PvPFlag, 3);
             writer.Write(Unknown4C);
             writer.Write(Unknown50, 14);
         }

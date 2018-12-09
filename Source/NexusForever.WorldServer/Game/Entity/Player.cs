@@ -119,12 +119,13 @@ namespace NexusForever.WorldServer.Game.Entity
             return new PlayerEntityModel
             {
                 Id       = CharacterId,
-                Unknown8 = 358,
+                RealmId  = 358,
                 Name     = Name,
                 Race     = Race,
                 Class    = Class,
                 Sex      = Sex,
-                Bones    = Bones
+                Bones    = Bones,
+                PvPFlag  = PvPFlag.Disabled
             };
         }
 
