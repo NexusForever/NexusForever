@@ -186,6 +186,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Bone = characterCreate.Bones[i]
                     });
                 }
+                //TODO: handle starting locations per race
+                character.LocationX = -7683.809f;
+				character.LocationY = -942.5914f;
+				character.LocationZ = -666.6343f;
+                character.WorldId = 870;
 
                 // create a temporary inventory to create starting gear
                 var inventory = new Inventory(character.Id, creationEntry);
@@ -201,7 +206,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     session.EnqueueMessageEncrypted(new ServerCharacterCreate
                     {
                         CharacterId = character.Id,
-                        WorldId     = 870,
+                        WorldId     = character.WorldId,
                         Result      = 3
                     });
                 }));
@@ -253,11 +258,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }
 
             session.Player = new Player(session, character);
+            Vector3 vector = new Vector3(character.LocationX, character.LocationY, character.LocationZ);
 
-            // TODO: make this not so... static
-            ushort worldId = 870;
-            Vector3 vector = new Vector3(-7683.809f, -942.5914f, -666.6343f);
-            MapManager.AddToMap(session.Player, worldId, vector);
+            MapManager.AddToMap(session.Player, character.WorldId, vector);
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterLogout)]
