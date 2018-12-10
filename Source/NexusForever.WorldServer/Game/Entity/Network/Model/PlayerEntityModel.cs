@@ -15,8 +15,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public ulong Unknown20 { get; set; }
         public List<uint> Unknown2C { get; } = new List<uint>();
         public string GuildName { get; set; }
-        public byte Unknown34 { get; set; }
-        public List<ulong> Unknown3C { get; } = new List<ulong>();
+        public byte Unknown34 { get; set; } // Probably guild rank, given sniffed information
+        public List<ulong> Unknown3C { get; } = new List<ulong>(); // Only appears in sniffs when user has a guild, assume related to guild as well. Guild members?
         public List<float> Bones { get; set; } = new List<float>();
         public PvPFlag PvPFlag { get; set; }
         public byte Unknown4C { get; set; }
