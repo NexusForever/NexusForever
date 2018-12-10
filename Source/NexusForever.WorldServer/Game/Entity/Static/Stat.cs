@@ -9,6 +9,7 @@
         /// Kinetic Energy (Warrior), Psi Points (Esper), Volatile Energy (Engineer), Medic Cores (Medic)
         /// </summary>
         Resource1           = 3,    // Must be float. How do we enforce?
+        Resource2           = 4,    // (Assumed Stat) Must be float. How do we enforce?
         /// <summary>
         /// Suit Power (Stalker)
         /// </summary>
@@ -17,6 +18,8 @@
         /// Spell Power (Spellslinger),
         /// </summary>
         Resource4           = 6,    // Must be float. How do we enforce?
+        Resource5           = 7,    // (Assumed Stat) Must be float. How do we enforce?
+        Resource6           = 8,    // (Assumed Stat) Must be float. How do we enforce?
         Dash                = 9,    // Must be float. How do we enforce?
         Level               = 10,
         MentorLevel         = 11,
