@@ -4,7 +4,10 @@
     {
         Health              = 0,
         Focus               = 1,    // Must be float. How do we enforce?
-        Endurance           = 2,    // Must be float. How do we enforce?
+        /// <summary>
+        /// Endurance
+        /// </summary>
+        Resource0           = 2,    // Must be float. How do we enforce?
         /// <summary>
         /// Kinetic Energy (Warrior), Psi Points (Esper), Volatile Energy (Engineer), Medic Cores (Medic)
         /// </summary>
