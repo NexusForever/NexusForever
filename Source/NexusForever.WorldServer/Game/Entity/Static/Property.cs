@@ -11,6 +11,9 @@
         RatingFocusRecovery                         = 6,
         BaseHealth                                  = 7,
         HealthRegenMultiplier                       = 8,
+        /// <summary>
+        /// Endurance
+        /// </summary>
         ResourceMax0                                = 9,
         /// <summary>
         /// Kinetic Energy (Warrior), Psi Points (Esper), Volatile Energy (Engineer), Medic Cores (Medic)
