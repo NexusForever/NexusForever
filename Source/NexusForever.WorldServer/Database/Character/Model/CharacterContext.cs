@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using NexusForever.Shared.Database;
 
 namespace NexusForever.WorldServer.Database.Character.Model
 {
@@ -28,10 +29,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySql("server=localhost;port=3306;user=nexusforever;password=nexusforever;database=nexus_forever_character");
-            }
+                optionsBuilder.UseMySql($"server={DatabaseManager.Config.Character.Host};port={DatabaseManager.Config.Character.Port};user={DatabaseManager.Config.Character.Username};"
+                    + $"password={DatabaseManager.Config.Character.Password};database={DatabaseManager.Config.Character.Database}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
