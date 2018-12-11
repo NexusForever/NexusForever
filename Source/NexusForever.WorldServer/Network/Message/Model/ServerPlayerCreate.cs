@@ -24,7 +24,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
 
             public ushort FactionId { get; set; }
-            public List<FactionReputation> FactionReputations { get; set; } = new List<FactionReputation>();
+            public List<FactionReputation> FactionReputations { get; } = new List<FactionReputation>();
 
             public void Write(GamePacketWriter writer)
             {
