@@ -21,6 +21,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterBone> CharacterBone { get; set; }
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual DbSet<CharacterReputation> CharacterReputation { get; set; }
         public virtual DbSet<Item> Item { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -169,6 +170,30 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterCustomisation)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_customisation_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterReputation>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.FactionId });
+
+                entity.ToTable("character_reputation");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.FactionId)
+                    .HasColumnName("factionId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.CharacterReputation)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK_character_faction_id__character_id");
             });
 
             modelBuilder.Entity<Item>(entity =>

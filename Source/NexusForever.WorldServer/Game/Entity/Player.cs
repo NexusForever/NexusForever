@@ -45,6 +45,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
+        public ReputationManager ReputationManager { get; }
         public WorldSession Session { get; }
 
         private double timeToSave = SaveDuration;
@@ -64,6 +65,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            ReputationManager = new ReputationManager(this, model);
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -161,7 +163,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = 166,
+                    FactionId = 166
                 }
             };
 
@@ -170,6 +172,20 @@ namespace NexusForever.WorldServer.Game.Entity
                 Currency currency = CurrencyManager.GetCurrency(i);
                 if (currency != null)
                     playerCreate.Money[i - 1] = currency.Amount;
+            }
+
+            uint[] reputationArray = new uint[]
+            {
+                (uint)Faction.Dominion, 533
+            };
+            for (uint i = 0; i < reputationArray.Length; i++)
+            {
+                Reputation reputation = ReputationManager.GetReputation(reputationArray[i]);
+                playerCreate.FactionData.FactionReputations.Add(new ServerPlayerCreate.Faction.FactionReputation
+                {
+                    FactionId = (ushort)reputationArray[i],
+                    Value = reputation.Value > 0 ? (float)reputation.Value : 1000f
+                });
             }
 
             foreach (Bag bag in Inventory)
@@ -287,6 +303,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             Inventory.Save(context);
             CurrencyManager.Save(context);
+            ReputationManager.Save(context);
         }
     }
 }
