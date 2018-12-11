@@ -116,6 +116,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public MailManager MailManager { get; }
         public ZoneMapManager ZoneMapManager { get; }
         public QuestManager QuestManager { get; }
+        public ReputationManager ReputationManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -160,6 +161,7 @@ namespace NexusForever.WorldServer.Game.Entity
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
+            ReputationManager       = new ReputationManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -193,7 +195,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SetStat(Stat.Sheathed, 1u);
 
             // temp
-            SetStat(Stat.Dash, 200F);
+            SetStat(Stat.Dash, 200f);
             // sprint
             SetStat(Stat.Resource0, 500f);
             SetStat(Stat.Shield, 450u);
@@ -375,6 +377,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 ActiveCostumeIndex = CostumeIndex,
                 InputKeySet = (uint)InputKeySet
             };
+            playerCreate.FactionData.FactionReputations = ReputationManager.LoadReputations();
 
             foreach (Currency currency in CurrencyManager)
                 playerCreate.Money[(byte)currency.Id - 1] = currency.Amount;
@@ -712,6 +715,7 @@ namespace NexusForever.WorldServer.Game.Entity
             MailManager.Save(context);
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
+            ReputationManager.Save(context);
         }
 
         /// <summary>

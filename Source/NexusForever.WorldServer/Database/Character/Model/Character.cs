@@ -26,6 +26,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterTitle = new HashSet<CharacterTitle>();
             CharacterZonemapHexgroup = new HashSet<CharacterZonemapHexgroup>();
             Item = new HashSet<Item>();
+            CharacterReputation = new HashSet<CharacterReputation>();
         }
 
         public ulong Id { get; set; }
@@ -71,5 +72,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual ICollection<CharacterTitle> CharacterTitle { get; set; }
         public virtual ICollection<CharacterZonemapHexgroup> CharacterZonemapHexgroup { get; set; }
         public virtual ICollection<Item> Item { get; set; }
+        public ICollection<CharacterReputation> CharacterReputation { get; set; }
     }
 }
