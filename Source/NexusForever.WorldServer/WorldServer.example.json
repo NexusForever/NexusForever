@@ -25,5 +25,6 @@
             "Password": "nexusforever",
             "Database": "nexus_forever_world"
         }
-    }
+    },
+    "RealmId": 1
 }

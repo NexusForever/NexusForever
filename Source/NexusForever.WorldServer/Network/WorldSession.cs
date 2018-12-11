@@ -25,7 +25,7 @@ namespace NexusForever.WorldServer.Network
             EnqueueMessageEncrypted(new ServerHello
             {
                 AuthVersion = 16042,
-                Unknown4    = 358,
+                RealmId     = WorldServer.RealmId,
                 Unknown8    = 21,
                 AuthMessage = 0x97998A0,
                 Unknown1C   = 11

@@ -205,19 +205,33 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<HousingBuildEntry> HousingBuild { get; private set; }
         public static GameTable<HousingContributionInfoEntry> HousingContributionInfo { get; private set; }
         public static GameTable<HousingContributionTypeEntry> HousingContributionType { get; private set; }
+
+        [GameData]
         public static GameTable<HousingDecorInfoEntry> HousingDecorInfo { get; private set; }
+
         public static GameTable<HousingDecorLimitCategoryEntry> HousingDecorLimitCategory { get; private set; }
         public static GameTable<HousingDecorTypeEntry> HousingDecorType { get; private set; }
         public static GameTable<HousingMannequinPoseEntry> HousingMannequinPose { get; private set; }
         public static GameTable<HousingMapInfoEntry> HousingMapInfo { get; private set; }
         public static GameTable<HousingNeighborhoodInfoEntry> HousingNeighborhoodInfo { get; private set; }
+
+        [GameData]
         public static GameTable<HousingPlotInfoEntry> HousingPlotInfo { get; private set; }
+
         public static GameTable<HousingPlotTypeEntry> HousingPlotType { get; private set; }
+
+        [GameData]
         public static GameTable<HousingPlugItemEntry> HousingPlugItem { get; private set; }
+
+        [GameData]
         public static GameTable<HousingPropertyInfoEntry> HousingPropertyInfo { get; private set; }
+
         public static GameTable<HousingResidenceInfoEntry> HousingResidenceInfo { get; private set; }
         public static GameTable<HousingResourceEntry> HousingResource { get; private set; }
+
+        [GameData]
         public static GameTable<HousingWallpaperInfoEntry> HousingWallpaperInfo { get; private set; }
+
         public static GameTable<HousingWarplotBossTokenEntry> HousingWarplotBossToken { get; private set; }
         public static GameTable<HousingWarplotPlugInfoEntry> HousingWarplotPlugInfo { get; private set; }
         public static GameTable<InputActionEntry> InputAction { get; private set; }

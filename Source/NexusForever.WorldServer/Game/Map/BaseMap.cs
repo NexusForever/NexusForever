@@ -4,15 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using NexusForever.Shared;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public class BaseMap : IUpdate
+    public class BaseMap : IMap
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
@@ -24,9 +24,14 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public const int GridBounds = 1;
 
-        public WorldEntry Entry { get; }
+        // arbitrary
+        public virtual float VisionRange { get; protected set; } = 32.0f;
+
+        public WorldEntry Entry { get; private set; }
+        public uint InstanceId { get; private set; }
 
         private readonly MapGrid[] grids = new MapGrid[GridCount * GridCount];
+        private float viewDistance;
 
         private readonly ConcurrentQueue<GridAction> pendingAdd = new ConcurrentQueue<GridAction>();
         private readonly ConcurrentQueue<GridEntity> pendingRemove = new ConcurrentQueue<GridEntity>();
@@ -35,13 +40,14 @@ namespace NexusForever.WorldServer.Game.Map
         private readonly QueuedCounter entityCounter = new QueuedCounter();
 
         private readonly Dictionary<uint, GridEntity> entities = new Dictionary<uint, GridEntity>();
-
-        public BaseMap(WorldEntry entry)
+        
+        public virtual void Initialise(MapInfo info, Player player)
         {
-            Entry = entry;
+            Entry      = info.Entry;
+            InstanceId = info.InstanceId;
             CacheEntitySpawns();
         }
-
+        
         private void CacheEntitySpawns()
         {
             foreach (var entity in WorldDatabase.GetEntities((ushort)Entry.Id))
@@ -131,6 +137,13 @@ namespace NexusForever.WorldServer.Game.Map
             action.Entity.OnAddToMap(this, guid, action.Position);
 
             log.Trace($"Added entity {action.Entity.Guid} to map {Entry.Id}.");
+
+            if (action.Entity is Player player)
+                OnAddToMap(player);
+        }
+
+        protected virtual void OnAddToMap(Player player)
+        {
         }
 
         private void RemoveEntity(GridEntity entity)
@@ -169,6 +182,13 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void Search(Vector3 vector, float radius, ISearchCheck check, out List<GridEntity> intersectedEntities)
         {
+            // negative radius is unlimited distance
+            if (radius < 0)
+            {
+                intersectedEntities = entities.Values.ToList();
+                return;
+            }
+
             intersectedEntities = new List<GridEntity>();
             for (float z = vector.Z - radius; z <= vector.Z + radius; z += MapCell.Size)
             {
@@ -180,7 +200,7 @@ namespace NexusForever.WorldServer.Game.Map
             }
         }
 
-        public void Update(double lastTick)
+        public virtual void Update(double lastTick)
         {
             while (pendingAdd.TryDequeue(out GridAction action))
                 AddEntity(action);
@@ -204,6 +224,18 @@ namespace NexusForever.WorldServer.Game.Map
             if (!entities.TryGetValue(guid, out GridEntity entity))
                 return null;
             return (T)entity;
+        }
+
+        /// <summary>
+        /// Enqueue broadcast of <see cref="IWritable"/> to all <see cref="Player"/>'s on the map.
+        /// </summary>
+        public void EnqueueToAll(IWritable message)
+        {
+            foreach (GridEntity entity in entities.Values)
+            {
+                Player player = entity as Player;
+                player?.Session.EnqueueMessageEncrypted(message);
+            }
         }
     }
 }

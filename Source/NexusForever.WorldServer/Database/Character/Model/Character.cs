@@ -23,6 +23,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Level { get; set; }
         public DateTime CreateTime { get; set; }
 
+        public Residence Residence { get; set; }
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }
         public ICollection<CharacterBone> CharacterBone { get; set; }
         public ICollection<CharacterCurrency> CharacterCurrency { get; set; }
