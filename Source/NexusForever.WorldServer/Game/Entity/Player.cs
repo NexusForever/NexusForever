@@ -174,6 +174,9 @@ namespace NexusForever.WorldServer.Game.Entity
                     playerCreate.Money[i - 1] = currency.Amount;
             }
 
+            // TODO: Implement adding base factions
+            // TODO: Implement faction list check & apply correct factions
+            // TODO: Grow Faction Enum
             uint[] reputationArray = new uint[]
             {
                 (uint)Faction.Dominion, 533
@@ -184,7 +187,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 playerCreate.FactionData.FactionReputations.Add(new ServerPlayerCreate.Faction.FactionReputation
                 {
                     FactionId = (ushort)reputationArray[i],
-                    Value = reputation.Value > 0 ? (float)reputation.Value : 1000f
+                    Value = reputation.Value
                 });
             }
 
