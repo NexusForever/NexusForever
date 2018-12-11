@@ -5,6 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -12,6 +13,8 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public uint CreatureId { get; }
         public VendorInfo VendorInfo { get; }
+
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         public NonPlayer(Database.World.Model.Entity entity)
             : base(EntityType.NonPlayer)
