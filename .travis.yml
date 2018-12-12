@@ -1,2 +1,6 @@
 language: csharp
 solution: Source/NexusForever.sln
+services:
+  - mysql
+before_script:
+  - ./Database/scripts/bootstrap.sh
