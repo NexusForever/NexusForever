@@ -26,9 +26,9 @@
         Dash                = 9,    // Must be float. How do we enforce?
         Level               = 10,
         MentorLevel         = 11,
-        State               = 12, // 0 = Standing (Combat Pose), 1 = Sitting, 2 = Laying Down, 3 = Standing (Idle)
+        StandState          = 12, // 0 = Standing (Combat Pose), 1 = Sitting, 2 = Laying Down, 3 = Standing (Idle) More info: https://github.com/Hammster/wildstar-api-docs/blob/36be999b77a9dcdc4b27e95d217d54e419fdcbf3/Classes/Unit.md#getstandstate
         Sheathed            = 15, // 0 = Unsheathed Weapons, 1 = Sheathed Weapons
         Shield              = 20,
-        LowHpAndGhostEffect = 32, // Need confirmation what screen effects are happening
+        // Stat(32) Duplicates Health, Stat(33) Duplicates Focus, and so on. Seems to loop at this point, suggesting a maximum of 32 "Stats".
     }
 }
