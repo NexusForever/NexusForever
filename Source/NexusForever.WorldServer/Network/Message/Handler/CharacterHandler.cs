@@ -275,5 +275,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 // cancel
             }
         }
+
+        [MessageHandler(GameMessageOpcode.ClientLogout)]
+        public static void HandleLogout(WorldSession session, ClientLogout logout)
+        {
+            session.EnqueueMessageEncrypted(new ServerClientLogout
+            {
+                ClientRequested = true,
+                Reason = LogoutReason.None
+            });
+        }
     }
 }
