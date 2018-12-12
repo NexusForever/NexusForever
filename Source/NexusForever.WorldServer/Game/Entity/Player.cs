@@ -16,13 +16,11 @@ using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     public class Player : WorldEntity, ISaveCharacter
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
@@ -149,9 +147,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
             IsLoading = false;
-
-            Position = vector;
-            Map.Entry.Id = (ushort)map.Entry.Id;
         }
 
         public override void OnRelocate(Vector3 vector)
