@@ -76,6 +76,7 @@ namespace NexusForever.WorldServer.Game.Housing
             type     = (DecorType)model.DecorType;
             position = new Vector3(model.X, model.Y, model.Z);
             rotation = new Quaternion(model.Qx, model.Qy, model.Qz, model.Qw);
+            scale    = model.Scale;
 
             saveMask = DecorSaveMask.None;
         }
