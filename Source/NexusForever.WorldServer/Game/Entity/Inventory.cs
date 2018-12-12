@@ -24,6 +24,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly ulong characterId;
         private readonly Player player;
         private readonly Dictionary<InventoryLocation, Bag> bags = new Dictionary<InventoryLocation, Bag>();
+        private readonly List<Item> deletedItems = new List<Item>();
 
         /// <summary>
         /// Create a new <see cref="Inventory"/> from <see cref="Player"/> database model.
@@ -282,6 +283,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             srcBag.RemoveItem(srcItem);
             srcItem.EnqueueDelete();
+            deletedItems.Add(srcItem);
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
@@ -447,6 +449,10 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (Bag bag in bags.Values)
                 foreach (Item item in bag)
                     item.Save(context);
+
+            foreach (Item item in deletedItems)
+                item.Save(context);
+            deletedItems.Clear();
         }
 
         public Item GetItemByGuid(ulong guid)
