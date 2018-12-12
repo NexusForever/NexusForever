@@ -3,31 +3,30 @@
 # Find dir script is running in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-# Clean existing DB
-mysql -u root -e "DROP DATABASE nexus_forever_auth;"
-mysql -u root -e "DROP DATABASE nexus_forever_character;"
-mysql -u root -e "DROP DATABASE nexus_forever_world;"
-mysql -u root -e "DROP USER nexusforever;"
+echo "Cleaning existing DB"
+mysql -v -u root -e "DROP DATABASE nexus_forever_auth;"
+mysql -v -u root -e "DROP DATABASE nexus_forever_character;"
+mysql -v -u root -e "DROP DATABASE nexus_forever_world;"
+mysql -v -u root -e "DROP USER nexusforever;"
 
+echo "Creating databases"
+mysql -v -u root -e "CREATE DATABASE nexus_forever_auth;"
+mysql -v -u root -e "CREATE DATABASE nexus_forever_character;"
+mysql -v -u root -e "CREATE DATABASE nexus_forever_world;"
 
-# Create Databases
-mysql -u root -e "CREATE DATABASE nexus_forever_auth;"
-mysql -u root -e "CREATE DATABASE nexus_forever_character;"
-mysql -u root -e "CREATE DATABASE nexus_forever_world;"
+echo "Creating user for tests to use"
+mysql -v -u root -e "CREATE USER nexusforever IDENTIFIED BY 'nexusforever';"
+mysql -v -u root -e "GRANT ALL ON *.* to nexusforever;"
 
-# Create user for servers to use
-mysql -u root -e "CREATE USER nexusforever IDENTIFIED BY 'nexusforever';"
-mysql -u root -e "GRANT ALL ON *.* to nexusforever;"
+echo "Running base scripts"
+mysql -v -u root -D nexus_forever_auth < $DIR/../Base/Auth.sql
+mysql -v -u root -D nexus_forever_character < $DIR/../Base/Character.sql
+mysql -v -u root -D nexus_forever_world < $DIR/../Base/World.sql
 
-# Initial DB setup
-mysql -u root -D nexus_forever_auth < $DIR/../Base/Auth.sql
-mysql -u root -D nexus_forever_character < $DIR/../Base/Character.sql
-mysql -u root -D nexus_forever_world < $DIR/../Base/World.sql
-
-# Run migrations
+echo "Running update scripts"
 find $DIR/../Updates/Auth/ -name '*.sql' -exec sh -c "mysql -u root -D nexus_forever_auth < {}" \;
 find $DIR/../Updates/Character/ -name '*.sql' -exec sh -c "mysql -u root -D nexus_forever_character < {}" \;
 find $DIR/../Updates/World/ -name '*.sql' -exec sh -c "mysql -u root -D nexus_forever_world < {}" \;
 
-# Insert server info into Auth DB
-mysql -u root -D nexus_forever_auth -e "INSERT INTO server (name, host, port, type) VALUES ('NexusForever', '127.0.0.1', 24000, 0);"
+echo "Inserting server information"
+mysql -v -u root -D nexus_forever_auth -e "INSERT INTO server (name, host, port, type) VALUES ('NexusForever', '127.0.0.1', 24000, 0);"
