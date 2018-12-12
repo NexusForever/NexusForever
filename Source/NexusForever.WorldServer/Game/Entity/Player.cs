@@ -240,12 +240,11 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void RemoveVisible(GridEntity entity)
         {
             base.RemoveVisible(entity);
-            /*Session.EnqueueMessageEncrypted(new ServerEntityDestory
+            Session.EnqueueMessageEncrypted(new ServerEntityDestory
             {
-                Guid = entity.Guid,
-                Unknown0 = true,
-                Unknown1 = 2
-            });*/
+                Guid     = entity.Guid,
+                Unknown0 = true
+            });
         }
 
         /// <summary>

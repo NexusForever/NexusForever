@@ -47,6 +47,7 @@
         ClientPacked                    = 0x025C, // the same as ClientEncrypted except the contents isn't encrypted?
         ServerEntityCreate              = 0x0262,
         ClientCharacterDelete           = 0x0352,
+        ServerEntityDestory             = 0x0355,
         ClientEmote                     = 0x037E,
         Server03AA                      = 0x03AA, // friendship account related
         Server03BE                      = 0x03BE, // friendship related
@@ -73,7 +74,6 @@
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
         Server086F                      = 0x086F,
-        ServerEntityDestory             = 0x088C, // 0x8A5??
         Server08B3                      = 0x08B3,
         ServerVendor                    = 0x090B,
         ServerPlayerCurrencyChanged     = 0x0919,
