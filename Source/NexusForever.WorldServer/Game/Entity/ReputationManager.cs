@@ -73,7 +73,7 @@ namespace NexusForever.WorldServer.Game.Entity
         //        throw new ArgumentNullException();
 
         //    currency.Amount = amount;
-            
+
         //    player.Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
         //    {
         //        CurrencyId = (byte)currency.Id,
@@ -82,35 +82,36 @@ namespace NexusForever.WorldServer.Game.Entity
         //}
 
         /// <summary>
-        /// Create a new <see cref="CharacterCurrency"/>.
+        /// Create a new <see cref="CharacterReputation"/>.
         /// </summary>
-        //public void CurrencyAddAmount(byte currencyId, ulong amount)
-        //{
-        //    CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
-        //    if (currencyEntry == null)
-        //        throw new ArgumentNullException();
+        public void ReputationAddValue(uint reputationId, ulong value)
+        {
+            Faction2Entry reputationEntry = GameTableManager.Faction2.GetEntry(reputationId);
+            if (reputationEntry == null)
+                throw new ArgumentNullException();
 
-        //    CurrencyAddAmount(currencyEntry, amount);
-        //}
+            ReputationAddValue(reputationEntry, value);
+        }
 
         /// <summary>
-        /// Create a new <see cref="CharacterCurrency"/>.
+        /// Create a new <see cref="CharacterReputation"/>.
         /// </summary>
-        //public void CurrencyAddAmount(CurrencyTypeEntry currencyEntry, ulong amount)
-        //{
-        //    if (currencyEntry == null)
-        //        throw new ArgumentNullException();
+        public void ReputationAddValue(Faction2Entry reputationEntry, ulong value)
+        {
+            if (reputationEntry == null)
+                throw new ArgumentNullException();
 
-        //    if (!currencies.TryGetValue((byte)currencyEntry.Id, out Currency currency))
-        //        CurrencyCreate(currencyEntry, (ulong)amount);
-        //    else
-        //    {
-        //        amount += currency.Amount;
-        //        if (currency.Entry.CapAmount > 0)
-        //            amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
-        //        CurrencyAmountUpdate(currency, amount);
-        //    }
-        //}
+            if (!reputations.TryGetValue((byte)reputationEntry.Id, out Reputation reputation))
+                ReputationCreate(reputationEntry, (ulong)value);
+            else
+            {
+                value += reputation.Value;
+                // TODO: Update this to check for capped faction
+                //if (reputation.Entry.CapAmount > 0)
+                //    amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
+                //CurrencyAmountUpdate(currency, amount);
+            }
+        }
 
         ///// <summary>
         ///// Create a new <see cref="CharacterCurrency"/>.
