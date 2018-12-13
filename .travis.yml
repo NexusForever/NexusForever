@@ -1,4 +1,6 @@
 language: csharp
+mono: none
+dotnet: 2.1.500
 solution: Source/NexusForever.sln
 services:
   - mysql
