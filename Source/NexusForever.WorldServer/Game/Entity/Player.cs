@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
             set
             {
                 level = value;
-                saveMask &= PlayerSaveMask.Level;
+                saveMask |= PlayerSaveMask.Level;
             }
         }
 
@@ -68,6 +68,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             Inventory   = new Inventory(this, model);
             Session     = session;
+
+            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)Level));
 
             // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
@@ -155,6 +157,12 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
             IsLoading = false;
+        }
+
+        public override void OnRelocate(Vector3 vector)
+        {
+            base.OnRelocate(vector);
+            saveMask |= PlayerSaveMask.Location;
         }
 
         private void SendPacketsAfterAddToMap()
@@ -342,9 +350,22 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.Level).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Location) != 0)
+                {
+                    model.LocationX = Position.X;
+                    entity.Property(p => p.LocationX).IsModified = true;
+
+                    model.LocationY = Position.Y;
+                    entity.Property(p => p.LocationY).IsModified = true;
+
+                    model.LocationZ = Position.Z;
+                    entity.Property(p => p.LocationZ).IsModified = true;
+
+                    model.WorldId = (ushort)Map.Entry.Id;
+                    entity.Property(p => p.WorldId).IsModified = true;
+                }
                 saveMask = PlayerSaveMask.None;
             }
-
             Inventory.Save(context);
             CurrencyManager.Save(context);
         }
