@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
@@ -50,8 +51,8 @@ namespace NexusForever.WorldServer.Game.Entity
         private double timeToSave = SaveDuration;
         private PlayerSaveMask saveMask;
 
+        private LogoutManager logoutManager;
         private PendingFarTeleport pendingFarTeleport;
-
 
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
@@ -99,6 +100,15 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void Update(double lastTick)
         {
+            if (logoutManager != null)
+            {
+                // don't process world updates while logout is finalising
+                if (logoutManager.ReadyToLogout)
+                    return;
+
+                logoutManager.Update(lastTick);
+            }
+
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
@@ -245,6 +255,57 @@ namespace NexusForever.WorldServer.Game.Entity
                 Guid     = entity.Guid,
                 Unknown0 = true
             });
+        }
+
+        /// <summary>
+        /// Start delayed logout with optional supplied time and <see cref="LogoutReason"/>.
+        /// </summary>
+        public void LogoutStart(double timeToLogout = 30d, LogoutReason reason = LogoutReason.None, bool requested = true)
+        {
+            if (logoutManager != null)
+                return;
+
+            logoutManager = new LogoutManager(timeToLogout, reason, requested);
+
+            Session.EnqueueMessageEncrypted(new ServerCharacterLogoutStart
+            {
+                TimeTillLogout = (uint)timeToLogout * 1000
+            });
+        }
+
+        /// <summary>
+        /// Cancel the current logout, this will fail if the timer has already elapsed.
+        /// </summary>
+        public void LogoutCancel()
+        {
+            // can't cancel logout if timer has already elapsed
+            if (logoutManager?.ReadyToLogout ?? false)
+                return;
+
+            logoutManager = null;
+        }
+
+        /// <summary>
+        /// Finishes the current logout, saving and cleaning up the <see cref="Player"/> before redirect to the character screen.
+        /// </summary>
+        public void LogoutFinish()
+        {
+            if (logoutManager == null)
+                throw new InvalidPacketValueException();
+
+            Session.EnqueueEvent(new TaskEvent(CharacterDatabase.SavePlayer(this),
+                () =>
+            {
+                RemoveFromMap();
+
+                Session.EnqueueMessageEncrypted(new ServerClientLogout
+                {
+                    Requested = logoutManager.Requested,
+                    Reason    = logoutManager.Reason
+                });
+
+                Session.Player = null;
+            }));
         }
 
         /// <summary>

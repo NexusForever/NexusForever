@@ -7,12 +7,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerClientLogout, MessageDirection.Server)]
     public class ServerClientLogout : IWritable
     {
-        public bool ClientRequested { get; set; }
+        public bool Requested { get; set; }
         public LogoutReason Reason { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(ClientRequested);
+            writer.Write(Requested);
             writer.Write(Reason, 5);
         }
     }

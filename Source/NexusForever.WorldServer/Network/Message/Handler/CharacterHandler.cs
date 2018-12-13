@@ -264,26 +264,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleCharacterLogout(WorldSession session, ClientCharacterLogout characterLogout)
         {
             if (characterLogout.Initiated)
-            {
-                session.EnqueueMessageEncrypted(new ServerCharacterLogoutStart
-                {
-                    TimeTillLogout = 30000u
-                });
-            }
+                session.Player.LogoutStart();
             else
-            {
-                // cancel
-            }
+                session.Player.LogoutCancel();
         }
 
         [MessageHandler(GameMessageOpcode.ClientLogout)]
         public static void HandleLogout(WorldSession session, ClientLogout logout)
         {
-            session.EnqueueMessageEncrypted(new ServerClientLogout
-            {
-                ClientRequested = true,
-                Reason = LogoutReason.None
-            });
+            session.Player.LogoutFinish();
         }
     }
 }
