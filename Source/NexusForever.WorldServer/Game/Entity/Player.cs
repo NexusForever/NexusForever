@@ -65,6 +65,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -179,7 +180,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = 166,
+                    FactionId = 166, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 }
             };
 
