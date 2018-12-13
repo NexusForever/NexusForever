@@ -19,7 +19,6 @@ namespace NexusForever.Shared.Database.Auth.Model
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
             if (!optionsBuilder.IsConfigured)
                 optionsBuilder.UseConfiguration(DatabaseManager.Config, DatabaseType.Auth);
         }

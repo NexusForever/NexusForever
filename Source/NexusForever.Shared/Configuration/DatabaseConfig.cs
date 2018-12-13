@@ -2,7 +2,6 @@
 
 namespace NexusForever.Shared.Configuration
 {
-
     public class DatabaseConfig : IDatabaseConfiguration
     {
         public DatabaseConnectionString Auth { get; set; }
@@ -24,5 +23,4 @@ namespace NexusForever.Shared.Configuration
             throw new ArgumentException($"Invalid database type: {type:G}", nameof(type));
         }
     }
-
 }

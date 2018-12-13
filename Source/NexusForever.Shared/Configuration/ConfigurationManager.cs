@@ -2,7 +2,6 @@
 
 namespace NexusForever.Shared.Configuration
 {
-
     public static class ConfigurationManager<T>
     {
         public static T Config { get; private set; }
@@ -14,5 +13,4 @@ namespace NexusForever.Shared.Configuration
             Config = SharedConfiguration.Configuration.Get<T>();
         }
     }
-
 }

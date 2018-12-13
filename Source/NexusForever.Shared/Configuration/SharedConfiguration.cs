@@ -9,7 +9,6 @@ using NLog;
 
 namespace NexusForever.Shared.Configuration
 {
-
     public static class SharedConfiguration
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
@@ -17,11 +16,12 @@ namespace NexusForever.Shared.Configuration
 
         public static void Initialize(string file)
         {
-            if (Configuration != null) return;
+            if (Configuration != null)
+                return;
 
             MigrateDatabaseConfiguration(file);
 
-            ConfigurationBuilder builder = new ConfigurationBuilder();
+            var builder = new ConfigurationBuilder();
 
             builder
                 .AddJsonFile(file, false, true)
@@ -35,7 +35,7 @@ namespace NexusForever.Shared.Configuration
         // This is only meant to aide people in updating their configs!
         private static void MigrateDatabaseConfiguration(string file)
         {
-            var jsonObject = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(file));
+            JObject jsonObject = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(file));
             JToken value = jsonObject.SelectToken("Database.Auth.Host") ??
                            jsonObject.SelectToken("Database.Character.Host") ??
                            jsonObject.SelectToken("Database.World.Host");
@@ -46,8 +46,10 @@ namespace NexusForever.Shared.Configuration
             }
 
             File.WriteAllText($"{file}.bak", File.ReadAllText(file));
+
             log.Warn("Configuration format has changed, and your configuration is being migrated to the new format");
             log.Warn("A backup of your configuration has been saved to {0}.bak", file);
+
             ConvertSingleDatabaseSection("Database.Auth", jsonObject);
             ConvertSingleDatabaseSection("Database.Character", jsonObject);
             ConvertSingleDatabaseSection("Database.World", jsonObject);
@@ -82,16 +84,21 @@ namespace NexusForever.Shared.Configuration
                 "Password",
                 "Database"
             };
+
             log.Debug("Reading old configuration format for JSON Path: {0}", path);
-            List<string> parts = originalProperties.Select(propertyName => selectedToken.Value<string>(propertyName))
+
+            List<string> parts = originalProperties
+                .Select(propertyName => selectedToken.Value<string>(propertyName))
                 .ToList();
             string connectionString =
                 $"server={parts[0]};port={parts[1]};user={parts[2]};password={parts[3]};database={parts[4]}";
+
             selectedToken.RemoveAll();
+
             log.Debug("Creating new configuration at JSON Path: {0}", path);
+
             selectedToken.Add("ConnectionString", JValue.CreateString(connectionString));
             selectedToken.Add("Provider", JValue.CreateString(DatabaseProvider.MySql.ToString()));
         }
     }
-
 }
