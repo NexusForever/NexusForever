@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Database;
@@ -22,6 +22,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<Item> Item { get; set; }
+        public virtual DbSet<CharacterStat> CharacterStat { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -234,6 +235,34 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.Item)
                     .HasForeignKey(d => d.OwnerId)
                     .HasConstraintName("FK__item_ownerId__character_id");
+            });
+
+            modelBuilder.Entity<CharacterStat>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Stat });
+
+                entity.ToTable("character_stats");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Stat)
+                    .HasColumnName("stat")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterStat)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_stats_stat_id_character_id");
             });
         }
     }
