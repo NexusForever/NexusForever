@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
@@ -37,7 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
             set
             {
                 level = value;
-                saveMask &= PlayerSaveMask.Level;
+                saveMask |= PlayerSaveMask.Level;
             }
         }
 
@@ -50,8 +51,8 @@ namespace NexusForever.WorldServer.Game.Entity
         private double timeToSave = SaveDuration;
         private PlayerSaveMask saveMask;
 
+        private LogoutManager logoutManager;
         private PendingFarTeleport pendingFarTeleport;
-
 
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
@@ -64,9 +65,12 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);
             Session     = session;
+
+            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)Level));
 
             // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
@@ -99,6 +103,15 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void Update(double lastTick)
         {
+            if (logoutManager != null)
+            {
+                // don't process world updates while logout is finalising
+                if (logoutManager.ReadyToLogout)
+                    return;
+
+                logoutManager.Update(lastTick);
+            }
+
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
@@ -148,6 +161,12 @@ namespace NexusForever.WorldServer.Game.Entity
             IsLoading = false;
         }
 
+        public override void OnRelocate(Vector3 vector)
+        {
+            base.OnRelocate(vector);
+            saveMask |= PlayerSaveMask.Location;
+        }
+
         private void SendPacketsAfterAddToMap()
         {
             Session.EnqueueMessageEncrypted(new ServerPathLog());
@@ -162,7 +181,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = 166,
+                    FactionId = 166, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 }
             };
 
@@ -241,12 +260,62 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void RemoveVisible(GridEntity entity)
         {
             base.RemoveVisible(entity);
-            /*Session.EnqueueMessageEncrypted(new ServerEntityDestory
+            Session.EnqueueMessageEncrypted(new ServerEntityDestory
             {
-                Guid = entity.Guid,
-                Unknown0 = true,
-                Unknown1 = 2
-            });*/
+                Guid     = entity.Guid,
+                Unknown0 = true
+            });
+        }
+
+        /// <summary>
+        /// Start delayed logout with optional supplied time and <see cref="LogoutReason"/>.
+        /// </summary>
+        public void LogoutStart(double timeToLogout = 30d, LogoutReason reason = LogoutReason.None, bool requested = true)
+        {
+            if (logoutManager != null)
+                return;
+
+            logoutManager = new LogoutManager(timeToLogout, reason, requested);
+
+            Session.EnqueueMessageEncrypted(new ServerCharacterLogoutStart
+            {
+                TimeTillLogout = (uint)timeToLogout * 1000
+            });
+        }
+
+        /// <summary>
+        /// Cancel the current logout, this will fail if the timer has already elapsed.
+        /// </summary>
+        public void LogoutCancel()
+        {
+            // can't cancel logout if timer has already elapsed
+            if (logoutManager?.ReadyToLogout ?? false)
+                return;
+
+            logoutManager = null;
+        }
+
+        /// <summary>
+        /// Finishes the current logout, saving and cleaning up the <see cref="Player"/> before redirect to the character screen.
+        /// </summary>
+        public void LogoutFinish()
+        {
+            if (logoutManager == null)
+                throw new InvalidPacketValueException();
+
+            Session.EnqueueEvent(new TaskEvent(CharacterDatabase.SavePlayer(this),
+                () =>
+            {
+                RemoveFromMap();
+
+                Session.EnqueueMessageEncrypted(new ServerClientLogout
+                {
+                    Requested = logoutManager.Requested,
+                    Reason    = logoutManager.Reason
+                });
+
+                Session.Player = null;
+            }));
         }
 
         /// <summary>
@@ -283,9 +352,22 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.Level).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Location) != 0)
+                {
+                    model.LocationX = Position.X;
+                    entity.Property(p => p.LocationX).IsModified = true;
+
+                    model.LocationY = Position.Y;
+                    entity.Property(p => p.LocationY).IsModified = true;
+
+                    model.LocationZ = Position.Z;
+                    entity.Property(p => p.LocationZ).IsModified = true;
+
+                    model.WorldId = (ushort)Map.Entry.Id;
+                    entity.Property(p => p.WorldId).IsModified = true;
+                }
                 saveMask = PlayerSaveMask.None;
             }
-
             Inventory.Save(context);
             CurrencyManager.Save(context);
         }

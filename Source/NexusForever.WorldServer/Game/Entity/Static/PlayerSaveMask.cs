@@ -8,7 +8,8 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     [Flags]
     public enum PlayerSaveMask
     {
-        None  = 0x0000,
-        Level = 0x0001
+        None      = 0x0000,
+        Level     = 0x0001,
+        Location  = 0x0002
     }
 }
