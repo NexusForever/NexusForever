@@ -1,0 +1,11 @@
+language: csharp
+mono: none
+dotnet: 2.1.500
+services:
+  - mysql
+before_script:
+  - ./Database/scripts/bootstrap.sh
+script:
+  - dotnet build ./Source/NexusForever.AuthServer
+  - dotnet build ./Source/NexusForever.StsServer
+  - dotnet build ./Source/NexusForever.WorldServer

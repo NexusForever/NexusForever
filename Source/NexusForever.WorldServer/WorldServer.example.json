@@ -5,25 +5,16 @@
     },
     "Database": {
         "Auth": {
-            "Host": "127.0.0.1",
-            "Port": 3306,
-            "Username": "nexusforever",
-            "Password": "nexusforever",
-            "Database": "nexus_forever_auth"
+            "ConnectionString": "server=127.0.0.1;port=3306;user=nexusforever;password=nexusforever;database=nexus_forever_auth",
+            "Provider": "MySql"
         },
         "Character": {
-            "Host": "127.0.0.1",
-            "Port": 3306,
-            "Username": "nexusforever",
-            "Password": "nexusforever",
-            "Database": "nexus_forever_character"
+            "ConnectionString": "server=127.0.0.1;port=3306;user=nexusforever;password=nexusforever;database=nexus_forever_character",
+            "Provider": "MySql"
         },
         "World": {
-            "Host": "127.0.0.1",
-            "Port": 3306,
-            "Username": "nexusforever",
-            "Password": "nexusforever",
-            "Database": "nexus_forever_world"
+            "ConnectionString": "server=127.0.0.1;port=3306;user=nexusforever;password=nexusforever;database=nexus_forever_world",
+            "Provider": "MySql"
         }
     }
 }
