@@ -69,8 +69,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Inventory   = new Inventory(this, model);
             Session     = session;
 
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)Level));
-
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
             Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
@@ -370,7 +368,6 @@ namespace NexusForever.WorldServer.Game.Entity
                     model.WorldId = (ushort)Map.Entry.Id;
                     entity.Property(p => p.WorldId).IsModified = true;
                 }
-
                 saveMask = PlayerSaveMask.None;
             }
             Inventory.Save(context);

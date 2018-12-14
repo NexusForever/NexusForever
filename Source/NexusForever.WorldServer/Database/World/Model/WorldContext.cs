@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
