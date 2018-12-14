@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Database.World.Model
@@ -9,6 +9,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         {
             EntityVendorCategory = new HashSet<EntityVendorCategory>();
             EntityVendorItem = new HashSet<EntityVendorItem>();
+            EntityStat = new HashSet<EntityStat>();
         }
 
         public uint Id { get; set; }
@@ -29,5 +30,6 @@ namespace NexusForever.WorldServer.Database.World.Model
         public EntityVendor EntityVendor { get; set; }
         public ICollection<EntityVendorCategory> EntityVendorCategory { get; set; }
         public ICollection<EntityVendorItem> EntityVendorItem { get; set; }
+        public ICollection<EntityStat> EntityStat { get; set; }
     }
 }

@@ -11,10 +11,12 @@ namespace NexusForever.WorldServer.Game.Entity
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public static ImmutableDictionary<uint, VendorInfo> VendorInfo { get; private set; }
+        public static ImmutableDictionary<uint, EntityStat> EntityStat { get; private set; }
 
         public static void Initialise()
         {
             InitialiseEntityVendorInfo();
+            InitialiseEntityStats();
         }
 
         private static void InitialiseEntityVendorInfo()
@@ -48,6 +50,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 .ToImmutableDictionary(v => v.Id, v => v);
 
             log.Info($"Loaded vendor information for {VendorInfo.Count} {(VendorInfo.Count > 1 ? "entities" : "entity")}.");
+        }
+        private static void InitialiseEntityStats()
+        {
+            ImmutableDictionary<uint, EntityStat> stats = WorldDatabase.GetEntityStats()
+                .GroupBy(v => v.Id)
+                .ToImmutableDictionary(g => g.Key, g => g.First());
         }
     }
 }

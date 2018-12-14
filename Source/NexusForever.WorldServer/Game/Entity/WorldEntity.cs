@@ -86,6 +86,27 @@ namespace NexusForever.WorldServer.Game.Entity
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
         }
 
+        protected float? GetStatValue(Stat stat)
+        {
+            return Stats.ContainsKey(stat) ? Stats[stat].Value : default;
+        }
+
+        protected void SetStat(Stat stat, float value)
+        {
+            if (Stats.ContainsKey(stat))
+                Stats[stat].Value = value;
+            else
+                Stats.Add(stat, new StatValue(stat, value));
+        }
+
+        protected void SetStat(Stat stat, uint value)
+        {
+            if (Stats.ContainsKey(stat))
+                Stats[stat].Value = value;
+            else
+                Stats.Add(stat, new StatValue(stat, value));
+        }
+
         /// <summary>
         /// Enqueue broadcast of <see cref="IWritable"/> to all visible <see cref="Player"/>'s in range.
         /// </summary>

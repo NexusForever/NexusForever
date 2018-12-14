@@ -1,10 +1,12 @@
-﻿using System.Numerics;
+using System.Numerics;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Database.World.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -12,6 +14,7 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public uint CreatureId { get; }
         public VendorInfo VendorInfo { get; }
+		private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public NonPlayer(Database.World.Model.Entity entity)
             : base(EntityType.NonPlayer)
@@ -29,12 +32,16 @@ namespace NexusForever.WorldServer.Game.Entity
             CalculateProperties();
 
             // temp shit
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, 1));
-            Stats.Add((Stat)15, new StatValue((Stat)15, 1));
-            Stats.Add((Stat)20, new StatValue((Stat)20, 1));
-            Stats.Add((Stat)21, new StatValue((Stat)21, 1));
-            Stats.Add((Stat)22, new StatValue((Stat)22, 1));
+            Stats.Add((Stat)15, new StatValue((Stat)15, 2));
+            //Stats.Add((Stat)20, new StatValue((Stat)20, 3));
+            Stats.Add((Stat)21, new StatValue((Stat)21, 4));
+            Stats.Add((Stat)22, new StatValue((Stat)22, 5));
+            foreach(EntityStat stat in entity.EntityStat)
+            {
+				log.Info("feach stat..");
+                Stats.Add(stat.Stat, new StatValue(stat.Stat, (uint)stat.Value));
+            }
+
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -55,29 +62,38 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void CalculateProperties()
         {
-            Creature2Entry creatureEntry = GameTableManager.Creature2.GetEntry(CreatureId);
+            Creature2Entry creature2Entry = GameTableManager.Creature2.GetEntry(CreatureId);
 
-            // TODO: research this some more
-            /*float[] values = new float[200];
+            if (creature2Entry == null||creature2Entry.Id<1||creature2Entry.Creature2DifficultyId<1||creature2Entry.Creature2ArcheTypeId<1||creature2Entry.Creature2TierId<1||creature2Entry.UnitRaceId<1)
+                return;
 
-            CreatureLevelEntry levelEntry = GameTableManager.CreatureLevel.GetEntry(6);
-            for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
-                values[i] = levelEntry.UnitPropertyValue[i];
+            UnitRaceEntry unitRaceEntry                                = GameTableManager.UnitRace.GetEntry(creature2Entry.UnitRaceId);
+            Creature2DifficultyEntry creature2DifficultyEntry          = GameTableManager.Creature2Difficulty.GetEntry(creature2Entry.Creature2DifficultyId);
+            Creature2ArcheTypeEntry creature2ArcheTypeEntry            = GameTableManager.Creature2ArcheType.GetEntry(creature2Entry.Creature2ArcheTypeId);
+            Creature2TierEntry creature2TierEntry                      = GameTableManager.Creature2Tier.GetEntry(creature2Entry.Creature2TierId);
+            Creature2ModelInfoEntry creature2ModelInfoEntry            = GameTableManager.Creature2ModelInfo.GetEntry(creature2Entry.Creature2ModelInfoId);
+            Creature2DisplayGroupEntryEntry creature2DisplayGroupEntry = GameTableManager.Creature2DisplayGroupEntry.GetEntry(creature2Entry.Creature2DisplayGroupId);
+            Creature2OutfitGroupEntryEntry creature2OutfitGroupEntry   = GameTableManager.Creature2OutfitGroupEntry.GetEntry(creature2Entry.Creature2OutfitGroupId);
+            Faction2Entry faction2Entry                                = GameTableManager.Faction2.GetEntry(creature2Entry.FactionId);
 
-            Creature2ArcheTypeEntry archeTypeEntry = GameTableManager.Creature2ArcheType.GetEntry(creatureEntry.Creature2ArcheTypeId);
-            for (uint i = 0u; i < archeTypeEntry.UnitPropertyMultiplier.Length; i++)
-                values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
+            int level = new System.Random().Next((int)creature2Entry.MinLevel, (int)creature2Entry.MaxLevel);
+            CreatureLevelEntry creatureLevelEntry                      = GameTableManager.CreatureLevel.GetEntry((ulong)level);
 
-            Creature2DifficultyEntry difficultyEntry = GameTableManager.Creature2Difficulty.GetEntry(creatureEntry.Creature2DifficultyId);
-            for (uint i = 0u; i < difficultyEntry.UnitPropertyMultiplier.Length; i++)
-                values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
+            float values;
 
-            Creature2TierEntry tierEntry = GameTableManager.Creature2Tier.GetEntry(creatureEntry.Creature2TierId);
-            for (uint i = 0u; i < tierEntry.UnitPropertyMultiplier.Length; i++)
-                values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
+            for (uint i = 0u; i < creatureLevelEntry.UnitPropertyValue.Length; i++)
+            {
+                values = creatureLevelEntry.UnitPropertyValue[i]
+                        * creature2ArcheTypeEntry.UnitPropertyMultiplier[i]
+                        * creature2DifficultyEntry.UnitPropertyMultiplier[i]
+                        * creature2TierEntry.UnitPropertyMultiplier[i];
+                SetProperty((Property)i, values);
+            }
+//            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)level));
+            Stats.Add(Stat.Health, new StatValue(Stat.Health, (uint)GetPropertyValue(Property.BaseHealth)));
+            Stats.Add(Stat.Shield, new StatValue(Stat.Shield, (uint)GetPropertyValue(Property.ShieldCapacityMax)));
 
-            for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
-                SetProperty((Property)i, values[i]);*/
+            // FIXME not done, more Stat's to add
         }
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Database.Character.Model
 {
@@ -12,6 +14,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterCurrency = new HashSet<CharacterCurrency>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
             Item = new HashSet<Item>();
+            CharacterStat = new HashSet<CharacterStat>();
         }
 
         public ulong Id { get; set; }
@@ -33,5 +36,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public ICollection<CharacterCurrency> CharacterCurrency { get; set; }
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
         public ICollection<Item> Item { get; set; }
+        public ICollection<CharacterStat> CharacterStat { get; set; }
     }
 }

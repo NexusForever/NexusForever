@@ -10,7 +10,9 @@ namespace NexusForever.WorldServer.Database.World
         public static ImmutableList<Entity> GetEntities(ushort world)
         {
             using (var context = new WorldContext())
-                return context.Entity.Where(e => e.World == world)
+                return context.Entity
+                    .Where(e => e.World == world)
+                    .Include(c => c.EntityStat)
                     .AsNoTracking()
                     .ToImmutableList();
         }
@@ -35,6 +37,14 @@ namespace NexusForever.WorldServer.Database.World
         {
             using (var context = new WorldContext())
                 return context.EntityVendorItem
+                    .AsNoTracking()
+                    .ToImmutableList();
+        }
+
+        public static ImmutableList<EntityStat> GetEntityStats()
+        {
+            using (var context = new WorldContext())
+                return context.EntityStat
                     .AsNoTracking()
                     .ToImmutableList();
         }

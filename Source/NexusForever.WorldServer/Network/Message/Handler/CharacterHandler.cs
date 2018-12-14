@@ -193,6 +193,22 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 character.LocationZ = -666.6343f;
                 character.WorldId = 870;
 
+                //TODO: handle starting stats per class/race
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.Health,
+                    Type  = (byte)StatValue.StatType.Int,
+                    Value = 800
+                });
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.Level,
+                    Type  = (byte)StatValue.StatType.Int,
+                    Value = 1
+                });
+
                 // create a temporary inventory to create starting gear
                 var inventory = new Inventory(character.Id, creationEntry);
                 var items = inventory

@@ -62,18 +62,12 @@ namespace NexusForever.WorldServer.Game.Entity
             Sex         = (Sex)model.Sex;
             Race        = (Race)model.Race;
             Class       = (Class)model.Class;
-            Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
             Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);
             Session     = session;
-
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)Level));
-
-            // temp
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -99,6 +93,15 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Bones.Add(bone.Bone);
             }
+
+            foreach(CharacterStat stat in model.CharacterStat)
+            {
+                if ((StatValue.StatType)stat.Type == StatValue.StatType.Int)
+                    Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, (uint)stat.Value));
+                else if((StatValue.StatType)stat.Type == StatValue.StatType.Float)
+                    Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, (float)stat.Value));
+            }
+            Level = (byte)GetStatValue(Stat.Level);
         }
 
         public override void Update(double lastTick)
@@ -365,6 +368,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     model.WorldId = (ushort)Map.Entry.Id;
                     entity.Property(p => p.WorldId).IsModified = true;
                 }
+
                 saveMask = PlayerSaveMask.None;
             }
             Inventory.Save(context);
