@@ -3,7 +3,7 @@
 namespace NexusForever.WorldServer.Game.Entity.Static
 {
     /// <summary>
-    /// Determines which fields need saving for <see cref="Player"/> when being saved to the database.
+    /// Enum containing properties used to set the <see cref="Player"/> PvP Flag
     /// </summary>
     [Flags]
     public enum PvPFlag
