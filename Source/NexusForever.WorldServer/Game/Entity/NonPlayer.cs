@@ -6,7 +6,6 @@ using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Database.World.Model;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -14,7 +13,6 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public uint CreatureId { get; }
         public VendorInfo VendorInfo { get; }
-		private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public NonPlayer(Database.World.Model.Entity entity)
             : base(EntityType.NonPlayer)
@@ -31,17 +29,13 @@ namespace NexusForever.WorldServer.Game.Entity
 
             CalculateProperties();
 
-            // temp shit
-            Stats.Add((Stat)15, new StatValue((Stat)15, 2));
-            //Stats.Add((Stat)20, new StatValue((Stat)20, 3));
-            Stats.Add((Stat)21, new StatValue((Stat)21, 4));
-            Stats.Add((Stat)22, new StatValue((Stat)22, 5));
             foreach(EntityStat stat in entity.EntityStat)
             {
-				log.Info("feach stat..");
-                Stats.Add(stat.Stat, new StatValue(stat.Stat, (uint)stat.Value));
+                if ((StatValue.StatType)stat.Type == StatValue.StatType.Int)
+                    Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, (uint)stat.Value));
+                else if((StatValue.StatType)stat.Type == StatValue.StatType.Float)
+                    Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, (float)stat.Value));
             }
-
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -89,11 +83,6 @@ namespace NexusForever.WorldServer.Game.Entity
                         * creature2TierEntry.UnitPropertyMultiplier[i];
                 SetProperty((Property)i, values);
             }
-//            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)level));
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, (uint)GetPropertyValue(Property.BaseHealth)));
-            Stats.Add(Stat.Shield, new StatValue(Stat.Shield, (uint)GetPropertyValue(Property.ShieldCapacityMax)));
-
-            // FIXME not done, more Stat's to add
         }
     }
 }
