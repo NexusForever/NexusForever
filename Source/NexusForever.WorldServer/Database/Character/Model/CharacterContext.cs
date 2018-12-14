@@ -27,7 +27,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(DatabaseManager.Config, DatabaseType.Character);
+                optionsBuilder.UseMySql($"server={DatabaseManager.Config.Character.Host};port={DatabaseManager.Config.Character.Port};user={DatabaseManager.Config.Character.Username};"
+                    + $"password={DatabaseManager.Config.Character.Password};database={DatabaseManager.Config.Character.Database}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

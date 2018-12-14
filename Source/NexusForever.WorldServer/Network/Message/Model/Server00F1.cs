@@ -3,7 +3,6 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-
     [Message(GameMessageOpcode.Server00F1, MessageDirection.Server)]
     public class Server00F1 : IWritable
     {

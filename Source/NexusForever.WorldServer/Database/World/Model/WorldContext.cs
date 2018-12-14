@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using NexusForever.Shared;
-using NexusForever.Shared.Configuration;
+using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Database;
 
 namespace NexusForever.WorldServer.Database.World.Model
@@ -25,7 +24,8 @@ namespace NexusForever.WorldServer.Database.World.Model
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(DatabaseManager.Config, DatabaseType.World);
+                optionsBuilder.UseMySql($"server={DatabaseManager.Config.World.Host};port={DatabaseManager.Config.World.Port};user={DatabaseManager.Config.World.Username};"
+                    + $"password={DatabaseManager.Config.World.Password};database={DatabaseManager.Config.World.Database}");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

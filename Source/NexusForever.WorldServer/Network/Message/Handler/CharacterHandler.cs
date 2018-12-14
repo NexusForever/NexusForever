@@ -88,7 +88,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Sex         = (Sex)character.Sex,
                         Race        = (Race)character.Race,
                         Class       = (Class)character.Class,
-                        Faction     = character.FactionId,
+                        Faction     = 166,
                         Level       = character.Level,
                         WorldId     = 3460,
                         WorldZoneId = 5967,
@@ -151,8 +151,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Race      = (byte)creationEntry.RaceId,
                     Sex       = (byte)creationEntry.Sex,
                     Class     = (byte)creationEntry.ClassId,
-                    Level     = 1,
-                    FactionId = (ushort)creationEntry.FactionId
+                    Level     = 1
                 };
 
                 // merge seperate label and value lists into a single dictonary
@@ -284,15 +283,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleCharacterLogout(WorldSession session, ClientCharacterLogout characterLogout)
         {
             if (characterLogout.Initiated)
-                session.Player.LogoutStart();
+            {
+                session.EnqueueMessageEncrypted(new ServerCharacterLogoutStart
+                {
+                    TimeTillLogout = 30000u
+                });
+            }
             else
-                session.Player.LogoutCancel();
-        }
-
-        [MessageHandler(GameMessageOpcode.ClientLogout)]
-        public static void HandleLogout(WorldSession session, ClientLogout logout)
-        {
-            session.Player.LogoutFinish();
+            {
+                // cancel
+            }
         }
     }
 }
