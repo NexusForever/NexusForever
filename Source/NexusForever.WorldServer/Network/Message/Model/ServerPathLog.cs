@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             public void Write(GamePacketWriter writer)
             {
-                uint[] unlockedArray = new uint[]{
+                uint[] unlockedArray = new uint[4]{
                     Soldier,
                     Settler,
                     Scientist,
