@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NLog;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
@@ -23,9 +22,6 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public class Player : WorldEntity, ISaveCharacter
     {
-
-        protected static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
@@ -177,7 +173,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 ActivePath = Path.Soldier,
                 PathProgress = new uint[] { 0, 0, 0, 0 },
-                UnlockedPathMask = 1
+                UnlockedPathMask = PathUnlocked.Soldier
             });
 
             Session.EnqueueMessageEncrypted(new Server00F1());
@@ -215,7 +211,6 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             Session.EnqueueMessageEncrypted(playerCreate);
-            log.Info($"Player {Name} entering world: {Race} {Level} {Class}");
         }
 
         public override void OnRemoveFromMap()
