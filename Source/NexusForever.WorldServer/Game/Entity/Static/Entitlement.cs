@@ -27,6 +27,7 @@
         LoyaltyChallengeBonus                = 44,
         LoyaltyRestXpBonus                   = 45,
         FraudCheck                           = 49,
+        ChuaWarriorUnlock                    = 61,
         AurinEngineerUnlock                  = 62,
         CanPurchasePromotionToken            = 63,
         SharedRealmBankUnlock                = 74,

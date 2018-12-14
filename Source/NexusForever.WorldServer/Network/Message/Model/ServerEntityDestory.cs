@@ -8,15 +8,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public uint Guid { get; set; }
         public bool Unknown0 { get; set; }
-        public byte Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Guid);
             writer.Write(Unknown0);
-            writer.Write(Unknown1, 5);
-            writer.Write(Unknown2);
         }
     }
 }

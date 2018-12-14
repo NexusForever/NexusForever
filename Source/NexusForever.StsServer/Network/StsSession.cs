@@ -8,6 +8,7 @@ using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.Network;
 using NexusForever.StsServer.Network.Message;
+using NexusForever.StsServer.Network.Message.Model;
 using NexusForever.StsServer.Network.Packet;
 
 namespace NexusForever.StsServer.Network
@@ -31,6 +32,11 @@ namespace NexusForever.StsServer.Network
         public void EnqueueMessageOk(IWritable message)
         {
             EnqueueMessage(200, "OK", message);
+        }
+
+        public void EnqueueMessageError(ServerErrorMessage message)
+        {
+            EnqueueMessage(400, "Bad Request", message);
         }
 
         public void EnqueueMessage(uint statusCode, string status, IWritable message)

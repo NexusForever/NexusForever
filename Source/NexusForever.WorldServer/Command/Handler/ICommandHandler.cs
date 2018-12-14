@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Contexts;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     public interface ICommandHandler
     {
-        IEnumerable<string> GetCommands();
         int Order { get; }
-        bool Handles(CommandContext session, string input);
-        void Handle(CommandContext session, string text);
+        IEnumerable<string> GetCommands();
+        Task<bool> HandlesAsync(CommandContext session, string input);
+        Task HandleAsync(CommandContext session, string text);
     }
 }

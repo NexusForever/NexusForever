@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +38,7 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterCustomisation)
                         .Include(c => c.Item)
                         .Include(c => c.CharacterBone)
+                        .Include(c => c.CharacterCurrency)
                     .ToListAsync();
             }
         }

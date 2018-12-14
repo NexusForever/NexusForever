@@ -12,7 +12,9 @@
         ServerChangeWorld               = 0x00AD,
         ClientVendorPurchase            = 0x00BE,
         ClientCharacterLogout           = 0x00BF,
+        ClientLogout                    = 0x00C0,
         ServerCharacterCreate           = 0x00DC,
+        ServerChannelUpdateLoot         = 0x00DD,
         Server00F1                      = 0x00F1,
         Server0104                      = 0x0104, // Galactic Archive
         ServerCharacter                 = 0x010F, // single character
@@ -46,6 +48,7 @@
         ClientPacked                    = 0x025C, // the same as ClientEncrypted except the contents isn't encrypted?
         ServerEntityCreate              = 0x0262,
         ClientCharacterDelete           = 0x0352,
+        ServerEntityDestory             = 0x0355,
         ClientEmote                     = 0x037E,
         Server03AA                      = 0x03AA, // friendship account related
         Server03BE                      = 0x03BE, // friendship related
@@ -58,7 +61,8 @@
         ClientHelloRealm                = 0x058F,
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
-        Server0636                      = 0x0636,
+        ServerMovementControl           = 0x0636,
+        ServerClientLogout              = 0x0594,
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
         ServerPathLog                   = 0x06BC,
@@ -72,9 +76,9 @@
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
         Server086F                      = 0x086F,
-        ServerEntityDestory             = 0x088C, // 0x8A5??
         Server08B3                      = 0x08B3,
         ServerVendor                    = 0x090B,
+        ServerPlayerCurrencyChanged     = 0x0919,
         ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
         ServerEmote                     = 0x093C,

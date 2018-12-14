@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using NexusForever.Shared;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
 
 namespace NexusForever.WorldServer.Database.Character.Model
@@ -19,14 +19,14 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<Character> Character { get; set; }
         public virtual DbSet<CharacterAppearance> CharacterAppearance { get; set; }
         public virtual DbSet<CharacterBone> CharacterBone { get; set; }
+        public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<Item> Item { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseMySql($"server={DatabaseManager.Config.Character.Host};port={DatabaseManager.Config.Character.Port};user={DatabaseManager.Config.Character.Username};"
-                    + $"password={DatabaseManager.Config.Character.Password};database={DatabaseManager.Config.Character.Database}");
+                optionsBuilder.UseConfiguration(DatabaseManager.Config, DatabaseType.Character);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,6 +71,22 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.Sex)
                     .HasColumnName("sex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationX)
+                    .HasColumnName("locationX")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationY)
+                    .HasColumnName("locationY")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationZ)
+                    .HasColumnName("locationZ")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
                     .HasDefaultValueSql("'0'");
             });
 
@@ -120,6 +136,30 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterBone)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK_character_bone_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterCurrency>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.CurrencyId });
+
+                entity.ToTable("character_currency");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CurrencyId)
+                    .HasColumnName("currencyId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Amount)
+                    .HasColumnName("amount")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.CharacterCurrency)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK_character_currency_id__character_id");
             });
 
             modelBuilder.Entity<CharacterCustomisation>(entity =>

@@ -19,7 +19,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
             {
                 if (account == null)
                 {
-                    // TODO: send error
+                    session.EnqueueMessageError(new ServerErrorMessage((int) ErrorCode.InvalidAccountNameOrPassword));
                     return;
                 }
 
@@ -56,7 +56,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
             byte[] key = session.KeyExchange.CalculateSessionKey();
             if (!session.KeyExchange.VerifyClientEvidenceMessage(keyData.M1))
             {
-                // TODO: send error
+                session.EnqueueMessageError(new ServerErrorMessage((int) ErrorCode.InvalidAccountNameOrPassword));
                 return;
             }
 
