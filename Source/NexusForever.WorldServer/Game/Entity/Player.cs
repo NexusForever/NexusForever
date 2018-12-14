@@ -172,7 +172,13 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerPathLog
             {
                 ActivePath = Path.Soldier,
-                PathProgress = new uint[] { 0, 0, 0, 0 },
+                PathProgress = new ServerPathLog.Progress
+                {
+                    Soldier   = 0,
+                    Settler   = 0,
+                    Scientist = 0,
+                    Explorer  = 0
+                },
                 UnlockedPathMask = PathUnlocked.Soldier
             });
 
