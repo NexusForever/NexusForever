@@ -128,7 +128,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         }
                     }
 
-
                     serverCharacterList.Characters.Add(listCharacter);
                 }
 
