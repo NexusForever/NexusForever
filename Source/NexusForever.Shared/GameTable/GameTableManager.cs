@@ -519,8 +519,6 @@ namespace NexusForever.Shared.GameTable
         [GameData("de-DE.bin")]
         public static TextTable TextGerman { get; private set; }
 
-        private static Dictionary<string, List<WorldLocation2Entry>> zoneLookupTable;
-
         public static void Initialise()
         {
             log.Info("Loading GameTables...");
@@ -530,17 +528,6 @@ namespace NexusForever.Shared.GameTable
             {
                 LoadGameTablesAsync().GetAwaiter().GetResult();
                 Debug.Assert(WorldLocation2 != null);
-
-                if (TextEnglish != null)
-                {
-                    log.Info("Indexing names to zones for teleport by name support");
-                    zoneLookupTable = CreateTeleportLookups();
-                }
-                else
-                {
-                    log.Warn("en-US.bin was not found, teleport by name support is disabled.");
-                    zoneLookupTable = new Dictionary<string, List<WorldLocation2Entry>>();
-                }
             }
             catch (Exception exception)
             {
@@ -674,47 +661,6 @@ namespace NexusForever.Shared.GameTable
                     .Unwrap();
 
             throw new GameTableException($"Unknown game table type {property.PropertyType}");
-        }
-
-        public static IEnumerable<WorldLocation2Entry> LookupZonesByName(string zoneName)
-        {
-            zoneLookupTable.TryGetValue(zoneName, out List<WorldLocation2Entry> list);
-            return list ?? Enumerable.Empty<WorldLocation2Entry>();
-        }
-
-        private static Dictionary<string, List<WorldLocation2Entry>> CreateTeleportLookups()
-        {
-            void AddObjectToKey(Dictionary<string, List<WorldLocation2Entry>> dictionary, string key,
-                WorldLocation2Entry obj)
-            {
-                if (!dictionary.TryGetValue(key, out List<WorldLocation2Entry> entries))
-                    dictionary.Add(key, entries = new List<WorldLocation2Entry>());
-
-                entries.Add(obj);
-            }
-
-            Dictionary<string, List<WorldLocation2Entry>> index =
-                new Dictionary<string, List<WorldLocation2Entry>>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (WorldLocation2Entry zone in WorldLocation2.Entries)
-            {
-                WorldZoneEntry worldZone = WorldZone.GetEntry(zone.WorldZoneId);
-                WorldEntry world = World.GetEntry(zone.WorldId);
-                if (worldZone == null && world == null)
-                    continue;
-
-                uint textId = worldZone?.LocalizedTextIdName ?? world.LocalizedTextIdName;
-                if (textId < 1)
-                    continue;
-
-                string text = TextEnglish.GetEntry(textId);
-                if (string.IsNullOrWhiteSpace(text))
-                    continue;
-
-                AddObjectToKey(index, text, zone);
-            }
-
-            return index;
         }
     }
 }
