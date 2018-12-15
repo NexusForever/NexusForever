@@ -86,7 +86,7 @@ namespace NexusForever.WorldServer.Game.Entity
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
         }
 
-        protected float? GetStatValue(Stat stat)
+        public float? GetStatValue(Stat stat)
         {
             return Stats.ContainsKey(stat) ? Stats[stat].Value : default;
         }

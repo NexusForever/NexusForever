@@ -32,17 +32,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Class Class { get; }
         public List<float> Bones { get; }
 
-        public byte Level
-        {
-            get => level;
-            set
-            {
-                level = value;
-                saveMask |= PlayerSaveMask.Level;
-            }
-        }
-
-        private byte level;
+        public byte Level { get; }
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
@@ -348,12 +338,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 };
 
                 EntityEntry<Character> entity = context.Attach(model);
-                if ((saveMask & PlayerSaveMask.Level) != 0)
-                {
-                    model.Level = Level;
-                    entity.Property(p => p.Level).IsModified = true;
-                }
-
                 if ((saveMask & PlayerSaveMask.Location) != 0)
                 {
                     model.LocationX = Position.X;

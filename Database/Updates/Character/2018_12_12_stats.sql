@@ -8,4 +8,4 @@ CREATE TABLE `character_stats` (
 );
 INSERT INTO `character_stats`(id,stat,type,value) SELECT `id`, 0, 0, 1000 FROM `character`;
 INSERT INTO `character_stats`(id,stat,type,value) SELECT `id`, 10, 0, `level`   FROM `character`;
-##ALTER TABLE `character` DROP COLUMN `level`;
+ALTER TABLE `character` DROP COLUMN `level`;

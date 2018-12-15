@@ -27,8 +27,6 @@ namespace NexusForever.WorldServer.Game.Entity
             if (EntityManager.VendorInfo.TryGetValue(entity.Id, out VendorInfo vendorInfo))
                 VendorInfo = vendorInfo;
 
-            CalculateProperties();
-
             foreach(EntityStat stat in entity.EntityStat)
             {
                 if ((StatValue.StatType)stat.Type == StatValue.StatType.Int)
@@ -36,6 +34,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 else if((StatValue.StatType)stat.Type == StatValue.StatType.Float)
                     Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, (float)stat.Value));
             }
+
+            CalculateProperties();
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -69,9 +69,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Creature2DisplayGroupEntryEntry creature2DisplayGroupEntry = GameTableManager.Creature2DisplayGroupEntry.GetEntry(creature2Entry.Creature2DisplayGroupId);
             Creature2OutfitGroupEntryEntry creature2OutfitGroupEntry   = GameTableManager.Creature2OutfitGroupEntry.GetEntry(creature2Entry.Creature2OutfitGroupId);
             Faction2Entry faction2Entry                                = GameTableManager.Faction2.GetEntry(creature2Entry.FactionId);
-
-            int level = new System.Random().Next((int)creature2Entry.MinLevel, (int)creature2Entry.MaxLevel);
-            CreatureLevelEntry creatureLevelEntry                      = GameTableManager.CreatureLevel.GetEntry((ulong)level);
+            CreatureLevelEntry creatureLevelEntry                      = GameTableManager.CreatureLevel.GetEntry((ulong)GetStatValue(Stat.Level));
 
             float values;
 

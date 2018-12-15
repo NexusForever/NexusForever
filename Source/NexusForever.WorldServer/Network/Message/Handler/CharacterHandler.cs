@@ -89,7 +89,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Race        = (Race)character.Race,
                         Class       = (Class)character.Class,
                         Faction     = character.FactionId,
-                        Level       = character.Level,
                         WorldId     = 3460,
                         WorldZoneId = 5967,
                         Unknown38   = 358
@@ -108,7 +107,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                             DisplayId = appearance.DisplayId
                         });
                     }
-                        
+
                     foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
                     {
                         listCharacter.Labels.Add(customisation.Label);
@@ -119,6 +118,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     {
                         listCharacter.Bones.Add(bone.Bone);
                     }
+
+                    foreach(CharacterStat stat in character.CharacterStat)
+                    {
+                        if ((Stat)stat.Stat == Stat.Level)
+                        {
+                            listCharacter.Level = (uint)stat.Value;
+                            break;
+                        }
+                    }
+
 
                     serverCharacterList.Characters.Add(listCharacter);
                 }
@@ -151,7 +160,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Race      = (byte)creationEntry.RaceId,
                     Sex       = (byte)creationEntry.Sex,
                     Class     = (byte)creationEntry.ClassId,
-                    Level     = 1,
                     FactionId = (ushort)creationEntry.FactionId
                 };
 

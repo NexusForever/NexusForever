@@ -58,10 +58,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
 
-                entity.Property(e => e.Level)
-                    .HasColumnName("level")
-                    .HasDefaultValueSql("'0'");
-
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasColumnName("name")

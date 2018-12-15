@@ -23,7 +23,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Sex { get; set; }
         public byte Race { get; set; }
         public byte Class { get; set; }
-        public byte Level { get; set; }
         public ushort FactionId { get; set; }
         public DateTime CreateTime { get; set; }
         public float LocationX { get; set; }
