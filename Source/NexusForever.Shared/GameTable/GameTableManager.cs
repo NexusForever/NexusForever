@@ -664,11 +664,14 @@ namespace NexusForever.Shared.GameTable
                 return Task.Factory.StartNew(() =>
                         GameTableFactory.LoadGameTable(property.PropertyType.GetGenericArguments().Single(), fileName))
                     .ContinueWith(SetPropertyOnCompletion)
-                    .ContinueWith(VerifyPropertySetOnCompletion);
+                    .Unwrap()
+                    .ContinueWith(VerifyPropertySetOnCompletion)
+                    .Unwrap();
 
             if (property.PropertyType == typeof(TextTable))
                 return Task.Factory.StartNew<object>(() => GameTableFactory.LoadTextTable(fileName))
-                    .ContinueWith(SetPropertyOnCompletion);
+                    .ContinueWith(SetPropertyOnCompletion)
+                    .Unwrap();
 
             throw new GameTableException($"Unknown game table type {property.PropertyType}");
         }
