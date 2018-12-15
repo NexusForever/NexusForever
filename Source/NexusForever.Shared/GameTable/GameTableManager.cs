@@ -511,9 +511,13 @@ namespace NexusForever.Shared.GameTable
 
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
-
-        [GameData("lang.bin")]
-        public static TextTable Text { get; private set; }
+        public static TextTable Text => TextEnglish;
+        [GameData("fr-FR.bin")]
+        public static TextTable TextFrench { get; private set; }
+        [GameData("en-US.bin")]
+        public static TextTable TextEnglish { get; private set; }
+        [GameData("de-DE.bin")]
+        public static TextTable TextGerman { get; private set; }
 
         private static Dictionary<string, List<WorldLocation2Entry>> zoneLookupTable;
 
@@ -526,7 +530,8 @@ namespace NexusForever.Shared.GameTable
             {
                 LoadGameTablesAsync().GetAwaiter().GetResult();
                 Debug.Assert(WorldLocation2 != null);
-                if (Text != null)
+
+                if (TextEnglish != null)
                 {
                     log.Info("Indexing names to zones for teleport by name support");
                     zoneLookupTable = CreateTeleportLookups();
@@ -562,15 +567,17 @@ namespace NexusForever.Shared.GameTable
                 tasks.Remove(next);
             }
 
-            async Task ExceptionHandler(Task task)
+            async Task<bool> ExceptionHandler(Task task)
             {
                 try
                 {
                     await task;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     exceptions.Add(ex);
+                    return false;
                 }
             }
 
@@ -614,13 +621,18 @@ namespace NexusForever.Shared.GameTable
 
                 tasks.Add(LoadGameTableAsync(property, fileName)
                     .ContinueWith(ExceptionHandler)
+                    .Unwrap()
                     .ContinueWith(
                         async task =>
                         {
-                            await task;
-                            log.Info("Completed loading {0} in {1}ms", fileName,
-                                (DateTime.Now - loadStarted).TotalMilliseconds);
-                        }));
+                            bool result = await task;
+                            if (result)
+                                log.Info("Completed loading {0} in {1}ms", fileName,
+                                    (DateTime.Now - loadStarted).TotalMilliseconds);
+                            else
+                                log.Error("Failed to load {0} in {1}ms", fileName,
+                                    (DateTime.Now - loadStarted).TotalMilliseconds);
+                        }).Unwrap());
 
                 if (tasks.Count > loadCount)
                     await WaitForNextTaskToFinish();
@@ -640,11 +652,19 @@ namespace NexusForever.Shared.GameTable
                 property.SetValue(null, await task);
             }
 
+            async Task VerifyPropertySetOnCompletion(Task task)
+            {
+                await task;
+                if (property.GetValue(null) == null)
+                    throw new InvalidOperationException($"Failed to load game data table {Path.GetFileName(fileName)}");
+            }
+
             if (property.PropertyType.IsGenericType &&
                 property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
                 return Task.Factory.StartNew(() =>
                         GameTableFactory.LoadGameTable(property.PropertyType.GetGenericArguments().Single(), fileName))
-                    .ContinueWith(SetPropertyOnCompletion);
+                    .ContinueWith(SetPropertyOnCompletion)
+                    .ContinueWith(VerifyPropertySetOnCompletion);
 
             if (property.PropertyType == typeof(TextTable))
                 return Task.Factory.StartNew<object>(() => GameTableFactory.LoadTextTable(fileName))
@@ -684,7 +704,7 @@ namespace NexusForever.Shared.GameTable
                 if (textId < 1)
                     continue;
 
-                string text = Text.GetEntry(textId);
+                string text = TextEnglish.GetEntry(textId);
                 if (string.IsNullOrWhiteSpace(text))
                     continue;
 
