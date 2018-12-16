@@ -223,6 +223,42 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Value = 1
                 });
 
+                character.CharacterProperty.Add(new CharacterProperty
+                {
+                    Id        = character.Id,
+                    Property  = (byte)Property.BaseHealth,
+                    Base      = 200,
+                    Value     = 800
+                });
+                character.CharacterProperty.Add(new CharacterProperty
+                {
+                    Id        = character.Id,
+                    Property  = (byte)Property.MoveSpeedMultiplier,
+                    Base      = 1,
+                    Value     = 1
+                });
+                character.CharacterProperty.Add(new CharacterProperty
+                {
+                    Id        = character.Id,
+                    Property  = (byte)Property.JumpHeight,
+                    Base      = 2.5f,
+                    Value     = 2.5f
+                });
+                character.CharacterProperty.Add(new CharacterProperty
+                {
+                    Id        = character.Id,
+                    Property  = (byte)Property.GravityMultiplier,
+                    Base      = 0.8f,
+                    Value     = 0.8f
+                });
+                character.CharacterProperty.Add(new CharacterProperty
+                {
+                    Id        = character.Id,
+                    Property  = (byte)Property.HealthRegenMultiplier,
+                    Base      = 0.00465f,
+                    Value     = 0.00465f
+                });
+
                 // create a temporary inventory to create starting gear
                 var inventory = new Inventory(character.Id, creationEntry);
                 var items = inventory

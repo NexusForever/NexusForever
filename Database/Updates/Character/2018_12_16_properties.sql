@@ -10,4 +10,4 @@ CREATE TABLE `character_properties` (
 INSERT INTO `character_properties`(id,property,base,value) SELECT `id`, 7, 200, 800 FROM `character`;   #basehealth
 INSERT INTO `character_properties`(id,property,base,value) SELECT `id`, 100, 1, 1 FROM `character`;     #MoveSpeedMultiplier
 INSERT INTO `character_properties`(id,property,base,value) SELECT `id`, 129, 2.5, 2.5 FROM `character`; #JumpHeight
-INSERT INTO `character_properties`(id,property,base,value) SELECT `id`, 130, 1, 1 FROM `character`;     #GravityMultiplier
+INSERT INTO `character_properties`(id,property,base,value) SELECT `id`, 130, 0.8, 0.8 FROM `character`;     #GravityMultiplier
