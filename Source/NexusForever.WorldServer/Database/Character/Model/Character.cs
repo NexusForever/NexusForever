@@ -15,6 +15,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
             Item = new HashSet<Item>();
             CharacterStat = new HashSet<CharacterStat>();
+            CharacterProperty = new HashSet<CharacterProperty>();
         }
 
         public ulong Id { get; set; }
@@ -36,5 +37,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
         public ICollection<Item> Item { get; set; }
         public ICollection<CharacterStat> CharacterStat { get; set; }
+        public ICollection<CharacterProperty> CharacterProperty { get; set; }
     }
 }

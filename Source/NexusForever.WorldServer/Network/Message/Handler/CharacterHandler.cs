@@ -211,6 +211,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 character.CharacterStat.Add(new CharacterStat
                 {
                     Id    = character.Id,
+                    Stat  = (byte)Stat.Dash,
+                    Type  = (byte)StatValue.StatType.Float,
+                    Value = 200
+                });
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
                     Stat  = (byte)Stat.Level,
                     Type  = (byte)StatValue.StatType.Int,
                     Value = 1

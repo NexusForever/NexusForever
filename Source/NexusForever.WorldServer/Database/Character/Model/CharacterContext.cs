@@ -25,6 +25,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<Item> Item { get; set; }
         public virtual DbSet<CharacterStat> CharacterStat { get; set; }
+        public virtual DbSet<CharacterProperty> CharacterProperty { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -260,6 +261,33 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterStat)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_stats_stat_id_character_id");
+            });
+            modelBuilder.Entity<CharacterProperty>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Property });
+
+                entity.ToTable("character_properties");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Property)
+                    .HasColumnName("property")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Base)
+                    .HasColumnName("base")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterProperty)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_properties_property_id_character_id");
             });
         }
     }

@@ -59,12 +59,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Inventory   = new Inventory(this, model);
             Session     = session;
 
-            // temp
-            Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
-            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
-            Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
-            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
-
             foreach (ItemVisual itemVisual in Inventory.GetItemVisuals())
                 itemVisuals.Add(itemVisual.Slot, itemVisual);
 
@@ -92,6 +86,11 @@ namespace NexusForever.WorldServer.Game.Entity
                     Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, (float)stat.Value));
             }
             Level = (byte)GetStatValue(Stat.Level);
+
+            foreach(CharacterProperty prop in model.CharacterProperty)
+            {
+                Properties.Add((Property)prop.Property, new PropertyValue((Property)prop.Property, prop.Base, prop.Value));
+            }
         }
 
         public override void Update(double lastTick)
