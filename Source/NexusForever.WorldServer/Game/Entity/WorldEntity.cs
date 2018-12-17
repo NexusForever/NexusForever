@@ -66,7 +66,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 },
                 VisibleItems = itemVisuals.Values.ToList(),
                 Properties   = Properties.Values.ToList(),
-                Faction1    = 166,
+                Faction1    = Faction1,
                 Faction2    = Faction2,
                 DisplayInfo = DisplayInfo,
                 OutfitInfo = OutfitInfo
