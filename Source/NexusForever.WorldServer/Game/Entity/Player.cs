@@ -30,6 +30,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
+        public Faction Faction { get; }
         public List<float> Bones { get; }
 
         public byte Level
@@ -65,6 +66,8 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            Faction     = (Faction)model.FactionId;
+            Faction1    = model.FactionId;
             Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);
@@ -181,7 +184,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = 166, // This does not do anything for the player's "main" faction. Exiles/Dominion
+                    FactionId = (ushort)Faction, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 }
             };
 
