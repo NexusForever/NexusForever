@@ -207,7 +207,39 @@ namespace NexusForever.WorldServer.Game.Entity
                 }
             }
 
+            playerCreate.ItemProficiencies = (uint)GetItemProficiences();
+
             Session.EnqueueMessageEncrypted(playerCreate);
+        }
+
+        public ItemProficiency GetItemProficiences()
+        {
+            ItemProficiency itemProficiencies;
+            switch(Class)
+            {
+                case Class.Esper:
+                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.Psyblade);
+                    break;
+                case Class.Engineer:
+                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.HeavyArmor | ItemProficiency.HeavyGun);
+                    break;
+                case Class.Medic:
+                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.Resonators);
+                    break;
+                case Class.Spellslinger:
+                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.Pistols);
+                    break;
+                case Class.Stalker:
+                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.Claws);
+                    break;
+                case Class.Warrior:
+                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.HeavyArmor | ItemProficiency.GreatWeapon);
+                    break;
+                default:
+                    itemProficiencies = (ItemProficiency.Instrument);
+                    break;
+            }
+            return itemProficiencies;
         }
 
         public override void OnRemoveFromMap()
