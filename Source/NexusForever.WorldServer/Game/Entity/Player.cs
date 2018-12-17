@@ -207,39 +207,17 @@ namespace NexusForever.WorldServer.Game.Entity
                 }
             }
 
-            playerCreate.ItemProficiencies = (uint)GetItemProficiences();
+            playerCreate.ItemProficiencies = GetItemProficiences();
 
             Session.EnqueueMessageEncrypted(playerCreate);
         }
 
-        public ItemProficiency GetItemProficiences()
+        public uint GetItemProficiences()
         {
-            ItemProficiency itemProficiencies;
-            switch(Class)
-            {
-                case Class.Esper:
-                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.Psyblade);
-                    break;
-                case Class.Engineer:
-                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.HeavyArmor | ItemProficiency.HeavyGun);
-                    break;
-                case Class.Medic:
-                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.Resonators);
-                    break;
-                case Class.Spellslinger:
-                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.Pistols);
-                    break;
-                case Class.Stalker:
-                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.Claws);
-                    break;
-                case Class.Warrior:
-                    itemProficiencies = (ItemProficiency.LightArmor | ItemProficiency.MediumArmor | ItemProficiency.HeavyArmor | ItemProficiency.GreatWeapon);
-                    break;
-                default:
-                    itemProficiencies = (ItemProficiency.Instrument);
-                    break;
-            }
-            return itemProficiencies;
+            ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
+            return classEntry.StartingItemProficiencies;
+
+            //TODO: Store proficiences in DB table and load from there. Do they change ever after creation? Perhaps something for use on custom servers?
         }
 
         public override void OnRemoveFromMap()
