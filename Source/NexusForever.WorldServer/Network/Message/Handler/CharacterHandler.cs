@@ -227,35 +227,35 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     Id        = character.Id,
                     Property  = (byte)Property.BaseHealth,
-                    Base      = 200,
+                    BaseValue = 200,
                     Value     = 800
                 });
                 character.CharacterProperty.Add(new CharacterProperty
                 {
                     Id        = character.Id,
                     Property  = (byte)Property.MoveSpeedMultiplier,
-                    Base      = 1,
+                    BaseValue = 1,
                     Value     = 1
                 });
                 character.CharacterProperty.Add(new CharacterProperty
                 {
                     Id        = character.Id,
                     Property  = (byte)Property.JumpHeight,
-                    Base      = 2.5f,
+                    BaseValue = 2.5f,
                     Value     = 2.5f
                 });
                 character.CharacterProperty.Add(new CharacterProperty
                 {
                     Id        = character.Id,
                     Property  = (byte)Property.GravityMultiplier,
-                    Base      = 0.8f,
+                    BaseValue = 0.8f,
                     Value     = 0.8f
                 });
                 character.CharacterProperty.Add(new CharacterProperty
                 {
                     Id        = character.Id,
                     Property  = (byte)Property.HealthRegenMultiplier,
-                    Base      = 0.04f,
+                    BaseValue = 0.04f,
                     Value     = 0.04f
                 });
 

@@ -35,7 +35,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, (float)stat.Value));
             }
 
-            CalculateProperties();
+            foreach(EntityProperty prop in entity.EntityProperty)
+            {
+                Properties.Add((Property)prop.Property, new PropertyValue((Property)prop.Property, prop.BaseValue, prop.Value));
+            }
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -56,6 +59,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void CalculateProperties()
         {
+/**
+			probably obsolete, kept for refernece...
+			live data differs too much from the calculated values
+
             Creature2Entry creature2Entry = GameTableManager.Creature2.GetEntry(CreatureId);
 
             if (creature2Entry == null||creature2Entry.Id<1||creature2Entry.Creature2DifficultyId<1||creature2Entry.Creature2ArcheTypeId<1||creature2Entry.Creature2TierId<1||creature2Entry.UnitRaceId<1)
@@ -81,6 +88,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         * creature2TierEntry.UnitPropertyMultiplier[i];
                 SetPropertyValue((Property)i, values);
             }
+**/
         }
     }
 }

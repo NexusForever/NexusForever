@@ -13,6 +13,7 @@ namespace NexusForever.WorldServer.Database.World
                 return context.Entity
                     .Where(e => e.World == world)
                     .Include(c => c.EntityStat)
+                    .Include(c => c.EntityProperty)
                     .AsNoTracking()
                     .ToImmutableList();
         }
@@ -45,6 +46,13 @@ namespace NexusForever.WorldServer.Database.World
         {
             using (var context = new WorldContext())
                 return context.EntityStat
+                    .AsNoTracking()
+                    .ToImmutableList();
+        }
+        public static ImmutableList<EntityProperty> GetEntityProperties()
+        {
+            using (var context = new WorldContext())
+                return context.EntityProperty
                     .AsNoTracking()
                     .ToImmutableList();
         }

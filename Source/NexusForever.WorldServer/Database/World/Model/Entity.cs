@@ -10,6 +10,7 @@ namespace NexusForever.WorldServer.Database.World.Model
             EntityVendorCategory = new HashSet<EntityVendorCategory>();
             EntityVendorItem = new HashSet<EntityVendorItem>();
             EntityStat = new HashSet<EntityStat>();
+            EntityProperty = new HashSet<EntityProperty>();
         }
 
         public uint Id { get; set; }
@@ -31,5 +32,6 @@ namespace NexusForever.WorldServer.Database.World.Model
         public ICollection<EntityVendorCategory> EntityVendorCategory { get; set; }
         public ICollection<EntityVendorItem> EntityVendorItem { get; set; }
         public ICollection<EntityStat> EntityStat { get; set; }
+        public ICollection<EntityProperty> EntityProperty { get; set; }
     }
 }

@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Entity;
 
-namespace NexusForever.WorldServer.Database.Character.Model
+namespace NexusForever.WorldServer.Database.World.Model
 {
-    public partial class CharacterProperty
+    public partial class EntityProperty
     {
-        public ulong Id { get; set; }
+        public uint Id { get; set; }
         public byte Property { set ; get; }
         public float BaseValue { get; set; }
         public float Value { get; set; }
 
-        public Character IdNavigation { get; set; }
+        public Entity IdNavigation { get; set; }
     }
 }

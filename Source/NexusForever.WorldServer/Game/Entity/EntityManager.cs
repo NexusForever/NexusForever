@@ -12,11 +12,13 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public static ImmutableDictionary<uint, VendorInfo> VendorInfo { get; private set; }
         public static ImmutableDictionary<uint, EntityStat> EntityStat { get; private set; }
+        public static ImmutableDictionary<uint, EntityProperty> EntityProperty { get; private set; }
 
         public static void Initialise()
         {
             InitialiseEntityVendorInfo();
             InitialiseEntityStats();
+            InitialiseEntityProperties();
         }
 
         private static void InitialiseEntityVendorInfo()
@@ -54,6 +56,12 @@ namespace NexusForever.WorldServer.Game.Entity
         private static void InitialiseEntityStats()
         {
             ImmutableDictionary<uint, EntityStat> stats = WorldDatabase.GetEntityStats()
+                .GroupBy(v => v.Id)
+                .ToImmutableDictionary(g => g.Key, g => g.First());
+        }
+        private static void InitialiseEntityProperties()
+        {
+            ImmutableDictionary<uint, EntityProperty> props = WorldDatabase.GetEntityProperties()
                 .GroupBy(v => v.Id)
                 .ToImmutableDictionary(g => g.Key, g => g.First());
         }

@@ -276,7 +276,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("property")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.Base)
+                entity.Property(e => e.BaseValue)
                     .HasColumnName("base")
                     .HasDefaultValueSql("'0'");
 

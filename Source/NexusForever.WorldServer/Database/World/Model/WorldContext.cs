@@ -22,6 +22,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         public virtual DbSet<EntityVendorCategory> EntityVendorCategory { get; set; }
         public virtual DbSet<EntityVendorItem> EntityVendorItem { get; set; }
         public virtual DbSet<EntityStat> EntityStat { get; set; }
+        public virtual DbSet<EntityProperty> EntityProperty { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -193,6 +194,34 @@ namespace NexusForever.WorldServer.Database.World.Model
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__entity_stats_stat_id_character_id");
             });
+            modelBuilder.Entity<EntityProperty>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Property });
+
+                entity.ToTable("entity_properties");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Property)
+                    .HasColumnName("property")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.BaseValue)
+                    .HasColumnName("base")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.EntityProperty)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__entity_properties_property_id_entity_id");
+            });
+
         }
     }
 }

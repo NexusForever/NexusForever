@@ -89,7 +89,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach(CharacterProperty prop in model.CharacterProperty)
             {
-                Properties.Add((Property)prop.Property, new PropertyValue((Property)prop.Property, prop.Base, prop.Value));
+                Properties.Add((Property)prop.Property, new PropertyValue((Property)prop.Property, prop.BaseValue, prop.Value));
             }
         }
 
@@ -383,9 +383,9 @@ namespace NexusForever.WorldServer.Game.Entity
                     EntityEntry<CharacterProperty> entity = context.Attach(model);
 
                     model.Value = property.Value.Value;
-                    model.Base = property.Value.BaseValue;
+                    model.BaseValue = property.Value.BaseValue;
                     entity.Property(p => p.Value).IsModified = true;
-                    entity.Property(p => p.Base).IsModified = true;
+                    entity.Property(p => p.BaseValue).IsModified = true;
                     property.Value.IsModified = false;
                 }
             }
