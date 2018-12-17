@@ -255,8 +255,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     Id        = character.Id,
                     Property  = (byte)Property.HealthRegenMultiplier,
-                    Base      = 0.00465f,
-                    Value     = 0.00465f
+                    Base      = 0.04f,
+                    Value     = 0.04f
                 });
 
                 // create a temporary inventory to create starting gear
