@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Rotation    = owner.Rotation;
             DisplayInfo = 32786;
 
-            SetProperty(Property.BaseHealth, 800.0f);
+            SetPropertyValue(Property.BaseHealth, 800.0f);
 
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
             Stats.Add(Stat.Level, new StatValue(Stat.Level, 3));

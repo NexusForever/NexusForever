@@ -7,8 +7,9 @@ namespace NexusForever.WorldServer.Game.Entity
     public class PropertyValue : IWritable
     {
         public Property Property { get; }
-        public float BaseValue { get; }
+        public float BaseValue { get; set; }
         public float Value { get; set; }
+        public bool IsModified { get; set; }
 
         public PropertyValue(Property property, float baseValue, float value)
         {

@@ -79,7 +79,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         * creature2ArcheTypeEntry.UnitPropertyMultiplier[i]
                         * creature2DifficultyEntry.UnitPropertyMultiplier[i]
                         * creature2TierEntry.UnitPropertyMultiplier[i];
-                SetProperty((Property)i, values);
+                SetPropertyValue((Property)i, values);
             }
         }
     }

@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Stat Stat { get; }
         public StatType Type { get; }
         public float Value { get; set; }
+		public bool IsModified { get; set; }
 
         public StatValue(Stat stat, uint value)
         {

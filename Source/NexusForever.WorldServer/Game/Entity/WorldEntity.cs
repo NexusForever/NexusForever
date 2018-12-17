@@ -73,12 +73,46 @@ namespace NexusForever.WorldServer.Game.Entity
             };
         }
 
-        protected void SetProperty(Property property, float value, float baseValue = 0.0f)
+        protected void SetProperty(Property property, float value, float baseValue)
         {
             if (Properties.ContainsKey(property))
+            {
+                if (Properties[property].Value != value || Properties[property].BaseValue != baseValue)
+                    Properties[property].IsModified = true;
                 Properties[property].Value = value;
+                Properties[property].BaseValue = baseValue;
+            }
             else
                 Properties.Add(property, new PropertyValue(property, baseValue, value));
+        }
+
+        protected void SetPropertyValue(Property property, float value)
+        {
+            if (Properties.ContainsKey(property))
+            {
+                if (Properties[property].Value != value)
+                    Properties[property].IsModified = true;
+                Properties[property].Value = value;
+            }
+            else
+                Properties.Add(property, new PropertyValue(property, 0f, value));
+        }
+
+        protected void SetPropertyBaseValue(Property property, float baseValue)
+        {
+            if (Properties.ContainsKey(property))
+            {
+                if (Properties[property].BaseValue != baseValue)
+                    Properties[property].IsModified = true;
+                Properties[property].BaseValue = baseValue;
+            }
+            else
+                Properties.Add(property, new PropertyValue(property, baseValue, 0f));
+        }
+
+        protected float? GetPropertyBaseValue(Property property)
+        {
+            return Properties.ContainsKey(property) ? Properties[property].BaseValue : default;
         }
 
         protected float? GetPropertyValue(Property property)
@@ -86,7 +120,12 @@ namespace NexusForever.WorldServer.Game.Entity
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
         }
 
-        public float? GetStatValue(Stat stat)
+        protected (float?, float?) GetProperty(Property property)
+        {
+            return Properties.ContainsKey(property) ? (Properties[property].Value, Properties[property].BaseValue) : default;
+        }
+
+        protected float? GetStatValue(Stat stat)
         {
             return Stats.ContainsKey(stat) ? Stats[stat].Value : default;
         }
@@ -94,17 +133,34 @@ namespace NexusForever.WorldServer.Game.Entity
         protected void SetStat(Stat stat, float value)
         {
             if (Stats.ContainsKey(stat))
+            {
+                if (Stats[stat].Value != value)
+                    Stats[stat].IsModified = true;
                 Stats[stat].Value = value;
+            }
             else
                 Stats.Add(stat, new StatValue(stat, value));
+
+            if (Stats[stat].IsModified)
+            {
+                // TODO: incomplete + outsource to method
+                switch(stat)
+                {
+                    case Stat.Level:
+                        // level up
+                        SetPropertyBaseValue(Property.BaseHealth, (value*200));
+                        // do XP stuff etc...
+                        break;
+                    case Stat.Health:
+                        // check if dead
+                        break;
+                }
+            }
         }
 
         protected void SetStat(Stat stat, uint value)
         {
-            if (Stats.ContainsKey(stat))
-                Stats[stat].Value = value;
-            else
-                Stats.Add(stat, new StatValue(stat, value));
+            SetStat(stat, (float)value);
         }
 
         /// <summary>

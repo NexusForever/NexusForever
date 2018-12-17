@@ -335,7 +335,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     Id = CharacterId
                 };
-
                 EntityEntry<Character> entity = context.Attach(model);
                 if ((saveMask & PlayerSaveMask.Location) != 0)
                 {
@@ -353,6 +352,42 @@ namespace NexusForever.WorldServer.Game.Entity
                 }
 
                 saveMask = PlayerSaveMask.None;
+            }
+
+            foreach(KeyValuePair<Stat, StatValue> stat in Stats)
+            {
+                if (stat.Value.IsModified)
+                {
+                    var model = new CharacterStat
+                    {
+                        Id = CharacterId,
+                        Stat = (byte)stat.Key
+                    };
+                    EntityEntry<CharacterStat> entity = context.Attach(model);
+
+                    model.Value = stat.Value.Value;
+                    entity.Property(p => p.Value).IsModified = true;
+                    stat.Value.IsModified = false;
+                }
+            }
+
+            foreach(KeyValuePair<Property, PropertyValue> property in Properties)
+            {
+                if (property.Value.IsModified)
+                {
+                    var model = new CharacterProperty
+                    {
+                        Id = CharacterId,
+                        Property = (byte)property.Key
+                    };
+                    EntityEntry<CharacterProperty> entity = context.Attach(model);
+
+                    model.Value = property.Value.Value;
+                    model.Base = property.Value.BaseValue;
+                    entity.Property(p => p.Value).IsModified = true;
+                    entity.Property(p => p.Base).IsModified = true;
+                    property.Value.IsModified = false;
+                }
             }
             Inventory.Save(context);
             CurrencyManager.Save(context);
