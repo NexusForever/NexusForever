@@ -6,6 +6,6 @@ CREATE TABLE `character_stats` (
     PRIMARY KEY (`id`, `stat`),
     CONSTRAINT `FK__character_stats_stat_id_character_id` FOREIGN KEY (`id`) REFERENCES `character` (`id`) ON DELETE CASCADE
 );
-INSERT INTO `character_stats`(id,stat,type,value) SELECT `id`, 0, 0, 1000 FROM `character`;
+INSERT INTO `character_stats`(id,stat,type,value) SELECT `id`, 0, 0, 800 FROM `character`;
 INSERT INTO `character_stats`(id,stat,type,value) SELECT `id`, 10, 0, `level`   FROM `character`;
 ALTER TABLE `character` DROP COLUMN `level`;
