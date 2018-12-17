@@ -3,7 +3,7 @@
 namespace NexusForever.WorldServer.Game.Entity.Static
 {
     /// <summary>
-    /// Allows setting a <see cref="Player"/>'s <see cref="ItemProficiencies"/> flags.
+    /// Allows setting a <see cref="Player"/>'s <see cref="ItemProficiencies"/> flags to support class <see cref="Item"/>
     /// </summary>
     [Flags]
     public enum ItemProficiency
