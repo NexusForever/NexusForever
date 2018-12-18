@@ -65,6 +65,7 @@
         ServerClientLogout              = 0x0594,
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
+        ClientPathActivate              = 0x06B2,
         ServerPathLog                   = 0x06BC,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
