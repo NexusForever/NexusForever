@@ -168,7 +168,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
-            Session.EnqueueMessageEncrypted(new ServerPathLog());
+            Session.EnqueueMessageEncrypted(new ServerPathLog
+            {
+                ActivePath = (byte)Path.Settler,
+                UnlockedPathMask = 15
+            });
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
             {
@@ -221,6 +225,14 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.AddVisible(entity);
             Session.EnqueueMessageEncrypted(((WorldEntity)entity).BuildCreatePacket());
+
+            if(entity is Player player)
+            {
+                Session.EnqueueMessageEncrypted(new ServerSetUnitPathType {
+                    Guid = player.Guid,
+                    Path = Path.Settler,
+                });
+            }
 
             if (entity == this)
             {

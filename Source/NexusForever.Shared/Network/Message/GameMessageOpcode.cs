@@ -77,6 +77,7 @@
         Server0856                      = 0x0856, // tradeskills
         Server086F                      = 0x086F,
         Server08B3                      = 0x08B3,
+        ServerSetUnitPathType           = 0x08B8,
         ServerVendor                    = 0x090B,
         ServerPlayerCurrencyChanged     = 0x0919,
         ServerItemVisualUpdate          = 0x0933,
