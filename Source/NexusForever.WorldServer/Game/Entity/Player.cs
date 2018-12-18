@@ -168,11 +168,20 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
+            // TODO: Read from Database
             Session.EnqueueMessageEncrypted(new ServerPathLog
             {
-                ActivePath = (byte)Path.Settler,
-                UnlockedPathMask = 15
+                ActivePath = Path.Soldier,
+                PathProgress = new ServerPathLog.Progress
+                {
+                    Soldier   = 0,
+                    Settler   = 0,
+                    Scientist = 0,
+                    Explorer  = 0
+                },
+                UnlockedPathMask = PathUnlocked.Soldier
             });
+
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
             {
