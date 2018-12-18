@@ -21,6 +21,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterBone> CharacterBone { get; set; }
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<Item> Item { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -184,6 +185,62 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterCustomisation)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_customisation_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterPath>(entity =>
+            {
+                entity.HasKey(e => new { e.Id });
+
+                entity.ToTable("character_path");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ActivePath)
+                    .HasColumnName("activePath")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PathsUnlocked)
+                    .HasColumnName("pathsUnlocked")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SoldierXp)
+                    .HasColumnName("soldierXp")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SettlerXp)
+                    .HasColumnName("settlerXp")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ScientistXp)
+                    .HasColumnName("scientistXp")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ExplorerXp)
+                    .HasColumnName("explorerXp")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SoldierLevelRewarded)
+                    .HasColumnName("soldierLevelRewarded")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SettlerLevelRewarded)
+                    .HasColumnName("settlerLevelRewarded")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ScientistLevelRewarded)
+                    .HasColumnName("scientistLevelRewarded")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ExplorerLevelRewarded)
+                    .HasColumnName("explorerLevelRewarded")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Character)
+                    .WithOne(p => p.CharacterPath)
+                    .HasForeignKey<CharacterPath>(d => d.Id)
+                    .HasConstraintName("FK__character_path_id__character_id");
             });
 
             modelBuilder.Entity<Item>(entity =>

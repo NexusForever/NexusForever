@@ -155,6 +155,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     FactionId = (ushort)creationEntry.FactionId
                 };
 
+                PathManager pathManager = new PathManager();
+                character.CharacterPath = new CharacterPath
+                {
+                    ActivePath = characterCreate.Path,
+                    PathsUnlocked = (ushort)pathManager.CalculatePathUnlocked(characterCreate.Path)
+                };
+
                 // merge seperate label and value lists into a single dictonary
                 Dictionary<uint, uint> customisations = characterCreate.Labels
                     .Zip(characterCreate.Values, (l, v) => new { l, v })

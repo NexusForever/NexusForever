@@ -30,6 +30,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
+        public PathEntry Path { get; }
         public List<float> Bones { get; }
 
         public byte Level
@@ -46,6 +47,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
+        public PathManager PathManager { get; }
         public WorldSession Session { get; }
 
         private double timeToSave = SaveDuration;
@@ -65,6 +67,8 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            PathManager = new PathManager(this, model);
+            Path        = PathManager.GetPath(CharacterId);
             Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);
@@ -171,15 +175,15 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO: Read from Database
             Session.EnqueueMessageEncrypted(new ServerPathLog
             {
-                ActivePath = Path.Soldier,
+                ActivePath = Path.ActivePath,
                 PathProgress = new ServerPathLog.Progress
                 {
-                    Soldier   = 0,
-                    Settler   = 0,
-                    Scientist = 0,
-                    Explorer  = 0
+                    Soldier   = Path.SoldierXp,
+                    Settler   = Path.SettlerXp,
+                    Scientist = Path.ScientistXp,
+                    Explorer  = Path.ExplorerXp
                 },
-                UnlockedPathMask = PathUnlocked.Soldier
+                UnlockedPathMask = Path.PathsUnlocked
             });
 
             Session.EnqueueMessageEncrypted(new Server00F1());
@@ -239,7 +243,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Session.EnqueueMessageEncrypted(new ServerSetUnitPathType {
                     Guid = player.Guid,
-                    Path = Path.Settler,
+                    Path = Path.ActivePath,
                 });
             }
 
@@ -390,6 +394,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
             Inventory.Save(context);
             CurrencyManager.Save(context);
+            PathManager.Save(context);
         }
     }
 }

@@ -32,6 +32,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public ICollection<CharacterBone> CharacterBone { get; set; }
         public ICollection<CharacterCurrency> CharacterCurrency { get; set; }
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public CharacterPath CharacterPath { get; set; }
         public ICollection<Item> Item { get; set; }
     }
 }
