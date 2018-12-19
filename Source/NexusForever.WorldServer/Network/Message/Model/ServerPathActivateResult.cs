@@ -4,14 +4,14 @@ using NexusForever.Shared.Network.Message;
 namespace NexusForever.WorldServer.Network.Message.Model
 {
 
-    [Message(GameMessageOpcode.ServerPathCancelActivate, MessageDirection.Server)]
-    public class ServerPathCancelActivate : IWritable
+    [Message(GameMessageOpcode.ServerPathActivateResult, MessageDirection.Server)]
+    public class ServerPathActivateResult : IWritable
     {
-        public byte Reason { get; set; }
+        public byte Result { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Reason);
+            writer.Write(Result);
         }
     }
 }

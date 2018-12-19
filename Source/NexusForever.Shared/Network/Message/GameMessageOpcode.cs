@@ -66,7 +66,7 @@
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
         ClientPathActivate              = 0x06B2,
-        ServerPathCancelActivate        = 0x06B3,
+        ServerPathActivateResult        = 0x06B3,
         ServerPathRefresh               = 0x06B4,
         Server06B5                      = 0x06B5, // Related to Path Mission Unlocking
         Server06BA                      = 0x06BA, // Related to Path Mission Updating
@@ -92,6 +92,7 @@
         ServerEmote                     = 0x093C,
         ClientWhoRequest                = 0x0959,
         ServerWhoResponse               = 0x095A,
+        ServerGrantAccountCurrency      = 0x0967,
         ServerAccountEntitlements       = 0x0968
     }
 }

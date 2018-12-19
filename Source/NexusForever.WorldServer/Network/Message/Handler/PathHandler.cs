@@ -29,8 +29,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             log.Debug($"ClientPathUnlock: Path: {clientPathUnlock.Path}");
 
             Player player = session.Player;
-            byte Result = 0;
-
             // TODO: Handle removing service tokens
             // TODO: Return proper error codes
 

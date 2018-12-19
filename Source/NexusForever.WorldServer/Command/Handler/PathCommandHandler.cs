@@ -33,17 +33,15 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
-        [SubCommandHandler("cancelActivationTest", "Used to simulate cancelling an activation request from client")]
-        public Task AddPathCancelActivationTestSubCommand(CommandContext context, string command, string[] parameters)
+        [SubCommandHandler("unlock", "[pathId] - Unlock a path for this player.")]
+        public Task AddPathUnlockSubCommand(CommandContext context, string command, string[] parameters)
         {
-            byte reason = 1;
             if (parameters.Length > 0)
-                reason = byte.Parse(parameters[0]);
-
-            context.Session.EnqueueMessageEncrypted(new ServerPathCancelActivate
             {
-                Reason = reason
-            });
+                uint unlockPath = uint.Parse(parameters[0]);
+                context.Session.Player.PathManager.UnlockPath((Path)unlockPath);
+            }
+
             return Task.CompletedTask;
         }
 
