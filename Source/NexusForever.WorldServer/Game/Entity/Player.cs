@@ -68,7 +68,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
             PathManager = new PathManager(this, model);
-            Path        = PathManager.GetPath(CharacterId);
+            Path        = PathManager.GetPath();
             Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);

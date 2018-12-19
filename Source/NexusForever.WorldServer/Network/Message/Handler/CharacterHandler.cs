@@ -159,7 +159,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 character.CharacterPath = new CharacterPath
                 {
                     ActivePath = characterCreate.Path,
-                    PathsUnlocked = (ushort)pathManager.CalculatePathUnlocked(characterCreate.Path)
+                    PathsUnlocked = (ushort)pathManager.CalculatePathUnlockedMask((Path)characterCreate.Path)
                 };
 
                 // merge seperate label and value lists into a single dictonary

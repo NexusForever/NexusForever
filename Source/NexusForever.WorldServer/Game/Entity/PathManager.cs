@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using NLog;
+﻿using NLog;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Database.Character.Model;
 
@@ -11,7 +9,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private readonly Player player;
-        private PathEntry pathEntry;
+        private protected PathEntry pathEntry;
 
         public PathManager() { }
 
@@ -34,7 +32,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (activePath < 0)
                 return null;
 
-            PathUnlocked pathUnlocked = CalculatePathUnlocked(activePath);
+            PathUnlocked pathUnlocked = CalculatePathUnlockedMask((Path)activePath);
 
             pathEntry = new PathEntry(
                 player.CharacterId,
@@ -49,7 +47,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         /// <param name="activePath"></param>
         /// <returns></returns>
-        public PathUnlocked CalculatePathUnlocked(byte activePath)
+        public PathUnlocked CalculatePathUnlockedMask(Path activePath)
         {
             PathUnlocked pathUnlocked;
             switch ((Path)activePath)
@@ -74,42 +72,95 @@ namespace NexusForever.WorldServer.Game.Entity
             return pathUnlocked;
         }
 
-        public PathEntry GetPath(ulong characterId)
+        /// <summary>
+        /// Return a <see cref="Player"/>'s <see cref="PathEntry"/>. Create <see cref="Path.Soldier"/> entry if doesn't exist.
+        /// </summary>
+        /// <returns></returns>
+        public PathEntry GetPath()
         {
             if (pathEntry == null)
             {
-                log.Warn("No path associated with character ID. Defaulting to Soldier.");
+                log.Warn($"No path associated with player {player.Name}. Defaulting to Soldier. ");
                 return PathCreate((byte)Path.Soldier);
             }
 
             return pathEntry;
         }
 
-        public void Save(CharacterContext context)
+        /// <summary>
+        /// /// Checks to see if a <see cref="Player"/>'s <see cref="Path"/> is active
+        /// </summary>
+        /// <param name="pathToCheck"></param>
+        /// <returns></returns>
+        public bool IsPathActive(Path pathToCheck)
         {
-            log.Info("PathManager.Save Called");
-            pathEntry.Save(context);
+            if (pathEntry.ActivePath == pathToCheck)
+                return true;
+
+            return false;
         }
 
         /// <summary>
-        /// Create a new <see cref="CharacterCurrency"/>.
+        /// Attempts to activate a <see cref="Player"/>'s <see cref="Path"/>
         /// </summary>
-        //public Currency CurrencyCreate(CurrencyTypeEntry currencyEntry, ulong amount = 0)
-        //{
-        //    if (currencyEntry == null)
-        //        return null;
+        /// <param name="pathToActivate"></param>
+        /// <returns></returns>
+        public bool ActivatePath(Path pathToActivate)
+        {
+            if (IsPathUnlocked(pathToActivate))
+            {
+                if (IsPathActive(pathToActivate))
+                    return false;
 
-        //    if (currencies.ContainsKey((byte)currencyEntry.Id))
-        //        throw new ArgumentException($"Currency {currencyEntry.Id} is already added to the player!");
+                pathEntry.ActivePath = pathToActivate;
+                return true;
+            }
 
-        //    Currency currency = new Currency(
-        //        player.CharacterId,
-        //        currencyEntry,
-        //        amount
-        //    );
-        //    currencies.Add((byte)currencyEntry.Id, currency);
-        //    return currency;
-        //}
+            return false;
+        }
+
+        /// <summary>
+        /// Checks to see if a <see cref="Player"/>'s <see cref="Path"/> is mathced by a corresponding <see cref="PathUnlocked"/> flag
+        /// </summary>
+        /// <param name="pathToUnlock"></param>
+        /// <returns></returns>
+        public bool IsPathUnlocked(Path pathToUnlock)
+        {
+            PathUnlocked newPathMask = CalculatePathUnlockedMask(pathToUnlock);
+            // Determines if the Path is already unlocked
+            if ((pathEntry.PathsUnlocked & newPathMask) == newPathMask)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Attemps to adjust the <see cref="Player"/>'s <see cref="PathUnlocked"/> status
+        /// </summary>
+        /// <param name="pathToUnlock"></param>
+        /// <returns></returns>
+        public bool UnlockPath(Path pathToUnlock)
+        {
+            if (pathToUnlock < 0)
+                return false;
+
+            if (IsPathUnlocked(pathToUnlock))
+                return false;
+
+            pathEntry.PathsUnlocked |= CalculatePathUnlockedMask(pathToUnlock);
+            return true;
+        }
+
+        /// <summary>
+        /// Execute a DB Save of the <see cref="CharacterContext"/>
+        /// </summary>
+        /// <param name="context"></param>
+        public void Save(CharacterContext context)
+        {
+            pathEntry.Save(context);
+        }
 
     }
 }

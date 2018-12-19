@@ -13,17 +13,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandlePathActivate(WorldSession session, ClientPathActivate clientPathActivate)
         {
             log.Debug($"ClientPathActivate: Path: {clientPathActivate.Path}, UseTokens: {clientPathActivate.UseTokens}");
+            Player player = session.Player;
 
-            if(clientPathActivate.UseTokens)
+            if (clientPathActivate.UseTokens)
             {
                 // TODO: Implement block if not enough tokens
                 // TODO: Remove tokens from account and send relevant packet updates
             }
 
-            Player player = session.Player;
-            player.Path.ActivePath = clientPathActivate.Path;
+            if(player.PathManager.ActivatePath(clientPathActivate.Path))
+            {
+                UpdatePathPackets(session, player);
+            }
 
-            UpdatePathPackets(session, player);
+            // TODO: Handle errors
         }
 
         [MessageHandler(GameMessageOpcode.ClientPathUnlock)]
@@ -32,19 +35,36 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             log.Debug($"ClientPathActivate: Path: {clientPathUnlock.Path}");
 
             Player player = session.Player;
+            byte Result = 0;
 
             // TODO: Handle removing service tokens
-            // TODO: Confirm that it's not already unlocked and return proper error codes if it is
-            // TODO: Extend PathManager to modify paths, unlocked paths
-            player.Path.PathsUnlocked |= player.PathManager.CalculatePathUnlocked((byte)clientPathUnlock.Path);
+            // TODO: Return proper error codes
 
-            session.EnqueueMessageEncrypted(new ServerPathUnlockResult
+
+            // TODO: HasEnoughTokens should be a request to a currency manager of somesort
+            bool HasEnoughTokens = true;
+            if(HasEnoughTokens)
             {
-                Result = 1,
-                UnlockedPathMask = player.Path.PathsUnlocked
-            });
+                if(player.PathManager.UnlockPath(clientPathUnlock.Path))
+                {
+                    Result = 1;
+                } else
+                {
+                    // TODO: Return failure result
+                    Result = 2;
+                }
 
-            UpdatePathPackets(session, player);
+                session.EnqueueMessageEncrypted(new ServerPathUnlockResult
+                {
+                    Result = Result,
+                    UnlockedPathMask = player.Path.PathsUnlocked
+                });
+
+                if(Result == 1)
+                {
+                    UpdatePathPackets(session, player);
+                }
+            }
         }
 
         /// <summary>

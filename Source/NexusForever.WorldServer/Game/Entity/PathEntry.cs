@@ -1,7 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -14,15 +12,71 @@ namespace NexusForever.WorldServer.Game.Entity
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public ulong CharacterId { get; set; }
-        public PathUnlocked PathsUnlocked { get; set; }
-        public uint SoldierXp { get; set; }
-        public uint SettlerXp { get; set; }
-        public uint ScientistXp { get; set; }
-        public uint ExplorerXp { get; set; }
         public uint SoldierLevelRewarded { get; set; }
         public uint SettlerLevelRewarded { get; set; }
         public uint ScientistLevelRewarded { get; set; }
         public uint ExplorerLevelRewarded { get; set; }
+
+        public PathUnlocked PathsUnlocked {
+            get => pathsUnlocked;
+            set
+            {
+                pathsUnlocked |= value;
+                saveMask |= PathSaveMask.PathChange;
+            }
+        }
+        private PathUnlocked pathsUnlocked;
+
+        public uint SoldierXp {
+            get => soldierXp;
+            set
+            {
+                if(soldierXp < 0 || value != soldierXp)
+                    throw new ArgumentException("New Soldier XP Value must be 0 or higher, and not equal to current XP total.");
+                soldierXp = value;
+                saveMask |= PathSaveMask.XPChange;
+            }
+        }
+        private uint soldierXp;
+
+        public uint SettlerXp
+        {
+            get => settlerXp;
+            set
+            {
+                if (settlerXp < 0 || value != settlerXp)
+                    throw new ArgumentException("New Settler XP Value must be 0 or higher, and not equal to current XP total.");
+                settlerXp = value;
+                saveMask |= PathSaveMask.XPChange;
+            }
+        }
+        private uint settlerXp;
+
+        public uint ScientistXp
+        {
+            get => scientistXp;
+            set
+            {
+                if (scientistXp < 0 || value != scientistXp)
+                    throw new ArgumentException("New Scientist XP Value must be 0 or higher, and not equal to current XP total.");
+                scientistXp = value;
+                saveMask |= PathSaveMask.XPChange;
+            }
+        }
+        private uint scientistXp;
+
+        public uint ExplorerXp
+        {
+            get => explorerXp;
+            set
+            {
+                if (explorerXp < 0 || value != explorerXp)
+                    throw new ArgumentException("New Explorer XP Value must be 0 or higher, and not equal to current XP total.");
+                explorerXp = value;
+                saveMask |= PathSaveMask.XPChange;
+            }
+        }
+        private uint explorerXp;
 
         public Path ActivePath
         {
@@ -32,7 +86,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (activePath == value && value != 0)
                     throw new ArgumentException("New Active Path must be different than current Active Path");
                 activePath = value;
-                saveMask |= PathSaveMask.Change;
+                saveMask |= PathSaveMask.PathChange;
             }
         }
 
@@ -74,24 +128,18 @@ namespace NexusForever.WorldServer.Game.Entity
             ActivePath = activePath;
             PathsUnlocked = pathsUnlocked;
 
-            log.Info("Received new PathEntry. Setting save mask.");
-
             saveMask = PathSaveMask.Create;
         }
 
         public void Save(CharacterContext context)
         {
-            log.Info("PathEntry.Save Called");
-
             if (saveMask == PathSaveMask.None)
             {
-                log.Info("PathSaveMask == None");
                 return;
             }
 
             if ((saveMask & PathSaveMask.Create) != 0)
             {
-                log.Info("PathSaveMask == Create");
                 // Currency doesn't exist in database, all infomation must be saved
                 context.Add(new CharacterPath
                 {
@@ -100,25 +148,27 @@ namespace NexusForever.WorldServer.Game.Entity
                     PathsUnlocked = (ushort)PathsUnlocked
                 });
             }
-            //else
-            //{
-            //    // Currency already exists in database, save only data that has been modified
-            //    var model = new CharacterCurrency
-            //    {
-            //        Id = CharacterId,
-            //        CurrencyId = (byte)Entry.Id,
-            //    };
+            else
+            {
+                // Currency already exists in database, save only data that has been modified
+                var model = new CharacterPath
+                {
+                    Id = CharacterId
+                };
 
-            //    // could probably clean this up with reflection, works for the time being
-            //    EntityEntry<CharacterCurrency> entity = context.Attach(model);
-            //    if ((saveMask & CurrencySaveMask.Amount) != 0)
-            //    {
-            //        model.Amount = Amount;
-            //        entity.Property(p => p.Amount).IsModified = true;
-            //    }
-            //}
+                EntityEntry<CharacterPath> entity = context.Attach(model);
+                if ((saveMask & PathSaveMask.PathChange) != 0)
+                {
+                    model.ActivePath = (byte)ActivePath;
+                    entity.Property(p => p.ActivePath).IsModified = true;
 
-            log.Info("Clearing PathSaveMask");
+                    model.PathsUnlocked = (ushort)PathsUnlocked;
+                    entity.Property(p => p.PathsUnlocked).IsModified = true;
+                }
+
+                //TODO: Handle saving XP and level-up rewards
+            }
+
             saveMask = PathSaveMask.None;
         }
     }

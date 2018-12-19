@@ -8,10 +8,11 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     [Flags]
     public enum PathSaveMask
     {
-        None               = 0x0000,
-        Create             = 0x0001,
-        Delete             = 0x0002,
-        Change             = 0x0004,
-        LevelUp            = 0x0008
+        None                = 0x0000,
+        Create              = 0x0001,
+        Delete              = 0x0002,
+        PathChange          = 0x0004,
+        XPChange            = 0x0008,
+        LevelChange         = 0x0016
     }
 }
