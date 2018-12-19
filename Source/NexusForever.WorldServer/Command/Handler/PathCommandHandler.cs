@@ -30,9 +30,6 @@ namespace NexusForever.WorldServer.Command.Handler
 
             context.Session.Player.PathManager.ActivatePath((Path)newPath);
 
-            context.Session.Player.PathManager.SendSetUnitPathTypePacket();
-            context.Session.Player.PathManager.SendPathLogPacket();
-
             return Task.CompletedTask;
         }
 

@@ -20,14 +20,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 // TODO: Implement block if not enough tokens
                 // TODO: Remove tokens from account and send relevant packet updates
             }
-
-            if(player.PathManager.ActivatePath(clientPathActivate.Path))
-            {
-                player.PathManager.SendSetUnitPathTypePacket();
-                player.PathManager.SendPathLogPacket();
-            }
-
-            // TODO: Handle errors
+            player.PathManager.ActivatePath(clientPathActivate.Path);
         }
 
         [MessageHandler(GameMessageOpcode.ClientPathUnlock)]
@@ -46,25 +39,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             bool HasEnoughTokens = true;
             if(HasEnoughTokens)
             {
-                if(player.PathManager.UnlockPath(clientPathUnlock.Path))
-                {
-                    Result = 1;
-                } else
-                {
-                    // TODO: Return failure result
-                    Result = 2;
-                }
-
-                session.EnqueueMessageEncrypted(new ServerPathUnlockResult
-                {
-                    Result = Result,
-                    UnlockedPathMask = player.PathManager.GetPathEntry().PathsUnlocked
-                });
-
-                if(Result == 1)
-                {
-                    player.PathManager.SendPathLogPacket();
-                }
+                player.PathManager.UnlockPath(clientPathUnlock.Path);
             }
         }
     }

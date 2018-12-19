@@ -2,6 +2,7 @@
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Network.Message.Model;
+using System;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -95,7 +96,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Path GetPath()
         {
             if (pathEntry == null)
-                throw new System.ArgumentException("No pathEntry exists. This should be called from the Player context.");
+                throw new ArgumentException("No pathEntry exists. This should be called from the Player context.");
 
             return pathEntry.ActivePath;
         }
@@ -118,19 +119,22 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         /// <param name="pathToActivate"></param>
         /// <returns></returns>
-        public bool ActivatePath(Path pathToActivate)
+        public void ActivatePath(Path pathToActivate)
         {
             if (IsPathUnlocked(pathToActivate))
             {
                 if (IsPathActive(pathToActivate))
-                    return false;
+                    throw new ArgumentException("Path is already active.");
 
                 pathEntry.ActivePath = pathToActivate;
                 player.Path = pathEntry.ActivePath;
-                return true;
+                SendSetUnitPathTypePacket();
+                SendPathLogPacket();
             }
-
-            return false;
+            else
+            {
+                throw new ArgumentException("Path is not unlocked.");
+            }
         }
 
         /// <summary>
@@ -155,16 +159,18 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         /// <param name="pathToUnlock"></param>
         /// <returns></returns>
-        public bool UnlockPath(Path pathToUnlock)
+        public void UnlockPath(Path pathToUnlock)
         {
+            byte Result = 1; // 1 == Ok?
             if (pathToUnlock < 0)
-                return false;
+                throw new ArgumentException("Path is not recognised.");
 
             if (IsPathUnlocked(pathToUnlock))
-                return false;
+                throw new ArgumentException("Path is already unlocked.");
 
             pathEntry.PathsUnlocked |= CalculatePathUnlockedMask(pathToUnlock);
-            return true;
+            SendServerPathUnlockResult(Result);
+            SendPathLogPacket();
         }
 
         /// <summary>
@@ -182,7 +188,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public void SendPathLogPacket()
         {
             if(player == null)
-                throw new System.ArgumentException("Needs player context to execute SendPathLogPacket()");
+                throw new ArgumentException("Needs player context to execute SendPathLogPacket()");
 
             player.Session.EnqueueMessageEncrypted(new ServerPathLog
             {
@@ -204,12 +210,24 @@ namespace NexusForever.WorldServer.Game.Entity
         public void SendSetUnitPathTypePacket()
         {
             if (player == null)
-                throw new System.ArgumentException("Needs player context to execute SendPathLogPacket()");
+                throw new ArgumentException("Needs player context to execute SendPathLogPacket()");
 
             player.Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
             {
                 Guid = player.Guid,
-                Path = player.Path,
+                Path = pathEntry.ActivePath,
+            });
+        }
+
+        public void SendServerPathUnlockResult(byte Result = 1)
+        {
+            if (player == null)
+                throw new ArgumentException("Needs player context to execute SendPathLogPacket()");
+
+            player.Session.EnqueueMessageEncrypted(new ServerPathUnlockResult
+            {
+                Result = Result,
+                UnlockedPathMask = pathEntry.PathsUnlocked
             });
         }
 
