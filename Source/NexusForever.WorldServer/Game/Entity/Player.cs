@@ -68,7 +68,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
             PathManager = new PathManager(this, model);
-            Path        = PathManager.GetPath();
+            Path        = PathManager.GetPathEntry();
             Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);
@@ -172,19 +172,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
-            // TODO: Read from Database
-            Session.EnqueueMessageEncrypted(new ServerPathLog
-            {
-                ActivePath = Path.ActivePath,
-                PathProgress = new ServerPathLog.Progress
-                {
-                    Soldier   = Path.SoldierXp,
-                    Settler   = Path.SettlerXp,
-                    Scientist = Path.ScientistXp,
-                    Explorer  = Path.ExplorerXp
-                },
-                UnlockedPathMask = Path.PathsUnlocked
-            });
+            PathManager.SendPathLogPacket();
 
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
@@ -241,10 +229,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if(entity is Player player)
             {
-                Session.EnqueueMessageEncrypted(new ServerSetUnitPathType {
-                    Guid = player.Guid,
-                    Path = Path.ActivePath,
-                });
+                player.PathManager.SendSetUnitPathTypePacket();
             }
 
             if (entity == this)

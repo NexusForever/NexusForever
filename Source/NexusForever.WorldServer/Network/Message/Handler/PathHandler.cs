@@ -74,23 +74,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         /// <param name="player"></param>
         public static void UpdatePathPackets(WorldSession session, Player player)
         {
-            session.EnqueueMessageEncrypted(new ServerSetUnitPathType
-            {
-                Guid = player.Guid,
-                Path = player.Path.ActivePath,
-            });
-            session.EnqueueMessageEncrypted(new ServerPathLog
-            {
-                ActivePath = player.Path.ActivePath,
-                PathProgress = new ServerPathLog.Progress
-                {
-                    Soldier = player.Path.SoldierXp,
-                    Settler = player.Path.SettlerXp,
-                    Scientist = player.Path.ScientistXp,
-                    Explorer = player.Path.ExplorerXp
-                },
-                UnlockedPathMask = player.Path.PathsUnlocked
-            });
+            player.PathManager.SendSetUnitPathTypePacket();
+            player.PathManager.SendPathLogPacket();
         }
     }
 }

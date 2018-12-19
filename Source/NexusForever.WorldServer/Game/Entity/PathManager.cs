@@ -1,6 +1,7 @@
 ﻿using NLog;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -76,7 +77,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// Return a <see cref="Player"/>'s <see cref="PathEntry"/>. Create <see cref="Path.Soldier"/> entry if doesn't exist.
         /// </summary>
         /// <returns></returns>
-        public PathEntry GetPath()
+        public PathEntry GetPathEntry()
         {
             if (pathEntry == null)
             {
@@ -85,6 +86,18 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             return pathEntry;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="Path"/> for this <see cref="Player"/>
+        /// </summary>
+        /// <returns></returns>
+        public Path GetPath()
+        {
+            if (pathEntry == null)
+                throw new System.ArgumentException("No pathEntry exists. This should be called from the Player context.");
+
+            return pathEntry.ActivePath;
         }
 
         /// <summary>
@@ -160,6 +173,43 @@ namespace NexusForever.WorldServer.Game.Entity
         public void Save(CharacterContext context)
         {
             pathEntry.Save(context);
+        }
+
+        /// <summary>
+        /// Used to update the Player's Path Log.
+        /// </summary>
+        public void SendPathLogPacket()
+        {
+            if(player == null)
+                throw new System.ArgumentException("Needs player context to execute SendPathLogPacket()");
+
+            player.Session.EnqueueMessageEncrypted(new ServerPathLog
+            {
+                ActivePath = pathEntry.ActivePath,
+                PathProgress = new ServerPathLog.Progress
+                {
+                    Soldier = pathEntry.SoldierXp,
+                    Settler = pathEntry.SettlerXp,
+                    Scientist = pathEntry.ScientistXp,
+                    Explorer = pathEntry.ExplorerXp
+                },
+                UnlockedPathMask = pathEntry.PathsUnlocked
+            });
+        }
+
+        /// <summary>
+        /// Used to tell the world (and the player) which Path Type this Player is.
+        /// </summary>
+        public void SendSetUnitPathTypePacket()
+        {
+            if (player == null)
+                throw new System.ArgumentException("Needs player context to execute SendPathLogPacket()");
+
+            player.Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
+            {
+                Guid = player.Guid,
+                Path = player.Path.ActivePath,
+            });
         }
 
     }
