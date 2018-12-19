@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         [SubCommandHandler("activate", "pathId - Activate a path for this player.")]
-        public Task AddPathSubCommand(CommandContext context, string command, string[] parameters)
+        public Task AddPathActivateSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length <= 0)
                 return Task.CompletedTask;
@@ -26,7 +26,6 @@ namespace NexusForever.WorldServer.Command.Handler
             uint newPath = 0;
             if (parameters.Length > 0)
                 newPath = uint.Parse(parameters[0]);
-            log.Info($"Received {command}: {parameters}, {newPath}");
 
             context.Session.Player.Path.ActivePath = (Path)newPath;
 
@@ -48,6 +47,27 @@ namespace NexusForever.WorldServer.Command.Handler
                 UnlockedPathMask = context.Session.Player.Path.PathsUnlocked
             });
 
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("cancelActivationTest", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathCancelActivationTestSubCommand(CommandContext context, string command, string[] parameters)
+        {
+            byte reason = 1;
+            if (parameters.Length > 0)
+                reason = byte.Parse(parameters[0]);
+
+            context.Session.EnqueueMessageEncrypted(new ServerPathCancelActivate
+            {
+                Reason = reason
+            });
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTestSubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new ServerPathRefresh());
             return Task.CompletedTask;
         }
     }
