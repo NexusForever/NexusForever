@@ -23,6 +23,37 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             Player player = session.Player;
             player.Path.ActivePath = clientPathActivate.Path;
 
+            UpdatePathPackets(session, player);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientPathUnlock)]
+        public static void HandlePathUnlock(WorldSession session, ClientPathUnlock clientPathUnlock)
+        {
+            log.Debug($"ClientPathActivate: Path: {clientPathUnlock.Path}");
+
+            Player player = session.Player;
+
+            // TODO: Handle removing service tokens
+            // TODO: Confirm that it's not already unlocked and return proper error codes if it is
+            // TODO: Extend PathManager to modify paths, unlocked paths
+            player.Path.PathsUnlocked |= player.PathManager.CalculatePathUnlocked((byte)clientPathUnlock.Path);
+
+            session.EnqueueMessageEncrypted(new ServerPathUnlockResult
+            {
+                Result = 1,
+                UnlockedPathMask = player.Path.PathsUnlocked
+            });
+
+            UpdatePathPackets(session, player);
+        }
+
+        /// <summary>
+        /// Used to update shared path packets between certain functions
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="player"></param>
+        public static void UpdatePathPackets(WorldSession session, Player player)
+        {
             session.EnqueueMessageEncrypted(new ServerSetUnitPathType
             {
                 Guid = player.Guid,

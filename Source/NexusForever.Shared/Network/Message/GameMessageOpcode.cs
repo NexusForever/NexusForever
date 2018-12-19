@@ -68,6 +68,8 @@
         ClientPathActivate              = 0x06B2,
         ServerPathCancelActivate        = 0x06B3,
         ServerPathRefresh               = 0x06B4,
+        ClientPathUnlock                = 0x06BD,
+        ServerPathUnlockResult          = 0x06BE,
         ServerPathLog                   = 0x06BC,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
