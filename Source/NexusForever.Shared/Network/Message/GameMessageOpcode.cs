@@ -68,6 +68,8 @@
         ClientPathActivate              = 0x06B2,
         ServerPathCancelActivate        = 0x06B3,
         ServerPathRefresh               = 0x06B4,
+        Server06B5                      = 0x06B5, // Related to Path Mission Unlocking
+        Server06BA                      = 0x06BA, // Related to Path Mission Updating
         ClientPathUnlock                = 0x06BD,
         ServerPathUnlockResult          = 0x06BE,
         ServerPathLog                   = 0x06BC,
