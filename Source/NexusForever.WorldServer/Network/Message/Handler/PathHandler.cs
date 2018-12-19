@@ -23,7 +23,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             if(player.PathManager.ActivatePath(clientPathActivate.Path))
             {
-                UpdatePathPackets(session, player);
+                player.PathManager.SendSetUnitPathTypePacket();
+                player.PathManager.SendPathLogPacket();
             }
 
             // TODO: Handle errors
@@ -32,7 +33,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientPathUnlock)]
         public static void HandlePathUnlock(WorldSession session, ClientPathUnlock clientPathUnlock)
         {
-            log.Debug($"ClientPathActivate: Path: {clientPathUnlock.Path}");
+            log.Debug($"ClientPathUnlock: Path: {clientPathUnlock.Path}");
 
             Player player = session.Player;
             byte Result = 0;
@@ -57,25 +58,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.EnqueueMessageEncrypted(new ServerPathUnlockResult
                 {
                     Result = Result,
-                    UnlockedPathMask = player.Path.PathsUnlocked
+                    UnlockedPathMask = player.PathManager.GetPathEntry().PathsUnlocked
                 });
 
                 if(Result == 1)
                 {
-                    UpdatePathPackets(session, player);
+                    player.PathManager.SendPathLogPacket();
                 }
             }
-        }
-
-        /// <summary>
-        /// Used to update shared path packets between certain functions
-        /// </summary>
-        /// <param name="session"></param>
-        /// <param name="player"></param>
-        public static void UpdatePathPackets(WorldSession session, Player player)
-        {
-            player.PathManager.SendSetUnitPathTypePacket();
-            player.PathManager.SendPathLogPacket();
         }
     }
 }

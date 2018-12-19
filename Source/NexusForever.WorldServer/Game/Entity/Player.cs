@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
-        public PathEntry Path { get; }
+        public Path Path { get; set; }
         public List<float> Bones { get; }
 
         public byte Level
@@ -68,7 +68,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
             PathManager = new PathManager(this, model);
-            Path        = PathManager.GetPathEntry();
+            Path        = PathManager.GetPath();
             Faction2    = model.FactionId;
 
             Inventory   = new Inventory(this, model);

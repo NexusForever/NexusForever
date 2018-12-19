@@ -126,6 +126,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     return false;
 
                 pathEntry.ActivePath = pathToActivate;
+                player.Path = pathEntry.ActivePath;
                 return true;
             }
 
@@ -208,7 +209,7 @@ namespace NexusForever.WorldServer.Game.Entity
             player.Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
             {
                 Guid = player.Guid,
-                Path = player.Path.ActivePath,
+                Path = player.Path,
             });
         }
 

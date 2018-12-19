@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -27,25 +28,10 @@ namespace NexusForever.WorldServer.Command.Handler
             if (parameters.Length > 0)
                 newPath = uint.Parse(parameters[0]);
 
-            context.Session.Player.Path.ActivePath = (Path)newPath;
+            context.Session.Player.PathManager.ActivatePath((Path)newPath);
 
-            context.Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
-            {
-                Guid = context.Session.Player.Guid,
-                Path = context.Session.Player.Path.ActivePath,
-            });
-            context.Session.EnqueueMessageEncrypted(new ServerPathLog
-            {
-                ActivePath = context.Session.Player.Path.ActivePath,
-                PathProgress = new ServerPathLog.Progress
-                {
-                    Soldier = context.Session.Player.Path.SoldierXp,
-                    Settler = context.Session.Player.Path.SettlerXp,
-                    Scientist = context.Session.Player.Path.ScientistXp,
-                    Explorer = context.Session.Player.Path.ExplorerXp
-                },
-                UnlockedPathMask = context.Session.Player.Path.PathsUnlocked
-            });
+            context.Session.Player.PathManager.SendSetUnitPathTypePacket();
+            context.Session.Player.PathManager.SendPathLogPacket();
 
             return Task.CompletedTask;
         }
@@ -67,7 +53,33 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("test", "Used to simulate cancelling an activation request from client")]
         public Task AddPathTestSubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.EnqueueMessageEncrypted(new ServerPathRefresh());
+            context.Session.EnqueueMessageEncrypted(new Server06B5
+            {
+                Unknown0 = 9,
+                UnknownStructures = new List<Server06B5.UnknownStructure>{
+                    new Server06B5.UnknownStructure
+                    {
+                        Unknown0 = 35,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    }
+                }
+            });
+            context.Session.EnqueueMessageEncrypted(new Server06BA
+            {
+                UnknownStructures = new List<Server06BA.UnknownStructure>{
+                    new Server06BA.UnknownStructure
+                    {
+                        Unknown0 = 35,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0,
+                        Unknown4 = 1,
+                        Unknown5 = 0
+                    }
+                }
+            });
             return Task.CompletedTask;
         }
     }
