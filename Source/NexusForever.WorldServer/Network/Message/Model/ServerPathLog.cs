@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public Path ActivePath { get; set; }
         public Progress PathProgress { get; set; }
         public PathUnlocked UnlockedPathMask { get; set; }
-        public uint Unknown3 { get; set; }
+        public int ActivateTimer { get; set; } // > 0 = On. < 0 = Off.
 
         public void Write(GamePacketWriter writer)
         {
@@ -50,7 +50,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             PathProgress.Write(writer);
 
             writer.Write(UnlockedPathMask, 4);
-            writer.Write(Unknown3);
+            writer.Write(ActivateTimer);
         }
     }
 }

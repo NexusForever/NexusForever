@@ -201,7 +201,8 @@ namespace NexusForever.WorldServer.Game.Entity
                     Scientist = pathEntry.ScientistXp,
                     Explorer = pathEntry.ExplorerXp
                 },
-                UnlockedPathMask = pathEntry.PathsUnlocked
+                UnlockedPathMask = pathEntry.PathsUnlocked,
+                ActivateTimer = 0 //-938144978
             });
         }
 

@@ -8,30 +8,30 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.Server06B5, MessageDirection.Server)]
     public class Server06B5 : IWritable
     {
-        public class UnknownStructure : IWritable
+        public class Mission : IWritable
         {
-            public uint Unknown0 { get; set; }
+            public uint MissionId { get; set; }
             public bool Unknown1 { get; set; }
             public uint Unknown2 { get; set; }
             public uint Unknown3 { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0, 15);
+                writer.Write(MissionId, 15);
                 writer.Write(Unknown1);
                 writer.Write(Unknown2);
                 writer.Write(Unknown3);
             }
         }
 
-        public ushort Unknown0 { get; set; }
-        public List<UnknownStructure> UnknownStructures { get; set; } = new List<UnknownStructure>();
+        public ushort EpisodeId { get; set; }
+        public List<Mission> Missions { get; set; } = new List<Mission>();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0, 14);
-            writer.Write(UnknownStructures.Count);
-            UnknownStructures.ForEach(e => e.Write(writer));
+            writer.Write(EpisodeId, 14);
+            writer.Write(Missions.Count);
+            Missions.ForEach(e => e.Write(writer));
         }
     }
 }

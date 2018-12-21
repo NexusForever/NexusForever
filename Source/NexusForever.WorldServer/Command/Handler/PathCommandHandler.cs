@@ -48,34 +48,183 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("test", "Used to simulate cancelling an activation request from client")]
         public Task AddPathTestSubCommand(CommandContext context, string command, string[] parameters)
         {
+            //uint unk0 = uint.Parse(parameters[0]);
             context.Session.EnqueueMessageEncrypted(new Server06B5
             {
-                Unknown0 = 9,
-                UnknownStructures = new List<Server06B5.UnknownStructure>{
-                    new Server06B5.UnknownStructure
+                EpisodeId = 28, // EpisodeID
+                Missions = new List<Server06B5.Mission>{
+                    new Server06B5.Mission
                     {
-                        Unknown0 = 35,
+                        MissionId = 42, // MissionID
+                        Unknown1 = true,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    },
+                    new Server06B5.Mission
+                    {
+                        MissionId = 160,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    },
+                    new Server06B5.Mission
+                    {
+                        MissionId = 648,
                         Unknown1 = false,
                         Unknown2 = 0,
                         Unknown3 = 0
                     }
                 }
             });
-            context.Session.EnqueueMessageEncrypted(new Server06BA
+
+            context.Session.EnqueueMessageEncrypted(new Server06B5
             {
-                UnknownStructures = new List<Server06BA.UnknownStructure>{
-                    new Server06BA.UnknownStructure
+                EpisodeId = 18, // EpisodeID
+                Missions = new List<Server06B5.Mission>{
+                    new Server06B5.Mission
                     {
-                        Unknown0 = 35,
+                        MissionId = 1048, // MissionID
                         Unknown1 = false,
                         Unknown2 = 0,
-                        Unknown3 = 0,
+                        Unknown3 = 0
+                    },
+                    new Server06B5.Mission
+                    {
+                        MissionId = 1056,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    },
+                    new Server06B5.Mission
+                    {
+                        MissionId = 1057,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    }
+                }
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test1", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest1SubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new Server06BF
+            {
+                Unknown0 = 426, //
+                Unknown1 = 28  // EpisodeID
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test2", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest2SubCommand(CommandContext context, string command, string[] parameters)
+        {
+
+            context.Session.EnqueueMessageEncrypted(new Server06B6
+            {
+                Unknown0 = 28, // EpisodeID
+                Unknown1 = 1
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test3", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest3SubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new Server06B7
+            {
+                Unknown0 = 18 // EpisodeID
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test4", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest4SubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new Server06B8
+            {
+                Unknown0 = 0,
+                Unknown1 = 28 // EpisodeID
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test5", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest5SubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new Server06B9
+            {
+                Unknown0 = 28, // EpisodeID
+                Unknown1 = 0,
+                Unknown2 = 0
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test6", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest6SubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new Server06BA
+            {
+                Missions = new List<Server06BA.Mission>{
+                    new Server06BA.Mission
+                    {
+                        MissionId = 160, 
+                        Completed = false, 
+                        ProgressPercent = 0, 
+                        MissionStep = 1, 
+                        Unknown4 = 0,
+                        Unknown5 = 0
+                    }
+                }
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test7", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest7SubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new Server06BB
+            {
+                MissionId = 42,
+                Completed = true,
+                ProgressPercent = 0,
+                MissionStep = 0 
+            });
+
+            return Task.CompletedTask;
+        }
+
+        [SubCommandHandler("test8", "Used to simulate cancelling an activation request from client")]
+        public Task AddPathTest8SubCommand(CommandContext context, string command, string[] parameters)
+        {
+            context.Session.EnqueueMessageEncrypted(new Server06BA
+            {
+                Missions = new List<Server06BA.Mission>{
+                    new Server06BA.Mission
+                    {
+                        MissionId = 42,
+                        Completed = false,
+                        ProgressPercent = 0,
+                        MissionStep = 1,
                         Unknown4 = 1,
                         Unknown5 = 0
                     }
                 }
             });
+
             return Task.CompletedTask;
         }
+
+
     }
 }
