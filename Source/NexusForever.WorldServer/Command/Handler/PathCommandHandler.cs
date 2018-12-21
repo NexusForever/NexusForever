@@ -181,7 +181,7 @@ namespace NexusForever.WorldServer.Command.Handler
                         Completed = false, 
                         ProgressPercent = 0, 
                         MissionStep = 1, 
-                        Unknown4 = 0,
+                        Unknown4 = 1,
                         Unknown5 = 0
                     }
                 }
@@ -204,27 +204,53 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
-        [SubCommandHandler("test8", "Used to simulate cancelling an activation request from client")]
-        public Task AddPathTest8SubCommand(CommandContext context, string command, string[] parameters)
+        [SubCommandHandler("testexplorer", "This should show Northern Wilds with 1 mission discovered/complete & Algoroc with 0 missions discovered")]
+        public Task AddPathTestExplorerSubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.EnqueueMessageEncrypted(new Server06BA
+            // TODO: Figure out the missing packet(s) to "show" Server06B5 to the client
+
+            context.Session.EnqueueMessageEncrypted(new Server06B5
             {
-                Missions = new List<Server06BA.Mission>{
-                    new Server06BA.Mission
+                EpisodeId = 9,
+                Missions = new List<Server06B5.Mission>{
+                    new Server06B5.Mission
                     {
-                        MissionId = 42,
-                        Completed = false,
-                        ProgressPercent = 0,
-                        MissionStep = 1,
-                        Unknown4 = 1,
-                        Unknown5 = 0
+                        MissionId = 35,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    },
+                    new Server06B5.Mission
+                    {
+                        MissionId = 36,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    },
+                    new Server06B5.Mission
+                    {
+                        MissionId = 158,
+                        Unknown1 = false,
+                        Unknown2 = 0,
+                        Unknown3 = 0
+                    },
+                    new Server06B5.Mission
+                    {
+                        MissionId = 1254,
+                        Unknown1 = true,
+                        Unknown2 = 0,
+                        Unknown3 = 0
                     }
                 }
             });
 
+            context.Session.EnqueueMessageEncrypted(new Server06BF
+            {
+                Unknown0 = 23,
+                Unknown1 = 39
+            });
+
             return Task.CompletedTask;
         }
-
-
     }
 }
