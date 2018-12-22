@@ -3,6 +3,7 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using System;
 using System.Collections.Generic;
@@ -166,7 +167,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in buybackItem.CurrencyAdditions)
                 session.Player.CurrencyManager.CurrencySubtractAmount(entry.Key, entry.Value);
 
-            session.Player.Inventory.AddItem(buybackItem.Item, buybackItem.Item.Location);
+            session.Player.Inventory.AddItem(buybackItem.Item, InventoryLocation.Inventory);
             session.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
             {
                 BuybackItemId = buybackItem.BuybackItemId

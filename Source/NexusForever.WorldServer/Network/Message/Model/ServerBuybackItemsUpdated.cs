@@ -34,11 +34,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
             foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in BuybackItem.CurrencyAdditions)
                 writer.Write(entry.Value);
             for (int i = 0; i < 2 - BuybackItem.CurrencyAdditions.Count; i++)
-                writer.Write(0);
+                writer.Write(0ul);
             foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in BuybackItem.CurrencyAdditions)
                 writer.Write(entry.Key.Id);
             for (int i = 0; i < 2 - BuybackItem.CurrencyAdditions.Count; i++)
-                writer.Write(0);
+                writer.Write(0ul);
             writer.Write(UnkE);
         }
     }

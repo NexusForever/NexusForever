@@ -120,7 +120,21 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 throw new ArgumentException($"InventoryLocation {inventoryLocation} is full!");
             }
+            
+            // Stacks are bought back in full, so no need to worry about splitting stacks
             AddItem(item, inventoryLocation, bagIndex);
+
+            if (!player?.IsLoading ?? false)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerItemAdd
+                {
+                    InventoryItem = new InventoryItem
+                    {
+                        Item = item.BuildNetworkItem(),
+                        Reason = 49
+                    }
+                });
+            }
         }
 
         /// <summary>
