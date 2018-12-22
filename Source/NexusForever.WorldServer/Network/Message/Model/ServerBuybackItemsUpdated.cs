@@ -8,19 +8,19 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ServerBuybackItemsUpdated : IWritable
     {
         public BuybackItem BuybackItem { get; set;}
-        public ulong Unk3 { get; set; } = 0;
-        public uint Unk4 { get; set; } = 0;
-        public ulong Unk5 { get; set; } = 0;
-        public ulong Unk6 { get; set; } = 0;
-        public uint Unk7 { get; set; } = 0;
+        public ulong Unk3 { get; set; }
+        public uint Unk4 { get; set; }
+        public ulong Unk5 { get; set; }
+        public ulong Unk6 { get; set; }
+        public uint Unk7 { get; set; }
         public byte[] Unk8 { get; set; } = new byte[20];
         public byte[] Unk9 { get; set; } = new byte[32];
-        public uint UnkE { get; set; } = 0;
+        public uint UnkE { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(BuybackItem.BuybackItemId);
-            writer.Write(BuybackItem.Item2Entry.Id, 18);
+            writer.Write(BuybackItem.Item.Entry.Id, 18);
             writer.Write(BuybackItem.Quantity);
             writer.Write(Unk3);
             writer.Write(Unk4);

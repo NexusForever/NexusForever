@@ -132,7 +132,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             Item soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
             BuybackItem buybackItem = new BuybackItem
             {
-                Item2Entry = soldItem.Entry,
+                Item = soldItem,
                 CurrencyTypeId0 = (byte)currency0.Entry.Id,
                 CurrencyTypeId1 = (byte)currency1.Entry.Id,
                 CurrencyAmount0 = calculatedCost0,
@@ -179,7 +179,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (currency1 != null)
                 session.Player.CurrencyManager.CurrencySubtractAmount(currency1.Entry, buybackItem.CurrencyAmount1);
 
-            session.Player.Inventory.ItemCreate(buybackItem.Item2Entry.Id, 1);
+            session.Player.Inventory.AddItem(buybackItem.Item, buybackItem.Item.Location);
             session.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
             {
                 BuybackItemId = buybackItem.BuybackItemId

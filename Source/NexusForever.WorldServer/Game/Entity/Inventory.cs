@@ -109,6 +109,21 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Add <see cref="Item"/> in the first available bag index for the given <see cref="InventoryLocation"/> .
+        /// </summary>
+        public void AddItem(Item item, InventoryLocation inventoryLocation)
+        {
+            Bag bag = GetBag(inventoryLocation);
+            uint bagIndex = bag.GetFirstAvailableBagIndex();
+
+            if (bagIndex == uint.MaxValue)
+            {
+                throw new ArgumentException($"InventoryLocation {inventoryLocation} is full!");
+            }
+            AddItem(item, inventoryLocation, bagIndex);
+        }
+
+        /// <summary>
         /// Create a new <see cref="Item"/> in the first available <see cref="EquippedItem"/> bag index.
         /// </summary>
         public void ItemCreate(Item2Entry itemEntry)
