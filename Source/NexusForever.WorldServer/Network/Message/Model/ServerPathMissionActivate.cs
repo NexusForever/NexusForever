@@ -5,31 +5,33 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server06B5, MessageDirection.Server)]
-    public class Server06B5 : IWritable
+    [Message(GameMessageOpcode.ServerPathMissionActivate, MessageDirection.Server)]
+    public class ServerPathMissionActivate : IWritable
     {
         public class Mission : IWritable
         {
             public uint MissionId { get; set; }
-            public bool Unknown1 { get; set; }
-            public uint Unknown2 { get; set; }
-            public uint Unknown3 { get; set; }
+            public bool Completed { get; set; }
+            public uint ProgressPercent { get; set; }
+            public uint MissionStep { get; set; }
+            public byte Unknown4 { get; set; } 
+            public uint Unknown5 { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(MissionId, 15);
-                writer.Write(Unknown1);
-                writer.Write(Unknown2);
-                writer.Write(Unknown3);
+                writer.Write(Completed);
+                writer.Write(ProgressPercent);
+                writer.Write(MissionStep);
+                writer.Write(Unknown4, 3);
+                writer.Write(Unknown5);
             }
         }
 
-        public ushort EpisodeId { get; set; }
         public List<Mission> Missions { get; set; } = new List<Mission>();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(EpisodeId, 14);
             writer.Write(Missions.Count);
             Missions.ForEach(e => e.Write(writer));
         }

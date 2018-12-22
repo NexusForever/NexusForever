@@ -49,61 +49,61 @@ namespace NexusForever.WorldServer.Command.Handler
         public Task AddPathTestSubCommand(CommandContext context, string command, string[] parameters)
         {
             //uint unk0 = uint.Parse(parameters[0]);
-            context.Session.EnqueueMessageEncrypted(new Server06B5
-            {
-                EpisodeId = 28, // EpisodeID
-                Missions = new List<Server06B5.Mission>{
-                    new Server06B5.Mission
-                    {
-                        MissionId = 42, // MissionID
-                        Unknown1 = true,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    },
-                    new Server06B5.Mission
-                    {
-                        MissionId = 160,
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    },
-                    new Server06B5.Mission
-                    {
-                        MissionId = 648,
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    }
-                }
-            });
+            //context.Session.EnqueueMessageEncrypted(new Server06B5
+            //{
+            //    EpisodeId = 28, // EpisodeID
+            //    Missions = new List<Server06B5.Mission>{
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 42, // MissionID
+            //            Unknown1 = true,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        },
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 160,
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        },
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 648,
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        }
+            //    }
+            //});
 
-            context.Session.EnqueueMessageEncrypted(new Server06B5
-            {
-                EpisodeId = 18, // EpisodeID
-                Missions = new List<Server06B5.Mission>{
-                    new Server06B5.Mission
-                    {
-                        MissionId = 1048, // MissionID
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    },
-                    new Server06B5.Mission
-                    {
-                        MissionId = 1056,
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    },
-                    new Server06B5.Mission
-                    {
-                        MissionId = 1057,
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    }
-                }
-            });
+            //context.Session.EnqueueMessageEncrypted(new Server06B5
+            //{
+            //    EpisodeId = 18, // EpisodeID
+            //    Missions = new List<Server06B5.Mission>{
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 1048, // MissionID
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        },
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 1056,
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        },
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 1057,
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        }
+            //    }
+            //});
 
             return Task.CompletedTask;
         }
@@ -111,10 +111,10 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("test1", "Used to simulate cancelling an activation request from client")]
         public Task AddPathTest1SubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.EnqueueMessageEncrypted(new Server06BF
+            context.Session.EnqueueMessageEncrypted(new ServerPathCurrentEpisode
             {
                 Unknown0 = 426, //
-                Unknown1 = 28  // EpisodeID
+                EpisodeId = 28  // EpisodeID
             });
 
             return Task.CompletedTask;
@@ -123,11 +123,12 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("test2", "Used to simulate cancelling an activation request from client")]
         public Task AddPathTest2SubCommand(CommandContext context, string command, string[] parameters)
         {
-
+            ushort unk0 = ushort.Parse(parameters[0]);
+            uint unk1 = uint.Parse(parameters[1]);
             context.Session.EnqueueMessageEncrypted(new Server06B6
             {
-                Unknown0 = 28, // EpisodeID
-                Unknown1 = 1
+                Unknown0 = unk0, // EpisodeID
+                Unknown1 = unk1
             });
 
             return Task.CompletedTask;
@@ -136,9 +137,10 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("test3", "Used to simulate cancelling an activation request from client")]
         public Task AddPathTest3SubCommand(CommandContext context, string command, string[] parameters)
         {
+            ushort unk0 = ushort.Parse(parameters[0]);
             context.Session.EnqueueMessageEncrypted(new Server06B7
             {
-                Unknown0 = 18 // EpisodeID
+                Unknown0 = unk0 // EpisodeID
             });
 
             return Task.CompletedTask;
@@ -172,10 +174,10 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("test6", "Used to simulate cancelling an activation request from client")]
         public Task AddPathTest6SubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.EnqueueMessageEncrypted(new Server06BA
+            context.Session.EnqueueMessageEncrypted(new ServerPathMissionActivate
             {
-                Missions = new List<Server06BA.Mission>{
-                    new Server06BA.Mission
+                Missions = new List<ServerPathMissionActivate.Mission>{
+                    new ServerPathMissionActivate.Mission
                     {
                         MissionId = 160, 
                         Completed = false, 
@@ -193,7 +195,7 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("test7", "Used to simulate cancelling an activation request from client")]
         public Task AddPathTest7SubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.EnqueueMessageEncrypted(new Server06BB
+            context.Session.EnqueueMessageEncrypted(new ServerPathMissionUpdate
             {
                 MissionId = 42,
                 Completed = true,
@@ -209,45 +211,45 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             // TODO: Figure out the missing packet(s) to "show" Server06B5 to the client
 
-            context.Session.EnqueueMessageEncrypted(new Server06B5
-            {
-                EpisodeId = 9,
-                Missions = new List<Server06B5.Mission>{
-                    new Server06B5.Mission
-                    {
-                        MissionId = 35,
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    },
-                    new Server06B5.Mission
-                    {
-                        MissionId = 36,
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    },
-                    new Server06B5.Mission
-                    {
-                        MissionId = 158,
-                        Unknown1 = false,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    },
-                    new Server06B5.Mission
-                    {
-                        MissionId = 1254,
-                        Unknown1 = true,
-                        Unknown2 = 0,
-                        Unknown3 = 0
-                    }
-                }
-            });
+            //context.Session.EnqueueMessageEncrypted(new Server06B5
+            //{
+            //    EpisodeId = 9,
+            //    Missions = new List<Server06B5.Mission>{
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 35,
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        },
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 36,
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        },
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 158,
+            //            Unknown1 = false,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        },
+            //        new Server06B5.Mission
+            //        {
+            //            MissionId = 1254,
+            //            Unknown1 = true,
+            //            Unknown2 = 0,
+            //            Unknown3 = 0
+            //        }
+            //    }
+            //});
 
-            context.Session.EnqueueMessageEncrypted(new Server06BF
+            context.Session.EnqueueMessageEncrypted(new ServerPathCurrentEpisode
             {
                 Unknown0 = 23,
-                Unknown1 = 39
+                EpisodeId = 39
             });
 
             return Task.CompletedTask;

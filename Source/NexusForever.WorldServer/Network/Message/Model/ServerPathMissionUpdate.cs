@@ -5,8 +5,8 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server06BB, MessageDirection.Server)]
-    public class Server06BB : IWritable
+    [Message(GameMessageOpcode.ServerPathMissionUpdate, MessageDirection.Server)]
+    public class ServerPathMissionUpdate : IWritable
     {
         public ushort MissionId { get; set; }
         public bool Completed { get; set; }
