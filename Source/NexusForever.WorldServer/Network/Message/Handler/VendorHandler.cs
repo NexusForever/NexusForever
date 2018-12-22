@@ -113,12 +113,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             float sellMultiplier = VendorInfo.SellPriceMultiplier * vendorSell.Quantity;
 
             Dictionary<CurrencyTypeEntry, ulong> additions = new Dictionary<CurrencyTypeEntry, ulong>();
-            for (int i = 0; i < itemEntry.CurrencyTypeId.Length; i++)
+            for (int i = 0; i < itemEntry.CurrencyTypeIdSellToVendor.Length; i++)
             {
-                Currency currency = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId[i]);
+                Currency currency = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeIdSellToVendor[i]);
                 if (currency == null)
                     continue;
-                ulong calculatedCost = (ulong)(itemEntry.CurrencyAmount[i] * sellMultiplier);
+                ulong calculatedCost = (ulong)(itemEntry.CurrencyAmountSellToVendor[i] * sellMultiplier);
                 additions[currency.Entry] = calculatedCost;
             }
 
