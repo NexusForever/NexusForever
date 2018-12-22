@@ -1,6 +1,8 @@
-﻿using NexusForever.Shared.Network;
+﻿using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -29,10 +31,14 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Unk7, 18);
             writer.WriteBytes(Unk8, 20);
             writer.WriteBytes(Unk9, 32);
-            writer.Write(BuybackItem.CurrencyAmount0);
-            writer.Write(BuybackItem.CurrencyAmount1);
-            writer.Write(BuybackItem.CurrencyTypeId0, 4);
-            writer.Write(BuybackItem.CurrencyTypeId1, 4);
+            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in BuybackItem.CurrencyAdditions)
+                writer.Write(entry.Value);
+            for (int i = 0; i < 2 - BuybackItem.CurrencyAdditions.Count; i++)
+                writer.Write(0);
+            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in BuybackItem.CurrencyAdditions)
+                writer.Write(entry.Key.Id);
+            for (int i = 0; i < 2 - BuybackItem.CurrencyAdditions.Count; i++)
+                writer.Write(0);
             writer.Write(UnkE);
         }
     }

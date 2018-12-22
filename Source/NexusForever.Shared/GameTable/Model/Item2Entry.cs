@@ -36,14 +36,14 @@ namespace NexusForever.Shared.GameTable.Model
         public uint Flags;
         public uint BindFlags;
         public uint BuyFromVendorStackCount;
-        public uint CurrencyTypeId0;
-        public uint CurrencyTypeId1;
-        public uint CurrencyAmount0;
-        public uint CurrencyAmount1;
-        public uint CurrencyTypeId0SellToVendor;
-        public uint CurrencyTypeId1SellToVendor;
-        public uint CurrencyAmount0SellToVendor;
-        public uint CurrencyAmount1SellToVendor;
+        [GameTableFieldArray(2)]
+        public uint[] CurrencyTypeId;
+        [GameTableFieldArray(2)]
+        public uint[] CurrencyAmount;
+        [GameTableFieldArray(2)]
+        public uint[] CurrencyTypeIdSellToVendor;
+        [GameTableFieldArray(2)]
+        public uint[] CurrencyAmountSellToVendor;
         public uint ItemColorSetId;
         public float SupportPowerPercentage;
         public uint LocalizedTextIdName;

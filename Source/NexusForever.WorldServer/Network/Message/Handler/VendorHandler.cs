@@ -5,6 +5,7 @@ using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -77,24 +78,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             Item2Entry itemEntry = GameTableManager.Item.GetEntry(vendorItem.ItemId);
             float costMultiplier = vendorPurchase.VendorItemQty * VendorInfo.BuyPriceMultiplier;
-            Currency currency0 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId0);
-            Currency currency1 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId1);
-            ulong calculatedCost0 = (ulong)(itemEntry.CurrencyAmount0 * costMultiplier);
-            ulong calculatedCost1 = (ulong)(itemEntry.CurrencyAmount1 * costMultiplier);
+            Dictionary<CurrencyTypeEntry, ulong> subtractions = new Dictionary<CurrencyTypeEntry, ulong>();
+            for (int i = 0; i < itemEntry.CurrencyTypeId.Length; i++)
+            {
+                Currency currency = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId[i]);
+                if (currency == null)
+                    continue;
+                ulong calculatedCost = (ulong)(itemEntry.CurrencyAmount[i] * costMultiplier);
+                if (currency != null && currency.Amount < calculatedCost)
+                    return; // Player does not have enough currency, abort
+                subtractions[currency.Entry] = calculatedCost;
+            }
+            
+            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in subtractions)
+                session.Player.CurrencyManager.CurrencySubtractAmount(entry.Key, entry.Value);
 
-            if (currency0 != null && currency0.Amount < itemEntry.CurrencyAmount0 * costMultiplier)
-                return;
-
-            if (currency1 != null && currency1.Amount < itemEntry.CurrencyAmount1 * costMultiplier)
-                return;
-
-            if (currency0 != null)
-                session.Player.CurrencyManager.CurrencySubtractAmount(currency0.Entry, calculatedCost0);
-
-            if (currency1 != null)
-                session.Player.CurrencyManager.CurrencySubtractAmount(currency1.Entry, calculatedCost1);
-
-            var item = new Game.Entity.Item(session.Player.CharacterId, itemEntry, Math.Min(1, itemEntry.MaxStackCount));
             session.Player.Inventory.ItemCreate(itemEntry.Id, vendorPurchase.VendorItemQty * itemEntry.BuyFromVendorStackCount);
         }
 
@@ -113,45 +111,39 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 return;
 
             float sellMultiplier = VendorInfo.SellPriceMultiplier * vendorSell.Quantity;
-            Currency currency0 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId0);
-            Currency currency1 = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId1);
-            ulong calculatedCost0 = (uint)(itemEntry.CurrencyAmount0SellToVendor * sellMultiplier);
-            ulong calculatedCost1 = (uint)(itemEntry.CurrencyAmount1SellToVendor * sellMultiplier);
 
-            if (currency0 == null)
-                currency0 = session.Player.CurrencyManager.GetCurrency(1);
-            if (currency1 == null)
-                currency1 = session.Player.CurrencyManager.GetCurrency(1);
-
+            Dictionary<CurrencyTypeEntry, ulong> additions = new Dictionary<CurrencyTypeEntry, ulong>();
+            for (int i = 0; i < itemEntry.CurrencyTypeId.Length; i++)
+            {
+                Currency currency = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId[i]);
+                if (currency == null)
+                    continue;
+                ulong calculatedCost = (ulong)(itemEntry.CurrencyAmount[i] * sellMultiplier);
+                additions[currency.Entry] = calculatedCost;
+            }
 
             // TODO Insert calculation for cost here
-            if (calculatedCost0 == 0 && calculatedCost1 == 0)
-                calculatedCost0 = 1;
 
             // TODO Figure out why this is showing "You deleted [item]"
             Item soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
+
+            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in additions)
+                session.Player.CurrencyManager.CurrencyAddAmount(entry.Key, entry.Value);
+
             BuybackItem buybackItem = new BuybackItem
             {
                 Item = soldItem,
-                CurrencyTypeId0 = (byte)currency0.Entry.Id,
-                CurrencyTypeId1 = (byte)currency1.Entry.Id,
-                CurrencyAmount0 = calculatedCost0,
-                CurrencyAmount1 = calculatedCost1,
+                CurrencyAdditions = additions,
                 BuybackItemId = session.Player.highestBuybackId++,
                 Quantity = vendorSell.Quantity
             };
+
             session.Player.BuybackItems.Add(buybackItem.BuybackItemId, buybackItem);
 
             session.EnqueueMessageEncrypted(new ServerBuybackItemsUpdated
             {
                 BuybackItem = buybackItem
             });
-
-            if (currency0 != null)
-                session.Player.CurrencyManager.CurrencyAddAmount((byte)currency0.Entry.Id, calculatedCost0);
-
-            if (currency1 != null)
-                session.Player.CurrencyManager.CurrencyAddAmount((byte)currency1.Entry.Id, calculatedCost1);
         }
 
 
@@ -164,20 +156,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             //TODO Ensure player has room in inventory
 
-            Currency currency0 = session.Player.CurrencyManager.GetCurrency(buybackItem.CurrencyTypeId0);
-            Currency currency1 = session.Player.CurrencyManager.GetCurrency(buybackItem.CurrencyTypeId1);
+            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in buybackItem.CurrencyAdditions)
+            {
+                Currency currency = session.Player.CurrencyManager.GetCurrency(entry.Key.Id);
+                if (currency != null && currency.Amount < entry.Value)
+                    return;  // Player does not have enough currency, abort
+            }
 
-            if (currency0 != null && currency0.Amount < buybackItem.CurrencyAmount0)
-                return;
-
-            if (currency1 != null && currency1.Amount < buybackItem.CurrencyAmount1)
-                return;
-
-            if (currency0 != null)
-                session.Player.CurrencyManager.CurrencySubtractAmount(currency0.Entry, buybackItem.CurrencyAmount0);
-
-            if (currency1 != null)
-                session.Player.CurrencyManager.CurrencySubtractAmount(currency1.Entry, buybackItem.CurrencyAmount1);
+            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in buybackItem.CurrencyAdditions)
+                session.Player.CurrencyManager.CurrencySubtractAmount(entry.Key, entry.Value);
 
             session.Player.Inventory.AddItem(buybackItem.Item, buybackItem.Item.Location);
             session.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
