@@ -96,7 +96,10 @@ namespace NexusForever.WorldServer.Game.Entity
         public Path GetPath()
         {
             if (pathEntry == null)
-                throw new ArgumentException("No pathEntry exists. This should be called from the Player context.");
+            {
+                log.Warn($"No path associated with player {player.Name}. Defaulting to Soldier. ");
+                return PathCreate((byte)Path.Soldier).ActivePath;
+            }
 
             return pathEntry.ActivePath;
         }
