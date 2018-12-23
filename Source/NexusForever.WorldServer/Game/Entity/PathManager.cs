@@ -197,12 +197,12 @@ namespace NexusForever.WorldServer.Game.Entity
             player.Session.EnqueueMessageEncrypted(new ServerPathLog
             {
                 ActivePath = pathEntry.ActivePath,
-                PathProgress = new ServerPathLog.Progress
+                PathProgress = new uint[]
                 {
-                    Soldier = pathEntry.SoldierXp,
-                    Settler = pathEntry.SettlerXp,
-                    Scientist = pathEntry.ScientistXp,
-                    Explorer = pathEntry.ExplorerXp
+                    pathEntry.SoldierXp,
+                    pathEntry.SettlerXp,
+                    pathEntry.SoldierXp,
+                    pathEntry.ExplorerXp
                 },
                 UnlockedPathMask = pathEntry.PathsUnlocked,
                 ActivateTimer = 0 //-938144978

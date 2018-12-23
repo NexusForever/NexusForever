@@ -7,39 +7,9 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerPathLog, MessageDirection.Server)]
     public class ServerPathLog : IWritable
     {
-        public class Progress
-        {
-            public Progress() { }
-
-            public Progress(uint soldier, uint settler, uint scientist, uint explorer)
-            {
-                Soldier     = soldier;
-                Settler     = settler;
-                Scientist   = scientist;
-                Explorer    = explorer;
-            }
-
-            public uint Soldier { get; set; }
-            public uint Settler { get; set; }
-            public uint Scientist { get; set; }
-            public uint Explorer { get; set; }
-
-            public void Write(GamePacketWriter writer)
-            {
-                uint[] unlockedArray = new uint[4]{
-                    Soldier,
-                    Settler,
-                    Scientist,
-                    Explorer
-                };
-
-                for (uint i = 0u; i < unlockedArray.Length; i++)
-                    writer.Write(unlockedArray[i]);
-            }
-        }
 
         public Path ActivePath { get; set; }
-        public Progress PathProgress { get; set; }
+        public uint[] PathProgress { get; set; } = new uint[4];
         public PathUnlocked UnlockedPathMask { get; set; }
         public int ActivateTimer { get; set; } // > 0 = On. < 0 = Off.
 
@@ -47,7 +17,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             writer.Write(ActivePath, 3);
 
-            PathProgress.Write(writer);
+            for (uint i = 0u; i < PathProgress.Length; i++)
+                writer.Write(PathProgress[i]);
 
             writer.Write(UnlockedPathMask, 4);
             writer.Write(ActivateTimer);
