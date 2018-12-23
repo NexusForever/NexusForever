@@ -8,7 +8,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ClientPathActivate : IReadable
     {
         public Path Path { get; private set; }
-        public bool UseTokens { get; private set; } // Possibly used to say user is spending service tokens to Activate ahead of timer?
+        public bool UseTokens { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

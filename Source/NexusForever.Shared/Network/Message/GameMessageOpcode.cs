@@ -98,7 +98,6 @@
         ServerEmote                     = 0x093C,
         ClientWhoRequest                = 0x0959,
         ServerWhoResponse               = 0x095A,
-        ServerGrantAccountCurrency      = 0x0967,
         ServerAccountEntitlements       = 0x0968
     }
 }
