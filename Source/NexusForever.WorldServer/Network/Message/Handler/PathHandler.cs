@@ -35,10 +35,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             // TODO: HasEnoughTokens should be a request to a currency manager of somesort
             bool HasEnoughTokens = true;
-            if(HasEnoughTokens)
-            {
+            if (HasEnoughTokens)
                 player.PathManager.UnlockPath(clientPathUnlock.Path);
-            }
         }
     }
 }
