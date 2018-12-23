@@ -227,10 +227,8 @@ namespace NexusForever.WorldServer.Game.Entity
             base.AddVisible(entity);
             Session.EnqueueMessageEncrypted(((WorldEntity)entity).BuildCreatePacket());
 
-            if(entity is Player player)
-            {
+            if (entity is Player player)
                 player.PathManager.SendSetUnitPathTypePacket();
-            }
 
             if (entity == this)
             {
