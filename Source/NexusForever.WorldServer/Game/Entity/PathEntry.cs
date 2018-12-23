@@ -17,7 +17,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public uint ScientistLevelRewarded { get; set; }
         public uint ExplorerLevelRewarded { get; set; }
 
-        public PathUnlocked PathsUnlocked {
+        public PathUnlocked PathsUnlocked
+        {
             get => pathsUnlocked;
             set
             {
@@ -27,12 +28,14 @@ namespace NexusForever.WorldServer.Game.Entity
         }
         private PathUnlocked pathsUnlocked;
 
-        public uint SoldierXp {
+        public uint SoldierXp
+        {
             get => soldierXp;
             set
             {
-                if(soldierXp < 0 || value != soldierXp)
+                if (value < soldierXp)
                     throw new ArgumentException("New Soldier XP Value must be 0 or higher, and not equal to current XP total.");
+
                 soldierXp = value;
                 saveMask |= PathSaveMask.XPChange;
             }
@@ -44,8 +47,9 @@ namespace NexusForever.WorldServer.Game.Entity
             get => settlerXp;
             set
             {
-                if (settlerXp < 0 || value != settlerXp)
+                if (value < settlerXp)
                     throw new ArgumentException("New Settler XP Value must be 0 or higher, and not equal to current XP total.");
+
                 settlerXp = value;
                 saveMask |= PathSaveMask.XPChange;
             }
@@ -57,8 +61,9 @@ namespace NexusForever.WorldServer.Game.Entity
             get => scientistXp;
             set
             {
-                if (scientistXp < 0 || value != scientistXp)
+                if (value < scientistXp)
                     throw new ArgumentException("New Scientist XP Value must be 0 or higher, and not equal to current XP total.");
+
                 scientistXp = value;
                 saveMask |= PathSaveMask.XPChange;
             }
@@ -70,8 +75,9 @@ namespace NexusForever.WorldServer.Game.Entity
             get => explorerXp;
             set
             {
-                if (explorerXp < 0 || value != explorerXp)
+                if (value < explorerXp)
                     throw new ArgumentException("New Explorer XP Value must be 0 or higher, and not equal to current XP total.");
+
                 explorerXp = value;
                 saveMask |= PathSaveMask.XPChange;
             }
@@ -85,6 +91,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 if (activePath == value && value != 0)
                     throw new ArgumentException("New Active Path must be different than current Active Path");
+
                 activePath = value;
                 saveMask |= PathSaveMask.PathChange;
             }
@@ -93,11 +100,6 @@ namespace NexusForever.WorldServer.Game.Entity
         private Path activePath;
 
         private PathSaveMask saveMask;
-
-        public PathEntry()
-        {
-
-        }
 
         /// <summary>
         /// Create a new <see cref="PathEntry"/> for a <see cref="Player"/> from <see cref="CharacterPath"/>
@@ -134,9 +136,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public void Save(CharacterContext context)
         {
             if (saveMask == PathSaveMask.None)
-            {
                 return;
-            }
 
             if ((saveMask & PathSaveMask.Create) != 0)
             {
