@@ -12,19 +12,19 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             public uint MissionId { get; set; }
             public bool Completed { get; set; }
-            public uint ProgressPercent { get; set; }
-            public uint MissionStep { get; set; }
-            public byte Unknown4 { get; set; } 
-            public uint Unknown5 { get; set; }
+            public uint Userdata { get; set; } // % of mission progress
+            public uint Statedata { get; set; } // 
+            public byte Reason { get; set; } 
+            public uint Giver { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(MissionId, 15);
                 writer.Write(Completed);
-                writer.Write(ProgressPercent);
-                writer.Write(MissionStep);
-                writer.Write(Unknown4, 3);
-                writer.Write(Unknown5);
+                writer.Write(Userdata);
+                writer.Write(Statedata);
+                writer.Write(Reason, 3);
+                writer.Write(Giver);
             }
         }
 
