@@ -155,11 +155,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     FactionId = (ushort)creationEntry.FactionId
                 };
 
-                PathManager pathManager = new PathManager();
                 character.CharacterPath = new CharacterPath
                 {
                     ActivePath = characterCreate.Path,
-                    PathsUnlocked = (ushort)pathManager.CalculatePathUnlockedMask((Path)characterCreate.Path)
+                    PathsUnlocked = (ushort)(PathUnlocked)(1 << characterCreate.Path)
                 };
 
                 // merge seperate label and value lists into a single dictonary
