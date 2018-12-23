@@ -237,6 +237,11 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("explorerLevelRewarded")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.PathActivatedTimestamp)
+                    .HasColumnName("pathActivatedTimestamp")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
                 entity.HasOne(d => d.Character)
                     .WithOne(p => p.CharacterPath)
                     .HasForeignKey<CharacterPath>(d => d.Id)

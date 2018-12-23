@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public uint SettlerLevelRewarded { get; set; }
         public uint ScientistLevelRewarded { get; set; }
         public uint ExplorerLevelRewarded { get; set; }
+        public DateTime PathActivatedTimestamp { get; set; }
 
         public Character Character { get; set; }
     }

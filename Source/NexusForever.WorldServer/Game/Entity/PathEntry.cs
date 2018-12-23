@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public uint SettlerLevelRewarded { get; set; }
         public uint ScientistLevelRewarded { get; set; }
         public uint ExplorerLevelRewarded { get; set; }
+        public DateTime PathActivatedTimestamp { get; set; }
 
         public PathUnlocked PathsUnlocked
         {

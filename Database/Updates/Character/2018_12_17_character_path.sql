@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `character_path` (
   `settlerLevelRewarded` int(10) unsigned NOT NULL DEFAULT '0',
   `scientistLevelRewarded` int(10) unsigned NOT NULL DEFAULT '0',
   `explorerLevelRewarded` int(10) unsigned NOT NULL DEFAULT '0',
+  `pathActivatedTimestamp` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `FK_character_path_id__character_id` FOREIGN KEY (`id`) REFERENCES `character` (`id`) ON DELETE CASCADE
 )
