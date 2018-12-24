@@ -35,7 +35,7 @@ namespace NexusForever.WorldServer.Game.Entity
             pathEntry = new PathEntry(
                 player.CharacterId,
                 (Path)activePath,
-                (PathUnlocked)(1 << activePath)
+                (PathUnlockedMask)(1 << activePath)
             );
             return pathEntry;
         }
@@ -104,19 +104,19 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Checks to see if a <see cref="Player"/>'s <see cref="Path"/> is mathced by a corresponding <see cref="PathUnlocked"/> flag
+        /// Checks to see if a <see cref="Player"/>'s <see cref="Path"/> is mathced by a corresponding <see cref="PathUnlockedMask"/> flag
         /// </summary>
         /// <param name="pathToUnlock"></param>
         /// <returns></returns>
         public bool IsPathUnlocked(Path pathToUnlock)
         {
-            PathUnlocked newPathMask = (PathUnlocked)(1 << (int)pathToUnlock);
+            PathUnlockedMask newPathMask = (PathUnlockedMask)(1 << (int)pathToUnlock);
             // Determines if the Path is already unlocked
             return (pathEntry.PathsUnlocked & newPathMask) == newPathMask;
         }
 
         /// <summary>
-        /// Attemps to adjust the <see cref="Player"/>'s <see cref="PathUnlocked"/> status
+        /// Attemps to adjust the <see cref="Player"/>'s <see cref="PathUnlockedMask"/> status
         /// </summary>
         /// <param name="pathToUnlock"></param>
         /// <returns></returns>
@@ -129,7 +129,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (IsPathUnlocked(pathToUnlock))
                 throw new ArgumentException("Path is already unlocked.");
 
-            pathEntry.PathsUnlocked |= (PathUnlocked)(1 << (int)pathToUnlock);
+            pathEntry.PathsUnlocked |= (PathUnlockedMask)(1 << (int)pathToUnlock);
             SendServerPathUnlockResult(Result);
             SendPathLogPacket();
         }
@@ -158,7 +158,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     pathEntry.ScientistXp,
                     pathEntry.ExplorerXp
                 },
-                UnlockedPathMask = pathEntry.PathsUnlocked,
+                PathUnlockedMask = pathEntry.PathsUnlocked,
                 ActivateTimer = 0 //-938144978
             });
         }

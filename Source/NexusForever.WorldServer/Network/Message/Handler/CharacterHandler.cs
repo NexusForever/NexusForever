@@ -158,7 +158,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 character.CharacterPath = new CharacterPath
                 {
                     ActivePath = characterCreate.Path,
-                    PathsUnlocked = (ushort)(PathUnlocked)(1 << characterCreate.Path)
+                    PathsUnlocked = (ushort)(PathUnlockedMask)(1 << characterCreate.Path)
                 };
 
                 // merge seperate label and value lists into a single dictonary

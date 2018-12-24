@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public uint ExplorerLevelRewarded { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
 
-        public PathUnlocked PathsUnlocked
+        public PathUnlockedMask PathsUnlocked
         {
             get => pathsUnlocked;
             set
@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask |= PathSaveMask.PathChange;
             }
         }
-        private PathUnlocked pathsUnlocked;
+        private PathUnlockedMask pathsUnlocked;
 
         public uint SoldierXp
         {
@@ -109,7 +109,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             CharacterId = model.Id;
             ActivePath = (Path)model.ActivePath;
-            PathsUnlocked = (PathUnlocked)model.PathsUnlocked;
+            PathsUnlocked = (PathUnlockedMask)model.PathsUnlocked;
             SoldierXp = model.SoldierXp;
             SettlerXp = model.SettlerXp;
             ScientistXp = model.ScientistXp;
@@ -125,7 +125,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="PathEntry"/>
         /// </summary>
-        public PathEntry(ulong owner, Path activePath, PathUnlocked pathsUnlocked)
+        public PathEntry(ulong owner, Path activePath, PathUnlockedMask pathsUnlocked)
         {
             CharacterId = owner;
             ActivePath = activePath;

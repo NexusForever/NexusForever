@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ServerPathUnlockResult : IWritable
     {
         public byte Result { get; set; }
-        public PathUnlocked UnlockedPathMask { get; set; }
+        public PathUnlockedMask UnlockedPathMask { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

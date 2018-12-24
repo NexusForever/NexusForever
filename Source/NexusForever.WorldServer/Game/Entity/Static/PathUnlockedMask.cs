@@ -6,7 +6,7 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     /// Allows a flag to unlock <see cref="Path"/> for <see cref="Player"/>.
     /// </summary>
     [Flags]
-    public enum PathUnlocked
+    public enum PathUnlockedMask
     {
         Soldier     = 1,
         Settler     = 2,
