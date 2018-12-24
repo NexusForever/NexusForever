@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer
             DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
 
             GameTableManager.Initialise();
-
+            SearchManager.Initialise();
             EntityManager.Initialise();
             EntityCommandManager.Initialise();
 
