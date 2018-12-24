@@ -8,8 +8,8 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     [Flags]
     public enum PvPFlag
     {
-        Disabled    = 0,
-        Enabled     = 1,
-        Forced      = 2, // Disables "Turn On/Off PvP" in Portrait.
+        Disabled    = 0x00,
+        Enabled     = 0x01,
+        Forced      = 0x02  // Disables "Turn On/Off PvP" in Portrait.
     }
 }

@@ -30,7 +30,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
-        public Faction Faction { get; }
         public List<float> Bones { get; }
 
         public byte Level
@@ -66,9 +65,8 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
-            Faction     = (Faction)model.FactionId;
-            Faction1    = model.FactionId;
-            Faction2    = model.FactionId;
+            Faction1    = (Faction)model.FactionId;
+            Faction2    = (Faction)model.FactionId;
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -184,7 +182,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = (ushort)Faction, // This does not do anything for the player's "main" faction. Exiles/Dominion
+                    FactionId = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 }
             };
 
@@ -212,10 +210,10 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(playerCreate);
         }
 
-        public uint GetItemProficiences()
+        public ItemProficiency GetItemProficiences()
         {
             ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
-            return classEntry.StartingItemProficiencies;
+            return (ItemProficiency)classEntry.StartingItemProficiencies;
 
             //TODO: Store proficiences in DB table and load from there. Do they change ever after creation? Perhaps something for use on custom servers?
         }
