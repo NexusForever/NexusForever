@@ -148,9 +148,9 @@ namespace NexusForever.WorldServer.Game.Entity
             durability  = model.Durability;
 
             if ((InventoryLocation)model.Location != InventoryLocation.Ability)
-				Entry       = GameTableManager.Item.GetEntry(model.ItemId);
-			else
-				SpellEntry  = GameTableManager.Spell4Base.GetEntry(model.ItemId);
+                Entry       = GameTableManager.Item.GetEntry(model.ItemId);
+            else
+                SpellEntry  = GameTableManager.Spell4Base.GetEntry(model.ItemId);
             saveMask    = ItemSaveMask.None;
         }
 
@@ -201,7 +201,7 @@ namespace NexusForever.WorldServer.Game.Entity
             uint itemId;
             if (SpellEntry == null)
                 itemId = Entry.Id;
-			else
+            else
                 itemId = SpellEntry.Id;
 
             if ((saveMask & ItemSaveMask.Create) != 0)
