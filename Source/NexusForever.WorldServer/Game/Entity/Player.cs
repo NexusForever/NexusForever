@@ -493,13 +493,5 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager.Save(context);
             TitleManager.Save(context);
         }
-        public void PlayerPeriodicStats()
-        {
-            uint health = (uint)GetStatValue(Stat.Health);
-            if(health < GetPropertyValue(Property.BaseHealth))
-            {
-                SetStat(Stat.Health, (uint)(health +(health*GetPropertyValue(Property.HealthRegenMultiplier)*100)));
-            }
-        }
     }
 }
