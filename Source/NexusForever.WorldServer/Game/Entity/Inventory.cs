@@ -108,6 +108,42 @@ namespace NexusForever.WorldServer.Game.Entity
             ItemCreate(itemEntry);
         }
 
+        public void SpellCreate(uint spellId, byte reason)
+        {
+            Spell4BaseEntry spell4BaseEntry = GameTableManager.Spell4Base.GetEntry(spellId);
+            if (spell4BaseEntry == null)
+                throw new ArgumentNullException();
+
+            SpellCreate(spell4BaseEntry, reason);
+        }
+
+        public void SpellCreate(Spell4BaseEntry spell4BaseEntry, byte reason)
+        {
+            if (spell4BaseEntry == null)
+                throw new ArgumentNullException();
+
+            Bag bag = GetBag(InventoryLocation.Ability);
+            Debug.Assert(bag != null);
+
+            uint bagIndex = bag.GetFirstAvailableBagIndex();
+            if (bagIndex == uint.MaxValue)
+            return;
+
+            var spell = new Item(characterId, spell4BaseEntry, 1);
+            AddItem(spell, InventoryLocation.Ability, bagIndex);
+            if (!player?.IsLoading ?? false)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerItemAdd
+                {
+                    InventoryItem = new InventoryItem
+                    {
+                        Item = spell.BuildNetworkItem(),
+                        Reason = reason
+                    }
+                });
+            }
+        }
+
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available <see cref="EquippedItem"/> bag index.
         /// </summary>

@@ -24,7 +24,7 @@
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
-        Server0169                      = 0x0169, // ability book related
+        ServerAbilityPoints             = 0x0169,
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
         ClientItemMove                  = 0x0182,
@@ -32,8 +32,8 @@
         ServerFlightPathUpdate          = 0x0188,
         ServerPlayerTitleUpdate         = 0x018B,
         ServerPlayerChanged             = 0x019B,
-        Server019D                      = 0x019D, // action set related
-        Server01A0                      = 0x01A0, // ability book related
+        ServerActionSet                 = 0x019D,
+        ServerAbilities                 = 0x01A0,
         Server01A3                      = 0x01A3, // AMP
         ServerChatJoin                  = 0x01BC,
         ClientChat                      = 0x01C3,
