@@ -10,6 +10,10 @@
         Inventory = 1,
 
         Unknown2  = 2,
+
+        [InventoryLocation(512u)]
+        Ability   = 4,
+
         Unknown5  = 5,
         Unknown8  = 8,
         Unknown9  = 9,

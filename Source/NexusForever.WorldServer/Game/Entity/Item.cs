@@ -17,6 +17,7 @@ namespace NexusForever.WorldServer.Game.Entity
     public class Item : ISaveCharacter
     {
         public Item2Entry Entry { get; }
+        public Spell4BaseEntry SpellEntry { get; }
         public ulong Guid { get; }
 
         public ulong CharacterId
@@ -146,7 +147,10 @@ namespace NexusForever.WorldServer.Game.Entity
             charges     = model.Charges;
             durability  = model.Durability;
 
-            Entry       = GameTableManager.Item.GetEntry(model.ItemId);
+            if ((InventoryLocation)model.Location != InventoryLocation.Ability)
+                Entry       = GameTableManager.Item.GetEntry(model.ItemId);
+            else
+                SpellEntry  = GameTableManager.Spell4Base.GetEntry(model.ItemId);
             saveMask    = ItemSaveMask.None;
         }
 
@@ -167,6 +171,20 @@ namespace NexusForever.WorldServer.Game.Entity
             saveMask    = ItemSaveMask.Create;
         }
 
+        public Item(ulong owner, Spell4BaseEntry entry, uint count = 1u)
+        {
+            Guid        = AssetManager.NextItemId;
+            characterId = owner;
+            location    = InventoryLocation.None;
+            bagIndex    = 0u;
+            stackCount  = count;
+            charges     = 0u;
+            durability  = 0.0f;
+
+            SpellEntry  = entry;
+            saveMask    = ItemSaveMask.Create;
+        }
+
         /// <summary>
         /// Enqueue <see cref="Item"/> to be deleted from the database.
         /// </summary>
@@ -180,6 +198,12 @@ namespace NexusForever.WorldServer.Game.Entity
             if (saveMask == ItemSaveMask.None)
                 return;
 
+            uint itemId;
+            if (SpellEntry == null)
+                itemId = Entry.Id;
+            else
+                itemId = SpellEntry.Id;
+
             if ((saveMask & ItemSaveMask.Create) != 0)
             {
                 // item doesn't exist in database, all infomation must be saved
@@ -187,7 +211,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     Id                 = Guid,
                     OwnerId            = CharacterId,
-                    ItemId             = Entry.Id,
+                    ItemId             = itemId,
                     Location           = (ushort)Location,
                     BagIndex           = BagIndex,
                     StackCount         = StackCount,
@@ -260,10 +284,16 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public NetworkItem BuildNetworkItem()
         {
+            uint itemId;
+            if (SpellEntry == null)
+                itemId = Entry.Id;
+            else
+                itemId = SpellEntry.Id;
+
             var networkItem = new NetworkItem
             {
                 Guid         = Guid,
-                ItemId       = Entry.Id,
+                ItemId       = itemId,
                 LocationData = new ItemLocation
                 {
                     Location = Location,

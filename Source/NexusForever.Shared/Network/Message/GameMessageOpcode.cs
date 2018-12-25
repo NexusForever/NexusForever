@@ -29,7 +29,7 @@ namespace NexusForever.Shared.Network.Message
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
-        Server0169                      = 0x0169, // ability book related
+        ServerAbilityPoints             = 0x0169,
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
         ClientItemMove                  = 0x0182,
@@ -39,8 +39,8 @@ namespace NexusForever.Shared.Network.Message
         ServerTitleUpdate               = 0x018A,
         ServerTitles                    = 0x018B,
         ServerPlayerChanged             = 0x019B,
-        Server019D                      = 0x019D, // action set related
-        Server01A0                      = 0x01A0, // ability book related
+        ServerActionSet                 = 0x019D,
+        ServerAbilities                 = 0x01A0,
         Server01A3                      = 0x01A3, // AMP
         ServerPathUpdateXP              = 0x01AA,
         ServerChatJoin                  = 0x01BC,
