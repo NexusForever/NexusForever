@@ -418,7 +418,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<Spell4Entry> Spell4 { get; private set; }
 
         public static GameTable<Spell4AoeTargetConstraintsEntry> Spell4AoeTargetConstraints { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4BaseEntry> Spell4Base { get; private set; }
+
         public static GameTable<Spell4CCConditionsEntry> Spell4CCConditions { get; private set; }
         public static GameTable<Spell4CastResultEntry> Spell4CastResult { get; private set; }
         public static GameTable<Spell4ClientMissileEntry> Spell4ClientMissile { get; private set; }

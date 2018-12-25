@@ -124,6 +124,15 @@ namespace NexusForever.WorldServer.Game.Entity
             Level = (byte)GetStatValue(Stat.Level);
         }
 
+        public class UnlockAbility
+        {
+            public uint Spell4BaseId { get; set; }
+            public byte Tier {get ; set; } = 1;
+            public UILocation Location { get; set; } = UILocation.None;
+            //TODO: is this really a "reason" - most Spells are sent as 49 as well, but some are 27/28
+            public byte Reason { get; set; } = 49;
+        }
+
         public override void Update(double lastTick)
         {
             if (logoutManager != null)
@@ -140,6 +149,8 @@ namespace NexusForever.WorldServer.Game.Entity
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
+                timeToSave = SaveDuration;
+
                 Session.EnqueueEvent(new TaskEvent(CharacterDatabase.SavePlayer(this),
                     () =>
                 {
@@ -185,6 +196,61 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
             IsLoading = false;
+
+            ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
+            Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(classEntry.Spell4IdInnateAbilityActive00);
+
+            var unlockAbilities = new List<UnlockAbility>();
+            var serverAbilities = new ServerAbilities();
+            var serverActionSet = new ServerActionSet{ActionSetIndex = 0};
+            byte tierPoints = 42;
+
+            //TODO:
+                // a) move (Add's) to CharacterHandler / CharacterCration
+                // b) store abilities persistently
+                // c) handle starting abilities by class - sadly no tbl data available...
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 47769}); // Transmat to Illium
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 38934}); // some pewpew mount
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 62503}); // falkron mount
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 63431}); // zBoard 79 mount
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 31213}); // Spellsurge
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 38229}); // Portal capital city
+
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 23148, Location = UILocation.LAS1});  // Shred
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 23161, Tier = 2, Location = UILocation.LAS2});  // Impale
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 23173, Tier = 3, Location = UILocation.LAS3});  // Stagger
+            unlockAbilities.Add(new UnlockAbility{Spell4BaseId = 46803, Location = UILocation.PathAbility});  // Summon Group
+
+
+            // on AddToMap, the full array is required to be sent - updates can be sent independently
+            for (int i = 0; i < 48; i++)
+                serverActionSet.actionLocation.Add(new ServerActionSet.ActionLocation {Location = (uint)i});
+
+            foreach(UnlockAbility u in unlockAbilities)
+            {
+                if (u.Spell4BaseId<1)
+                    continue;
+
+                Session.Player.Inventory.SpellCreate(u.Spell4BaseId, u.Reason);
+                serverAbilities.ability.Add(new ServerAbilities.Ability {Spell4BaseId = u.Spell4BaseId, Tier = u.Tier});
+
+                int l = (int)u.Location;
+                if (u.Spell4BaseId >0 && (UILocation)l != UILocation.None && u.Tier > 0)
+                {
+                    serverActionSet.actionLocation[l].Unknown0 = 4;
+                    serverActionSet.actionLocation[l].Unknown4 = 4;
+                    serverActionSet.actionLocation[l].Location =(uint)l;
+                    serverActionSet.actionLocation[l].Spell4BaseId = u.Spell4BaseId;
+                }
+                tierPoints -= (byte)(u.Tier-1);
+            }
+
+            Session.EnqueueMessageEncrypted(serverAbilities);
+
+            // TODO: make points stored persistent or always calc?
+            Session.EnqueueMessageEncrypted(new ServerAbilityPoints {AbilityPointsAvailable = tierPoints, AbilityPointsSpent = 42}); // enables ability tier points
+
+            Session.EnqueueMessageEncrypted(serverActionSet);
         }
 
         public override void OnRelocate(Vector3 vector)
@@ -224,6 +290,10 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 foreach (Item item in bag)
                 {
+                    // don't add abilities - client crash
+                    if (bag.Location == InventoryLocation.Ability)
+                        continue;
+
                     playerCreate.Inventory.Add(new InventoryItem
                     {
                         Item   = item.BuildNetworkItem(),
@@ -422,6 +492,14 @@ namespace NexusForever.WorldServer.Game.Entity
             CurrencyManager.Save(context);
             PathManager.Save(context);
             TitleManager.Save(context);
+        }
+        public void PlayerPeriodicStats()
+        {
+            uint health = (uint)GetStatValue(Stat.Health);
+            if(health < GetPropertyValue(Property.BaseHealth))
+            {
+                SetStat(Stat.Health, (uint)(health +(health*GetPropertyValue(Property.HealthRegenMultiplier)*100)));
+            }
         }
     }
 }
