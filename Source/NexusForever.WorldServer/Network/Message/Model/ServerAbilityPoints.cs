@@ -6,8 +6,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerAbilityPoints, MessageDirection.Server)]
     public class ServerAbilityPoints : IWritable
     {
-		public uint AbilityPointsAvailable { get; set; }
-		public uint AbilityPointsSpent { get; set; }
+        public uint AbilityPointsAvailable { get; set; }
+        public uint AbilityPointsSpent { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

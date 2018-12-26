@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerActionSet, MessageDirection.Server)]
     public class ServerActionSet : IWritable
     {
-		public class ActionLocation : IWritable
+        public class ActionLocation : IWritable
         {   
             public byte   Unknown0 { get; set; } = 0;
             public ushort Unknown4 { get; set; } = 300;
@@ -25,17 +25,17 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-		public byte ActionSetIndex = 0;
-		public byte Unknown3 = 1;
-		public byte Unknown5 = 1;
-		public List<ActionLocation> actionLocation { get; set; } = new List<ActionLocation>();
+        public byte ActionSetIndex = 0;
+        public byte Unknown3 = 1;
+        public byte Unknown5 = 1;
+        public List<ActionLocation> actionLocation { get; set; } = new List<ActionLocation>();
 
         public void Write(GamePacketWriter writer)
         {
-			writer.Write(ActionSetIndex, 3u);
-			writer.Write(Unknown3, 2u);
-			writer.Write(Unknown5, 6u);
-	 		writer.Write(actionLocation.Count, 6u);
+            writer.Write(ActionSetIndex, 3u);
+            writer.Write(Unknown3, 2u);
+            writer.Write(Unknown5, 6u);
+            writer.Write(actionLocation.Count, 6u);
             actionLocation.ForEach(e => e.Write(writer));
         }
     }
