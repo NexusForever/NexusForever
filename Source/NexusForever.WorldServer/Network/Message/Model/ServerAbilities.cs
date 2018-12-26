@@ -8,7 +8,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerAbilities, MessageDirection.Server)]
     public class ServerAbilities : IWritable
     {
-		public class Ability : IWritable
+        public class Ability : IWritable
         {   
             public uint Spell4BaseId { get; set; }
             public byte Tier { get; set; }
@@ -22,10 +22,10 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-		public List<Ability> ability { get; set; } = new List<Ability>();
+        public List<Ability> ability { get; set; } = new List<Ability>();
         public void Write(GamePacketWriter writer)
         {
-			writer.Write((uint)ability.Count);
+            writer.Write((uint)ability.Count);
             ability.ForEach(e => e.Write(writer));
         }
     }
