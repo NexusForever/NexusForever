@@ -69,7 +69,8 @@ namespace NexusForever.WorldServer.Game.Entity
             CurrencyManager = new CurrencyManager(this, model);
             PathManager = new PathManager(this, model);
             Path        = PathManager.GetPath();
-            Faction2    = model.FactionId;
+            Faction1    = (Faction)model.FactionId;
+            Faction2    = (Faction)model.FactionId;
 
             Inventory   = new Inventory(this, model);
             Session     = session;
@@ -136,12 +137,13 @@ namespace NexusForever.WorldServer.Game.Entity
             return new PlayerEntityModel
             {
                 Id       = CharacterId,
-                Unknown8 = 358,
+                RealmId  = 358,
                 Name     = Name,
                 Race     = Race,
                 Class    = Class,
                 Sex      = Sex,
-                Bones    = Bones
+                Bones    = Bones,
+                PvPFlag  = PvPFlag.Disabled
             };
         }
 
@@ -185,7 +187,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 FactionData = new ServerPlayerCreate.Faction
                 {
-                    FactionId = 166, // This does not do anything for the player's "main" faction. Exiles/Dominion
+                    FactionId = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 }
             };
 
@@ -208,7 +210,17 @@ namespace NexusForever.WorldServer.Game.Entity
                 }
             }
 
+            playerCreate.ItemProficiencies = GetItemProficiences();
+
             Session.EnqueueMessageEncrypted(playerCreate);
+        }
+
+        public ItemProficiency GetItemProficiences()
+        {
+            ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
+            return (ItemProficiency)classEntry.StartingItemProficiencies;
+
+            //TODO: Store proficiences in DB table and load from there. Do they change ever after creation? Perhaps something for use on custom servers?
         }
 
         public override void OnRemoveFromMap()

@@ -2,7 +2,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Game;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -16,7 +18,12 @@ namespace NexusForever.WorldServer.Command.Handler
         protected override async Task HandleCommandAsync(CommandContext context, string command, string[] parameters)
         {
             string zoneName = string.Join(" ", parameters);
-            WorldLocation2Entry zone = GameTableManager.LookupZonesByName(zoneName).FirstOrDefault();
+
+            WorldLocation2Entry zone = SearchManager.Search<WorldLocation2Entry>(zoneName, context.Language, 
+                i => 
+                GameTableManager.WorldZone.GetEntry(i.WorldZoneId)?.LocalizedTextIdName ?? 
+                GameTableManager.World.GetEntry(i.WorldId)?.LocalizedTextIdName ?? 
+                0).FirstOrDefault();
             if (zone == null)
                 await context.SendErrorAsync($"Unknown zone: {zoneName}");
             else
