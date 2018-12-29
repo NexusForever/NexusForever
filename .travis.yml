@@ -1,6 +1,8 @@
 language: csharp
 mono: none
 dotnet: 2.2.100
+os: linux
+dist: xenial
 services:
   - mysql
 before_script:
