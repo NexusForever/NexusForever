@@ -10,27 +10,27 @@ script:
   - dotnet build ./Source/NexusForever.StsServer
   - dotnet build ./Source/NexusForever.WorldServer
 before_deploy:
-  - export TRAVIS_TAG="Travis-"$(git log --format=%h -1)
+  - export TRAVIS_TAG="Travis-"$(git log --format=%H -1)
   - git tag $TRAVIS_TAG
   - baseDir=$(pwd)
   - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.AuthServer
   - cd $baseDir/Source/NexusForever.AuthServer/bin/Release/netcoreapp*.*/win-x64/publish/
-  - zip -9 AuthServer-win-x64 *
-  - dotnet publish -c Release -r linux-x64 $baseDir/Source/NexusForever.AuthServer
-  - cd $baseDir/Source/NexusForever.AuthServer/bin/Release/netcoreapp*.*/linux-x64/publish/
-  - zip -9 AuthServer-linux-x64 *
+  - zip -9 AuthServer-Full *
   - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.StsServer
   - cd $baseDir/Source/NexusForever.StsServer/bin/Release/netcoreapp*.*/win-x64/publish/
-  - zip -9 StsServer-win-x64 *
-  - dotnet publish -c Release -r linux-x64 $baseDir/Source/NexusForever.StsServer
-  - cd $baseDir/Source/NexusForever.StsServer/bin/Release/netcoreapp*.*/linux-x64/publish/
-  - zip -9 StsServer-linux-x64 *
+  - zip -9 StsServer-Full *
   - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.WorldServer
   - cd $baseDir/Source/NexusForever.WorldServer/bin/Release/netcoreapp*.*/win-x64/publish/
-  - zip -9 WorldServer-win-x64 *
-  - dotnet publish -c Release -r linux-x64 $baseDir/Source/NexusForever.WorldServer
-  - cd $baseDir/Source/NexusForever.WorldServer/bin/Release/netcoreapp*.*/linux-x64/publish/
-  - zip -9 WorldServer-linux-x64 *
+  - zip -9 WorldServer-Full *
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.AuthServer
+  - cd $baseDir/Source/NexusForever.AuthServer/bin/Release/netcoreapp*.*/win-x64/
+  - zip -9 AuthServer * -x */
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.StsServer
+  - cd $baseDir/Source/NexusForever.StsServer/bin/Release/netcoreapp*.*/win-x64/
+  - zip -9 StsServer * -x */
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.WorldServer
+  - cd $baseDir/Source/NexusForever.WorldServer/bin/Release/netcoreapp*.*/win-x64/
+  - zip -9 WorldServer * -x */
   - cd $baseDir
 deploy:
   provider: releases
@@ -39,6 +39,7 @@ deploy:
   file_glob: true
   file: 
     - ./Source/NexusForever.*/bin/Release/netcoreapp*.*/*-x64/publish/*.zip
+    - ./Source/NexusForever.*/bin/Release/netcoreapp*.*/*-x64/*.zip
   skip_cleanup: true
   on:
     branch: master
