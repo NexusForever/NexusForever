@@ -36,8 +36,8 @@ namespace NexusForever.WorldServer.Game.TextSearch
         {
             if (IsEmpty) return null;
             if (!index.TryGetValue(text, out List<uint> values))
-                return null;
-            return values;
+                return Enumerable.Empty<uint>();
+            return values ?? Enumerable.Empty<uint>();
         }
 
         public IEnumerable<uint> FuzzySearch(string text)
