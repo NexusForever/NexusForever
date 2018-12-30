@@ -35,6 +35,7 @@
         Server019D                      = 0x019D, // action set related
         Server01A0                      = 0x01A0, // ability book related
         Server01A3                      = 0x01A3, // AMP
+        ServerPathUpdateXP              = 0x01AA,
         ServerChatJoin                  = 0x01BC,
         ClientChat                      = 0x01C3,
         ServerChatAccept                = 0x01C2,

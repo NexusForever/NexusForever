@@ -311,9 +311,15 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PathExplorerPowerMapEntry> PathExplorerPowerMap { get; private set; }
         public static GameTable<PathExplorerScavengerClueEntry> PathExplorerScavengerClue { get; private set; }
         public static GameTable<PathExplorerScavengerHuntEntry> PathExplorerScavengerHunt { get; private set; }
+
+        [GameData]
         public static GameTable<PathLevelEntry> PathLevel { get; private set; }
+
         public static GameTable<PathMissionEntry> PathMission { get; private set; }
+
+        [GameData]
         public static GameTable<PathRewardEntry> PathReward { get; private set; }
+
         public static GameTable<PathScientistCreatureInfoEntry> PathScientistCreatureInfo { get; private set; }
         public static GameTable<PathScientistDatacubeDiscoveryEntry> PathScientistDatacubeDiscovery { get; private set; }
         public static GameTable<PathScientistExperimentationEntry> PathScientistExperimentation { get; private set; }

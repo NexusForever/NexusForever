@@ -45,5 +45,16 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
+        [SubCommandHandler("addxp", "xp - Add the XP value to the player's curent Path XP.")]
+        public Task AddPathAddXPSubCommand(CommandContext context, string command, string[] parameters)
+        {
+            if (parameters.Length > 0)
+            {
+                uint xp = uint.Parse(parameters[0]);
+                context.Session.Player.PathManager.AddXp(xp);
+            }
+
+            return Task.CompletedTask;
+        }
     }
 }

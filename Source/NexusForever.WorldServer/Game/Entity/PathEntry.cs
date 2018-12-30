@@ -12,10 +12,6 @@ namespace NexusForever.WorldServer.Game.Entity
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public ulong CharacterId { get; set; }
-        public uint SoldierLevelRewarded { get; set; }
-        public uint SettlerLevelRewarded { get; set; }
-        public uint ScientistLevelRewarded { get; set; }
-        public uint ExplorerLevelRewarded { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
 
         public PathUnlockedMask PathsUnlocked
@@ -85,6 +81,61 @@ namespace NexusForever.WorldServer.Game.Entity
         }
         private uint explorerXp;
 
+        public uint SoldierLevelRewarded {
+            get => soldierLevelRewarded;
+            set
+            {
+                if (value < soldierLevelRewarded)
+                    throw new ArgumentException("New Level Rewarded Value must be higher, and not equal to current XP total.");
+
+                soldierLevelRewarded = value;
+                saveMask |= PathSaveMask.LevelChange;
+            }
+        }
+        private uint soldierLevelRewarded;
+
+        public uint SettlerLevelRewarded
+        {
+            get => settlerLevelRewarded;
+            set
+            {
+                if (value < settlerLevelRewarded)
+                    throw new ArgumentException("New Level Rewarded Value must be higher, and not equal to current XP total.");
+
+                settlerLevelRewarded = value;
+                saveMask |= PathSaveMask.LevelChange;
+            }
+        }
+        private uint settlerLevelRewarded;
+
+        public uint ScientistLevelRewarded
+        {
+            get => scientistLevelRewarded;
+            set
+            {
+                if (value < scientistLevelRewarded)
+                    throw new ArgumentException("New Level Rewarded Value must be higher, and not equal to current XP total.");
+
+                scientistLevelRewarded = value;
+                saveMask |= PathSaveMask.LevelChange;
+            }
+        }
+        private uint scientistLevelRewarded;
+
+        public uint ExplorerLevelRewarded
+        {
+            get => explorerLevelRewarded;
+            set
+            {
+                if (value <   explorerLevelRewarded)
+                    throw new ArgumentException("New Level Rewarded Value must be higher, and not equal to current XP total.");
+
+                explorerLevelRewarded = value;
+                saveMask |= PathSaveMask.LevelChange;
+            }
+        }
+        private uint explorerLevelRewarded;
+
         public Path ActivePath
         {
             get => activePath;
@@ -134,6 +185,10 @@ namespace NexusForever.WorldServer.Game.Entity
             saveMask = PathSaveMask.Create;
         }
 
+        /// <summary>
+        /// Save the <see cref="CharacterPath"/> with it's current state
+        /// </summary>
+        /// <param name="context">The character context to save against</param>
         public void Save(CharacterContext context)
         {
             if (saveMask == PathSaveMask.None)
@@ -167,7 +222,35 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.PathsUnlocked).IsModified = true;
                 }
 
-                //TODO: Handle saving XP and level-up rewards
+                if ((saveMask & PathSaveMask.XPChange) != 0)
+                {
+                    model.SoldierXp = SoldierXp;
+                    entity.Property(p => p.SoldierXp).IsModified = true;
+
+                    model.SettlerXp = SettlerXp;
+                    entity.Property(p => p.SettlerXp).IsModified = true;
+
+                    model.ScientistXp = ScientistXp;
+                    entity.Property(p => p.ScientistXp).IsModified = true;
+
+                    model.ExplorerXp = ExplorerXp;
+                    entity.Property(p => p.ExplorerXp).IsModified = true;
+                }
+
+                if ((saveMask & PathSaveMask.LevelChange) != 0)
+                {
+                    model.SoldierLevelRewarded = SoldierLevelRewarded;
+                    entity.Property(p => p.SoldierLevelRewarded).IsModified = true;
+
+                    model.SettlerLevelRewarded = SettlerLevelRewarded;
+                    entity.Property(p => p.SettlerLevelRewarded).IsModified = true;
+
+                    model.ScientistLevelRewarded = ScientistLevelRewarded;
+                    entity.Property(p => p.ScientistLevelRewarded).IsModified = true;
+
+                    model.ExplorerLevelRewarded = ExplorerLevelRewarded;
+                    entity.Property(p => p.ExplorerLevelRewarded).IsModified = true;
+                }
             }
 
             saveMask = PathSaveMask.None;

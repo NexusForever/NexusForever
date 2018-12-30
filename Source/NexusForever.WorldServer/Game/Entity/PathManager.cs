@@ -1,8 +1,11 @@
-﻿using NLog;
+﻿using System;
+using System.Collections.Generic;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -135,6 +138,171 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Add XP to the current <see cref="Path"/>
+        /// </summary>
+        /// <param name="xp"></param>
+        public void AddXp(uint xp = 25)
+        {
+            if (xp <= 0)
+                throw new ArgumentException("XP must be greater than 0.");
+
+            uint[] newLevels = new uint[0];
+            switch (pathEntry.ActivePath)
+            {
+                case Path.Soldier:
+                    pathEntry.SoldierXp += xp;
+                    SendServerPathUpdateXp(pathEntry.SoldierXp);
+
+                    newLevels = CheckForLevelUp(pathEntry.SoldierXp, xp);
+                    if (newLevels.Length > 0)
+                        foreach (uint level in newLevels)
+                            GrantLevelUpReward(pathEntry.ActivePath, level);
+                    break;
+                case Path.Settler:
+                    pathEntry.SettlerXp += xp;
+                    SendServerPathUpdateXp(pathEntry.SettlerXp);
+
+                    newLevels = CheckForLevelUp(pathEntry.SettlerXp, xp);
+                    if (newLevels.Length > 0)
+                        foreach (uint level in newLevels)
+                            GrantLevelUpReward(pathEntry.ActivePath, level);
+                    break;
+                case Path.Scientist:
+                    pathEntry.ScientistXp += xp;
+                    SendServerPathUpdateXp(pathEntry.ScientistXp);
+
+                    newLevels = CheckForLevelUp(pathEntry.ScientistXp, xp);
+                    if (newLevels.Length > 0)
+                        foreach (uint level in newLevels)
+                            GrantLevelUpReward(pathEntry.ActivePath, level);
+                    break;
+                case Path.Explorer:
+                    pathEntry.ExplorerXp += xp;
+                    SendServerPathUpdateXp(pathEntry.ExplorerXp);
+
+                    newLevels = CheckForLevelUp(pathEntry.ExplorerXp, xp);
+                    if (newLevels.Length > 0)
+                        foreach (uint level in newLevels)
+                            GrantLevelUpReward(pathEntry.ActivePath, level);
+                    break;
+                default:
+                    throw new ArgumentException($"Path not recognised: {pathEntry.ActivePath}");
+            }
+        }
+
+        /// <summary>
+        /// Get the current <see cref="Path"/> level for the <see cref="Player"/>
+        /// </summary>
+        /// <param name="path">The path being checked</param>
+        /// <returns></returns>
+        public uint GetCurrentLevel(Path path)
+        {
+            Dictionary<Path, uint> pathXpValue = new Dictionary<Path, uint>
+            {
+                { Path.Soldier, pathEntry.SoldierXp },
+                { Path.Settler, pathEntry.SettlerXp },
+                { Path.Scientist, pathEntry.ScientistXp },
+                { Path.Explorer, pathEntry.ExplorerXp }
+            };
+            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP >= pathXpValue[path] && x.PathTypeEnum == (uint)path).PathLevel;
+        }
+
+        /// <summary>
+        /// Get the level based on an amount of XP
+        /// </summary>
+        /// <param name="xp">The XP value to get the level by</param>
+        /// <returns></returns>
+        private uint GetLevelByExperience(uint xp)
+        {
+            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP >= xp && x.PathTypeEnum == (uint)pathEntry.ActivePath).PathLevel;
+        }
+
+        /// <summary>
+        /// Check to see if a level up should happen based on current XP and XP just earned.
+        /// </summary>
+        /// <param name="totalXp">Path XP after XP earned has been applied</param>
+        /// <param name="xpGained">XP just earned</param>
+        /// <returns></returns>
+        private uint[] CheckForLevelUp(uint totalXp, uint xpGained)
+        {
+            uint currentLevel = GetLevelByExperience(totalXp - xpGained);
+            PathLevelEntry[] levelEntriesGained = Array.FindAll(GameTableManager.PathLevel.Entries, 
+                x => x.PathXP >= (totalXp - xpGained) && 
+                x.PathXP <= totalXp && 
+                x.PathTypeEnum == (uint)pathEntry.ActivePath
+                );
+
+            if (levelEntriesGained.Length == 0)
+                return new uint[0];
+
+            List<uint> levelsGained = new List<uint>();
+            foreach (PathLevelEntry levelEntry in levelEntriesGained)
+                levelsGained.Add(levelEntry.PathLevel);
+
+            return levelsGained.ToArray();
+
+        }
+
+        /// <summary>
+        /// Grants a player a level up reward for a <see cref="Path"/> and level
+        /// </summary>
+        /// <param name="path">The path to grant the reward for</param>
+        /// <param name="level">The level to grant the reward for</param>
+        private void GrantLevelUpReward(Path path, uint level)
+        {
+            Dictionary<Path, uint> baseRewardObjectId = new Dictionary<Path, uint>
+            {
+                { Path.Soldier, 7 },
+                { Path.Settler, 37 },
+                { Path.Scientist, 67 },
+                { Path.Explorer, 97 }
+            };
+            Dictionary<Path, Action> PathActions = new Dictionary<Path, Action>
+            {
+                { Path.Soldier, () => pathEntry.SoldierLevelRewarded = level },
+                { Path.Settler, () => pathEntry.SettlerLevelRewarded = level },
+                { Path.Scientist, () => pathEntry.ScientistLevelRewarded = level },
+                { Path.Explorer, () => pathEntry.ExplorerLevelRewarded = level }
+            };
+            uint pathRewardObjectId = baseRewardObjectId[path] + (Math.Clamp(level - 2, 0, 100)); // level - 2 is used because the objectIDs start at level 2 and a -2 offset was needed
+            PathRewardEntry[] pathRewardEntries = Array.FindAll(GameTableManager.PathReward.Entries, x => x.ObjectId == pathRewardObjectId);
+
+            foreach(PathRewardEntry pathRewardEntry in pathRewardEntries)
+            {
+                if (pathRewardEntry.PathRewardFlags > 0)
+                    continue;
+
+                if (pathRewardEntry.Item2Id == 0 && pathRewardEntry.Spell4Id == 0 && pathRewardEntry.CharacterTitleId == 0)
+                    continue;
+
+                if (pathRewardEntry.PrerequisiteId == 18 && player.Faction1 != Faction.Dominion)
+                    continue;
+
+                if (pathRewardEntry.PrerequisiteId == 19 && player.Faction1 != Faction.Exile)
+                    continue;
+
+                GrantPathReward(pathRewardEntry);
+                PathActions[path]();
+                break;
+            }
+        }
+
+        /// <summary>
+        /// Grant the <see cref="Player"/> rewards from the <see cref="PathRewardEntry"/>
+        /// </summary>
+        /// <param name="pathRewardEntry">The entry containing items, spells, or titles, to be rewarded"/></param>
+        private void GrantPathReward(PathRewardEntry pathRewardEntry)
+        {
+            if (pathRewardEntry == null)
+                throw new ArgumentNullException();
+
+            if (pathRewardEntry.Item2Id > 0)
+                player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, 4);
+            // TODO: Grant Spell rewards
+            // TODO: Grant Title rewards (needs PR #64)
+        }
+
+        /// <summary>
         /// Execute a DB Save of the <see cref="CharacterContext"/>
         /// </summary>
         /// <param name="context"></param>
@@ -176,6 +344,10 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
+        /// <summary>
+        /// Sends a response to the player's <see cref="Path"/> activate request
+        /// </summary>
+        /// <param name="Result">Used for success or error values</param>
         public void SendServerPathActivateResult(byte Result = 0)
         {
 
@@ -185,6 +357,10 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
+        /// <summary>
+        /// Sends a response to the player's request for unlocking a <see cref="Path"/>
+        /// </summary>
+        /// <param name="Result">Used for success or error values</param>
         public void SendServerPathUnlockResult(byte Result = 0)
         {
 
@@ -195,5 +371,16 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
+        /// <summary>
+        /// Sends total XP for the activate path to the player
+        /// </summary>
+        /// <param name="totalXp">Total Path XP to be sent</param>
+        private void SendServerPathUpdateXp(uint totalXp)
+        {
+            player.Session.EnqueueMessageEncrypted(new ServerPathUpdateXP
+            {
+                TotalXP = totalXp
+            });
+        }
     }
 }
