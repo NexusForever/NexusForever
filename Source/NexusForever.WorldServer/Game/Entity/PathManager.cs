@@ -334,12 +334,11 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void SendSetUnitPathTypePacket()
         {
-
-            player.Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
+            player.EnqueueToVisible(new ServerSetUnitPathType
             {
                 Guid = player.Guid,
                 Path = pathEntry.ActivePath,
-            });
+            }, true);
         }
 
         /// <summary>
