@@ -502,7 +502,7 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
-        private Bag GetBag(InventoryLocation location)
+        public Bag GetBag(InventoryLocation location)
         {
             return bags.TryGetValue(location, out Bag container) ? container : null;
         }
