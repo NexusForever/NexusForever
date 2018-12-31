@@ -325,7 +325,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     pathEntry.ExplorerXp
                 },
                 PathUnlockedMask = pathEntry.PathsUnlocked,
-                ActivateTimer = 0 //-938144978
+                ActivateTimer = 0 // TODO: Need to figure out timestamp calculations necessary for this value to update the client appropriately
             });
         }
 
