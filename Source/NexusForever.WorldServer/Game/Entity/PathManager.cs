@@ -204,7 +204,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 { Path.Scientist, pathEntry.ScientistXp },
                 { Path.Explorer, pathEntry.ExplorerXp }
             };
-            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP >= pathXpValue[path] && x.PathTypeEnum == (uint)path).PathLevel;
+            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP <= pathXpValue[path] && x.PathTypeEnum == (uint)path).PathLevel;
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <returns></returns>
         private uint GetLevelByExperience(uint xp)
         {
-            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP >= xp && x.PathTypeEnum == (uint)pathEntry.ActivePath).PathLevel;
+            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP <= xp && x.PathTypeEnum == (uint)pathEntry.ActivePath).PathLevel;
         }
 
         /// <summary>
@@ -227,13 +227,10 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             uint currentLevel = GetLevelByExperience(totalXp - xpGained);
             PathLevelEntry[] levelEntriesGained = Array.FindAll(GameTableManager.PathLevel.Entries, 
-                x => x.PathXP >= (totalXp - xpGained) && 
+                x => x.PathLevel > currentLevel && 
                 x.PathXP <= totalXp && 
                 x.PathTypeEnum == (uint)pathEntry.ActivePath
                 );
-
-            if (levelEntriesGained.Length == 0)
-                return new uint[0];
 
             List<uint> levelsGained = new List<uint>();
             foreach (PathLevelEntry levelEntry in levelEntriesGained)
@@ -296,9 +293,10 @@ namespace NexusForever.WorldServer.Game.Entity
             if (pathRewardEntry == null)
                 throw new ArgumentNullException();
 
+            // TODO: Check if there's bag space. Otherwise queue? Or is there an overflow inventory?
             if (pathRewardEntry.Item2Id > 0)
                 player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, 4);
-            // TODO: Grant Spell rewards
+            // TODO: Grant Spell rewards (needs PR #76)
             // TODO: Grant Title rewards (needs PR #64)
         }
 
