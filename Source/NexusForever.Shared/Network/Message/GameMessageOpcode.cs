@@ -56,6 +56,7 @@
         ServerRealmInfo                 = 0x03DB,
         ClientCheat                     = 0x03E0,
         Server0497                      = 0x0497, // guild info
+        ClientCastSpell                 = 0x04DB,
         ServerItemSwap                  = 0x0568,
         ServerItemMove                  = 0x0569,
         ClientHelloRealm                = 0x058F,
