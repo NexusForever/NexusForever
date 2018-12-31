@@ -35,7 +35,6 @@ namespace NexusForever.WorldServer.Command.Handler
             }
 
             float originalValue = SetPropertyValue(context, newValue);
-            context.Session.Player.JumpHeight = newValue;
             await context.SendMessageAsync($"{property.Name} set to {newValue}, previous value: {originalValue}");
         }
 

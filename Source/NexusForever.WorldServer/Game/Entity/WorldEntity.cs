@@ -17,12 +17,29 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Dictionary<Stat, StatValue> Stats { get; } = new Dictionary<Stat, StatValue>();
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
-        private List<PropertyValue> PendingPropertyUpdates { get; } = new List<PropertyValue>();
+        private HashSet<Property> DirtyProperties { get; } = new HashSet<Property>();
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
         public Faction Faction1 { get; protected set; }
         public Faction Faction2 { get; protected set; }
+        // Properties
+        public float MoveSpeedMultiplier
+        {
+            get => GetPropertyValue(Property.MoveSpeedMultiplier) ?? 0;
+            set => SetProperty(Property.MoveSpeedMultiplier, value, 1.0f);
+        }
 
+        public float JumpHeight
+        {
+            get => GetPropertyValue(Property.JumpHeight) ?? 0f;
+            set => SetProperty(Property.JumpHeight, value, 2.5f);
+        }
+
+        public float GravityMultiplier
+        {
+            get => GetPropertyValue(Property.GravityMultiplier) ?? 0f;
+            set => SetProperty(Property.GravityMultiplier, value, 1.0f);
+        }
         public bool IsLoading { get; protected set; }
 
         protected Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
@@ -46,27 +63,27 @@ namespace NexusForever.WorldServer.Game.Entity
             if(!HasPendingPropertyChanges)
                 return null;
             HashSet<Property> properties = new HashSet<Property>();
-            PendingPropertyUpdates.Reverse();
             ServerEntityPropertyBatchUpdate propertyUpdatePacket = new ServerEntityPropertyBatchUpdate()
             {
                 Guid = Guid
             };
             // Start at the back of the list
-            foreach (PropertyValue propertyUpdate in PendingPropertyUpdates)
+            foreach (Property propertyUpdate in DirtyProperties)
             {
-                if(!properties.Add(propertyUpdate.Property)) continue;
-                propertyUpdatePacket.PropertyValues.Add(propertyUpdate);
+                if (!Properties.TryGetValue(propertyUpdate, out PropertyValue propertyValue) ||
+                    propertyValue == null) continue;
+                propertyUpdatePacket.PropertyValues.Add(propertyValue);
             }
 
-            PendingPropertyUpdates.Clear();
+            DirtyProperties.Clear();
             return propertyUpdatePacket;
         }
 
-        public bool HasPendingPropertyChanges => PendingPropertyUpdates.Count != 0;
+        public bool HasPendingPropertyChanges => DirtyProperties.Count != 0;
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            PendingPropertyUpdates.Clear();
+            DirtyProperties.Clear();
             return new ServerEntityCreate
             {
                 Guid      = Guid,
@@ -106,7 +123,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Properties[property].Value = value;
             else
                 Properties.Add(property, new PropertyValue(property, baseValue, value));
-            PendingPropertyUpdates.Add(Properties[property]);
+            DirtyProperties.Add(property);
         }
 
         protected float? GetPropertyValue(Property property)

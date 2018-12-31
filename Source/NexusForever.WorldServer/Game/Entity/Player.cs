@@ -42,24 +42,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
-        // Properties
-        public float MoveSpeedMultiplier
-        {
-            get => GetPropertyValue(Property.MoveSpeedMultiplier) ?? 0;
-            set => SetProperty(Property.MoveSpeedMultiplier, value, 1.0f);
-        }
 
-        public float JumpHeight
-        {
-            get => GetPropertyValue(Property.JumpHeight) ?? 0f;
-            set => SetProperty(Property.JumpHeight, value, 2.5f);
-        }
-
-        public float GravityMultiplier
-        {
-            get => GetPropertyValue(Property.GravityMultiplier) ?? 0f;
-            set => SetProperty(Property.GravityMultiplier, value, 1.0f);
-        }
 
         private byte level;
 
