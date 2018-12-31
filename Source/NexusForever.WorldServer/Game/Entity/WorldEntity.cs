@@ -5,6 +5,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
@@ -16,7 +17,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Dictionary<Stat, StatValue> Stats { get; } = new Dictionary<Stat, StatValue>();
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
-
+        private List<PropertyValue> PendingPropertyUpdates { get; } = new List<PropertyValue>();
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
         public Faction Faction1 { get; protected set; }
@@ -35,11 +36,37 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void Update(double lastTick)
         {
-
+            var propertyUpdatePacket = BuildPropertyUpdates();
+            if (propertyUpdatePacket == null) return;
+            EnqueueToVisible(propertyUpdatePacket, includeSelf: true);
         }
+
+        public virtual ServerEntityPropertyBatchUpdate BuildPropertyUpdates()
+        {
+            if(!HasPendingPropertyChanges)
+                return null;
+            HashSet<Property> properties = new HashSet<Property>();
+            PendingPropertyUpdates.Reverse();
+            ServerEntityPropertyBatchUpdate propertyUpdatePacket = new ServerEntityPropertyBatchUpdate()
+            {
+                Guid = Guid
+            };
+            // Start at the back of the list
+            foreach (PropertyValue propertyUpdate in PendingPropertyUpdates)
+            {
+                if(!properties.Add(propertyUpdate.Property)) continue;
+                propertyUpdatePacket.PropertyValues.Add(propertyUpdate);
+            }
+
+            PendingPropertyUpdates.Clear();
+            return propertyUpdatePacket;
+        }
+
+        public bool HasPendingPropertyChanges => PendingPropertyUpdates.Count != 0;
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
+            PendingPropertyUpdates.Clear();
             return new ServerEntityCreate
             {
                 Guid      = Guid,
@@ -79,6 +106,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Properties[property].Value = value;
             else
                 Properties.Add(property, new PropertyValue(property, baseValue, value));
+            PendingPropertyUpdates.Add(Properties[property]);
         }
 
         protected float? GetPropertyValue(Property property)
@@ -101,7 +129,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     continue;
 
                 player.Session.EnqueueMessageEncrypted(message);
-            }       
+            }
         }
     }
 }

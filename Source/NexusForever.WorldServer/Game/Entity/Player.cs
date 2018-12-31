@@ -42,6 +42,25 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        // Properties
+        public float MoveSpeedMultiplier
+        {
+            get => GetPropertyValue(Property.MoveSpeedMultiplier) ?? 0;
+            set => SetProperty(Property.MoveSpeedMultiplier, value, 1.0f);
+        }
+
+        public float JumpHeight
+        {
+            get => GetPropertyValue(Property.JumpHeight) ?? 0f;
+            set => SetProperty(Property.JumpHeight, value, 2.5f);
+        }
+
+        public float GravityMultiplier
+        {
+            get => GetPropertyValue(Property.GravityMultiplier) ?? 0f;
+            set => SetProperty(Property.GravityMultiplier, value, 1.0f);
+        }
+
         private byte level;
 
         public Inventory Inventory { get; }
@@ -78,9 +97,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
-            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
-            Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
-            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
+            MoveSpeedMultiplier = 1f;
+            JumpHeight = 2.5f;
+            GravityMultiplier = 1f;
+            
 
             foreach (ItemVisual itemVisual in Inventory.GetItemVisuals())
                 itemVisuals.Add(itemVisual.Slot, itemVisual);
@@ -113,6 +133,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 logoutManager.Update(lastTick);
             }
 
+            
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
@@ -126,6 +147,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 // prevent packets from being processed until asynchronous player save task is complete
                 Session.CanProcessPackets = false;
             }
+
+            base.Update(lastTick);
+
         }
 
         protected override IEntityModel BuildEntityModel()
