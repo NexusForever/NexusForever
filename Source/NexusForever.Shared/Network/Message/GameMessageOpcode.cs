@@ -25,6 +25,7 @@
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
         Server0169                      = 0x0169, // ability book related
+        ClientToggleWeapons             = 0x0177,
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
         ClientItemMove                  = 0x0182,
@@ -81,6 +82,8 @@
         ServerPlayerCurrencyChanged     = 0x0919,
         ServerItemVisualUpdate          = 0x0933,
         Server0934                      = 0x0934,
+        ServerStatUpdateFloat           = 0x0935,
+        ServerStatUpdateInt             = 0x0938,
         ServerEmote                     = 0x093C,
         ClientWhoRequest                = 0x0959,
         ServerWhoResponse               = 0x095A,
