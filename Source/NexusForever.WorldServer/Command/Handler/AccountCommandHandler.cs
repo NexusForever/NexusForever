@@ -22,9 +22,13 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            AuthDatabase.CreateAccount(parameters[0], parameters[1]);
-            await context.SendMessageAsync($"Account {parameters[0]} created successfully")
-                .ConfigureAwait(false);
+            bool success = AuthDatabase.CreateAccount(parameters[0], parameters[1]);
+            if (success)
+                await context.SendMessageAsync($"Account {parameters[0]} created successfully")
+                    .ConfigureAwait(false);
+            else
+                await context.SendMessageAsync($"Account {parameters[0]} could not be created. Duplicate username.")
+                    .ConfigureAwait(false);
         }
 
         [SubCommandHandler("delete", "email - Delete an account")]

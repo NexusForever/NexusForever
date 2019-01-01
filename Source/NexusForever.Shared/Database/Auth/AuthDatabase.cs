@@ -43,10 +43,14 @@ namespace NexusForever.Shared.Database.Auth
         /// <summary>
         /// 
         /// </summary>
-        public static void CreateAccount(string email, string password)
+        public static bool CreateAccount(string email, string password)
         {
             using (var context = new AuthContext())
             {
+                Account account = context.Account.SingleOrDefault(a => a.Email.ToLower() == email.ToLower());
+                if (account != null)
+                    return false;
+
                 byte[] s = RandomProvider.GetBytes(16u);
                 byte[] v = Srp6Provider.GenerateVerifier(s, email, password);
 
@@ -58,6 +62,8 @@ namespace NexusForever.Shared.Database.Auth
                 });
 
                 context.SaveChanges();
+
+                return true;
             }
         }
 
