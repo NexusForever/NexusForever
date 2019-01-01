@@ -72,6 +72,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Session     = session;
 
             Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)Level));
+            Stats.Add(Stat.Sheathed, new StatValue(Stat.Sheathed, 1));
 
             // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
