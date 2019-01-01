@@ -148,6 +148,8 @@ namespace NexusForever.WorldServer.Game.Entity
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new KeybindingManager(this, session.Account, model);
 
+            SetStat(Stat.Sheathed, 1u);
+
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
             Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
