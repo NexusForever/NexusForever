@@ -47,8 +47,8 @@ namespace NexusForever.Shared.Database.Auth
         {
             using (var context = new AuthContext())
             {
-                Account account = context.Account.SingleOrDefault(a => a.Email.ToLower() == email.ToLower());
-                if (account != null)
+                bool account = context.Account.Any(a => a.Email.ToLower() == email.ToLower());
+                if (account == true)
                     return false;
 
                 byte[] s = RandomProvider.GetBytes(16u);
