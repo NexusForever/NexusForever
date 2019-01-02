@@ -1,5 +1,5 @@
 ## NexusForever
-[![Build Status](https://travis-ci.com/Rawaho/NexusForever.svg?branch=master)](https://travis-ci.com/Rawaho/NexusForever)
+[![Build Status](https://travis-ci.com/NexusForever/NexusForever.svg?branch=master)](https://travis-ci.com/NexusForever/NexusForever)
 
 ### Information
 A server emulator for WildStar written in C# that supports build 16042.
