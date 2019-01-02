@@ -262,7 +262,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
                     .HasDefaultValueSql("'0'");
-                
+
                 entity.Property(e => e.Title)
                     .HasColumnName("title")
                     .HasDefaultValueSql("'0'");
