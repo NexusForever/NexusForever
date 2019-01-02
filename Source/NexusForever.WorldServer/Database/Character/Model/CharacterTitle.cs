@@ -8,6 +8,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public ulong Id { get; set; }
         public ushort Title { get; set; }
         public uint TimeRemaining { get; set; }
+        public byte Revoked { get; set; }
 
         public Character IdNavigation { get; set; }
     }

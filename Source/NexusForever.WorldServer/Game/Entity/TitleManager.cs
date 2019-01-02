@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Entity
             get => activeTitleId;
             set
             {
-                if (value != 0 && (!titles.ContainsKey(value) || activeTitleId == value))
+                if (value != 0 && (!titles.TryGetValue(activeTitleId, out Title title) || title.Revoked || activeTitleId == value))
                     return;
 
                 activeTitleId = value;
@@ -38,7 +38,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private readonly Player player;
         private readonly Dictionary<ushort, Title> titles = new Dictionary<ushort, Title>();
-        private readonly Dictionary<ushort, Title> removedTitles = new Dictionary<ushort, Title>();
 
         /// <summary>
         /// Create a new <see cref="TitleManager"/> from existing <see cref="Character"/> database model.
@@ -56,13 +55,13 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Update(double lastTick)
         {
-            foreach (Title title in titles.Values.ToArray())
+            foreach (Title title in this)
             {
                 title.Update(lastTick);
                 if (title.TimeRemaining != null && title.TimeRemaining <= 0d)
                 {
                     // title has expired
-                    RemoveTitle((ushort)title.Entry.Id);
+                    RevokeTitle((ushort)title.Entry.Id);
                 }
             }
         }
@@ -83,10 +82,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 activeSaved = true;
             }
 
-            // must delete before adding new titles
-            foreach (Title title in removedTitles.Values)
-                title.Delete(context);
-
             foreach (Title title in titles.Values)
                 title.Save(context);
         }
@@ -100,19 +95,21 @@ namespace NexusForever.WorldServer.Game.Entity
             if (entry == null)
                 throw new InvalidPacketValueException();
 
-            if (titles.ContainsKey(titleId))
+            if (titles.TryGetValue(titleId, out Title title))
             {
-                player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
+                if (title.Revoked)
+                    title.Revoked = false;
+                else
                 {
-                    TitleId      = titleId,
-                    Alreadyowned = true
-                });
+                    player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
+                    {
+                        TitleId      = titleId,
+                        Alreadyowned = true
+                    });
 
-                return;
+                    return;
+                }
             }
-
-            if (removedTitles.Remove(titleId, out Title title))
-                titles.Add(titleId, title);
             else
                 titles.Add(titleId, new Title(player.CharacterId, entry));
 
@@ -126,18 +123,17 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Remove <see cref="Title"/> with supplied title id, if suppress is true <see cref="ServerTitleUpdate"/> won't be sent.
+        /// Revoke <see cref="Title"/> with supplied title id, if suppress is true <see cref="ServerTitleUpdate"/> won't be sent.
         /// </summary>
-        public void RemoveTitle(ushort titleId, bool suppress = false)
+        public void RevokeTitle(ushort titleId, bool suppress = false)
         {
             if (GameTableManager.CharacterTitle.GetEntry(titleId) == null)
                 throw new InvalidPacketValueException();
 
-            if (!titles.Remove(titleId, out Title title))
-                return;
+            if (!titles.TryGetValue(titleId, out Title title))
+                throw new InvalidPacketValueException();
 
-            if (title.SavedToDatabase)
-                removedTitles.Add((ushort)title.Entry.Id, title);
+            title.Revoked = true;
 
             if (!suppress)
             {
@@ -161,6 +157,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Titles = titles.Values.Select(t => new ServerTitles.Title
                 {
                     TitleId       = (ushort)t.Entry.Id,
+                    Revoked       = t.Revoked,
                     TimeRemaining = (uint)(t.TimeRemaining ?? 0d)
                 }).ToList()
             });
@@ -185,34 +182,30 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// This is only used debug/command purposes.
         /// </summary>
-        public void RemoveAllTitles()
+        public void RevokeAllTitles()
         {
             ushort[] titleIds = titles.Values
                 .Select(entry => (ushort)entry.Entry.Id)
                 .ToArray();
 
             foreach (ushort titleId in titleIds)
-                RemoveTitle(titleId, true);
+                RevokeTitle(titleId, true);
 
-            player.Session.EnqueueMessageEncrypted(new ServerTitles
-            {
-                Titles = titleIds.Select(t => new ServerTitles.Title
-                {
-                    TitleId = t,
-                    Revoked = true
-                }).ToList()
-            });
+            // client crashes if too many single title updates are sent, send as bulk
+            SendTitles();
         }
 
         private void EnsureActiveTitleIsOwned()
         {
-            if (activeTitleId != 0 && !titles.ContainsKey(activeTitleId))
+            if (activeTitleId != 0 && (!titles.TryGetValue(activeTitleId, out Title title) || title.Revoked))
                 ActiveTitleId = 0;
         }
 
         public IEnumerator<Title> GetEnumerator()
         {
-            return titles.Values.GetEnumerator();
+            return titles.Values
+                .Where(t => !t.Revoked)
+                .GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

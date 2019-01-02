@@ -6,6 +6,8 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     public enum TitleSaveMask
     {
         None          = 0x00,
-        TimeRemaining = 0x01
+        Create        = 0x01,
+        TimeRemaining = 0x02,
+        Revoked       = 0x04
     }
 }

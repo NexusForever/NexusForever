@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
@@ -29,8 +29,17 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private double? timeRemaining;
 
-        // TODO: move to more generic place
-        public bool SavedToDatabase { get; private set; }
+        public bool Revoked
+        {
+            get => revoked;
+            set
+            {
+                revoked = value;
+                saveMask |= TitleSaveMask.Revoked;
+            }
+        }
+
+        private bool revoked;
 
         private TitleSaveMask saveMask;
 
@@ -41,11 +50,12 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             CharacterId = model.Id;
             Entry       = GameTableManager.CharacterTitle.GetEntry(model.Title);
+            revoked     = Convert.ToBoolean(model.Revoked);
 
             if (Entry.LifeTimeSeconds != 0u)
                 timeRemaining = model.TimeRemaining;
 
-            SavedToDatabase = true;
+            saveMask = TitleSaveMask.None;
         }
 
         /// <summary>
@@ -59,7 +69,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (Entry.LifeTimeSeconds != 0u)
                 timeRemaining = Entry.LifeTimeSeconds;
 
-            SavedToDatabase = false;
+            saveMask = TitleSaveMask.Create;
         }
 
         public void Update(double lastTick)
@@ -70,7 +80,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Save(CharacterContext context)
         {
-            if (!SavedToDatabase)
+            if (saveMask == TitleSaveMask.None)
+                return;
+
+            if ((saveMask & TitleSaveMask.Create) != 0)
             {
                 // title doesn't exist in database, all infomation must be saved
                 context.Add(new CharacterTitle
@@ -79,14 +92,9 @@ namespace NexusForever.WorldServer.Game.Entity
                     Title         = (ushort)Entry.Id,
                     TimeRemaining = (uint)(timeRemaining ?? 0d)
                 });
-
-                SavedToDatabase = true;
             }
             else
             {
-                if (saveMask == TitleSaveMask.None)
-                    return;
-
                 // title already exists in database, save only data that has been modified
                 var model = new CharacterTitle
                 {
@@ -102,19 +110,14 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.TimeRemaining).IsModified = true;
                 }
 
-                saveMask = TitleSaveMask.None;
+                if ((saveMask & TitleSaveMask.Revoked) != 0)
+                {
+                    model.Revoked = Convert.ToByte(Revoked);
+                    entity.Property(p => p.Revoked).IsModified = true;
+                }
             }
-        }
 
-        public void Delete(CharacterContext context)
-        {
-            var model = new CharacterTitle
-            {
-                Id    = CharacterId,
-                Title = (ushort)Entry.Id
-            };
-
-            context.Entry(model).State = EntityState.Deleted;
+            saveMask = TitleSaveMask.None;
         }
     }
 }

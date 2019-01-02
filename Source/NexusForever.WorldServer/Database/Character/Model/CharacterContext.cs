@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Database;
@@ -188,6 +188,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.Title)
                     .HasColumnName("title")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Revoked)
+                    .HasColumnName("revoked")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.TimeRemaining)

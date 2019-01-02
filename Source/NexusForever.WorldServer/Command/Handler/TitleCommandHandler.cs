@@ -24,13 +24,13 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
-        [SubCommandHandler("remove", "titleId - Remove a title from the character")]
+        [SubCommandHandler("revoke", "titleId - Revoke a title from the character")]
         public Task RemoveTitleSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length <= 0)
                 return Task.CompletedTask;
 
-            context.Session.Player.TitleManager.RemoveTitle(ushort.Parse(parameters[0]));
+            context.Session.Player.TitleManager.RevokeTitle(ushort.Parse(parameters[0]));
             return Task.CompletedTask;
         }
 
@@ -41,10 +41,10 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
-        [SubCommandHandler("none", "Remove all titles from the character")]
+        [SubCommandHandler("none", "Revoke all titles from the character")]
         public Task RemoveAllTitlesSubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.Player.TitleManager.RemoveAllTitles();
+            context.Session.Player.TitleManager.RevokeAllTitles();
             return Task.CompletedTask;
         }
     }
