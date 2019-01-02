@@ -298,6 +298,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, 4);
             // TODO: Grant Spell rewards (needs PR #76)
             // TODO: Grant Title rewards (needs PR #64)
+            if (pathRewardEntry.CharacterTitleId > 0)
+                player.TitleManager.AddTitle((ushort)pathRewardEntry.CharacterTitleId);
+
         }
 
         /// <summary>
