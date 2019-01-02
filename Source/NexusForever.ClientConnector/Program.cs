@@ -31,30 +31,30 @@ namespace NexusForever.ClientConnector
                 Console.Write("Type in your host name: ");
                 string hostName = Console.ReadLine();
 
+                Console.Write("Type in your language: [en,de]");
+                string language = Console.ReadLine();
+
                 ClientConfiguration clientConfig = new ClientConfiguration
                 {
-                    HostName = hostName
+                    HostName = hostName,
+                    Language = language
                 };
 
                 File.WriteAllText(jsonFile, JsonConvert.SerializeObject(clientConfig));
+            }
 
-                LaunchClient(hostName);
-            }
-            else
-            {
-                ConfigurationManager<ClientConfiguration>.Initialise(jsonFile);
-                LaunchClient(ConfigurationManager<ClientConfiguration>.Config.HostName);
-            }
+            ConfigurationManager<ClientConfiguration>.Initialise(jsonFile);
+            LaunchClient(ConfigurationManager<ClientConfiguration>.Config);
         }
 
-        private static void LaunchClient(string hostName)
+        private static void LaunchClient(ClientConfiguration config)
         {
             STARTUPINFO si = new STARTUPINFO();
             PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
 
             CreateProcess(
                 "WildStar64.exe",
-                $"/auth {hostName} /authNc {hostName} /lang en /patcher {hostName} /SettingsKey WildStar /realmDataCenterId 9",
+                $"/auth {config.HostName} /authNc {config.HostName} /lang {config.Language} /patcher {config.HostName} /SettingsKey WildStar /realmDataCenterId 9",
                 IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, null, ref si, out pi);
         }
     }

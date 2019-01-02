@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
+using NexusForever.Shared;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
 
 namespace NexusForever.WorldServer.Database.Character.Model
@@ -27,8 +27,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseMySql($"server={DatabaseManager.Config.Character.Host};port={DatabaseManager.Config.Character.Port};user={DatabaseManager.Config.Character.Username};"
-                    + $"password={DatabaseManager.Config.Character.Password};database={DatabaseManager.Config.Character.Database}");
+                optionsBuilder.UseConfiguration(DatabaseManager.Config, DatabaseType.Character);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -77,6 +76,22 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.Title)
                     .HasColumnName("title")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationX)
+                    .HasColumnName("locationX")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationY)
+                    .HasColumnName("locationY")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationZ)
+                    .HasColumnName("locationZ")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
                     .HasDefaultValueSql("'0'");
             });
 
