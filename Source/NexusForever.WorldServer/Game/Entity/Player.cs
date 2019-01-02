@@ -143,7 +143,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Class    = Class,
                 Sex      = Sex,
                 Bones    = Bones,
-                Title    = TitleManager.ActiveTitleId
+                Title    = TitleManager.ActiveTitleId,
                 PvPFlag  = PvPFlag.Disabled
             };
         }
