@@ -30,8 +30,8 @@ namespace NexusForever.Shared.Network.Message
         ClientEntitySelect              = 0x0185,
         ServerFlightPathUpdate          = 0x0188,
         ServerTitleSet                  = 0x0189,
-        ServerTitleAdd                  = 0x018A,
-        ServerTitlesUpdate              = 0x018B,
+        ServerTitleUpdate               = 0x018A,
+        ServerTitles                    = 0x018B,
         ServerPlayerChanged             = 0x019B,
         Server019D                      = 0x019D, // action set related
         Server01A0                      = 0x01A0, // ability book related

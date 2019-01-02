@@ -146,7 +146,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("amount")
                     .HasDefaultValueSql("'0'");
 
-                entity.HasOne(d => d.Character)
+                entity.HasOne(d => d.IdNavigation)
                     .WithMany(p => p.CharacterCurrency)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK_character_currency_id__character_id");
@@ -190,7 +190,11 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("title")
                     .HasDefaultValueSql("'0'");
 
-                entity.HasOne(d => d.Character)
+                entity.Property(e => e.TimeRemaining)
+                    .HasColumnName("timeRemaining")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
                     .WithMany(p => p.CharacterTitle)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_title_id__character_id");

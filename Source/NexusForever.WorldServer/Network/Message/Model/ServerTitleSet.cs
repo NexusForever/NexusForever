@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     class ServerTitleSet : IWritable
     {
         public uint Guid { get; set; }
-        public ulong Title { get; set; }
+        public ushort Title { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

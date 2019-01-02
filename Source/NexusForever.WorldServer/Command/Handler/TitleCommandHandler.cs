@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using NexusForever.Shared.GameTable;
 using NexusForever.WorldServer.Command.Attributes;
@@ -21,7 +20,7 @@ namespace NexusForever.WorldServer.Command.Handler
             if (parameters.Length <= 0)
                 return Task.CompletedTask;
 
-            context.Session.Player.TitleManager.Add(uint.Parse(parameters[0]));
+            context.Session.Player.TitleManager.AddTitle(ushort.Parse(parameters[0]));
             return Task.CompletedTask;
         }
 
@@ -31,21 +30,21 @@ namespace NexusForever.WorldServer.Command.Handler
             if (parameters.Length <= 0)
                 return Task.CompletedTask;
 
-            context.Session.Player.TitleManager.Remove(uint.Parse(parameters[0]));
+            context.Session.Player.TitleManager.RemoveTitle(ushort.Parse(parameters[0]));
             return Task.CompletedTask;
         }
 
         [SubCommandHandler("all", "Add all titles to the character")]
         public Task AddAllTitlesSubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.Player.TitleManager.Owned = GameTableManager.CharacterTitle.Entries.Select(entry => (ulong) entry.Id).ToList();
+            context.Session.Player.TitleManager.AddAllTitles();
             return Task.CompletedTask;
         }
 
         [SubCommandHandler("none", "Remove all titles from the character")]
         public Task RemoveAllTitlesSubCommand(CommandContext context, string command, string[] parameters)
         {
-            context.Session.Player.TitleManager.Owned = new List<ulong>();
+            context.Session.Player.TitleManager.RemoveAllTitles();
             return Task.CompletedTask;
         }
     }

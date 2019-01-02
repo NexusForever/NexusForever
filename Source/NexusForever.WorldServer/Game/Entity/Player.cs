@@ -101,6 +101,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void Update(double lastTick)
         {
+            TitleManager.Update(lastTick);
+
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
@@ -127,7 +129,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Class    = Class,
                 Sex      = Sex,
                 Bones    = Bones,
-                Title    = TitleManager.Active
+                Title    = TitleManager.ActiveTitleId
             };
         }
 
@@ -189,7 +191,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             Session.EnqueueMessageEncrypted(playerCreate);
 
-            TitleManager.Update();
+            TitleManager.SendTitles();
         }
 
         public override void OnRemoveFromMap()

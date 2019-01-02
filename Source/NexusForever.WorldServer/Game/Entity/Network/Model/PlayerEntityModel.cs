@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public List<float> Bones { get; set; } = new List<float>();
         public byte Unknown48 { get; set; }
         public byte Unknown4C { get; set; }
-        public ulong Title { get; set; }
+        public ushort Title { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

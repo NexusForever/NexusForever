@@ -1,179 +1,223 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    // TODO we might want to put this at a more generic place!
-    internal enum SaveStatus
+    public class TitleManager : IUpdate, ISaveCharacter, IEnumerable<Title>
     {
-        New,
-        Saved,
-        Deleted
-    }
-
-    public class TitleManager : ISaveCharacter
-    {
-        private readonly Player player;
-
-        private Dictionary<ulong, SaveStatus> owned = new Dictionary<ulong, SaveStatus>();
-
-        public List<ulong> Owned
+        public ushort ActiveTitleId
         {
-            get => owned.Where(entry => entry.Value != SaveStatus.Deleted).Select(entry => entry.Key).ToList();
+            get => activeTitleId;
             set
             {
-                foreach (ulong title in value)
-                {
-                    if (!owned.ContainsKey(title))
-                        owned.Add(title, SaveStatus.New);
-                    else if (owned[title] == SaveStatus.Deleted)
-                        owned[title] = SaveStatus.Saved;
-                }
-
-                foreach (ulong title in owned.Keys.ToList())
-                {
-                    if (value.Contains(title))
-                        continue;
-
-                    if (owned[title] == SaveStatus.Saved)
-                        owned[title] = SaveStatus.Deleted;
-                    else
-                        owned.Remove(title);
-                }
-                
-                Update();
-
-                EnsureActiveTitleIsOwned();
-            }
-        }
-
-        private ulong active;
-        private bool activeSaved = true;
-
-        public ulong Active
-        {
-            get => active;
-            set
-            {
-                if ((value != 0 && (!owned.ContainsKey(value) || owned[value] == SaveStatus.Deleted)) || active == value)
+                if (value != 0 && (!titles.ContainsKey(value) || activeTitleId == value))
                     return;
 
-                active = value;
+                activeTitleId = value;
+                activeSaved   = false;
 
                 player.EnqueueToVisible(new ServerTitleSet
                 {
-                    Guid = player.Guid,
-                    Title = Active
+                    Guid  = player.Guid,
+                    Title = ActiveTitleId
                 }, true);
-
-                activeSaved = false;
             }
         }
 
+        private ushort activeTitleId;
+        private bool activeSaved = true;
+
+        private readonly Player player;
+        private readonly Dictionary<ushort, Title> titles = new Dictionary<ushort, Title>();
+        private readonly Dictionary<ushort, Title> removedTitles = new Dictionary<ushort, Title>();
+
+        /// <summary>
+        /// Create a new <see cref="TitleManager"/> from existing <see cref="Character"/> database model.
+        /// </summary>
         public TitleManager(Player owner, Character model)
         {
             player = owner;
-            active = model.Title;
+            activeTitleId = model.Title;
 
-            foreach (CharacterTitle characterTitle in model.CharacterTitle)
-                owned.Add(characterTitle.Title, SaveStatus.Saved);
-        }
-
-        public void Add(ulong title)
-        {
-            if (owned.ContainsKey(title))
-            {
-                if (owned[title] == SaveStatus.Deleted)
-                    owned[title] = SaveStatus.Saved;
-                else
-                    return;
-            }
-            else
-            {
-                if (GameTableManager.CharacterTitle.GetEntry(title) == null)
-                    return;
-
-                owned.Add(title, SaveStatus.New);
-            }
-
-            player.Session.EnqueueMessageEncrypted(new ServerTitleAdd
-            {
-                Title = title
-            });
-        }
-
-        public void Remove(ulong title)
-        {
-            if (!owned.ContainsKey(title) || owned[title] == SaveStatus.Deleted)
-                return;
-
-            if (owned[title] == SaveStatus.New)
-                owned.Remove(title);
-            else
-                owned[title] = SaveStatus.Deleted;
-
-            Update();
+            foreach (CharacterTitle titleModel in model.CharacterTitle)
+                titles.Add(titleModel.Title, new Title(titleModel));
 
             EnsureActiveTitleIsOwned();
         }
 
-        private void EnsureActiveTitleIsOwned()
+        public void Update(double lastTick)
         {
-            if (owned.ContainsKey(active))
-                return;
-
-            Active = 0;
-        }
-
-        public void Update()
-        {
-            player.Session.EnqueueMessageEncrypted(new ServerTitlesUpdate
+            foreach (Title title in titles.Values.ToArray())
             {
-                Titles = Owned
-            });
+                title.Update(lastTick);
+                if (title.TimeRemaining != null && title.TimeRemaining <= 0d)
+                {
+                    // title has expired
+                    RemoveTitle((ushort)title.Entry.Id);
+                }
+            }
         }
 
         public void Save(CharacterContext context)
         {
             if (!activeSaved)
             {
-                Character model = new Character
+                var model = new Character
                 {
-                    Id = player.CharacterId
+                    Id    = player.CharacterId,
+                    Title = activeTitleId
                 };
 
                 EntityEntry<Character> entity = context.Attach(model);
-                model.Title = active;
                 entity.Property(p => p.Title).IsModified = true;
 
                 activeSaved = true;
             }
 
-            foreach (ulong title in owned.Where(entry => entry.Value != SaveStatus.Saved).Select(entry => entry.Key).ToList())
+            // must delete before adding new titles
+            foreach (Title title in removedTitles.Values)
+                title.Delete(context);
+
+            foreach (Title title in titles.Values)
+                title.Save(context);
+        }
+
+        /// <summary>
+        /// Add new <see cref="Title"/> with supplied title id, if suppress is true <see cref="ServerTitleUpdate"/> won't be sent.
+        /// </summary>
+        public void AddTitle(ushort titleId, bool suppress = false)
+        {
+            CharacterTitleEntry entry = GameTableManager.CharacterTitle.GetEntry(titleId);
+            if (entry == null)
+                throw new InvalidPacketValueException();
+
+            if (titles.ContainsKey(titleId))
             {
-                CharacterTitle model = new CharacterTitle
+                player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
                 {
-                    Id = player.CharacterId,
-                    Title = (uint) title
-                };
+                    TitleId      = titleId,
+                    Alreadyowned = true
+                });
 
-                if (owned[title] == SaveStatus.Deleted)
-                {
-                    context.Entry(model).State = EntityState.Deleted;
-                    owned.Remove(title);
-                }
-                else if (owned[title] == SaveStatus.New)
-                    context.Entry(model).State = EntityState.Added;
-
+                return;
             }
+
+            if (removedTitles.Remove(titleId, out Title title))
+                titles.Add(titleId, title);
+            else
+                titles.Add(titleId, new Title(player.CharacterId, entry));
+
+            if (!suppress)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
+                {
+                    TitleId = titleId
+                });
+            }
+        }
+
+        /// <summary>
+        /// Remove <see cref="Title"/> with supplied title id, if suppress is true <see cref="ServerTitleUpdate"/> won't be sent.
+        /// </summary>
+        public void RemoveTitle(ushort titleId, bool suppress = false)
+        {
+            if (GameTableManager.CharacterTitle.GetEntry(titleId) == null)
+                throw new InvalidPacketValueException();
+
+            if (!titles.Remove(titleId, out Title title))
+                return;
+
+            if (title.SavedToDatabase)
+                removedTitles.Add((ushort)title.Entry.Id, title);
+
+            if (!suppress)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
+                {
+                    TitleId = (ushort)title.Entry.Id,
+                    Revoked = true
+                });
+            }
+
+            EnsureActiveTitleIsOwned();
+        }
+
+        /// <summary>
+        /// Send <see cref="ServerTitles"/> to owner <see cref="Player"/>.
+        /// </summary>
+        public void SendTitles()
+        {
+            player.Session.EnqueueMessageEncrypted(new ServerTitles
+            {
+                Titles = titles.Values.Select(t => new ServerTitles.Title
+                {
+                    TitleId       = (ushort)t.Entry.Id,
+                    TimeRemaining = (uint)(t.TimeRemaining ?? 0d)
+                }).ToList()
+            });
+        }
+
+        /// <summary>
+        /// This is only used debug/command purposes.
+        /// </summary>
+        public void AddAllTitles()
+        {
+            ushort[] titleIds = GameTableManager.CharacterTitle.Entries
+                .Select(entry => (ushort)entry.Id)
+                .ToArray();
+
+            foreach (ushort titleId in titleIds)
+                AddTitle(titleId, true);
+
+            // client crashes if too many single title updates are sent, send as bulk
+            SendTitles();
+        }
+
+        /// <summary>
+        /// This is only used debug/command purposes.
+        /// </summary>
+        public void RemoveAllTitles()
+        {
+            ushort[] titleIds = titles.Values
+                .Select(entry => (ushort)entry.Entry.Id)
+                .ToArray();
+
+            foreach (ushort titleId in titleIds)
+                RemoveTitle(titleId, true);
+
+            player.Session.EnqueueMessageEncrypted(new ServerTitles
+            {
+                Titles = titleIds.Select(t => new ServerTitles.Title
+                {
+                    TitleId = t,
+                    Revoked = true
+                }).ToList()
+            });
+        }
+
+        private void EnsureActiveTitleIsOwned()
+        {
+            if (activeTitleId != 0 && !titles.ContainsKey(activeTitleId))
+                ActiveTitleId = 0;
+        }
+
+        public IEnumerator<Title> GetEnumerator()
+        {
+            return titles.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

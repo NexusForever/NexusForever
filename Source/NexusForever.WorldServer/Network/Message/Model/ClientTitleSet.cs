@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            TitleId = reader.ReadUShort();
+            TitleId = reader.ReadUShort(14u);
         }
     }
 }

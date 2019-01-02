@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Class { get; set; }
         public byte Level { get; set; }
         public DateTime CreateTime { get; set; }
-        public ulong Title { get; set; }
+        public ushort Title { get; set; }
 
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }
         public ICollection<CharacterBone> CharacterBone { get; set; }
