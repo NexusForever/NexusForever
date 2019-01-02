@@ -278,5 +278,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             session.Player.LogoutFinish();
         }
+
+        [MessageHandler(GameMessageOpcode.ClientTitleSet)]
+        public static void HandleTitleSet(WorldSession session, ClientTitleSet request)
+        {
+            session.Player.TitleManager.ActiveTitleId = request.TitleId;
+        }
     }
 }
