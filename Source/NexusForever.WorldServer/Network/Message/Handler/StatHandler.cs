@@ -1,4 +1,5 @@
 ﻿using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
@@ -12,13 +13,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientToggleWeapons)]
         public static void HandleWeaponToggle(WorldSession session, ClientToggleWeapons clientToggleWeapons)
         {
+            // TODO: Ensure player not in combat
+
             if (session.Player.Stats.ContainsKey(Stat.Sheathed))
-            {
-                if (session.Player.Stats[Stat.Sheathed].Value == 1)
-                    session.Player.Stats[Stat.Sheathed].Value = 0;
-                else
-                    session.Player.Stats[Stat.Sheathed].Value = 1;
-            }
+                session.Player.Stats[Stat.Sheathed].Value = clientToggleWeapons.ToggleState;
+            else
+                session.Player.Stats.Add(Stat.Sheathed, new StatValue(Stat.Sheathed, clientToggleWeapons.ToggleState));
 
             session.Player.EnqueueToVisible(new ServerStatUpdateInt
             {
