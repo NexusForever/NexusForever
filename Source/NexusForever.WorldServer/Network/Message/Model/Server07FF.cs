@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {   
             public uint   Unknown0 { get; set; } = 0;
             public byte   Unknown4 { get; set; } = 0;
-            public Position Position { get; set; }
+            public Position Position { get; set; } = new Position();
             public uint   Unknown17 { get; set; } = 0;
             public uint   Unknown21 { get; set; } = 0;
 
@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public ushort Unknown0 { get; set; } = 0;
             public uint   Unknown2 { get; set; } = 0;
             public byte   Unknown6 { get; set; } = 0;
-            public Position Position { get; set; }
+            public Position Position { get; set; } = new Position();
             public uint   Unknown19 { get; set; } = 0;
             public uint   Unknown23 { get; set; } = 0;
 
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint Guid { get; set; }
         public ushort Unknown20 { get; set; } = 0;
         public uint Guid2 { get; set; } // target?
-        public Position Position { get; set; }
+        public Position Position { get; set; } = new Position();
         public uint Unknorn38 { get; set; } = 0;        
         public bool Unknown41 { get; set; } = false;
         public bool Unknown42 { get; set; } = false;
