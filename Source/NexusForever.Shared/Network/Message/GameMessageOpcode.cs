@@ -73,6 +73,7 @@
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
         ClientCharacterSelect           = 0x07DD,
+        Server07FF                      = 0x07FF,
         ClientStorefrontRequestCatalog  = 0x082D,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
