@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -11,9 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {   
             public uint   Unknown0 { get; set; } = 0;
             public byte   Unknown4 { get; set; } = 0;
-            public uint   Unknown5 { get; set; } = 0;
-            public uint   Unknown9 { get; set; } = 0;
-            public uint   Unknown13 { get; set; } = 0;
+            public Position Position { get; set; }
             public uint   Unknown17 { get; set; } = 0;
             public uint   Unknown21 { get; set; } = 0;
 
@@ -21,9 +20,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             {
                 writer.Write(Unknown0);
                 writer.Write(Unknown4);
-                writer.Write(Unknown5);
-                writer.Write(Unknown9);
-                writer.Write(Unknown13);
+                Position.Write(writer);
                 writer.Write(Unknown17);
                 writer.Write(Unknown21);
             }
@@ -34,9 +31,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public ushort Unknown0 { get; set; } = 0;
             public uint   Unknown2 { get; set; } = 0;
             public byte   Unknown6 { get; set; } = 0;
-            public uint   Unknown7 { get; set; } = 0;
-            public uint   Unknown11 { get; set; } = 0;
-            public uint   Unknown15 { get; set; } = 0;
+            public Position Position { get; set; }
             public uint   Unknown19 { get; set; } = 0;
             public uint   Unknown23 { get; set; } = 0;
 
@@ -45,9 +40,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write(Unknown0);
                 writer.Write(Unknown2);
                 writer.Write(Unknown6);
-                writer.Write(Unknown7);
-                writer.Write(Unknown11);
-                writer.Write(Unknown15);
+                Position.Write(writer);
                 writer.Write(Unknown19);
                 writer.Write(Unknown23);
             }
@@ -60,9 +53,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint Guid { get; set; }
         public ushort Unknown20 { get; set; } = 0;
         public uint Guid2 { get; set; } // target?
-        public uint Unknown26 { get; set; } = 0;
-        public uint Unknown30 { get; set; } = 0;
-        public uint Unknown34 { get; set; } = 0;
+        public Position Position { get; set; }
         public uint Unknorn38 { get; set; } = 0;        
         public bool Unknown41 { get; set; } = false;
         public bool Unknown42 { get; set; } = false;
@@ -79,9 +70,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Guid);
             writer.Write(Unknown20);
             writer.Write(Guid2);
-            writer.Write(Unknown26);
-            writer.Write(Unknown30);
-            writer.Write(Unknown34);
+            Position.Write(writer);
             writer.Write(Unknorn38);
 
             writer.Write(unknownStructure0.Count, 8u);
