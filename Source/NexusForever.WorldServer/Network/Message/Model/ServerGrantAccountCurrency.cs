@@ -8,18 +8,16 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ServerGrantAccountCurrency : IWritable
     {
         public byte Type { get; set; }
-        public ulong Amount { get; set; }
-        public ulong BonusAmount { get; set; } // This is used to say how many of the Amount were granted by a bonus (like Signature status).
+        public ulong TotalAmount { get; set; } // This is the new total of chosen currency. Subtract or Adding currency should send a new total.
+        public ulong BonusAmount { get; set; } // This is used to say how many of the TotalAmount were granted by signature bonus on this "transaction".
         public ulong Unk4 { get; set; }
-        public ulong Unk5 { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Type, 5);
-            writer.Write(Amount);
+            writer.Write(TotalAmount);
             writer.Write(BonusAmount);
             writer.Write(Unk4);
-            writer.Write(Unk5);
         }
     }
 }
