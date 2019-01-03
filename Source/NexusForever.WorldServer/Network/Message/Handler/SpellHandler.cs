@@ -20,8 +20,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class SpellHandler
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
-
         [MessageHandler(GameMessageOpcode.ClientCastSpell)]
         public static void HandlePlayerCastSpell(WorldSession session, ClientCastSpell spell)
         {
