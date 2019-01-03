@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Entity
             get => activeTitleId;
             set
             {
-                if (value != 0 && (!titles.TryGetValue(activeTitleId, out Title title) || title.Revoked || activeTitleId == value))
+                if (value != 0 && (!titles.TryGetValue(value, out Title title) || title.Revoked || activeTitleId == value))
                     return;
 
                 activeTitleId = value;
