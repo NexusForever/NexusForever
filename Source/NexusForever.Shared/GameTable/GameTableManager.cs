@@ -73,7 +73,10 @@ namespace NexusForever.Shared.GameTable
 
         public static GameTable<CharacterCustomizationLabelEntry> CharacterCustomizationLabel { get; private set; }
         public static GameTable<CharacterCustomizationSelectionEntry> CharacterCustomizationSelection { get; private set; }
+
+        [GameData]
         public static GameTable<CharacterTitleEntry> CharacterTitle { get; private set; }
+
         public static GameTable<CharacterTitleCategoryEntry> CharacterTitleCategory { get; private set; }
         public static GameTable<ChatChannelEntry> ChatChannel { get; private set; }
         public static GameTable<CinematicEntry> Cinematic { get; private set; }

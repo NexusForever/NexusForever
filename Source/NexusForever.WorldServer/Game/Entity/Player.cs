@@ -46,6 +46,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
+        public TitleManager TitleManager { get; }
         public WorldSession Session { get; }
 
         private double timeToSave = SaveDuration;
@@ -65,6 +66,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            TitleManager = new TitleManager(this, model);
             Faction1    = (Faction)model.FactionId;
             Faction2    = (Faction)model.FactionId;
 
@@ -112,6 +114,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 logoutManager.Update(lastTick);
             }
+            
+            TitleManager.Update(lastTick);
 
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
@@ -139,6 +143,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Class    = Class,
                 Sex      = Sex,
                 Bones    = Bones,
+                Title    = TitleManager.ActiveTitleId,
                 PvPFlag  = PvPFlag.Disabled
             };
         }
@@ -208,6 +213,8 @@ namespace NexusForever.WorldServer.Game.Entity
             playerCreate.ItemProficiencies = GetItemProficiences();
 
             Session.EnqueueMessageEncrypted(playerCreate);
+
+            TitleManager.SendTitles();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -381,6 +388,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
             Inventory.Save(context);
             CurrencyManager.Save(context);
+            TitleManager.Save(context);
         }
     }
 }
