@@ -146,48 +146,53 @@ namespace NexusForever.WorldServer.Game.Entity
             if (xp <= 0)
                 throw new ArgumentException("XP must be greater than 0.");
 
-            uint[] newLevels = new uint[0];
-            switch (pathEntry.ActivePath)
+            if (GetCurrentLevel(pathEntry.ActivePath) < 30)
             {
-                case Path.Soldier:
-                    pathEntry.SoldierXp += xp;
-                    SendServerPathUpdateXp(pathEntry.SoldierXp);
+                uint[] newLevels = new uint[0];
+                switch (pathEntry.ActivePath)
+                {
+                    case Path.Soldier:
+                        pathEntry.SoldierXp += xp;
+                        SendServerPathUpdateXp(pathEntry.SoldierXp);
 
-                    newLevels = CheckForLevelUp(pathEntry.SoldierXp, xp);
-                    if (newLevels.Length > 0)
-                        foreach (uint level in newLevels)
-                            GrantLevelUpReward(pathEntry.ActivePath, level);
-                    break;
-                case Path.Settler:
-                    pathEntry.SettlerXp += xp;
-                    SendServerPathUpdateXp(pathEntry.SettlerXp);
+                        newLevels = CheckForLevelUp(pathEntry.SoldierXp, xp);
+                        if (newLevels.Length > 0)
+                            foreach (uint level in newLevels)
+                                GrantLevelUpReward(pathEntry.ActivePath, level);
+                        break;
+                    case Path.Settler:
+                        pathEntry.SettlerXp += xp;
+                        SendServerPathUpdateXp(pathEntry.SettlerXp);
 
-                    newLevels = CheckForLevelUp(pathEntry.SettlerXp, xp);
-                    if (newLevels.Length > 0)
-                        foreach (uint level in newLevels)
-                            GrantLevelUpReward(pathEntry.ActivePath, level);
-                    break;
-                case Path.Scientist:
-                    pathEntry.ScientistXp += xp;
-                    SendServerPathUpdateXp(pathEntry.ScientistXp);
+                        newLevels = CheckForLevelUp(pathEntry.SettlerXp, xp);
+                        if (newLevels.Length > 0)
+                            foreach (uint level in newLevels)
+                                GrantLevelUpReward(pathEntry.ActivePath, level);
+                        break;
+                    case Path.Scientist:
+                        pathEntry.ScientistXp += xp;
+                        SendServerPathUpdateXp(pathEntry.ScientistXp);
 
-                    newLevels = CheckForLevelUp(pathEntry.ScientistXp, xp);
-                    if (newLevels.Length > 0)
-                        foreach (uint level in newLevels)
-                            GrantLevelUpReward(pathEntry.ActivePath, level);
-                    break;
-                case Path.Explorer:
-                    pathEntry.ExplorerXp += xp;
-                    SendServerPathUpdateXp(pathEntry.ExplorerXp);
+                        newLevels = CheckForLevelUp(pathEntry.ScientistXp, xp);
+                        if (newLevels.Length > 0)
+                            foreach (uint level in newLevels)
+                                GrantLevelUpReward(pathEntry.ActivePath, level);
+                        break;
+                    case Path.Explorer:
+                        pathEntry.ExplorerXp += xp;
+                        SendServerPathUpdateXp(pathEntry.ExplorerXp);
 
-                    newLevels = CheckForLevelUp(pathEntry.ExplorerXp, xp);
-                    if (newLevels.Length > 0)
-                        foreach (uint level in newLevels)
-                            GrantLevelUpReward(pathEntry.ActivePath, level);
-                    break;
-                default:
-                    throw new ArgumentException($"Path not recognised: {pathEntry.ActivePath}");
+                        newLevels = CheckForLevelUp(pathEntry.ExplorerXp, xp);
+                        if (newLevels.Length > 0)
+                            foreach (uint level in newLevels)
+                                GrantLevelUpReward(pathEntry.ActivePath, level);
+                        break;
+                    default:
+                        throw new ArgumentException($"Path not recognised: {pathEntry.ActivePath}");
+                }
             }
+
+            // TODO: Reward Elder XP after achieving rank 30
         }
 
         /// <summary>
@@ -280,6 +285,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 GrantPathReward(pathRewardEntry);
                 PathActions[path]();
+                // TODO: Play Level up effect
                 break;
             }
         }
@@ -296,8 +302,9 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO: Check if there's bag space. Otherwise queue? Or is there an overflow inventory?
             if (pathRewardEntry.Item2Id > 0)
                 player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, 4);
+            
             // TODO: Grant Spell rewards (needs PR #76)
-            // TODO: Grant Title rewards (needs PR #64)
+
             if (pathRewardEntry.CharacterTitleId > 0)
                 player.TitleManager.AddTitle((ushort)pathRewardEntry.CharacterTitleId);
 
