@@ -15,7 +15,6 @@ using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
-using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -28,10 +27,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             ushort bagIndex = spell.BagIndex;
             uint guid = spell.Guid;
-			
-			Item Spell = session.Player.Inventory.GetBag(InventoryLocation.Ability).GetItem(bagIndex);
-			
-			log.Trace($"cast spell {Spell.SpellEntry.Id}");
+            Random random = new Random();
+
+            Item Spell = session.Player.Inventory.GetBag(InventoryLocation.Ability).GetItem(bagIndex);
 
             if (Spell.SpellEntry.Id != 0)
             {
@@ -40,9 +38,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     throw (new InvalidPacketValueException("HandleSpell: Invalid Spell4BaseEntry {Spell.SpellEntry.Id}"));
             }
 
-			// 1: [...] 
-			// 2: pew pew
-			// 3: :-)
+            if (spell.Unknown48 == true) // probably "begin casting"
+            {
+                Spell4Entry matchSpell4 = Array.Find(GameTableManager.Spell4.Entries, x => x.Spell4BaseIdBaseSpell == Spell.SpellEntry.Id && x.TierIndex == 1);
+
+                session.Player.EnqueueToVisible(new Server07FF
+                {
+                    CastingId   = (uint)random.Next(), // FIXME: this should be a global server increment
+                    Guid        = session.Player.Guid,
+                    Guid2       = session.Player.Guid, // possibly replace with (if set) target
+                    Spell4Id    = matchSpell4.Id,
+                    Spell4Id2   = matchSpell4.Id       // sometimes differs from Spell4Id
+                }, true);
+            }
         }
     }
 }
