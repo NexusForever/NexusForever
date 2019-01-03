@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using FactionId = NexusForever.WorldServer.Game.Entity.Static.Faction;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -13,7 +14,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             public class FactionReputation : IWritable
             {
-                public ushort FactionId { get; set; }
+                public FactionId FactionId { get; set; }
                 public float Value { get; set; }
 
                 public void Write(GamePacketWriter writer)
@@ -23,7 +24,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 }
             }
 
-            public ushort FactionId { get; set; }
+            public FactionId FactionId { get; set; }
             public List<FactionReputation> FactionReputations { get; } = new List<FactionReputation>();
 
             public void Write(GamePacketWriter writer)
@@ -67,7 +68,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public ulong[] Money { get; } = new ulong[16];
         public uint Xp { get; set; }
         public uint RestBonusXp { get; set; }
-        public uint ItemProficiencies { get; set; }
+        public ItemProficiency ItemProficiencies { get; set; }
         public uint ElderPoints { get; set; }
         public uint DailyElderPoints { get; set; }
         public byte SpecIndex { get; set; }
@@ -97,7 +98,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             writer.Write(Xp);
             writer.Write(RestBonusXp);
-            writer.Write(ItemProficiencies);
+            writer.Write(ItemProficiencies, 32u);
             writer.Write(ElderPoints);
             writer.Write(DailyElderPoints);
             writer.Write(SpecIndex, 3u);

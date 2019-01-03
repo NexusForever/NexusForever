@@ -105,8 +105,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public List<ItemVisual> VisibleItems { get; set; } = new List<ItemVisual>();
         public List<UnknownStructure88> Unknown88 { get; } = new List<UnknownStructure88>();
         public uint Unknown8C { get; set; }
-        public ushort Faction1 { get; set; }
-        public ushort Faction2 { get; set; }
+        public Faction Faction1 { get; set; }
+        public Faction Faction2 { get; set; }
         public uint Unknown98 { get; set; }
         public ulong Unknown9C { get; set; }
         public UnknownStructureA8 UnknownA8 { get; set; } = new UnknownStructureA8();
