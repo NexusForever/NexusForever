@@ -8,79 +8,79 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.Server07FF, MessageDirection.Server)]
     public class Server07FF : IWritable
     {
-        public class UnknownStructure0 : IWritable
+        public class InitialPosition : IWritable
         {   
-            public uint   Unknown0 { get; set; } = 0;
+            public uint   CasterId { get; set; } = 0;
             public byte   Unknown4 { get; set; } = 0;
             public Position Position { get; set; } = new Position();
-            public uint   Unknown17 { get; set; } = 0;
+            public float  Yaw { get; set; } = 0;
             public uint   Unknown21 { get; set; } = 0;
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0);
+                writer.Write(CasterId);
                 writer.Write(Unknown4);
                 Position.Write(writer);
-                writer.Write(Unknown17);
+                writer.Write(Yaw);
                 writer.Write(Unknown21);
             }
         }
 
-        public class UnknownStructure1 : IWritable
+        public class TelegraphPosition : IWritable
         {   
             public ushort Unknown0 { get; set; } = 0;
-            public uint   Unknown2 { get; set; } = 0;
+            public uint   CasterId { get; set; } = 0;
             public byte   Unknown6 { get; set; } = 0;
             public Position Position { get; set; } = new Position();
-            public uint   Unknown19 { get; set; } = 0;
+            public float  Yaw { get; set; } = 0;
             public uint   Unknown23 { get; set; } = 0;
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(Unknown0);
-                writer.Write(Unknown2);
+                writer.Write(CasterId);
                 writer.Write(Unknown6);
                 Position.Write(writer);
-                writer.Write(Unknown19);
+                writer.Write(Yaw);
                 writer.Write(Unknown23);
             }
         }
 
         public uint CastingId { get; set; }
         public uint Spell4Id { get; set; }
-        public uint Spell4Id2 { get; set; }
-        public uint Unknown12 { get; set; } = 0;
-        public uint Guid { get; set; }
+        public uint RootSpell4Id { get; set; }
+        public uint ParentSpell4Id { get; set; } = 0;
+        public uint CasterId { get; set; }
         public ushort Unknown20 { get; set; } = 0;
         public uint Guid2 { get; set; } // target?
-        public Position Position { get; set; } = new Position();
-        public uint Unknorn38 { get; set; } = 0;        
-        public bool Unknown41 { get; set; } = false;
-        public bool Unknown42 { get; set; } = false;
+        public Position FieldPosition { get; set; } = new Position();
+        public float Yaw { get; set; } = 0;
+        public bool UserInitiatedSpellCast  { get; set; } = false;
+        public bool UseCreatureOverrides { get; set; } = false;
 
-        public List<UnknownStructure0> unknownStructure0 { get; set; } = new List<UnknownStructure0>();
-        public List<UnknownStructure1> unknownStructure1 { get; set; } = new List<UnknownStructure1>();
+        public List<InitialPosition> initialPosition { get; set; } = new List<InitialPosition>();
+        public List<TelegraphPosition> telegraphPosition { get; set; } = new List<TelegraphPosition>();
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CastingId);
             writer.Write(Spell4Id, 18);
-            writer.Write(Spell4Id2, 18);
-            writer.Write(Unknown12, 18);
-            writer.Write(Guid);
+            writer.Write(RootSpell4Id, 18);
+            writer.Write(ParentSpell4Id, 18);
+            writer.Write(CasterId);
             writer.Write(Unknown20);
             writer.Write(Guid2);
-            Position.Write(writer);
-            writer.Write(Unknorn38);
+            FieldPosition.Write(writer);
+            writer.Write(Yaw);
 
-            writer.Write(unknownStructure0.Count, 8u);
-            unknownStructure0.ForEach(u => u.Write(writer));
+            writer.Write(initialPosition.Count, 8u);
+            initialPosition.ForEach(i => i.Write(writer));
 
-            writer.Write(unknownStructure1.Count, 8u);
-            unknownStructure1.ForEach(u => u.Write(writer));
+            writer.Write(telegraphPosition.Count, 8u);
+            telegraphPosition.ForEach(t => t.Write(writer));
 
-            writer.Write(Unknown41);
-            writer.Write(Unknown42);
+            writer.Write(UserInitiatedSpellCast);
+            writer.Write(UseCreatureOverrides);
         }
     }
 }
