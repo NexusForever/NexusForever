@@ -259,7 +259,6 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <param name="pathRewardEntry">The entry containing items, spells, or titles, to be rewarded"/></param>
         private void GrantPathReward(PathRewardEntry pathRewardEntry)
         {
-            log.Debug($"GrantPathReward Called, {pathRewardEntry.Id}");
             if (pathRewardEntry == null)
                 throw new ArgumentNullException();
 
@@ -299,7 +298,6 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <param name="context"></param>
         public void Save(CharacterContext context)
         {
-            log.Debug($"PathManager.Save Called");
             foreach (PathEntry pathEntry in paths.Values)
                 pathEntry.Save(context);
         }

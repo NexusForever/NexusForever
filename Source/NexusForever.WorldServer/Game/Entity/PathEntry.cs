@@ -90,14 +90,11 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <param name="context">The character context to save against</param>
         public void Save(CharacterContext context)
         {
-            log.Debug($"PathEntry.Save called");
-
             if (saveMask == PathSaveMask.None)
                 return;
 
             if ((saveMask & PathSaveMask.Create) != 0)
             {
-                log.Debug($"PathSaveMask == Create");
                 // Path doesn't exist in database, all infomation must be saved
                 context.Add(new CharacterPath
                 {
@@ -120,21 +117,18 @@ namespace NexusForever.WorldServer.Game.Entity
                 EntityEntry<CharacterPath> entity = context.Attach(model);
                 if ((saveMask & PathSaveMask.Unlocked) != 0)
                 {
-                    log.Debug($"PathSaveMask == Unlocked");
                     model.Unlocked = Unlocked;
                     entity.Property(p => p.Unlocked).IsModified = true;
                 }
 
                 if ((saveMask & PathSaveMask.XPChange) != 0)
                 {
-                    log.Debug($"PathSaveMask == XPChange");
                     model.TotalXp = TotalXp;
                     entity.Property(p => p.TotalXp).IsModified = true;
                 }
 
                 if ((saveMask & PathSaveMask.LevelChange) != 0)
                 {
-                    log.Debug($"PathSaveMask == LevelChange");
                     model.LevelRewarded = LevelRewarded;
                     entity.Property(p => p.LevelRewarded).IsModified = true;
                 }
