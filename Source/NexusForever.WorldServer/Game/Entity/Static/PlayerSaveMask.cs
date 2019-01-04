@@ -10,6 +10,7 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     {
         None      = 0x0000,
         Level     = 0x0001,
-        Location  = 0x0002
+        Location  = 0x0002,
+        Path      = 0x0004
     }
 }

@@ -152,14 +152,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Sex       = (byte)creationEntry.Sex,
                     Class     = (byte)creationEntry.ClassId,
                     Level     = 1,
-                    FactionId = (ushort)creationEntry.FactionId
+                    FactionId = (ushort)creationEntry.FactionId,
+                    Path      = characterCreate.Path
                 };
 
-                character.CharacterPath = new CharacterPath
+                character.CharacterPath.Add(new CharacterPath
                 {
-                    ActivePath = characterCreate.Path,
-                    PathsUnlocked = (ushort)(PathUnlockedMask)(1 << characterCreate.Path)
-                };
+                    PathName = ((Path)characterCreate.Path).ToString(),
+                    Unlocked = true
+                });
 
                 // merge seperate label and value lists into a single dictonary
                 Dictionary<uint, uint> customisations = characterCreate.Labels

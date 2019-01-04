@@ -6,15 +6,18 @@ using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
+using NexusForever.WorldServer.Database;
+using System.Collections;
+using System.Linq;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class PathManager
+    public class PathManager: ISaveCharacter, IEnumerable<PathEntry>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private readonly Player player;
-        private protected PathEntry pathEntry;
+        private readonly Dictionary<Path, PathEntry> paths = new Dictionary<Path, PathEntry>();
 
         /// <summary>
         /// Create a new <see cref="PathManager"/> from <see cref="Player"/> database model.
@@ -23,23 +26,46 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             player = owner;
 
-            if (model.CharacterPath != null)
-                pathEntry = new PathEntry(model.CharacterPath);
+            foreach (var pathEntry in model.CharacterPath)
+                paths.Add((Path)Enum.Parse(typeof(Path), pathEntry.PathName), new PathEntry(pathEntry));
+        }
+
+        public void Load()
+        {
+            if (paths.Count <= 0)
+                paths.TryAdd(player.Path, PathCreate(player.Path, true));
+
+            if (paths.Count < 4)
+                foreach (Path path in (Path[])Enum.GetValues(typeof(Path)))
+                {
+                    if (paths.ContainsKey(path))
+                        continue;
+
+                    paths.TryAdd(path, PathCreate(path));
+                }
+
+            // TODO: Check for missing level up rewards.
+
+            SendPathLogPacket();
         }
 
         /// <summary>
         /// Create a new <see cref="PathEntry"/>.
         /// </summary>
-        public PathEntry PathCreate(byte activePath, ulong amount = 0)
+        public PathEntry PathCreate(Path path, bool unlocked = false)
         {
-            if (activePath < 0)
+            if (!Enum.IsDefined(typeof(Path), path))
                 return null;
 
-            pathEntry = new PathEntry(
+            if (paths.ContainsKey(path))
+                throw new ArgumentException($"{path} is already added to the player!");
+
+            PathEntry pathEntry = new PathEntry(
                 player.CharacterId,
-                (Path)activePath,
-                (PathUnlockedMask)(1 << activePath)
+                path,
+                unlocked
             );
+            paths.Add(path, pathEntry);
             return pathEntry;
         }
 
@@ -47,30 +73,12 @@ namespace NexusForever.WorldServer.Game.Entity
         /// Return a <see cref="Player"/>'s <see cref="PathEntry"/>. Create <see cref="Path.Soldier"/> entry if doesn't exist.
         /// </summary>
         /// <returns></returns>
-        public PathEntry GetPathEntry()
+        public PathEntry GetPathEntry(Path path)
         {
-            if (pathEntry == null)
-            {
-                log.Warn($"No path associated with player {player.Name}. Defaulting to Soldier.");
-                return PathCreate((byte)Path.Soldier);
-            }
+            if (!paths.ContainsKey(path))
+                throw new ArgumentException($"{path} is not added to the player!");
 
-            return pathEntry;
-        }
-
-        /// <summary>
-        /// Returns the <see cref="Path"/> for this <see cref="Player"/>
-        /// </summary>
-        /// <returns></returns>
-        public Path GetPath()
-        {
-            if (pathEntry == null)
-            {
-                log.Warn($"No path associated with player {player.Name}. Defaulting to Soldier.");
-                return PathCreate((byte)Path.Soldier).ActivePath;
-            }
-
-            return pathEntry.ActivePath;
+            return paths[path];
         }
 
         /// <summary>
@@ -80,7 +88,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <returns></returns>
         public bool IsPathActive(Path pathToCheck)
         {
-            return pathEntry.ActivePath == pathToCheck;
+            return player.Path == pathToCheck;
         }
 
         /// <summary>
@@ -99,8 +107,10 @@ namespace NexusForever.WorldServer.Game.Entity
             if (IsPathActive(pathToActivate))
                 throw new ArgumentException("Path is already active.");
 
-            pathEntry.ActivePath = pathToActivate;
-            player.Path = pathEntry.ActivePath;
+            player.Path = pathToActivate;
+
+            // TODO: Update activate timer
+
             SendServerPathActivateResult();
             SendSetUnitPathTypePacket();
             SendPathLogPacket();
@@ -113,9 +123,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <returns></returns>
         public bool IsPathUnlocked(Path pathToUnlock)
         {
-            PathUnlockedMask newPathMask = (PathUnlockedMask)(1 << (int)pathToUnlock);
-            // Determines if the Path is already unlocked
-            return (pathEntry.PathsUnlocked & newPathMask) == newPathMask;
+            return paths[pathToUnlock].Unlocked;
         }
 
         /// <summary>
@@ -132,7 +140,8 @@ namespace NexusForever.WorldServer.Game.Entity
             if (IsPathUnlocked(pathToUnlock))
                 throw new ArgumentException("Path is already unlocked.");
 
-            pathEntry.PathsUnlocked |= (PathUnlockedMask)(1 << (int)pathToUnlock);
+            paths[pathToUnlock].Unlocked = true;
+
             SendServerPathUnlockResult(Result);
             SendPathLogPacket();
         }
@@ -146,50 +155,18 @@ namespace NexusForever.WorldServer.Game.Entity
             if (xp <= 0)
                 throw new ArgumentException("XP must be greater than 0.");
 
-            if (GetCurrentLevel(pathEntry.ActivePath) < 30)
+            Path path = player.Path;
+
+            if (GetCurrentLevel(path) < 30)
             {
-                uint[] newLevels = new uint[0];
-                switch (pathEntry.ActivePath)
-                {
-                    case Path.Soldier:
-                        pathEntry.SoldierXp += xp;
-                        SendServerPathUpdateXp(pathEntry.SoldierXp);
+                paths[path].TotalXp += xp;
 
-                        newLevels = CheckForLevelUp(pathEntry.SoldierXp, xp);
-                        if (newLevels.Length > 0)
-                            foreach (uint level in newLevels)
-                                GrantLevelUpReward(pathEntry.ActivePath, level);
-                        break;
-                    case Path.Settler:
-                        pathEntry.SettlerXp += xp;
-                        SendServerPathUpdateXp(pathEntry.SettlerXp);
+                uint[] newLevels = CheckForLevelUp(paths[path].TotalXp, xp);
+                if (newLevels.Length > 0)
+                    foreach (uint level in newLevels)
+                        GrantLevelUpReward(path, level);
 
-                        newLevels = CheckForLevelUp(pathEntry.SettlerXp, xp);
-                        if (newLevels.Length > 0)
-                            foreach (uint level in newLevels)
-                                GrantLevelUpReward(pathEntry.ActivePath, level);
-                        break;
-                    case Path.Scientist:
-                        pathEntry.ScientistXp += xp;
-                        SendServerPathUpdateXp(pathEntry.ScientistXp);
-
-                        newLevels = CheckForLevelUp(pathEntry.ScientistXp, xp);
-                        if (newLevels.Length > 0)
-                            foreach (uint level in newLevels)
-                                GrantLevelUpReward(pathEntry.ActivePath, level);
-                        break;
-                    case Path.Explorer:
-                        pathEntry.ExplorerXp += xp;
-                        SendServerPathUpdateXp(pathEntry.ExplorerXp);
-
-                        newLevels = CheckForLevelUp(pathEntry.ExplorerXp, xp);
-                        if (newLevels.Length > 0)
-                            foreach (uint level in newLevels)
-                                GrantLevelUpReward(pathEntry.ActivePath, level);
-                        break;
-                    default:
-                        throw new ArgumentException($"Path not recognised: {pathEntry.ActivePath}");
-                }
+                SendServerPathUpdateXp(paths[path].TotalXp);
             }
 
             // TODO: Reward Elder XP after achieving rank 30
@@ -202,14 +179,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <returns></returns>
         public uint GetCurrentLevel(Path path)
         {
-            Dictionary<Path, uint> pathXpValue = new Dictionary<Path, uint>
-            {
-                { Path.Soldier, pathEntry.SoldierXp },
-                { Path.Settler, pathEntry.SettlerXp },
-                { Path.Scientist, pathEntry.ScientistXp },
-                { Path.Explorer, pathEntry.ExplorerXp }
-            };
-            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP <= pathXpValue[path] && x.PathTypeEnum == (uint)path).PathLevel;
+            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP <= paths[path].TotalXp && x.PathTypeEnum == (uint)path).PathLevel;
         }
 
         /// <summary>
@@ -219,7 +189,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <returns></returns>
         private uint GetLevelByExperience(uint xp)
         {
-            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP <= xp && x.PathTypeEnum == (uint)pathEntry.ActivePath).PathLevel;
+            return Array.FindLast(GameTableManager.PathLevel.Entries, x => x.PathXP <= xp && x.PathTypeEnum == (uint)player.Path).PathLevel;
         }
 
         /// <summary>
@@ -234,7 +204,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PathLevelEntry[] levelEntriesGained = Array.FindAll(GameTableManager.PathLevel.Entries, 
                 x => x.PathLevel > currentLevel && 
                 x.PathXP <= totalXp && 
-                x.PathTypeEnum == (uint)pathEntry.ActivePath
+                x.PathTypeEnum == (uint)player.Path
                 );
 
             List<uint> levelsGained = new List<uint>();
@@ -259,14 +229,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 { Path.Scientist, 67 },
                 { Path.Explorer, 97 }
             };
-            Dictionary<Path, Action> PathActions = new Dictionary<Path, Action>
-            {
-                { Path.Soldier, () => pathEntry.SoldierLevelRewarded = level },
-                { Path.Settler, () => pathEntry.SettlerLevelRewarded = level },
-                { Path.Scientist, () => pathEntry.ScientistLevelRewarded = level },
-                { Path.Explorer, () => pathEntry.ExplorerLevelRewarded = level }
-            };
-            uint pathRewardObjectId = baseRewardObjectId[path] + (Math.Clamp(level - 2, 0, 100)); // level - 2 is used because the objectIDs start at level 2 and a -2 offset was needed
+            uint pathRewardObjectId = baseRewardObjectId[path] + (Math.Clamp(level - 2, 0, 29)); // level - 2 is used because the objectIDs start at level 2 and a -2 offset was needed
             PathRewardEntry[] pathRewardEntries = Array.FindAll(GameTableManager.PathReward.Entries, x => x.ObjectId == pathRewardObjectId);
 
             foreach(PathRewardEntry pathRewardEntry in pathRewardEntries)
@@ -284,7 +247,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     continue;
 
                 GrantPathReward(pathRewardEntry);
-                PathActions[path]();
+                paths[path].LevelRewarded = (byte)level;
                 // TODO: Play Level up effect
                 break;
             }
@@ -296,6 +259,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <param name="pathRewardEntry">The entry containing items, spells, or titles, to be rewarded"/></param>
         private void GrantPathReward(PathRewardEntry pathRewardEntry)
         {
+            log.Debug($"GrantPathReward Called, {pathRewardEntry.Id}");
             if (pathRewardEntry == null)
                 throw new ArgumentNullException();
 
@@ -310,13 +274,34 @@ namespace NexusForever.WorldServer.Game.Entity
 
         }
 
+        private PathUnlockedMask GetPathUnlockedMask()
+        {
+            PathUnlockedMask pathUnlockedMask = new PathUnlockedMask();
+
+            if (paths[Path.Soldier].Unlocked)
+                pathUnlockedMask |= PathUnlockedMask.Soldier;
+
+            if (paths[Path.Settler].Unlocked)
+                pathUnlockedMask |= PathUnlockedMask.Settler;
+
+            if (paths[Path.Scientist].Unlocked)
+                pathUnlockedMask |= PathUnlockedMask.Scientist;
+
+            if (paths[Path.Explorer].Unlocked)
+                pathUnlockedMask |= PathUnlockedMask.Explorer;
+
+            return pathUnlockedMask;
+        }
+
         /// <summary>
         /// Execute a DB Save of the <see cref="CharacterContext"/>
         /// </summary>
         /// <param name="context"></param>
         public void Save(CharacterContext context)
         {
-            pathEntry.Save(context);
+            log.Debug($"PathManager.Save Called");
+            foreach (PathEntry pathEntry in paths.Values)
+                pathEntry.Save(context);
         }
 
         /// <summary>
@@ -326,15 +311,15 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             player.Session.EnqueueMessageEncrypted(new ServerPathLog
             {
-                ActivePath = pathEntry.ActivePath,
+                ActivePath = player.Path,
                 PathProgress = new uint[]
                 {
-                    pathEntry.SoldierXp,
-                    pathEntry.SettlerXp,
-                    pathEntry.ScientistXp,
-                    pathEntry.ExplorerXp
+                    paths[Path.Soldier].TotalXp,
+                    paths[Path.Settler].TotalXp,
+                    paths[Path.Scientist].TotalXp,
+                    paths[Path.Explorer].TotalXp
                 },
-                PathUnlockedMask = pathEntry.PathsUnlocked,
+                PathUnlockedMask = GetPathUnlockedMask(),
                 ActivateTimer = 0 // TODO: Need to figure out timestamp calculations necessary for this value to update the client appropriately
             });
         }
@@ -347,7 +332,7 @@ namespace NexusForever.WorldServer.Game.Entity
             player.EnqueueToVisible(new ServerSetUnitPathType
             {
                 Guid = player.Guid,
-                Path = pathEntry.ActivePath,
+                Path = player.Path,
             }, true);
         }
 
@@ -374,7 +359,7 @@ namespace NexusForever.WorldServer.Game.Entity
             player.Session.EnqueueMessageEncrypted(new ServerPathUnlockResult
             {
                 Result = Result,
-                UnlockedPathMask = pathEntry.PathsUnlocked
+                UnlockedPathMask = GetPathUnlockedMask()
             });
         }
 
@@ -388,6 +373,16 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 TotalXP = totalXp
             });
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<PathEntry> GetEnumerator()
+        {
+            return paths.Values.GetEnumerator();
         }
     }
 }

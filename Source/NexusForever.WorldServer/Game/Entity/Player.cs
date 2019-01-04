@@ -30,7 +30,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
-        public Path Path { get; set; }
         public List<float> Bones { get; }
 
         public byte Level
@@ -44,6 +43,17 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         private byte level;
+
+        public Path Path
+        {
+            get => path;
+            set
+            {
+                path = value;
+                saveMask |= PlayerSaveMask.Path;
+            }
+        }
+        private Path path;
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
@@ -69,7 +79,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
             PathManager = new PathManager(this, model);
-            Path        = PathManager.GetPath();
+            Path        = (Path)model.Path;
             TitleManager = new TitleManager(this, model);
             Faction1    = (Faction)model.FactionId;
             Faction2    = (Faction)model.FactionId;
@@ -179,7 +189,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
-            PathManager.SendPathLogPacket();
+            PathManager.Load();
 
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
@@ -392,6 +402,13 @@ namespace NexusForever.WorldServer.Game.Entity
                     model.WorldId = (ushort)Map.Entry.Id;
                     entity.Property(p => p.WorldId).IsModified = true;
                 }
+
+                if((saveMask & PlayerSaveMask.Path) != 0)
+                {
+                    model.Path = (uint)Path;
+                    entity.Property(p => p.Path).IsModified = true;
+                }
+
                 saveMask = PlayerSaveMask.None;
             }
             Inventory.Save(context);

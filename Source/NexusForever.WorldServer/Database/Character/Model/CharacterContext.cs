@@ -79,6 +79,15 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("title")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.Path)
+                    .HasColumnName("activePath")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PathActivatedTimestamp)
+                    .HasColumnName("pathActivatedTimestamp")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
                 entity.Property(e => e.LocationX)
                     .HasColumnName("locationX")
                     .HasDefaultValueSql("'0'");
@@ -194,62 +203,35 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
             modelBuilder.Entity<CharacterPath>(entity =>
             {
-                entity.HasKey(e => new { e.Id });
+                entity.HasKey(e => new { e.Id, e.PathName });
 
-                entity.ToTable("character_path");
+                entity.ToTable("character_paths");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.ActivePath)
-                    .HasColumnName("activePath")
+                entity.Property(e => e.PathName)
+                    .IsRequired()
+                    .HasColumnName("pathName")
+                    .HasColumnType("varchar(50)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.Unlocked)
+                    .HasColumnName("unlocked")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.PathsUnlocked)
-                    .HasColumnName("pathsUnlocked")
+                entity.Property(e => e.TotalXp)
+                    .HasColumnName("totalXp")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.SoldierXp)
-                    .HasColumnName("soldierXp")
+                entity.Property(e => e.LevelRewarded)
+                    .HasColumnName("levelRewarded")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.SettlerXp)
-                    .HasColumnName("settlerXp")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.ScientistXp)
-                    .HasColumnName("scientistXp")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.ExplorerXp)
-                    .HasColumnName("explorerXp")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.SoldierLevelRewarded)
-                    .HasColumnName("soldierLevelRewarded")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.SettlerLevelRewarded)
-                    .HasColumnName("settlerLevelRewarded")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.ScientistLevelRewarded)
-                    .HasColumnName("scientistLevelRewarded")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.ExplorerLevelRewarded)
-                    .HasColumnName("explorerLevelRewarded")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.PathActivatedTimestamp)
-                    .HasColumnName("pathActivatedTimestamp")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
-
-                entity.HasOne(d => d.Character)
-                    .WithOne(p => p.CharacterPath)
-                    .HasForeignKey<CharacterPath>(d => d.Id)
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterPath)
+                    .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_path_id__character_id");
             });
 

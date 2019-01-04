@@ -1,17 +1,14 @@
 -- Dumping structure for table nexus_forever_character.character_path
-CREATE TABLE IF NOT EXISTS `character_path` (
+CREATE TABLE IF NOT EXISTS `character_paths` (
   `id` bigint(20) unsigned NOT NULL DEFAULT '0',
-  `activePath` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `pathsUnlocked` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `soldierXp` int(10) unsigned NOT NULL DEFAULT '0',
-  `settlerXp` int(10) unsigned NOT NULL DEFAULT '0',
-  `scientistXp` int(10) unsigned NOT NULL DEFAULT '0',
-  `explorerXp` int(10) unsigned NOT NULL DEFAULT '0',
-  `soldierLevelRewarded` int(10) unsigned NOT NULL DEFAULT '0',
-  `settlerLevelRewarded` int(10) unsigned NOT NULL DEFAULT '0',
-  `scientistLevelRewarded` int(10) unsigned NOT NULL DEFAULT '0',
-  `explorerLevelRewarded` int(10) unsigned NOT NULL DEFAULT '0',
-  `pathActivatedTimestamp` datetime NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  `pathName` varchar(50) NOT NULL DEFAULT '',
+  `unlocked` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `totalXp` int(10) unsigned NOT NULL DEFAULT '0',
+  `levelRewarded` tinyint(4) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`, `pathName`),
   CONSTRAINT `FK_character_path_id__character_id` FOREIGN KEY (`id`) REFERENCES `character` (`id`) ON DELETE CASCADE
-)
+);
+
+ALTER TABLE `character` 
+ADD `activePath` int(10) unsigned NOT NULL DEFAULT '0',
+ADD `pathActivatedTimestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
