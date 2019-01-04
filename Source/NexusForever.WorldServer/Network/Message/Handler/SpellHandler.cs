@@ -42,11 +42,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 session.Player.EnqueueToVisible(new Server07FF
                 {
-                    CastingId   = (uint)random.Next(), // FIXME: this should be a global server increment
-                    Guid        = session.Player.Guid,
-                    Guid2       = session.Player.Guid, // possibly replace with (if set) target
-                    Spell4Id    = matchSpell4.Id,
-                    Spell4Id2   = matchSpell4.Id       // sometimes differs from Spell4Id
+                    CastingId       = (uint)random.Next(), // FIXME: this should be a global server increment
+                    CasterId        = session.Player.Guid,
+                    Guid2           = session.Player.Guid, // possibly replace with (if set) target
+                    Spell4Id        = matchSpell4.Id,
+                    RootSpell4Id    = matchSpell4.Id,
+                    ParentSpell4Id  = 0,
+                    FieldPosition   = new Position(session.Player.Position),
                 }, true);
             }
         }
