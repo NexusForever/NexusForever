@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Database.Character.Model
@@ -11,6 +11,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterBone = new HashSet<CharacterBone>();
             CharacterCurrency = new HashSet<CharacterCurrency>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
+            CharacterTitle = new HashSet<CharacterTitle>();
             Item = new HashSet<Item>();
             CharacterReputation = new HashSet<CharacterReputation>();
         }
@@ -22,12 +23,19 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Race { get; set; }
         public byte Class { get; set; }
         public byte Level { get; set; }
+        public ushort FactionId { get; set; }
         public DateTime CreateTime { get; set; }
+        public ushort Title { get; set; }
+        public float LocationX { get; set; }
+        public float LocationY { get; set; }
+        public float LocationZ { get; set; }
+        public ushort WorldId { get; set; }
 
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }
         public ICollection<CharacterBone> CharacterBone { get; set; }
         public ICollection<CharacterCurrency> CharacterCurrency { get; set; }
         public ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public ICollection<CharacterTitle> CharacterTitle { get; set; }
         public ICollection<Item> Item { get; set; }
         public ICollection<CharacterReputation> CharacterReputation { get; set; }
     }

@@ -3,8 +3,8 @@
     public enum Language
     {
         English = 1,
-        German,
-        French,
-        Korean
+        German  = 2,
+        French  = 3,
+        Chinese = 5
     }
 }

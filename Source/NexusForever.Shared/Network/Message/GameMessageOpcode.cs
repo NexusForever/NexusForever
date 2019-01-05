@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Shared.Network.Message
+namespace NexusForever.Shared.Network.Message
 {
     public enum GameMessageOpcode
     {
@@ -12,6 +12,7 @@
         ServerChangeWorld               = 0x00AD,
         ClientVendorPurchase            = 0x00BE,
         ClientCharacterLogout           = 0x00BF,
+        ClientLogout                    = 0x00C0,
         ServerCharacterCreate           = 0x00DC,
         ServerChannelUpdateLoot         = 0x00DD,
         Server00F1                      = 0x00F1,
@@ -29,29 +30,32 @@
         ClientItemMove                  = 0x0182,
         ClientEntitySelect              = 0x0185,
         ServerFlightPathUpdate          = 0x0188,
-        ServerPlayerTitleUpdate         = 0x018B,
+        ServerTitleSet                  = 0x0189,
+        ServerTitleUpdate               = 0x018A,
+        ServerTitles                    = 0x018B,
         ServerPlayerChanged             = 0x019B,
         Server019D                      = 0x019D, // action set related
         Server01A0                      = 0x01A0, // ability book related
         Server01A3                      = 0x01A3, // AMP
         ServerChatJoin                  = 0x01BC,
-        ClientChat                      = 0x01C3,
         ServerChatAccept                = 0x01C2,
+        ClientChat                      = 0x01C3,
         ServerChat                      = 0x01C8,
         Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
         ClientPing                      = 0x0241,
         ClientEncrypted                 = 0x0244,
         ServerCombatLog                 = 0x0247,
         ClientCharacterCreate           = 0x025B,
-        ServerPlayerCreate              = 0x025E,
         ClientPacked                    = 0x025C, // the same as ClientEncrypted except the contents isn't encrypted?
+        ServerPlayerCreate              = 0x025E,
         ServerEntityCreate              = 0x0262,
         ClientCharacterDelete           = 0x0352,
+        ServerEntityDestory             = 0x0355,
         ClientEmote                     = 0x037E,
         Server03AA                      = 0x03AA, // friendship account related
         Server03BE                      = 0x03BE, // friendship related
-        ServerRealmEncrypted            = 0x03DC,
         ServerRealmInfo                 = 0x03DB,
+        ServerRealmEncrypted            = 0x03DC,
         ClientCheat                     = 0x03E0,
         Server0497                      = 0x0497, // guild info
         ServerItemSwap                  = 0x0568,
@@ -60,11 +64,13 @@
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
         ServerMovementControl           = 0x0636,
+        ServerClientLogout              = 0x0594,
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
         ServerPathLog                   = 0x06BC,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
+        ClientTitleSet                  = 0x078E,
         ClientRealmList                 = 0x07A4,
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
@@ -73,7 +79,6 @@
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
         Server086F                      = 0x086F,
-        ServerEntityDestory             = 0x088C, // 0x8A5??
         Server08B3                      = 0x08B3,
         ServerVendor                    = 0x090B,
         ServerPlayerCurrencyChanged     = 0x0919,

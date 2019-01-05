@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Network;
 using NLog;
 
@@ -8,6 +9,7 @@ namespace NexusForever.WorldServer.Command.Contexts
     {
         protected ILogger Logger { get; } = LogManager.GetCurrentClassLogger();
         public WorldSession Session { get; set; }
+        public Language Language { get; } = Language.English;
 
         protected CommandContext(WorldSession session)
         {

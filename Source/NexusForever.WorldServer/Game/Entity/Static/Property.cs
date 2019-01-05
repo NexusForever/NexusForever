@@ -11,10 +11,22 @@
         RatingFocusRecovery                         = 6,
         BaseHealth                                  = 7,
         HealthRegenMultiplier                       = 8,
+        /// <summary>
+        /// Endurance
+        /// </summary>
         ResourceMax0                                = 9,
+        /// <summary>
+        /// Kinetic Energy (Warrior), Psi Points (Esper), Volatile Energy (Engineer), Medic Cores (Medic)
+        /// </summary>
         ResourceMax1                                = 10,
         ResourceMax2                                = 11,
+        /// <summary>
+        /// Suit Power (Stalker)
+        /// </summary>
         ResourceMax3                                = 12,
+        /// <summary>
+        /// Spell Power (Spellslinger),
+        /// </summary>
         ResourceMax4                                = 13,
         ResourceMax5                                = 14,
         ResourceMax6                                = 15,
