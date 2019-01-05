@@ -76,6 +76,12 @@ namespace NexusForever.Shared.Network.Message
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
         ClientCharacterSelect           = 0x07DD,
+        Server07F5                      = 0x07F5,
+        Server07F9                      = 0x07F9,
+        Server07FA                      = 0x07FA,
+        Server07FC                      = 0x07FC,
+        Server07FD                      = 0x07FD,
+        Server07FE                      = 0x07FE,
         Server07FF                      = 0x07FF,
         ClientStorefrontRequestCatalog  = 0x082D,
         Server0854                      = 0x0854, // crafting schematic
