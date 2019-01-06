@@ -8,9 +8,10 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     [Flags]
     public enum PathUnlockedMask
     {
-        Soldier     = 1,
-        Settler     = 2,
-        Scientist   = 4,
-        Explorer    = 8
+        None      = 0,
+        Soldier   = 1 << Path.Soldier,
+        Settler   = 1 << Path.Settler,
+        Scientist = 1 << Path.Scientist,
+        Explorer  = 1 << Path.Explorer
     }
 }

@@ -79,7 +79,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
             PathManager = new PathManager(this, model);
-            Path        = (Path)model.Path;
+            Path        = (Path)model.ActivePath;
             TitleManager = new TitleManager(this, model);
             Faction1    = (Faction)model.FactionId;
             Faction2    = (Faction)model.FactionId;
@@ -189,7 +189,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
-            PathManager.Load();
+            PathManager.SendPathLogPacket();
 
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
@@ -405,8 +405,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 if((saveMask & PlayerSaveMask.Path) != 0)
                 {
-                    model.Path = (uint)Path;
-                    entity.Property(p => p.Path).IsModified = true;
+                    model.ActivePath = (uint)Path;
+                    entity.Property(p => p.ActivePath).IsModified = true;
                 }
 
                 saveMask = PlayerSaveMask.None;

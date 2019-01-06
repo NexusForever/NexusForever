@@ -3,14 +3,11 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     public class PathEntry : ISaveCharacter
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         public Path Path { get; set;  }
         public ulong CharacterId { get; set; }
 
@@ -64,8 +61,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public PathEntry(CharacterPath model)
         {
             CharacterId = model.Id;
-            Path = (Path)Enum.Parse(typeof(Path), model.PathName);
-            Unlocked = model.Unlocked;
+            Path = (Path)model.Path;
+            Unlocked = Convert.ToBoolean(model.Unlocked);
             TotalXp = model.TotalXp;
             LevelRewarded = model.LevelRewarded;
             
@@ -99,8 +96,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 context.Add(new CharacterPath
                 {
                     Id = CharacterId,
-                    PathName = Path.ToString(),
-                    Unlocked = Unlocked,
+                    Path = (byte)Path,
+                    Unlocked = Convert.ToByte(Unlocked),
                     TotalXp = TotalXp,
                     LevelRewarded = LevelRewarded
                 });
@@ -111,13 +108,13 @@ namespace NexusForever.WorldServer.Game.Entity
                 var model = new CharacterPath
                 {
                     Id = CharacterId,
-                    PathName = Path.ToString()
+                    Path = (byte)Path
                 };
 
                 EntityEntry<CharacterPath> entity = context.Attach(model);
                 if ((saveMask & PathSaveMask.Unlocked) != 0)
                 {
-                    model.Unlocked = Unlocked;
+                    model.Unlocked = Convert.ToByte(Unlocked);
                     entity.Property(p => p.Unlocked).IsModified = true;
                 }
 

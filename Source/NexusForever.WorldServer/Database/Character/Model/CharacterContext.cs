@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
@@ -48,6 +50,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("accountId")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.ActivePath)
+                    .HasColumnName("activePath")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.Class)
                     .HasColumnName("class")
                     .HasDefaultValueSql("'0'");
@@ -57,36 +63,13 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
 
+                entity.Property(e => e.FactionId)
+                    .HasColumnName("factionId")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.Level)
                     .HasColumnName("level")
                     .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasColumnName("name")
-                    .HasColumnType("varchar(50)")
-                    .HasDefaultValueSql("''");
-
-                entity.Property(e => e.Race)
-                    .HasColumnName("race")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Sex)
-                    .HasColumnName("sex")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Title)
-                    .HasColumnName("title")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Path)
-                    .HasColumnName("activePath")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.PathActivatedTimestamp)
-                    .HasColumnName("pathActivatedTimestamp")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
 
                 entity.Property(e => e.LocationX)
                     .HasColumnName("locationX")
@@ -98,6 +81,29 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.LocationZ)
                     .HasColumnName("locationZ")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(50)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.PathActivatedTimestamp)
+                    .HasColumnName("pathActivatedTimestamp")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
+                entity.Property(e => e.Race)
+                    .HasColumnName("race")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Sex)
+                    .HasColumnName("sex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Title)
+                    .HasColumnName("title")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.WorldId)
@@ -203,30 +209,28 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
             modelBuilder.Entity<CharacterPath>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.PathName });
+                entity.HasKey(e => new { e.Id, e.Path });
 
-                entity.ToTable("character_paths");
+                entity.ToTable("character_path");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.PathName)
-                    .IsRequired()
-                    .HasColumnName("pathName")
-                    .HasColumnType("varchar(50)")
-                    .HasDefaultValueSql("''");
+                entity.Property(e => e.Path)
+                    .HasColumnName("path")
+                    .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.Unlocked)
-                    .HasColumnName("unlocked")
+                entity.Property(e => e.LevelRewarded)
+                    .HasColumnName("levelRewarded")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.TotalXp)
                     .HasColumnName("totalXp")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.LevelRewarded)
-                    .HasColumnName("levelRewarded")
+                entity.Property(e => e.Unlocked)
+                    .HasColumnName("unlocked")
                     .HasDefaultValueSql("'0'");
 
                 entity.HasOne(d => d.IdNavigation)

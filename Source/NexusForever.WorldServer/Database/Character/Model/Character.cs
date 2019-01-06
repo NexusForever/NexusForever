@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Database.Character.Model
@@ -25,12 +25,12 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Level { get; set; }
         public ushort FactionId { get; set; }
         public DateTime CreateTime { get; set; }
-        public ushort Title { get; set; }
         public float LocationX { get; set; }
         public float LocationY { get; set; }
         public float LocationZ { get; set; }
         public ushort WorldId { get; set; }
-        public uint Path { get; set; }
+        public ushort Title { get; set; }
+        public uint ActivePath { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
 
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }

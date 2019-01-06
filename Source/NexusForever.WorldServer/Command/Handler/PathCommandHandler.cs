@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
 namespace NexusForever.WorldServer.Command.Handler

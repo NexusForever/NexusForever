@@ -5,6 +5,6 @@
         Soldier,
         Settler,
         Scientist,
-        Explorer,
+        Explorer
     }
 }
