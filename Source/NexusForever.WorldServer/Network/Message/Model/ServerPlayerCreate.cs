@@ -34,20 +34,6 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write((ushort)FactionReputations.Count);
                 FactionReputations.ForEach(f => f.Write(writer));
             }
-
-            public void Add(ushort id, float value)
-            {
-                if(id != 0|| value != 0)
-                {
-                    return;
-                }
-
-                FactionReputations.Add(new FactionReputation
-                {
-                    FactionId = id,
-                    Value = value
-                });
-            }
         }
 
         public class Pet : IWritable
