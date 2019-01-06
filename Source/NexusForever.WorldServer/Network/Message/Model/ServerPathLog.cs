@@ -1,15 +1,17 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ServerPathLog, MessageDirection.Server)]
     public class ServerPathLog : IWritable
     {
-        public byte ActivePath { get; set; }
-        public uint[] PathProgress { get; } = new uint[4];
-        public byte UnlockedPathMask { get; set; }
-        public uint Unknown3 { get; set; }
+
+        public Path ActivePath { get; set; }
+        public uint[] PathProgress { get; set; } = new uint[4];
+        public PathUnlockedMask PathUnlockedMask { get; set; }
+        public int ActivateTimer { get; set; } // > 0 = On. < 0 = Off.
 
         public void Write(GamePacketWriter writer)
         {
@@ -18,8 +20,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
             for (uint i = 0u; i < PathProgress.Length; i++)
                 writer.Write(PathProgress[i]);
 
-            writer.Write(UnlockedPathMask, 4);
-            writer.Write(Unknown3);
+            writer.Write(PathUnlockedMask, 4);
+            writer.Write(ActivateTimer);
         }
     }
 }

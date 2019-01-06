@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -145,15 +146,25 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 var character = new Character
                 {
-                    AccountId = session.Account.Id,
-                    Id        = AssetManager.NextCharacterId,
-                    Name      = characterCreate.Name,
-                    Race      = (byte)creationEntry.RaceId,
-                    Sex       = (byte)creationEntry.Sex,
-                    Class     = (byte)creationEntry.ClassId,
-                    Level     = 1,
-                    FactionId = (ushort)creationEntry.FactionId
+                    AccountId  = session.Account.Id,
+                    Id         = AssetManager.NextCharacterId,
+                    Name       = characterCreate.Name,
+                    Race       = (byte)creationEntry.RaceId,
+                    Sex        = (byte)creationEntry.Sex,
+                    Class      = (byte)creationEntry.ClassId,
+                    Level      = 1,
+                    FactionId  = (ushort)creationEntry.FactionId,
+                    ActivePath = characterCreate.Path
                 };
+
+                for (Path path = Path.Soldier; path <= Path.Explorer; path++)
+                {
+                    character.CharacterPath.Add(new CharacterPath
+                    {
+                        Path     = (byte)path,
+                        Unlocked = Convert.ToByte(characterCreate.Path == (byte)path)
+                    });
+                }
 
                 // merge seperate label and value lists into a single dictonary
                 Dictionary<uint, uint> customisations = characterCreate.Labels
