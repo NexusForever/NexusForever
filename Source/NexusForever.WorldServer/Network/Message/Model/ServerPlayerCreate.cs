@@ -14,7 +14,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             public class FactionReputation : IWritable
             {
-                public FactionId FactionId { get; set; }
+                public ushort FactionId { get; set; }
                 public float Value { get; set; }
 
                 public void Write(GamePacketWriter writer)
@@ -44,8 +44,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
                 FactionReputations.Add(new FactionReputation
                 {
-                    FactionId = (ushort)id,
-                    Value = (float)value
+                    FactionId = id,
+                    Value = value
                 });
             }
         }

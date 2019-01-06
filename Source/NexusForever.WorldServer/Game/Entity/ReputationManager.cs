@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CharacterReputation"/>.
         /// </summary>
-        public Reputation ReputationCreate(uint factionId, ulong value = 0)
+        public Reputation ReputationCreate(uint factionId, uint value = 0)
         {
             Faction2Entry reputationEntry = GameTableManager.Faction2.GetEntry(factionId);
             if (reputationEntry == null)
@@ -43,13 +43,10 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CharacterReputation"/>.
         /// </summary>
-        public Reputation ReputationCreate(Faction2Entry reputationEntry, ulong value = 0)
+        public Reputation ReputationCreate(Faction2Entry reputationEntry, uint value = 0)
         {
             if (reputationEntry == null)
-            {
-                log.Info("reputatioEntry == null");
                 return null;
-            }
 
             if (reputations.ContainsKey((uint)reputationEntry.Id))
                 throw new ArgumentException($"Reputation {reputationEntry.Id} is already added to the player!");
@@ -59,91 +56,48 @@ namespace NexusForever.WorldServer.Game.Entity
                 reputationEntry,
                 value
             );
-            reputations.Add((uint)reputationEntry.Id, reputation);
-            log.Info($"Adding {reputationEntry.Id}, {reputationEntry.Id}");
+            reputations.Add(reputationEntry.Id, reputation);
+            ReputationValueUpdate(reputation, value);
             return reputation;
         }
 
         /// <summary>
-        ///Update <see cref="CharacterCurrency"/> with supplied amount.
-        /// </summary>
-        //private void CurrencyAmountUpdate(Currency currency, ulong amount)
-        //{
-        //    if (currency == null)
-        //        throw new ArgumentNullException();
-
-        //    currency.Amount = amount;
-
-        //    player.Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
-        //    {
-        //        CurrencyId = (byte)currency.Id,
-        //        Amount = currency.Amount,
-        //    });
-        //}
-
-        /// <summary>
         /// Create a new <see cref="CharacterReputation"/>.
         /// </summary>
-        public void ReputationAddValue(uint reputationId, ulong value)
+        public void AddValue(uint reputationId, uint value)
         {
             Faction2Entry reputationEntry = GameTableManager.Faction2.GetEntry(reputationId);
             if (reputationEntry == null)
                 throw new ArgumentNullException();
 
-            ReputationAddValue(reputationEntry, value);
+            AddValue(reputationEntry, value);
         }
 
         /// <summary>
         /// Create a new <see cref="CharacterReputation"/>.
         /// </summary>
-        public void ReputationAddValue(Faction2Entry reputationEntry, ulong value)
+        public void AddValue(Faction2Entry reputationEntry, uint value)
         {
             if (reputationEntry == null)
                 throw new ArgumentNullException();
 
-            if (!reputations.TryGetValue((byte)reputationEntry.Id, out Reputation reputation))
-                ReputationCreate(reputationEntry, (ulong)value);
+            if (!reputations.TryGetValue(reputationEntry.Id, out Reputation reputation))
+                ReputationCreate(reputationEntry, value);
             else
             {
-                value += reputation.Value;
-                // TODO: Update this to check for capped faction
-                //if (reputation.Entry.CapAmount > 0)
-                //    amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
-                //CurrencyAmountUpdate(currency, amount);
+                float valueToSend = 0f;
+                if (reputation.Amount + value > 32000)
+                    valueToSend = 32000 - reputation.Amount;
+                else
+                    valueToSend = value;
+
+                if (valueToSend > 0)
+                {
+                    reputation.Amount += (uint)valueToSend;
+                    ReputationValueUpdate(reputation, valueToSend);
+                }
             }
         }
-
-        ///// <summary>
-        ///// Create a new <see cref="CharacterCurrency"/>.
-        ///// </summary>
-        //public void CurrencySubtractAmount(byte currencyId, ulong amount)
-        //{
-        //    CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
-        //    if (currencyEntry == null)
-        //        throw new ArgumentNullException();
-
-        //    CurrencySubtractAmount(currencyEntry, amount);
-        //}
-
-        ///// <summary>
-        ///// Create a new <see cref="CharacterCurrency"/>.
-        ///// </summary>
-        //public void CurrencySubtractAmount(CurrencyTypeEntry currencyEntry, ulong amount)
-        //{
-        //    if (currencyEntry == null)
-        //        throw new ArgumentNullException();
-
-        //    if (!currencies.TryGetValue((byte)currencyEntry.Id, out Currency currency))
-        //        throw new ArgumentException($"Cannot create currency {currencyEntry.Id} with a negative amount!");
-        //    if (currency.Amount < amount)
-        //        throw new ArgumentException($"Trying to remove more currency {currencyEntry.Id} than the player has!");
-        //    CurrencyAmountUpdate(currency, currency.Amount - amount);
-        //}
-
-        //public Currency GetCurrency(uint currencyId)
-        //{
-        //    return GetCurrency((byte)currencyId);
-        //}
 
         public Reputation GetReputation(uint reputationId)
         {
@@ -152,10 +106,46 @@ namespace NexusForever.WorldServer.Game.Entity
             return reputation;
         }
 
+        /// <summary>
+        /// Used to load the <see cref="CharacterReputation"/> to the player on entering world
+        /// </summary>
+        /// <returns></returns>
+        public List<ServerPlayerCreate.Faction.FactionReputation> LoadReputations()
+        {
+            List<ServerPlayerCreate.Faction.FactionReputation> factionList = new List<ServerPlayerCreate.Faction.FactionReputation>();
+
+            if (reputations.Count <= 0)
+                ReputationCreate((uint)player.Faction1);
+
+            foreach (KeyValuePair<uint, Reputation> reputation in reputations)
+                factionList.Add(new ServerPlayerCreate.Faction.FactionReputation
+                {
+                    FactionId = (ushort)reputation.Value.Id,
+                    Value = reputation.Value.Amount
+                });
+
+            return factionList;
+        }
+
         public void Save(CharacterContext context)
         {
             foreach (Reputation reputation in reputations.Values)
                 reputation.Save(context);
+        }
+
+        /// <summary>
+        /// Update <see cref="Reputation"/> with supplied amount.
+        /// </summary>
+        private void ReputationValueUpdate(Reputation reputation, float value)
+        {
+            if (reputation == null)
+                throw new ArgumentNullException();
+
+            player.Session.EnqueueMessageEncrypted(new ServerReputationUpdate
+            {
+                FactionId = (ushort)reputation.Id,
+                Value = value,
+            });
         }
 
         IEnumerator IEnumerable.GetEnumerator()

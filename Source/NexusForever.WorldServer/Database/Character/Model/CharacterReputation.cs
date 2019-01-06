@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
     {
         public ulong Id { get; set; }
         public uint FactionId { get; set; }
-        public ulong Value { get; set; }
+        public uint Value { get; set; }
 
         public Character Character { get; set; }
     }

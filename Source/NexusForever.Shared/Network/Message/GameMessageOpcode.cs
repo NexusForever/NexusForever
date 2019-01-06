@@ -37,6 +37,7 @@ namespace NexusForever.Shared.Network.Message
         Server019D                      = 0x019D, // action set related
         Server01A0                      = 0x01A0, // ability book related
         Server01A3                      = 0x01A3, // AMP
+        ServerReputationUpdate          = 0x01A5,
         ServerChatJoin                  = 0x01BC,
         ServerChatAccept                = 0x01C2,
         ClientChat                      = 0x01C3,
