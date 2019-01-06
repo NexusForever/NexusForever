@@ -44,8 +44,20 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private byte level;
 
+        public Path Path
+        {
+            get => path;
+            set
+            {
+                path = value;
+                saveMask |= PlayerSaveMask.Path;
+            }
+        }
+        private Path path;
+
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
+        public PathManager PathManager { get; }
         public TitleManager TitleManager { get; }
         public WorldSession Session { get; }
 
@@ -66,6 +78,8 @@ namespace NexusForever.WorldServer.Game.Entity
             Level       = model.Level;
             Bones       = new List<float>();
             CurrencyManager = new CurrencyManager(this, model);
+            PathManager = new PathManager(this, model);
+            Path        = (Path)model.ActivePath;
             TitleManager = new TitleManager(this, model);
             Faction1    = (Faction)model.FactionId;
             Faction2    = (Faction)model.FactionId;
@@ -175,7 +189,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
-            Session.EnqueueMessageEncrypted(new ServerPathLog());
+            PathManager.SendPathLogPacket();
+
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
             {
@@ -240,6 +255,9 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.AddVisible(entity);
             Session.EnqueueMessageEncrypted(((WorldEntity)entity).BuildCreatePacket());
+
+            if (entity is Player player)
+                player.PathManager.SendSetUnitPathTypePacket();
 
             if (entity == this)
             {
@@ -384,10 +402,18 @@ namespace NexusForever.WorldServer.Game.Entity
                     model.WorldId = (ushort)Map.Entry.Id;
                     entity.Property(p => p.WorldId).IsModified = true;
                 }
+
+                if((saveMask & PlayerSaveMask.Path) != 0)
+                {
+                    model.ActivePath = (uint)Path;
+                    entity.Property(p => p.ActivePath).IsModified = true;
+                }
+
                 saveMask = PlayerSaveMask.None;
             }
             Inventory.Save(context);
             CurrencyManager.Save(context);
+            PathManager.Save(context);
             TitleManager.Save(context);
         }
     }

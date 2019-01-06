@@ -37,6 +37,7 @@ namespace NexusForever.Shared.Network.Message
         Server019D                      = 0x019D, // action set related
         Server01A0                      = 0x01A0, // ability book related
         Server01A3                      = 0x01A3, // AMP
+        ServerPathUpdateXP              = 0x01AA,
         ServerChatJoin                  = 0x01BC,
         ServerChatAccept                = 0x01C2,
         ClientChat                      = 0x01C3,
@@ -67,7 +68,20 @@ namespace NexusForever.Shared.Network.Message
         ServerClientLogout              = 0x0594,
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
+        ClientPathActivate              = 0x06B2,
+        ServerPathActivateResult        = 0x06B3,
+        ServerPathRefresh               = 0x06B4,
+        ServerPathEpisodeProgress       = 0x06B5,
+        Server06B6                      = 0x06B6,
+        Server06B7                      = 0x06B7,
+        Server06B8                      = 0x06B8,
+        Server06B9                      = 0x06B9,
+        ServerPathMissionActivate       = 0x06BA, 
+        ServerPathMissionUpdate         = 0x06BB, 
         ServerPathLog                   = 0x06BC,
+        ClientPathUnlock                = 0x06BD,
+        ServerPathUnlockResult          = 0x06BE,
+        ServerPathCurrentEpisode        = 0x06BF,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
         ClientTitleSet                  = 0x078E,
@@ -80,6 +94,7 @@ namespace NexusForever.Shared.Network.Message
         Server0856                      = 0x0856, // tradeskills
         Server086F                      = 0x086F,
         Server08B3                      = 0x08B3,
+        ServerSetUnitPathType           = 0x08B8,
         ServerVendor                    = 0x090B,
         ServerPlayerCurrencyChanged     = 0x0919,
         ServerItemVisualUpdate          = 0x0933,

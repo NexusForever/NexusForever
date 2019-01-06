@@ -138,19 +138,19 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(uint itemId, uint count)
+        public void ItemCreate(uint itemId, uint count, byte reason = 49)
         {
             Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
-            ItemCreate(itemEntry, count);
+            ItemCreate(itemEntry, count, reason);
         }
 
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(Item2Entry itemEntry, uint count)
+        public void ItemCreate(Item2Entry itemEntry, uint count, byte reason = 49)
         {
             if (itemEntry == null)
                 throw new ArgumentNullException();
@@ -186,7 +186,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         InventoryItem = new InventoryItem
                         {
                             Item = item.BuildNetworkItem(),
-                            Reason = 49
+                            Reason = reason
                         }
                     });
                 }
