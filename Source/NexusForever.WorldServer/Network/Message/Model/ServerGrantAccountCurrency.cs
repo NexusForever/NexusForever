@@ -3,7 +3,6 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-
     [Message(GameMessageOpcode.ServerGrantAccountCurrency, MessageDirection.Server)]
     public class ServerGrantAccountCurrency : IWritable
     {
