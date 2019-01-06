@@ -78,7 +78,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Level = session.Player.Level,
                     Race = session.Player.Race,
                     Class = session.Player.Class,
-                    Path = Path.Scientist,
+                    Path = session.Player.Path,
                     Faction = Faction.Dominion,
                     Sex = session.Player.Sex,
                     Zone = 1417

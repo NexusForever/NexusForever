@@ -73,7 +73,10 @@ namespace NexusForever.Shared.GameTable
 
         public static GameTable<CharacterCustomizationLabelEntry> CharacterCustomizationLabel { get; private set; }
         public static GameTable<CharacterCustomizationSelectionEntry> CharacterCustomizationSelection { get; private set; }
+
+        [GameData]
         public static GameTable<CharacterTitleEntry> CharacterTitle { get; private set; }
+
         public static GameTable<CharacterTitleCategoryEntry> CharacterTitleCategory { get; private set; }
         public static GameTable<ChatChannelEntry> ChatChannel { get; private set; }
         public static GameTable<CinematicEntry> Cinematic { get; private set; }
@@ -311,9 +314,15 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PathExplorerPowerMapEntry> PathExplorerPowerMap { get; private set; }
         public static GameTable<PathExplorerScavengerClueEntry> PathExplorerScavengerClue { get; private set; }
         public static GameTable<PathExplorerScavengerHuntEntry> PathExplorerScavengerHunt { get; private set; }
+
+        [GameData]
         public static GameTable<PathLevelEntry> PathLevel { get; private set; }
+
         public static GameTable<PathMissionEntry> PathMission { get; private set; }
+
+        [GameData]
         public static GameTable<PathRewardEntry> PathReward { get; private set; }
+
         public static GameTable<PathScientistCreatureInfoEntry> PathScientistCreatureInfo { get; private set; }
         public static GameTable<PathScientistDatacubeDiscoveryEntry> PathScientistDatacubeDiscovery { get; private set; }
         public static GameTable<PathScientistExperimentationEntry> PathScientistExperimentation { get; private set; }
@@ -511,11 +520,13 @@ namespace NexusForever.Shared.GameTable
 
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
-
-        [GameData("lang.bin")]
-        public static TextTable Text { get; private set; }
-
-        private static Dictionary<string, List<WorldLocation2Entry>> zoneLookupTable;
+        public static TextTable Text => TextEnglish;
+        [GameData("fr-FR.bin")]
+        public static TextTable TextFrench { get; private set; }
+        [GameData("en-US.bin")]
+        public static TextTable TextEnglish { get; private set; }
+        [GameData("de-DE.bin")]
+        public static TextTable TextGerman { get; private set; }
 
         public static void Initialise()
         {
@@ -526,16 +537,6 @@ namespace NexusForever.Shared.GameTable
             {
                 LoadGameTablesAsync().GetAwaiter().GetResult();
                 Debug.Assert(WorldLocation2 != null);
-                if (Text != null)
-                {
-                    log.Info("Indexing names to zones for teleport by name support");
-                    zoneLookupTable = CreateTeleportLookups();
-                }
-                else
-                {
-                    log.Warn("en-US.bin was not found, teleport by name support is disabled.");
-                    zoneLookupTable = new Dictionary<string, List<WorldLocation2Entry>>();
-                }
             }
             catch (Exception exception)
             {
@@ -562,15 +563,17 @@ namespace NexusForever.Shared.GameTable
                 tasks.Remove(next);
             }
 
-            async Task ExceptionHandler(Task task)
+            async Task<bool> ExceptionHandler(Task task)
             {
                 try
                 {
                     await task;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     exceptions.Add(ex);
+                    return false;
                 }
             }
 
@@ -614,13 +617,18 @@ namespace NexusForever.Shared.GameTable
 
                 tasks.Add(LoadGameTableAsync(property, fileName)
                     .ContinueWith(ExceptionHandler)
+                    .Unwrap()
                     .ContinueWith(
                         async task =>
                         {
-                            await task;
-                            log.Info("Completed loading {0} in {1}ms", fileName,
-                                (DateTime.Now - loadStarted).TotalMilliseconds);
-                        }));
+                            bool result = await task;
+                            if (result)
+                                log.Info("Completed loading {0} in {1}ms", fileName,
+                                    (DateTime.Now - loadStarted).TotalMilliseconds);
+                            else
+                                log.Error("Failed to load {0} in {1}ms", fileName,
+                                    (DateTime.Now - loadStarted).TotalMilliseconds);
+                        }).Unwrap());
 
                 if (tasks.Count > loadCount)
                     await WaitForNextTaskToFinish();
@@ -640,58 +648,28 @@ namespace NexusForever.Shared.GameTable
                 property.SetValue(null, await task);
             }
 
+            async Task VerifyPropertySetOnCompletion(Task task)
+            {
+                await task;
+                if (property.GetValue(null) == null)
+                    throw new InvalidOperationException($"Failed to load game data table {Path.GetFileName(fileName)}");
+            }
+
             if (property.PropertyType.IsGenericType &&
                 property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
                 return Task.Factory.StartNew(() =>
                         GameTableFactory.LoadGameTable(property.PropertyType.GetGenericArguments().Single(), fileName))
-                    .ContinueWith(SetPropertyOnCompletion);
+                    .ContinueWith(SetPropertyOnCompletion)
+                    .Unwrap()
+                    .ContinueWith(VerifyPropertySetOnCompletion)
+                    .Unwrap();
 
             if (property.PropertyType == typeof(TextTable))
                 return Task.Factory.StartNew<object>(() => GameTableFactory.LoadTextTable(fileName))
-                    .ContinueWith(SetPropertyOnCompletion);
+                    .ContinueWith(SetPropertyOnCompletion)
+                    .Unwrap();
 
             throw new GameTableException($"Unknown game table type {property.PropertyType}");
-        }
-
-        public static IEnumerable<WorldLocation2Entry> LookupZonesByName(string zoneName)
-        {
-            zoneLookupTable.TryGetValue(zoneName, out List<WorldLocation2Entry> list);
-            return list ?? Enumerable.Empty<WorldLocation2Entry>();
-        }
-
-        private static Dictionary<string, List<WorldLocation2Entry>> CreateTeleportLookups()
-        {
-            void AddObjectToKey(Dictionary<string, List<WorldLocation2Entry>> dictionary, string key,
-                WorldLocation2Entry obj)
-            {
-                if (!dictionary.TryGetValue(key, out List<WorldLocation2Entry> entries))
-                    dictionary.Add(key, entries = new List<WorldLocation2Entry>());
-
-                entries.Add(obj);
-            }
-
-            Dictionary<string, List<WorldLocation2Entry>> index =
-                new Dictionary<string, List<WorldLocation2Entry>>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (WorldLocation2Entry zone in WorldLocation2.Entries)
-            {
-                WorldZoneEntry worldZone = WorldZone.GetEntry(zone.WorldZoneId);
-                WorldEntry world = World.GetEntry(zone.WorldId);
-                if (worldZone == null && world == null)
-                    continue;
-
-                uint textId = worldZone?.LocalizedTextIdName ?? world.LocalizedTextIdName;
-                if (textId < 1)
-                    continue;
-
-                string text = Text.GetEntry(textId);
-                if (string.IsNullOrWhiteSpace(text))
-                    continue;
-
-                AddObjectToKey(index, text, zone);
-            }
-
-            return index;
         }
     }
 }

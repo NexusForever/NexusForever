@@ -39,6 +39,8 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.Item)
                         .Include(c => c.CharacterBone)
                         .Include(c => c.CharacterCurrency)
+                        .Include(c => c.CharacterPath)
+                        .Include(c => c.CharacterTitle)
                     .ToListAsync();
             }
         }

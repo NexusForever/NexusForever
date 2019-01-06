@@ -19,8 +19,8 @@ namespace NexusForever.WorldServer.Game.Entity
             CreatureId  = entity.Creature;
             DisplayInfo = entity.DisplayInfo;
             OutfitInfo  = entity.OutfitInfo;
-            Faction1    = entity.Faction1;
-            Faction2    = entity.Faction2;
+            Faction1    = (Faction)entity.Faction1;
+            Faction2    = (Faction)entity.Faction2;
             Rotation    = new Vector3(entity.Rx, entity.Ry, entity.Rz);
 
             if (EntityManager.VendorInfo.TryGetValue(entity.Id, out VendorInfo vendorInfo))
