@@ -1,22 +1,20 @@
-﻿using NexusForever.Shared.Network;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server07F9, MessageDirection.Server)]
-    public class Server07F9 : IWritable
+    [Message(GameMessageOpcode.Server07F7, MessageDirection.Server)]
+    public class Server07F7 : IWritable
     {
         public uint CastingId { get; set; }
-        public ushort Unknown5 { get; set; }
         public uint CasterId { get; set; }
-        public bool Unknown11 { get; set; }
+        public uint Unknown8 { get; set; } // something 0x07F4 loop 1 related
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CastingId);
-            writer.Write(Unknown5, 9u);
             writer.Write(CasterId);
-            writer.Write(Unknown11);
+            writer.Write(Unknown8);
         }
     }
 }

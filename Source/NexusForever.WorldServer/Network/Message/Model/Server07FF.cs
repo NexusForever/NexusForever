@@ -64,9 +64,9 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CastingId);
-            writer.Write(Spell4Id, 18);
-            writer.Write(RootSpell4Id, 18);
-            writer.Write(ParentSpell4Id, 18);
+            writer.Write(Spell4Id, 18u);
+            writer.Write(RootSpell4Id, 18u);
+            writer.Write(ParentSpell4Id, 18u);
             writer.Write(CasterId);
             writer.Write(Unknown20);
             writer.Write(Guid2);
