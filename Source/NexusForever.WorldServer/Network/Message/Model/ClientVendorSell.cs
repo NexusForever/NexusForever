@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public void Read(GamePacketReader reader)
         {
             ItemLocation.Read(reader);
-            Quantity = reader.ReadUInt(16);
+            Quantity = reader.ReadUInt();
         }
     }
 }

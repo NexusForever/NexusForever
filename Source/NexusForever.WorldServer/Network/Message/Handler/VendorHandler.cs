@@ -5,15 +5,12 @@ using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class VendorHandler
     {
-
         [MessageHandler(GameMessageOpcode.ClientVendor)]
         public static void HandleClientVendor(WorldSession session, ClientVendor vendor)
         {
@@ -68,31 +65,34 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientVendorPurchase)]
         public static void HandleVendorPurchase(WorldSession session, ClientVendorPurchase vendorPurchase)
         {
-            VendorInfo VendorInfo = session.Player.SelectedVendorInfo;
-
-            if (VendorInfo == null)
+            VendorInfo vendorInfo = session.Player.SelectedVendorInfo;
+            if (vendorInfo == null)
                 return;
 
-            EntityVendorItem vendorItem = VendorInfo.GetItemAtIndex(vendorPurchase.VendorIndex);
+            EntityVendorItem vendorItem = vendorInfo.GetItemAtIndex(vendorPurchase.VendorIndex);
             if (vendorItem == null)
                 return;
 
             Item2Entry itemEntry = GameTableManager.Item.GetEntry(vendorItem.ItemId);
-            float costMultiplier = vendorPurchase.VendorItemQty * VendorInfo.BuyPriceMultiplier;
-            Dictionary<CurrencyTypeEntry, ulong> subtractions = new Dictionary<CurrencyTypeEntry, ulong>();
+            float costMultiplier = vendorInfo.BuyPriceMultiplier * vendorPurchase.VendorItemQty;
+
+            // do all sanity checks before modifying currency
+            var currencyChanges = new List<(byte CurrencyTypeId, ulong CurrencyAmount)>();
             for (int i = 0; i < itemEntry.CurrencyTypeId.Length; i++)
             {
                 Currency currency = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeId[i]);
                 if (currency == null)
                     continue;
-                ulong calculatedCost = (ulong)(itemEntry.CurrencyAmount[i] * costMultiplier);
-                if (currency != null && currency.Amount < calculatedCost)
-                    return; // Player does not have enough currency, abort
-                subtractions[currency.Entry] = calculatedCost;
+
+                ulong currencyAmount = (ulong)(itemEntry.CurrencyAmount[i] * costMultiplier);
+                if (currency.Amount < currencyAmount)
+                    return;
+
+                currencyChanges.Add((currency.Id, currencyAmount));
             }
             
-            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in subtractions)
-                session.Player.CurrencyManager.CurrencySubtractAmount(entry.Key, entry.Value);
+            foreach ((byte currencyTypeId, ulong currencyAmount) in currencyChanges)
+                session.Player.CurrencyManager.CurrencySubtractAmount(currencyTypeId, currencyAmount);
 
             session.Player.Inventory.ItemCreate(itemEntry.Id, vendorPurchase.VendorItemQty * itemEntry.BuyFromVendorStackCount);
         }
@@ -101,77 +101,61 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientSellItemToVendor)]
         public static void HandleVendorSell(WorldSession session, ClientVendorSell vendorSell)
         {
-            VendorInfo VendorInfo = session.Player.SelectedVendorInfo;
-
-            if (VendorInfo == null)
+            VendorInfo vendorInfo = session.Player.SelectedVendorInfo;
+            if (vendorInfo == null)
                 return;
 
             Item2Entry itemEntry = session.Player.Inventory.GetItemFromLocation(vendorSell.ItemLocation).Entry;
-
             if (itemEntry == null)
                 return;
 
-            float sellMultiplier = VendorInfo.SellPriceMultiplier * vendorSell.Quantity;
+            float costMultiplier = vendorInfo.SellPriceMultiplier * vendorSell.Quantity;
 
-            Dictionary<CurrencyTypeEntry, ulong> additions = new Dictionary<CurrencyTypeEntry, ulong>();
+            // do all sanity checks before modifying currency
+            var currencyChange = new List<(byte CurrencyTypeId, ulong CurrencyAmount)>();
             for (int i = 0; i < itemEntry.CurrencyTypeIdSellToVendor.Length; i++)
             {
                 Currency currency = session.Player.CurrencyManager.GetCurrency(itemEntry.CurrencyTypeIdSellToVendor[i]);
                 if (currency == null)
                     continue;
-                ulong calculatedCost = (ulong)(itemEntry.CurrencyAmountSellToVendor[i] * sellMultiplier);
-                additions[currency.Entry] = calculatedCost;
+
+                ulong currencyAmount = (ulong)(itemEntry.CurrencyAmountSellToVendor[i] * costMultiplier);
+                currencyChange.Add((currency.Id, currencyAmount));
             }
 
             // TODO Insert calculation for cost here
 
+            foreach ((byte currencyTypeId, ulong currencyAmount) in currencyChange)
+                session.Player.CurrencyManager.CurrencyAddAmount(currencyTypeId, currencyAmount);
+
             // TODO Figure out why this is showing "You deleted [item]"
             Item soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
-
-            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in additions)
-                session.Player.CurrencyManager.CurrencyAddAmount(entry.Key, entry.Value);
-
-            BuybackItem buybackItem = new BuybackItem
-            {
-                Item = soldItem,
-                CurrencyAdditions = additions,
-                BuybackItemId = session.Player.highestBuybackId++,
-                Quantity = vendorSell.Quantity
-            };
-
-            session.Player.BuybackItems.Add(buybackItem.BuybackItemId, buybackItem);
-
-            session.EnqueueMessageEncrypted(new ServerBuybackItemsUpdated
-            {
-                BuybackItem = buybackItem
-            });
+            BuybackManager.AddItem(session.Player, soldItem, vendorSell.Quantity, currencyChange);
         }
 
 
         [MessageHandler(GameMessageOpcode.ClientBuybackItemFromVendor)]
         public static void HandleBuybackItemFromVendor(WorldSession session, ClientBuybackItemFromVendor buybackItemFromVendor)
         {
-
-            if (!session.Player.BuybackItems.TryGetValue(buybackItemFromVendor.BuybackPosition, out BuybackItem buybackItem))
-                return; //TODO tell client it failed
+            BuybackItem buybackItem = BuybackManager.GetItem(session.Player, buybackItemFromVendor.UniqueId);
+            if (buybackItem == null)
+                return;
 
             //TODO Ensure player has room in inventory
 
-            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in buybackItem.CurrencyAdditions)
+            // do all sanity checks before modifying currency
+            foreach ((byte currencyTypeId, ulong currencyAmount) in buybackItem.CurrencyChange)
             {
-                Currency currency = session.Player.CurrencyManager.GetCurrency(entry.Key.Id);
-                if (currency != null && currency.Amount < entry.Value)
-                    return;  // Player does not have enough currency, abort
+                Currency currency = session.Player.CurrencyManager.GetCurrency(currencyTypeId);
+                if (currency != null && currency.Amount < currencyAmount)
+                    return;
             }
 
-            foreach (KeyValuePair<CurrencyTypeEntry, ulong> entry in buybackItem.CurrencyAdditions)
-                session.Player.CurrencyManager.CurrencySubtractAmount(entry.Key, entry.Value);
+            foreach ((byte currencyTypeId, ulong currencyAmount) in buybackItem.CurrencyChange)
+                session.Player.CurrencyManager.CurrencySubtractAmount(currencyTypeId, currencyAmount);
 
             session.Player.Inventory.AddItem(buybackItem.Item, InventoryLocation.Inventory);
-            session.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
-            {
-                BuybackItemId = buybackItem.BuybackItemId
-            });
+            BuybackManager.RemoveItem(session.Player, buybackItem);
         }
     }
 }

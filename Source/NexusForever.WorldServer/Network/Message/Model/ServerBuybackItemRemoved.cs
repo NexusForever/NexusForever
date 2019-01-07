@@ -6,11 +6,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerBuybackItemRemoved, MessageDirection.Server)]
     public class ServerBuybackItemRemoved : IWritable
     {
-        public uint BuybackItemId { get; set; }
+        public uint UniqueId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(BuybackItemId);
+            writer.Write(UniqueId);
         }
     }
 }

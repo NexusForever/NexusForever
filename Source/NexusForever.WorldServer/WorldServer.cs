@@ -56,6 +56,7 @@ namespace NexusForever.WorldServer
             {
                 NetworkManager<WorldSession>.Update(lastTick);
                 MapManager.Update(lastTick);
+                BuybackManager.Update(lastTick);
             });
 
             using (WorldServerEmbeddedWebServer.Initialise())
