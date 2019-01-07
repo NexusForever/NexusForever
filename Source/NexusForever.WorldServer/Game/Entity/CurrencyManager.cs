@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NexusForever.Shared.GameTable;
@@ -72,7 +72,7 @@ namespace NexusForever.WorldServer.Game.Entity
             
             player.Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
             {
-                CurrencyId = (byte)currency.Id,
+                CurrencyId = currency.Id,
                 Amount = currency.Amount,
             });
         }

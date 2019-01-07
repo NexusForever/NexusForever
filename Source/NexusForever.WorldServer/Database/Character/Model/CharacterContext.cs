@@ -1,5 +1,6 @@
+﻿using System;
 using Microsoft.EntityFrameworkCore;
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
@@ -22,8 +23,9 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterBone> CharacterBone { get; set; }
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual DbSet<CharacterPath> CharacterPath { get; set; }
+        public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
         public virtual DbSet<Item> Item { get; set; }
-        public virtual DbSet<CharacterStat> CharacterStat { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -48,6 +50,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("accountId")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.ActivePath)
+                    .HasColumnName("activePath")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.Class)
                     .HasColumnName("class")
                     .HasDefaultValueSql("'0'");
@@ -57,22 +63,12 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
 
+                entity.Property(e => e.FactionId)
+                    .HasColumnName("factionId")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.Level)
                     .HasColumnName("level")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasColumnName("name")
-                    .HasColumnType("varchar(50)")
-                    .HasDefaultValueSql("''");
-
-                entity.Property(e => e.Race)
-                    .HasColumnName("race")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Sex)
-                    .HasColumnName("sex")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.LocationX)
@@ -85,6 +81,29 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.LocationZ)
                     .HasColumnName("locationZ")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(50)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.PathActivatedTimestamp)
+                    .HasColumnName("pathActivatedTimestamp")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
+                entity.Property(e => e.Race)
+                    .HasColumnName("race")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Sex)
+                    .HasColumnName("sex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Title)
+                    .HasColumnName("title")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.WorldId)
@@ -158,7 +177,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("amount")
                     .HasDefaultValueSql("'0'");
 
-                entity.HasOne(d => d.Character)
+                entity.HasOne(d => d.IdNavigation)
                     .WithMany(p => p.CharacterCurrency)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK_character_currency_id__character_id");
@@ -186,6 +205,66 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterCustomisation)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_customisation_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterPath>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Path });
+
+                entity.ToTable("character_path");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Path)
+                    .HasColumnName("path")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LevelRewarded)
+                    .HasColumnName("levelRewarded")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TotalXp)
+                    .HasColumnName("totalXp")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Unlocked)
+                    .HasColumnName("unlocked")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterPath)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_path_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterTitle>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Title });
+
+                entity.ToTable("character_title");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Title)
+                    .HasColumnName("title")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Revoked)
+                    .HasColumnName("revoked")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TimeRemaining)
+                    .HasColumnName("timeRemaining")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterTitle)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_title_id__character_id");
             });
 
             modelBuilder.Entity<Item>(entity =>
@@ -235,34 +314,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.Item)
                     .HasForeignKey(d => d.OwnerId)
                     .HasConstraintName("FK__item_ownerId__character_id");
-            });
-
-            modelBuilder.Entity<CharacterStat>(entity =>
-            {
-                entity.HasKey(e => new { e.Id, e.Stat });
-
-                entity.ToTable("character_stats");
-
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Stat)
-                    .HasColumnName("stat")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Type)
-                    .HasColumnName("type")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Value)
-                    .HasColumnName("value")
-                    .HasDefaultValueSql("'0'");
-
-                entity.HasOne(d => d.IdNavigation)
-                    .WithMany(p => p.CharacterStat)
-                    .HasForeignKey(d => d.Id)
-                    .HasConstraintName("FK__character_stats_stat_id_character_id");
             });
         }
     }

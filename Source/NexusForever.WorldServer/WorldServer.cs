@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer
             DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
 
             GameTableManager.Initialise();
-
+            SearchManager.Initialise();
             EntityManager.Initialise();
             EntityCommandManager.Initialise();
 
@@ -56,6 +56,7 @@ namespace NexusForever.WorldServer
             {
                 NetworkManager<WorldSession>.Update(lastTick);
                 MapManager.Update(lastTick);
+                BuybackManager.Update(lastTick);
             });
 
             using (WorldServerEmbeddedWebServer.Initialise())

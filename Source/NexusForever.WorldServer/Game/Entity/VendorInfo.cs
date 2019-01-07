@@ -19,5 +19,13 @@ namespace NexusForever.WorldServer.Game.Entity
             Categories          = categories;
             Items               = items;
         }
+
+        public EntityVendorItem GetItemAtIndex(uint index)
+        {
+            foreach (EntityVendorItem item in Items)
+                if (item.Index == index)
+                    return item;
+            return null;
+        }
     }
 }

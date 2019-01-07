@@ -9,6 +9,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte CurrencyId { get; set; }
         public ulong Amount { get; set; }
 
-        public Character Character { get; set; }
+        public Character IdNavigation { get; set; }
     }
 }

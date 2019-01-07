@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Game.Entity
     public class Currency : ISaveCharacter
     {
         public CurrencyTypeEntry Entry { get; set; }
-        public ulong Id { get; }
+        public byte Id => (byte)Entry.Id;
         public ulong CharacterId { get; set; }
 
         public ulong Amount
@@ -37,7 +37,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public Currency(CurrencyModel model)
         {
             CharacterId = model.Id;
-            Id = model.CurrencyId;
             Entry = GameTableManager.CurrencyType.GetEntry(model.CurrencyId);
             Amount = model.Amount;
 
@@ -49,7 +48,6 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Currency(ulong owner, CurrencyTypeEntry entry, ulong value = 0u)
         {
-            Id = entry.Id;
             CharacterId = owner;
             Entry = entry;
             Amount = amount;
