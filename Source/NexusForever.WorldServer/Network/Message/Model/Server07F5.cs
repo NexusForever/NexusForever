@@ -1,4 +1,4 @@
-﻿using NexusForever.Shared.Network;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
@@ -13,9 +13,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CastingId);
-            writer.Write(CasterId, 9);
+            writer.Write(CasterId);
             writer.Write(Unknown8);
-
         }
     }
 }

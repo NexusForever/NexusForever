@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class Server07FD : IWritable
     {
         public class UnknownStructure0 : IWritable
-        {   
+        {
             public uint   Unknown0 { get; set; } = 0;
             public byte   Unknown4 { get; set; } = 0;
             public Position Position { get; set; } = new Position();
@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         }
 
         public class UnknownStructure1 : IWritable
-        {   
+        {
             public ushort Unknown0 { get; set; } = 0;
             public uint   Unknown2 { get; set; } = 0;
             public byte   Unknown6 { get; set; } = 0;

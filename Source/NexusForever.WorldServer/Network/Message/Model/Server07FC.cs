@@ -13,8 +13,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Unknown0);
-            writer.Write(Spell4Id, 18);
-            writer.Write(Unknown9, 9);
+            writer.Write(Spell4Id, 18u);
+            writer.Write(Unknown9, 9u);
         }
     }
 }
