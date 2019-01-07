@@ -34,13 +34,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 Spell4BaseEntry spell4BaseEntry = GameTableManager.Spell4Base.GetEntry(Spell.SpellEntry.Id);
                 if (spell4BaseEntry == null)
                     throw (new InvalidPacketValueException("HandleSpell: Invalid Spell4BaseEntry {Spell.SpellEntry.Id}"));
-
-                Spell4EffectsEntry matchSpell4Effects = Array.Find(GameTableManager.Spell4Effects.Entries, x => x.SpellId == Spell.SpellEntry.Id);
             }
 
             if (spell.Unknown48 == true) // probably "begin casting"
             {
                 Spell4Entry matchSpell4 = Array.Find(GameTableManager.Spell4.Entries, x => x.Spell4BaseIdBaseSpell == Spell.SpellEntry.Id && x.TierIndex == 1);
+                Spell4EffectsEntry matchSpell4Effects = Array.Find(GameTableManager.Spell4Effects.Entries, x => x.SpellId == Spell.SpellEntry.Id);
 
                 // FIXME: this should be a global server increment
                 uint CastingId = (uint)random.Next();
@@ -61,9 +60,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     new Server07F4.UnknownStructure1
                     {
-                     Spell4EffectId = matchSpell4Effects,
-                     Unknown0 = 4722,
-                     Unknown2 = 4294967295
+                        Spell4EffectId = matchSpell4Effects.Id,
+                        Unknown0 = 4722,
+                        Unknown2 = 4294967295
                     }
                 };
 
@@ -79,13 +78,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     }
                 };
 
-                session.Player.EnqueueToVisible(new Server07F4
+                if (matchSpell4Effects.Id > 0)
                 {
-                    CastingId       = CastingId,
-                    Position        = new Position(session.Player.Position),
-                    unknownStructure0 = unknownStructure0,
-                    Unknown1 = 255
-                }, true);
+                    session.Player.EnqueueToVisible(new Server07F4
+                    {
+                        CastingId       = CastingId,
+                        Position        = new Position(session.Player.Position),
+                        unknownStructure0 = unknownStructure0,
+                        Unknown1        = 255
+                    }, true);
+                }
             }
         }
     }
