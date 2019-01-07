@@ -109,6 +109,35 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Add <see cref="Item"/> in the first available bag index for the given <see cref="InventoryLocation"/> .
+        /// </summary>
+        public void AddItem(Item item, InventoryLocation inventoryLocation)
+        {
+            Bag bag = GetBag(inventoryLocation);
+            uint bagIndex = bag.GetFirstAvailableBagIndex();
+
+            if (bagIndex == uint.MaxValue)
+            {
+                throw new ArgumentException($"InventoryLocation {inventoryLocation} is full!");
+            }
+            
+            // Stacks are bought back in full, so no need to worry about splitting stacks
+            AddItem(item, inventoryLocation, bagIndex);
+
+            if (!player?.IsLoading ?? false)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerItemAdd
+                {
+                    InventoryItem = new InventoryItem
+                    {
+                        Item = item.BuildNetworkItem(),
+                        Reason = 49
+                    }
+                });
+            }
+        }
+
+        /// <summary>
         /// Create a new <see cref="Item"/> in the first available <see cref="EquippedItem"/> bag index.
         /// </summary>
         public void ItemCreate(Item2Entry itemEntry)
@@ -268,10 +297,22 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO
         }
 
+        public Item GetItemFromLocation(ItemLocation itemLocation)
+        {
+            Bag bag = GetBag(itemLocation.Location);
+            if (bag == null)
+                throw new InvalidPacketValueException();
+
+            Item item = bag.GetItem(itemLocation.BagIndex);
+            if (item == null)
+                throw new InvalidPacketValueException();
+            return item;
+        }
+
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
-        public void ItemDelete(ItemLocation from)
+        public Item ItemDelete(ItemLocation from)
         {
             Bag srcBag = GetBag(from.Location);
             if (srcBag == null)
@@ -289,6 +330,8 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Guid = srcItem.Guid
             });
+
+            return srcItem;
         }
 
         /// <summary>
