@@ -428,7 +428,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<Spell4ConditionsEntry> Spell4Conditions { get; private set; }
         public static GameTable<Spell4EffectGroupListEntry> Spell4EffectGroupList { get; private set; }
         public static GameTable<Spell4EffectModificationEntry> Spell4EffectModification { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4EffectsEntry> Spell4Effects { get; private set; }
+
         public static GameTable<Spell4GroupListEntry> Spell4GroupList { get; private set; }
         public static GameTable<Spell4HitResultsEntry> Spell4HitResults { get; private set; }
         public static GameTable<Spell4ModificationEntry> Spell4Modification { get; private set; }
