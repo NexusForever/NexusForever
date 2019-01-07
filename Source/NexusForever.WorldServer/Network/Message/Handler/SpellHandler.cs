@@ -39,7 +39,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (spell.Unknown48 == true) // probably "begin casting"
             {
                 Spell4Entry matchSpell4 = Array.Find(GameTableManager.Spell4.Entries, x => x.Spell4BaseIdBaseSpell == Spell.SpellEntry.Id && x.TierIndex == 1);
-                Spell4EffectsEntry matchSpell4Effects = Array.Find(GameTableManager.Spell4Effects.Entries, x => x.SpellId == Spell.SpellEntry.Id);
+                Spell4EffectsEntry matchSpell4Effects = Array.Find(GameTableManager.Spell4Effects.Entries, x => x.SpellId == matchSpell4.Id);
 
                 // FIXME: this should be a global server increment
                 uint CastingId = (uint)random.Next();
