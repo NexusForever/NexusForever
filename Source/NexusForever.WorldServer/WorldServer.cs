@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using NLog;
 using NexusForever.Shared;
@@ -14,6 +15,7 @@ using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
+using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
@@ -30,6 +32,8 @@ namespace NexusForever.WorldServer
         #endif
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
+        public static ushort RealmId { get; private set; }
 
         private static void Main()
         {
@@ -50,6 +54,13 @@ namespace NexusForever.WorldServer
             GlobalSpellManager.Initialise();
             ServerManager.Initialise();
 
+            ResidenceManager.Initialise();
+
+            // make sure the assigned realm id in the configuration file exists in the database
+            RealmId = ConfigurationManager<WorldServerConfiguration>.Config.RealmId;
+            if (ServerManager.Servers.All(s => s.Model.Id != RealmId))
+                throw new ConfigurationException($"Realm id {RealmId} in configuration file doesn't exist in the database!");
+
             MessageManager.Initialise();
             SocialManager.Initialise();
             CommandManager.Initialise();
@@ -58,6 +69,7 @@ namespace NexusForever.WorldServer
             {
                 NetworkManager<WorldSession>.Update(lastTick);
                 MapManager.Update(lastTick);
+                ResidenceManager.Update(lastTick);
                 BuybackManager.Update(lastTick);
             });
 

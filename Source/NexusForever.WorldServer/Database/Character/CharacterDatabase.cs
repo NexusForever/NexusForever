@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
+using ResidenceEntity = NexusForever.WorldServer.Game.Housing.Residence;
 
 namespace NexusForever.WorldServer.Database.Character
 {
@@ -22,10 +23,22 @@ namespace NexusForever.WorldServer.Database.Character
                 return context.Item.DefaultIfEmpty().Max(s => s.Id);
         }
 
-        public static Model.Item GetItemById(ulong Id)
+        public static ulong GetNextResidenceId()
         {
             using (var context = new CharacterContext())
-                return context.Item.Where(e => e.Id == Id).First();
+                return context.Residence.DefaultIfEmpty().Max(r => r.Id);
+        }
+
+        public static ulong GetNextDecorId()
+        {
+            using (var context = new CharacterContext())
+                return context.ResidenceDecor.DefaultIfEmpty().Max(r => r.DecorId);
+        }
+
+        public static Model.Item GetItemById(ulong id)
+        {
+            using (var context = new CharacterContext())
+                return context.Item.First(e => e.Id == id);
         }
 
         public static async Task<List<Model.Character>> GetCharacters(uint accountId)
@@ -64,6 +77,28 @@ namespace NexusForever.WorldServer.Database.Character
                 player.Save(context);
                 await context.SaveChangesAsync();
             }
+        }
+
+        public static async Task SaveResidence(ResidenceEntity residence)
+        {
+            using (var context = new CharacterContext())
+            {
+                residence.Save(context);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<Residence> GetResidence(string name)
+        {
+            using (var context = new CharacterContext())
+            {
+                return await context.Residence
+                    .Include(r => r.ResidenceDecor)
+                    .Include(r => r.ResidencePlot)
+                    .Include(r => r.Owner)
+                    .SingleOrDefaultAsync(r => r.Owner.Name == name);
+            }
+
         }
     }
 }

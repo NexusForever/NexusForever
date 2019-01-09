@@ -71,7 +71,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private PlayerSaveMask saveMask;
 
         private LogoutManager logoutManager;
-        private PendingFarTeleport pendingFarTeleport;
+        private PendingTeleport pendingTeleport;
 
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
@@ -179,7 +179,7 @@ namespace NexusForever.WorldServer.Game.Entity
             return new PlayerEntityModel
             {
                 Id       = CharacterId,
-                RealmId  = 358,
+                RealmId  = WorldServer.RealmId,
                 Name     = Name,
                 Race     = Race,
                 Class    = Class,
@@ -220,6 +220,9 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager.SendPathLogPacket();
             BuybackManager.SendBuybackItems(this);
 
+            Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
+            
+            Session.EnqueueMessageEncrypted(new ServerPathLog());
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
             {
@@ -272,10 +275,10 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.OnRemoveFromMap();
 
-            if (pendingFarTeleport != null)
+            if (pendingTeleport != null)
             {
-                MapManager.AddToMap(this, pendingFarTeleport.WorldId, pendingFarTeleport.Vector);
-                pendingFarTeleport = null;
+                MapManager.AddToMap(this, pendingTeleport.Info, pendingTeleport.Vector);
+                pendingTeleport = null;
             }
         }
 
@@ -385,18 +388,27 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Teleport <see cref="Player"/> to supplied location.
         /// </summary>
-        public void TeleportTo(ushort worldId, float x, float y, float z)
+        public void TeleportTo(ushort worldId, float x, float y, float z, uint instanceId = 0u, ulong residenceId = 0ul)
         {
             WorldEntry entry = GameTableManager.World.GetEntry(worldId);
             if (entry == null)
                 throw new ArgumentException();
 
-            if (Map != null && Map.Entry.Id == entry.Id)
+            TeleportTo(entry, new Vector3(x, y, z), instanceId, residenceId);
+        }
+
+        /// <summary>
+        /// Teleport <see cref="Player"/> to supplied location.
+        /// </summary>
+        public void TeleportTo(WorldEntry entry, Vector3 vector, uint instanceId = 0u, ulong residenceId = 0ul)
+        {
+            if (Map?.Entry.Id == entry.Id)
             {
                 // TODO: don't remove player from map if it's the same as destination
             }
 
-            pendingFarTeleport = new PendingFarTeleport(worldId, x, y, z);
+            var info = new MapInfo(entry, instanceId, residenceId);
+            pendingTeleport = new PendingTeleport(info, vector);
             RemoveFromMap();
         }
 

@@ -9,9 +9,6 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public abstract class GridEntity : IUpdate
     {
-        // arbitrary
-        private const float VisionRange = 32.0f;
-
         public uint Guid { get; protected set; }
         public BaseMap Map { get; private set; }
         public Vector3 Position { get; protected set; }
@@ -38,8 +35,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public virtual void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
-            Guid   = guid;
-            Map    = map;
+            Guid     = guid;
+            Map      = map;
             Position = vector;
             UpdateVision();
         }
@@ -85,7 +82,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void UpdateVision()
         {
-            Map.Search(Position, VisionRange, new SearchCheckRange(Position, VisionRange), out List<GridEntity> intersectedEntities);
+            Map.Search(Position, Map.VisionRange, new SearchCheckRange(Position, Map.VisionRange), out List<GridEntity> intersectedEntities);
 
             // new entities now in vision range
             foreach (GridEntity entity in intersectedEntities.Except(visibleEntities))

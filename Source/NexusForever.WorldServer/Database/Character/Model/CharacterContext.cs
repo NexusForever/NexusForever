@@ -26,6 +26,9 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
         public virtual DbSet<Item> Item { get; set; }
+        public virtual DbSet<Residence> Residence { get; set; }
+        public virtual DbSet<ResidenceDecor> ResidenceDecor { get; set; }
+        public virtual DbSet<ResidencePlot> ResidencePlot { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -314,6 +317,174 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.Item)
                     .HasForeignKey(d => d.OwnerId)
                     .HasConstraintName("FK__item_ownerId__character_id");
+            });
+
+            modelBuilder.Entity<Residence>(entity =>
+            {
+                entity.ToTable("residence");
+
+                entity.HasIndex(e => e.OwnerId)
+                    .HasName("ownerId")
+                    .IsUnique();
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.DoorDecorInfoId)
+                    .HasColumnName("doorDecorInfoId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.EntrywayDecorInfoId)
+                    .HasColumnName("entrywayDecorInfoId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Flags)
+                    .HasColumnName("flags")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.GardenSharing)
+                    .HasColumnName("gardenSharing")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.GroundWallpaperId)
+                    .HasColumnName("groundWallpaperId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(50)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.OwnerId)
+                    .HasColumnName("ownerId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PrivacyLevel)
+                    .HasColumnName("privacyLevel")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PropertyInfoId)
+                    .HasColumnName("propertyInfoId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ResourceSharing)
+                    .HasColumnName("resourceSharing")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.RoofDecorInfoId)
+                    .HasColumnName("roofDecorInfoId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SkyWallpaperId)
+                    .HasColumnName("skyWallpaperId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.WallpaperId)
+                    .HasColumnName("wallpaperId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Owner)
+                    .WithOne(p => p.Residence)
+                    .HasForeignKey<Residence>(d => d.OwnerId)
+                    .HasConstraintName("FK__residence_ownerId__character_id");
+            });
+
+            modelBuilder.Entity<ResidenceDecor>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.DecorId });
+
+                entity.ToTable("residence_decor");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.DecorId)
+                    .HasColumnName("decorId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.DecorInfoId)
+                    .HasColumnName("decorInfoId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.DecorType)
+                    .HasColumnName("decorType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Qw)
+                    .HasColumnName("qw")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Qx)
+                    .HasColumnName("qx")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Qy)
+                    .HasColumnName("qy")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Qz)
+                    .HasColumnName("qz")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Scale)
+                    .HasColumnName("scale")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.X)
+                    .HasColumnName("x")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Y)
+                    .HasColumnName("y")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Z)
+                    .HasColumnName("z")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.ResidenceDecor)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__residence_decor_id__residence_id");
+            });
+
+            modelBuilder.Entity<ResidencePlot>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Index });
+
+                entity.ToTable("residence_plot");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.BuildState)
+                    .HasColumnName("buildState")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PlotInfoId)
+                    .HasColumnName("plotInfoId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PlugFacing)
+                    .HasColumnName("plugFacing")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PlugItemId)
+                    .HasColumnName("plugItemId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.ResidencePlot)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__residence_plot_id__residence_id");
             });
         }
     }

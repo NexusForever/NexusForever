@@ -147,6 +147,14 @@ namespace NexusForever.WorldServer.Game.Entity
             return currency;
         }
 
+        public bool CanAfford(byte currencyId, ulong amount)
+        {
+            if (!currencies.TryGetValue(currencyId, out Currency currency))
+                return false;
+
+            return currency.Amount < amount;
+        }
+
         public void Save(CharacterContext context)
         {
             foreach (Currency currency in currencies.Values)

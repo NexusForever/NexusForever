@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Network.Message;
@@ -66,6 +68,28 @@ namespace NexusForever.Shared.Network
             }
 
             log.Trace($"Sent packet {opcode}(0x{opcode:X}).");
+        }
+
+        [Conditional("DEBUG")]
+        public void EnqueueMessageEncrypted(uint opcode, string hex)
+        {
+            using (var stream = new MemoryStream())
+            using (var writer = new GamePacketWriter(stream))
+            {
+                writer.Write(opcode, 16);
+                
+                byte[] body = Enumerable.Range(0, hex.Length)
+                    .Where(x => x % 2 == 0)
+                    .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                    .ToArray();
+                writer.WriteBytes(body);
+                
+                writer.FlushBits();
+
+                byte[] data      = stream.ToArray();
+                byte[] encrypted = encryption.Encrypt(data, data.Length);
+                EnqueueMessage(BuildEncryptedMessage(encrypted));
+            }
         }
 
         protected abstract IWritable BuildEncryptedMessage(byte[] data);

@@ -4,7 +4,7 @@
     public class ServerHello : IWritable
     {
         public uint AuthVersion { get; set; }
-        public uint Unknown4 { get; set; }
+        public uint RealmId { get; set; }
         public uint Unknown8 { get; set; }
         public uint UnknownC { get; set; }
         public ulong Unknown10 { get; set; }
@@ -18,7 +18,7 @@
         public void Write(GamePacketWriter writer)
         {
             writer.Write(AuthVersion);
-            writer.Write(Unknown4);
+            writer.Write(RealmId);
             writer.Write(Unknown8);
             writer.Write(UnknownC);
             writer.Write(Unknown10);

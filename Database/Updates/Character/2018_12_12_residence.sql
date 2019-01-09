@@ -1,0 +1,19 @@
+CREATE TABLE `residence` (
+    `id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+    `ownerId` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+    `propertyInfoId` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+    `name` VARCHAR(50) NOT NULL DEFAULT '',
+    `privacyLevel` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+    `wallpaperId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `roofDecorInfoId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `entrywayDecorInfoId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `doorDecorInfoId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `groundWallpaperId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `skyWallpaperId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `flags` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `resourceSharing` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+    `gardenSharing` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `ownerId` (`ownerId`),
+    CONSTRAINT `FK__residence_ownerId__character_id` FOREIGN KEY (`ownerId`) REFERENCES `character` (`id`) ON DELETE CASCADE
+);

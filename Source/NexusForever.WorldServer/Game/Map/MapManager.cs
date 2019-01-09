@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
 
@@ -14,25 +12,53 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        private static readonly Dictionary</*worldId*/ ushort, BaseMap> maps = new Dictionary<ushort, BaseMap>();
+        private static readonly Dictionary</*worldId*/ ushort, IMap> maps = new Dictionary<ushort, IMap>();
 
         /// <summary>
-        /// Enqueue <see cref="GridEntity"/> to be added to a map. 
+        /// Enqueue <see cref="Player"/> to be added to a map. 
         /// </summary>
-        public static void AddToMap(GridEntity entity, ushort worldId, Vector3 vector3)
+        public static void AddToMap(Player player, MapInfo info, Vector3 vector3)
         {
-            WorldEntry entry = GameTableManager.World.GetEntry(worldId);
-            if (entry == null)
+            if (info?.Entry == null)
                 throw new ArgumentException();
 
-            if (maps.TryGetValue(worldId, out BaseMap map))
-                map.EnqueueAdd(entity, vector3);
-            else
+            IMap map = CreateMap(info, player);
+            map.EnqueueAdd(player, vector3);
+        }
+
+        /// <summary>
+        /// Create base or instanced <see cref="IMap"/> of <see cref="MapInfo"/> for <see cref="Player"/>.
+        /// </summary>
+        private static IMap CreateMap(MapInfo info, Player player)
+        {
+            IMap map = CreateBaseMap(info);
+            if (map is IInstancedMap iMap)
+                map = iMap.CreateInstance(info, player);
+
+            return map;
+        }
+
+        /// <summary>
+        /// Create and store base <see cref="IMap"/> of <see cref="MapInfo"/>.
+        /// </summary>
+        private static IMap CreateBaseMap(MapInfo info)
+        {
+            if (maps.TryGetValue((ushort)info.Entry.Id, out IMap map))
+                return map;
+
+            switch (info.Entry.Type)
             {
-                var newMap = new BaseMap(entry);
-                newMap.EnqueueAdd(entity, vector3);
-                maps.Add(worldId, newMap);
+                case 5:
+                    map = new InstancedMap<ResidenceMap>();
+                    break;
+                default:
+                    map = new BaseMap();
+                    break;
             }
+            
+            map.Initialise(info, null);
+            maps.Add((ushort)info.Entry.Id, map);
+            return map;
         }
 
         public static void Update(double lastTick)
@@ -43,7 +69,7 @@ namespace NexusForever.WorldServer.Game.Map
             var sw = Stopwatch.StartNew();
 
             var tasks = new List<Task>();
-            foreach (BaseMap map in maps.Values)
+            foreach (IMap map in maps.Values)
                 tasks.Add(Task.Run(() => { map.Update(lastTick); }));
             try
             {
@@ -56,7 +82,7 @@ namespace NexusForever.WorldServer.Game.Map
 
             sw.Stop();
             if (sw.ElapsedMilliseconds > 10)
-                log.Warn($"{maps.Count} map(s) took {sw.ElapsedMilliseconds} to update!");
+                log.Warn($"{maps.Count} map(s) took {sw.ElapsedMilliseconds}ms to update!");
         }
     }
 }

@@ -14,10 +14,12 @@ using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
+using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -79,7 +81,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Level = 50
                 });
 
-                var serverCharacterList = new ServerCharacterList();
+                var serverCharacterList = new ServerCharacterList
+                {
+                    RealmId = WorldServer.RealmId
+                };
                 foreach (Character character in characters)
                 {
                     var listCharacter = new ServerCharacterList.Character
@@ -93,7 +98,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Level       = character.Level,
                         WorldId     = 3460,
                         WorldZoneId = 5967,
-                        Unknown38   = 358
+                        RealmId     = WorldServer.RealmId
                     };
 
                     // create a temporary inventory to show equipped gear
@@ -270,9 +275,38 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }
 
             session.Player = new Player(session, character);
-            Vector3 vector = new Vector3(character.LocationX, character.LocationY, character.LocationZ);
 
-            MapManager.AddToMap(session.Player, character.WorldId, vector);
+            WorldEntry entry = GameTableManager.World.GetEntry(character.WorldId);
+            if (entry == null)
+                throw new ArgumentOutOfRangeException();
+
+            switch (entry.Type)
+            {
+                // housing map
+                case 5:
+                {
+                    // characters logging in to a housing map are returned to their own residence
+                    session.EnqueueEvent(new TaskGenericEvent<Residence>(ResidenceManager.GetResidence(session.Player.Name),
+                        residence =>
+                    {
+                        if (residence == null)
+                            residence = ResidenceManager.CreateResidence(session.Player);
+
+                        ResidenceEntrance entrance = ResidenceManager.GetResidenceEntrance(residence);
+                        var mapInfo = new MapInfo(entrance.Entry, 0u, residence.Id);
+                        MapManager.AddToMap(session.Player, mapInfo, entrance.Position);
+                    }));
+
+                    break;
+                }
+                default:
+                {
+                    var mapInfo = new MapInfo(entry);
+                    var vector3 = new Vector3(character.LocationX, character.LocationY, character.LocationZ);
+                    MapManager.AddToMap(session.Player, mapInfo, vector3);
+                    break;
+                }
+            }
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterLogout)]

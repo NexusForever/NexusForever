@@ -42,7 +42,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public List<ItemVisual> Gear { get; } = new List<ItemVisual>();
             public ushort WorldId { get; set; }
             public ushort WorldZoneId { get; set; }
-            public ushort Unknown38 { get; set; }
+            public ushort RealmId { get; set; }
             public UnknownStructure2 Unknown3C { get; } = new UnknownStructure2();
             public byte Unknown50 { get; set; }
             public bool IsLocked { get; set; }
@@ -73,7 +73,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
                 writer.Write(WorldId, 15);
                 writer.Write(WorldZoneId, 15);
-                writer.Write(Unknown38, 14);
+                writer.Write(RealmId, 14);
 
                 Unknown3C.Write(writer);
 
@@ -100,7 +100,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public List<Character> Characters { get; } = new List<Character>();
         public List<uint> Unknown14 { get; } = new List<uint>();
         public List<uint> Unknown1C { get; } = new List<uint>();
-        public ushort Unknown20 { get; set; }
+        public ushort RealmId { get; set; }
         public ushort Unknown28 { get; set; }
         public ulong Unknown30 { get; set; }
         public uint Unknown38 { get; set; }
@@ -126,7 +126,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             foreach (uint value in Unknown1C)
                 writer.Write(value);
 
-            writer.Write(Unknown20, 14);
+            writer.Write(RealmId, 14);
 
             writer.Write(Unknown28, 14);
             writer.Write(Unknown30);
