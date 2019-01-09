@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public class Item : ISaveCharacter
     {
+        public uint Id => Entry?.Id ?? SpellEntry.Id;
         public Item2Entry Entry { get; }
         public Spell4BaseEntry SpellEntry { get; }
         public ulong Guid { get; }
@@ -171,6 +172,9 @@ namespace NexusForever.WorldServer.Game.Entity
             saveMask    = ItemSaveMask.Create;
         }
 
+        /// <summary>
+        /// Create a new <see cref="Item"/> from a <see cref="Spell4BaseEntry"/> template.
+        /// </summary>
         public Item(ulong owner, Spell4BaseEntry entry, uint count = 1u)
         {
             Guid        = AssetManager.NextItemId;
@@ -198,12 +202,6 @@ namespace NexusForever.WorldServer.Game.Entity
             if (saveMask == ItemSaveMask.None)
                 return;
 
-            uint itemId;
-            if (SpellEntry == null)
-                itemId = Entry.Id;
-            else
-                itemId = SpellEntry.Id;
-
             if ((saveMask & ItemSaveMask.Create) != 0)
             {
                 // item doesn't exist in database, all infomation must be saved
@@ -211,7 +209,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     Id                 = Guid,
                     OwnerId            = CharacterId,
-                    ItemId             = itemId,
+                    ItemId             = Id,
                     Location           = (ushort)Location,
                     BagIndex           = BagIndex,
                     StackCount         = StackCount,
@@ -284,16 +282,10 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public NetworkItem BuildNetworkItem()
         {
-            uint itemId;
-            if (SpellEntry == null)
-                itemId = Entry.Id;
-            else
-                itemId = SpellEntry.Id;
-
             var networkItem = new NetworkItem
             {
                 Guid         = Guid,
-                ItemId       = itemId,
+                ItemId       = Id,
                 LocationData = new ItemLocation
                 {
                     Location = Location,

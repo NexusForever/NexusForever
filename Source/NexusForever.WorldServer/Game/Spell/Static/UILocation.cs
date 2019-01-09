@@ -1,4 +1,4 @@
-namespace NexusForever.WorldServer.Game.Entity.Static
+namespace NexusForever.WorldServer.Game.Spell.Static
 {
     public enum UILocation : uint
     {

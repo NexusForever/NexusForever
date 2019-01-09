@@ -1,42 +1,39 @@
-using System;
 using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ServerActionSet, MessageDirection.Server)]
     public class ServerActionSet : IWritable
     {
-        public class ActionLocation : IWritable
-        {   
-            public byte   Unknown0 { get; set; } = 0;
-            public ushort Unknown4 { get; set; } = 300;
-            public uint   Location { get; set; } = (uint)UILocation.None;
-            public uint   Spell4BaseId { get; set; } = 0;
+        public class Action : IWritable
+        {
+            public byte ShortcutType { get; set; }
+            public ItemLocation Location { get; set; } = new ItemLocation();
+            public uint ObjectId { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0, 4u);
-                writer.Write(Unknown4, 9u);
-                writer.Write(Location, 32u);
-                writer.Write(Spell4BaseId, 32u);
+                writer.Write(ShortcutType, 4u);
+                Location.Write(writer);
+                writer.Write(ObjectId);
             }
         }
 
-        public byte ActionSetIndex = 0;
-        public byte Unknown3 = 1;
-        public byte Unknown5 = 1;
-        public List<ActionLocation> actionLocation { get; set; } = new List<ActionLocation>();
+        public byte Index { get; set; }
+        public byte Unknown3 { get; set; }
+        public byte Unknown5 { get; set; }
+        public List<Action> Actions { get; set; } = new List<Action>();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(ActionSetIndex, 3u);
+            writer.Write(Index, 3u);
             writer.Write(Unknown3, 2u);
             writer.Write(Unknown5, 6u);
-            writer.Write(actionLocation.Count, 6u);
-            actionLocation.ForEach(e => e.Write(writer));
+            writer.Write(Actions.Count, 6u);
+            Actions.ForEach(e => e.Write(writer));
         }
     }
 }

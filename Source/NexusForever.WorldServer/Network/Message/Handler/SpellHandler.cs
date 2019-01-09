@@ -1,18 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using NexusForever.Shared.Configuration;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 
@@ -21,74 +15,66 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     public static class SpellHandler
     {
         [MessageHandler(GameMessageOpcode.ClientCastSpell)]
-        public static void HandlePlayerCastSpell(WorldSession session, ClientCastSpell spell)
+        public static void HandlePlayerCastSpell(WorldSession session, ClientCastSpell castSpell)
         {
-            ushort bagIndex = spell.BagIndex;
-            uint guid = spell.Guid;
-            Random random = new Random();
+            // the code in the function is temporary and just for a bit of fun, it will be replaced when the underlying spell system is implemented
+            Item item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
+            if (item == null)
+                throw new InvalidPacketValueException();
 
-            Item Spell = session.Player.Inventory.GetBag(InventoryLocation.Ability).GetItem(bagIndex);
+            UnlockedSpell spell = session.Player.SpellManager.GetSpell(item.Id);
+            if (spell == null)
+                throw new InvalidPacketValueException();
 
-            if (Spell.SpellEntry.Id != 0)
+            // true is probably "begin casting"
+            if (!castSpell.Unknown48)
+                return;
+
+            uint castingId = GlobalSpellManager.NextCastingId;
+            Spell4Entry spell4Entry = GameTableManager.Spell4.Entries
+                .SingleOrDefault(x => x.Spell4BaseIdBaseSpell == spell.Entry.Id && x.TierIndex == spell.Tier);
+
+            session.Player.EnqueueToVisible(new ServerSpellStart
             {
-                Spell4BaseEntry spell4BaseEntry = GameTableManager.Spell4Base.GetEntry(Spell.SpellEntry.Id);
-                if (spell4BaseEntry == null)
-                    throw (new InvalidPacketValueException("HandleSpell: Invalid Spell4BaseEntry {Spell.SpellEntry.Id}"));
+                CastingId              = castingId,
+                CasterId               = session.Player.Guid,
+                PrimaryTargetId        = session.Player.Guid,
+                Spell4Id               = spell4Entry.Id,
+                RootSpell4Id           = spell4Entry.Id,
+                ParentSpell4Id         = 0,
+                FieldPosition          = new Position(session.Player.Position),
+                UserInitiatedSpellCast = true
+            }, true);
+
+            var targetInfo = new ServerSpellGo.TargetInfo
+            {
+                UnitId        = session.Player.Guid, // FIXME: insert target
+                TargetFlags   = 1,
+                InstanceCount = 1,
+                CombatResult  = 2
+            };
+
+            foreach (Spell4EffectsEntry spell4EffectEntry in GameTableManager.Spell4Effects.Entries
+                .Where(x => x.SpellId == spell4Entry.Id))
+            {
+                targetInfo.EffectInfoData.Add(new ServerSpellGo.TargetInfo.EffectInfo
+                {
+                    Spell4EffectId = spell4EffectEntry.Id,
+                    EffectUniqueId = 4722,
+                    TimeRemaining  = -1
+                });
             }
 
-            if (spell.Unknown48 == true) // probably "begin casting"
+            session.Player.EnqueueToVisible(new ServerSpellGo
             {
-                Spell4Entry matchSpell4 = Array.Find(GameTableManager.Spell4.Entries, x => x.Spell4BaseIdBaseSpell == Spell.SpellEntry.Id && x.TierIndex == 1);
-                Spell4EffectsEntry matchSpell4Effects = Array.Find(GameTableManager.Spell4Effects.Entries, x => x.SpellId == matchSpell4.Id);
-
-                // FIXME: this should be a global server increment
-                uint CastingId = (uint)random.Next();
-
-                session.Player.EnqueueToVisible(new Server07FF
+                ServerUniqueId     = castingId,
+                PrimaryDestination = new Position(session.Player.Position),
+                Phase              = 255,
+                TargetInfoData     = new List<ServerSpellGo.TargetInfo>
                 {
-                    CastingId       = CastingId,
-                    CasterId        = session.Player.Guid,
-                    Guid2           = session.Player.Guid, // possibly replace with (if set) target
-                    Spell4Id        = matchSpell4.Id,
-                    RootSpell4Id    = matchSpell4.Id,
-                    ParentSpell4Id  = 0,
-                    FieldPosition   = new Position(session.Player.Position),
-                    UserInitiatedSpellCast = true
-                }, true);
-
-                List<Server07F4.UnknownStructure1> unknownStructure1 = new List<Server07F4.UnknownStructure1>
-                {
-                    new Server07F4.UnknownStructure1
-                    {
-                        Spell4EffectId = matchSpell4Effects.Id,
-                        Unknown0 = 4722,
-                        Unknown2 = 4294967295
-                    }
-                };
-
-                List<Server07F4.UnknownStructure0> unknownStructure0 = new List<Server07F4.UnknownStructure0>
-                {
-                    new Server07F4.UnknownStructure0
-                    {
-                        TargetId = session.Player.Guid, // FIXME: insert target
-                        Unknown2 = 1,
-                        Unknown3 = 1,
-                        Unknown4 = 2,
-                        unknownStructure1 = unknownStructure1
-                    }
-                };
-
-                if (matchSpell4Effects.Id > 0)
-                {
-                    session.Player.EnqueueToVisible(new Server07F4
-                    {
-                        CastingId       = CastingId,
-                        Position        = new Position(session.Player.Position),
-                        unknownStructure0 = unknownStructure0,
-                        Unknown1        = 255
-                    }, true);
+                    targetInfo 
                 }
-            }
+            }, true);
         }
     }
 }

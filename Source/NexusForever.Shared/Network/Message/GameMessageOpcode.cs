@@ -30,6 +30,7 @@ namespace NexusForever.Shared.Network.Message
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
         ServerAbilityPoints             = 0x0169,
+        ServerSpellUpdate               = 0x017B,
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
         ClientItemMove                  = 0x0182,
@@ -95,7 +96,7 @@ namespace NexusForever.Shared.Network.Message
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
         ClientCharacterSelect           = 0x07DD,
-        Server07F4                      = 0x07F4, // spell related: effect + more
+        ServerSpellGo                   = 0x07F4, // spell related: effect + more
         Server07F5                      = 0x07F5, // spell related
         Server07F6                      = 0x07F6, // spell related
         Server07F7                      = 0x07F7, // spell related
@@ -106,7 +107,7 @@ namespace NexusForever.Shared.Network.Message
         Server07FC                      = 0x07FC, // spell related: spell/casting errors
         Server07FD                      = 0x07FD, // spell related
         Server07FE                      = 0x07FE, // spell related
-        Server07FF                      = 0x07FF, // spell related: casting animation, initial response to 0x04DB
+        ServerSpellStart                = 0x07FF, // spell related: casting animation, initial response to 0x04DB
         ClientStorefrontRequestCatalog  = 0x082D,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills

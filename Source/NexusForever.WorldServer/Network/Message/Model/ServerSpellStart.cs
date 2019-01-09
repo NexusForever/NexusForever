@@ -5,16 +5,16 @@ using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server07FF, MessageDirection.Server)]
-    public class Server07FF : IWritable
+    [Message(GameMessageOpcode.ServerSpellStart, MessageDirection.Server)]
+    public class ServerSpellStart : IWritable
     {
         public class InitialPosition : IWritable
         {   
-            public uint   CasterId { get; set; } = 0;
-            public byte   Unknown4 { get; set; } = 0;
+            public uint   CasterId { get; set; }
+            public byte   Unknown4 { get; set; }
             public Position Position { get; set; } = new Position();
-            public float  Yaw { get; set; } = 0;
-            public uint   Unknown21 { get; set; } = 0;
+            public float  Yaw { get; set; }
+            public uint   Unknown21 { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -28,12 +28,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public class TelegraphPosition : IWritable
         {   
-            public ushort Unknown0 { get; set; } = 0;
-            public uint   CasterId { get; set; } = 0;
-            public byte   Unknown6 { get; set; } = 0;
+            public ushort Unknown0 { get; set; }
+            public uint   CasterId { get; set; }
+            public byte   Unknown6 { get; set; }
             public Position Position { get; set; } = new Position();
-            public float  Yaw { get; set; } = 0;
-            public uint   Unknown23 { get; set; } = 0;
+            public float  Yaw { get; set; }
+            public uint   Unknown23 { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -49,17 +49,17 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint CastingId { get; set; }
         public uint Spell4Id { get; set; }
         public uint RootSpell4Id { get; set; }
-        public uint ParentSpell4Id { get; set; } = 0;
+        public uint ParentSpell4Id { get; set; }
         public uint CasterId { get; set; }
-        public ushort Unknown20 { get; set; } = 0;
-        public uint Guid2 { get; set; } // target?
+        public ushort Unknown20 { get; set; }
+        public uint PrimaryTargetId { get; set; }
         public Position FieldPosition { get; set; } = new Position();
-        public float Yaw { get; set; } = 0;
-        public bool UserInitiatedSpellCast  { get; set; } = false;
-        public bool UseCreatureOverrides { get; set; } = false;
+        public float Yaw { get; set; }
+        public bool UserInitiatedSpellCast  { get; set; }
+        public bool UseCreatureOverrides { get; set; }
 
-        public List<InitialPosition> initialPosition { get; set; } = new List<InitialPosition>();
-        public List<TelegraphPosition> telegraphPosition { get; set; } = new List<TelegraphPosition>();
+        public List<InitialPosition> InitialPositionData { get; set; } = new List<InitialPosition>();
+        public List<TelegraphPosition> TelegraphPositionData { get; set; } = new List<TelegraphPosition>();
 
         public void Write(GamePacketWriter writer)
         {
@@ -69,15 +69,15 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(ParentSpell4Id, 18u);
             writer.Write(CasterId);
             writer.Write(Unknown20);
-            writer.Write(Guid2);
+            writer.Write(PrimaryTargetId);
             FieldPosition.Write(writer);
             writer.Write(Yaw);
 
-            writer.Write(initialPosition.Count, 8u);
-            initialPosition.ForEach(i => i.Write(writer));
+            writer.Write(InitialPositionData.Count, 8u);
+            InitialPositionData.ForEach(i => i.Write(writer));
 
-            writer.Write(telegraphPosition.Count, 8u);
-            telegraphPosition.ForEach(t => t.Write(writer));
+            writer.Write(TelegraphPositionData.Count, 8u);
+            TelegraphPositionData.ForEach(t => t.Write(writer));
 
             writer.Write(UserInitiatedSpellCast);
             writer.Write(UseCreatureOverrides);
