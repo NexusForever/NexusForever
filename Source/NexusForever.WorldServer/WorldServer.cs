@@ -16,6 +16,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer
@@ -46,6 +47,7 @@ namespace NexusForever.WorldServer
             EntityCommandManager.Initialise();
 
             AssetManager.Initialise();
+            GlobalSpellManager.Initialise();
             ServerManager.Initialise();
 
             MessageManager.Initialise();

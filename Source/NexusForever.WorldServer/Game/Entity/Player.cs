@@ -14,6 +14,7 @@ using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -30,7 +31,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
-        public List<float> Bones { get; }
+        public List<float> Bones { get; } = new List<float>();
 
         public byte Level
         {
@@ -55,11 +56,15 @@ namespace NexusForever.WorldServer.Game.Entity
         }
         private Path path;
 
+        public WorldSession Session { get; }
+        public bool IsLoading { get; private set; } = true;
+
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
         public PathManager PathManager { get; }
         public TitleManager TitleManager { get; }
-        public WorldSession Session { get; }
+        public SpellManager SpellManager { get; }
+
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
         private double timeToSave = SaveDuration;
@@ -71,24 +76,26 @@ namespace NexusForever.WorldServer.Game.Entity
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
         {
-            CharacterId = model.Id;
-            Name        = model.Name;
-            Sex         = (Sex)model.Sex;
-            Race        = (Race)model.Race;
-            Class       = (Class)model.Class;
-            Level       = model.Level;
-            Bones       = new List<float>();
+            Session         = session;
+
+            CharacterId     = model.Id;
+            Name            = model.Name;
+            Sex             = (Sex)model.Sex;
+            Race            = (Race)model.Race;
+            Class           = (Class)model.Class;
+            Level           = model.Level;
+            Path            = (Path)model.ActivePath;
+            Faction1        = (Faction)model.FactionId;
+            Faction2        = (Faction)model.FactionId;
+
+            // managers
+            Inventory       = new Inventory(this, model);
             CurrencyManager = new CurrencyManager(this, model);
-            PathManager = new PathManager(this, model);
-            Path        = (Path)model.ActivePath;
-            TitleManager = new TitleManager(this, model);
-            Faction1    = (Faction)model.FactionId;
-            Faction2    = (Faction)model.FactionId;
+            PathManager     = new PathManager(this, model);
+            TitleManager    = new TitleManager(this, model);
+            SpellManager    = new SpellManager(this, model);
 
-            Inventory   = new Inventory(this, model);
-            Session     = session;
-
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, (uint)Level));
+            Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
             // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
@@ -98,6 +105,26 @@ namespace NexusForever.WorldServer.Game.Entity
             Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
             Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
             Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
+
+            // temp
+            // TODO:
+            // a) move (Add's) to CharacterHandler / CharacterCration
+            // b) store abilities persistently
+            // c) handle starting abilities by class - sadly no tbl data available...
+            SpellManager.AddSpell(47769); // Transmat to Illium
+            SpellManager.AddSpell(38934); // some pewpew mount
+            SpellManager.AddSpell(62503); // falkron mount
+            SpellManager.AddSpell(63431); // zBoard 79 mount
+            SpellManager.AddSpell(31213); // Spellsurge
+            SpellManager.AddSpell(38229); // Portal capital city
+            SpellManager.AddSpell(23148); // Shred
+            SpellManager.AddSpell(23161); // Impale
+            SpellManager.AddSpell(23173); // Stagger
+            SpellManager.AddSpell(46803); // Summon Group
+            SpellManager.AddSpellToActionSet(0, 23148, UILocation.LAS1);
+            SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2, 2);
+            SpellManager.AddSpellToActionSet(0, 23173, UILocation.LAS3, 3);
+            SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
 
             foreach (ItemVisual itemVisual in Inventory.GetItemVisuals())
                 itemVisuals.Add(itemVisual.Slot, itemVisual);
@@ -114,9 +141,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             foreach(CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
-            {
                 Bones.Add(bone.Bone);
-            }
         }
 
         public override void Update(double lastTick)
@@ -135,6 +160,8 @@ namespace NexusForever.WorldServer.Game.Entity
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
+                timeToSave = SaveDuration;
+
                 Session.EnqueueEvent(new TaskEvent(CharacterDatabase.SavePlayer(this),
                     () =>
                 {
@@ -202,7 +229,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             var playerCreate = new ServerPlayerCreate
             {
-                FactionData = new ServerPlayerCreate.Faction
+                ItemProficiencies = GetItemProficiences(),
+                FactionData       = new ServerPlayerCreate.Faction
                 {
                     FactionId = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 }
@@ -215,23 +243,21 @@ namespace NexusForever.WorldServer.Game.Entity
                     playerCreate.Money[i - 1] = currency.Amount;
             }
 
-            foreach (Bag bag in Inventory)
+            foreach (Item item in Inventory
+                .Where(b => b.Location != InventoryLocation.Ability)
+                .SelectMany(i => i))
             {
-                foreach (Item item in bag)
+                playerCreate.Inventory.Add(new InventoryItem
                 {
-                    playerCreate.Inventory.Add(new InventoryItem
-                    {
-                        Item   = item.BuildNetworkItem(),
-                        Reason = 49
-                    });
-                }
+                    Item   = item.BuildNetworkItem(),
+                    Reason = 49
+                });
             }
-
-            playerCreate.ItemProficiencies = GetItemProficiences();
 
             Session.EnqueueMessageEncrypted(playerCreate);
 
             TitleManager.SendTitles();
+            SpellManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()

@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         public void Read(GamePacketReader reader)
         {
             Location = reader.ReadEnum<InventoryLocation>(9u);
-            BagIndex     = reader.ReadUInt();
+            BagIndex = reader.ReadUInt();
         }
 
         public void Write(GamePacketWriter writer)

@@ -105,7 +105,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (vendorInfo == null)
                 return;
 
-            Item2Entry itemEntry = session.Player.Inventory.GetItemFromLocation(vendorSell.ItemLocation).Entry;
+            Item2Entry itemEntry = session.Player.Inventory.GetItem(vendorSell.ItemLocation).Entry;
             if (itemEntry == null)
                 return;
 

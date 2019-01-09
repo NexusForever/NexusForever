@@ -22,8 +22,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public Faction Faction1 { get; protected set; }
         public Faction Faction2 { get; protected set; }
 
-        public bool IsLoading { get; protected set; }
-
         protected Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
 
         protected WorldEntity(EntityType type)

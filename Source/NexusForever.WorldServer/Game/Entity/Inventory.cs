@@ -109,6 +109,39 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Create a new <see cref="Item"/> from supplied <see cref="Spell4BaseEntry"/> in the first available <see cref="InventoryLocation.Ability"/> bag slot.
+        /// </summary>
+        public Item SpellCreate(Spell4BaseEntry spell4BaseEntry, byte reason)
+        {
+            if (spell4BaseEntry == null)
+                throw new ArgumentNullException();
+
+            Bag bag = GetBag(InventoryLocation.Ability);
+            Debug.Assert(bag != null);
+
+            uint bagIndex = bag.GetFirstAvailableBagIndex();
+            if (bagIndex == uint.MaxValue)
+                return null;
+
+            var spell = new Item(characterId, spell4BaseEntry);
+            AddItem(spell, InventoryLocation.Ability, bagIndex);
+
+            if (!player?.IsLoading ?? false)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerItemAdd
+                {
+                    InventoryItem = new InventoryItem
+                    {
+                        Item   = spell.BuildNetworkItem(),
+                        Reason = reason
+                    }
+                });
+            }
+
+            return spell;
+        }
+
+        /// <summary>
         /// Add <see cref="Item"/> in the first available bag index for the given <see cref="InventoryLocation"/> .
         /// </summary>
         public void AddItem(Item item, InventoryLocation inventoryLocation)
@@ -297,15 +330,27 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO
         }
 
-        public Item GetItemFromLocation(ItemLocation itemLocation)
+        /// <summary>
+        /// Return <see cref="Item"/> at supplied <see cref="ItemLocation"/>.
+        /// </summary>
+        public Item GetItem(ItemLocation itemLocation)
         {
-            Bag bag = GetBag(itemLocation.Location);
+            return GetItem(itemLocation.Location, itemLocation.BagIndex);
+        }
+
+        /// <summary>
+        /// Return <see cref="Item"/> at supplied <see cref="InventoryLocation"/> and bag index.
+        /// </summary>
+        public Item GetItem(InventoryLocation location, uint bagIndex)
+        {
+            Bag bag = GetBag(location);
             if (bag == null)
                 throw new InvalidPacketValueException();
 
-            Item item = bag.GetItem(itemLocation.BagIndex);
+            Item item = bag.GetItem(bagIndex);
             if (item == null)
                 throw new InvalidPacketValueException();
+
             return item;
         }
 
@@ -489,9 +534,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Save(CharacterContext context)
         {
-            foreach (Bag bag in bags.Values)
-                foreach (Item item in bag)
-                    item.Save(context);
+            foreach (Item item in bags.Values
+                .Where(b => b.Location != InventoryLocation.Ability)
+                .SelectMany(i => i))
+                item.Save(context);
 
             foreach (Item item in deletedItems)
                 item.Save(context);

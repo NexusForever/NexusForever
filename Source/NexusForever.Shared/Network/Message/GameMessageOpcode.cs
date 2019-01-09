@@ -29,7 +29,8 @@ namespace NexusForever.Shared.Network.Message
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
-        Server0169                      = 0x0169, // ability book related
+        ServerAbilityPoints             = 0x0169,
+        ServerSpellUpdate               = 0x017B,
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
         ClientItemMove                  = 0x0182,
@@ -39,8 +40,8 @@ namespace NexusForever.Shared.Network.Message
         ServerTitleUpdate               = 0x018A,
         ServerTitles                    = 0x018B,
         ServerPlayerChanged             = 0x019B,
-        Server019D                      = 0x019D, // action set related
-        Server01A0                      = 0x01A0, // ability book related
+        ServerActionSet                 = 0x019D,
+        ServerAbilities                 = 0x01A0,
         Server01A3                      = 0x01A3, // AMP
         ServerPathUpdateXP              = 0x01AA,
         ServerChatJoin                  = 0x01BC,
@@ -64,6 +65,7 @@ namespace NexusForever.Shared.Network.Message
         ServerRealmEncrypted            = 0x03DC,
         ClientCheat                     = 0x03E0,
         Server0497                      = 0x0497, // guild info
+        ClientCastSpell                 = 0x04DB,
         ServerItemSwap                  = 0x0568,
         ServerItemMove                  = 0x0569,
         ClientHelloRealm                = 0x058F,
@@ -94,6 +96,18 @@ namespace NexusForever.Shared.Network.Message
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
         ClientCharacterSelect           = 0x07DD,
+        ServerSpellGo                   = 0x07F4, // spell related: effect + more
+        Server07F5                      = 0x07F5, // spell related
+        Server07F6                      = 0x07F6, // spell related
+        Server07F7                      = 0x07F7, // spell related
+        Server07F8                      = 0x07F8, // spell related
+        Server07F9                      = 0x07F9, // spell related
+        Server07FA                      = 0x07FA, // spell related
+        Server07FB                      = 0x07FB, // spell related
+        Server07FC                      = 0x07FC, // spell related: spell/casting errors
+        Server07FD                      = 0x07FD, // spell related
+        Server07FE                      = 0x07FE, // spell related
+        ServerSpellStart                = 0x07FF, // spell related: casting animation, initial response to 0x04DB
         ClientStorefrontRequestCatalog  = 0x082D,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills

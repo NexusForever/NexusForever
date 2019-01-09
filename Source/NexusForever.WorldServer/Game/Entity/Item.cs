@@ -16,7 +16,9 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public class Item : ISaveCharacter
     {
+        public uint Id => Entry?.Id ?? SpellEntry.Id;
         public Item2Entry Entry { get; }
+        public Spell4BaseEntry SpellEntry { get; }
         public ulong Guid { get; }
 
         public ulong CharacterId
@@ -146,7 +148,10 @@ namespace NexusForever.WorldServer.Game.Entity
             charges     = model.Charges;
             durability  = model.Durability;
 
-            Entry       = GameTableManager.Item.GetEntry(model.ItemId);
+            if ((InventoryLocation)model.Location != InventoryLocation.Ability)
+                Entry       = GameTableManager.Item.GetEntry(model.ItemId);
+            else
+                SpellEntry  = GameTableManager.Spell4Base.GetEntry(model.ItemId);
             saveMask    = ItemSaveMask.None;
         }
 
@@ -164,6 +169,23 @@ namespace NexusForever.WorldServer.Game.Entity
             durability  = 1.0f;
 
             Entry       = entry;
+            saveMask    = ItemSaveMask.Create;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Item"/> from a <see cref="Spell4BaseEntry"/> template.
+        /// </summary>
+        public Item(ulong owner, Spell4BaseEntry entry, uint count = 1u)
+        {
+            Guid        = AssetManager.NextItemId;
+            characterId = owner;
+            location    = InventoryLocation.None;
+            bagIndex    = 0u;
+            stackCount  = count;
+            charges     = 0u;
+            durability  = 0.0f;
+
+            SpellEntry  = entry;
             saveMask    = ItemSaveMask.Create;
         }
 
@@ -187,7 +209,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     Id                 = Guid,
                     OwnerId            = CharacterId,
-                    ItemId             = Entry.Id,
+                    ItemId             = Id,
                     Location           = (ushort)Location,
                     BagIndex           = BagIndex,
                     StackCount         = StackCount,
@@ -263,7 +285,7 @@ namespace NexusForever.WorldServer.Game.Entity
             var networkItem = new NetworkItem
             {
                 Guid         = Guid,
-                ItemId       = Entry.Id,
+                ItemId       = Id,
                 LocationData = new ItemLocation
                 {
                     Location = Location,
