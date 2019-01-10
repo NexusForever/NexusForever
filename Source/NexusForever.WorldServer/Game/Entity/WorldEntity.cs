@@ -21,6 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public ushort OutfitInfo { get; protected set; }
         public Faction Faction1 { get; protected set; }
         public Faction Faction2 { get; protected set; }
+        public uint Target { get;  set; }
 
         protected Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
 
