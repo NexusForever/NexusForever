@@ -133,6 +133,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
             }, true);
 
+            if (castingId_dmg<1)
+                return;
+
             session.Player.EnqueueToVisible(new ServerSpellGo
             {
                 ServerUniqueId     = castingId_dmg,
