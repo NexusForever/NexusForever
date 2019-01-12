@@ -190,6 +190,7 @@ namespace NexusForever.Shared.Network.Message
         Server068B                      = 0x068B, // pet customization something
         ServerUnlockPetFlair            = 0x068D,
         ServerChangePetStance           = 0x068F,
+        ServerPublicEventStart          = 0x0700,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
         ClientTitleSet                  = 0x078E,
@@ -219,6 +220,8 @@ namespace NexusForever.Shared.Network.Message
         Server0814                      = 0x0814, // spell related
         Server0816                      = 0x0816, // spell related: broadcast parts of 0x07FF?
         Server0817                      = 0x0817, // spell related
+        ClientStorefrontPurchaseAccount = 0x0828,
+        ClientStorefrontPurchaseCharacter = 0x082A,
         ClientStorefrontRequestCatalog  = 0x082D,
         ClientSummonVanityPet           = 0x082F,
         ServerTimeOfDay                 = 0x0845,
@@ -250,8 +253,15 @@ namespace NexusForever.Shared.Network.Message
         ServerAccountCurrencySet        = 0x0966,
         ServerAccountCurrencyGrant      = 0x0967,
         ServerAccountEntitlements       = 0x0968,
+        ServerAccountItems              = 0x096D,
+        ServerAccountItemCooldownSet    = 0x0974,
+        ServerAccountItemAdd            = 0x0975,
+        ServerAccountItemsPending       = 0x0979,
         ServerGenericUnlockList         = 0x0981,
         ServerGenericUnlock             = 0x0982,
-        ServerGenericUnlockResult       = 0x0985
+        ServerGenericUnlockResult       = 0x0985,
+        ServerStoreFinalise             = 0x0987,
+        ServerStoreCategories           = 0x0988,
+        ServerStoreOffers               = 0x098B,
     }
 }
