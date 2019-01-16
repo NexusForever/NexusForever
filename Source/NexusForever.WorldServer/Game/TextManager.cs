@@ -71,7 +71,7 @@ namespace NexusForever.WorldServer.Game
             Func<T, uint> textIdAccessor,
             bool fuzzy = false) where T : class, new()
         {
-            return Search<T>(text, language, t => new[] { textIdAccessor(t) });
+            return Search<T>(text, language, t => new[] { textIdAccessor(t) }, fuzzy);
         }
         /// <summary>
         ///     Find objects matching the specified search string

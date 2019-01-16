@@ -15,11 +15,7 @@ namespace NexusForever.WorldServer.Game.TextSearch
         {
             index = new Dictionary<string, List<uint>>(StringComparer.OrdinalIgnoreCase);
             if (textTable == null)
-            {
                 return;
-            }
-
-
 
             foreach (TextTableEntry entry in textTable.Entries)
                 AddEntry(index, entry);
@@ -34,7 +30,8 @@ namespace NexusForever.WorldServer.Game.TextSearch
 
         public IEnumerable<uint> ExactSearch(string text)
         {
-            if (IsEmpty) return null;
+            if (IsEmpty)
+                return null;
             if (!index.TryGetValue(text, out List<uint> values))
                 return Enumerable.Empty<uint>();
             return values ?? Enumerable.Empty<uint>();

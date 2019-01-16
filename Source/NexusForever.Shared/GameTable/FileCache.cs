@@ -36,7 +36,8 @@ namespace NexusForever.Shared.GameTable
                 state = Interlocked.CompareExchange(ref cacheCheck, 1, 0);
                 Thread.Sleep(100);
             }
-            if (state == 2) return;
+            if (state == 2)
+                return;
             DirectoryInfo cacheDirectory = lazyCacheDirectory.Value;
             FileInfo cacheInfoFile = cacheDirectory.EnumerateFiles("cacheInfo.txt").FirstOrDefault();
             if (cacheInfoFile != null && cacheInfoFile.Exists)
