@@ -75,8 +75,13 @@ namespace NexusForever.WorldServer.Command.Handler
             var sw = new StringWriter();
             sw.WriteLine("Decor Lookup Results:");
 
-            foreach (CachedDecor decor in AssetManager.GetDecor(parameters[0]))
-                sw.WriteLine($"({decor.Id}) {decor.Name}");
+            TextTable tt = GameTableManager.GetTextTable(context.Language);
+            foreach (HousingDecorInfoEntry decorEntry in
+                SearchManager.Search<HousingDecorInfoEntry>(parameters[0], context.Language, e => e.LocalizedTextIdName, true))
+            {
+                string text = tt.GetEntry(decorEntry.LocalizedTextIdName);
+                sw.WriteLine($"({decorEntry.Id}) {text}");
+            }
 
             context.SendMessageAsync(sw.ToString());
             return Task.CompletedTask;

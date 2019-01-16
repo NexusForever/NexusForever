@@ -32,7 +32,6 @@ namespace NexusForever.WorldServer.Game
 
         private static ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
         private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
-        private static ImmutableHashSet<CachedDecor> decorLookup;
 
         public static void Initialise()
         {
@@ -43,7 +42,6 @@ namespace NexusForever.WorldServer.Game
             CacheInventoryEquipSlots();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
-            CacheDecorLookup();
         }
 
         private static void CacheCharacterCustomisations()
@@ -108,21 +106,6 @@ namespace NexusForever.WorldServer.Game
             itemDisplaySourcesEntry = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
-        private static void CacheDecorLookup()
-        {
-            var entries = new HashSet<CachedDecor>();
-            foreach (HousingDecorInfoEntry entry in GameTableManager.HousingDecorInfo.Entries)
-            {
-                string name = GameTableManager.Text.GetEntry(entry.LocalizedTextIdName);
-                if (string.IsNullOrWhiteSpace(name))
-                    continue;
-
-                entries.Add(new CachedDecor(entry.Id, name));
-            }
-
-            decorLookup = entries.ToImmutableHashSet();
-        }
-
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
         /// </summary>
@@ -146,13 +129,6 @@ namespace NexusForever.WorldServer.Game
         public static ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
         {
             return itemDisplaySourcesEntry.TryGetValue(itemSource, out ImmutableList<ItemDisplaySourceEntryEntry> entries) ? entries : null;
-        }
-
-        public static IEnumerable<CachedDecor> GetDecor(string name)
-        {
-            return decorLookup
-                .Where(d => d.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase))
-                .OrderBy(d => d.Id);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.GameTable.Static;
 using NLog;
 
 namespace NexusForever.Shared.GameTable
@@ -579,7 +580,7 @@ namespace NexusForever.Shared.GameTable
 
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
-        public static TextTable Text => TextEnglish;
+
         [GameData("fr-FR.bin")]
         public static TextTable TextFrench { get; private set; }
         [GameData("en-US.bin")]
@@ -729,6 +730,24 @@ namespace NexusForever.Shared.GameTable
                     .Unwrap();
 
             throw new GameTableException($"Unknown game table type {property.PropertyType}");
+        }
+
+        /// <summary>
+        /// Return the <see cref="TextTable"/> for the specified <see cref="Static.Language"/>.
+        /// </summary>
+        public static TextTable GetTextTable(Language language)
+        {
+            switch (language)
+            {
+                case Static.Language.English:
+                    return TextEnglish;
+                case Static.Language.French:
+                    return TextFrench;
+                case Static.Language.German:
+                    return TextGerman;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
