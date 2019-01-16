@@ -8,7 +8,7 @@ using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class NonPlayer : WorldEntity
+    public class NonPlayer : UnitEntity
     {
         public uint CreatureId { get; }
         public VendorInfo VendorInfo { get; }

@@ -329,5 +329,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             session.Player.TitleManager.ActiveTitleId = request.TitleId;
         }
+
+        [MessageHandler(GameMessageOpcode.ClientEntitySelect)]
+        public static void HandleClientTarget(WorldSession session, ClientEntitySelect target)
+        {
+            session.Player.Target = target.Guid;
+        }
     }
 }

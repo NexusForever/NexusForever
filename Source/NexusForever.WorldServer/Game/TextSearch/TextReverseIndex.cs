@@ -8,35 +8,38 @@ namespace NexusForever.WorldServer.Game.TextSearch
 {
     public class TextReverseIndex
     {
-        private readonly ImmutableDictionary<string, uint> index;
+        private readonly Dictionary<string, List<uint>> index;
         public bool IsEmpty => !index.Keys.Any();
 
         public TextReverseIndex(TextTable textTable)
         {
+            index = new Dictionary<string, List<uint>>(StringComparer.OrdinalIgnoreCase);
             if (textTable == null)
-            {
-                this.index = ImmutableDictionary<string, uint>.Empty;
                 return;
-            }
-
-            Dictionary<string, uint> index = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
 
             foreach (TextTableEntry entry in textTable.Entries)
-                index[string.Intern(entry.Text)] = entry.Id;
-
-            this.index = index.ToImmutableDictionary();
+                AddEntry(index, entry);
         }
 
-        public uint? GetId(string text)
+        private void AddEntry(Dictionary<string, List<uint>> dictionary, TextTableEntry entry)
         {
-            if (!index.TryGetValue(text, out uint val)) 
+            if (!dictionary.TryGetValue(entry.Text, out List<uint> list) || list == null)
+                dictionary[entry.Text] = list = new List<uint>();
+            list.Add(entry.Id);
+        }
+
+        public IEnumerable<uint> ExactSearch(string text)
+        {
+            if (IsEmpty)
                 return null;
-            return val;
+            if (!index.TryGetValue(text, out List<uint> values))
+                return Enumerable.Empty<uint>();
+            return values ?? Enumerable.Empty<uint>();
         }
 
         public IEnumerable<uint> FuzzySearch(string text)
         {
-            return index.Keys.Where(i => i.Contains(text, StringComparison.OrdinalIgnoreCase)).Select(i => index[i])
+            return index.Keys.Where(i => i.Contains(text, StringComparison.OrdinalIgnoreCase)).SelectMany(i => index[i]).Distinct()
                 .ToList();
         }
     }

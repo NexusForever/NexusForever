@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -46,8 +47,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
                     public uint OverkillAmount { get; set; }
                     public uint Unknown6 { get; set; }
                     public bool KilledTarget { get; set; }
-                    public byte CombatResult { get; set; }
-                    public byte DamageType { get; set; }
+                    public CombatResult CombatResult { get; set; }
+                    public DamageType DamageType { get; set; }
 
                     public List<UnknownStructure3> unknownStructure3 { get; set; } = new List<UnknownStructure3>();
 
@@ -96,7 +97,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public byte   Ndx { get; set; }
             public byte   TargetFlags { get; set; }
             public ushort InstanceCount { get; set; }
-            public byte   CombatResult { get; set; }
+            public CombatResult CombatResult { get; set; }
 
             public List<EffectInfo> EffectInfoData { get; set; } = new List<EffectInfo>();
 
@@ -178,7 +179,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public List<TelegraphPosition> TelegraphPositionData { get; set; } = new List<TelegraphPosition>();
         public List<MissileInfo> MissileInfoData { get; set; } = new List<MissileInfo>();
 
-        public byte Phase { get; set; } = 0;
+        public sbyte Phase { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

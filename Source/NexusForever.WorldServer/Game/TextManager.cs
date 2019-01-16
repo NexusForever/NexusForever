@@ -56,21 +56,23 @@ namespace NexusForever.WorldServer.Game
         public static IEnumerable<uint> Search(string text, Language language, bool fuzzy = false)
         {
             TextReverseIndex index = GetIndex(language);
-            if (index == null) 
+            if (index == null)
                 return Enumerable.Empty<uint>();
             List<uint> ids = new List<uint>();
             if (fuzzy)
                 ids.AddRange(index.FuzzySearch(text));
             else
-            {
-                uint? id = index.GetId(text);
-                if (id != null)
-                    ids.Add(id.Value);
-            }
+                ids.AddRange(index.ExactSearch(text));
 
             return ids;
         }
 
+        public static IEnumerable<T> Search<T>(string text, Language language,
+            Func<T, uint> textIdAccessor,
+            bool fuzzy = false) where T : class, new()
+        {
+            return Search<T>(text, language, t => new[] { textIdAccessor(t) }, fuzzy);
+        }
         /// <summary>
         ///     Find objects matching the specified search string
         /// </summary>
@@ -80,15 +82,15 @@ namespace NexusForever.WorldServer.Game
         /// <param name="textIdAccessor">Field accessor for the localized text ID</param>
         /// <param name="fuzzy">true to search for strings containing the specified text, false for an exact match</param>
         /// <returns>Enumerable of found objects</returns>
-        public static IEnumerable<T> Search<T>(string text, Language language, Func<T, uint> textIdAccessor,
+        public static IEnumerable<T> Search<T>(string text, Language language, Func<T, IEnumerable<uint>> textIdAccessor,
             bool fuzzy = false)
             where T : class, new()
         {
             GameTable<T> gameTable = GetGameTable<T>();
-            if (gameTable == null) 
+            if (gameTable == null)
                 return Enumerable.Empty<T>();
             IEnumerable<uint> ids = Search(text, language, fuzzy);
-            return gameTable.Entries.Where(i => ids.Contains(textIdAccessor(i)));
+            return gameTable.Entries.Where(i => textIdAccessor(i)?.Any(x => ids.Contains(x)) ?? false);
         }
 
         private static TextReverseIndex GetIndex(Language language)

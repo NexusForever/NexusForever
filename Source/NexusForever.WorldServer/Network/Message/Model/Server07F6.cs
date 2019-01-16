@@ -28,56 +28,57 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write(Unknown4);
                 writer.Write(Unknown5);
                 writer.Write(Unknown6);
-                writer.Write(Unknown7, 3);
+                writer.Write(Unknown7, 3u);
             }
         }
 
-        public class UnknownStructure2 : IWritable // same used for 0x07F4
+        public class DamageDescription : IWritable // same used for 0x07F4
         {
-            public uint Unknown0 { get; set; } = 0;
-            public uint Unknown1 { get; set; } = 0;
-            public uint Unknown2 { get; set; } = 0;
-            public uint Unknown3 { get; set; } = 0;
-            public uint Unknown4 { get; set; } = 0;
-            public uint Unknown5 { get; set; } = 0;
-            public uint Unknown6 { get; set; } = 0;
-            public bool Unknown7 { get; set; } = false;
-            public byte Unknown8 { get; set; } = 0;
-            public byte Unknown9 { get; set; } = 0;
+            public uint RawDamage { get; set; }
+            public uint RawScaledDamage { get; set; }
+            public uint AbsorbedAmount { get; set; }
+            public uint ShieldAbsorbAmount { get; set; }
+            public uint AdjustedDamage { get; set; }
+            public uint OverkillAmount { get; set; }
+            public uint Unknown6 { get; set; }
+            public bool KilledTarget { get; set; }
+            public byte CombatResult { get; set; }
+            public byte DamageType { get; set; }
+
             public List<UnknownStructure3> unknownStructure3 { get; set; } = new List<UnknownStructure3>();
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0);
-                writer.Write(Unknown1);
-                writer.Write(Unknown2);
-                writer.Write(Unknown3);
-                writer.Write(Unknown4);
-                writer.Write(Unknown5);
+                writer.Write(RawDamage);
+                writer.Write(RawScaledDamage);
+                writer.Write(AbsorbedAmount);
+                writer.Write(ShieldAbsorbAmount);
+                writer.Write(AdjustedDamage);
+                writer.Write(OverkillAmount);
                 writer.Write(Unknown6);
-                writer.Write(Unknown7);
-                writer.Write(Unknown8, 4);
-                writer.Write(Unknown9, 3);
+                writer.Write(KilledTarget);
+                writer.Write(CombatResult, 4u);
+                writer.Write(DamageType, 3u);
                 
                 writer.Write(unknownStructure3.Count, 8u);
                 unknownStructure3.ForEach(u => u.Write(writer));
             }
         }
 
-        public uint CastingId { get; set; }
+        public uint ServerUniqueId { get; set; }
         public uint Spell4EffectId { get; set; } = 0;
-        public uint Unknown0 { get; set; } = 0;
-        public uint Unknown1 { get; set; } = 0;
+        public uint UnitId { get; set; } = 0;
+        public uint TargetId { get; set; } = 0;
 
-        public UnknownStructure2 unknownStructure2 { get; set; } = new UnknownStructure2();
+        public DamageDescription DamageDescriptionData { get; set; } = new DamageDescription();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(CastingId);
+            writer.Write(ServerUniqueId);
             writer.Write(Spell4EffectId, 19);
-            writer.Write(Unknown0);
-            writer.Write(Unknown1);
-            unknownStructure2.Write(writer);
+            writer.Write(UnitId);
+            writer.Write(TargetId);
+            DamageDescriptionData.Write(writer);
         }
     }
 }

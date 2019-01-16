@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.GameTable.Static;
 using NLog;
 
 namespace NexusForever.Shared.GameTable
 {
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
     public static class GameTableManager
     {
         private const int minimumThreads = 2;
@@ -362,7 +365,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PetFlairEntry> PetFlair { get; private set; }
         public static GameTable<PlayerNotificationTypeEntry> PlayerNotificationType { get; private set; }
         public static GameTable<PositionalRequirementEntry> PositionalRequirement { get; private set; }
+
+        [GameData]
         public static GameTable<PrerequisiteEntry> Prerequisite { get; private set; }
+
         public static GameTable<PrerequisiteTypeEntry> PrerequisiteType { get; private set; }
         public static GameTable<PrimalMatrixNodeEntry> PrimalMatrixNode { get; private set; }
         public static GameTable<PrimalMatrixRewardEntry> PrimalMatrixReward { get; private set; }
@@ -431,15 +437,20 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<Spell4Entry> Spell4 { get; private set; }
 
+        [GameData]
         public static GameTable<Spell4AoeTargetConstraintsEntry> Spell4AoeTargetConstraints { get; private set; }
 
         [GameData]
         public static GameTable<Spell4BaseEntry> Spell4Base { get; private set; }
 
+        [GameData]
         public static GameTable<Spell4CCConditionsEntry> Spell4CCConditions { get; private set; }
         public static GameTable<Spell4CastResultEntry> Spell4CastResult { get; private set; }
         public static GameTable<Spell4ClientMissileEntry> Spell4ClientMissile { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4ConditionsEntry> Spell4Conditions { get; private set; }
+
         public static GameTable<Spell4EffectGroupListEntry> Spell4EffectGroupList { get; private set; }
         public static GameTable<Spell4EffectModificationEntry> Spell4EffectModification { get; private set; }
 
@@ -447,24 +458,47 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<Spell4EffectsEntry> Spell4Effects { get; private set; }
 
         public static GameTable<Spell4GroupListEntry> Spell4GroupList { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4HitResultsEntry> Spell4HitResults { get; private set; }
+
         public static GameTable<Spell4ModificationEntry> Spell4Modification { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4PrerequisitesEntry> Spell4Prerequisites { get; private set; }
         public static GameTable<Spell4ReagentEntry> Spell4Reagent { get; private set; }
         public static GameTable<Spell4RunnerEntry> Spell4Runner { get; private set; }
         public static GameTable<Spell4ServiceTokenCostEntry> Spell4ServiceTokenCost { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4SpellTypesEntry> Spell4SpellTypes { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4StackGroupEntry> Spell4StackGroup { get; private set; }
+
         public static GameTable<Spell4TagEntry> Spell4Tag { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4TargetAngleEntry> Spell4TargetAngle { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4TargetMechanicsEntry> Spell4TargetMechanics { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4TelegraphEntry> Spell4Telegraph { get; private set; }
+
         public static GameTable<Spell4ThresholdsEntry> Spell4Thresholds { get; private set; }
         public static GameTable<Spell4TierRequirementsEntry> Spell4TierRequirements { get; private set; }
+
+        [GameData]
         public static GameTable<Spell4ValidTargetsEntry> Spell4ValidTargets { get; private set; }
+
         public static GameTable<Spell4VisualEntry> Spell4Visual { get; private set; }
         public static GameTable<Spell4VisualGroupEntry> Spell4VisualGroup { get; private set; }
+
+        [GameData]
         public static GameTable<SpellCoolDownEntry> SpellCoolDown { get; private set; }
+
         public static GameTable<SpellEffectTypeEntry> SpellEffectType { get; private set; }
         public static GameTable<SpellLevelEntry> SpellLevel { get; private set; }
         public static GameTable<SpellPhaseEntry> SpellPhase { get; private set; }
@@ -474,11 +508,17 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<StoreKeywordEntry> StoreKeyword { get; private set; }
         public static GameTable<StoreLinkEntry> StoreLink { get; private set; }
         public static GameTable<StoryPanelEntry> StoryPanel { get; private set; }
+
+        [GameData]
         public static GameTable<TargetGroupEntry> TargetGroup { get; private set; }
+
         public static GameTable<TargetMarkerEntry> TargetMarker { get; private set; }
         public static GameTable<TaxiNodeEntry> TaxiNode { get; private set; }
         public static GameTable<TaxiRouteEntry> TaxiRoute { get; private set; }
+
+        [GameData]
         public static GameTable<TelegraphDamageEntry> TelegraphDamage { get; private set; }
+
         public static GameTable<TicketCategoryEntry> TicketCategory { get; private set; }
         public static GameTable<TicketSubCategoryEntry> TicketSubCategory { get; private set; }
         public static GameTable<TrackingSlotEntry> TrackingSlot { get; private set; }
@@ -540,7 +580,7 @@ namespace NexusForever.Shared.GameTable
 
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
-        public static TextTable Text => TextEnglish;
+
         [GameData("fr-FR.bin")]
         public static TextTable TextFrench { get; private set; }
         [GameData("en-US.bin")]
@@ -690,6 +730,24 @@ namespace NexusForever.Shared.GameTable
                     .Unwrap();
 
             throw new GameTableException($"Unknown game table type {property.PropertyType}");
+        }
+
+        /// <summary>
+        /// Return the <see cref="TextTable"/> for the specified <see cref="Static.Language"/>.
+        /// </summary>
+        public static TextTable GetTextTable(Language language)
+        {
+            switch (language)
+            {
+                case Static.Language.English:
+                    return TextEnglish;
+                case Static.Language.French:
+                    return TextFrench;
+                case Static.Language.German:
+                    return TextGerman;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
