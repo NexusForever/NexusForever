@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -8,24 +9,21 @@ namespace NexusForever.Shared.GameTable
     {
         public static string ReadWideString(this BinaryReader reader)
         {
-            uint position = 0u;
-            byte[] buffer = new byte[64];
-
-            while (true)
+            // We don't know if the reader is using the correct encoding. We shouldn't have to do this here,
+            // but that would be alot of changes to make to fix. So instead we'll just create our own reader
+            // and use the base stream with the correct encoding. This should cause no harm, since we advance
+            // the underlying stream and BinaryReader doesn't actually care about position.
+            using (var wrappedReader = new BinaryReader(reader.BaseStream, Encoding.Unicode, true))
             {
-                if (position == buffer.Length)
+                List<char> characters = new List<char>();
+
+                while (true)
                 {
-                    byte[] content = buffer;
-                    buffer = new byte[buffer.Length + 64];
-                    Buffer.BlockCopy(content, 0, buffer, 0, content.Length);
+                    char character = wrappedReader.ReadChar();
+                    if (character == 0)
+                        return new string(characters.ToArray());
+                    characters.Add(character);
                 }
-
-                ushort character = reader.ReadUInt16();
-                if (character == 0)
-                    return Encoding.Unicode.GetString(buffer, 0, (int)position);
-
-                buffer[position++] = (byte)(character & 0x00FF);
-                buffer[position++] = (byte)(character >> 8);
             }
         }
     }
