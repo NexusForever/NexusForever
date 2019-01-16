@@ -136,8 +136,8 @@ namespace NexusForever.WorldServer.Game.Map
             Decor[] decors = residence.GetDecor().ToArray();
             for (uint i = 0u; i < decors.Length; i++)
             {
-                // client freaks out if too much decor is sent in a single message, limit to 500
-                if (i != 0u && i % 500u == 0u)
+                // client freaks out if too much decor is sent in a single message, limit to 100
+                if (i != 0u && i % 100u == 0u)
                 {
                     player.Session.EnqueueMessageEncrypted(residenceDecor);
                     residenceDecor = new ServerHousingResidenceDecor();
