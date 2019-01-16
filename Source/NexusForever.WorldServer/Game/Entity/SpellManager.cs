@@ -1,21 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class SpellManager
+    public class SpellManager : IUpdate
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         private readonly Player player;
-        private readonly Dictionary<uint/*Spell4BaseId*/, UnlockedSpell> spells = new Dictionary<uint, UnlockedSpell>();
+
+        private readonly Dictionary<uint /*spell4BaseId*/, UnlockedSpell> spells = new Dictionary<uint, UnlockedSpell>();
+        private readonly Dictionary<uint /*spell4BaseId*/, double /*cooldown*/> spellCooldowns = new Dictionary<uint, double>();
+        private double globalSpellCooldown;
+
         private readonly ActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
         private byte activeActionSet;
 
@@ -29,23 +35,52 @@ namespace NexusForever.WorldServer.Game.Entity
                 actionSets[i] = new ActionSet(i);
         }
 
+        public void Update(double lastTick)
+        {
+            // update global cooldown
+            if (globalSpellCooldown > 0d)
+            {
+                if (globalSpellCooldown - lastTick <= 0d)
+                {
+                    globalSpellCooldown = 0d;
+                    log.Trace("Global spell cooldown has reset.");
+                }
+                else
+                    globalSpellCooldown -= lastTick;
+            }
+
+            // update spell cooldowns
+            foreach ((uint spell4BaseId, double cooldown) in spellCooldowns.ToArray())
+            {
+                if (cooldown - lastTick <= 0d)
+                {
+                    spellCooldowns.Remove(spell4BaseId);
+                    log.Trace($"Spell {spell4BaseId} cooldown has reset.");
+                }
+                else
+                    spellCooldowns[spell4BaseId] = cooldown - lastTick;
+            }
+        }
+
         /// <summary>
         /// Add a new <see cref="UnlockedSpell"/> created from supplied spell base id and tier.
         /// </summary>
         public void AddSpell(uint spell4BaseId, byte tier = 1)
         {
-            Spell4BaseEntry entry = GameTableManager.Spell4Base.GetEntry(spell4BaseId);
-            if (entry == null)
+            SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4BaseId);
+            if (spellBaseInfo == null)
+                throw new ArgumentOutOfRangeException();
+
+            SpellInfo spellInfo = spellBaseInfo.GetSpellInfo(tier);
+            if (spellInfo == null)
                 throw new ArgumentOutOfRangeException();
 
             if (spells.ContainsKey(spell4BaseId))
                 throw new InvalidOperationException();
 
-            // TODO: validate tier
+            Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, 49);
 
-            Item item = player.Inventory.SpellCreate(entry, 49);
-
-            var unlockedSpell = new UnlockedSpell(entry, tier, item);
+            var unlockedSpell = new UnlockedSpell(spellBaseInfo, tier, item);
             if (!player.IsLoading)
             {
                 player.Session.EnqueueMessageEncrypted(new ServerSpellUpdate
@@ -56,7 +91,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 });
             }
 
-            spells.Add(entry.Id, unlockedSpell);
+            spells.Add(spellBaseInfo.Entry.Id, unlockedSpell);
         }
 
         /// <summary>
@@ -65,6 +100,43 @@ namespace NexusForever.WorldServer.Game.Entity
         public UnlockedSpell GetSpell(uint spell4BaseId)
         {
             return spells.TryGetValue(spell4BaseId, out UnlockedSpell spell) ? spell : null;
+        }
+
+        /// <summary>
+        /// Return spell cooldown for supplied spell base in seconds.
+        /// </summary>
+        public double GetSpellCooldown(uint spell4BaseId)
+        {
+            return spellCooldowns.TryGetValue(spell4BaseId, out double cooldown) ? cooldown : 0d;
+        }
+
+        /// <summary>
+        /// Set spell cooldown in seconds for supplied spell base.
+        /// </summary>
+        public void SetSpellCooldown(uint spell4BaseId, double cooldown)
+        {
+            if (spellCooldowns.ContainsKey(spell4BaseId))
+                spellCooldowns[spell4BaseId] = cooldown;
+            else
+                spellCooldowns.Add(spell4BaseId, cooldown);
+
+            log.Trace($"Spell {spell4BaseId} cooldown set to {cooldown} seconds.");
+
+            if (!player.IsLoading)
+            {
+                // TODO: send packet
+            }
+        }
+
+        public double GetGlobalSpellCooldown()
+        {
+            return globalSpellCooldown;
+        }
+
+        public void SetGlobalSpellCooldown(double cooldown)
+        {
+            globalSpellCooldown = cooldown;
+            log.Trace($"Global spell cooldown set to {cooldown} seconds.");
         }
 
         /// <summary>

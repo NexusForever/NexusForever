@@ -122,7 +122,7 @@ namespace NexusForever.Shared.Network.Message
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
         ClientCharacterSelect           = 0x07DD,
-        ServerSpellGo                   = 0x07F4, // spell related: effect + more
+        ServerSpellGo                   = 0x07F4,
         Server07F5                      = 0x07F5, // spell related
         Server07F6                      = 0x07F6, // spell related
         Server07F7                      = 0x07F7, // spell related
@@ -130,10 +130,10 @@ namespace NexusForever.Shared.Network.Message
         Server07F9                      = 0x07F9, // spell related
         Server07FA                      = 0x07FA, // spell related
         Server07FB                      = 0x07FB, // spell related
-        Server07FC                      = 0x07FC, // spell related: spell/casting errors
+        ServerSpellCastResult           = 0x07FC,
         Server07FD                      = 0x07FD, // spell related
         Server07FE                      = 0x07FE, // spell related
-        ServerSpellStart                = 0x07FF, // spell related: casting animation, initial response to 0x04DB
+        ServerSpellStart                = 0x07FF,
         ClientStorefrontRequestCatalog  = 0x082D,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills

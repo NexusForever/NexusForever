@@ -21,7 +21,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class Player : WorldEntity, ISaveCharacter
+    public class Player : UnitEntity, ISaveCharacter
     {
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
@@ -156,6 +156,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
             
             TitleManager.Update(lastTick);
+            SpellManager.Update(lastTick);
 
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
@@ -172,6 +173,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 // prevent packets from being processed until asynchronous player save task is complete
                 Session.CanProcessPackets = false;
             }
+
+            base.Update(lastTick);
         }
 
         protected override IEntityModel BuildEntityModel()

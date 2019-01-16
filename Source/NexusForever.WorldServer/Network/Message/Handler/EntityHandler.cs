@@ -1,6 +1,4 @@
 ﻿using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database.World.Model;
-using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -17,6 +15,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 switch (command)
                 {
                     case SetPositionCommand setPosition:
+                        session.Player.CancelSpellsOnMove();
                         session.Player.Map.EnqueueRelocate(session.Player, setPosition.Position.Vector);
                         break;
                     case SetRotationCommand setRotation:

@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Game.Spell
             if (tierPointCost > TierPoints)
                 throw new InvalidOperationException();
 
-            actions.Add(new ActionSetAction(4, spell.Entry.Id, location));
+            actions.Add(new ActionSetAction(4, spell.Info.Entry.Id, location));
         }
 
         public void Save(CharacterContext context)
