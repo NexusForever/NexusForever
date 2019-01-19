@@ -417,14 +417,15 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Save(CharacterContext context)
         {
+            var model = new Character
+            {
+                Id = CharacterId
+            };
+
+            EntityEntry<Character> entity = context.Attach(model);
+
             if (saveMask != PlayerSaveMask.None)
             {
-                var model = new Character
-                {
-                    Id = CharacterId
-                };
-
-                EntityEntry<Character> entity = context.Attach(model);
                 if ((saveMask & PlayerSaveMask.Level) != 0)
                 {
                     model.Level = Level;
@@ -446,7 +447,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.WorldId).IsModified = true;
                 }
 
-                if((saveMask & PlayerSaveMask.Path) != 0)
+                if ((saveMask & PlayerSaveMask.Path) != 0)
                 {
                     model.ActivePath = (uint)Path;
                     entity.Property(p => p.ActivePath).IsModified = true;
@@ -454,6 +455,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 saveMask = PlayerSaveMask.None;
             }
+
             Inventory.Save(context);
             CurrencyManager.Save(context);
             PathManager.Save(context);
