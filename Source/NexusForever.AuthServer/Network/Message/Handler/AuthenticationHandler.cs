@@ -33,7 +33,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                             Index = 0,
                             Messages =
                             {
-                                "Welcome to this NexusForever server!\nVisit: https://github.com/Rawaho/NexusForever"
+                                "Welcome to this NexusForever server!\nVisit: https://github.com/NexusForever/NexusForever"
                             }
                         }
                     }
