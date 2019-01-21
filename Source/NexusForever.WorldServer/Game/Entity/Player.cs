@@ -204,6 +204,7 @@ namespace NexusForever.WorldServer.Game.Entity
             });
 
             base.OnAddToMap(map, guid, vector);
+            map.OnAddToMap(this);
 
             SendPacketsAfterAddToMap();
 

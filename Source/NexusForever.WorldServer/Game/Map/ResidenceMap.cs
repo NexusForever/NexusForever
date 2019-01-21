@@ -42,7 +42,7 @@ namespace NexusForever.WorldServer.Game.Map
             }
         }
 
-        protected override void OnAddToMap(Player player)
+        public override void OnAddToMap(Player player)
         {
             if (residence == null)
                 throw new InvalidOperationException();

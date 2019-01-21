@@ -136,12 +136,9 @@ namespace NexusForever.WorldServer.Game.Map
             action.Entity.OnAddToMap(this, guid, action.Position);
 
             log.Trace($"Added entity {action.Entity.Guid} to map {Entry.Id}.");
-
-            if (action.Entity is Player player)
-                OnAddToMap(player);
         }
 
-        protected virtual void OnAddToMap(Player player)
+        public virtual void OnAddToMap(Player player)
         {
         }
 
