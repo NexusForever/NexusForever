@@ -33,6 +33,7 @@ namespace NexusForever.Shared.Network.Message
         ServerMountUnlocked             = 0x0129,
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
+        ClientRequestAMPReset           = 0x0151,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
         ServerAbilityPoints             = 0x0169,

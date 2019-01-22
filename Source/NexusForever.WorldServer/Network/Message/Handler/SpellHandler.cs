@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
@@ -82,5 +83,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
         }
         //[MessageHandler(GameMessageOpcode.ClientChangeInnate)]
+
+        [MessageHandler(GameMessageOpcode.ClientRequestAMPReset)]
+        public static void HandleClientChangeActionSet(WorldSession session, ClientRequestAMPReset clientRequestAMPReset)
+        {
+            // TODO: check for client validity,
+            // TODO: handle reset cost
+            session.Player.SpellManager.UpdateActionSetAMPs(clientRequestAMPReset.ActionSetIndex, new List<ushort>());
+            session.Player.SpellManager.SendServerAMPList(clientRequestAMPReset.ActionSetIndex);
+        }
+
     }
 }
