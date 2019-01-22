@@ -33,6 +33,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<Residence> Residence { get; set; }
         public virtual DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public virtual DbSet<ResidencePlot> ResidencePlot { get; set; }
+        public virtual DbSet<CharacterAction> CharacterAction { get; set; }
+        public virtual DbSet<CharacterAMP> CharacterAMP { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -120,6 +122,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.WorldId)
                     .HasColumnName("worldId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ActiveSpec)
+                    .HasColumnName("activeSpec")
                     .HasDefaultValueSql("'0'");
             });
 
@@ -623,6 +629,66 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.ResidencePlot)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__residence_plot_id__residence_id");
+            });
+
+            modelBuilder.Entity<CharacterAction>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.SpecIndex, e.Location });
+
+                entity.ToTable("character_actions");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SpecIndex)
+                    .HasColumnName("specIndex")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.Location)
+                    .HasColumnName("location")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.Action)
+                    .HasColumnName("action")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TierIndex)
+                    .HasColumnName("TierIndex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterAction)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_actions_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterAMP>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.SpecIndex, e.AMPId });
+
+                entity.ToTable("character_amps");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SpecIndex)
+                    .HasColumnName("specIndex")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.AMPId)
+                    .HasColumnName("ampId")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterAMP)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_amps_id__character_id");
             });
         }
     }

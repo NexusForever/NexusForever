@@ -7,6 +7,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
     {
         public Character()
         {
+            CharacterAction = new HashSet<CharacterAction>();
+            CharacterAMP = new HashSet<CharacterAMP>();
             CharacterAppearance = new HashSet<CharacterAppearance>();
             CharacterBone = new HashSet<CharacterBone>();
             CharacterCostume = new HashSet<CharacterCostume>();
@@ -36,8 +38,11 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public uint ActivePath { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
         public sbyte ActiveCostumeIndex { get; set; }
+        public byte ActiveSpec { get; set; }
 
         public virtual Residence Residence { get; set; }
+        public virtual ICollection<CharacterAction> CharacterAction { get; set; }
+        public virtual ICollection<CharacterAMP> CharacterAMP { get; set; }
         public virtual ICollection<CharacterAppearance> CharacterAppearance { get; set; }
         public virtual ICollection<CharacterBone> CharacterBone { get; set; }
         public virtual ICollection<CharacterCostume> CharacterCostume { get; set; }

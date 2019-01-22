@@ -609,5 +609,15 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             return GetEnumerator();
         }
+
+        public Item GetSpell(Spell4BaseEntry spell4BaseEntry)
+        {
+            Bag bag = GetBag(InventoryLocation.Ability);
+            foreach (Item item in bag)
+                if (item.SpellEntry == spell4BaseEntry)
+                    return item;
+
+            return null;
+        }
     }
 }

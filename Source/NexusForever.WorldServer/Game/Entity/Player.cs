@@ -136,6 +136,8 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager    = new SpellManager(this, model);
             PetCustomisationManager = new PetCustomisationManager(this, model);
 
+            SpellManager.SetActiveActionSet(model.ActiveSpec);
+
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
             // temp
@@ -148,27 +150,44 @@ namespace NexusForever.WorldServer.Game.Entity
             Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
 
             // temp
-            // TODO:
-            // a) move (Add's) to CharacterHandler / CharacterCration
-            // b) store abilities persistently
-            // c) handle starting abilities by class - sadly no tbl data available...
             SpellManager.AddSpell(47769); // Transmat to Illium
             SpellManager.AddSpell(22919); // Recall house - broken, seems to require an additional unlock
             SpellManager.AddSpell(38934); // some pewpew mount
             SpellManager.AddSpell(62503); // falkron mount
             SpellManager.AddSpell(63431); // zBoard 79 mount
-            SpellManager.AddSpell(31213); // Spellsurge
-            SpellManager.AddSpell(38229); // Portal capital city
-            SpellManager.AddSpell(23148); // Shred
-            SpellManager.AddSpell(23161); // Impale
-            SpellManager.AddSpell(23173); // Stagger
-            SpellManager.AddSpell(46803); // Summon Group
-            SpellManager.AddSpellToActionSet(0, 23148, UILocation.LAS1);
-            SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2, 2);
-            SpellManager.AddSpellToActionSet(0, 23173, UILocation.LAS3, 3);
-            SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
             SpellManager.AddSpell(62563); // pet
             SpellManager.AddSpell(62562); // pet
+            SpellManager.AddSpell(8740, 0); // Grinder mount - locked on purpose
+
+            //SpellManager.AddSpell(38229); // Portal capital city
+            //SpellManager.AddSpell(46803, 2); // Summon Group
+            //SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
+
+            Spell4Entry spell4Entry = new Spell4Entry();
+
+            // TODO: this should eventually be used on level up and store the spells persistently to the ability bag (4)
+            foreach(var spellLevel in GameTableManager.SpellLevel.Entries
+                .Where(s => s.ClassId == model.Class && s.CharacterLevel <= model.Level)
+                .OrderBy(s => s.CharacterLevel))
+            {
+                //FIXME
+                if (spellLevel.PrerequisiteId > 0)
+                    continue;
+
+                spell4Entry = GameTableManager.Spell4.GetEntry(spellLevel.Spell4Id);
+                if (spell4Entry == null)
+                    continue;
+
+                SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+            }
+
+
+            ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
+            foreach(uint classSpell in classEntry.Spell4IdInnateAbilityActive.Concat(classEntry.Spell4IdInnateAbilityPassive).Concat(classEntry.Spell4IdAttackPrimary).Concat(classEntry.Spell4IdAttackUnarmed))
+            {
+                    spell4Entry = GameTableManager.Spell4.GetEntry(classSpell);
+                    if (spell4Entry != null) SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+            }
 
             Costume costume = null;
             if (CostumeIndex >= 0)
@@ -340,6 +359,8 @@ namespace NexusForever.WorldServer.Game.Entity
                     Reason = 49
                 });
             }
+
+            playerCreate.SpecIndex = SpellManager.activeActionSet;
 
             Session.EnqueueMessageEncrypted(playerCreate);
 
@@ -600,6 +621,7 @@ namespace NexusForever.WorldServer.Game.Entity
             TitleManager.Save(context);
             CostumeManager.Save(context);
             PetCustomisationManager.Save(context);
+            SpellManager.Save(context);
         }
     }
 }

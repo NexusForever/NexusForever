@@ -227,6 +227,28 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     .SelectMany(b => b)
                     .Select(i => i);
 
+                character.ActiveSpec = 0;
+                Spell4Entry spell4Entry = new Spell4Entry();
+                uint unlockStartingAbility = 0;
+                foreach(var spellLevel in GameTableManager.SpellLevel.Entries
+                    .Where(s => s.ClassId == character.Class && s.CharacterLevel == 1))
+                {
+                    spell4Entry = GameTableManager.Spell4.GetEntry(spellLevel.Spell4Id);
+                    if (spell4Entry == null)
+                        continue;
+
+                    character.CharacterAction.Add(new CharacterAction
+                    {
+                        Id = character.Id,
+                        SpecIndex = 0,
+                        Location = (ushort)unlockStartingAbility,
+                        Action = spell4Entry.Spell4BaseIdBaseSpell,
+                        TierIndex = 1
+                    });
+
+                    unlockStartingAbility++;
+                }
+
                 // TODO: actually error check this
                 session.EnqueueEvent(new TaskEvent(CharacterDatabase.CreateCharacter(character, items),
                     () =>
