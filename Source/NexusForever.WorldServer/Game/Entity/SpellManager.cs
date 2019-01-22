@@ -220,6 +220,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SendServerSpellList();
             SendServerAbilityPoints();
             SendServerActionSets();
+            SendServerAMPLists();
         }
 
         public void SendServerAbilities()
