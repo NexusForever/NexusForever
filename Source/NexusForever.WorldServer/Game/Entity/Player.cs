@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
@@ -115,19 +116,68 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.AddSpell(38934); // some pewpew mount
             SpellManager.AddSpell(62503); // falkron mount
             SpellManager.AddSpell(63431); // zBoard 79 mount
-            SpellManager.AddSpell(31213); // Spellsurge
             SpellManager.AddSpell(38229); // Portal capital city
             SpellManager.AddSpell(46803, 2); // Summon Group
+            SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
             SpellManager.AddSpell(8740, 0); // Grinder mount - locked on purpose
 
-            SpellManager.AddSpell(23148, 2); // Shred T2
-            SpellManager.AddSpell(23161); // Impale
-            SpellManager.AddSpell(23173, 3); // Stagger
+            List<uint> tempClassAbilities = new List<uint>();
 
-            SpellManager.AddSpellToActionSet(0, 23148, UILocation.LAS1, 2);
-            SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2);
-            SpellManager.AddSpellToActionSet(0, 23173, UILocation.LAS3, 3);
-            SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
+            switch((Class)model.Class)
+            {
+                case Class.Warrior:
+                    tempClassAbilities.Add(18309);
+                    tempClassAbilities.Add(37968);
+                    tempClassAbilities.Add(38017);
+                    break;
+                case Class.Engineer:
+                    tempClassAbilities.Add(26468);
+                    tempClassAbilities.Add(25473);
+                    tempClassAbilities.Add(25635);
+                    break;
+                case Class.Esper:
+                    tempClassAbilities.Add(19102);
+                    tempClassAbilities.Add(19019);
+                    tempClassAbilities.Add(19022);
+                    break;
+                case Class.Medic:
+                    tempClassAbilities.Add(38201);
+                    tempClassAbilities.Add(16322);
+                    tempClassAbilities.Add(26543);
+                    break;
+                case Class.Stalker:
+                    tempClassAbilities.Add(23148);
+                    tempClassAbilities.Add(23161);
+                    tempClassAbilities.Add(23173);
+                    break;
+                case Class.Spellslinger:
+                    tempClassAbilities.Add(27638);
+                    tempClassAbilities.Add(20684);
+                    tempClassAbilities.Add(20325);
+                    break;
+            }
+
+            ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
+            Spell4Entry spell4Entry = new Spell4Entry();
+
+            foreach(FieldInfo f in typeof(ClassEntry).GetFields())
+            {
+                if(f.Name.StartsWith("Spell4Id"))
+                {
+                    spell4Entry = GameTableManager.Spell4.GetEntry((uint)f.GetValue(classEntry));
+                    if (spell4Entry != null) tempClassAbilities.Add(spell4Entry.Spell4BaseIdBaseSpell);
+                }
+            }
+
+            for (byte i = 0; i < tempClassAbilities.Count; i++)
+            {
+                    if (tempClassAbilities[i] > 0)
+                    {
+                        SpellManager.AddSpell(tempClassAbilities[i]);
+                        if (i < 3)
+                            SpellManager.AddSpellToActionSet(0, tempClassAbilities[i], (UILocation)i);
+                    }
+            }
 
             foreach (ItemVisual itemVisual in Inventory.GetItemVisuals())
                 itemVisuals.Add(itemVisual.Slot, itemVisual);
