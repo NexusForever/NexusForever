@@ -117,12 +117,15 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.AddSpell(63431); // zBoard 79 mount
             SpellManager.AddSpell(31213); // Spellsurge
             SpellManager.AddSpell(38229); // Portal capital city
-            SpellManager.AddSpell(23148); // Shred
+            SpellManager.AddSpell(46803, 2); // Summon Group
+            SpellManager.AddSpell(8740, 0); // Grinder mount - locked on purpose
+
+            SpellManager.AddSpell(23148, 2); // Shred T2
             SpellManager.AddSpell(23161); // Impale
-            SpellManager.AddSpell(23173); // Stagger
-            SpellManager.AddSpell(46803); // Summon Group
-            SpellManager.AddSpellToActionSet(0, 23148, UILocation.LAS1);
-            SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2, 2);
+            SpellManager.AddSpell(23173, 3); // Stagger
+
+            SpellManager.AddSpellToActionSet(0, 23148, UILocation.LAS1, 2);
+            SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2);
             SpellManager.AddSpellToActionSet(0, 23173, UILocation.LAS3, 3);
             SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
 

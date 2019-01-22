@@ -3,6 +3,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell;
+using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -29,5 +30,57 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 SpellInfo = spell.Info.GetSpellInfo(spell.Tier)
             });
         }
+
+        [MessageHandler(GameMessageOpcode.ClientChangeActiveActionSet)]
+        public static void HandleClientChangeActionSet(WorldSession session, ClientChangeActiveActionSet clientChangeActiveActionSet)
+        {
+            session.EnqueueMessageEncrypted(new ServerChangeActiveActionSet
+            {
+                ActionSetError = session.Player.SpellManager.SetActiveActionSet(clientChangeActiveActionSet.ActionSetIndex),
+                ActionSetIndex = session.Player.SpellManager.activeActionSet
+            });
+            session.Player.SpellManager.SendServerAbilityPoints();
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientUpdateActionSet)]
+        public static void HandleClientChangeActionSet(WorldSession session, ClientUpdateActionSet clientUpdateActionSet)
+        {
+            // TODO: check for client validity, e.g. Level & Spell4TierRequirements
+            
+            for (byte i = 0; i < clientUpdateActionSet.Actions.Count; i++)
+            {
+                ActionSetAction action = session.Player.SpellManager.GetSpellFromActionSet(clientUpdateActionSet.ActionSetIndex,  (UILocation)i);
+                if (action == null || action.ObjectId != clientUpdateActionSet.Actions[i])
+                {
+                    session.Player.SpellManager.RemoveSpellFromActionSet(clientUpdateActionSet.ActionSetIndex, (UILocation)i);
+                    if (clientUpdateActionSet.Actions[i] > 0)
+                        session.Player.SpellManager.AddSpellToActionSet(clientUpdateActionSet.ActionSetIndex, clientUpdateActionSet.Actions[i], (UILocation)i);
+                }
+            }
+
+            for (byte i = 0; i < clientUpdateActionSet.ActionTiers.Count; i++)
+            {
+                var (spell, tier) = clientUpdateActionSet.ActionTiers[i];
+                if (spell > 0)
+                    session.Player.SpellManager.UpdateActionSetSpellTier(clientUpdateActionSet.ActionSetIndex, spell, tier);
+            }
+
+            session.Player.SpellManager.SendServerSpellList();
+            session.Player.SpellManager.SendServerActionSet(clientUpdateActionSet.ActionSetIndex);
+
+            if (clientUpdateActionSet.ActionTiers.Count > 0)
+            {
+                session.Player.SpellManager.SendServerAbilityPoints();
+            }
+
+            if (clientUpdateActionSet.AMPs.Count > 0)
+            {
+                session.Player.SpellManager.UpdateActionSetAMPs(clientUpdateActionSet.ActionSetIndex, clientUpdateActionSet.AMPs);
+                session.Player.SpellManager.SendServerAMPList(clientUpdateActionSet.ActionSetIndex);
+            }
+
+
+        }
+        //[MessageHandler(GameMessageOpcode.ClientChangeInnate)]
     }
 }
