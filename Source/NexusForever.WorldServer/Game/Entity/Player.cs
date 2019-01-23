@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Reflection;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
@@ -160,13 +159,10 @@ namespace NexusForever.WorldServer.Game.Entity
             ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
             Spell4Entry spell4Entry = new Spell4Entry();
 
-            foreach(FieldInfo f in typeof(ClassEntry).GetFields())
+            foreach(uint classSpell in classEntry.Spell4IdInnateAbilityActive.Concat(classEntry.Spell4IdInnateAbilityPassive).Concat(classEntry.Spell4IdAttackPrimary).Concat(classEntry.Spell4IdAttackUnarmed))
             {
-                if(f.Name.StartsWith("Spell4Id"))
-                {
-                    spell4Entry = GameTableManager.Spell4.GetEntry((uint)f.GetValue(classEntry));
+                    spell4Entry = GameTableManager.Spell4.GetEntry(classSpell);
                     if (spell4Entry != null) tempClassAbilities.Add(spell4Entry.Spell4BaseIdBaseSpell);
-                }
             }
 
             for (byte i = 0; i < tempClassAbilities.Count; i++)
