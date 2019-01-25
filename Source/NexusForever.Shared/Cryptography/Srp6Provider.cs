@@ -160,7 +160,11 @@ namespace NexusForever.Shared.Cryptography
                 .Reverse()
                 .ToArray();
 
-            int length = Math.Max(4, Array.IndexOf<byte>(T, 0) + 1);
+            int first0 = Array.IndexOf<byte>(T.Reverse().ToArray(), 0);
+            int length = 4;
+
+            if (first0 >= 0 && first0 < T.Length-4)
+                length = T.Length - first0;
 
             byte[] E = new byte[length / 2];
             for (uint i = 0u; i < E.Length; i++)
