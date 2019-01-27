@@ -90,24 +90,22 @@ namespace NexusForever.Shared.Cryptography
             if (A == BigInteger.Zero || B == BigInteger.Zero || S == BigInteger.Zero)
                 throw new CryptographicException("Missing data from previous operations: A, B, S");
 
-            /*using (var sha256 = new SHA256Managed())
+            using (var sha256 = new SHA256Managed())
             {
-                byte[] IHash = sha256.ComputeHash(I);
-                BigInteger hash = Hash(Hash(N) ^ Hash(g),
-                    new BigInteger(IHash, true), s, A, B, K);
+                var IHash = sha256.ComputeHash(I);
+                var NHash = sha256.ComputeHash(N.ToByteArray(true));
+                var GHash = sha256.ComputeHash(new byte[] { 2, 0, 0, 0 });
+                for (var i = 0; i < NHash.Length; i++)
+                    NHash[i] ^= GHash[i];
 
-                byte[] bytes = hash.ToByteArray(true);
-                ReverseBytesAsUInt32(bytes);
-                hash = new BigInteger(bytes, true);
+                var hash = sha256.ComputeHash(NHash.Concat(IHash).Concat(s.ToByteArray(true)).Concat(A.ToByteArray(true)).Concat(B.ToByteArray(true)).Concat(K.ToByteArray(true)).ToArray());
 
-                if (M1 != hash)
-                {
+                if (!clientM1.SequenceEqual(hash))
+                    return false;
 
-                }
-            }*/
-
-            M1 = new BigInteger(clientM1, true);
-            return true;
+                M1 = new BigInteger(hash, true);
+                return true;
+            }
         }
 
         /// <summary>
