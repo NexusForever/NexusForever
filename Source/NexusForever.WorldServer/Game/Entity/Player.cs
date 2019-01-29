@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.GameTable.Static;
 using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
@@ -14,6 +15,7 @@ using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -217,6 +219,21 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.OnRelocate(vector);
             saveMask |= PlayerSaveMask.Location;
+        }
+
+        protected override void OnZoneUpdate()
+        {
+            if (Zone != null)
+            {
+                TextTable tt = GameTableManager.GetTextTable(Language.English);
+
+                Session.EnqueueMessageEncrypted(new ServerChat
+                {
+                    Guid    = Session.Player.Guid,
+                    Channel = ChatChannel.System,
+                    Text    = $"New Zone: {tt.GetEntry(Zone.LocalizedTextIdName)}"
+                });
+            }
         }
 
         private void SendPacketsAfterAddToMap()

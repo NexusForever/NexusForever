@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Map;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -11,6 +13,7 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public uint Guid { get; protected set; }
         public BaseMap Map { get; private set; }
+        public WorldZoneEntry Zone { get; private set; }
         public Vector3 Position { get; protected set; }
 
         protected readonly HashSet<GridEntity> visibleEntities = new HashSet<GridEntity>();
@@ -56,6 +59,17 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Position = vector;
             UpdateVision();
+
+            uint worldAreaId = Map.MapFile.GetWorldAreaId(vector);
+            if (Zone?.Id != worldAreaId)
+            {
+                Zone = GameTableManager.WorldZone.GetEntry(worldAreaId);
+                OnZoneUpdate();
+            }
+        }
+
+        protected virtual void OnZoneUpdate()
+        {
         }
 
         /// <summary>

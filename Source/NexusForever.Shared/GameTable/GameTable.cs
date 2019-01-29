@@ -17,7 +17,7 @@ namespace NexusForever.Shared.GameTable
 
         public T[] Entries { get; private set; }
 
-        private readonly GameTableHeader header;
+        private GameTableHeader header;
         private int[] lookup;
 
         private static readonly Dictionary<FieldInfo, GameTableFieldArrayAttribute> attributeCache;
@@ -46,8 +46,18 @@ namespace NexusForever.Shared.GameTable
 
         public GameTable(string path)
         {
-            using (FileStream fileStream = File.OpenRead(path))
-            using (var stream = new BufferedStream(fileStream, bufferSize))
+            using (FileStream stream = File.OpenRead(path))
+                Initialise(stream);
+        }
+
+        public GameTable(Stream stream)
+        {
+            Initialise(stream);
+        }
+
+        private void Initialise(Stream inputStream)
+        {
+            using (var stream = new BufferedStream(inputStream, bufferSize))
             using (var reader = new BinaryReader(stream))
             {
                 if (reader.BaseStream.Remaining() < Marshal.SizeOf<GameTableHeader>())

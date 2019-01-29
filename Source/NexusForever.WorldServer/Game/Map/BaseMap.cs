@@ -1,10 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.IO.Map;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Entity;
@@ -28,6 +31,7 @@ namespace NexusForever.WorldServer.Game.Map
         public virtual float VisionRange { get; protected set; } = 32.0f;
 
         public WorldEntry Entry { get; private set; }
+        public MapFile MapFile { get; } = new MapFile();
         public uint InstanceId { get; private set; }
 
         private readonly MapGrid[] grids = new MapGrid[GridCount * GridCount];
@@ -44,7 +48,9 @@ namespace NexusForever.WorldServer.Game.Map
         {
             Entry      = info.Entry;
             InstanceId = info.InstanceId;
+
             CacheEntitySpawns();
+            LoadMapFile();
         }
         
         private void CacheEntitySpawns()
@@ -57,6 +63,18 @@ namespace NexusForever.WorldServer.Game.Map
                 var test   = new NonPlayer(entity);
                 var vector = new Vector3(entity.X, entity.Y, entity.Z);
                 EnqueueAdd(test, vector);
+            }
+        }
+
+        private void LoadMapFile()
+        {
+            string mapPath  = ConfigurationManager<WorldServerConfiguration>.Config.Map.MapPath;
+            string filePath = Path.ChangeExtension(Path.Combine(mapPath, Path.GetFileName(Entry.AssetPath)), ".nfmap");
+
+            using (FileStream stream = File.OpenRead(filePath))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                MapFile.Read(reader);
             }
         }
 
