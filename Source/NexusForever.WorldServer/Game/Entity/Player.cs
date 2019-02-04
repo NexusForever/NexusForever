@@ -73,6 +73,11 @@ namespace NexusForever.WorldServer.Game.Entity
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
 
+        public DateTime CreateTime { get; }
+        public double TimePlayedTotal  { get; set; }
+        public double TimePlayedLevel  { get; set; }
+        public double TimePlayedSession  { get; set; }
+
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
         {
@@ -94,6 +99,11 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager     = new PathManager(this, model);
             TitleManager    = new TitleManager(this, model);
             SpellManager    = new SpellManager(this, model);
+
+            CreateTime      = model.CreateTime;
+            TimePlayedTotal = model.TimePlayedTotal;
+            TimePlayedLevel = model.TimePlayedLevel;
+            TimePlayedSession = 0;
 
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
@@ -161,6 +171,8 @@ namespace NexusForever.WorldServer.Game.Entity
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
+                UpdatePlayedValues(true);
+
                 timeToSave = SaveDuration;
 
                 Session.EnqueueEvent(new TaskEvent(CharacterDatabase.SavePlayer(this),
@@ -456,10 +468,27 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask = PlayerSaveMask.None;
             }
 
+            model.TimePlayedLevel = (uint)TimePlayedLevel;
+            entity.Property(p => p.TimePlayedLevel).IsModified = true;
+            model.TimePlayedTotal = (uint)TimePlayedTotal;
+            entity.Property(p => p.TimePlayedTotal).IsModified = true;
+
             Inventory.Save(context);
             CurrencyManager.Save(context);
             PathManager.Save(context);
             TitleManager.Save(context);
+        }
+
+        public double UpdatePlayedValues(bool store = true)
+        {
+            double diff = (SaveDuration - timeToSave);
+            if (!store)
+                return diff;
+
+            TimePlayedSession += diff;
+            TimePlayedLevel += diff;
+            TimePlayedTotal += diff;
+            return 0;
         }
     }
 }

@@ -32,6 +32,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public ushort Title { get; set; }
         public uint ActivePath { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
+        public uint TimePlayedTotal { get; set; }
+        public uint TimePlayedLevel { get; set; }
 
         public Residence Residence { get; set; }
         public ICollection<CharacterAppearance> CharacterAppearance { get; set; }
