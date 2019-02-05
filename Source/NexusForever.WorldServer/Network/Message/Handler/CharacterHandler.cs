@@ -335,5 +335,27 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             session.Player.Target = target.Guid;
         }
+
+        [MessageHandler(GameMessageOpcode.ClientRapidTransport)]
+        public static void HandleClientTarget(WorldSession session, ClientRapidTransport clientRapidTransport)
+        {
+            //TODO: check for cooldown
+            //TODO: handle payment
+
+            var taxiNode = GameTableManager.TaxiNode.GetEntry(clientRapidTransport.TaxiNode);
+
+            if (session.Player.Level < taxiNode.AutoUnlockLevel)
+                throw new InvalidPacketValueException();
+
+            var worldLocation = GameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
+
+            if (worldLocation == null)
+                throw new InvalidPacketValueException();
+
+            //TODO: initiate 82922 (Rapid Transport) by 0x7FD
+
+            session.Player.Rotation = new Vector3(worldLocation.Facing0, worldLocation.Facing0, worldLocation.Facing2);
+            session.Player.TeleportTo((ushort)worldLocation.WorldId, worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
+        }
     }
 }
