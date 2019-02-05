@@ -1,24 +1,23 @@
 using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
-    [EntityCommand(EntityCommand.SetMove)]
-    public class SetMoveCommand : IEntityCommand
+    [EntityCommand(EntityCommand.SetRotationFacePosition)]
+    public class SetRotationFacePositionCommand : IEntityCommand
     {
-        public Move MoveData { get; set; }
+        public Position Position { get; set; }
         public bool Blend { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            MoveData = new Move();
-            MoveData.Read(reader);
+            Position = new Position();
+            Position.Read(reader);
             Blend = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
-            MoveData.Write(writer);
+            Position.Write(writer);
             writer.Write(Blend);
         }
     }
