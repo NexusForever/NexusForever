@@ -16,6 +16,11 @@ namespace NexusForever.WorldServer.Game.Entity
         public WorldZoneEntry Zone { get; private set; }
         public Vector3 Position { get; protected set; }
 
+        /// <summary>
+        /// Distance between a <see cref="GridEntity"/> and a <see cref="MapGrid"/> for activation.
+        /// </summary>
+        public float ActivationRange { get; protected set; }
+
         protected readonly HashSet<GridEntity> visibleEntities = new HashSet<GridEntity>();
 
         /// <summary>
@@ -60,7 +65,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Position = vector;
             UpdateVision();
 
-            uint worldAreaId = Map.MapFile.GetWorldAreaId(vector);
+            uint worldAreaId = Map.File.GetWorldAreaId(vector);
             if (Zone?.Id != worldAreaId)
             {
                 Zone = GameTableManager.WorldZone.GetEntry(worldAreaId);

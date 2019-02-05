@@ -78,6 +78,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
         {
+            ActivationRange = BaseMap.DefaultVisionRange;
+
             Session         = session;
 
             CharacterId     = model.Id;
