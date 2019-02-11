@@ -7,12 +7,12 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
     public class InstancePortalEntityModel : IEntityModel
     {
         public uint CreatureId { get; set; }
-        public uint Unknown0 { get ; set; }
+        public uint RemainingTimeMs { get ; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CreatureId, 18u);
-            writer.Write(Unknown0);
+            writer.Write(RemainingTimeMs);
         }
     }
 }

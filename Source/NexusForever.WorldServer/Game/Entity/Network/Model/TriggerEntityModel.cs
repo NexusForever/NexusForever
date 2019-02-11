@@ -6,30 +6,30 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
 {
     public class TriggerEntityModel : IEntityModel
     {
-        public class UnknownTriggerStructure : IWritable
+        public class Bound : IWritable
         {
-            public byte Unknown0 { get; set; }
-            public Position Position { get; set; }
-            public Position Rotation { get; set; }
-            public uint Unknown1 { get; set; }
+            public byte Type { get; set; }
+            public Position Min { get; set; }
+            public Position Lim { get; set; }
+            public float Radius { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0, 2);
-                Position.Write(writer);
-                Rotation.Write(writer);
-                writer.Write(Unknown1);
+                writer.Write(Type, 2);
+                Min.Write(writer);
+                Lim.Write(writer);
+                writer.Write(Radius);
             }
         }
 
         public string Name { get; set; }
-        public List<UnknownTriggerStructure> Unknown0 { get; } = new List<UnknownTriggerStructure>();
+        public List<Bound> Bounds { get; } = new List<Bound>();
 
         public void Write(GamePacketWriter writer)
         {
             writer.WriteStringWide(Name);
-            writer.Write((byte)Unknown0.Count, 8);
-            Unknown0.ForEach(s => s.Write(writer));
+            writer.Write((byte)Bounds.Count, 8);
+            Bounds.ForEach(s => s.Write(writer));
         }
     }
 }

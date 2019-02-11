@@ -44,7 +44,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Guid      = Guid,
                 Type      = Type,
                 EntityModel    = BuildEntityModel(),
-                Unknown60 = 1,
+                CreateFlags = 1,
                 Stats     = Stats.Values.ToList(),
                 Commands =
                 {

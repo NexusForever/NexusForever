@@ -36,8 +36,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public override ServerEntityCreate BuildCreatePacket()
         {
             var lol = base.BuildCreatePacket();
-            lol.Unknown60 = 1;
-            lol.Unknown68 = 904575;
+            lol.CreateFlags = 1;
+            lol.Time = 904575;
             return lol;
         }
     }

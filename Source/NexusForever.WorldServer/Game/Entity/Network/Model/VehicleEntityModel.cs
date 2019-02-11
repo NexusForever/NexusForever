@@ -7,16 +7,16 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
     public class VehicleEntityModel : IEntityModel
     {
         // probably list of passengers - list of 0x086F
-        public class UnknownMountStructure : IWritable
+        public class Passenger : IWritable
         {
-            public byte Unknown0 { get; set; }
-            public byte Unknown1 { get; set; }
+            public byte SeatType { get; set; }
+            public byte SeatPosition { get; set; }
             public uint UnitId { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0, 2);
-                writer.Write(Unknown1, 3);
+                writer.Write(SeatType, 2);
+                writer.Write(SeatPosition, 3);
                 writer.Write(UnitId);
             }
         }
@@ -24,7 +24,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public uint CreatureId { get; set; }
         public ushort UnitVehicleId { get; set; }
         public uint OwnerId { get; set; }
-        public List<UnknownMountStructure> Unknown4 { get; } = new List<UnknownMountStructure>();
+        public List<Passenger> Passengers { get; } = new List<Passenger>();
 
         public void Write(GamePacketWriter writer)
         {
@@ -32,8 +32,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
             writer.Write(UnitVehicleId, 14);
             writer.Write(OwnerId);
 
-            writer.Write((byte)Unknown4.Count, 3);
-            Unknown4.ForEach(s => s.Write(writer));
+            writer.Write((byte)Passengers.Count, 3);
+            Passengers.ForEach(s => s.Write(writer));
         }
     }
 }

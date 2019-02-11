@@ -8,13 +8,13 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
     {
         public uint CreatureId { get; set; }
         public uint OwnerId { get; set; }
-        public ushort Unknown1 { get; set; }
+        public ushort OwnerDisplayItemId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CreatureId, 18u);
             writer.Write(OwnerId);
-            writer.Write(Unknown1, 15u);
+            writer.Write(OwnerDisplayItemId, 15u);
         }
     }
 }
