@@ -9,6 +9,7 @@ using NexusForever.Game;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
+using NexusForever.Game.Contact;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Guild;
@@ -98,6 +99,7 @@ namespace NexusForever.WorldServer
             CharacterManager.Instance.Initialise(); // must be initialised before residences
             GlobalResidenceManager.Instance.Initialise();
             GlobalGuildManager.Instance.ValidateCommunityResidences();
+            GlobalContactManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
             ItemManager.Instance.Initialise();
@@ -168,6 +170,7 @@ namespace NexusForever.WorldServer
             // save residences, guilds and players to the database
             GlobalResidenceManager.Instance.Shutdown();
             GlobalGuildManager.Instance.Shutdown();
+            GlobalContactManager.Instance.Shutdown();
 
             foreach (WorldSession worldSession in NetworkManager<WorldSession>.Instance)
                 worldSession.Player?.SaveDirect();

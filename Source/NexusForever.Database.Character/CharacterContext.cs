@@ -12,6 +12,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterActionSetShortcutModel> CharacterActionSetShortcut { get; set; }
         public DbSet<CharacterAppearanceModel> CharacterAppearance { get; set; }
         public DbSet<CharacterBoneModel> CharacterBone { get; set; }
+        public DbSet<CharacterContactModel> CharacterContact { get; set; }
         public DbSet<CharacterCostumeModel> CharacterCostume { get; set; }
         public DbSet<CharacterCostumeItemModel> CharacterCostumeItem { get; set; }
         public DbSet<CharacterCreateModel> CharacterCreate { get; set; }
@@ -395,6 +396,63 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.Bone)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK_character_bone_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterContactModel>(entity =>
+            {
+                entity.ToTable("character_contact");
+
+                entity.HasKey(e => new { e.Id, e.OwnerId, e.ContactId })
+                    .HasName("PRIMARY");
+
+                entity.HasIndex(e => e.Id)
+                    .HasDatabaseName("contactGuid")
+                    .IsUnique();
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.OwnerId)
+                    .HasColumnName("ownerId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ContactId)
+                    .HasColumnName("contactId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasColumnType("int(3) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.InviteMessage)
+                    .HasColumnName("inviteMessage")
+                    .HasColumnType("varchar(100)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.PrivateNote)
+                    .HasColumnName("privateNote")
+                    .HasColumnType("varchar(100)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.Accepted)
+                    .HasColumnName("accepted")
+                    .HasColumnType("tinyint(8) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RequestTime)
+                    .HasColumnName("requestTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("current_timestamp()");
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.Contact)
+                    .HasForeignKey(d => d.OwnerId)
+                    .HasConstraintName("FK__character_contact_id__character_id");
             });
 
             modelBuilder.Entity<CharacterCostumeModel>(entity =>

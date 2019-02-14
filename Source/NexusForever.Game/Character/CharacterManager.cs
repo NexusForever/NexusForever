@@ -131,6 +131,19 @@ namespace NexusForever.Game.Character
         }
 
         /// <summary>
+        /// Used to update an <see cref="IPlayer"/> build a snapshot of the data. Should be used on player logout to keep the server's character data consistent.
+        /// </summary>
+        public void OnLogout(IPlayer player)
+        {
+            if (!characters.ContainsKey(player.CharacterId))
+                throw new Exception($"{player.CharacterId} should exist in characters dictionary.");
+
+            characters[player.CharacterId] = new Character(player);
+
+            log.Trace($"{player.Name} (ID: {player.CharacterId}) logged out.");
+        }
+
+        /// <summary>
         /// Returns a <see cref="bool"/> whether there is an <see cref="ICharacter"/> that exists with the name passed in.
         /// </summary>
         public bool IsCharacter(string name)

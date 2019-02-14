@@ -1,7 +1,11 @@
 using System;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Character;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Character;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Static.Contact;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
@@ -24,14 +28,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientPlayerInfoRequest)]
         public static void HandlePlayerInfoRequest(IWorldSession session, ClientPlayerInfoRequest request)
         {
-            ICharacter character = CharacterManager.Instance.GetCharacter(request.Identity.CharacterId);
+            ICharacter character = PlayerManager.Instance.GetPlayer(request.Identity.CharacterId) as Player;
+            if (character == null)
+                character = CharacterManager.Instance.GetCharacter(request.Identity.CharacterId);
             if (character == null)
                 throw new InvalidPacketValueException();
-
+            
             float? onlineStatus = character.GetOnlineStatus();
-            session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
-            {
-                BaseData = new ServerPlayerInfoFullResponse.Base
+            if (request.Type == ContactType.Ignore) // Ignored user data request
+                session.EnqueueMessageEncrypted(new ServerPlayerInfoBasicResponse
                 {
                     ResultCode = 0,
                     Identity = new TargetPlayerIdentity
@@ -41,14 +46,28 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     },
                     Name = character.Name,
                     Faction = character.Faction1
-                },
-                IsClassPathSet = true,
-                Path  = character.Path,
-                Class = character.Class,
-                Level = character.Level,
-                IsLastLoggedOnInDaysSet = onlineStatus.HasValue,
-                LastLoggedInDays = onlineStatus.GetValueOrDefault(0f)
-            });
+                });
+            else
+                session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
+                {
+                    BaseData = new()
+                    {
+                        ResultCode = 0,
+                        Identity = new TargetPlayerIdentity
+                        {
+                            RealmId = RealmContext.Instance.RealmId,
+                            CharacterId = character.CharacterId
+                        },
+                        Name = character.Name,
+                        Faction = character.Faction1
+                    },
+                    IsClassPathSet = true,
+                    Path = character.Path,
+                    Class = character.Class,
+                    Level = character.Level,
+                    IsLastLoggedOnInDaysSet = onlineStatus.HasValue || character is not IPlayer ? true : false,
+                    LastLoggedInDays = onlineStatus.GetValueOrDefault(-0.069f)
+                });
         }
 
         [MessageHandler(GameMessageOpcode.ClientToggleWeapons)]

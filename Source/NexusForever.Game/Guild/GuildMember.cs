@@ -4,6 +4,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Character;
+using NexusForever.Game.Entity;
 using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.GuildMember;
 
 namespace NexusForever.Game.Guild
@@ -150,7 +151,9 @@ namespace NexusForever.Game.Guild
         /// </summary>
         public NetworkGuildMember Build()
         {
-            ICharacter characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
+            ICharacter characterInfo = PlayerManager.Instance.GetPlayer(CharacterId) as Player;
+            if (characterInfo == null)
+             characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
             return new NetworkGuildMember
             {
                 Realm                    = RealmContext.Instance.RealmId,

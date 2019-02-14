@@ -56,5 +56,11 @@
             "Enable": true,
             "Directory": ""
         }
-    }
+    },
+    "Contacts": {
+      "MaxFriends": 100,
+      "MaxRivals": 100,
+      "MaxIgnored": 100,
+      "MaxRequestDuration": 7
+   }
 }

@@ -557,6 +557,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 GlobalResidenceManager.Instance.RemoveResidence(characterToDelete.Name);
                 CharacterManager.Instance.DeleteCharacter(characterToDelete.Id, characterToDelete.Name);
 
+                // TODO: Delete contact connections, update those online with character deleted.
+
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
                 {
                     Result = deleteCheck.result
