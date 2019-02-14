@@ -4,7 +4,7 @@ namespace NexusForever.WorldServer
 {
     public class WorldServerConfiguration
     {
-        public class MapConfig
+        public struct MapConfig
         {
             public string MapPath { get; set; }
         }

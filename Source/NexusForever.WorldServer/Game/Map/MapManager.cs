@@ -27,8 +27,8 @@ namespace NexusForever.WorldServer.Game.Map
             log.Info("Validating map files...");
 
             string mapPath = ConfigurationManager<WorldServerConfiguration>.Config.Map.MapPath;
-            if (!Directory.Exists(mapPath))
-                throw new DirectoryNotFoundException();
+            if (mapPath == null || !Directory.Exists(mapPath))
+                throw new DirectoryNotFoundException("Invalid path to base maps! Make sure you have set it in the configuration file.");
 
             foreach (string fileName in Directory.EnumerateFiles(mapPath, "*.nfmap"))
             {
