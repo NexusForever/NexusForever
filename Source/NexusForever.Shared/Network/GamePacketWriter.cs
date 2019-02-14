@@ -123,18 +123,10 @@ namespace NexusForever.Shared.Network
         public void WriteStringWide(string value)
         {
             byte[] data = Encoding.Unicode.GetBytes(value ?? "");
-            /*if (data.Length > 0x7F)
-            {
-                WriteBit(true);
-                WriteBits(data.Length, 15);
-            }
-            else
-            {
-                WriteBit(false);
-                WriteBits(data.Length, 7);
-            }*/
+            bool extended = data.Length >> 1 > 0x7F;
 
-            WriteBits((byte)data.Length, 8);
+            Write(extended);
+            Write(data.Length >> 1, extended ? 15u : 7u);
             WriteBytes(data);
         }
     }

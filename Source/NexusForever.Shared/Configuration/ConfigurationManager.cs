@@ -6,10 +6,9 @@ namespace NexusForever.Shared.Configuration
     {
         public static T Config { get; private set; }
 
-
         public static void Initialise(string file)
         {
-            SharedConfiguration.Initialize(file);
+            SharedConfiguration.Initialise(file);
             Config = SharedConfiguration.Configuration.Get<T>();
         }
     }
