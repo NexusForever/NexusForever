@@ -48,10 +48,7 @@ namespace NexusForever.Shared.IO.Map
         public uint GetWorldAreaId(Vector3 vector)
         {
             MapFileCell cell = GetCell(vector);
-            if (cell == null)
-                return 0u;
-
-            return cell.GetWorldAreaIds().FirstOrDefault(worldAreaId => worldAreaId != 0u);
+            return cell?.GetWorldAreaIds()?.FirstOrDefault(worldAreaId => worldAreaId != 0u) ?? 0u;
         }
 
         /// <summary>
