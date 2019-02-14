@@ -14,7 +14,7 @@ namespace NexusForever.Shared.Configuration
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         public static IConfiguration Configuration { get; private set; }
 
-        public static void Initialize(string file)
+        public static void Initialise(string file)
         {
             if (Configuration != null)
                 return;

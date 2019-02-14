@@ -17,5 +17,8 @@
             "Provider": "MySql"
         }
     },
+    "Map": {
+        "MapPath": "map"
+    },
     "RealmId": 1
 }
