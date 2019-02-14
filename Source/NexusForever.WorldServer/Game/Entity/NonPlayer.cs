@@ -5,25 +5,31 @@ using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class NonPlayer : UnitEntity
+    [DatabaseEntity(EntityType.NonPlayer)]
+    public class NonPlayer : UnitEntity, IDatabaseEntity
     {
-        public uint CreatureId { get; }
-        public VendorInfo VendorInfo { get; }
+        public uint CreatureId { get; private set; }
+        public VendorInfo VendorInfo { get; private set; }
 
-        public NonPlayer(Database.World.Model.Entity entity)
+        public NonPlayer()
             : base(EntityType.NonPlayer)
         {
-            CreatureId  = entity.Creature;
-            DisplayInfo = entity.DisplayInfo;
-            OutfitInfo  = entity.OutfitInfo;
-            Faction1    = (Faction)entity.Faction1;
-            Faction2    = (Faction)entity.Faction2;
-            Rotation    = new Vector3(entity.Rx, entity.Ry, entity.Rz);
+        }
 
-            if (EntityManager.VendorInfo.TryGetValue(entity.Id, out VendorInfo vendorInfo))
+        public void Initialise(EntityModel model)
+        {
+            CreatureId  = model.Creature;
+            DisplayInfo = model.DisplayInfo;
+            OutfitInfo  = model.OutfitInfo;
+            Faction1    = (Faction)model.Faction1;
+            Faction2    = (Faction)model.Faction2;
+            Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
+
+            if (EntityManager.VendorInfo.TryGetValue(model.Id, out VendorInfo vendorInfo))
                 VendorInfo = vendorInfo;
 
             CalculateProperties();

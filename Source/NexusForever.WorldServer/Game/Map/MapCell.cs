@@ -1,56 +1,76 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared;
+using NexusForever.Shared.Game.Map;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public class MapCell
+    public class MapCell : IUpdate
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        /// <summary>
-        /// Size of cell, represents 32 world units on all sides.
-        /// </summary>
-        public const int Size = 32;
-
-        public Vector3 Vector { get; }
+        public (uint X, uint Z) Coord { get; }
 
         private readonly HashSet<GridEntity> entities = new HashSet<GridEntity>();
 
         /// <summary>
-        /// Initialise <see cref="MapCell"/> at the specified world position.
+        /// Return <see cref="MapCell"/> at supplied <see cref="Vector3"/>.
         /// </summary>
-        public MapCell(Vector3 vector)
+        public static (uint cellX, uint cellZ) GetCellCoord(Vector3 vector)
         {
-            Vector = vector;
-        }
+            int x = (int)Math.Floor(MapDefines.GridCellCount * (MapDefines.WorldGridOrigin + vector.X / MapDefines.GridSize));
+            if (x < 0 || x > MapDefines.WorldGridCount * MapDefines.GridCellCount)
+                throw new ArgumentOutOfRangeException($"Position X: {vector.X} is invalid!");
 
-        public void AddEntity(GridEntity entity)
-        {
-            entities.Add(entity);
-            log.Trace($"Added entity {entity.Guid} to cell at X:{Vector.X}, Z:{Vector.Z}.");
-        }
+            int z = (int)Math.Floor(MapDefines.GridCellCount * (MapDefines.WorldGridOrigin + vector.Z / MapDefines.GridSize));
+            if (z < 0 || z > MapDefines.WorldGridCount * MapDefines.GridCellCount)
+                throw new ArgumentOutOfRangeException($"Position Z: {vector.X} is invalid!");
 
-        public void RemoveEntity(GridEntity entity)
-        {
-            entities.Remove(entity);
-            log.Trace($"Removed entity {entity.Guid} from cell at X:{Vector.X}, Z:{Vector.Z}.");
+            return ((uint)x & MapDefines.GridCellCount - 1, (uint)z & MapDefines.GridCellCount - 1);
         }
 
         /// <summary>
-        /// Return all <see cref="GridEntity"/>'s in cell that satisfy <see cref="ISearchCheck"/>.
+        /// Initialise new <see cref="MapCell"/> at the supplied position.
         /// </summary>
-        public void Search(ISearchCheck check, List<GridEntity> intersectedEntities)
+        public MapCell(uint cellX, uint cellZ)
         {
-            intersectedEntities.AddRange(entities.Where(check.CheckEntity));
+            Coord = (cellX, cellZ);
         }
 
         public void Update(double lastTick)
         {
             foreach (GridEntity entity in entities)
                 entity.Update(lastTick);
+        }
+
+        /// <summary>
+        /// Add <see cref="GridEntity"/> to the <see cref="MapCell"/>.
+        /// </summary>
+        public void AddEntity(GridEntity entity)
+        {
+            entities.Add(entity);
+            log.Trace($"Added entity {entity.Guid} to cell at X:{Coord.X}, Z:{Coord.Z}.");
+        }
+
+        /// <summary>
+        /// Remove <see cref="GridEntity"/> from the <see cref="MapCell"/>.
+        /// </summary>
+        public void RemoveEntity(GridEntity entity)
+        {
+            entities.Remove(entity);
+            log.Trace($"Removed entity {entity.Guid} from cell at X:{Coord.X}, Z:{Coord.Z}.");
+        }
+
+        /// <summary>
+        /// Return all <see cref="GridEntity"/>'s in the <see cref="MapCell"/> that satisfy <see cref="ISearchCheck"/>.
+        /// </summary>
+        public void Search(ISearchCheck check, List<GridEntity> intersectedEntities)
+        {
+            intersectedEntities.AddRange(entities.Where(check.CheckEntity));
         }
     }
 }

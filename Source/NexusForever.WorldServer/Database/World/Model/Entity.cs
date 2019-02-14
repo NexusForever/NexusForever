@@ -15,6 +15,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         public byte Type { get; set; }
         public uint Creature { get; set; }
         public ushort World { get; set; }
+        public ushort Area { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }

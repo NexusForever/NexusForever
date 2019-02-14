@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
@@ -35,6 +37,10 @@ namespace NexusForever.WorldServer.Database.World.Model
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Area)
+                    .HasColumnName("area")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Creature)

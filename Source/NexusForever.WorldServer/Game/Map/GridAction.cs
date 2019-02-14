@@ -6,12 +6,12 @@ namespace NexusForever.WorldServer.Game.Map
     public class GridAction
     {
         public GridEntity Entity { get; }
-        public Vector3 Position { get; }
+        public Vector3 Vector { get; }
 
-        public GridAction(GridEntity entity, Vector3 position)
+        public GridAction(GridEntity entity, Vector3 vector)
         {
-            Entity   = entity;
-            Position = position;
+            Entity = entity;
+            Vector = vector;
         }
     }
 }
