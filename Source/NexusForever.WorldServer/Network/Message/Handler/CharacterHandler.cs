@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleRealmList(WorldSession session, ClientRealmList realmList)
         {
             var serverRealmList = new ServerRealmList();
-            foreach (ServerManager.ServerInfo server in ServerManager.Servers)
+            foreach (ServerInfo server in ServerManager.Servers)
             {
                 // TODO: finish this...
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo

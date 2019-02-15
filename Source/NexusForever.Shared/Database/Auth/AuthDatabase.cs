@@ -113,5 +113,13 @@ namespace NexusForever.Shared.Database.Auth
                     .AsNoTracking()
                     .ToImmutableList();
         }
+
+        public static ImmutableList<ServerMessage> GetServerMessages()
+        {
+            using (var context = new AuthContext())
+                return context.ServerMessage
+                    .AsNoTracking()
+                    .ToImmutableList();
+        }
     }
 }

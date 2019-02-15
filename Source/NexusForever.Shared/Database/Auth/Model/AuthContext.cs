@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Configuration;
 
 namespace NexusForever.Shared.Database.Auth.Model
@@ -16,6 +18,7 @@ namespace NexusForever.Shared.Database.Auth.Model
 
         public virtual DbSet<Account> Account { get; set; }
         public virtual DbSet<Server> Server { get; set; }
+        public virtual DbSet<ServerMessage> ServerMessage { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -103,6 +106,28 @@ namespace NexusForever.Shared.Database.Auth.Model
                 entity.Property(e => e.Type)
                     .HasColumnName("type")
                     .HasDefaultValueSql("'0'");
+            });
+
+            modelBuilder.Entity<ServerMessage>(entity =>
+            {
+                entity.HasKey(e => new { e.Index, e.Language })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("server_message");
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Language)
+                    .HasColumnName("language")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Message)
+                    .IsRequired()
+                    .HasColumnName("message")
+                    .HasColumnType("varchar(256)")
+                    .HasDefaultValueSql("''");
             });
         }
     }
