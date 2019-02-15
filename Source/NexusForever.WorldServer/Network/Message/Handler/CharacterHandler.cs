@@ -96,7 +96,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Class       = (Class)character.Class,
                         Faction     = character.FactionId,
                         Level       = character.Level,
-                        WorldId     = 3460,
+                        WorldId     = character.WorldId,
                         WorldZoneId = 5967,
                         RealmId     = WorldServer.RealmId
                     };
