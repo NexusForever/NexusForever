@@ -98,7 +98,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Level       = character.Level,
                         WorldId     = character.WorldId,
                         WorldZoneId = 5967,
-                        RealmId     = WorldServer.RealmId
+                        RealmId     = WorldServer.RealmId,
+                        Path        = (byte)character.ActivePath,
+                        // this should show and hide items depending on the current costume
+                        GearMask    = 0xFFFFFFFF
                     };
 
                     // create a temporary inventory to show equipped gear
@@ -115,11 +118,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         });
                     }
                         
-                    foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
+                    /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
                     {
                         listCharacter.Labels.Add(customisation.Label);
                         listCharacter.Values.Add(customisation.Value);
-                    }
+                    }*/
 
                     foreach (CharacterBone bone in character.CharacterBone.OrderBy(bone => bone.BoneIndex))
                     {
