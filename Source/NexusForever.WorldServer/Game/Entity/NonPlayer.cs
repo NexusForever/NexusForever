@@ -6,6 +6,7 @@ using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
+using NexusForever.WorldServer.Database.World.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -34,13 +35,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
             CalculateProperties();
 
-            // temp shit
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, 1));
-            Stats.Add((Stat)15, new StatValue((Stat)15, 1));
-            Stats.Add((Stat)20, new StatValue((Stat)20, 1));
-            Stats.Add((Stat)21, new StatValue((Stat)21, 1));
-            Stats.Add((Stat)22, new StatValue((Stat)22, 1));
+            // FIXME: move to WorldEntity?
+            foreach(EntityStat stat in model.EntityStat)
+                    Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, stat.Value));
         }
 
         protected override IEntityModel BuildEntityModel()

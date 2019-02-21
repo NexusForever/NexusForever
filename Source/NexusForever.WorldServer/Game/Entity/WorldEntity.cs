@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Dictionary<Stat, StatValue> Stats { get; } = new Dictionary<Stat, StatValue>();
+        public Dictionary<Stat, StatValue> Stats { get; private set; } = new Dictionary<Stat, StatValue>();
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
 
         public uint DisplayInfo { get; protected set; }
@@ -103,6 +103,39 @@ namespace NexusForever.WorldServer.Game.Entity
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
         }
 
+        public dynamic GetStatValue(Stat stat)
+        {
+            if (Stats.TryGetValue(stat, out StatValue value))
+                return StatValue.GetStatType(stat) == StatValue.StatType.Float ? (float)value.Value : (uint)value.Value;
+            else
+                return StatValue.GetStatType(stat) == StatValue.StatType.Float ? 0f : 0u;
+        }
+
+        protected void SetStat(Stat stat, float value)
+        {
+            if (Stats.TryGetValue(stat, out StatValue statValue))
+            {
+                if (statValue.Value != value)
+                {
+                    statValue.SaveMask |= StatSaveMask.Modified;
+                    statValue.Value = value;
+                }
+            }
+            else
+            {
+                Stats.Add(stat, new StatValue(stat, value));
+                Stats[stat].SaveMask |= StatSaveMask.Create;
+            }
+
+            if (Stats[stat].SaveMask != StatSaveMask.None)
+                OnStatUpdate(stat, value);
+        }
+
+        protected void SetStat(Stat stat, uint value)
+        {
+            SetStat(stat, (float)value);
+        }
+
         /// <summary>
         /// Update <see cref="ItemVisual"/> for multiple supplied <see cref="ItemSlot"/>.
         /// </summary>
@@ -148,6 +181,50 @@ namespace NexusForever.WorldServer.Game.Entity
                     continue;
 
                 player.Session.EnqueueMessageEncrypted(message);
+            }
+        }
+
+        public void OnStatUpdate(Stat stat, float value)
+        {
+            if (StatValue.SendUpdate(stat))
+            {
+                if (StatValue.GetStatType(stat) == StatValue.StatType.Float)
+                {
+                    EnqueueToVisible(new ServerEntityStatUpdateFloat
+                    {
+                        UnitId = Guid,
+                        Stat = new StatValue(stat, value)
+                    }, this is Player);
+                }
+                else if (StatValue.GetStatType(stat) == StatValue.StatType.Int)
+                {
+                    EnqueueToVisible(new ServerEntityStatUpdateInt
+                    {
+                        UnitId = Guid,
+                        Stat = new StatValue(stat, value)
+                    }, this is Player);
+                }
+            }
+            else if(stat == Stat.Health)
+            {
+                EnqueueToVisible(new ServerUpdateHealth
+                {
+                    UnitId = Guid,
+                    Health = (uint)value,
+                    UnknownMask = 32768
+                }, this is Player);
+            }
+
+            switch(stat)
+            {
+                case Stat.Level:
+                    if (this is Player player)
+                        player.LevelUp();
+                    break;
+
+                case Stat.Health:
+                    // check if it's dead, Jim
+                    break;
             }
         }
     }

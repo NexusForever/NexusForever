@@ -179,7 +179,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                             DisplayId = appearance.DisplayId
                         });
                     }
-                        
+
                     /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
                     {
                         listCharacter.Labels.Add(customisation.Label);
@@ -189,6 +189,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     foreach (CharacterBone bone in character.CharacterBone.OrderBy(bone => bone.BoneIndex))
                     {
                         listCharacter.Bones.Add(bone.Bone);
+                    }
+
+                    foreach(CharacterStat stat in character.CharacterStat)
+                    {
+                        if ((Stat)stat.Stat == Stat.Level)
+                        {
+                            listCharacter.Level = (uint)stat.Value;
+                            break;
+                        }
                     }
 
                     serverCharacterList.Characters.Add(listCharacter);
@@ -227,7 +236,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Race       = (byte)creationEntry.RaceId,
                     Sex        = (byte)creationEntry.Sex,
                     Class      = (byte)creationEntry.ClassId,
-                    Level      = 1,
                     FactionId  = (ushort)creationEntry.FactionId,
                     ActivePath = characterCreate.Path
                 };
@@ -316,6 +324,38 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 IEnumerable<Item> items = inventory
                     .SelectMany(b => b)
                     .Select(i => i);
+
+                //TODO: handle starting stats per class/race
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.Health,
+                    Value = 800
+                });
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.Shield,
+                    Value = 450
+                });
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.Dash,
+                    Value = 200
+                });
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.Level,
+                    Value = 1
+                });
+                character.CharacterStat.Add(new CharacterStat
+                {
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.StandState,
+                    Value = 3
+                });
 
                 // TODO: actually error check this
                 session.EnqueueEvent(new TaskEvent(CharacterDatabase.CreateCharacter(character, items),

@@ -25,6 +25,7 @@ using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NexusForever.WorldServer.Game.Spell;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -40,17 +41,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Class Class { get; }
         public List<float> Bones { get; } = new List<float>();
 
-        public byte Level
-        {
-            get => level;
-            set
-            {
-                level = value;
-                saveMask |= PlayerSaveMask.Level;
-            }
-        }
-
-        private byte level;
+        public byte Level { get; private set; }
 
         public Path Path
         {
@@ -139,7 +130,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Sex             = (Sex)model.Sex;
             Race            = (Race)model.Race;
             Class           = (Class)model.Class;
-            Level           = model.Level;
             Path            = (Path)model.ActivePath;
             CostumeIndex    = model.ActiveCostumeIndex;
             InputKeySet     = (InputSets)model.InputKeySet;
@@ -159,11 +149,6 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager    = new SpellManager(this, model);
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new KeybindingManager(this, session.Account, model);
-
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
-
-            // temp
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -185,6 +170,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach(CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
+
+            foreach(CharacterStat stat in model.CharacterStat)
+                Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, stat.Value));
+
+            Level = (byte)GetStatValue(Stat.Level);
         }
 
         public override void Update(double lastTick)
@@ -581,12 +571,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (saveMask != PlayerSaveMask.None)
             {
-                if ((saveMask & PlayerSaveMask.Level) != 0)
-                {
-                    model.Level = Level;
-                    entity.Property(p => p.Level).IsModified = true;
-                }
-
                 if ((saveMask & PlayerSaveMask.Location) != 0)
                 {
                     model.LocationX = Position.X;
@@ -631,6 +615,37 @@ namespace NexusForever.WorldServer.Game.Entity
             model.TimePlayedTotal = (uint)TimePlayedTotal;
             entity.Property(p => p.TimePlayedTotal).IsModified = true;
 
+            foreach (KeyValuePair<Stat, StatValue> stat in Stats)
+            {
+                if (stat.Value.SaveMask != StatSaveMask.None)
+                {
+                    if ((stat.Value.SaveMask & StatSaveMask.Create) != 0)
+                    {
+                        context.Add(new CharacterStat
+                        {
+                            Id = CharacterId,
+                            Stat = (byte)stat.Key,
+                            Value = stat.Value.Value
+                        });
+                    }
+                    else
+                    {
+                        var statModel = new CharacterStat
+                        {
+                            Id = CharacterId,
+                            Stat = (byte)stat.Key
+                        };
+
+                        EntityEntry<CharacterStat> statEntity = context.Attach(statModel);
+                        statModel.Value = stat.Value.Value;
+
+                        statEntity.Property(p => p.Value).IsModified = true;
+                    }
+
+                    stat.Value.SaveMask = StatSaveMask.None;
+                }
+            }
+
             Inventory.Save(context);
             CurrencyManager.Save(context);
             PathManager.Save(context);
@@ -647,6 +662,27 @@ namespace NexusForever.WorldServer.Game.Entity
         public double GetTimeSinceLastSave()
         {
             return SaveDuration - timeToSave;
+        }
+
+        public void LevelUp()
+        {
+            Level = (byte)GetStatValue(Stat.Level);
+
+            // TODO: XP stuff etc.
+
+            Spell4Entry spell4Entry = GameTableManager.Spell4.Entries
+                .Where(e => e.Spell4BaseIdBaseSpell == 53378 && e.TierIndex == Level)
+                .FirstOrDefault();
+
+            SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4Entry.Spell4BaseIdBaseSpell);
+            SpellInfo spellInfo = spellBaseInfo.GetSpellInfo((byte)spell4Entry.TierIndex);
+
+            CastSpell(new SpellParameters
+            {
+                SpellInfo = spellInfo
+            });
+
+            // FIXME: SpellFinish (0x07FE) needs to be sent, or you have an endless loop of "level up" on screen
         }
     }
 }

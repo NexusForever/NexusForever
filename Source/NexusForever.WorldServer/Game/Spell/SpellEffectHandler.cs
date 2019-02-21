@@ -71,6 +71,11 @@ namespace NexusForever.WorldServer.Game.Spell
                 player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
         }
 
+        [SpellEffectHandler(SpellEffectType.FullScreenEffect)]
+        private void HandleFullScreenEffect(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+        }
+
         [SpellEffectHandler(SpellEffectType.RapidTransport)]
         private void HandleEffectRapidTransport(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
@@ -145,7 +150,7 @@ namespace NexusForever.WorldServer.Game.Spell
                 return;
 
             var vanityPet = new VanityPet(player, info.Entry.DataBits00);
-	        player.Map.EnqueueAdd(vanityPet, player.Position);
+            player.Map.EnqueueAdd(vanityPet, player.Position);
         }
     }
 }

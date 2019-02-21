@@ -26,11 +26,14 @@ namespace NexusForever.WorldServer.Game.Entity
         private static ImmutableDictionary<EntityType, DatabaseEntityFactoryDelegate> databaseEntityFactories;
 
         public static ImmutableDictionary<uint, VendorInfo> VendorInfo { get; private set; }
+        public static ImmutableDictionary<uint, EntityStat> EntityStat { get; private set; }
+
 
         public static void Initialise()
         {
             InitialiseEntityFactories();
             InitialiseEntityVendorInfo();
+            InitialiseEntityStats();
 
             CalculateEntityAreaData();
         }
@@ -85,6 +88,13 @@ namespace NexusForever.WorldServer.Game.Entity
                 .ToImmutableDictionary(v => v.Id, v => v);
 
             log.Info($"Loaded vendor information for {VendorInfo.Count} {(VendorInfo.Count > 1 ? "entities" : "entity")}.");
+        }
+
+        private static void InitialiseEntityStats()
+        {
+            ImmutableDictionary<uint, EntityStat> stats = WorldDatabase.GetEntityStats()
+                .GroupBy(v => v.Id)
+                .ToImmutableDictionary(g => g.Key, g => g.First());
         }
 
         [Conditional("DEBUG")]
