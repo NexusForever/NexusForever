@@ -19,6 +19,7 @@ using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
+using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -54,6 +55,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.Characters.Clear();
                 session.Characters.AddRange(characters);
 
+                session.GenericUnlockManager.SendUnlockList();
                 session.EnqueueMessageEncrypted(new ServerAccountEntitlements
                 {
                     Entitlements =
@@ -99,14 +101,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         WorldId     = character.WorldId,
                         WorldZoneId = 5967,
                         RealmId     = WorldServer.RealmId,
-                        Path        = (byte)character.ActivePath,
-                        // this should show and hide items depending on the current costume
-                        GearMask    = 0xFFFFFFFF
+                        Path        = (byte)character.ActivePath
                     };
 
-                    // create a temporary inventory to show equipped gear
-                    var inventory = new Inventory(null, character);
-                    foreach (ItemVisual itemVisual in inventory.GetItemVisuals())
+                    // create a temporary Inventory and CostumeManager to show equipped gear
+                    var inventory      = new Inventory(null, character);
+                    var costumeManager = new CostumeManager(null, session.Account, character);
+
+                    CostumeEntity costume = null;
+                    if (character.ActiveCostumeIndex >= 0)
+                        costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
+
+                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+
+                    foreach (ItemVisual itemVisual in inventory.GetItemVisuals(costume))
                         listCharacter.Gear.Add(itemVisual);
 
                     foreach (CharacterAppearance appearance in character.CharacterAppearance)

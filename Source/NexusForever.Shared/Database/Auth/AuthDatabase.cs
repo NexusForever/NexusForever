@@ -11,6 +11,15 @@ namespace NexusForever.Shared.Database.Auth
 {
     public static class AuthDatabase
     {
+        public static async Task Save(Action<AuthContext> action)
+        {
+            using (var context = new AuthContext())
+            {
+                action.Invoke(context);
+                await context.SaveChangesAsync();
+            }
+        }
+
         /// <summary>
         /// Selects an <see cref="Account"/> asynchronously that matches the supplied email.
         /// </summary>
@@ -37,11 +46,14 @@ namespace NexusForever.Shared.Database.Auth
         {
             string sessionKey = BitConverter.ToString(sessionKeyBytes).Replace("-", "");
             using (var context = new AuthContext())
-                return await context.Account.SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
+                return await context.Account
+                    .Include(a => a.AccountCostumeUnlock)
+                    .Include(a => a.AccountGenericUnlock)
+                    .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 
         /// <summary>
-        /// 
+        /// Create a new account with the supplied email and password, the password will have a verifier generated that is inserted into the database.
         /// </summary>
         public static void CreateAccount(string email, string password)
         {
@@ -62,7 +74,7 @@ namespace NexusForever.Shared.Database.Auth
         }
 
         /// <summary>
-        /// 
+        /// Delete an existing account with the supplied email.
         /// </summary>
         public static bool DeleteAccount(string email)
         {
@@ -75,7 +87,7 @@ namespace NexusForever.Shared.Database.Auth
 
                 context.Account.Remove(account);
                 return context.SaveChanges() > 0;
-            };
+            }
         }
 
         /// <summary>

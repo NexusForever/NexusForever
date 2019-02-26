@@ -59,7 +59,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0);
+                writer.Write(Unknown0, 14u);
                 writer.Write(Unknown4);
             }
         }
@@ -78,7 +78,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public List<Pet> Pets { get; } = new List<Pet>();
         public uint UnknownB8 { get; set; }
         public ushort UnknownBC { get; set; }
-        public uint UnknownC0 { get; set; }
+        public int ActiveCostumeIndex { get; set; }
         public uint UnknownC4 { get; set; }
         public uint UnknownC8 { get; set; }
         public List<ushort> KnownDyes { get; } = new List<ushort>();
@@ -112,7 +112,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             writer.Write(UnknownB8);
             writer.Write(UnknownBC);
-            writer.Write(UnknownC0);
+            writer.Write(ActiveCostumeIndex);
             writer.Write(UnknownC4);
             writer.Write(UnknownC8);
 
