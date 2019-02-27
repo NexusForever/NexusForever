@@ -12,6 +12,7 @@ using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
+using Item = NexusForever.WorldServer.Game.Entity.Item;
 
 namespace NexusForever.WorldServer.Game.Social
 {
@@ -145,7 +146,7 @@ namespace NexusForever.WorldServer.Game.Social
                 {
                     case ChatFormatItemGuid chatFormatItemGuid:
                     {
-                        var item = session.Player.Inventory.GetItemByGuid(chatFormatItemGuid.Guid);
+                        Item item = session.Player.Inventory.GetItem(chatFormatItemGuid.Guid);
 
                         // TODO: this probably needs to be a full item response
                         yield return new ChatFormat
