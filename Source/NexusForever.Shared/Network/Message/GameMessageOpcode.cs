@@ -142,11 +142,12 @@ namespace NexusForever.Shared.Network.Message
         Server07F8                      = 0x07F8, // spell related
         Server07F9                      = 0x07F9, // spell related
         Server07FA                      = 0x07FA, // spell related
-        Server07FB                      = 0x07FB, // spell related
+        Server07FB                      = 0x07FB, // spell miss info?
         ServerSpellCastResult           = 0x07FC,
         Server07FD                      = 0x07FD, // spell related
         Server07FE                      = 0x07FE, // spell related
         ServerSpellStart                = 0x07FF,
+        ServerCooldown                  = 0x0804,
         Server0811                      = 0x0811, // spell related: broadcast parts of 0x07FF?
         Server0814                      = 0x0814, // spell related
         Server0816                      = 0x0816, // spell related: broadcast parts of 0x07FF?
@@ -162,6 +163,7 @@ namespace NexusForever.Shared.Network.Message
         ServerVendorItemsUpdated        = 0x090B,
         ClientCostumeItemUnlock         = 0x090F,
         ServerPlayerCurrencyChanged     = 0x0919,
+        ServerCooldownList              = 0x091B,
         Server092C                      = 0x092C,
         ServerItemVisualUpdate          = 0x0933,
         ServerEntityStatUpdate          = 0x0935, // 0x0938??
