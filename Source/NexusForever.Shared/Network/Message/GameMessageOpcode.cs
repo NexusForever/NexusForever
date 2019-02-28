@@ -31,6 +31,7 @@ namespace NexusForever.Shared.Network.Message
         ServerItemAdd                   = 0x0111,
         ServerCharacterList             = 0x0117,
         ServerMountUnlocked             = 0x0129,
+        ClientRapidTransport            = 0x0141,
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,

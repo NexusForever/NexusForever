@@ -524,6 +524,8 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<TargetGroupEntry> TargetGroup { get; private set; }
 
         public static GameTable<TargetMarkerEntry> TargetMarker { get; private set; }
+
+        [GameData]
         public static GameTable<TaxiNodeEntry> TaxiNode { get; private set; }
         public static GameTable<TaxiRouteEntry> TaxiRoute { get; private set; }
 
