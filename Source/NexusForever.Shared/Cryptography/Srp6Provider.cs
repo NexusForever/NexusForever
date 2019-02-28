@@ -36,7 +36,7 @@ namespace NexusForever.Shared.Cryptography
             using (var sha256 = new SHA256Managed())
             {
                 byte[] P = sha256.ComputeHash(Encoding.ASCII.GetBytes($"{I}:{p}"));
-                BigInteger x = Hash(new BigInteger(s, true), new BigInteger(P, true));
+                BigInteger x = Hash(true, new BigInteger(s, true), new BigInteger(P, true));
                 return BigInteger.ModPow(g, x, N).ToByteArray();
             }
         }
@@ -54,7 +54,7 @@ namespace NexusForever.Shared.Cryptography
         public byte[] GenerateServerCredentials()
         {
             b = RandomProvider.GetUnsignedBigInteger(128u);
-            BigInteger k = Hash(N, g);
+            BigInteger k = Hash(true, N, g);
             B = (k * v + BigInteger.ModPow(g, b, N)) % N;
             return B.ToByteArray(true);
         }
@@ -69,7 +69,7 @@ namespace NexusForever.Shared.Cryptography
                 throw new CryptographicException();
 
             A = a;
-            u = Hash(A, B);
+            u = Hash(true, A, B);
             S = BigInteger.ModPow(A * BigInteger.ModPow(v, u, N), b, N);
         }
 
@@ -93,17 +93,13 @@ namespace NexusForever.Shared.Cryptography
             using (var sha256 = new SHA256Managed())
             {
                 var IHash = sha256.ComputeHash(I);
-                var NHash = sha256.ComputeHash(N.ToByteArray(true));
-                var GHash = sha256.ComputeHash(new byte[] { 2, 0, 0, 0 });
-                for (var i = 0; i < NHash.Length; i++)
-                    NHash[i] ^= GHash[i];
+                BigInteger serverM1 = Hash(false, Hash(false, N) ^ Hash(false, g),
+                    new BigInteger(IHash, true), s, A, B, K);
 
-                var hash = sha256.ComputeHash(NHash.Concat(IHash).Concat(s.ToByteArray(true)).Concat(A.ToByteArray(true)).Concat(B.ToByteArray(true)).Concat(K.ToByteArray(true)).ToArray());
-
-                if (!clientM1.SequenceEqual(hash))
+                if (!clientM1.SequenceEqual(serverM1.ToByteArray(true)))
                     return false;
 
-                M1 = new BigInteger(hash, true);
+                M1 = new BigInteger(clientM1, true);
                 return true;
             }
         }
@@ -116,14 +112,14 @@ namespace NexusForever.Shared.Cryptography
             if (A == BigInteger.Zero || M1 == BigInteger.Zero || K == BigInteger.Zero)
                 throw new CryptographicException("Missing data from previous operations: A, M1, K");
 
-            M2 = Hash(A, M1, K);
+            M2 = Hash(true, A, M1, K);
 
             byte[] M2Bytes = M2.ToByteArray(true);
             ReverseBytesAsUInt32(M2Bytes);
             return M2Bytes;
         }
 
-        private static BigInteger Hash(params BigInteger[] integers)
+        private static BigInteger Hash(bool reverse, params BigInteger[] integers)
         {
             using (var sha256 = new SHA256Managed())
             {
@@ -143,7 +139,8 @@ namespace NexusForever.Shared.Cryptography
                 }
 
                 byte[] hash = sha256.Hash;
-                ReverseBytesAsUInt32(hash);
+                if (reverse)
+                    ReverseBytesAsUInt32(hash);
                 return new BigInteger(hash, true);
             }
         }
@@ -153,12 +150,12 @@ namespace NexusForever.Shared.Cryptography
         /// </summary>
         private static BigInteger ShaInterleave(BigInteger key)
         {
-            byte[] T = key
-                .ToByteArray(true)
+            byte[] keyBytes = key.ToByteArray(true);
+            byte[] T = keyBytes
                 .Reverse()
                 .ToArray();
 
-            int first0 = Array.IndexOf<byte>(T.Reverse().ToArray(), 0);
+            int first0 = Array.IndexOf<byte>(keyBytes, 0);
             int length = 4;
 
             if (first0 >= 0 && first0 < T.Length-4)
