@@ -519,6 +519,12 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.ActivePath).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Costume) != 0)
+                {
+                    model.ActiveCostumeIndex = CostumeIndex;
+                    entity.Property(p => p.ActiveCostumeIndex).IsModified = true;
+                }
+
                 saveMask = PlayerSaveMask.None;
             }
 
