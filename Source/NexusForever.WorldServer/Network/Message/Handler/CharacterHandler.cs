@@ -16,6 +16,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
@@ -348,25 +349,27 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientRapidTransport)]
-        public static void HandleClientTarget(WorldSession session, ClientRapidTransport clientRapidTransport)
+        public static void HandleClientTarget(WorldSession session, ClientRapidTransport rapidTransport)
         {
             //TODO: check for cooldown
             //TODO: handle payment
 
-            var taxiNode = GameTableManager.TaxiNode.GetEntry(clientRapidTransport.TaxiNode);
+            TaxiNodeEntry taxiNode = GameTableManager.TaxiNode.GetEntry(rapidTransport.TaxiNode);
+            if (taxiNode == null)
+                throw new InvalidPacketValueException();
 
             if (session.Player.Level < taxiNode.AutoUnlockLevel)
                 throw new InvalidPacketValueException();
 
-            var worldLocation = GameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
-
+            WorldLocation2Entry worldLocation = GameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
             if (worldLocation == null)
                 throw new InvalidPacketValueException();
 
-            //TODO: initiate 82922 (Rapid Transport) by 0x7FD
-
-            session.Player.Rotation = new Vector3(worldLocation.Facing0, worldLocation.Facing0, worldLocation.Facing2);
-            session.Player.TeleportTo((ushort)worldLocation.WorldId, worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
+            GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(1307);
+            session.Player.CastSpell(entry.Dataint0, new SpellParameters
+            {
+                TaxiNode = rapidTransport.TaxiNode
+            });
         }
     }
 }
