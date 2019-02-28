@@ -74,7 +74,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
                 });
             }
 
-            // must be set after sending response
+            // enqueue new key to be set after next packet flush
             session.InitialiseEncryption(key);
         }
 
