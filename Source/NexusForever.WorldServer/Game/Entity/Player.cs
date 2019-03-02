@@ -121,6 +121,10 @@ namespace NexusForever.WorldServer.Game.Entity
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
             // temp
+            Stats.Add(Stat.Sheathed, new StatValue(Stat.Sheathed, 1));
+            Stats.Add(Stat.StandState, new StatValue(Stat.StandState, 3));          //sets characters to regular standing state
+
+            // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
 
             // temp
