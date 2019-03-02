@@ -437,18 +437,33 @@ namespace NexusForever.WorldServer.Game.Entity
             if (logoutManager == null)
                 throw new InvalidPacketValueException();
 
-            Session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+            Session.EnqueueMessageEncrypted(new ServerClientLogout
+            {
+                Requested = logoutManager.Requested,
+                Reason    = logoutManager.Reason
+            });
+
+            CleanUp();
+        }
+
+        /// <summary>
+        /// Save to the database, remove from the world and release from parent <see cref="WorldSession"/>.
+        /// </summary>
+        public void CleanUp()
+        {
+            CleanupManager.Track(Session.Account);
+
+            Session.EnqueueEvent(new TaskEvent(AuthDatabase.Save(Save),
                 () =>
             {
-                RemoveFromMap();
-
-                Session.EnqueueMessageEncrypted(new ServerClientLogout
+                Session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+                    () =>
                 {
-                    Requested = logoutManager.Requested,
-                    Reason    = logoutManager.Reason
-                });
+                    RemoveFromMap();
+                    Session.Player = null;
 
-                Session.Player = null;
+                    CleanupManager.Untrack(Session.Account);
+                }));
             }));
         }
 

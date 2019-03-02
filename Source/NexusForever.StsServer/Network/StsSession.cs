@@ -87,12 +87,6 @@ namespace NexusForever.StsServer.Network
             }
         }
 
-        protected override void OnDisconnect()
-        {
-            base.OnDisconnect();
-            // TODO...
-        }
-
         public override void Update(double lastTick)
         {
             // process pending packet queue

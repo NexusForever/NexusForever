@@ -43,6 +43,12 @@ namespace NexusForever.WorldServer.Network
             };
         }
 
+        protected override void OnDisconnect()
+        {
+            base.OnDisconnect();
+            Player?.CleanUp();
+        }
+
         /// <summary>
         /// Initialise <see cref="WorldSession"/> from an existing <see cref="Account"/> database model.
         /// </summary>

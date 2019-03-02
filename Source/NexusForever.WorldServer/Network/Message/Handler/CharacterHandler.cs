@@ -286,6 +286,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 return;
             }
 
+            if (CleanupManager.HasPendingCleanup(session.Account))
+            {
+                session.EnqueueMessageEncrypted(new ServerCharacterSelectFail
+                {
+                    Result = CharacterSelectResult.FailedCharacterInWorld
+                });
+                return;
+            }
+
             session.Player = new Player(session, character);
 
             WorldEntry entry = GameTableManager.World.GetEntry(character.WorldId);
