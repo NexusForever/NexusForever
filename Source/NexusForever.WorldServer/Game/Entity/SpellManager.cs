@@ -115,6 +115,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void SetSpellCooldown(uint spell4Id, double cooldown)
         {
+            if (cooldown < 0d)
+                throw new ArgumentOutOfRangeException();
+
             if (spellCooldowns.ContainsKey(spell4Id))
                 spellCooldowns[spell4Id] = cooldown;
             else
@@ -135,6 +138,12 @@ namespace NexusForever.WorldServer.Game.Entity
                     }
                 });
             }
+        }
+
+        public void ResetAllSpellCooldowns()
+        {
+            foreach (uint spell4Id in spellCooldowns.Keys.ToList())
+                SetSpellCooldown(spell4Id, 0d);
         }
 
         public double GetGlobalSpellCooldown()
