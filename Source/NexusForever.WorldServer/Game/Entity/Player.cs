@@ -262,12 +262,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
-            PathManager.SendPathLogPacket();
+            PathManager.SendInitialPackets();
             BuybackManager.SendBuybackItems(this);
 
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
-            
-            Session.EnqueueMessageEncrypted(new ServerPathLog());
             Session.EnqueueMessageEncrypted(new Server00F1());
             Session.EnqueueMessageEncrypted(new ServerMovementControl
             {
