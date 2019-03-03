@@ -15,6 +15,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public float Durability { get; set; }
         public uint ExpirationTimeLeft { get; set; }
 
-        public Character Owner { get; set; }
+        public virtual Character Owner { get; set; }
     }
 }

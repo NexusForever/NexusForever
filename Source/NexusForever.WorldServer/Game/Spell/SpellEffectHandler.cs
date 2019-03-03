@@ -1,4 +1,6 @@
-﻿using NexusForever.Shared.GameTable;
+﻿using System.Numerics;
+using NexusForever.Shared;
+using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Spell.Static;
@@ -41,6 +43,25 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if (target is Player player)
                 player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
+        }
+
+        [SpellEffectHandler(SpellEffectType.RapidTransport)]
+        private void HandleEffectRapidTransport(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            TaxiNodeEntry taxiNode = GameTableManager.TaxiNode.GetEntry(parameters.TaxiNode);
+            if (taxiNode == null)
+                return;
+
+            WorldLocation2Entry worldLocation = GameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
+            if (worldLocation == null)
+                return;
+
+            if (!(target is Player player))
+                return;
+
+            var rotation = new Quaternion(worldLocation.Facing0, worldLocation.Facing0, worldLocation.Facing2, worldLocation.Facing3);
+            player.Rotation = rotation.ToEulerDegrees();
+            player.TeleportTo((ushort)worldLocation.WorldId, worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
         }
     }
 }

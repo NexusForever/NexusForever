@@ -51,5 +51,26 @@ namespace NexusForever.Shared
         {
             return degrees % 180f;
         }
+
+        /// <summary>
+        /// Convert <see cref="Quaternion"/> to <see cref="Vector3"/> in degrees.
+        /// </summary>
+        public static Vector3 ToEulerDegrees(this Quaternion q)
+        {
+            float xx = q.X * q.X;
+            float xy = q.X * q.Y;
+            float xz = q.X * q.Z;
+            float xw = q.X * q.W;
+            float yy = q.Y * q.Y;
+            float yz = q.Y * q.Z;
+            float yw = q.Y * q.W;
+            float zz = q.Z * q.Z;
+            float zw = q.Z * q.W;
+
+            float p = MathF.Asin(-2f * (yz - xw));
+            float y = MathF.Atan2(2f * (xz + yw), 1f - 2f * (xx + yy));
+            float r = MathF.Atan2(2f * (xy + zw), 1f - 2f * (xx + zz));
+            return new Vector3(y.ToDegrees(), p.ToDegrees(), r.ToDegrees());
+        }
     }
 }

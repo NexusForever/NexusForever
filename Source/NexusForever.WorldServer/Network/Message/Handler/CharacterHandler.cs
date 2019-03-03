@@ -16,9 +16,11 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
+using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -29,7 +31,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleRealmList(WorldSession session, ClientRealmList realmList)
         {
             var serverRealmList = new ServerRealmList();
-            foreach (ServerManager.ServerInfo server in ServerManager.Servers)
+            foreach (ServerInfo server in ServerManager.Servers)
             {
                 // TODO: finish this...
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
@@ -54,6 +56,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.Characters.Clear();
                 session.Characters.AddRange(characters);
 
+                session.GenericUnlockManager.SendUnlockList();
                 session.EnqueueMessageEncrypted(new ServerAccountEntitlements
                 {
                     Entitlements =
@@ -96,14 +99,23 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Class       = (Class)character.Class,
                         Faction     = character.FactionId,
                         Level       = character.Level,
-                        WorldId     = 3460,
+                        WorldId     = character.WorldId,
                         WorldZoneId = 5967,
-                        RealmId     = WorldServer.RealmId
+                        RealmId     = WorldServer.RealmId,
+                        Path        = (byte)character.ActivePath
                     };
 
-                    // create a temporary inventory to show equipped gear
-                    var inventory = new Inventory(null, character);
-                    foreach (ItemVisual itemVisual in inventory.GetItemVisuals())
+                    // create a temporary Inventory and CostumeManager to show equipped gear
+                    var inventory      = new Inventory(null, character);
+                    var costumeManager = new CostumeManager(null, session.Account, character);
+
+                    CostumeEntity costume = null;
+                    if (character.ActiveCostumeIndex >= 0)
+                        costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
+
+                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+
+                    foreach (ItemVisual itemVisual in inventory.GetItemVisuals(costume))
                         listCharacter.Gear.Add(itemVisual);
 
                     foreach (CharacterAppearance appearance in character.CharacterAppearance)
@@ -115,11 +127,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         });
                     }
                         
-                    foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
+                    /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
                     {
                         listCharacter.Labels.Add(customisation.Label);
                         listCharacter.Values.Add(customisation.Value);
-                    }
+                    }*/
 
                     foreach (CharacterBone bone in character.CharacterBone.OrderBy(bone => bone.BoneIndex))
                     {
@@ -274,6 +286,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 return;
             }
 
+            if (CleanupManager.HasPendingCleanup(session.Account))
+            {
+                session.EnqueueMessageEncrypted(new ServerCharacterSelectFail
+                {
+                    Result = CharacterSelectResult.FailedCharacterInWorld
+                });
+                return;
+            }
+
             session.Player = new Player(session, character);
 
             WorldEntry entry = GameTableManager.World.GetEntry(character.WorldId);
@@ -346,6 +367,30 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 TimePlayedSession   = (uint)(session.Player.TimePlayedSession + diff),
                 TimePlayedTotal     = (uint)(session.Player.TimePlayedTotal + diff),
                 TimePlayedLevel     = (uint)(session.Player.TimePlayedLevel + diff),
+            });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientRapidTransport)]
+        public static void HandleClientTarget(WorldSession session, ClientRapidTransport rapidTransport)
+        {
+            //TODO: check for cooldown
+            //TODO: handle payment
+
+            TaxiNodeEntry taxiNode = GameTableManager.TaxiNode.GetEntry(rapidTransport.TaxiNode);
+            if (taxiNode == null)
+                throw new InvalidPacketValueException();
+
+            if (session.Player.Level < taxiNode.AutoUnlockLevel)
+                throw new InvalidPacketValueException();
+
+            WorldLocation2Entry worldLocation = GameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
+            if (worldLocation == null)
+                throw new InvalidPacketValueException();
+
+            GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(1307);
+            session.Player.CastSpell(entry.Dataint0, new SpellParameters
+            {
+                TaxiNode = rapidTransport.TaxiNode
             });
         }
     }

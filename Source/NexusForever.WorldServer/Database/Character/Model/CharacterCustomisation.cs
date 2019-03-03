@@ -9,6 +9,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public uint Label { get; set; }
         public uint Value { get; set; }
 
-        public Character IdNavigation { get; set; }
+        public virtual Character IdNavigation { get; set; }
     }
 }

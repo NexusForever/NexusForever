@@ -10,6 +10,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public uint TimeRemaining { get; set; }
         public byte Revoked { get; set; }
 
-        public Character IdNavigation { get; set; }
+        public virtual Character IdNavigation { get; set; }
     }
 }

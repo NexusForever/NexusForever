@@ -18,6 +18,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public float Qz { get; set; }
         public float Qw { get; set; }
 
-        public Residence IdNavigation { get; set; }
+        public virtual Residence IdNavigation { get; set; }
     }
 }

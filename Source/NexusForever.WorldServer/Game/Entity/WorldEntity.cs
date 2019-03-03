@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Faction Faction2 { get; protected set; }
         public uint Target { get;  set; }
 
-        protected Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
+        private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
 
         protected WorldEntity(EntityType type)
         {
@@ -83,6 +83,31 @@ namespace NexusForever.WorldServer.Game.Entity
         protected float? GetPropertyValue(Property property)
         {
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
+        }
+
+        /// <summary>
+        /// Update <see cref="ItemVisual"/> for multiple supplied <see cref="ItemSlot"/>.
+        /// </summary>
+        public void SetAppearance(IEnumerable<ItemVisual> visuals)
+        {
+            foreach (ItemVisual visual in visuals)
+                SetAppearance(visual);
+        }
+
+        /// <summary>
+        /// Update <see cref="ItemVisual"/> for supplied <see cref="ItemVisual"/>.
+        /// </summary>
+        public void SetAppearance(ItemVisual visual)
+        {
+            if (visual.DisplayId != 0)
+            {
+                if (!itemVisuals.ContainsKey(visual.Slot))
+                    itemVisuals.Add(visual.Slot, visual);
+                else
+                    itemVisuals[visual.Slot] = visual;
+            }
+            else
+                itemVisuals.Remove(visual.Slot);
         }
 
         /// <summary>

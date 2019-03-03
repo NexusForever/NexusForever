@@ -26,8 +26,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte ResourceSharing { get; set; }
         public byte GardenSharing { get; set; }
 
-        public Character Owner { get; set; }
-        public ICollection<ResidenceDecor> ResidenceDecor { get; set; }
-        public ICollection<ResidencePlot> ResidencePlot { get; set; }
+        public virtual Character Owner { get; set; }
+        public virtual ICollection<ResidenceDecor> ResidenceDecor { get; set; }
+        public virtual ICollection<ResidencePlot> ResidencePlot { get; set; }
     }
 }

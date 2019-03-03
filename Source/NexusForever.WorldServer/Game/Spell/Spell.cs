@@ -93,7 +93,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if (caster is Player player)
             {
-                if (player.SpellManager.GetSpellCooldown(parameters.SpellInfo.BaseInfo.Entry.Id) > 0d)
+                if (player.SpellManager.GetSpellCooldown(parameters.SpellInfo.Entry.Id) > 0d)
                     return CastResult.SpellCooldown;
 
                 // this isn't entirely correct, research GlobalCooldownEnum
@@ -175,7 +175,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if (caster is Player player)
                 if (parameters.SpellInfo.Entry.SpellCoolDown != 0u)
-                    player.SpellManager.SetSpellCooldown(parameters.SpellInfo.BaseInfo.Entry.Id, parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
+                    player.SpellManager.SetSpellCooldown(parameters.SpellInfo.Entry.Id, parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
 
             SelectTargets();
             ExecuteEffects();

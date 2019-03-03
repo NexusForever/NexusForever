@@ -44,10 +44,9 @@ namespace NexusForever.Shared.Network
             //
             foreach (T session in sessions)
             {
-                if (session.Disconnected || session.Heartbeat.Flatline)
+                session.Update(lastTick);
+                if (session.Disconnected && !session.PendingEvent)
                     pendingRemove.Enqueue(session);
-                else
-                    session.Update(lastTick);
             }
 
             //

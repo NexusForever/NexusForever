@@ -11,6 +11,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public uint TotalXp { get; set; }
         public byte LevelRewarded { get; set; }
 
-        public Character IdNavigation { get; set; }
+        public virtual Character IdNavigation { get; set; }
     }
 }

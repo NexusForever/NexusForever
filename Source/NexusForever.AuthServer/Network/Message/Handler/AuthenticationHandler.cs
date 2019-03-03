@@ -26,24 +26,20 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 session.EnqueueMessageEncrypted(new ServerAuthAccepted());
                 session.EnqueueMessageEncrypted(new ServerRealmMessages
                 {
-                    MessageGroup =
-                    {
-                        new ServerRealmMessages.Message
+                    Messages = ServerManager.ServerMessages
+                        .Select(m => new ServerRealmMessages.Message
                         {
-                            Index = 0,
-                            Messages =
-                            {
-                                "Welcome to this NexusForever server!\nVisit: https://github.com/NexusForever/NexusForever"
-                            }
-                        }
-                    }
+                            Index    = m.Index,
+                            Messages = m.Messages
+                        })
+                        .ToList()
                 });
 
                 byte[] sessionKey = RandomProvider.GetBytes(16u);
                 session.EnqueueEvent(new TaskEvent(AuthDatabase.UpdateAccountSessionKey(account, sessionKey),
                     () =>
                 {
-                    ServerManager.ServerInfo server = ServerManager.Servers.First();
+                    ServerInfo server = ServerManager.Servers.First();
                     session.EnqueueMessageEncrypted(new ServerRealmInfo
                     {
                         AccountId  = account.Id,

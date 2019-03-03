@@ -19,6 +19,8 @@ namespace NexusForever.Shared.Network.Message
         ClientCharacterLogout           = 0x00BF,
         ClientLogout                    = 0x00C0,
         ClientHousingResidencePrivacyLevel = 0x00C9,
+        ServerCostume                   = 0x00D8,
+        ServerCostumeList               = 0x00D9,
         ServerCharacterCreate           = 0x00DC,
         ServerChannelUpdateLoot         = 0x00DD,
         Server00F1                      = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
@@ -29,6 +31,7 @@ namespace NexusForever.Shared.Network.Message
         ServerItemAdd                   = 0x0111,
         ServerCharacterList             = 0x0117,
         ServerMountUnlocked             = 0x0129,
+        ClientRapidTransport            = 0x0141,
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
@@ -59,6 +62,12 @@ namespace NexusForever.Shared.Network.Message
         ClientPing                      = 0x0241,
         ClientEncrypted                 = 0x0244,
         ServerCombatLog                 = 0x0247,
+        ClientCostumeSave               = 0x0255,
+        ClientCostumeSet                = 0x0256,
+        ServerCostumeSave               = 0x0257,
+        ServerCostumeItemUnlockMultiple = 0x0258,
+        ServerCostumeItemUnlock         = 0x0259,
+        ServerCostumeItemList           = 0x025A,
         ClientCharacterCreate           = 0x025B,
         ClientPacked                    = 0x025C, // the same as ClientEncrypted except the contents isn't encrypted?
         ServerPlayerCreate              = 0x025E,
@@ -67,6 +76,7 @@ namespace NexusForever.Shared.Network.Message
         ServerEntityDestory             = 0x0355,
         ServerQuestInit                 = 0x035F,
         ClientEmote                     = 0x037E,
+        ClientCostumeItemForget         = 0x038B,
         Server03AA                      = 0x03AA, // friendship account related
         Server03BE                      = 0x03BE, // friendship related
         ServerRealmInfo                 = 0x03DB,
@@ -134,11 +144,12 @@ namespace NexusForever.Shared.Network.Message
         Server07F8                      = 0x07F8, // spell related
         Server07F9                      = 0x07F9, // spell related
         Server07FA                      = 0x07FA, // spell related
-        Server07FB                      = 0x07FB, // spell related
+        Server07FB                      = 0x07FB, // spell miss info?
         ServerSpellCastResult           = 0x07FC,
         Server07FD                      = 0x07FD, // spell related
         Server07FE                      = 0x07FE, // spell related
         ServerSpellStart                = 0x07FF,
+        ServerCooldown                  = 0x0804,
         Server0811                      = 0x0811, // spell related: broadcast parts of 0x07FF?
         Server0814                      = 0x0814, // spell related
         Server0816                      = 0x0816, // spell related: broadcast parts of 0x07FF?
@@ -152,7 +163,10 @@ namespace NexusForever.Shared.Network.Message
         Server0905                      = 0x0905, // displays addons on mounts, maybe more
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
+        ClientCostumeItemUnlock         = 0x090F,
         ServerPlayerCurrencyChanged     = 0x0919,
+        ServerCooldownList              = 0x091B,
+        Server092C                      = 0x092C,
         ServerItemVisualUpdate          = 0x0933,
         ServerEntityStatUpdate          = 0x0935, // 0x0938??
         Server0934                      = 0x0934,
@@ -161,6 +175,9 @@ namespace NexusForever.Shared.Network.Message
         ClientWhoRequest                = 0x0959,
         ServerWhoResponse               = 0x095A,
         ServerGrantAccountCurrency      = 0x0967,
-        ServerAccountEntitlements       = 0x0968
+        ServerAccountEntitlements       = 0x0968,
+        ServerGenericUnlockList         = 0x0981,
+        ServerGenericUnlock             = 0x0982,
+        ServerGenericUnlockResult       = 0x0985
     }
 }
