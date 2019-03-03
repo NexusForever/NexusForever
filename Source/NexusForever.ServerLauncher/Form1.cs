@@ -2,6 +2,7 @@
 using NexusForever.ServerLauncher.Configuration;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -12,6 +13,7 @@ namespace NexusForever.ServerLauncher
         private const string configPath = "config.json";
         private Process authApplication, stsApplication, worldApplication;
         private bool IsAuthExited, IsStsExited, IsWorldExited = false;
+        private string AuthPath, StsPath, WorldPath;
 
         public Form1()
         {
@@ -19,74 +21,77 @@ namespace NexusForever.ServerLauncher
             LoadConfig();
         }
 
+        #region File Loading/Saving
         private void LoadConfig()
         {
             if (!File.Exists(configPath))
-            {
                 SaveFile();
-            }
 
             ConfigurationManager<ServerConfiguration>.Initialise(configPath);
-            authPath.Text   = ConfigurationManager<ServerConfiguration>.Config.AuthPath;
-            stsPath.Text    = ConfigurationManager<ServerConfiguration>.Config.StsPath;
-            worldPath.Text  = ConfigurationManager<ServerConfiguration>.Config.WorldPath;
+            if (!Directory.Exists(ConfigurationManager<ServerConfiguration>.Config.MainPath))
+                Log($"Dir does not exist: '{ConfigurationManager<ServerConfiguration>.Config.MainPath}'", true);
+            else
+            {
+                sourcePath.Text = ConfigurationManager<ServerConfiguration>.Config.MainPath;
+                LoadFiles();
+                SaveFile();
+            }
         }
         private void SaveFile()
         {
             ServerConfiguration configuration = new ServerConfiguration
             {
-                AuthPath    = authPath.Text,
-                StsPath     = stsPath.Text,
-                WorldPath   = worldPath.Text
+                MainPath    = sourcePath.Text,
+                AuthPath    = AuthPath,
+                StsPath     = StsPath,
+                WorldPath   = WorldPath
             };
 
             File.WriteAllText(configPath, JsonConvert.SerializeObject(configuration, Formatting.Indented));
         }
+        #endregion
 
         #region Browse Functions
-        private void authBrowse_Click(object sender, EventArgs e)
+        private void browseSource_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog dialog = new OpenFileDialog())
+            using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Filter = "DLL Files(*.dll)|*.dll";
-                dialog.Title = "Select the auth dll";
-
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    authPath.Text = dialog.FileName;
-                    SaveFile();
+                    sourcePath.Text = dialog.SelectedPath;
+                    Log($"Selected: {dialog.SelectedPath}");
+
+                    LoadFiles();
                 }
             }
         }
-
-        private void stsBrowse_Click(object sender, EventArgs e)
+        private void LoadFiles()
         {
-            using (OpenFileDialog dialog = new OpenFileDialog())
+            string[] files = Directory.GetFiles(sourcePath.Text, "*.dll", SearchOption.AllDirectories);
+            foreach (string filePath in files)
             {
-                dialog.Filter = "DLL Files(*.dll)|*.dll";
-                dialog.Title = "Select the sts dll";
-
-                if (dialog.ShowDialog() == DialogResult.OK)
+                if (filePath.Contains("obj"))
+                    continue;
+                else
                 {
-                    stsPath.Text = dialog.FileName;
-                    SaveFile();
+                    string filename = Path.GetFileName(filePath);
+
+                    switch (filename)
+                    {
+                        case "NexusForever.StsServer.dll":
+                            StsPath = filePath;
+                            break;
+                        case "NexusForever.AuthServer.dll":
+                            AuthPath = filePath;
+                            break;
+                        case "NexusForever.WorldServer.dll":
+                            WorldPath = filePath;
+                            break;
+                    }
                 }
             }
-        }
 
-        private void worldBrowse_Click(object sender, EventArgs e)
-        {
-            using (OpenFileDialog dialog = new OpenFileDialog())
-            {
-                dialog.Filter = "DLL Files(*.dll)|*.dll";
-                dialog.Title = "Select the world dll";
-
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    worldPath.Text = dialog.FileName;
-                    SaveFile();
-                }
-            }
+            SaveFile();
         }
         #endregion
 
@@ -97,12 +102,13 @@ namespace NexusForever.ServerLauncher
             authApplication.StartInfo   = new ProcessStartInfo()
             {
                 FileName = "dotnet",
-                Arguments = authPath.Text
+                Arguments = ConfigurationManager<ServerConfiguration>.Config.AuthPath
             };
 
             authApplication.Start();
             authApplication.EnableRaisingEvents = true;
             authApplication.Exited += new EventHandler(AuthExited);
+            IsAuthExited = false;
 
             Log("Started Auth Server");
         }
@@ -117,18 +123,19 @@ namespace NexusForever.ServerLauncher
             }
         }
 
-        private void startSts_Click(object sender, System.EventArgs e)
+        private void startSts_Click(object sender, EventArgs e)
         {
             stsApplication              = new Process();
             stsApplication.StartInfo    = new ProcessStartInfo()
             {
                 FileName = "dotnet",
-                Arguments = stsPath.Text
+                Arguments = ConfigurationManager<ServerConfiguration>.Config.StsPath
             };
 
             stsApplication.Start();
             stsApplication.EnableRaisingEvents = true;
             stsApplication.Exited += new EventHandler(StsExited);
+            IsStsExited = false;
 
             Log("Started Sts Server");
         }
@@ -148,12 +155,13 @@ namespace NexusForever.ServerLauncher
             worldApplication.StartInfo  = new ProcessStartInfo()
             {
                 FileName = "dotnet",
-                Arguments = worldPath.Text
+                Arguments = ConfigurationManager<ServerConfiguration>.Config.WorldPath
             };
 
             worldApplication.Start();
             worldApplication.EnableRaisingEvents = true;
             worldApplication.Exited += new EventHandler(WorldExited);
+            IsWorldExited = false;
 
             Log("Started World Server");
         }
@@ -173,11 +181,18 @@ namespace NexusForever.ServerLauncher
         #endregion
 
         #region Log Box
-        public void Log(string line)
+        public void Log(string line, bool error = false)
         {
             string timeStamp            = DateTime.Now.ToLongTimeString();
+            Color color;
+            if (error)
+                color = Color.Red;
+            else
+                color = Color.Black;
+
             logWindow.SelectionStart    = logWindow.TextLength;
             logWindow.SelectionLength   = 0;
+            logWindow.SelectionColor    = color;
             logWindow.AppendText($"{timeStamp} | {line} \n");
             logWindow.ScrollToCaret();
         }
