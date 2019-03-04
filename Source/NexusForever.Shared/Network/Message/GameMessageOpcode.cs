@@ -94,6 +94,8 @@ namespace NexusForever.Shared.Network.Message
         ServerChatAccept                = 0x01C2,
         ClientChat                      = 0x01C3,
         ServerChat                      = 0x01C8,
+        ClientChatWhisper               = 0x01D4,
+        ServerChatZoneChange            = 0x01DA,
         Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
         ClientPing                      = 0x0241,
         ClientEncrypted                 = 0x0244,

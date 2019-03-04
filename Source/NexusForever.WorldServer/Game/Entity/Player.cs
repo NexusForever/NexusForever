@@ -369,6 +369,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
+            SocialManager.Instance.JoinChatChannels(Session);
             SendInGameTime();
             PathManager.SendInitialPackets();
             BuybackManager.Instance.SendBuybackItems(this);
@@ -453,7 +454,6 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             playerCreate.SpecIndex = SpellManager.ActiveActionSet;
-
             Session.EnqueueMessageEncrypted(playerCreate);
 
             TitleManager.SendTitles();
@@ -611,6 +611,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Save(() =>
                 {
                     RemoveFromMap();
+                    SocialManager.Instance.LeaveChatChannels(Session);
                     Session.Player = null;
                 });
             }
