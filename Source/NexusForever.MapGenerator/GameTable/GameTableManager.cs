@@ -11,7 +11,7 @@ namespace NexusForever.MapGenerator.GameTable
 
         public static void Initialise(Archive archive)
         {
-            World = LoadGameTable<WorldEntry>(archive, "DB\\World.tbl");
+            World = LoadGameTable<WorldEntry>(archive, "DB/World.tbl");
         }
 
         private static GameTable<T> LoadGameTable<T>(Archive archive, string path) where T : class, new()
