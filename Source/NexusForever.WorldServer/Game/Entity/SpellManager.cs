@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Shared;
@@ -100,6 +100,15 @@ namespace NexusForever.WorldServer.Game.Entity
         public UnlockedSpell GetSpell(uint spell4BaseId)
         {
             return spells.TryGetValue(spell4BaseId, out UnlockedSpell spell) ? spell : null;
+        }
+
+        public List<UnlockedSpell> GetPets()
+        {
+            return spells.Values
+                .Where(s => s.Info.SpellType.Id == 27 ||
+                            s.Info.SpellType.Id == 30 ||
+                            s.Info.SpellType.Id == 104)
+                .ToList();
         }
 
         /// <summary>

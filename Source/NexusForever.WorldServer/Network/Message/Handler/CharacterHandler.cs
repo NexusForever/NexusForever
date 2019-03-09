@@ -354,7 +354,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientEntitySelect)]
         public static void HandleClientTarget(WorldSession session, ClientEntitySelect target)
         {
-            session.Player.Target = target.Guid;
+            session.Player.TargetGuid = target.Guid;
         }
 
         [MessageHandler(GameMessageOpcode.ClientRapidTransport)]

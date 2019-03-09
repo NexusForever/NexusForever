@@ -3,11 +3,15 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server0639, MessageDirection.Server)]
-    public class Server0639 : IWritable
+    [Message(GameMessageOpcode.ServerUnlockPetFlair, MessageDirection.Server)]
+    public class ServerUnlockPetFlair : IWritable
     {
+        public ushort PetFlairId { get; set; }
+
         public void Write(GamePacketWriter writer)
         {
+            writer.Write(PetFlairId, 14u);
         }
     }
 }
+

@@ -15,6 +15,7 @@ using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
+using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
@@ -74,6 +75,21 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private sbyte costumeIndex;
 
+        /// <summary>
+        /// Guid of the <see cref="WorldEntity"/> that currently being controlled by the <see cref="Player"/>.
+        /// </summary>
+        public uint ControlGuid { get; private set; }
+
+        /// <summary>
+        /// Guid of the <see cref="Vehicle"/> the <see cref="Player"/> is a passenger on.
+        /// </summary>
+        public uint VehicleGuid { get; set; }
+
+        /// <summary>
+        /// Guid of the <see cref="VanityPet"/> currently summoned by the <see cref="Player"/>.
+        /// </summary>
+        public uint PetGuid { get; set; }
+
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
@@ -83,6 +99,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public TitleManager TitleManager { get; }
         public SpellManager SpellManager { get; }
         public CostumeManager CostumeManager { get; }
+        public PetCustomisationManager PetCustomisationManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -117,6 +134,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager     = new PathManager(this, model);
             TitleManager    = new TitleManager(this, model);
             SpellManager    = new SpellManager(this, model);
+            PetCustomisationManager = new PetCustomisationManager(this, model);
 
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
@@ -135,6 +153,7 @@ namespace NexusForever.WorldServer.Game.Entity
             // b) store abilities persistently
             // c) handle starting abilities by class - sadly no tbl data available...
             SpellManager.AddSpell(47769); // Transmat to Illium
+            SpellManager.AddSpell(22919); // Recall house - broken, seems to require an additional unlock
             SpellManager.AddSpell(38934); // some pewpew mount
             SpellManager.AddSpell(62503); // falkron mount
             SpellManager.AddSpell(63431); // zBoard 79 mount
@@ -148,6 +167,8 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2, 2);
             SpellManager.AddSpellToActionSet(0, 23173, UILocation.LAS3, 3);
             SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
+            SpellManager.AddSpell(62563); // pet
+            SpellManager.AddSpell(62562); // pet
 
             Costume costume = null;
             if (CostumeIndex >= 0)
@@ -243,6 +264,10 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.OnRelocate(vector);
             saveMask |= PlayerSaveMask.Location;
+
+            // TODO: remove this once pathfinding is implemented
+            if (PetGuid > 0)
+                Map.EnqueueRelocate(GetVisible<VanityPet>(PetGuid), vector);
         }
 
         protected override void OnZoneUpdate()
@@ -269,11 +294,7 @@ namespace NexusForever.WorldServer.Game.Entity
             
             Session.EnqueueMessageEncrypted(new ServerPathLog());
             Session.EnqueueMessageEncrypted(new Server00F1());
-            Session.EnqueueMessageEncrypted(new ServerMovementControl
-            {
-                Ticket = 1,
-                Immediate = true,
-            });
+            SetControl(this);
 
             // this seems to set values at the client by id, needs more research
             // id 11 is related to costume slots
@@ -324,6 +345,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             TitleManager.SendTitles();
             SpellManager.SendInitialPackets();
+            PetCustomisationManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -345,6 +367,39 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        public override ServerEntityCreate BuildCreatePacket()
+        {
+            ServerEntityCreate entityCreate = base.BuildCreatePacket();
+            if (VehicleGuid == 0u)
+                return entityCreate;
+
+            entityCreate.Commands = new Dictionary<EntityCommand, IEntityCommand>
+            {
+                {
+                    EntityCommand.SetPlatform,
+                    new SetPlatformCommand
+                    {
+                        Platform = VehicleGuid
+                    }
+                },
+                {
+                    EntityCommand.SetPosition,
+                    new SetPositionCommand
+                    {
+                        Position = new Position(new Vector3(0f,0f,0f))
+                    }
+                },
+                {
+                    EntityCommand.SetRotation,
+                    new SetRotationCommand
+                    {
+                        Position = new Position(new Vector3(0f,0f,0f))
+                    }
+                }
+            };
+            return entityCreate;
+        }
+
         public override void AddVisible(GridEntity entity)
         {
             base.AddVisible(entity);
@@ -361,30 +416,6 @@ namespace NexusForever.WorldServer.Game.Entity
                     Unknown1 = 1
                 });
             }
-
-            if (entity is Mount mount && mount.OwnerGuid == Guid)
-            {
-                Session.EnqueueMessageEncrypted(new Server08B3
-                {
-                    MountGuid = mount.Guid,
-                    Unknown0  = 0,
-                    Unknown1  = true
-                });
-
-                // sets mount nameplate to show owner instead of creatures
-                // handler calls Mount LUA event
-                Session.EnqueueMessageEncrypted(new Server086F
-                {
-                    MountGuid = mount.Guid,
-                    OwnerGuid = Guid
-                });
-
-                Session.EnqueueMessageEncrypted(new Server0934
-                {
-                    MountGuid = mount.Guid,
-                    Faction   = 166
-                });
-            }
         }
 
         public override void RemoveVisible(GridEntity entity)
@@ -399,6 +430,22 @@ namespace NexusForever.WorldServer.Game.Entity
                     Unknown0 = true
                 });
             }
+        }
+
+        /// <summary>
+        /// Set the <see cref="WorldEntity"/> that currently being controlled by the <see cref="Player"/>.
+        /// </summary>
+        public void SetControl(WorldEntity entity)
+        {
+            ControlGuid = entity.Guid;
+            entity.ControllerGuid = Guid;
+
+            Session.EnqueueMessageEncrypted(new ServerMovementControl
+            {
+                Ticket    = 1,
+                Immediate = true,
+                UnitId    = entity.Guid
+            });
         }
 
         /// <summary>
@@ -552,6 +599,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager.Save(context);
             TitleManager.Save(context);
             CostumeManager.Save(context);
+            PetCustomisationManager.Save(context);
         }
     }
 }

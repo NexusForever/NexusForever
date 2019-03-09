@@ -26,6 +26,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
+        public virtual DbSet<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
+        public virtual DbSet<CharacterPetFlair> CharacterPetFlair { get; set; }
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
         public virtual DbSet<Item> Item { get; set; }
         public virtual DbSet<Residence> Residence { get; set; }
@@ -317,6 +319,62 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterPath)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_path_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterPetCustomisation>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Type, e.ObjectId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_pet_customisation");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ObjectId)
+                    .HasColumnName("objectId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.FlairIdMask)
+                    .HasColumnName("flairIdMask")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(128)")
+                    .HasDefaultValueSql("''");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterPetCustomisation)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_pet_customisation_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterPetFlair>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.PetFlairId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_pet_flair");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PetFlairId)
+                    .HasColumnName("petFlairId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterPetFlair)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_pet_flair_id__character_id");
             });
 
             modelBuilder.Entity<CharacterTitle>(entity =>
