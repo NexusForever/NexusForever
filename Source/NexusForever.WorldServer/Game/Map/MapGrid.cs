@@ -65,7 +65,7 @@ namespace NexusForever.WorldServer.Game.Map
         public void RemoveEntity(GridEntity entity)
         {
             GetCell(entity.Position).RemoveEntity(entity);
-            log.Trace($"Added entity {entity.Guid} to grid at X:{Coord.X}, Z:{Coord.Z}.");
+            log.Trace($"Removed entity {entity.Guid} to grid at X:{Coord.X}, Z:{Coord.Z}.");
         }
 
         /// <summary>

@@ -1,39 +1,24 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
+using NetworkVehiclePassenger = NexusForever.WorldServer.Network.Message.Model.Shared.VehiclePassenger;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Model
 {
     public class MountEntityModel : IEntityModel
     {
-        // probably flairs
-        public class UnknownMountStructure : IWritable
-        {
-            public byte Unknown0 { get; set; }
-            public byte Unknown1 { get; set; }
-            public uint Unknown2 { get; set; }
-
-            public void Write(GamePacketWriter writer)
-            {
-                writer.Write(Unknown0, 2);
-                writer.Write(Unknown1, 3);
-                writer.Write(Unknown2);
-            }
-        }
-
         public uint CreatureId { get; set; }
-        public ushort Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
-        public List<UnknownMountStructure> Unknown4 { get; } = new List<UnknownMountStructure>();
+        public ushort UnitVehicleId { get; set; }
+        public uint OwnerId { get; set; }
+        public List<NetworkVehiclePassenger> Passengers { get; set; } = new List<NetworkVehiclePassenger>();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(CreatureId, 18);
-            writer.Write(Unknown1, 14);
-            writer.Write(Unknown2);
+            writer.Write(CreatureId, 18u);
+            writer.Write(UnitVehicleId, 14u);
+            writer.Write(OwnerId);
 
-            writer.Write((byte)Unknown4.Count, 3);
-            Unknown4.ForEach(s => s.Write(writer));
+            writer.Write((byte)Passengers.Count, 3u);
+            Passengers.ForEach(p => p.Write(writer));
         }
     }
 }

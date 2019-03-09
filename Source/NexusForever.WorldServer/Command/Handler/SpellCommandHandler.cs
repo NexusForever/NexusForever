@@ -38,5 +38,16 @@ namespace NexusForever.WorldServer.Command.Handler
 
             return Task.CompletedTask;
         }
+
+        [SubCommandHandler("resetcooldown", "[spell4Id] - Reset a single spell cooldown, if no spell if supplyed all cooldowns will be reset")]
+        public Task ResetCooldownSubCommand(CommandContext context, string command, string[] parameters)
+        {
+            if (parameters.Length > 0)
+                context.Session.Player.SpellManager.SetSpellCooldown(uint.Parse(parameters[0]), 0d);
+            else
+                context.Session.Player.SpellManager.ResetAllSpellCooldowns();
+
+            return Task.CompletedTask;
+        }
     }
 }

@@ -96,8 +96,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public uint Guid { get; set; }
         public EntityType Type { get; set; }
-        public IEntityModel EntityModel { get; set; }
         public byte CreateFlags { get; set; }
+        public IEntityModel EntityModel { get; set; }
         public List<StatValue> Stats { get; set; } = new List<StatValue>();
         public uint Time { get; set; }
         public Dictionary<EntityCommand, IEntityCommand> Commands { get; set; } = new Dictionary<EntityCommand, IEntityCommand>();

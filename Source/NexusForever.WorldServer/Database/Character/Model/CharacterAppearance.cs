@@ -9,6 +9,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Slot { get; set; }
         public ushort DisplayId { get; set; }
 
-        public Character IdNavigation { get; set; }
+        public virtual Character IdNavigation { get; set; }
     }
 }

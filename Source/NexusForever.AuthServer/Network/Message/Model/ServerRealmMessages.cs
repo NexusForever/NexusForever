@@ -20,12 +20,12 @@ namespace NexusForever.AuthServer.Network.Message.Model
             }
         }
 
-        public List<Message> MessageGroup { get; set; } = new List<Message>();
+        public List<Message> Messages { get; set; } = new List<Message>();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(MessageGroup.Count);
-            MessageGroup.ForEach(m => m.Write(writer));
+            writer.Write(Messages.Count);
+            Messages.ForEach(m => m.Write(writer));
         }
     }
 }

@@ -9,6 +9,11 @@ namespace NexusForever.Shared.Network
     {
         protected static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Returns if there is a pending <see cref="IEvent"/> that has yet to complete.
+        /// </summary>
+        public bool PendingEvent => events.Count != 0;
+
         private readonly Queue<IEvent> events = new Queue<IEvent>();
 
         /// <summary>

@@ -12,6 +12,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte PlugFacing { get; set; }
         public byte BuildState { get; set; }
 
-        public Residence IdNavigation { get; set; }
+        public virtual Residence IdNavigation { get; set; }
     }
 }

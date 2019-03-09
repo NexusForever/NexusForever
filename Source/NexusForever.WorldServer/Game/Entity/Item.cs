@@ -16,6 +16,28 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public class Item : ISaveCharacter
     {
+        /// <summary>
+        /// Return the display id for <see cref="Item2Entry"/>.
+        /// </summary>
+        public static ushort GetDisplayId(Item2Entry entry)
+        {
+            if (entry == null)
+                return 0;
+
+            if (entry.ItemSourceId == 0u)
+                return (ushort)entry.ItemDisplayId;
+
+            List<ItemDisplaySourceEntryEntry> entries = AssetManager.GetItemDisplaySource(entry.ItemSourceId)
+                .Where(e => e.Item2TypeId == entry.Item2TypeId)
+                .ToList();
+
+            if (entries.Count == 1)
+                return (ushort)entries[0].ItemDisplayId;
+
+            // TODO: research this...
+            throw new NotImplementedException();
+        }
+
         public uint Id => Entry?.Id ?? SpellEntry.Id;
         public Item2Entry Entry { get; }
         public Spell4BaseEntry SpellEntry { get; }
@@ -38,12 +60,17 @@ namespace NexusForever.WorldServer.Game.Entity
             get => location;
             set
             {
+                if (location != value)
+                    PreviousLocation = location;
+
                 location = value;
                 saveMask |= ItemSaveMask.Location;
             }
         }
 
         private InventoryLocation location;
+
+        public InventoryLocation PreviousLocation { get; private set; }
 
         public uint BagIndex
         {
@@ -113,25 +140,6 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         private uint expirationTimeLeft;
-
-        public ushort DisplayId
-        {
-            get
-            {
-                if (Entry.ItemSourceId == 0u)
-                    return (ushort)Entry.ItemDisplayId;
-
-                List<ItemDisplaySourceEntryEntry> entries = AssetManager.GetItemDisplaySource(Entry.ItemSourceId)
-                    .Where(e => e.Item2TypeId == Entry.Item2TypeId)
-                    .ToList();
-
-                if (entries.Count == 1)
-                    return (ushort)entries[0].ItemDisplayId;
-
-                // TODO: research this...
-                throw new NotImplementedException();
-            }
-        }
 
         private ItemSaveMask saveMask;
 

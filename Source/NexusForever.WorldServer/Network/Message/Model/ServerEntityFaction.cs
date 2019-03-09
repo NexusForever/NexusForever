@@ -3,16 +3,16 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server0934, MessageDirection.Server)]
-    public class Server0934 : IWritable
+    [Message(GameMessageOpcode.ServerEntityFaction, MessageDirection.Server)]
+    public class ServerEntityFaction : IWritable
     {
-        public uint MountGuid { get; set; }
+        public uint UnitId { get; set; }
         public ushort Faction { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(MountGuid);
-            writer.Write(Faction, 14);
+            writer.Write(UnitId);
+            writer.Write(Faction, 14u);
         }
     }
 }

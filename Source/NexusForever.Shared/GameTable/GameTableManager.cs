@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -176,7 +176,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<DatacubeEntry> Datacube { get; private set; }
         public static GameTable<DatacubeVolumeEntry> DatacubeVolume { get; private set; }
         public static GameTable<DistanceDamageModifierEntry> DistanceDamageModifier { get; private set; }
+
+        [GameData]
         public static GameTable<DyeColorRampEntry> DyeColorRamp { get; private set; }
+
         public static GameTable<EldanAugmentationEntry> EldanAugmentation { get; private set; }
         public static GameTable<EldanAugmentationCategoryEntry> EldanAugmentationCategory { get; private set; }
         public static GameTable<EmoteSequenceTransitionEntry> EmoteSequenceTransition { get; private set; }
@@ -194,11 +197,17 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<Faction2RelationshipEntry> Faction2Relationship { get; private set; }
         public static GameTable<FinishingMoveDeathVisualEntry> FinishingMoveDeathVisual { get; private set; }
         public static GameTable<FullScreenEffectEntry> FullScreenEffect { get; private set; }
+
+        [GameData]
         public static GameTable<GameFormulaEntry> GameFormula { get; private set; }
+
         public static GameTable<GenericMapEntry> GenericMap { get; private set; }
         public static GameTable<GenericMapNodeEntry> GenericMapNode { get; private set; }
         public static GameTable<GenericStringGroupsEntry> GenericStringGroups { get; private set; }
+
+        [GameData]
         public static GameTable<GenericUnlockEntryEntry> GenericUnlockEntry { get; private set; }
+
         public static GameTable<GenericUnlockSetEntry> GenericUnlockSet { get; private set; }
         public static GameTable<GossipEntryEntry> GossipEntry { get; private set; }
         public static GameTable<GossipSetEntry> GossipSet { get; private set; }
@@ -255,6 +264,8 @@ namespace NexusForever.Shared.GameTable
 
         public static GameTable<ItemBudgetEntry> ItemBudget { get; private set; }
         public static GameTable<ItemColorSetEntry> ItemColorSet { get; private set; }
+
+        [GameData]
         public static GameTable<ItemDisplayEntry> ItemDisplay { get; private set; }
 
         [GameData]
@@ -362,6 +373,8 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PeriodicQuestGroupEntry> PeriodicQuestGroup { get; private set; }
         public static GameTable<PeriodicQuestSetEntry> PeriodicQuestSet { get; private set; }
         public static GameTable<PeriodicQuestSetCategoryEntry> PeriodicQuestSetCategory { get; private set; }
+
+        [GameData]
         public static GameTable<PetFlairEntry> PetFlair { get; private set; }
         public static GameTable<PlayerNotificationTypeEntry> PlayerNotificationType { get; private set; }
         public static GameTable<PositionalRequirementEntry> PositionalRequirement { get; private set; }
@@ -513,6 +526,8 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<TargetGroupEntry> TargetGroup { get; private set; }
 
         public static GameTable<TargetMarkerEntry> TargetMarker { get; private set; }
+
+        [GameData]
         public static GameTable<TaxiNodeEntry> TaxiNode { get; private set; }
         public static GameTable<TaxiRouteEntry> TaxiRoute { get; private set; }
 
@@ -545,7 +560,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<UnitRaceEntry> UnitRace { get; private set; }
 
+        [GameData]
         public static GameTable<UnitVehicleEntry> UnitVehicle { get; private set; }
+
         public static GameTable<VeteranTierEntry> VeteranTier { get; private set; }
         public static GameTable<VirtualItemEntry> VirtualItem { get; private set; }
         public static GameTable<VisualEffectEntry> VisualEffect { get; private set; }

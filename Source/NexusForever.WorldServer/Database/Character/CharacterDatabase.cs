@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Game.Entity;
 using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 using ResidenceEntity = NexusForever.WorldServer.Game.Housing.Residence;
 
@@ -11,6 +11,15 @@ namespace NexusForever.WorldServer.Database.Character
 {
     public static class CharacterDatabase
     {
+        public static async Task Save(Action<CharacterContextExtended> action)
+        {
+            using (var context = new CharacterContextExtended())
+            {
+                action.Invoke(context);
+                await context.SaveChangesAsync();
+            }
+        }
+
         public static ulong GetNextCharacterId()
         {
             using (var context = new CharacterContext())
@@ -54,6 +63,10 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterCurrency)
                         .Include(c => c.CharacterPath)
                         .Include(c => c.CharacterTitle)
+                        .Include(c => c.CharacterCostume)
+                            .ThenInclude(c => c.CharacterCostumeItem)
+                        .Include(c => c.CharacterPetCustomisation)
+                        .Include(c => c.CharacterPetFlair)
                     .ToListAsync();
             }
         }
@@ -66,15 +79,6 @@ namespace NexusForever.WorldServer.Database.Character
                 foreach (var item in items)
                     item.Save(context);
 
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public static async Task SavePlayer(Player player)
-        {
-            using (var context = new CharacterContext())
-            {
-                player.Save(context);
                 await context.SaveChangesAsync();
             }
         }

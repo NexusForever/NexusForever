@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public float ActivationRange { get; protected set; }
 
-        protected readonly HashSet<GridEntity> visibleEntities = new HashSet<GridEntity>();
+        protected readonly Dictionary<uint, GridEntity> visibleEntities = new Dictionary<uint, GridEntity>();
 
         /// <summary>
         /// Enqueue for removal from the map.
@@ -51,7 +51,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public virtual void OnRemoveFromMap()
         {
-            foreach (GridEntity entity in visibleEntities.ToList())
+            foreach (GridEntity entity in visibleEntities.Values.ToList())
                 entity.RemoveVisible(this);
 
             visibleEntities.Clear();
@@ -85,7 +85,7 @@ namespace NexusForever.WorldServer.Game.Entity
             /*if (!CanSeeEntity(entity))
                 return;*/
 
-            visibleEntities.Add(entity);
+            visibleEntities.Add(entity.Guid, entity);
         }
 
         /// <summary>
@@ -93,7 +93,17 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public virtual void RemoveVisible(GridEntity entity)
         {
-            visibleEntities.Remove(entity);
+            visibleEntities.Remove(entity.Guid);
+        }
+
+        /// <summary>
+        /// Return visible <see cref="GridEntity"/> by supplied guid.
+        /// </summary>
+        public T GetVisible<T>(uint guid) where T : GridEntity
+        {
+            if (!visibleEntities.TryGetValue(guid, out GridEntity entity))
+                return null;
+            return (T)entity;
         }
 
         /// <summary>
@@ -104,7 +114,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Map.Search(Position, Map.VisionRange, new SearchCheckRange(Position, Map.VisionRange), out List<GridEntity> intersectedEntities);
 
             // new entities now in vision range
-            foreach (GridEntity entity in intersectedEntities.Except(visibleEntities))
+            foreach (GridEntity entity in intersectedEntities.Except(visibleEntities.Values))
             {
                 AddVisible(entity);
                 if (entity != this)
@@ -112,7 +122,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             // old entities now out of vision range
-            foreach (GridEntity entity in visibleEntities.Except(intersectedEntities).ToList())
+            foreach (GridEntity entity in visibleEntities.Values.Except(intersectedEntities).ToList())
             {
                 RemoveVisible(entity);
                 entity.RemoveVisible(this);
