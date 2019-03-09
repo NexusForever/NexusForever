@@ -3,15 +3,15 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server07FE, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerSpellFinish, MessageDirection.Server)]
 
-    public class Server07FE : IWritable
+    public class ServerSpellFinish : IWritable
     {
-        public uint CastingId { get; set; }
+        public uint ServerUniqueId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(CastingId);
+            writer.Write(ServerUniqueId);
         }
     }
 }

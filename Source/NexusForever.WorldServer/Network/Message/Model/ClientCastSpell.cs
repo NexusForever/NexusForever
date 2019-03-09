@@ -8,13 +8,13 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public ushort BagIndex { get; private set; }
         public uint Guid { get; private set; }
-        public bool Unknown48 { get; private set; }
+        public bool ButtonPressed { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            BagIndex  = reader.ReadUShort();
-            Guid      = reader.ReadUInt();
-            Unknown48 = reader.ReadBit();
+            BagIndex = reader.ReadUShort();
+            Guid = reader.ReadUInt();
+            ButtonPressed = reader.ReadBit();
         }
     }
 }

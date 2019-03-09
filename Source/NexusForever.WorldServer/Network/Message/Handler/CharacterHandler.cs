@@ -357,6 +357,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.Player.Target = target.Guid;
         }
 
+        [MessageHandler(GameMessageOpcode.ClientRequstPlayed)]
+        public static void HandleClientRequstPlayed(WorldSession session, ClientRequstPlayed nothing)
+        {
+            double diff = session.Player.UpdatePlayedValues(false);
+            session.EnqueueMessageEncrypted(new ServerPlayerPlayed
+            {
+                CreateTime = session.Player.CreateTime,
+                TimePlayedSession = (uint)(session.Player.TimePlayedSession + diff),
+                TimePlayedTotal = (uint)(session.Player.TimePlayedTotal + diff),
+                TimePlayedLevel = (uint)(session.Player.TimePlayedLevel + diff),
+            });
+        }
+
         [MessageHandler(GameMessageOpcode.ClientRapidTransport)]
         public static void HandleClientTarget(WorldSession session, ClientRapidTransport rapidTransport)
         {

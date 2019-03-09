@@ -373,6 +373,8 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PeriodicQuestGroupEntry> PeriodicQuestGroup { get; private set; }
         public static GameTable<PeriodicQuestSetEntry> PeriodicQuestSet { get; private set; }
         public static GameTable<PeriodicQuestSetCategoryEntry> PeriodicQuestSetCategory { get; private set; }
+
+        [GameData]
         public static GameTable<PetFlairEntry> PetFlair { get; private set; }
         public static GameTable<PlayerNotificationTypeEntry> PlayerNotificationType { get; private set; }
         public static GameTable<PositionalRequirementEntry> PositionalRequirement { get; private set; }
@@ -558,7 +560,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<UnitRaceEntry> UnitRace { get; private set; }
 
+        [GameData]
         public static GameTable<UnitVehicleEntry> UnitVehicle { get; private set; }
+
         public static GameTable<VeteranTierEntry> VeteranTier { get; private set; }
         public static GameTable<VirtualItemEntry> VirtualItem { get; private set; }
         public static GameTable<VisualEffectEntry> VisualEffect { get; private set; }

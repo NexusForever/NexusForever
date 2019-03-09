@@ -119,6 +119,14 @@ namespace NexusForever.WorldServer.Database.Character.Model
                 entity.Property(e => e.WorldId)
                     .HasColumnName("worldId")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TimePlayedTotal)
+                    .HasColumnName("timePlayedTotal")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TimePlayedLevel)
+                   .HasColumnName("timePlayedLevel")
+                   .HasDefaultValueSql("'0'");
             });
 
             modelBuilder.Entity<CharacterAppearance>(entity =>

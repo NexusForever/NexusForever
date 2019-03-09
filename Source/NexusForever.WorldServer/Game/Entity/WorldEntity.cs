@@ -19,11 +19,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
-        public Faction Faction1 { get; protected set; }
-        public Faction Faction2 { get; protected set; }
+        public Faction Faction1 { get; set; }
+        public Faction Faction2 { get; set; }
         public uint Target { get;  set; }
 
-        private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
+        public Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
 
         protected WorldEntity(EntityType type)
         {

@@ -129,5 +129,23 @@ namespace NexusForever.Shared.Network
             Write(data.Length >> 1, extended ? 15u : 7u);
             WriteBytes(data);
         }
+
+        public void BitBang(ushort[] bitPostitions, uint length = 0u)
+        {
+            int bitIndex = 0;
+            if (length == 0)
+                throw new ArgumentException();
+
+            byte[] output = new byte[length];
+
+            foreach (var bitPostition in bitPostitions)
+            {
+                bitIndex = (bitPostition - (bitPostition % 8) + (7 - (bitPostition % 8))) % 8;
+                output[(bitPostition / 8)] |= (byte)(1 << bitIndex);
+            }
+
+            foreach (byte value in output)
+                WriteBits(value, 8);
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private double globalSpellCooldown;
 
         private readonly ActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
-        private byte activeActionSet;
+        private byte activeActionSet = 0;
 
         /// <summary>
         /// Create a new <see cref="SpellManager"/> from existing <see cref="Character"/> database model.
@@ -100,6 +100,14 @@ namespace NexusForever.WorldServer.Game.Entity
         public UnlockedSpell GetSpell(uint spell4BaseId)
         {
             return spells.TryGetValue(spell4BaseId, out UnlockedSpell spell) ? spell : null;
+        }
+        public List<UnlockedSpell> GetPets()
+        {
+            return spells.Values
+                .Where(s => s.Info.SpellType.Id == 27 ||
+                            s.Info.SpellType.Id == 30 ||
+                            s.Info.SpellType.Id == 104)
+                .ToList();
         }
 
         /// <summary>
