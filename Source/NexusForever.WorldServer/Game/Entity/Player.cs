@@ -23,6 +23,7 @@ using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NexusForever.WorldServer.Game.Entity.Network.Command;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -37,7 +38,11 @@ namespace NexusForever.WorldServer.Game.Entity
         public Race Race { get; }
         public Class Class { get; }
         public List<float> Bones { get; } = new List<float>();
-
+        public uint MountId;
+        public uint PetId;
+        public List<PetCustomization> PetCustomizations = new List<PetCustomization>();
+        public List<ushort> PetFlairUnlockBits = new List<ushort>();
+        public List<uint> UnlockedPetFlairs = new List<uint>();
         public byte Level
         {
             get => level;
@@ -135,6 +140,7 @@ namespace NexusForever.WorldServer.Game.Entity
             // b) store abilities persistently
             // c) handle starting abilities by class - sadly no tbl data available...
             SpellManager.AddSpell(47769); // Transmat to Illium
+            SpellManager.AddSpell(22919); // Recall house - broken, seems to require an additional unlock
             SpellManager.AddSpell(38934); // some pewpew mount
             SpellManager.AddSpell(62503); // falkron mount
             SpellManager.AddSpell(63431); // zBoard 79 mount
@@ -148,6 +154,49 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2, 2);
             SpellManager.AddSpellToActionSet(0, 23173, UILocation.LAS3, 3);
             SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
+            SpellManager.AddSpell(62563); // pet
+            SpellManager.AddSpell(62562); // pet
+
+            //temp...
+            UnlockedPetFlairs.Add(1244); // falkron flair
+            UnlockedPetFlairs.Add(1245); // falkron flair
+            UnlockedPetFlairs.Add(1246); // falkron flair
+            UnlockedPetFlairs.Add(130); // this has prerequisits - removal test
+            UnlockedPetFlairs.Add(131); // this has prerequisits - removal test
+
+            UnlockedPetFlairs.Add(60); // raptor flair
+            UnlockedPetFlairs.Add(61); // raptor flair
+            UnlockedPetFlairs.Add(62); // raptor flair
+
+            foreach (var unlockedPetFlair in UnlockedPetFlairs)
+            {
+                if (unlockedPetFlair < 1)
+                    continue;
+
+                var petFlair = GameTableManager.PetFlair.GetEntry(unlockedPetFlair);
+                if (petFlair == null)
+                    continue;
+
+                // TODO: check if prerequisits are met
+                if (petFlair.PrerequisiteId > 0)
+                    continue;
+
+                foreach (var unlockBit in petFlair.UnlockBitIndex)
+                    if(unlockBit > 0)
+                        PetFlairUnlockBits.Add((ushort)unlockBit);
+            }
+
+            foreach (var pet in SpellManager.GetPets())
+            {
+                //FIXME: this is sample code how to map flairs, e.g. from persitent storage
+
+                PetCustomizations.Add(new PetCustomization
+                {
+                    PetType = PetType.GroundMount, //fixme
+                    Spell4Id = pet.Info.GetSpellInfo(1).Entry.Id,
+                    PetFlairIds = new uint[4] {0,0,0,0}
+                });
+            }
 
             Costume costume = null;
             if (CostumeIndex >= 0)
@@ -324,6 +373,12 @@ namespace NexusForever.WorldServer.Game.Entity
 
             TitleManager.SendTitles();
             SpellManager.SendInitialPackets();
+
+            Session.EnqueueMessageEncrypted(new ServerPetCustomizationList
+            {
+                PetFlairUnlockBits = PetFlairUnlockBits,
+                PetCustomizations = PetCustomizations
+            });
         }
 
         public ItemProficiency GetItemProficiences()
@@ -345,10 +400,95 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        public override ServerEntityCreate BuildCreatePacket()
+        {
+            ServerEntityCreate entityCreate = base.BuildCreatePacket();
+
+            if (MountId < 1)
+                return entityCreate;
+
+            entityCreate.Commands = new Dictionary<EntityCommand, IEntityCommand>
+            {
+                {
+                    EntityCommand.SetPlatform,
+                    new SetPlatformCommand
+                    {
+                        Platform = MountId
+                    }
+                },
+                {
+                    EntityCommand.SetPosition,
+                    new SetPositionCommand
+                    {
+                        Position = new Position(new Vector3(0,0,0))
+                    }
+                },
+                {
+                    EntityCommand.SetVelocityDefaults,
+                    new SetVelocityDefaultsCommand
+                    {
+                    }
+                },
+                {
+                    EntityCommand.SetMove,
+                    new SetMoveCommand
+                    {
+                    }
+                },
+                {
+                    EntityCommand.SetRotation,
+                    new SetRotationCommand
+                    {
+                        Position = new Position(new Vector3(0,0,0))
+                    }
+                 },
+                {
+                    EntityCommand.SetState,
+                    new SetStateCommand
+                    {
+                    }
+                 },
+                {
+                    EntityCommand.SetModeDefault,
+                    new SetModeDefaultCommand
+                    {
+                    }
+                }
+            };
+            return entityCreate;
+        }
+
         public override void AddVisible(GridEntity entity)
         {
             base.AddVisible(entity);
             Session.EnqueueMessageEncrypted(((WorldEntity)entity).BuildCreatePacket());
+
+            if (entity is Mount mount)
+            {
+                if (mount.OwnerGuid != Guid)
+                {
+                   Session.EnqueueMessageEncrypted(new Server08B3
+                   {
+                        MountGuid = mount.Guid,
+                        Unknown0  = 0,
+                        Unknown1  = true
+                    });
+
+                    mount.UpdateVisuals();
+
+                    Session.EnqueueMessageEncrypted(new Server089B
+                    {
+                        UnitId    = mount.Guid,
+                        MountGuid = mount.OwnerGuid
+                    });
+
+                    Session.EnqueueMessageEncrypted(new Server086F
+                    {
+                        MountGuid = mount.Guid,
+                        OwnerGuid = mount.OwnerGuid
+                    });
+                }
+            }
 
             if (entity is Player player)
                 player.PathManager.SendSetUnitPathTypePacket();
@@ -361,34 +501,20 @@ namespace NexusForever.WorldServer.Game.Entity
                     Unknown1 = 1
                 });
             }
-
-            if (entity is Mount mount && mount.OwnerGuid == Guid)
-            {
-                Session.EnqueueMessageEncrypted(new Server08B3
-                {
-                    MountGuid = mount.Guid,
-                    Unknown0  = 0,
-                    Unknown1  = true
-                });
-
-                // sets mount nameplate to show owner instead of creatures
-                // handler calls Mount LUA event
-                Session.EnqueueMessageEncrypted(new Server086F
-                {
-                    MountGuid = mount.Guid,
-                    OwnerGuid = Guid
-                });
-
-                Session.EnqueueMessageEncrypted(new Server0934
-                {
-                    MountGuid = mount.Guid,
-                    Faction   = 166
-                });
-            }
         }
 
         public override void RemoveVisible(GridEntity entity)
         {
+            // disembark
+            if (entity is Mount mount)
+            {
+                // my horse is amazing
+                if (MountId == mount.Guid)
+                {
+                    mount.Disembark(this);
+                }
+            }
+
             base.RemoveVisible(entity);
 
             if (entity != this)

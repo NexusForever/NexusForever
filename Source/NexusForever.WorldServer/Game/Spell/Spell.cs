@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Shared;
@@ -47,6 +47,9 @@ namespace NexusForever.WorldServer.Game.Spell
                 // spell effects have finished executing
                 status = SpellStatus.Finished;
                 log.Trace($"Spell {parameters.SpellInfo.Entry.Id} has finished.");
+
+                // TODO: add a timer to count down on the Effect before sending the finish - sending the finish will e.g. wear off the buff
+                //SendSpellFinish();
             }
         }
 
@@ -214,6 +217,7 @@ namespace NexusForever.WorldServer.Game.Spell
                         var info = new SpellTargetInfo.SpellTargetEffectInfo(effectId, spell4EffectsEntry);
                         effectTarget.Effects.Add(info);
 
+                        // TODO: if there is an unhandled exception in the handler, there will be an infinite loop on Execute()
                         handler.Invoke(this, effectTarget.Entity, info);
                     }
                 }
@@ -253,6 +257,17 @@ namespace NexusForever.WorldServer.Game.Spell
                 ParentSpell4Id         = parameters.ParentSpellInfo?.Entry.Id ?? 0,
                 FieldPosition          = new Position(caster.Position),
                 UserInitiatedSpellCast = parameters.UserInitiatedSpellCast
+            }, true);
+        }
+
+        private void SendSpellFinish()
+        {
+            if (status != SpellStatus.Finished)
+                return;
+
+            caster.EnqueueToVisible(new ServerSpellFinish
+            {
+                ServerUniqueId = castingId,
             }, true);
         }
 

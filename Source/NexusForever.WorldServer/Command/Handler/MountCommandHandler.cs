@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -18,7 +19,7 @@ namespace NexusForever.WorldServer.Command.Handler
         protected override Task HandleCommandAsync(CommandContext context, string command, string[] parameters)
         {
             WorldSession session = context.Session;
-            var mount = new Mount(session.Player);
+            var mount = new Mount(session.Player, 68284, 77358, PetType.GroundMount);
             var vector = new Vector3(session.Player.Position.X, session.Player.Position.Y, session.Player.Position.Z);
             session.Player.Map.EnqueueAdd(mount, vector);
             return Task.CompletedTask;
