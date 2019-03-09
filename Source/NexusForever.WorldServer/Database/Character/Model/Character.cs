@@ -13,6 +13,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterCurrency = new HashSet<CharacterCurrency>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
             CharacterPath = new HashSet<CharacterPath>();
+            CharacterPetCustomisation = new HashSet<CharacterPetCustomisation>();
+            CharacterPetFlair = new HashSet<CharacterPetFlair>();
             CharacterTitle = new HashSet<CharacterTitle>();
             Item = new HashSet<Item>();
         }
@@ -42,6 +44,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual ICollection<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual ICollection<CharacterPath> CharacterPath { get; set; }
+        public virtual ICollection<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
+        public virtual ICollection<CharacterPetFlair> CharacterPetFlair { get; set; }
         public virtual ICollection<CharacterTitle> CharacterTitle { get; set; }
         public virtual ICollection<Item> Item { get; set; }
     }

@@ -56,18 +56,5 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 ServerUniqueId  = cancelSpell.ServerUniqueId
             },true);
         }
-
-        [MessageHandler(GameMessageOpcode.ClientDisembark)]
-        public static void HandlePlayerDisembark(WorldSession session, ClientDisembark nothing)
-        {
-            var owner = session.Player;
-
-            if (owner.MountId < 1)
-                throw new InvalidPacketValueException();
-
-            var mount = owner.Map.GetEntity<Mount>(owner.MountId);
-
-            mount.RemoveFromMap();
-        }
     }
 }

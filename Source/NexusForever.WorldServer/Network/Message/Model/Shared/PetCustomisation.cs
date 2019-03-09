@@ -1,32 +1,31 @@
-using NexusForever.Shared.Network;
+﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model.Shared
 {
-    public class PetCustomization : IWritable
+    public class PetCustomisation : IWritable
     {
-        public const byte MaxSlots = 4;
-
         public PetType PetType { get; set; }
-        public uint Spell4Id { get; set; }
+        public uint PetObjectId { get; set; }
         public string PetName { get; set; }
         // there are 4 slots - not sure if uint or some short/short struct
-        public uint[] PetFlairIds { get; set; } = new uint[MaxSlots];
+        public uint[] SlotFlairIds { get; set; } = new uint[PetCustomisationManager.MaxCustomisationFlairs];
 
-        public PetCustomization()
+        public PetCustomisation()
         {
-            for (var i = 0; i < MaxSlots; i++)
-                PetFlairIds[i] = 0;
+            for (int i = 0; i < SlotFlairIds.Length; i++)
+                SlotFlairIds[i] = 0;
         }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(PetType, 2u);
-            writer.Write(Spell4Id);
+            writer.Write(PetObjectId);
             writer.WriteStringWide(PetName);
 
-            foreach(var slot in PetFlairIds)
+            foreach(uint slot in SlotFlairIds)
                 writer.Write(slot);
         }
     }

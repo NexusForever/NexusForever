@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
@@ -47,8 +46,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
             base.OnAddToMap(map, guid, vector);
-            var owner = Map.GetEntity<Player>(OwnerGuid);
-            owner.PetId = Guid;
+            Player owner = GetVisible<Player>(OwnerGuid);
+            owner.PetGuid = Guid;
 
             owner.EnqueueToVisible(new Server08B3
             {
@@ -56,7 +55,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 Unknown0  = 0,
                 Unknown1  = true
             }, true);
-
         }
 
         public override ServerEntityCreate BuildCreatePacket()

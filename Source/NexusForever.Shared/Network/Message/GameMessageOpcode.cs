@@ -32,7 +32,7 @@ namespace NexusForever.Shared.Network.Message
         ServerCharacterList             = 0x0117,
         ServerMountUnlocked             = 0x0129,
         ServerPetCustomizationList      = 0x012E,
-        ServerPetCustomization          = 0x012F,
+        ServerPetCustomisation          = 0x012F,
         ClientRapidTransport            = 0x0141,
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
@@ -56,7 +56,7 @@ namespace NexusForever.Shared.Network.Message
         Server01A3                      = 0x01A3, // AMP
         ServerPathUpdateXP              = 0x01AA,
         ServerExperienceGained          = 0x01AC,
-        ClientDisembark                 = 0x01AF,
+        ClientVehicleDisembark          = 0x01AF,
         ServerChatJoin                  = 0x01BC,
         ServerChatAccept                = 0x01C2,
         ClientChat                      = 0x01C3,
@@ -141,7 +141,7 @@ namespace NexusForever.Shared.Network.Message
         ClientCharacterSelect           = 0x07DD,
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
-        ClientPetCustomization          = 0x07ED,
+        ClientPetCustomisation          = 0x07ED,
         ServerSpellGo                   = 0x07F4,
         Server07F5                      = 0x07F5, // spell related
         Server07F6                      = 0x07F6, // spell related
@@ -164,12 +164,12 @@ namespace NexusForever.Shared.Network.Message
         ClientSummonVanityPet           = 0x082F,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
-        Server086F                      = 0x086F,
+        ServerVehiclePassengerAdd       = 0x086F,
         Server089B                      = 0x089B, // mount related
         Server08B3                      = 0x08B3,
         ServerSetUnitPathType           = 0x08B8,
-        ServerDisembark                 = 0x08C7,
-        Server0905                      = 0x0905, // displays addons on mounts, maybe more
+        ServerVehiclePassengerRemove    = 0x08C7,
+        ServerEntityVisualUpdate        = 0x0905,
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
         ClientCostumeItemUnlock         = 0x090F,
@@ -177,8 +177,8 @@ namespace NexusForever.Shared.Network.Message
         ServerCooldownList              = 0x091B,
         Server092C                      = 0x092C,
         ServerItemVisualUpdate          = 0x0933,
+        ServerEntityFaction             = 0x0934,
         ServerEntityStatUpdate          = 0x0935, // 0x0938??
-        Server0934                      = 0x0934,
         Server093A                      = 0x093A,
         ServerEmote                     = 0x093C,
         ClientWhoRequest                = 0x0959,

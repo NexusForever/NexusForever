@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            Spell4BaseId  = reader.ReadUInt(18);
+            Spell4BaseId = reader.ReadUInt(18);
         }
     }
 }

@@ -15,6 +15,7 @@ using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
+using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
@@ -23,7 +24,6 @@ using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using NexusForever.WorldServer.Game.Entity.Network.Command;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -38,11 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Race Race { get; }
         public Class Class { get; }
         public List<float> Bones { get; } = new List<float>();
-        public uint MountId;
-        public uint PetId;
-        public List<PetCustomization> PetCustomizations = new List<PetCustomization>();
-        public List<ushort> PetFlairUnlockBits = new List<ushort>();
-        public List<uint> UnlockedPetFlairs = new List<uint>();
+
         public byte Level
         {
             get => level;
@@ -79,6 +75,21 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private sbyte costumeIndex;
 
+        /// <summary>
+        /// Guid of the <see cref="WorldEntity"/> that currently being controlled by the <see cref="Player"/>.
+        /// </summary>
+        public uint ControlGuid { get; private set; }
+
+        /// <summary>
+        /// Guid of the <see cref="Vehicle"/> the <see cref="Player"/> is a passenger on.
+        /// </summary>
+        public uint VehicleGuid { get; set; }
+
+        /// <summary>
+        /// Guid of the <see cref="VanityPet"/> currently summoned by the <see cref="Player"/>.
+        /// </summary>
+        public uint PetGuid { get; set; }
+
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
@@ -88,6 +99,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public TitleManager TitleManager { get; }
         public SpellManager SpellManager { get; }
         public CostumeManager CostumeManager { get; }
+        public PetCustomisationManager PetCustomisationManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -122,6 +134,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager     = new PathManager(this, model);
             TitleManager    = new TitleManager(this, model);
             SpellManager    = new SpellManager(this, model);
+            PetCustomisationManager = new PetCustomisationManager(this, model);
 
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
@@ -156,47 +169,6 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
             SpellManager.AddSpell(62563); // pet
             SpellManager.AddSpell(62562); // pet
-
-            //temp...
-            UnlockedPetFlairs.Add(1244); // falkron flair
-            UnlockedPetFlairs.Add(1245); // falkron flair
-            UnlockedPetFlairs.Add(1246); // falkron flair
-            UnlockedPetFlairs.Add(130); // this has prerequisits - removal test
-            UnlockedPetFlairs.Add(131); // this has prerequisits - removal test
-
-            UnlockedPetFlairs.Add(60); // raptor flair
-            UnlockedPetFlairs.Add(61); // raptor flair
-            UnlockedPetFlairs.Add(62); // raptor flair
-
-            foreach (var unlockedPetFlair in UnlockedPetFlairs)
-            {
-                if (unlockedPetFlair < 1)
-                    continue;
-
-                var petFlair = GameTableManager.PetFlair.GetEntry(unlockedPetFlair);
-                if (petFlair == null)
-                    continue;
-
-                // TODO: check if prerequisits are met
-                if (petFlair.PrerequisiteId > 0)
-                    continue;
-
-                foreach (var unlockBit in petFlair.UnlockBitIndex)
-                    if(unlockBit > 0)
-                        PetFlairUnlockBits.Add((ushort)unlockBit);
-            }
-
-            foreach (var pet in SpellManager.GetPets())
-            {
-                //FIXME: this is sample code how to map flairs, e.g. from persitent storage
-
-                PetCustomizations.Add(new PetCustomization
-                {
-                    PetType = PetType.GroundMount, //fixme
-                    Spell4Id = pet.Info.GetSpellInfo(1).Entry.Id,
-                    PetFlairIds = new uint[4] {0,0,0,0}
-                });
-            }
 
             Costume costume = null;
             if (CostumeIndex >= 0)
@@ -292,6 +264,10 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.OnRelocate(vector);
             saveMask |= PlayerSaveMask.Location;
+
+            // TODO: remove this once pathfinding is implemented
+            if (PetGuid > 0)
+                Map.EnqueueRelocate(GetVisible<VanityPet>(PetGuid), vector);
         }
 
         protected override void OnZoneUpdate()
@@ -318,11 +294,7 @@ namespace NexusForever.WorldServer.Game.Entity
             
             Session.EnqueueMessageEncrypted(new ServerPathLog());
             Session.EnqueueMessageEncrypted(new Server00F1());
-            Session.EnqueueMessageEncrypted(new ServerMovementControl
-            {
-                Ticket = 1,
-                Immediate = true,
-            });
+            SetControl(this);
 
             // this seems to set values at the client by id, needs more research
             // id 11 is related to costume slots
@@ -373,12 +345,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             TitleManager.SendTitles();
             SpellManager.SendInitialPackets();
-
-            Session.EnqueueMessageEncrypted(new ServerPetCustomizationList
-            {
-                PetFlairUnlockBits = PetFlairUnlockBits,
-                PetCustomizations = PetCustomizations
-            });
+            PetCustomisationManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -403,8 +370,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public override ServerEntityCreate BuildCreatePacket()
         {
             ServerEntityCreate entityCreate = base.BuildCreatePacket();
-
-            if (MountId < 1)
+            if (VehicleGuid == 0u)
                 return entityCreate;
 
             entityCreate.Commands = new Dictionary<EntityCommand, IEntityCommand>
@@ -413,45 +379,21 @@ namespace NexusForever.WorldServer.Game.Entity
                     EntityCommand.SetPlatform,
                     new SetPlatformCommand
                     {
-                        Platform = MountId
+                        Platform = VehicleGuid
                     }
                 },
                 {
                     EntityCommand.SetPosition,
                     new SetPositionCommand
                     {
-                        Position = new Position(new Vector3(0,0,0))
-                    }
-                },
-                {
-                    EntityCommand.SetVelocityDefaults,
-                    new SetVelocityDefaultsCommand
-                    {
-                    }
-                },
-                {
-                    EntityCommand.SetMove,
-                    new SetMoveCommand
-                    {
+                        Position = new Position(new Vector3(0f,0f,0f))
                     }
                 },
                 {
                     EntityCommand.SetRotation,
                     new SetRotationCommand
                     {
-                        Position = new Position(new Vector3(0,0,0))
-                    }
-                 },
-                {
-                    EntityCommand.SetState,
-                    new SetStateCommand
-                    {
-                    }
-                 },
-                {
-                    EntityCommand.SetModeDefault,
-                    new SetModeDefaultCommand
-                    {
+                        Position = new Position(new Vector3(0f,0f,0f))
                     }
                 }
             };
@@ -462,33 +404,6 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.AddVisible(entity);
             Session.EnqueueMessageEncrypted(((WorldEntity)entity).BuildCreatePacket());
-
-            if (entity is Mount mount)
-            {
-                if (mount.OwnerGuid != Guid)
-                {
-                   Session.EnqueueMessageEncrypted(new Server08B3
-                   {
-                        MountGuid = mount.Guid,
-                        Unknown0  = 0,
-                        Unknown1  = true
-                    });
-
-                    mount.UpdateVisuals();
-
-                    Session.EnqueueMessageEncrypted(new Server089B
-                    {
-                        UnitId    = mount.Guid,
-                        MountGuid = mount.OwnerGuid
-                    });
-
-                    Session.EnqueueMessageEncrypted(new Server086F
-                    {
-                        MountGuid = mount.Guid,
-                        OwnerGuid = mount.OwnerGuid
-                    });
-                }
-            }
 
             if (entity is Player player)
                 player.PathManager.SendSetUnitPathTypePacket();
@@ -505,16 +420,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void RemoveVisible(GridEntity entity)
         {
-            // disembark
-            if (entity is Mount mount)
-            {
-                // my horse is amazing
-                if (MountId == mount.Guid)
-                {
-                    mount.Disembark(this);
-                }
-            }
-
             base.RemoveVisible(entity);
 
             if (entity != this)
@@ -525,6 +430,22 @@ namespace NexusForever.WorldServer.Game.Entity
                     Unknown0 = true
                 });
             }
+        }
+
+        /// <summary>
+        /// Set the <see cref="WorldEntity"/> that currently being controlled by the <see cref="Player"/>.
+        /// </summary>
+        public void SetControl(WorldEntity entity)
+        {
+            ControlGuid = entity.Guid;
+            entity.ControllerGuid = Guid;
+
+            Session.EnqueueMessageEncrypted(new ServerMovementControl
+            {
+                Ticket    = 1,
+                Immediate = true,
+                UnitId    = entity.Guid
+            });
         }
 
         /// <summary>
@@ -678,6 +599,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager.Save(context);
             TitleManager.Save(context);
             CostumeManager.Save(context);
+            PetCustomisationManager.Save(context);
         }
     }
 }
