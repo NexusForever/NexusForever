@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
@@ -8,7 +7,6 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
-using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Spell
@@ -29,8 +27,8 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             target.CastSpell(info.Entry.DataBits00, new SpellParameters
             {
-                ParentSpellInfo = parameters.SpellInfo,
-                RootSpellInfo = parameters.RootSpellInfo,
+                ParentSpellInfo        = parameters.SpellInfo,
+                RootSpellInfo          = parameters.RootSpellInfo,
                 UserInitiatedSpellCast = false
             });
         }
@@ -39,50 +37,26 @@ namespace NexusForever.WorldServer.Game.Spell
         private void HandleEffectSummonMount(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
             // TODO: handle NPC mounting?
-
-            Player player = (Player)target;
-            if (player.MountId != 0)
+            if (!(target is Player player))
                 return;
 
-            PetType mountType = info.Entry.DataBits01 == 411 ? PetType.HoverBoard : PetType.GroundMount;
-            var mount = new Mount(player, info.Entry.DataBits00, info.Entry.SpellId, mountType);
-
-            if (mount == null)
+            if (player.VehicleGuid != 0u)
                 return;
+
+            var mount = new Mount(player, parameters.SpellInfo.Entry.Id, info.Entry.DataBits00, info.Entry.DataBits01, info.Entry.DataBits04);
+            mount.EnqueuePassengerAdd(player, VehicleSeatType.Pilot, 0);
 
             // usually for hover boards
-            if (info.Entry.DataBits04 > 0)
+            /*if (info.Entry.DataBits04 > 0u)
             {
-                mount.itemVisuals.Add(ItemSlot.Mount, new ItemVisual
+                mount.SetAppearance(new ItemVisual
                 {
-                    Slot = ItemSlot.Mount,
+                    Slot      = ItemSlot.Mount,
                     DisplayId = (ushort)info.Entry.DataBits04
                 });
-            }
+            }*/
 
             player.Map.EnqueueAdd(mount, player.Position);
-
-            // FIXME: add itemvisuals BodyType for hover boards?
-
-            var petCustomizations = player.PetCustomizations.SingleOrDefault(p => p.Spell4Id == mount.Spell.Id);
-            if (petCustomizations != null)
-            {
-                foreach (var petFlairId in petCustomizations.PetFlairIds)
-                {
-                    if (petFlairId < 1)
-                        continue;
-
-                    var petFlair = GameTableManager.PetFlair.GetEntry(petFlairId);
-                    Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(petFlair.Spell4Id);
-                    SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4Entry.Spell4BaseIdBaseSpell);
-                    SpellInfo spellInfo = spellBaseInfo.GetSpellInfo((byte)spell4Entry.TierIndex);
-
-                    mount.CastSpell(new SpellParameters
-                    {
-                        SpellInfo = spellInfo
-                    });
-                }
-            }
 
             // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464
             // FIXME: also cast 80530,Mount Sprint  - Tier 2,36122
@@ -97,59 +71,6 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if (target is Player player)
                 player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
-        }
-
-        [SpellEffectHandler(SpellEffectType.SummonVanityPet)]
-        private void HandleEffectSummonVanityPet(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
-        {
-            Player player = (Player)target;
-            var vanityPet = new VanityPet(player, info.Entry.DataBits00);
-
-            if (vanityPet == null)
-                return;
-
-            player.Map.EnqueueAdd(vanityPet, player.Position);
-        }
-
-        [SpellEffectHandler(SpellEffectType.UnlockPetFlair)]
-        private void HandleEffectUnlockPetFlair(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
-        {
-            Mount mount = (Mount)target;
-            Player owner = mount.Map.GetEntity<Player>(mount.OwnerGuid);
-
-            var petFlair = GameTableManager.PetFlair.GetEntry(info.Entry.DataBits00);
-            var petCustomization = owner.PetCustomizations.SingleOrDefault(p => p.Spell4Id == mount.Spell.Id);
-
-            if (petFlair == null)
-                throw new ArgumentOutOfRangeException();
-
-            // Spell(Effect) Info does not specify if the spell is cast for left or right side...
-            ItemSlot slot = 0;
-            for (int i = 0; i < 4; i++)
-            {
-                if (petCustomization.PetFlairIds[i] == petFlair.Id)
-                    if (!mount.itemVisuals.ContainsKey(slot = ItemSlot.MountFront + i))
-                        break;
-            }
-            if (slot == 0)
-                return;
-
-            int displayIndex = slot == ItemSlot.MountRight ? 1 : 0;
-            ItemDisplayEntry itemDisplay = new ItemDisplayEntry();
-
-            if (petFlair.ItemDisplayId[displayIndex] > 0)
-                itemDisplay = GameTableManager.ItemDisplay.GetEntry(petFlair.ItemDisplayId[displayIndex]);
-
-            if (itemDisplay != null)
-                mount.ItemColorSetId = itemDisplay.ItemColorSetId;
-
-            mount.itemVisuals.Add(slot, new ItemVisual
-            {
-                Slot = slot,
-                DisplayId = (ushort)petFlair.ItemDisplayId[displayIndex]
-            });
-
-            mount.UpdateVisuals();
         }
 
         [SpellEffectHandler(SpellEffectType.RapidTransport)]
@@ -171,17 +92,23 @@ namespace NexusForever.WorldServer.Game.Spell
             player.TeleportTo((ushort)worldLocation.WorldId, worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
         }
 
-        [SpellEffectHandler(SpellEffectType.Disguise)]
-        private void HandleEffectDisguise(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        [SpellEffectHandler(SpellEffectType.UnlockPetFlair)]
+        private void HandleEffectUnlockPetFlair(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
+            if (!(target is Player player))
+                return;
+
+            player.PetCustomisationManager.UnlockFlair((ushort)info.Entry.DataBits00);
         }
-        [SpellEffectHandler(SpellEffectType.DisguiseOutfit)]
-        private void HandleEffectDisguiseOutfit(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+
+        [SpellEffectHandler(SpellEffectType.SummonVanityPet)]
+        private void HandleEffectSummonVanityPet(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-        }
-        [SpellEffectHandler(SpellEffectType.MimicDisguise)]
-        private void HandleEffectMimicDisguise(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
-        {
+            if (!(target is Player player))
+                return;
+
+            var vanityPet = new VanityPet(player, info.Entry.DataBits00);
+	        player.Map.EnqueueAdd(vanityPet, player.Position);
         }
     }
 }

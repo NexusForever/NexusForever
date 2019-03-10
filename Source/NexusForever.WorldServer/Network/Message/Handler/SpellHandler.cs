@@ -53,21 +53,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             //TODO: integrate into some Spell System removal queue & do the checks & handle stopped effects
             session.Player.EnqueueToVisible(new ServerSpellFinish
             {
-                ServerUniqueId = cancelSpell.ServerUniqueId
-            }, true);
-        }
-
-        [MessageHandler(GameMessageOpcode.ClientDisembark)]
-        public static void HandlePlayerDisembark(WorldSession session, ClientDisembark nothing)
-        {
-            var owner = session.Player;
-
-            if (owner.MountId < 1)
-                throw new InvalidPacketValueException();
-
-            var mount = owner.Map.GetEntity<Mount>(owner.MountId);
-
-            mount.RemoveFromMap();
+                ServerUniqueId  = cancelSpell.ServerUniqueId
+            },true);
         }
     }
 }

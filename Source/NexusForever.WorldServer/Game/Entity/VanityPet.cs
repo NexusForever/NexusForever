@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
@@ -22,10 +21,10 @@ namespace NexusForever.WorldServer.Game.Entity
         public VanityPet(Player owner, uint creature)
             : base(EntityType.Pet)
         {
-            OwnerGuid = owner.Guid;
-            Creature = GameTableManager.Creature2.GetEntry(creature);
-            Creature2DisplayGroup = GameTableManager.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == Creature.Creature2DisplayGroupId);
-            DisplayInfo = Creature2DisplayGroup.Creature2DisplayInfoId;
+            OwnerGuid               = owner.Guid;
+            Creature                = GameTableManager.Creature2.GetEntry(creature);
+            Creature2DisplayGroup   = GameTableManager.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == Creature.Creature2DisplayGroupId);
+            DisplayInfo             = Creature2DisplayGroup.Creature2DisplayInfoId;
 
             SetProperty(Property.BaseHealth, 800.0f, 800.0f);
 
@@ -38,25 +37,24 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             return new PetEntityModel
             {
-                CreatureId = Creature.Id,
-                OwnerId = OwnerGuid,
-                Name = ""
+                CreatureId  = Creature.Id,
+                OwnerId     = OwnerGuid,
+                Name        = ""
             };
         }
 
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
             base.OnAddToMap(map, guid, vector);
-            var owner = Map.GetEntity<Player>(OwnerGuid);
-            owner.PetId = Guid;
+            Player owner = GetVisible<Player>(OwnerGuid);
+            owner.PetGuid = Guid;
 
             owner.EnqueueToVisible(new Server08B3
             {
                 MountGuid = Guid,
-                Unknown0 = 0,
-                Unknown1 = true
+                Unknown0  = 0,
+                Unknown1  = true
             }, true);
-
         }
 
         public override ServerEntityCreate BuildCreatePacket()

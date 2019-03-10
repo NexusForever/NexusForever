@@ -96,7 +96,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public uint Guid { get; set; }
         public EntityType Type { get; set; }
-        public byte Unknown60 { get; set; }
+        public byte CreateFlags { get; set; }
         public IEntityModel EntityModel { get; set; }
         public List<StatValue> Stats { get; set; } = new List<StatValue>();
         public uint Unknown68 { get; set; }
@@ -121,7 +121,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Guid);
             writer.Write(Type, 6);
             EntityModel.Write(writer);
-            writer.Write(Unknown60);
+            writer.Write(CreateFlags);
 
             writer.Write((byte)Stats.Count, 5);
             Stats.ForEach(o => o.Write(writer));

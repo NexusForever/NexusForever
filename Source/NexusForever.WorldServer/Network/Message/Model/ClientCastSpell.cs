@@ -12,8 +12,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            BagIndex = reader.ReadUShort();
-            Guid = reader.ReadUInt();
+            BagIndex  = reader.ReadUShort();
+            Guid      = reader.ReadUInt();
             ButtonPressed = reader.ReadBit();
         }
     }

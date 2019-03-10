@@ -1,4 +1,4 @@
-﻿using NexusForever.Shared.Network;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            ServerUniqueId = reader.ReadUInt();
+            ServerUniqueId  = reader.ReadUInt();
         }
     }
 }

@@ -4,20 +4,20 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server089B, MessageDirection.Server)]
-    public class Server089B : IWritable
+    [Message(GameMessageOpcode.ServerVehiclePassengerAdd, MessageDirection.Server)]
+    public class ServerVehiclePassengerAdd : IWritable
     {
         public uint Self { get; set; }
-        public uint Vehicle { get; set; }
         public VehicleSeatType SeatType { get; set; }
         public byte SeatPosition { get; set; }
+        public uint UnitId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Self);
-            writer.Write(Vehicle);
             writer.Write(SeatType, 2u);
             writer.Write(SeatPosition, 3u);
+            writer.Write(UnitId);
         }
     }
 }
