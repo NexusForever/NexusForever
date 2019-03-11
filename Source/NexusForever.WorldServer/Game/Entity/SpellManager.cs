@@ -110,14 +110,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 .ToList();
         }
 
-        public List<UnlockedSpell> GetPets()
-        {
-            return spells.Values
-                .Where(s => s.Info.SpellType.Id == 27 ||
-                            s.Info.SpellType.Id == 30 ||
-                            s.Info.SpellType.Id == 104)
-                .ToList();
-        }
 
         /// <summary>
         /// Return spell cooldown for supplied spell id in seconds.
