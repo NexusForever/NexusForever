@@ -137,6 +137,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PetCustomisationManager = new PetCustomisationManager(this, model);
 
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
+            Stats.Add(Stat.Sheathed, new StatValue(Stat.Sheathed, 1));
 
             // temp
             Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
