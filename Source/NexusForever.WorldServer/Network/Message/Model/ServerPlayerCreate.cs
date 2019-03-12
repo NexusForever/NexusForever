@@ -52,15 +52,15 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-        public class CharacterEntitlement : IWritable
+        public class UnknownStructure : IWritable
         {
-            public Entitlement Entitlement { get; set; }
-            public uint Count { get; set; }
+            public ushort Unknown0 { get; set; }
+            public uint Unknown4 { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Entitlement, 14u);
-                writer.Write(Count);
+                writer.Write(Unknown0, 14u);
+                writer.Write(Unknown4);
             }
         }
 
@@ -86,7 +86,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public float GearScore { get; set; }
         public bool IsPvpServer { get; set; }
         public uint Unknown4DC { get; set; }
-        public List<CharacterEntitlement> CharacterEntitlements { set; get; } = new List<CharacterEntitlement>();
+        public List<UnknownStructure> Unknown4E4 { get; } = new List<UnknownStructure>();
 
         public void Write(GamePacketWriter writer)
         {
@@ -126,8 +126,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(IsPvpServer);
             writer.Write(Unknown4DC);
 
-            writer.Write(CharacterEntitlements.Count);
-            CharacterEntitlements.ForEach(u => u.Write(writer));
+            writer.Write(Unknown4E4.Count);
+            Unknown4E4.ForEach(u => u.Write(writer));
         }
     }
 }

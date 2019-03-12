@@ -39,7 +39,6 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
-
         [SubCommandHandler("resetcooldown", "[spell4Id] - Reset a single spell cooldown, if no spell if supplyed all cooldowns will be reset")]
         public Task ResetCooldownSubCommand(CommandContext context, string command, string[] parameters)
         {
@@ -47,14 +46,6 @@ namespace NexusForever.WorldServer.Command.Handler
                 context.Session.Player.SpellManager.SetSpellCooldown(uint.Parse(parameters[0]), 0d);
             else
                 context.Session.Player.SpellManager.ResetAllSpellCooldowns();
-
-            return Task.CompletedTask;
-        }
-
-        [SubCommandHandler("resetRT", "resets Rapid Transport CD")]
-        public Task ResetSpellSubCommand(CommandContext context, string command, string[] parameters)
-        {
-            context.Session.Player.SpellManager.SetSpellCooldown(82922, 0d);    //SpellID for Rapid Transport = 82922
 
             return Task.CompletedTask;
         }

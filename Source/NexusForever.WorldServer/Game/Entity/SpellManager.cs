@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private double globalSpellCooldown;
 
         private readonly ActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
-        private byte activeActionSet = 0;
+        private byte activeActionSet;
 
         /// <summary>
         /// Create a new <see cref="SpellManager"/> from existing <see cref="Character"/> database model.
@@ -101,6 +101,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             return spells.TryGetValue(spell4BaseId, out UnlockedSpell spell) ? spell : null;
         }
+
         public List<UnlockedSpell> GetPets()
         {
             return spells.Values
@@ -109,7 +110,6 @@ namespace NexusForever.WorldServer.Game.Entity
                             s.Info.SpellType.Id == 104)
                 .ToList();
         }
-
 
         /// <summary>
         /// Return spell cooldown for supplied spell id in seconds.

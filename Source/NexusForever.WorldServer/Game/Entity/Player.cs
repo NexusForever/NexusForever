@@ -147,10 +147,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
-            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 2f, 2f));
-            Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 5f, 5f));
+            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
+            Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
             Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
-            Properties.Add(Property.MountSpeedMultiplier, new PropertyValue(Property.MountSpeedMultiplier, 5f, 5f));
 
             // temp
             // TODO:
@@ -162,19 +161,6 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.AddSpell(38934); // some pewpew mount
             SpellManager.AddSpell(62503); // falkron mount
             SpellManager.AddSpell(63431); // zBoard 79 mount
-            SpellManager.AddSpell(54977); // Snarf
-            SpellManager.AddSpell(44433); // eldan hoverboard
-            SpellManager.AddSpell(47868); // uniblade hotrod
-            SpellManager.AddSpell(51967); // data drifter
-            SpellManager.AddSpell(63220); // LIFTY
-            SpellManager.AddSpell(62899); // uniblade infared
-            SpellManager.AddSpell(62880); // BOAT
-            SpellManager.AddSpell(61946); // hoverboard loftite
-            SpellManager.AddSpell(61954); // hoverboard fungal
-            SpellManager.AddSpell(62730); // loftite girrok
-            SpellManager.AddSpell(62318); // velocirex electrified
-            SpellManager.AddSpell(62176); // snarf panda
-
             SpellManager.AddSpell(31213); // Spellsurge
             SpellManager.AddSpell(38229); // Portal capital city
             SpellManager.AddSpell(23148); // Shred
