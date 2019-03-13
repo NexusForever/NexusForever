@@ -500,9 +500,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             uint experience = info.GetRewardExperience();
             if (experience != 0u)
-            {
-                // TODO: reward experience
-            }
+                player.GrantXp(experience, ExpReason.Quest);
 
             uint money = info.GetRewardMoney();
             if (money != 0u)

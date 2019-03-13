@@ -31,6 +31,8 @@ namespace NexusForever.Database.Character.Model
         public uint TimePlayedLevel { get; set; }
         public DateTime? DeleteTime { get; set; }
         public string OriginalName { get; set; }
+        public uint TotalXp { get; set; }
+        public uint RestBonusXp { get; set; }
 
         public ResidenceModel Residence { get; set; }
         public ICollection<CharacterAchievementModel> Achievement { get; set; } = new HashSet<CharacterAchievementModel>();

@@ -25,6 +25,8 @@ using NexusForever.WorldServer.Game.Setting;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Static;
+using NexusForever.WorldServer.Game.Spell;
+using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -113,6 +115,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public bool IsSitting => currentChairGuid != null;
         private uint? currentChairGuid;
+        
+        public bool SignatureEnabled = false; // TODO: Make configurable.
 
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
@@ -136,6 +140,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public QuestManager QuestManager { get; }
         public CharacterAchievementManager AchievementManager { get; }
         public SupplySatchelManager SupplySatchelManager { get; }
+        public XpManager XpManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -183,6 +188,7 @@ namespace NexusForever.WorldServer.Game.Entity
             QuestManager            = new QuestManager(this, model);
             AchievementManager      = new CharacterAchievementManager(this, model);
             SupplySatchelManager    = new SupplySatchelManager(this, model);
+            XpManager               = new XpManager(this, model);
 
             Session.EntitlementManager.OnNewCharacter(model);
 
@@ -424,7 +430,9 @@ namespace NexusForever.WorldServer.Game.Entity
                         Count       = e.Amount
                     })
                     .ToList(),
-                TradeskillMaterials   = SupplySatchelManager.BuildNetworkPacket()
+                TradeskillMaterials   = SupplySatchelManager.BuildNetworkPacket(),
+                Xp                    = XpManager.TotalXp,
+                RestBonusXp           = XpManager.RestBonusXp
             };
 
             foreach (Currency currency in CurrencyManager)
@@ -737,6 +745,14 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Shortcut method to grant XP to the player
+        /// </summary>
+        public void GrantXp(uint xp, ExpReason reason = ExpReason.Cheat)
+        {
+            XpManager.GrantXp(xp, reason);
+        }
+
+        /// <summary>
         /// Send <see cref="GenericError"/> to <see cref="Player"/>.
         /// </summary>
         public void SendGenericError(GenericError error)
@@ -747,6 +763,10 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
+        /// <summary>
+        /// Send message to <see cref="Player"/> using the <see cref="ChatChannel.System"/> channel.
+        /// </summary>
+        /// <param name="text"></param>
         public void SendSystemMessage(string text)
         {
             Session.EnqueueMessageEncrypted(new ServerChat
@@ -844,6 +864,7 @@ namespace NexusForever.WorldServer.Game.Entity
             QuestManager.Save(context);
             AchievementManager.Save(context);
             SupplySatchelManager.Save(context);
+            XpManager.Save(context);
 
             Session.EntitlementManager.Save(context);
         }

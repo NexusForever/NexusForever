@@ -159,6 +159,11 @@ namespace NexusForever.Database.Character
                     .HasColumnType("tinyint(3) unsigned")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.RestBonusXp)
+                    .HasColumnName("restBonusXp")
+                    .HasColumnType("int unsigned")
+                    .HasDefaultValue(0);
+
                 entity.Property(e => e.Sex)
                     .HasColumnName("sex")
                     .HasColumnType("tinyint(3) unsigned")
@@ -177,6 +182,11 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Title)
                     .HasColumnName("title")
                     .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.TotalXp)
+                    .HasColumnName("totalXp")
+                    .HasColumnType("int unsigned")
                     .HasDefaultValue(0);
 
                 entity.Property(e => e.WorldId)
