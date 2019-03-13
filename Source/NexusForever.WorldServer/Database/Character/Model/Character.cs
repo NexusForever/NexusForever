@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterPetCustomisation = new HashSet<CharacterPetCustomisation>();
             CharacterPetFlair = new HashSet<CharacterPetFlair>();
             CharacterTitle = new HashSet<CharacterTitle>();
+            CharacterKeybinding = new HashSet<CharacterKeybinding>();
             Item = new HashSet<Item>();
         }
 
@@ -36,6 +37,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public uint ActivePath { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
         public sbyte ActiveCostumeIndex { get; set; }
+        public sbyte InputKeySet { get; set; }
 
         public virtual Residence Residence { get; set; }
         public virtual ICollection<CharacterAppearance> CharacterAppearance { get; set; }
@@ -47,6 +49,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual ICollection<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual ICollection<CharacterPetFlair> CharacterPetFlair { get; set; }
         public virtual ICollection<CharacterTitle> CharacterTitle { get; set; }
+        public virtual ICollection<CharacterKeybinding> CharacterKeybinding { get; set; }
         public virtual ICollection<Item> Item { get; set; }
     }
 }

@@ -9,6 +9,7 @@ namespace NexusForever.Shared.Database.Auth.Model
         {
             AccountCostumeUnlock = new HashSet<AccountCostumeUnlock>();
             AccountGenericUnlock = new HashSet<AccountGenericUnlock>();
+            AccountKeybinding    = new HashSet<AccountKeybinding>();
         }
 
         public uint Id { get; set; }
@@ -21,5 +22,6 @@ namespace NexusForever.Shared.Database.Auth.Model
 
         public virtual ICollection<AccountCostumeUnlock> AccountCostumeUnlock { get; set; }
         public virtual ICollection<AccountGenericUnlock> AccountGenericUnlock { get; set; }
+        public virtual ICollection<AccountKeybinding> AccountKeybinding { get; set; }
     }
 }
