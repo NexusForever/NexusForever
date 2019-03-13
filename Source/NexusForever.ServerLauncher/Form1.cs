@@ -102,7 +102,7 @@ namespace NexusForever.ServerLauncher
             authApplication.StartInfo   = new ProcessStartInfo()
             {
                 FileName = "dotnet",
-                Arguments = ConfigurationManager<ServerConfiguration>.Config.AuthPath
+                Arguments = AuthPath
             };
 
             authApplication.Start();
@@ -129,7 +129,7 @@ namespace NexusForever.ServerLauncher
             stsApplication.StartInfo    = new ProcessStartInfo()
             {
                 FileName = "dotnet",
-                Arguments = ConfigurationManager<ServerConfiguration>.Config.StsPath
+                Arguments = StsPath
             };
 
             stsApplication.Start();
@@ -155,7 +155,7 @@ namespace NexusForever.ServerLauncher
             worldApplication.StartInfo  = new ProcessStartInfo()
             {
                 FileName = "dotnet",
-                Arguments = ConfigurationManager<ServerConfiguration>.Config.WorldPath
+                Arguments = WorldPath
             };
 
             worldApplication.Start();
