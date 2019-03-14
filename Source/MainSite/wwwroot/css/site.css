@@ -60,24 +60,38 @@ hr {
     width: 200px;
     border:dashed;
     border-width:thin;
-    border-color: aqua;
+    border-bottom:none;
+    border-color: black;
+}
+
+#inputFieldBottom {
+    background-color: rgba(130, 251, 245, 0.4);
+    width: 200px;
+    border: dashed;
+    border-width: thin;
+    border-color: black;
 }
 
 #buttonReg {
-    background: none;
+    background: rgba(130, 251, 245, 0.4);
     border: solid;
     border-color: aqua;
+    position:absolute;
 }
 
 #registrationDiv {
     background-color: rgba(130, 251, 245, 0.3);
-    width: 100%;
-    height: 100%;
+    width: auto;
+    height: auto;
     /*background-image: url('https://i.stack.imgur.com/sIIwU.gif');
     background-repeat: repeat;
     background-attachment: fixed;
     background-position: center;
     background-size: auto;*/
+}
+
+#textConsistency{
+    color:black;
 }
 
 /* Hide/rearrange for smaller screens */
