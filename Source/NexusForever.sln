@@ -17,7 +17,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.ClientConnecto
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.MapGenerator", "NexusForever.MapGenerator\NexusForever.MapGenerator.csproj", "{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.MapGenerator", "NexusForever.MapGenerator\NexusForever.MapGenerator.csproj", "{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainSite", "MainSite\MainSite.csproj", "{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{775E278A-6EED-4E11-B484-8538593CE0A8} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{D6201763-C0A1-4725-88E3-DCB3C35F5F73} = {96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7} = {96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}
+		{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D83B735-7E6A-4C1A-83C4-DD80682C2859}

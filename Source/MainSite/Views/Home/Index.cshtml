@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Wildstar Server";
+}
+
+<body>
+    @*@using (@Html.BeginForm("Register", "Home", FormMethod.Post))
+    {
+    @model MainSite.Models.AccountBaseModel*@
+    <div id="registrationDiv">
+        <form asp-action="Register" method="post">
+            <div>
+                <table align="center">
+                    <tr>
+                        <td style="text-align:right">Email:</td>
+                        <td>
+                            <input type="email" name="Email" id="inputField" />
+                        </td>
+                        <td style="padding:0px 0px 0px 5px">< --- Will be used to inform your loved ones upon your demise.</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:right">Password:</td>
+                        <td>
+                            <input type="password" name="Password" id="inputField" />
+                        </td>
+                        <td style="padding:0px 0px 0px 5px">< --- For your personal belongings.</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:right">Confirm Password:</td>
+                        <td>
+                            <input type="password" name="Confirmation" id="inputField" />
+                        </td>
+                        <td style="padding:0px 0px 0px 5px">< --- Not everyone is as sharp as you are, we will ask you to do it again.</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="submit" value="Register" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </div>
+    @*}*@
+</body>
