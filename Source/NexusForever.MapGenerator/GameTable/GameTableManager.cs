@@ -9,20 +9,24 @@ namespace NexusForever.MapGenerator.GameTable
     {
         public static GameTable<WorldEntry> World { get; private set; }
 
-        public static void Initialise(Archive archive)
+        public static void Initialise()
         {
-            World = LoadGameTable<WorldEntry>(archive, "DB\\World.tbl");
+            World = LoadGameTable<WorldEntry>("World.tbl");
         }
 
-        private static GameTable<T> LoadGameTable<T>(Archive archive, string path) where T : class, new()
+        /// <summary>
+        /// Return <see cref="GameTable{T}"/> for supplied table name found in the main client archive.
+        /// </summary>
+        private static GameTable<T> LoadGameTable<T>(string name) where T : class, new()
         {
-            if (!(archive.IndexFile.FindEntry(path) is IArchiveFileEntry file))
+            string filePath = Path.Combine("DB", name);
+            if (!(ArchiveManager.MainArchive.IndexFile.FindEntry(filePath) is IArchiveFileEntry file))
                 throw new FileNotFoundException();
 
-            using (Stream stream = archive.OpenFileStream(file))
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (Stream archiveStream = ArchiveManager.MainArchive.OpenFileStream(file))
+            using (var memoryStream = new MemoryStream())
             {
-                stream.CopyTo(memoryStream);
+                archiveStream.CopyTo(memoryStream);
                 memoryStream.Position = 0;
                 return new GameTable<T>(memoryStream);
             }
