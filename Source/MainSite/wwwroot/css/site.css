@@ -17,33 +17,15 @@ body {
     padding-right: 15px;
 }
 
-/* Carousel */
-.carousel-caption p {
-    font-size: 20px;
-    line-height: 1.4;
-}
-
-/* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"] {
-    width: 100%;
-}
-
-
-/* QR code generator */
-#qrCode {
-    margin: 15px;
-}
-
 #footer {
-    position:absolute;
+    position: absolute;
     bottom: 0;
     width: inherit;
     height: 50px; /* Height of the footer */
-    text-align:center;
-    color:white;
+    text-align: center;
+    color: white;
     text-shadow: 3px 3px 3px black;
     border-color: black;
-
 }
 
 hr {
@@ -57,16 +39,16 @@ hr {
 
 #inputField {
     background-color: rgba(130, 251, 245, 0.4);
-    width: 200px;
-    border:dashed;
-    border-width:thin;
-    border-bottom:none;
+    width: 100%;
+    border: dashed;
+    border-width: thin;
+    border-bottom: none;
     border-color: black;
 }
 
 #inputFieldBottom {
     background-color: rgba(130, 251, 245, 0.4);
-    width: 200px;
+    width: 100%;
     border: dashed;
     border-width: thin;
     border-color: black;
@@ -76,28 +58,24 @@ hr {
     background: rgba(130, 251, 245, 0.4);
     border: solid;
     border-color: aqua;
-    position:absolute;
+    position:relative;
 }
 
 #registrationDiv {
-    background-color: rgba(130, 251, 245, 0.3);
     width: auto;
     height: auto;
-    /*background-image: url('https://i.stack.imgur.com/sIIwU.gif');
-    background-repeat: repeat;
-    background-attachment: fixed;
-    background-position: center;
-    background-size: auto;*/
+    position: center;
 }
 
-#textConsistency{
-    color:black;
+#textConsistency {
+    color: black;
 }
 
-/* Hide/rearrange for smaller screens */
-@media screen and (max-width: 767px) {
-    /* Hide captions */
-    .carousel-caption {
-        display: none;
-    }
+#mainContainer {
+    background-color: rgba(130, 251, 245, 0.3);
+    border: dashed;
+    border-color: black;
+    
+    height: 100%;
+    width: 100%;
 }
