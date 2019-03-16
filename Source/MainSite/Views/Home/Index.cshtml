@@ -3,42 +3,38 @@
 }
 
 <body>
-    @*@using (@Html.BeginForm("Register", "Home", FormMethod.Post))
-    {
-    @model MainSite.Models.AccountBaseModel*@
-    <div id="registrationDiv">
-        <form asp-action="Register" method="post">
-            <div>
-                <table align="center">
-                    <tr>
-                        <th style="text-align:right">Email:</th>
-                        <td>
-                            <input type="email" name="Email" id="inputField" />
-                        </td>
-                        <th id="textConsistency" style="padding:0px 0px 0px 5px">< --- Will be used to inform your loved ones upon your demise.</th>
-                    </tr>
-                    <tr>
-                        <th style="text-align:right">Password:</th>
-                        <td>
-                            <input type="password" name="Password" id="inputField" />
-                        </td>
-                        <th id="textConsistency" style="padding:0px 0px 0px 5px">< --- For your personal belongings.</th>
-                    </tr>
-                    <tr>
-                        <th style="text-align:right">Confirm Password:</th>
-                        <td>
-                            <input type="password" name="Confirmation" id="inputFieldBottom" />
-                        </td>
-                        <th id="textConsistency" style="padding:0px 0px 0px 5px">< --- Not everyone is as sharp as you are, we will ask you to do it again.</th>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="submit" value="Register" id="buttonReg"/>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </form>
+    <div class="container" id="mainContainer">
+        <div id="registrationDiv">
+            <form asp-action="Register" method="post">
+                    <table align="center">
+                        <tr>
+                            <th style="text-align:right">Email:</th>
+                            <td>
+                                <input type="email" name="Email" id="inputField" />
+                            </td>
+                            <th id="textConsistency" style="padding:0px 0px 0px 5px">< --- Will be used to inform your loved ones upon your demise.</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:right">Password:</th>
+                            <td>
+                                <input type="password" name="Password" id="inputField" />
+                            </td>
+                            <th id="textConsistency" style="padding:0px 0px 0px 5px">< --- For your personal belongings.</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:right">Confirm Password:</th>
+                            <td>
+                                <input type="password" name="Confirmation" id="inputFieldBottom" />
+                            </td>
+                            <th id="textConsistency" style="padding:0px 0px 0px 5px">< --- Not everyone is as sharp as you are, we will ask you to do it again.</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="submit" value="Register" id="buttonReg" />
+                            </td>
+                        </tr>
+                    </table>
+            </form>
+        </div>
     </div>
-    @*}*@
 </body>
