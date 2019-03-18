@@ -41,6 +41,7 @@ namespace NexusForever.Shared.Network.Message
         ClientRequestAmpReset           = 0x0151,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
+        ClientMailSend                  = 0x0168,
         ServerAbilityPoints             = 0x0169,
         ClientNonSpellActionSetChanges  = 0x016A,
         ServerShowActionBar             = 0x016C,
@@ -118,7 +119,7 @@ namespace NexusForever.Shared.Network.Message
         ClientPlayerInfoRequest         = 0x0597,
         ServerPlayerInfoBasicResponse   = 0x0598,
         ServerPlayerInfoFullResponse    = 0x0599,
-        ServerAvailableMail             = 0x05A3,
+        ServerMailAvailable             = 0x05A3,
         Server0635                      = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
