@@ -346,6 +346,39 @@ namespace NexusForever.WorldServer.Game.Entity
             TitleManager.SendTitles();
             SpellManager.SendInitialPackets();
             PetCustomisationManager.SendInitialPackets();
+
+            Session.EnqueueMessageEncrypted(new ServerMailAvailable
+            {
+                Unknown0 = true,
+                MailList = new List<ServerMailAvailable.Mail>
+                {
+                    new ServerMailAvailable.Mail
+                    {
+                        MailId = 445382167,
+                        SenderType = Mail.Static.SenderType.Player, 
+                        Subject = "Jesus",
+                        Message = "Christ",
+                        TextEntrySubject = 0,
+                        TextEntryMessage = 0,
+                        CreatureId = 0,
+                        CurrencyGiftType = 2,
+                        CurrencyGiftAmount = 0,
+                        CostOnDeliveryAmount = 25,
+                        ExpiryTimeInDays = 10f,
+                        Flags = Mail.Static.MailFlag.None,
+                        SenderRealm = 1,
+                        SenderCharacterId = 100,
+                        Attachments = new List<ServerMailAvailable.Mail.Attachment>
+                        {
+                            new ServerMailAvailable.Mail.Attachment
+                            {
+                                ItemId = 50762,
+                                Amount = 1
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         public ItemProficiency GetItemProficiences()

@@ -11,6 +11,7 @@ namespace NexusForever.Shared.Network.Message
         ServerAuthEncrypted             = 0x0076,
         ServerCharacterLogoutStart      = 0x0092,
         ServerChangeWorld               = 0x00AD,
+        ClientAbilityModify             = 0x00B1,
         ServerBuybackItemUpdated        = 0x00BA,
         ClientBuybackItemFromVendor     = 0x00BB,
         ServerBuybackItems              = 0x00BC,
@@ -38,6 +39,7 @@ namespace NexusForever.Shared.Network.Message
         ClientItemDelete                = 0x0149,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
+        ClientMailSend                  = 0x0168,
         ServerAbilityPoints             = 0x0169,
         ServerShowActionBar             = 0x016C,
         ServerSpellUpdate               = 0x017B,
@@ -108,7 +110,9 @@ namespace NexusForever.Shared.Network.Message
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
         ServerClientLogout              = 0x0594,
-        ServerAvailableMail             = 0x05A3,
+        ClientPlayerInfoRequest         = 0x0597,
+        ServerPlayerInfoBasicResponse   = 0x0598,
+        ServerMailAvailable             = 0x05A3,
         Server0635                      = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
