@@ -15,9 +15,9 @@ using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
-using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Mail;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Setting;
 using NexusForever.WorldServer.Game.Setting.Static;
@@ -98,6 +98,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// Guid of the <see cref="VanityPet"/> currently summoned by the <see cref="Player"/>.
         /// </summary>
         public uint PetGuid { get; set; }
+
+        public Dictionary<ulong, MailItem> AvailableMail { get; private set; } = new Dictionary<ulong, MailItem>();
 
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
@@ -189,6 +191,9 @@ namespace NexusForever.WorldServer.Game.Entity
             // sprint
             SetStat(Stat.Resource0, 500f);
             SetStat(Stat.Shield, 450u);
+
+            foreach (CharacterMail mail in model.CharacterMail)
+                AvailableMail.Add(mail.Id, new MailItem(mail));
         }
 
         public override void Update(double lastTick)
@@ -321,6 +326,12 @@ namespace NexusForever.WorldServer.Game.Entity
                         Id    = RewardProperty.ExtraDecorSlots,
                         Type  = 1,
                         Value = 2000
+                    },
+                    new ServerRewardPropertySet.RewardProperty
+                    {
+                        Id    = RewardProperty.Trading,
+                        Type  = 1,
+                        Value = 1
                     }
                 }
             });
@@ -365,6 +376,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PetCustomisationManager.SendInitialPackets();
             KeybindingManager.SendInitialPackets();
             DatacubeManager.SendInitialPackets();
+            MailManager.SendInitialPackets(Session);
         }
 
         public ItemProficiency GetItemProficiences()
@@ -610,6 +622,7 @@ namespace NexusForever.WorldServer.Game.Entity
             KeybindingManager.Save(context);
             SpellManager.Save(context);
             DatacubeManager.Save(context);
+            MailManager.Save(this, context);
         }
 
         /// <summary>

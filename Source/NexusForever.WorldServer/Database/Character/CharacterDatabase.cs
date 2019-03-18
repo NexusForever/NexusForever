@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Mail;
 using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 using ResidenceEntity = NexusForever.WorldServer.Game.Housing.Residence;
 
@@ -59,7 +60,7 @@ namespace NexusForever.WorldServer.Database.Character
         public static Model.Item GetItemById(ulong id)
         {
             using (var context = new CharacterContext())
-                return context.Item.First(e => e.Id == id);
+                return context.Item.FirstOrDefault(e => e.Id == id);
         }
 
         public static async Task<List<Model.Character>> GetCharacters(uint accountId)
@@ -85,6 +86,8 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterActionSetShortcut)
                         .Include(c => c.CharacterActionSetAmp)
                         .Include(c => c.CharacterDatacube)
+                        .Include(c => c.CharacterMail)
+                            .ThenInclude(c => c.CharacterMailAttachment)
                     .ToListAsync();
             }
         }
@@ -142,6 +145,21 @@ namespace NexusForever.WorldServer.Database.Character
                     .Include(r => r.Owner)
                     .Where(r => r.PrivacyLevel == 0)
                     .ToList();
+            }
+        }
+
+        public static ulong GetNextMailId()
+        {
+            using (var context = new CharacterContext())
+                return context.CharacterMail.DefaultIfEmpty().Max(s => s.Id);
+        }
+
+        public static async Task SaveMail(MailItem mail)
+        {
+            using (var context = new CharacterContext())
+            {
+                mail.Save(context);
+                await context.SaveChangesAsync();
             }
         }
     }

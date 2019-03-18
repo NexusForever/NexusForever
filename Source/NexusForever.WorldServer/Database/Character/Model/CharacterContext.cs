@@ -28,13 +28,15 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<CharacterDatacube> CharacterDatacube { get; set; }
+        public virtual DbSet<CharacterKeybinding> CharacterKeybinding { get; set; }
+        public virtual DbSet<CharacterMail> CharacterMail { get; set; }
+        public virtual DbSet<CharacterMailAttachment> CharacterMailAttachment { get; set; }
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual DbSet<CharacterPetFlair> CharacterPetFlair { get; set; }
         public virtual DbSet<CharacterSpell> CharacterSpell { get; set; }
         public virtual DbSet<CharacterStat> CharacterStat { get; set; }
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
-        public virtual DbSet<CharacterKeybinding> CharacterKeybinding { get; set; }
         public virtual DbSet<Item> Item { get; set; }
         public virtual DbSet<Residence> Residence { get; set; }
         public virtual DbSet<ResidenceDecor> ResidenceDecor { get; set; }
@@ -377,6 +379,37 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasConstraintName("FK__character_customisation_id__character_id");
             });
 
+            modelBuilder.Entity<CharacterDatacube>(entity =>
+            {
+                entity.HasKey(e => new {e.Id, e.Type, e.DatacubeId})
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_datacube");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.DatacubeId)
+                    .HasColumnName("datacube")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.Progress)
+                    .HasColumnName("progress")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterDatacube)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_datacube_id__character_id");
+            });
+
             modelBuilder.Entity<CharacterKeybinding>(entity =>
             {
                 entity.HasKey(e => new { e.Id, e.InputActionId })
@@ -447,35 +480,101 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasConstraintName("FK__character_keybinding_id__character_id");
             });
 
-            modelBuilder.Entity<CharacterDatacube>(entity =>
+            modelBuilder.Entity<CharacterMail>(entity =>
             {
-                entity.HasKey(e => new {e.Id, e.Type, e.DatacubeId})
+                entity.HasKey(e => new { e.Id })
                     .HasName("PRIMARY");
 
-                entity.ToTable("character_datacube");
+                entity.ToTable("character_mail");
 
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
+                entity.Property(e => e.CreateTime)
+                    .HasColumnName("createTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
+                entity.Property(e => e.CreatureId)
+                    .HasColumnName("creatureId")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.Type)
-                    .HasColumnName("type")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
+                entity.Property(e => e.CurrencyAmount)
+                    .HasColumnName("currencyAmount")
+                    .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.DatacubeId)
-                    .HasColumnName("datacube")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
+                entity.Property(e => e.CurrencyType)
+                    .HasColumnName("currencyType")
+                    .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.Progress)
-                    .HasColumnName("progress")
+                entity.Property(e => e.DeliveryTime)
+                    .HasColumnName("deliveryTime")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Flags)
+                    .HasColumnName("flags")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.HasPaidOrCollectedCurrency)
+                    .HasColumnName("hasPaidOrCollectedCurrency")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.IsCashOnDelivery)
+                    .HasColumnName("isCashOnDelivery")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Message)
+                    .HasColumnName("message")
+                    .HasColumnType("varchar(2000)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.RecipientId)
+                    .HasColumnName("recipientId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SenderType)
+                    .HasColumnName("senderType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SenderId)
+                    .HasColumnName("senderId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Subject)
+                    .HasColumnName("subject")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.TextEntryMessage)
+                    .HasColumnName("textEntryMessage")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TextEntrySubject)
+                    .HasColumnName("textEntrySubject")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Recipient)
+                    .WithMany(p => p.CharacterMail)
+                    .HasForeignKey(d => d.RecipientId)
+                    .HasConstraintName("FK__character_mail_recipientId__character_id");
+            });
+
+            modelBuilder.Entity<CharacterMailAttachment>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Index })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_mail_attachment");
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ItemGuid)
+                    .HasColumnName("itemGuid")
                     .HasDefaultValueSql("'0'");
 
                 entity.HasOne(d => d.IdNavigation)
-                    .WithMany(p => p.CharacterDatacube)
+                    .WithMany(p => p.CharacterMailAttachment)
                     .HasForeignKey(d => d.Id)
-                    .HasConstraintName("FK__character_datacube_id__character_id");
+                    .HasConstraintName("FK__character_mail_attachment_id__character_mail_id");
             });
 
             modelBuilder.Entity<CharacterPath>(entity =>
