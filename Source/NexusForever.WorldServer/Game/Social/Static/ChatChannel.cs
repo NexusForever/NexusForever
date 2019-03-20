@@ -40,6 +40,6 @@
         ZoneFrench,
         NexusGerman,
         NexusFrench,
-        Community
+        Community = 47
     }
 }

@@ -32,6 +32,7 @@ using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
+using NexusForever.WorldServer.Game.Guild;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -441,10 +442,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             CharacterModel characterToDelete = session.Characters.FirstOrDefault(c => c.Id == characterDelete.CharacterId);
 
-            CharacterModifyResult GetResult()
+            (CharacterModifyResult, uint) GetResult()
             {
                 if (characterToDelete == null)
-                    return CharacterModifyResult.DeleteFailed;
+                    return (CharacterModifyResult.DeleteFailed, 0);
 
                 // TODO: Not sure if this is definitely the case, but put it in for good measure
                 if (characterToDelete.Mail.Count > 0)
@@ -452,21 +453,32 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     foreach (CharacterMailModel characterMail in characterToDelete.Mail)
                     {
                         if (characterMail.Attachment.Count > 0)
-                            return CharacterModifyResult.DeleteFailed;
+                            return (CharacterModifyResult.DeleteFailed, 0);
                     }
                 }
 
-                // TODO: Ensure character is not a guild master
+                (CharacterModifyResult, uint) guildRemoveResult = (CharacterModifyResult.DeleteOk, 0);
+                foreach(GuildBase guild in GlobalGuildManager.Instance.GetMatchingGuilds(characterToDelete.Id))
+                {
+                    if (guild.LeaderId == characterDelete.CharacterId)
+                    {
+                        guildRemoveResult.Item1 = CharacterModifyResult.DeleteFailed_GuildMaster;
+                        guildRemoveResult.Item2 += 1;
+                    }
+                }
+                if (guildRemoveResult.Item1 != CharacterModifyResult.DeleteOk)
+                    return guildRemoveResult;
 
-                return CharacterModifyResult.DeleteOk;
+                return (CharacterModifyResult.DeleteOk, 0);
             }
 
-            CharacterModifyResult result = GetResult();
-            if (result != CharacterModifyResult.DeleteOk)
+            (CharacterModifyResult result, uint data) deleteCheck = GetResult();
+            if (deleteCheck.result != CharacterModifyResult.DeleteOk)
             {
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
                 {
-                    Result = result
+                    Result = deleteCheck.result,
+                    Data = deleteCheck.data
                 });
                 return;
             }
@@ -497,12 +509,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.CanProcessPackets = true;
 
+                GlobalGuildManager.Instance.RemoveCharacterFromAllGuilds(characterToDelete.Id);
                 ResidenceManager.Instance.RemoveResidence(characterToDelete.Name);
                 CharacterManager.Instance.DeleteCharacter(characterToDelete.Id, characterToDelete.Name);
 
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
                 {
-                    Result = result
+                    Result = deleteCheck.result
                 });
             }));
         }

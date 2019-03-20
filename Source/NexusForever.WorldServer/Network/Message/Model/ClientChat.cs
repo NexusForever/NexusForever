@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ClientChat : IReadable
     {
         public ChatChannel Channel { get; private set; }
-        public ulong Unknown0 { get; set; }
+        public ulong ChatId { get; set; }
         public string Message { get; private set; }
         public List<ChatFormat> Formats { get; } = new List<ChatFormat>();
         public ushort Unknown0C { get; private set; }
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public void Read(GamePacketReader reader)
         {
             Channel  = reader.ReadEnum<ChatChannel>(14u);
-            Unknown0 = reader.ReadULong();
+            ChatId = reader.ReadULong();
             Message  = reader.ReadWideString();
 
             byte formatCount = reader.ReadByte(5u);

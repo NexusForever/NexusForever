@@ -32,6 +32,10 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterTitleModel> CharacterTitle { get; set; }
         public DbSet<CharacterTradeskillMaterialModel> CharacterTradeskillMaterial { get; set; }
         public DbSet<CharacterZonemapHexgroupModel> CharacterZonemapHexgroup { get; set; }
+        public DbSet<Guild> Guild { get; set; }
+        public DbSet<GuildRank> GuildRank { get; set; }
+        public DbSet<GuildMember> GuildMember { get; set; }
+        public DbSet<GuildData> GuildData { get; set; }
         public DbSet<ItemModel> Item { get; set; }
         public DbSet<ResidenceModel> Residence { get; set; }
         public DbSet<ResidenceDecor> ResidenceDecor { get; set; }
@@ -103,6 +107,14 @@ namespace NexusForever.Database.Character
                     .HasColumnName("factionId")
                     .HasColumnType("smallint(5) unsigned")
                     .HasDefaultValue(0);
+
+                entity.Property(e => e.GuildAffiliation)
+                   .HasColumnName("guildAffiliation")
+                   .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.GuildHolomarkMask)
+                    .HasColumnName("guildHolomarkMask")
+                    .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.InnateIndex)
                     .HasColumnName("innateIndex")
@@ -1130,6 +1142,143 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.ZonemapHexgroup)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_zonemap_hexgroup_id__character_id");
+            });
+
+            modelBuilder.Entity<Guild>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("guild");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Name)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.LeaderId)
+                    .HasColumnName("leaderId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CreateTime)
+                    .HasColumnName("createTime")
+                    .HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<GuildData>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("guild_guild_data");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Taxes)
+                    .HasColumnName("taxes")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.MessageOfTheDay)
+                    .HasColumnName("motd")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.AdditionalInfo)
+                    .HasColumnName("additionalInfo")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.BackgroundIconPartId)
+                    .HasColumnName("backgroundIconPartId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ForegroundIconPartId)
+                    .HasColumnName("foregroundIconPartId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ScanLinesPartId)
+                    .HasColumnName("scanLinesPartId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithOne(p => p.GuildData)
+                    .HasForeignKey<GuildData>(d => d.Id)
+                    .HasConstraintName("FK__guild_guild_data_id__guild_id");
+            });
+
+            modelBuilder.Entity<GuildRank>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Index })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("guild_rank");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index");
+
+                entity.Property(e => e.Name)
+                    .HasColumnName("name");
+
+                entity.Property(e => e.Permission)
+                    .HasColumnName("permission");
+
+                entity.Property(e => e.BankWithdrawalPermission)
+                    .HasColumnName("bankWithdrawPermission")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.MoneyWithdrawalLimit)
+                    .HasColumnName("moneyWithdrawalLimit")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.RepairLimit)
+                    .HasColumnName("repairLimit")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.GuildRank)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__guild_rank_id__guild_id");
+            });
+
+            modelBuilder.Entity<GuildMember>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.CharacterId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("guild_member");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CharacterId)
+                    .HasColumnName("characterId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Rank)
+                    .HasColumnName("rank");
+
+                entity.Property(e => e.Note)
+                    .HasColumnName("note")
+                    .HasColumnType("varchar(50)")
+                    .HasDefaultValueSql("''"); ;
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.GuildMember)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__guild_member_id__guild_id");
             });
 
             modelBuilder.Entity<ItemModel>(entity =>

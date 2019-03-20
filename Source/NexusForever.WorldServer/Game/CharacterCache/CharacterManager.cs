@@ -8,7 +8,7 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
-    public sealed class CharacterManager: Singleton<CharacterManager>
+    public sealed class CharacterManager : Singleton<CharacterManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 

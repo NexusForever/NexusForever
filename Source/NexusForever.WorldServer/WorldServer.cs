@@ -18,6 +18,7 @@ using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
+using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
@@ -78,6 +79,7 @@ namespace NexusForever.WorldServer
             EntityCacheManager.Instance.Initialise();
             FactionManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
+            GlobalGuildManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
             PrerequisiteManager.Instance.Initialise();
@@ -103,6 +105,7 @@ namespace NexusForever.WorldServer
                 ResidenceManager.Instance.Update(lastTick);
                 BuybackManager.Instance.Update(lastTick);
                 GlobalQuestManager.Instance.Update(lastTick);
+                GlobalGuildManager.Instance.Update(lastTick);
 
                 // process commands after everything else in the tick has processed
                 CommandManager.Instance.Update(lastTick);
