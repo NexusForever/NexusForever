@@ -295,6 +295,12 @@ namespace NexusForever.WorldServer.Game.Entity
                         Id    = 11,
                         Type  = 1,
                         Value = CostumeManager.CostumeCap
+                    },
+                    new Server092C.Variable
+                    {
+                        Id    = 14,
+                        Type  = 1,
+                        Value = 1
                     }
                 }
             });
