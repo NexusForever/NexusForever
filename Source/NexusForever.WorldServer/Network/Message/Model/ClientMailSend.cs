@@ -14,6 +14,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public ulong Unknown5 { get; private set; }
         public byte Unknown6 { get; private set; }
         public uint Unknown7 { get; private set; }
+        public ulong Unknown8 { get; private set; }
+
 
         public void Read(GamePacketReader reader)
         {
@@ -25,6 +27,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             Unknown5 = reader.ReadULong();
             Unknown6 = reader.ReadByte(2);
             Unknown7 = reader.ReadUInt();
+            Unknown8 = reader.ReadULong();
         }
     }
 }

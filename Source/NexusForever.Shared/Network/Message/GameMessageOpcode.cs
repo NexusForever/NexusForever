@@ -31,6 +31,8 @@ namespace NexusForever.Shared.Network.Message
         ServerCharacter                 = 0x010F, // single character
         ServerItemAdd                   = 0x0111,
         ServerCharacterList             = 0x0117,
+        ClientMailOpen                  = 0x0122,
+        ClientMailTakeCash              = 0x0127,
         ServerMountUnlocked             = 0x0129,
         ServerPetCustomizationList      = 0x012E,
         ServerPetCustomisation          = 0x012F,
@@ -112,6 +114,7 @@ namespace NexusForever.Shared.Network.Message
         ServerClientLogout              = 0x0594,
         ClientPlayerInfoRequest         = 0x0597,
         ServerPlayerInfoBasicResponse   = 0x0598,
+        ServerMailResult                = 0x05A2,
         ServerMailAvailable             = 0x05A3,
         Server0635                      = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A

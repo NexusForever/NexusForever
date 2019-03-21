@@ -350,9 +350,9 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerMailAvailable
             {
                 Unknown0 = true,
-                MailList = new List<ServerMailAvailable.Mail>
+                MailList = new List<NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailItem>
                 {
-                    new ServerMailAvailable.Mail
+                    new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailItem
                     {
                         MailId = 445382167,
                         SenderType = Mail.Static.SenderType.Player, 
@@ -362,15 +362,15 @@ namespace NexusForever.WorldServer.Game.Entity
                         TextEntryMessage = 0,
                         CreatureId = 0,
                         CurrencyGiftType = 2,
-                        CurrencyGiftAmount = 0,
-                        CostOnDeliveryAmount = 25,
+                        CurrencyGiftAmount = 25,
+                        CostOnDeliveryAmount = 0,
                         ExpiryTimeInDays = 10f,
                         Flags = Mail.Static.MailFlag.None,
                         SenderRealm = 1,
                         SenderCharacterId = 100,
-                        Attachments = new List<ServerMailAvailable.Mail.Attachment>
+                        Attachments = new List<NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment>
                         {
-                            new ServerMailAvailable.Mail.Attachment
+                            new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment
                             {
                                 ItemId = 50762,
                                 Amount = 1
