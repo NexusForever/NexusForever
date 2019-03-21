@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using RewardPropertyEnum = NexusForever.WorldServer.Game.Entity.Static.RewardProperty;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server092C, MessageDirection.Server)]
-    public class Server092C : IWritable
+    [Message(GameMessageOpcode.ServerRewardPropertySet, MessageDirection.Server)]
+    public class ServerRewardPropertySet : IWritable
     {
-        public class Variable : IWritable
+        public class RewardProperty : IWritable
         {
-            public byte Id { get; set; }
+            public RewardPropertyEnum Id { get; set; }
             public byte Type { get; set; }
             public float Value { get; set; }
 
@@ -34,7 +35,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-        public List<Variable> Variables { get; set; } = new List<Variable>();
+        public List<RewardProperty> Variables { get; set; } = new List<RewardProperty>();
 
         public void Write(GamePacketWriter writer)
         {
