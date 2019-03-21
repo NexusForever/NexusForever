@@ -32,6 +32,8 @@ namespace NexusForever.Shared.Network.Message
         ServerCharacter                 = 0x010F, // single character
         ServerItemAdd                   = 0x0111,
         ServerCharacterList             = 0x0117,
+        ClientMailOpen                  = 0x0122,
+        ClientMailTakeCash              = 0x0127,
         ServerMountUnlocked             = 0x0129,
         ServerPetCustomizationList      = 0x012E,
         ServerPetCustomisation          = 0x012F,
