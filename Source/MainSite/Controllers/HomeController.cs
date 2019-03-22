@@ -7,24 +7,25 @@ using Microsoft.AspNetCore.Mvc;
 using MainSite.Models;
 using NexusForever.Shared.Database.Auth;
 using Microsoft.AspNetCore.Authorization;
+using System.Net.Sockets;
+using System.Collections.Immutable;
+using NexusForever.Shared.Database.Auth.Model;
 
 namespace MainSite.Controllers
 {
     public class HomeController : Controller
     {
-        private bool IsOnline = false;
+        private bool isOnline = false;
+        private ImmutableList<Server> servers;
 
         public IActionResult Index()
         {
-            IsOnline = true;
             GetStatusImage();
             return View();
         }
 
-        [HttpPost]
         public IActionResult Register(AccountBaseModel newUser)
         {
-            IsOnline = false;
             GetStatusImage();
             if (newUser.Email != null && newUser.Confirmation != null && newUser.Password != null)
             {
@@ -47,16 +48,50 @@ namespace MainSite.Controllers
 
         private void GetStatusImage()
         {
-            switch (IsOnline)
+            try
             {
-                case true:
-                    ViewBag.StatusSrc = "images/StatusOnline.png";
-                    break;
-                default:
-                    ViewBag.StatusSrc = "images/StatusOffline.png";
-                    break;
-                    
+                if (servers == null)
+                {
+                    servers = GetServers();
+                }
+
+                isOnline = PingHost(servers.First().Host, servers.First().Port);
+
+                switch (isOnline)
+                {
+                    case true:
+                        ViewBag.StatusSrc = "images/StatusOnline.png";
+                        break;
+                    default:
+                        ViewBag.StatusSrc = "images/StatusOffline.png";
+                        break;
+
+                }
             }
+            catch (Exception ex)
+            {
+                ViewBag.StatusSrc = "images/StatusOffline.png";
+            }
+        }
+
+        private static bool PingHost(string hostIP, int portNr)
+        {
+            try
+            {
+                using (var client = new TcpClient(hostIP, portNr))
+                {
+                    return true;
+                }
+            }
+            catch (SocketException ex)
+            {
+                return false;
+            }
+        }
+
+        private static ImmutableList<Server> GetServers()
+        {
+            return AuthDatabase.GetServers();
         }
     }
 }
