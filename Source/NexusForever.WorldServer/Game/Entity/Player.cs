@@ -361,25 +361,32 @@ namespace NexusForever.WorldServer.Game.Entity
                     new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailItem
                     {
                         MailId = 445382167,
-                        SenderType = Mail.Static.SenderType.Player, 
+                        SenderType = Mail.Static.SenderType.Player,
                         Subject = "Jesus",
                         Message = "Christ",
                         TextEntrySubject = 0,
                         TextEntryMessage = 0,
                         CreatureId = 0,
                         CurrencyGiftType = 2,
-                        CurrencyGiftAmount = 25,
-                        CostOnDeliveryAmount = 0,
+                        CurrencyGiftAmount = 0,
+                        CostOnDeliveryAmount = 250,
                         ExpiryTimeInDays = 10f,
                         Flags = Mail.Static.MailFlag.None,
                         SenderRealm = 1,
-                        SenderCharacterId = 100,
+                        SenderCharacterId = 2,
                         Attachments = new List<NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment>
                         {
                             new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment
                             {
                                 ItemId = 50762,
-                                Amount = 1
+                                Amount = 1,
+                                Unknown3 = 1
+                            },
+                            new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment
+                            {
+                                ItemId = 82671,
+                                Amount = 1,
+                                Unknown3 = 2
                             }
                         }
                     }

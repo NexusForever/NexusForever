@@ -1,5 +1,6 @@
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -10,11 +11,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public string Realm { get; private set; }
         public string Subject { get; private set; }
         public string Message { get; private set; }
-        public ulong Unknown4 { get; private set; }
-        public ulong Unknown5 { get; private set; }
-        public byte Unknown6 { get; private set; }
-        public uint Unknown7 { get; private set; }
-        public ulong Unknown8 { get; private set; }
+        public ulong CreditsSent { get; private set; }
+        public ulong CreditsRequsted { get; private set; }
+        public byte DeliveryTime { get; private set; } // 0 Instant, 1 Hour, 2, Day
+        public uint UnitId { get; private set; } // Mailbox Entity Guid
+        public List<ulong> Items { get; set; } = new List<ulong>();
 
 
         public void Read(GamePacketReader reader)
@@ -23,11 +24,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
             Realm = reader.ReadWideString();
             Subject = reader.ReadWideString();
             Message = reader.ReadWideString();
-            Unknown4 = reader.ReadULong();
-            Unknown5 = reader.ReadULong();
-            Unknown6 = reader.ReadByte(2);
-            Unknown7 = reader.ReadUInt();
-            Unknown8 = reader.ReadULong();
+            CreditsSent = reader.ReadULong();
+            CreditsRequsted = reader.ReadULong();
+            DeliveryTime = reader.ReadByte(2);
+            UnitId = reader.ReadUInt();
+            for (uint i = 0; i < 10; i++)
+                Items.Add(reader.ReadULong());
         }
     }
 }
