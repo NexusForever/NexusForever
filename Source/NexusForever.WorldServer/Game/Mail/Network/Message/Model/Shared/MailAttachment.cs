@@ -17,13 +17,13 @@ namespace NexusForever.WorldServer.Mail.Network.Message.Model.Shared
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(ItemId, 18);
+            writer.Write(ItemId, 18u);
             writer.Write(Amount);
             writer.Write(Unknown3);
             writer.Write(Unknown4);
             writer.Write(Unknown5);
             writer.Write(Unknown6);
-            writer.Write(Unknown7);
+            writer.Write(Unknown7, 18u);
 
             for (uint i = 0u; i < Unknown8.Length; i++)
                 writer.Write(Unknown8[i]);

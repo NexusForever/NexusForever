@@ -32,7 +32,11 @@ namespace NexusForever.Shared.Network.Message
         ServerCharacter                 = 0x010F, // single character
         ServerItemAdd                   = 0x0111,
         ServerCharacterList             = 0x0117,
+        ClientMailDelete                = 0x011E,
         ClientMailOpen                  = 0x0122,
+        ClientMailPayCOD                = 0x0123,
+        ClientMailReturn                = 0x0124,
+        ClientMailTakeAttachment        = 0x0126,
         ClientMailTakeCash              = 0x0127,
         ServerMountUnlocked             = 0x0129,
         ServerPetCustomizationList      = 0x012E,
@@ -121,7 +125,10 @@ namespace NexusForever.Shared.Network.Message
         ClientPlayerInfoRequest         = 0x0597,
         ServerPlayerInfoBasicResponse   = 0x0598,
         ServerPlayerInfoFullResponse    = 0x0599,
+        ServerMailResult                = 0x05A2,
         ServerMailAvailable             = 0x05A3,
+        ServerMailUnavailable           = 0x05A7,
+        ServerMailTakeAttachment        = 0x05A8,
         Server0635                      = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
