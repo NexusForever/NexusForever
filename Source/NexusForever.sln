@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{96FBF6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.MapGenerator", "NexusForever.MapGenerator\NexusForever.MapGenerator.csproj", "{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainSite", "MainSite\MainSite.csproj", "{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainSite", "MainSite\MainSite.csproj", "{237DDAAC-FBD1-43D0-B9E5-C684EEFA73AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
