@@ -1,7 +1,8 @@
 ﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification\ 
 for details on configuring this project to bundle and minify static web assets. */
 body {
-    background-image: url('https://stmed.net/sites/default/files/wildstar-hd-wallpapers-33898-741305.png');
+    /*background-image: url('https://stmed.net/sites/default/files/wildstar-hd-wallpapers-33898-741305.png');   THIS IS AN EXAMPLE OF WEB BASED BackgroundIMG*/
+    background-image: url('/images/Mainbackground.png'); /*THIS IS AN EXAMPLE OF USING LOCAL IMAGE AS BACKGROUND*/
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: center;
@@ -75,7 +76,23 @@ hr {
     background-color: rgba(130, 251, 245, 0.3);
     border: dashed;
     border-color: black;
-    
-    height: 100%;
-    width: 100%;
+    margin-bottom: 50px;
+    height: inherit;
+    width: inherit;
+}
+
+#serverStatusContainer {
+    background-color: rgba(130, 251, 245, 0.3);
+    border: dashed;
+    position:absolute;
+    bottom:150px;
+    height:inherit;
+    width:inherit;
+    border-color: black;
+}
+
+#serverStatusText {
+    font-weight: bold;
+    font-size: 45px;
+    color: black;
 }

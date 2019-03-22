@@ -12,48 +12,50 @@ namespace MainSite.Controllers
 {
     public class HomeController : Controller
     {
+        private bool IsOnline = false;
+
         public IActionResult Index()
         {
+            IsOnline = true;
+            GetStatusImage();
             return View();
-        }
-
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         [HttpPost]
         public IActionResult Register(AccountBaseModel newUser)
         {
-            try
+            IsOnline = false;
+            GetStatusImage();
+            if (newUser.Email != null && newUser.Confirmation != null && newUser.Password != null)
             {
-                if(newUser.Password.Equals(newUser.Confirmation))
-                AuthDatabase.CreateAccount(newUser.Email, newUser.Password);
-                return View();
-
+                if (newUser.Password.Equals(newUser.Confirmation))
+                {
+                    try
+                    {
+                        AuthDatabase.CreateAccount(newUser.Email, newUser.Password);
+                        return View("RegisterSuccess");
+                    }
+                    catch
+                    {
+                        return View("DBException");
+                    }
+                }
+                return View("RegisterFailed");
             }
-            catch (Exception ex)
+            return View("Index");
+        }
+
+        private void GetStatusImage()
+        {
+            switch (IsOnline)
             {
-                return View("Index");
+                case true:
+                    ViewBag.StatusSrc = "images/StatusOnline.png";
+                    break;
+                default:
+                    ViewBag.StatusSrc = "images/StatusOffline.png";
+                    break;
+                    
             }
         }
     }
