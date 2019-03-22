@@ -17,10 +17,23 @@
     </environment>
 </head>
 <body>
-<div>
-</div>
     <div class="container body-content">
         @RenderBody()
+
+        <div id="serverStatusContainer">
+            <table>
+                <tr>
+                    <td>
+                        <strong id="serverStatusText">SERVER STATUS:</strong>
+                    </td>
+                    <td>
+                        <img src="~/@ViewBag.StatusSrc" height="60" width="60"/>
+                        @*<img src="@Url.Action("GetStatusImage")" />*@
+                    </td>
+                </tr>
+            </table>
+        </div>
+
         <footer id="footer">
             <p> Only the bold will return</p>
         </footer>
