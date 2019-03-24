@@ -1,9 +1,12 @@
 ﻿using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Database.Character;
+using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
 {
@@ -54,9 +57,10 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
                     result = GenericError.Mail_Busy;
 
                 if (result == GenericError.Ok)
+                {
                     session.Player.CurrencyManager.CurrencySubtractAmount(1, mailItem.CurrencyAmount);
-
-                mailItem.PayOrTakeCash();
+                    mailItem.PayOrTakeCash();
+                }
 
                 session.EnqueueMessageEncrypted(new ServerMailResult
                 {
@@ -109,15 +113,35 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientMailSend)]
         public static void HandleMailSend(WorldSession session, ClientMailSend clientMailSend)
         {
-            log.Info($"{clientMailSend.Name}, {clientMailSend.Realm}, {clientMailSend.Subject}, {clientMailSend.Message}, {clientMailSend.CreditsSent}, {clientMailSend.CreditsRequsted}, {clientMailSend.DeliveryTime}, {clientMailSend.UnitId}");
+            GenericError result = GenericError.Ok;
 
-            MailManager.SendMail(session, clientMailSend);
+            Character targetCharacter = CharacterDatabase.GetCharacterByName(clientMailSend.Name);
+            if(targetCharacter != null)
+            {
+                if (!session.Player.CurrencyManager.CanAfford(1, clientMailSend.CreditsSent))
+                    result = GenericError.Mail_InsufficientFunds;
+
+                // TODO: Check that the player is not blocked
+
+                if (clientMailSend.CreditsRequested > 0 && clientMailSend.CreditsSent > 0)
+                    result = GenericError.Mail_CanNotHaveCoDAndGift;
+
+                if ((clientMailSend.Items.Count > 0 || clientMailSend.CreditsRequested > 0 || clientMailSend.CreditsSent > 0) && !MailManager.IsTargetMailBoxInRange(session, clientMailSend.UnitId))
+                    result = GenericError.Mail_FailedToCreate;
+
+                if(result == GenericError.Ok)
+                {
+                    MailManager.SendMailToPlayer(session, clientMailSend, targetCharacter);
+                }
+            }
+            else
+                result = GenericError.Mail_CannotFindPlayer;
 
             session.EnqueueMessageEncrypted(new ServerMailResult
             {
                 Action = 1,
                 MailId = 0,
-                Result = 0
+                Result = result
             });
         }
     }
