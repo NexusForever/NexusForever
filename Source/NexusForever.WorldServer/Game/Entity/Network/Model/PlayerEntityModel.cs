@@ -12,11 +12,11 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public Race Race { get; set; }
         public Class Class { get; set; }
         public Sex Sex { get; set; }
-        public ulong Unknown20 { get; set; }
-        public List<uint> Unknown2C { get; } = new List<uint>();
+        public ulong GroupId { get; set; }
+        public List<uint> PetIdList { get; } = new List<uint>();
         public string GuildName { get; set; }
-        public byte Unknown34 { get; set; } // Probably guild rank, given sniffed information
-        public List<ulong> Unknown3C { get; } = new List<ulong>(); // Only appears in sniffs when user has a guild, assume related to guild as well. Guild members?
+        public byte GuildType { get; set; }
+        public List<ulong> GuildIds { get; } = new List<ulong>(); // Only appears in sniffs when user has a guild, assume related to guild as well. Guild members?
         public List<float> Bones { get; set; } = new List<float>();
         public PvPFlag PvPFlag { get; set; }
         public byte Unknown4C { get; set; }
@@ -30,16 +30,17 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
             writer.Write(Race, 5);
             writer.Write(Class, 5);
             writer.Write(Sex, 2);
-            writer.Write(Unknown20);
+            writer.Write(GroupId);
 
-            writer.Write((byte)Unknown2C.Count);
-            Unknown2C.ForEach(e => writer.Write(e));
+            writer.Write((byte)PetIdList.Count);
+            PetIdList.ForEach(e => writer.Write(e));
 
             writer.WriteStringWide(GuildName);
-            writer.Write(Unknown34, 4);
+            writer.Write(GuildType, 4);
 
-            writer.Write((byte)Unknown3C.Count, 5);
-            Unknown3C.ForEach(e => writer.Write(e));
+            writer.Write((byte)GuildIds.Count, 5);
+            GuildIds.ForEach(e => writer.Write(e));
+
             writer.Write(Bones.Count, 6);
             Bones.ForEach(e => writer.Write(e));
 

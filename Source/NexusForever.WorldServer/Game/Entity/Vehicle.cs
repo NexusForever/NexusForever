@@ -176,7 +176,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         EntityCommand.SetPlatform,
                         new SetPlatformCommand
                         {
-                            Platform = Guid
+                            UnitId = Guid
                         }
                     ),
                     (
@@ -184,7 +184,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         new SetPositionCommand
                         {
                             Position = new Position(new Vector3(0f,0f,0f)),
-                            Unknown3 = false
+                            Blend = false
                         }
                     ),
                     (
@@ -192,7 +192,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         new SetRotationCommand
                         {
                             Position = new Position(new Vector3(0f,0f,0f)),
-                            Unknown3 = false
+                            Blend = false
                         }
                     )
                 }
@@ -274,7 +274,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         new SetPositionCommand
                         {
                             Position = new Position(Position),
-                            Unknown3 = false
+                            Blend = false
                         }
                     ),
                     (
@@ -282,7 +282,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         new SetRotationCommand
                         {
                             Position = new Position(Rotation),
-                            Unknown3 = false
+                            Blend = false
                         }
                     )
                 }

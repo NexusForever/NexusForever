@@ -48,7 +48,7 @@ namespace NexusForever.WorldServer.Game.Entity
             return new NonPlayerEntityModel
             {
                 CreatureId = CreatureId,
-                Unknown0 = 0
+                QuestChecklistIdx = 0
             };
         }
 
