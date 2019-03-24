@@ -129,5 +129,14 @@ namespace NexusForever.Shared.Network
             Write(data.Length >> 1, extended ? 15u : 7u);
             WriteBytes(data);
         }
+
+        public void WriteStringFixed(string value)
+        {
+            string str = $"{value ?? ""}\0";
+            byte[] data = Encoding.Unicode.GetBytes(str);
+
+            Write(str.Length, 16);
+            WriteBytes(data);
+        }
     }
 }
