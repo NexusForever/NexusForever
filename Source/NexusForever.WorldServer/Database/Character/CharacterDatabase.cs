@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Mail;
 using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 using ResidenceEntity = NexusForever.WorldServer.Game.Housing.Residence;
 
@@ -67,6 +68,7 @@ namespace NexusForever.WorldServer.Database.Character
                             .ThenInclude(c => c.CharacterCostumeItem)
                         .Include(c => c.CharacterPetCustomisation)
                         .Include(c => c.CharacterPetFlair)
+                        .Include(c => c.CharacterMail)
                     .ToListAsync();
             }
         }
@@ -103,6 +105,21 @@ namespace NexusForever.WorldServer.Database.Character
                     .SingleOrDefaultAsync(r => r.Owner.Name == name);
             }
 
+        }
+
+        public static ulong GetNextMailId()
+        {
+            using (var context = new CharacterContext())
+                return context.CharacterMail.DefaultIfEmpty().Max(s => s.Id);
+        }
+
+        public static async Task SaveMail(MailItem mail)
+        {
+            using (var context = new CharacterContext())
+            {
+                mail.Save(context);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

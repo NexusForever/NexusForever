@@ -1,5 +1,6 @@
 ﻿using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
@@ -13,35 +14,57 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientMailDelete)]
         public static void HandleMailDelete(WorldSession session, ClientMailDelete clientMailDelete)
         {
-            log.Info($"{clientMailDelete.Unknown0}, {clientMailDelete.MailId}");
-            session.EnqueueMessageEncrypted(new ServerMailResult
-            {
-                Action = 5,
-                MailId = clientMailDelete.MailId,
-                Result = 0
-            });
-            session.EnqueueMessageEncrypted(new ServerMailUnavailable
-            {
-                MailId = clientMailDelete.MailId
-            });
+            foreach(ulong mailId in clientMailDelete.MailList)
+                if (session.Player.AvailableMail.TryGetValue(mailId, out MailItem mailItem))
+                {
+                    // TODO: Confirm that this user is allowed to delete this mail
+                    mailItem.EnqueueDelete();
+
+                    session.EnqueueMessageEncrypted(new ServerMailResult
+                    {
+                        Action = 5,
+                        MailId = mailItem.Id,
+                        Result = 0
+                    });
+                    session.EnqueueMessageEncrypted(new ServerMailUnavailable
+                    {
+                        MailId = mailItem.Id
+                    });
+                }
         }
 
         [MessageHandler(GameMessageOpcode.ClientMailOpen)]
         public static void HandleMailOpen(WorldSession session, ClientMailOpen clientMailOpen)
         {
-           log.Info($"{clientMailOpen.Unknown0}, {clientMailOpen.MailId}");
+            foreach (ulong mailId in clientMailOpen.MailList)
+                if (session.Player.AvailableMail.TryGetValue(mailId, out MailItem mailItem))
+                    mailItem.MarkAsRead();
         }
 
         [MessageHandler(GameMessageOpcode.ClientMailPayCOD)]
         public static void HandleMailPayCOD(WorldSession session, ClientMailPayCOD clientMailPayCOD)
         {
-            log.Info($"{clientMailPayCOD.MailId}, {clientMailPayCOD.UnitId}");
-            session.EnqueueMessageEncrypted(new ServerMailResult
+            GenericError result = GenericError.Ok;
+            if (session.Player.AvailableMail.TryGetValue(clientMailPayCOD.MailId, out MailItem mailItem))
             {
-                Action = 3,
-                MailId = clientMailPayCOD.MailId,
-                Result = 0
-            });
+                if (!session.Player.CurrencyManager.CanAfford(1, mailItem.CurrencyAmount))
+                    result = GenericError.Mail_InsufficientFunds;
+
+                if (mailItem.HasPaidOrCollectedCurrency)
+                    result = GenericError.Mail_Busy;
+
+                if (result == GenericError.Ok)
+                    session.Player.CurrencyManager.CurrencySubtractAmount(1, mailItem.CurrencyAmount);
+
+                mailItem.PayOrTakeCash();
+
+                session.EnqueueMessageEncrypted(new ServerMailResult
+                {
+                    Action = 3,
+                    MailId = mailItem.Id,
+                    Result = result
+                });
+            }
         }
 
         [MessageHandler(GameMessageOpcode.ClientMailReturn)]
@@ -87,6 +110,8 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
         public static void HandleMailSend(WorldSession session, ClientMailSend clientMailSend)
         {
             log.Info($"{clientMailSend.Name}, {clientMailSend.Realm}, {clientMailSend.Subject}, {clientMailSend.Message}, {clientMailSend.CreditsSent}, {clientMailSend.CreditsRequsted}, {clientMailSend.DeliveryTime}, {clientMailSend.UnitId}");
+
+            MailManager.SendMail(session, clientMailSend);
 
             session.EnqueueMessageEncrypted(new ServerMailResult
             {
