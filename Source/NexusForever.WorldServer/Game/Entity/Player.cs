@@ -74,6 +74,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private sbyte costumeIndex;
 
+        public DateTime CreateTime { get; }
+        public double TimePlayedTotal { get; private set; }
+        public double TimePlayedLevel { get; private set; }
+        public double TimePlayedSession { get; private set; }
+        
         /// <summary>
         /// Guid of the <see cref="WorldEntity"/> that currently being controlled by the <see cref="Player"/>.
         /// </summary>
@@ -125,6 +130,10 @@ namespace NexusForever.WorldServer.Game.Entity
             CostumeIndex    = model.ActiveCostumeIndex;
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
+
+            CreateTime      = model.CreateTime;
+            TimePlayedTotal = model.TimePlayedTotal;
+            TimePlayedLevel = model.TimePlayedLevel;
 
             // managers
             CostumeManager  = new CostumeManager(this, session.Account, model);
@@ -180,6 +189,11 @@ namespace NexusForever.WorldServer.Game.Entity
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
+                double timeSinceLastSave = GetTimeSinceLastSave();
+                TimePlayedSession += timeSinceLastSave;
+                TimePlayedLevel += timeSinceLastSave;
+                TimePlayedTotal += timeSinceLastSave;
+
                 timeToSave = SaveDuration;
 
                 Session.EnqueueEvent(new TaskEvent(AuthDatabase.Save(Save),
@@ -570,6 +584,11 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask = PlayerSaveMask.None;
             }
 
+            model.TimePlayedLevel = (uint)TimePlayedLevel;
+            entity.Property(p => p.TimePlayedLevel).IsModified = true;
+            model.TimePlayedTotal = (uint)TimePlayedTotal;
+            entity.Property(p => p.TimePlayedTotal).IsModified = true;
+
             Inventory.Save(context);
             CurrencyManager.Save(context);
             PathManager.Save(context);
@@ -577,6 +596,14 @@ namespace NexusForever.WorldServer.Game.Entity
             CostumeManager.Save(context);
             PetCustomisationManager.Save(context);
             SpellManager.Save(context);
+        }
+
+        /// <summary>
+        /// Returns the time in seconds that has past since the last <see cref="Player"/> save.
+        /// </summary>
+        public double GetTimeSinceLastSave()
+        {
+            return SaveDuration - timeToSave;
         }
     }
 }
