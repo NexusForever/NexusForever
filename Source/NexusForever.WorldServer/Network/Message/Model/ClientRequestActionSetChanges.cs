@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 
@@ -8,10 +7,22 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ClientRequestActionSetChanges, MessageDirection.Client)]
     public class ClientRequestActionSetChanges : IReadable
     {
-        public List<uint> Actions { get; private set; } = new List<uint>();
-        public List<(uint Action, byte Tier)> ActionTiers { get; private set; } = new List<(uint, byte)>();
+        public class ActionTier : IReadable
+        {
+            public uint Action { get; private set; }
+            public byte Tier { get; private set; }
+
+            public void Read(GamePacketReader reader)
+            {
+                Action = reader.ReadUInt(18u);
+                Tier   = reader.ReadByte();
+            }
+        }
+
+        public List<uint> Actions { get; } = new List<uint>();
+        public List<ActionTier> ActionTiers { get; } = new List<ActionTier>();
         public byte ActionSetIndex { get; private set; }
-        public List<ushort> AMPs { get; private set; } = new List<ushort>();
+        public List<ushort> Amps { get; } = new List<ushort>();
         
         public void Read(GamePacketReader reader)
         {
@@ -23,11 +34,15 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             count = reader.ReadByte(5u);            
             for (uint i = 0u; i < count; i++)
-                ActionTiers.Add((reader.ReadUInt(18u), reader.ReadByte()));
+            {
+                var actionTier = new ActionTier();
+                actionTier.Read(reader);
+                ActionTiers.Add(actionTier);
+            }
 
             count = reader.ReadByte(7u);
             for (uint i = 0u; i < count; i++)
-                AMPs.Add(reader.ReadUShort());
+                Amps.Add(reader.ReadUShort());
         }
     }
 }

@@ -4,17 +4,17 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerAMPList, MessageDirection.Server)]
-    public class ServerAMPList : IWritable
+    [Message(GameMessageOpcode.ServerAmpList, MessageDirection.Server)]
+    public class ServerAmpList : IWritable
     {
         public byte SpecIndex { get; set; }
-        public List<ushort> AMPs { get; set; } = new List<ushort>();
+        public List<ushort> Amps { get; set; } = new List<ushort>();
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(SpecIndex, 3u);
-            writer.Write((byte)AMPs.Count, 7u);
-            foreach (ushort amp in AMPs)
+            writer.Write((byte)Amps.Count, 7u);
+            foreach (ushort amp in Amps)
                 writer.Write(amp);
         }
     }

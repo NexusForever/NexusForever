@@ -19,6 +19,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         }
 
         public virtual DbSet<Character> Character { get; set; }
+        public virtual DbSet<CharacterActionSetAmp> CharacterActionSetAmp { get; set; }
+        public virtual DbSet<CharacterActionSetShortcut> CharacterActionSetShortcut { get; set; }
         public virtual DbSet<CharacterAppearance> CharacterAppearance { get; set; }
         public virtual DbSet<CharacterBone> CharacterBone { get; set; }
         public virtual DbSet<CharacterCostume> CharacterCostume { get; set; }
@@ -28,13 +30,12 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual DbSet<CharacterPetFlair> CharacterPetFlair { get; set; }
+        public virtual DbSet<CharacterSpell> CharacterSpell { get; set; }
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
         public virtual DbSet<Item> Item { get; set; }
         public virtual DbSet<Residence> Residence { get; set; }
         public virtual DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public virtual DbSet<ResidencePlot> ResidencePlot { get; set; }
-        public virtual DbSet<CharacterAction> CharacterAction { get; set; }
-        public virtual DbSet<CharacterAMP> CharacterAMP { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -66,6 +67,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.ActivePath)
                     .HasColumnName("activePath")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ActiveSpec)
+                    .HasColumnName("activeSpec")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Class)
@@ -123,10 +128,68 @@ namespace NexusForever.WorldServer.Database.Character.Model
                 entity.Property(e => e.WorldId)
                     .HasColumnName("worldId")
                     .HasDefaultValueSql("'0'");
+            });
 
-                entity.Property(e => e.ActiveSpec)
-                    .HasColumnName("activeSpec")
+            modelBuilder.Entity<CharacterActionSetAmp>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.SpecIndex, e.AmpId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_action_set_amp");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SpecIndex)
+                    .HasColumnName("specIndex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.AmpId)
+                    .HasColumnName("ampId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterActionSetAmp)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_action_set_amp_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterActionSetShortcut>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.SpecIndex, e.Location })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_action_set_shortcut");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SpecIndex)
+                    .HasColumnName("specIndex")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Location)
+                    .HasColumnName("location")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ObjectId)
+                    .HasColumnName("objectId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ShortcutType)
+                    .HasColumnName("shortcutType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Tier)
+                    .HasColumnName("tier")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterActionSetShortcut)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_action_set_shortcut_id__character_id");
             });
 
             modelBuilder.Entity<CharacterAppearance>(entity =>
@@ -383,6 +446,31 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasConstraintName("FK__character_pet_flair_id__character_id");
             });
 
+            modelBuilder.Entity<CharacterSpell>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Spell4BaseId, e.Tier })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_spell");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Spell4BaseId)
+                    .HasColumnName("spell4BaseId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Tier)
+                    .HasColumnName("tier")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterSpell)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_spell_id__character_id");
+            });
+
             modelBuilder.Entity<CharacterTitle>(entity =>
             {
                 entity.HasKey(e => new { e.Id, e.Title })
@@ -629,66 +717,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.ResidencePlot)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__residence_plot_id__residence_id");
-            });
-
-            modelBuilder.Entity<CharacterAction>(entity =>
-            {
-                entity.HasKey(e => new { e.Id, e.SpecIndex, e.Location });
-
-                entity.ToTable("character_actions");
-
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.SpecIndex)
-                    .HasColumnName("specIndex")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Location)
-                    .HasColumnName("location")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Action)
-                    .HasColumnName("action")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.TierIndex)
-                    .HasColumnName("TierIndex")
-                    .HasDefaultValueSql("'0'");
-
-                entity.HasOne(d => d.IdNavigation)
-                    .WithMany(p => p.CharacterAction)
-                    .HasForeignKey(d => d.Id)
-                    .HasConstraintName("FK__character_actions_id__character_id");
-            });
-
-            modelBuilder.Entity<CharacterAMP>(entity =>
-            {
-                entity.HasKey(e => new { e.Id, e.SpecIndex, e.AMPId });
-
-                entity.ToTable("character_amps");
-
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.SpecIndex)
-                    .HasColumnName("specIndex")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.AMPId)
-                    .HasColumnName("ampId")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
-
-                entity.HasOne(d => d.IdNavigation)
-                    .WithMany(p => p.CharacterAMP)
-                    .HasForeignKey(d => d.Id)
-                    .HasConstraintName("FK__character_amps_id__character_id");
             });
         }
     }

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using NexusForever.Shared.GameTable;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
@@ -12,7 +15,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     public static class SpellHandler
     {
         [MessageHandler(GameMessageOpcode.ClientCastSpell)]
-        public static void HandlePlayerCastSpell(WorldSession session, ClientCastSpell castSpell)
+        public static void HandleCastSpell(WorldSession session, ClientCastSpell castSpell)
         {
             Item item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
             if (item == null)
@@ -26,14 +29,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (!castSpell.ButtonPressed)
                 return;
 
+            byte tier = session.Player.SpellManager.GetSpellTier(spell.Info.Entry.Id);
             session.Player.CastSpell(new SpellParameters
             {
-                SpellInfo = spell.Info.GetSpellInfo(spell.Tier)
+                SpellInfo = spell.Info.GetSpellInfo(tier)
             });
         }
 
         [MessageHandler(GameMessageOpcode.Client009A)]
-        public static void HandlePlayerCastSpell(WorldSession session, Client009A castSpell)
+        public static void HandleCastSpell(WorldSession session, Client009A castSpell)
         {
             Item item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
             if (item == null)
@@ -43,9 +47,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (spell == null)
                 throw new InvalidPacketValueException();
 
+            byte tier = session.Player.SpellManager.GetSpellTier(spell.Info.Entry.Id);
             session.Player.CastSpell(new SpellParameters
             {
-                SpellInfo = spell.Info.GetSpellInfo(spell.Tier)
+                SpellInfo = spell.Info.GetSpellInfo(tier)
             });
         }
 
@@ -60,71 +65,97 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChangeActiveActionSet)]
-        public static void HandleClientChangeActionSet(WorldSession session, ClientChangeActiveActionSet clientChangeActiveActionSet)
+        public static void HandleChangeActiveActionSet(WorldSession session, ClientChangeActiveActionSet changeActiveActionSet)
         {
             session.EnqueueMessageEncrypted(new ServerChangeActiveActionSet
             {
-                ActionSetError = session.Player.SpellManager.SetActiveActionSet(clientChangeActiveActionSet.ActionSetIndex),
-                ActionSetIndex = session.Player.SpellManager.activeActionSet
+                SpecError      = session.Player.SpellManager.SetActiveActionSet(changeActiveActionSet.ActionSetIndex),
+                ActionSetIndex = session.Player.SpellManager.ActiveActionSet
             });
+
             session.Player.SpellManager.SendServerAbilityPoints();
         }
 
         [MessageHandler(GameMessageOpcode.ClientRequestActionSetChanges)]
-        public static void HandleClientChangeActionSet(WorldSession session, ClientRequestActionSetChanges clientRequestActionSetChanges)
+        public static void HandleRequestActionSetChanges(WorldSession session, ClientRequestActionSetChanges requestActionSetChanges)
         {
             // TODO: check for client validity, e.g. Level & Spell4TierRequirements
-            
-            for (byte i = 0; i < clientRequestActionSetChanges.Actions.Count; i++)
+
+            ActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.ActionSetIndex);
+
+            List<ActionSetShortcut> shortcuts = actionSet.Actions.ToList();
+            for (UILocation i = 0; i < (UILocation)requestActionSetChanges.Actions.Count; i++)
             {
-                ActionSetAction action = session.Player.SpellManager.GetSpellFromActionSet(clientRequestActionSetChanges.ActionSetIndex,  (UILocation)i);
-                if (action == null || action.ObjectId != clientRequestActionSetChanges.Actions[i])
+                ActionSetShortcut shortcut = actionSet.GetShortcut(i);
+                if (shortcut != null)
+                    actionSet.RemoveShortcut(i);
+
+                uint spell4BaseId = requestActionSetChanges.Actions[(int)i];
+                if (spell4BaseId != 0u)
                 {
-                    session.Player.SpellManager.RemoveSpellFromActionSet(clientRequestActionSetChanges.ActionSetIndex, (UILocation)i);
-                    if (clientRequestActionSetChanges.Actions[i] > 0)
-                        session.Player.SpellManager.AddSpellToActionSet(clientRequestActionSetChanges.ActionSetIndex, clientRequestActionSetChanges.Actions[i], (UILocation)i);
+                    ActionSetShortcut existingShortcut = shortcuts.SingleOrDefault(s => s.ObjectId == spell4BaseId);
+                    byte tier = existingShortcut?.Tier ?? 1;
+                    actionSet.AddShortcut(i, ShortcutType.Spell, spell4BaseId, tier);
                 }
             }
 
-            for (byte i = 0; i < clientRequestActionSetChanges.ActionTiers.Count; i++)
-            {
-                var (spell, tier) = clientRequestActionSetChanges.ActionTiers[i];
-                if (spell > 0)
-                    session.Player.SpellManager.UpdateActionSetSpellTier(clientRequestActionSetChanges.ActionSetIndex, spell, tier);
-            }
+            foreach (ClientRequestActionSetChanges.ActionTier actionTier in requestActionSetChanges.ActionTiers)
+                session.Player.SpellManager.UpdateSpell(actionTier.Action, actionTier.Tier, requestActionSetChanges.ActionSetIndex);
 
-            session.Player.SpellManager.SendServerSpellList();
-            session.Player.SpellManager.SendServerActionSet(clientRequestActionSetChanges.ActionSetIndex);
-
-            if (clientRequestActionSetChanges.ActionTiers.Count > 0)
-            {
+            session.EnqueueMessageEncrypted(actionSet.BuildServerActionSet());
+            if (requestActionSetChanges.ActionTiers.Count > 0)
                 session.Player.SpellManager.SendServerAbilityPoints();
-            }
 
-            if (clientRequestActionSetChanges.AMPs.Count > 0)
+            // only new AMP can be added with this packet, filter out existing ones
+            List<ushort> newAmps = requestActionSetChanges.Amps
+                .Except(actionSet.Amps
+                    .Select(a => (ushort)a.Entry.Id))
+                .ToList();
+
+            if (newAmps.Count > 0)
             {
-                session.Player.SpellManager.UpdateActionSetAMPs(clientRequestActionSetChanges.ActionSetIndex, clientRequestActionSetChanges.AMPs);
-                session.Player.SpellManager.SendServerAMPList(clientRequestActionSetChanges.ActionSetIndex);
+                foreach (ushort id in newAmps)
+                    actionSet.AddAmp(id);
+
+               session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
             }
-
-
         }
-        //[MessageHandler(GameMessageOpcode.ClientChangeInnate)]
 
-        [MessageHandler(GameMessageOpcode.ClientRequestAMPReset)]
-        public static void HandleClientChangeActionSet(WorldSession session, ClientRequestAMPReset clientRequestAMPReset)
+        [MessageHandler(GameMessageOpcode.ClientRequestAmpReset)]
+        public static void HandleRequestAmpReset(WorldSession session, ClientRequestAmpReset requestAmpReset)
         {
             // TODO: check for client validity 
             // TODO: handle reset cost
 
-            if (clientRequestAMPReset.ResetType == 1)
-                session.Player.SpellManager.ResetActionSetAMPCategory(clientRequestAMPReset.ActionSetIndex, clientRequestAMPReset.Value);
-            else if (clientRequestAMPReset.ResetType == 2)
-                session.Player.SpellManager.RemoveActionSetAMP(clientRequestAMPReset.ActionSetIndex, clientRequestAMPReset.Value);
-            else
-                session.Player.SpellManager.UpdateActionSetAMPs(clientRequestAMPReset.ActionSetIndex, new List<ushort>());
+            ActionSet actionSet = session.Player.SpellManager.GetActionSet(requestAmpReset.ActionSetIndex);
+            actionSet.RemoveAmp(requestAmpReset.RespecType, requestAmpReset.Value);
+            session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
+        }
 
-            session.Player.SpellManager.SendServerAMPList(clientRequestAMPReset.ActionSetIndex);
+        [MessageHandler(GameMessageOpcode.ClientNonSpellActionSetChanges)]
+        public static void HandleNonSpellActionSetChanges(WorldSession session, ClientNonSpellActionSetChanges requestActionSetChanges)
+        {
+            // TODO: validate the rest of the shortcut types when known
+
+            switch (requestActionSetChanges.ShortcutType)
+            {
+                case ShortcutType.Item:
+                {
+                    if (GameTableManager.Item.GetEntry(requestActionSetChanges.ObjectId) == null)
+                        throw new InvalidPacketValueException();
+                    break;
+                }
+                case ShortcutType.Spell:
+                    throw new InvalidPacketValueException();
+                default:
+                    throw new NotImplementedException();
+            }
+
+            ActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.Unknown);
+            if (requestActionSetChanges.ObjectId == 0u)
+                actionSet.RemoveShortcut(requestActionSetChanges.ActionBarIndex);
+            else
+                actionSet.AddShortcut(requestActionSetChanges.ActionBarIndex, requestActionSetChanges.ShortcutType, requestActionSetChanges.ObjectId, 0);
         }
     }
 }

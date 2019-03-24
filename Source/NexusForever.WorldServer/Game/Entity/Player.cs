@@ -20,7 +20,6 @@ using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -136,8 +135,6 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager    = new SpellManager(this, model);
             PetCustomisationManager = new PetCustomisationManager(this, model);
 
-            SpellManager.SetActiveActionSet(model.ActiveSpec);
-
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
             // temp
@@ -148,46 +145,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
             Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
             Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
-
-            // temp
-            SpellManager.AddSpell(47769); // Transmat to Illium
-            SpellManager.AddSpell(22919); // Recall house - broken, seems to require an additional unlock
-            SpellManager.AddSpell(38934); // some pewpew mount
-            SpellManager.AddSpell(62503); // falkron mount
-            SpellManager.AddSpell(63431); // zBoard 79 mount
-            SpellManager.AddSpell(62563); // pet
-            SpellManager.AddSpell(62562); // pet
-            SpellManager.AddSpell(8740, 0); // Grinder mount - locked on purpose
-
-            //SpellManager.AddSpell(38229); // Portal capital city
-            //SpellManager.AddSpell(46803, 2); // Summon Group
-            //SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
-
-            Spell4Entry spell4Entry = new Spell4Entry();
-
-            // TODO: this should eventually be used on level up and store the spells persistently to the ability bag (4)
-            foreach(var spellLevel in GameTableManager.SpellLevel.Entries
-                .Where(s => s.ClassId == model.Class && s.CharacterLevel <= model.Level)
-                .OrderBy(s => s.CharacterLevel))
-            {
-                //FIXME
-                if (spellLevel.PrerequisiteId > 0)
-                    continue;
-
-                spell4Entry = GameTableManager.Spell4.GetEntry(spellLevel.Spell4Id);
-                if (spell4Entry == null)
-                    continue;
-
-                SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
-            }
-
-
-            ClassEntry classEntry = GameTableManager.Class.GetEntry((ulong)Class);
-            foreach(uint classSpell in classEntry.Spell4IdInnateAbilityActive.Concat(classEntry.Spell4IdInnateAbilityPassive).Concat(classEntry.Spell4IdAttackPrimary).Concat(classEntry.Spell4IdAttackUnarmed))
-            {
-                    spell4Entry = GameTableManager.Spell4.GetEntry(classSpell);
-                    if (spell4Entry != null) SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
-            }
 
             Costume costume = null;
             if (CostumeIndex >= 0)
@@ -360,7 +317,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 });
             }
 
-            playerCreate.SpecIndex = SpellManager.activeActionSet;
+            playerCreate.SpecIndex = SpellManager.ActiveActionSet;
 
             Session.EnqueueMessageEncrypted(playerCreate);
 

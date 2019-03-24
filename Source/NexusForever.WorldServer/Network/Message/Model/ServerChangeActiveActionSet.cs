@@ -1,5 +1,6 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Network.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -7,12 +8,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ServerChangeActiveActionSet : IWritable
     {
         public byte ActionSetIndex { get; set; }
-        public uint ActionSetError { get; set; }
+        public SpecError SpecError { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(ActionSetIndex, 3u);
-            writer.Write(ActionSetError);
+            writer.Write(SpecError, 32u);
         }
     }
 }

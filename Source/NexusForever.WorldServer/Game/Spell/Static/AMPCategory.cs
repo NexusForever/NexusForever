@@ -1,6 +1,6 @@
 namespace NexusForever.WorldServer.Game.Spell.Static
 {
-    public enum AMPCategory
+    public enum AmpCategory
     {
         Utility     = 1,  
         Support     = 2, 
