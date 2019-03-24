@@ -67,6 +67,9 @@ namespace NexusForever.WorldServer.Database.Character
                             .ThenInclude(c => c.CharacterCostumeItem)
                         .Include(c => c.CharacterPetCustomisation)
                         .Include(c => c.CharacterPetFlair)
+                        .Include(c => c.CharacterSpell)
+                        .Include(c => c.CharacterActionSetShortcut)
+                        .Include(c => c.CharacterActionSetAmp)
                     .ToListAsync();
             }
         }

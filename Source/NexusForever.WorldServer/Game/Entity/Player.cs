@@ -20,7 +20,6 @@ using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -146,29 +145,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
             Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
             Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
-
-            // temp
-            // TODO:
-            // a) move (Add's) to CharacterHandler / CharacterCration
-            // b) store abilities persistently
-            // c) handle starting abilities by class - sadly no tbl data available...
-            SpellManager.AddSpell(47769); // Transmat to Illium
-            SpellManager.AddSpell(22919); // Recall house - broken, seems to require an additional unlock
-            SpellManager.AddSpell(38934); // some pewpew mount
-            SpellManager.AddSpell(62503); // falkron mount
-            SpellManager.AddSpell(63431); // zBoard 79 mount
-            SpellManager.AddSpell(31213); // Spellsurge
-            SpellManager.AddSpell(38229); // Portal capital city
-            SpellManager.AddSpell(23148); // Shred
-            SpellManager.AddSpell(23161); // Impale
-            SpellManager.AddSpell(23173); // Stagger
-            SpellManager.AddSpell(46803); // Summon Group
-            SpellManager.AddSpellToActionSet(0, 23148, UILocation.LAS1);
-            SpellManager.AddSpellToActionSet(0, 23161, UILocation.LAS2, 2);
-            SpellManager.AddSpellToActionSet(0, 23173, UILocation.LAS3, 3);
-            SpellManager.AddSpellToActionSet(0, 46803, UILocation.PathAbility);
-            SpellManager.AddSpell(62563); // pet
-            SpellManager.AddSpell(62562); // pet
 
             Costume costume = null;
             if (CostumeIndex >= 0)
@@ -340,6 +316,8 @@ namespace NexusForever.WorldServer.Game.Entity
                     Reason = 49
                 });
             }
+
+            playerCreate.SpecIndex = SpellManager.ActiveActionSet;
 
             Session.EnqueueMessageEncrypted(playerCreate);
 
@@ -600,6 +578,7 @@ namespace NexusForever.WorldServer.Game.Entity
             TitleManager.Save(context);
             CostumeManager.Save(context);
             PetCustomisationManager.Save(context);
+            SpellManager.Save(context);
         }
     }
 }

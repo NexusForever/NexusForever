@@ -13,14 +13,13 @@ namespace NexusForever.WorldServer.Command.Handler
         {
         }
 
-        [SubCommandHandler("add", "spell4BaseId [tier] - Add a spell to the character, optionally supplying the tier")]
+        [SubCommandHandler("add", "spell4BaseId - Add a spell to the character")]
         public Task AddSpellSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length == 0)
                 return Task.CompletedTask;
 
-            byte tier = parameters.Length > 1 ? byte.Parse(parameters[1]) : (byte)1;
-            context.Session.Player.SpellManager.AddSpell(uint.Parse(parameters[0]), tier);
+            context.Session.Player.SpellManager.AddSpell(uint.Parse(parameters[0]));
             return Task.CompletedTask;
         }
 

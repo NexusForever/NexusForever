@@ -7,20 +7,24 @@ namespace NexusForever.Shared.GameTable.Model
         public uint LocalizedTextId;
         public uint LocalizedTextIdNameFemale;
         public uint Mechanic;
-        public uint Spell4IdInnateAbilityActive00;
-        public uint Spell4IdInnateAbilityActive01;
-        public uint Spell4IdInnateAbilityActive02;
-        public uint Spell4IdInnateAbilityPassive00;
-        public uint Spell4IdInnateAbilityPassive01;
-        public uint Spell4IdInnateAbilityPassive02;
-        public uint PrerequisiteIdInnateAbility00;
-        public uint PrerequisiteIdInnateAbility01;
-        public uint PrerequisiteIdInnateAbility02;
+
+        [GameTableFieldArray(3)]
+        public uint[] Spell4IdInnateAbilityActive;
+
+        [GameTableFieldArray(3)]
+        public uint[] Spell4IdInnateAbilityPassive;
+
+        [GameTableFieldArray(3)]
+        public uint[] PrerequisiteIdInnateAbility;
+
         public uint StartingItemProficiencies;
-        public uint Spell4IdAttackPrimary00;
-        public uint Spell4IdAttackPrimary01;
-        public uint Spell4IdAttackUnarmed00;
-        public uint Spell4IdAttackUnarmed01;
+
+        [GameTableFieldArray(2)]
+        public uint[] Spell4IdAttackPrimary;
+
+        [GameTableFieldArray(2)]
+        public uint[] Spell4IdAttackUnarmed;
+
         public uint Spell4IdResAbility;
         public uint LocalizedTextIdDescription;
         public uint Spell4GroupId;

@@ -24,7 +24,6 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public string Name { get; set; }
         public string Realm { get; set; }
-
         public ulong Guid { get; set; }
         public string Text { get; set; }
 
