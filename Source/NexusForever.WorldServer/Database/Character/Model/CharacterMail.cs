@@ -5,10 +5,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
 {
     public partial class CharacterMail
     {
-        //public CharacterMail()
-        //{
-        //    CharacterMailAttachment = new HashSet<CharacterMailAttachment>();
-        //}
+        public CharacterMail()
+        {
+            CharacterMailAttachment = new HashSet<CharacterMailAttachment>();
+        }
 
         public ulong Id { get; set; }
         public ulong RecipientId { get; set; }
@@ -28,6 +28,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public DateTime CreateTime { get; set; }
 
         public virtual Character Recipient { get; set; }
-        //public virtual ICollection<CharacterMailAttachment> CharacterMailAttachment { get; set; }
+        public virtual ICollection<CharacterMailAttachment> CharacterMailAttachment { get; set; }
     }
 }

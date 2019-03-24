@@ -89,11 +89,31 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientMailTakeAttachment)]
         public static void HandleMailTakeAttackment(WorldSession session, ClientMailTakeAttachment clientMailTakeAttachment)
         {
-            log.Info($"{clientMailTakeAttachment.MailId}, {clientMailTakeAttachment.Index}, {clientMailTakeAttachment.UnitId}");
+            GenericError result = GenericError.Ok;
+
+            if (clientMailTakeAttachment.UnitId <= 0 || !MailManager.IsTargetMailBoxInRange(session, clientMailTakeAttachment.UnitId))
+                result = GenericError.Mail_MailBoxOutOfRange;
+
+            if (session.Player.Inventory.IsInventoryFull())
+                result = GenericError.Item_InventoryFull; // Handle when inventory is empty
+
+            if (result == GenericError.Ok)
+            {
+                session.Player.AvailableMail.TryGetValue(clientMailTakeAttachment.MailId, out MailItem mailItem);
+                if (mailItem != null)
+                {
+                    MailAttachment mailAttachment = mailItem.GetAttachment(clientMailTakeAttachment.Index);
+                    mailItem.AttachmentDelete(mailAttachment);
+                    session.Player.Inventory.ItemCreate(mailAttachment.ItemId, mailAttachment.Amount);                    
+                }
+                else
+                    result = GenericError.Mail_InvalidInventorySlot;
+            }
+
             session.EnqueueMessageEncrypted(new ServerMailTakeAttachment
             {
                 MailId = clientMailTakeAttachment.MailId,
-                Result = 0,
+                Result = result,
                 Index = clientMailTakeAttachment.Index
             });
         }

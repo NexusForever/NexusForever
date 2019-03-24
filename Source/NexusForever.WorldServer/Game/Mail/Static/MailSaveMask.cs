@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace NexusForever.WorldServer.Game.Entity.Static
+namespace NexusForever.WorldServer.Game.Mail.Static
 {
     /// <summary>
-    /// Determines which fields need saving for <see cref="PathEntry"/> when being saved to the database.
+    /// Determines which fields need saving for <see cref="MailItem"/> when being saved to the database.
     /// </summary>
     [Flags]
     public enum MailSaveMask
