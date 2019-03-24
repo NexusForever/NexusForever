@@ -74,6 +74,7 @@ namespace NexusForever.WorldServer.Game.Mail
         public bool IsPendingDelete => ((saveMask & MailSaveMask.Delete) != 0);
 
         private readonly SortedDictionary</*index*/uint, MailAttachment> mailAttachments = new SortedDictionary</*index*/uint, MailAttachment>();
+        private readonly HashSet<MailAttachment> deletedAttachments = new HashSet<MailAttachment>();
 
         public MailItem(MailModel model)
         {
@@ -91,7 +92,8 @@ namespace NexusForever.WorldServer.Game.Mail
             DeliveryTime = (DeliveryTime)model.DeliveryTime;
             CreateTime = model.CreateTime;
 
-            // TODO: handle attached items
+            foreach (CharacterMailAttachment mailAttachment in model.CharacterMailAttachment)
+                mailAttachments.Add(mailAttachment.Index, new MailAttachment(model.Id, mailAttachment.ItemId, mailAttachment.Index, mailAttachment.Amount));
 
             saveMask = MailSaveMask.None;
         }
@@ -107,12 +109,12 @@ namespace NexusForever.WorldServer.Game.Mail
         /// <param name="isCOD"></param>
         /// <param name="deliveryTime"></param>
         /// <param name="attachedItems"></param>
-        public MailItem(ulong newRecipientId, Player sender, string subject, string message, ulong currencyAmount, bool isCOD, DeliveryTime deliveryTime, List<MailAttachment> attachedItems = null)
+        public MailItem(ulong newRecipientId, Player sender, string subject, string message, ulong currencyAmount, bool isCOD, DeliveryTime deliveryTime)
         {
             Id = MailManager.NextMailId;
             recipientId = newRecipientId;
             SenderType = SenderType.Player;
-            SenderId = 2; // sender.CharacterId;
+            SenderId = sender.CharacterId;
             Subject = subject;
             Message = message;
             CurrencyType = CurrencyType.Credits;
@@ -123,9 +125,6 @@ namespace NexusForever.WorldServer.Game.Mail
             flags = MailFlag.None;
             DeliveryTime = deliveryTime;
             CreateTime = DateTime.Now;
-            if(attachedItems != null)
-                for (byte i = 0; i < attachedItems.Count; i++)
-                    mailAttachments.TryAdd(attachedItems[i].Index, attachedItems[i]);
 
             saveMask = MailSaveMask.Create;
         }
@@ -142,61 +141,78 @@ namespace NexusForever.WorldServer.Game.Mail
         {
             log.Info($"Save called on {Id}");
 
-            if (saveMask == MailSaveMask.None)
-                return;
-
-            if ((saveMask & MailSaveMask.Create) != 0)
+            if (saveMask != MailSaveMask.None)
             {
-                context.Add(new MailModel
+                if ((saveMask & MailSaveMask.Create) != 0)
                 {
-                    Id = Id,
-                    RecipientId = RecipientId,
-                    SenderType = (byte)SenderType,
-                    SenderId = SenderId,
-                    Subject = Subject,
-                    Message = Message,
-                    TextEntrySubject = TextEntrySubject,
-                    TextEntryMessage = TextEntryMessage,
-                    CreatureId = CreatureId,
-                    CurrencyType = Convert.ToByte(CurrencyType),
-                    CurrencyAmount = CurrencyAmount,
-                    IsCashOnDelivery = Convert.ToByte(IsCashOnDelivery),
-                    HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency),
-                    Flags = (byte)Flags,
-                    DeliveryTime = (byte)DeliveryTime,
-                    CreateTime = CreateTime
-                });
-            }
-            else if ((saveMask & MailSaveMask.Delete) != 0)
-            {
-                var model = new MailModel
+                    context.Add(new MailModel
+                    {
+                        Id = Id,
+                        RecipientId = RecipientId,
+                        SenderType = (byte)SenderType,
+                        SenderId = SenderId,
+                        Subject = Subject,
+                        Message = Message,
+                        TextEntrySubject = TextEntrySubject,
+                        TextEntryMessage = TextEntryMessage,
+                        CreatureId = CreatureId,
+                        CurrencyType = Convert.ToByte(CurrencyType),
+                        CurrencyAmount = CurrencyAmount,
+                        IsCashOnDelivery = Convert.ToByte(IsCashOnDelivery),
+                        HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency),
+                        Flags = (byte)Flags,
+                        DeliveryTime = (byte)DeliveryTime,
+                        CreateTime = CreateTime
+                    });
+                }
+                else if ((saveMask & MailSaveMask.Delete) != 0)
                 {
-                    Id = Id
-                };
+                    var model = new MailModel
+                    {
+                        Id = Id
+                    };
 
-                context.Entry(model).State = EntityState.Deleted;
-            }
-            else
-            {
-                var model = new MailModel
+                    context.Entry(model).State = EntityState.Deleted;
+                }
+                else
                 {
-                    Id = Id
-                };
+                    var model = new MailModel
+                    {
+                        Id = Id
+                    };
 
-                EntityEntry<MailModel> entity = context.Attach(model);
-                if ((saveMask & MailSaveMask.Flags) != 0)
-                {
-                    model.Flags = Convert.ToByte(Flags);
-                    entity.Property(p => p.Flags).IsModified = true;
+                    EntityEntry<MailModel> entity = context.Attach(model);
+                    if ((saveMask & MailSaveMask.Flags) != 0)
+                    {
+                        model.Flags = Convert.ToByte(Flags);
+                        entity.Property(p => p.Flags).IsModified = true;
+                    }
+
+                    if ((saveMask & MailSaveMask.CurrencyChange) != 0)
+                    {
+                        model.HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency);
+                        entity.Property(p => p.HasPaidOrCollectedCurrency).IsModified = true;
+                    }
                 }
 
-                if ((saveMask & MailSaveMask.CurrencyChange) != 0)
-                {
-                    model.HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency);
-                    entity.Property(p => p.HasPaidOrCollectedCurrency).IsModified = true;
-                }
+                saveMask = MailSaveMask.None;
             }
-            saveMask = MailSaveMask.None;
+
+            foreach (MailAttachment mailAttachment in mailAttachments.Values)
+                mailAttachment.Save(context);
+
+            foreach (MailAttachment mailAttachment in deletedAttachments)
+                mailAttachment.Save(context);
+        }
+
+        /// <summary>
+        /// Returns the specific <see cref="MailAttachment"/> based on its index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public MailAttachment GetAttachment(uint index)
+        {
+            return mailAttachments[index];
         }
 
         /// <summary>
@@ -223,5 +239,17 @@ namespace NexusForever.WorldServer.Game.Mail
             HasPaidOrCollectedCurrency = true;
         }
 
+        public void AttachmentAdd(MailAttachment mailAttachment)
+        {
+            mailAttachments.Add(mailAttachment.Index, mailAttachment);
+        }
+
+        public void AttachmentDelete(MailAttachment mailAttachment)
+        {
+            mailAttachment.EnqueueDelete();
+
+            mailAttachments.Remove(mailAttachment.Index);
+            deletedAttachments.Add(mailAttachment);
+        }
     }
 }

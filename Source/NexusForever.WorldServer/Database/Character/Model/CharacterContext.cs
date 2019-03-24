@@ -28,6 +28,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
         public virtual DbSet<CharacterMail> CharacterMail { get; set; }
+        public virtual DbSet<CharacterMailAttachment> CharacterMailAttachment { get; set; }
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual DbSet<CharacterPetFlair> CharacterPetFlair { get; set; }
@@ -444,6 +445,35 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterMail)
                     .HasForeignKey(d => d.RecipientId)
                     .HasConstraintName("FK__character_mail_recipientId__character_id");
+            });
+
+            modelBuilder.Entity<CharacterMailAttachment>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Index })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_mail_attachment");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ItemId)
+                    .HasColumnName("itemId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Amount)
+                    .HasColumnName("amount")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterMailAttachment)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_mail_attachment_id__character_mail_id");
             });
 
             modelBuilder.Entity<CharacterPath>(entity =>
