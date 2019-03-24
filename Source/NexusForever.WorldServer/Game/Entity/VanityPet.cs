@@ -62,7 +62,7 @@ namespace NexusForever.WorldServer.Game.Entity
             var owner = Map.GetEntity<Player>(OwnerGuid);
 
             var entityCreate = base.BuildCreatePacket();
-            entityCreate.Unknown68 = 904575;
+            entityCreate.Time = 904575;
             entityCreate.Faction1 = Faction1;
             entityCreate.Faction2 = Faction2;
 

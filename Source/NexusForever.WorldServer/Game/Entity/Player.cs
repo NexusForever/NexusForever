@@ -357,7 +357,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     EntityCommand.SetPlatform,
                     new SetPlatformCommand
                     {
-                        Platform = VehicleGuid
+                        UnitId = VehicleGuid
                     }
                 },
                 {
