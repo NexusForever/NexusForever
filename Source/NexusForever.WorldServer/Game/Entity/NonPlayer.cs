@@ -48,14 +48,14 @@ namespace NexusForever.WorldServer.Game.Entity
             return new NonPlayerEntityModel
             {
                 CreatureId = CreatureId,
-                Unknown0 = 0
+                QuestChecklistIdx = 0
             };
         }
 
         public override ServerEntityCreate BuildCreatePacket()
         {
             ServerEntityCreate entityCreate = base.BuildCreatePacket();
-            entityCreate.Unknown60 = (byte)(VendorInfo != null ? 4 : 0); // show vendor icon above entity
+            entityCreate.CreateFlags = (byte)(VendorInfo != null ? 4 : 0); // show vendor icon above entity
             return entityCreate;
         }
 

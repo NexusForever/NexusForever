@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -180,6 +180,7 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<DyeColorRampEntry> DyeColorRamp { get; private set; }
 
+        [GameData]
         public static GameTable<EldanAugmentationEntry> EldanAugmentation { get; private set; }
         public static GameTable<EldanAugmentationCategoryEntry> EldanAugmentationCategory { get; private set; }
         public static GameTable<EmoteSequenceTransitionEntry> EmoteSequenceTransition { get; private set; }
@@ -373,6 +374,8 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PeriodicQuestGroupEntry> PeriodicQuestGroup { get; private set; }
         public static GameTable<PeriodicQuestSetEntry> PeriodicQuestSet { get; private set; }
         public static GameTable<PeriodicQuestSetCategoryEntry> PeriodicQuestSetCategory { get; private set; }
+
+        [GameData]
         public static GameTable<PetFlairEntry> PetFlair { get; private set; }
         public static GameTable<PlayerNotificationTypeEntry> PlayerNotificationType { get; private set; }
         public static GameTable<PositionalRequirementEntry> PositionalRequirement { get; private set; }
@@ -511,6 +514,8 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<SpellCoolDownEntry> SpellCoolDown { get; private set; }
 
         public static GameTable<SpellEffectTypeEntry> SpellEffectType { get; private set; }
+
+        [GameData]
         public static GameTable<SpellLevelEntry> SpellLevel { get; private set; }
         public static GameTable<SpellPhaseEntry> SpellPhase { get; private set; }
         public static GameTable<Spline2Entry> Spline2 { get; private set; }
@@ -558,7 +563,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<UnitRaceEntry> UnitRace { get; private set; }
 
+        [GameData]
         public static GameTable<UnitVehicleEntry> UnitVehicle { get; private set; }
+
         public static GameTable<VeteranTierEntry> VeteranTier { get; private set; }
         public static GameTable<VirtualItemEntry> VirtualItem { get; private set; }
         public static GameTable<VisualEffectEntry> VisualEffect { get; private set; }

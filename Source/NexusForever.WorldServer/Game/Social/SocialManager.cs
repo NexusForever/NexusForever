@@ -147,7 +147,6 @@ namespace NexusForever.WorldServer.Game.Social
                     case ChatFormatItemGuid chatFormatItemGuid:
                     {
                         Item item = session.Player.Inventory.GetItem(chatFormatItemGuid.Guid);
-
                         // TODO: this probably needs to be a full item response
                         yield return new ChatFormat
                         {

@@ -471,6 +471,16 @@ namespace NexusForever.WorldServer.Game.Entity
             return null;
         }
 
+        public Item GetSpell(Spell4BaseEntry spell4BaseEntry)
+        {
+            Bag bag = GetBag(InventoryLocation.Ability);
+            foreach (Item item in bag)
+                if (item.SpellEntry == spell4BaseEntry)
+                    return item;
+
+            return null;
+        }
+
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>

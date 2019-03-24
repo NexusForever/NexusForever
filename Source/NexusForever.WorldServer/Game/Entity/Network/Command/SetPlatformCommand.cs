@@ -1,20 +1,20 @@
-﻿using NexusForever.Shared.Network;
+using NexusForever.Shared.Network;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetPlatform)]
     public class SetPlatformCommand : IEntityCommand
     {
-        public uint Platform { get; set; }
+        public uint UnitId { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            Platform = reader.ReadUInt();
+            UnitId = reader.ReadUInt();
         }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Platform);
+            writer.Write(UnitId);
         }
     }
 }
