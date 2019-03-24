@@ -74,6 +74,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private sbyte costumeIndex;
 
+        public DateTime CreateTime { get; }
+        public double TimePlayedTotal { get; private set; }
+        public double TimePlayedLevel { get; private set; }
+        public double TimePlayedSession { get; private set; }
+
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
@@ -91,11 +96,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
-
-        public DateTime CreateTime { get; }
-        public double TimePlayedTotal  { get; set; }
-        public double TimePlayedLevel  { get; set; }
-        public double TimePlayedSession  { get; set; }
 
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
@@ -115,6 +115,10 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
 
+            CreateTime      = model.CreateTime;
+            TimePlayedTotal = model.TimePlayedTotal;
+            TimePlayedLevel = model.TimePlayedLevel;
+
             // managers
             CostumeManager  = new CostumeManager(this, session.Account, model);
             Inventory       = new Inventory(this, model);
@@ -122,11 +126,6 @@ namespace NexusForever.WorldServer.Game.Entity
             PathManager     = new PathManager(this, model);
             TitleManager    = new TitleManager(this, model);
             SpellManager    = new SpellManager(this, model);
-
-            CreateTime      = model.CreateTime;
-            TimePlayedTotal = model.TimePlayedTotal;
-            TimePlayedLevel = model.TimePlayedLevel;
-            TimePlayedSession = 0;
 
             Stats.Add(Stat.Level, new StatValue(Stat.Level, level));
 
@@ -193,7 +192,10 @@ namespace NexusForever.WorldServer.Game.Entity
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
-                UpdatePlayedValues(true);
+                double timeSinceLastSave = GetTimeSinceLastSave();
+                TimePlayedSession += timeSinceLastSave;
+                TimePlayedLevel += timeSinceLastSave;
+                TimePlayedTotal += timeSinceLastSave;
 
                 timeToSave = SaveDuration;
 
@@ -571,16 +573,12 @@ namespace NexusForever.WorldServer.Game.Entity
             CostumeManager.Save(context);
         }
 
-        public double UpdatePlayedValues(bool store = true)
+        /// <summary>
+        /// Returns the time in seconds that has past since the last <see cref="Player"/> save.
+        /// </summary>
+        public double GetTimeSinceLastSave()
         {
-            double diff = (SaveDuration - timeToSave);
-            if (!store)
-                return diff;
-
-            TimePlayedSession += diff;
-            TimePlayedLevel += diff;
-            TimePlayedTotal += diff;
-            return 0;
+            return SaveDuration - timeToSave;
         }
     }
 }

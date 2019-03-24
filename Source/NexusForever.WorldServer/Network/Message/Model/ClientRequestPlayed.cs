@@ -3,8 +3,8 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientRequstPlayed, MessageDirection.Client)]
-    public class ClientRequstPlayed : IReadable
+    [Message(GameMessageOpcode.ClientRequestPlayed, MessageDirection.Client)]
+    public class ClientRequestPlayed : IReadable
     {
         public void Read(GamePacketReader reader)
         {

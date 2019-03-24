@@ -114,7 +114,7 @@ namespace NexusForever.Shared.Network.Message
         ClientPlayerMovementSpeedUpdate = 0x063B,
         ServerOwnedCommodityOrders      = 0x064C,
         ServerOwnedItemAuctions         = 0x064D,
-        ClientRequstPlayed              = 0x0693,
+        ClientRequestPlayed             = 0x0693,
         ServerPlayerPlayed              = 0x0694,
         ClientPathActivate              = 0x06B2,
         ServerPathActivateResult        = 0x06B3,
