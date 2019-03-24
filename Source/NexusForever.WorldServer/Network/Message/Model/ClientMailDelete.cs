@@ -1,18 +1,20 @@
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ClientMailDelete, MessageDirection.Client)]
     public class ClientMailDelete : IReadable
     {
-        public uint Unknown0 { get; private set; }
-        public ulong MailId { get; private set; }
+        public uint Count { get; private set; }
+        public List<ulong> MailList { get; private set; } = new List<ulong>();
 
         public void Read(GamePacketReader reader)
         {
-            Unknown0  = reader.ReadUInt();
-            MailId = reader.ReadULong();
+            Count  = reader.ReadUInt();
+            for (int i = 0; i < Count; i++)
+                MailList.Add(reader.ReadULong());
         }
     }
 }

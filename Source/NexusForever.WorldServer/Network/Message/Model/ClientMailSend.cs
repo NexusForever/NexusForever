@@ -1,5 +1,6 @@
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Mail.Static;
 using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
@@ -13,7 +14,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public string Message { get; private set; }
         public ulong CreditsSent { get; private set; }
         public ulong CreditsRequsted { get; private set; }
-        public byte DeliveryTime { get; private set; } // 0 Instant, 1 Hour, 2, Day
+        public DeliveryTime DeliveryTime { get; private set; } // 0 Instant, 1 Hour, 2, Day
         public uint UnitId { get; private set; } // Mailbox Entity Guid
         public List<ulong> Items { get; set; } = new List<ulong>();
 
@@ -26,7 +27,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             Message = reader.ReadWideString();
             CreditsSent = reader.ReadULong();
             CreditsRequsted = reader.ReadULong();
-            DeliveryTime = reader.ReadByte(2);
+            DeliveryTime = (DeliveryTime)reader.ReadByte(2);
             UnitId = reader.ReadUInt();
             for (uint i = 0; i < 10; i++)
                 Items.Add(reader.ReadULong());

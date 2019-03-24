@@ -27,6 +27,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterCostumeItem> CharacterCostumeItem { get; set; }
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual DbSet<CharacterMail> CharacterMail { get; set; }
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual DbSet<CharacterPetFlair> CharacterPetFlair { get; set; }
@@ -363,6 +364,86 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterCustomisation)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_customisation_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterMail>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_mail");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CreateTime)
+                    .HasColumnName("createTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
+                entity.Property(e => e.CreatureId)
+                    .HasColumnName("creatureId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CurrencyAmount)
+                    .HasColumnName("currencyAmount")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CurrencyType)
+                    .HasColumnName("currencyType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.DeliveryTime)
+                    .HasColumnName("deliveryTime")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Flags)
+                    .HasColumnName("flags")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.HasPaidOrCollectedCurrency)
+                    .HasColumnName("hasPaidOrCollectedCurrency")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.IsCashOnDelivery)
+                    .HasColumnName("isCashOnDelivery")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Message)
+                    .HasColumnName("message")
+                    .HasColumnType("varchar(2000)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.RecipientId)
+                    .HasColumnName("recipientId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SenderType)
+                    .HasColumnName("senderType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SenderId)
+                    .HasColumnName("senderId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Subject)
+                    .HasColumnName("subject")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.TextEntryMessage)
+                    .HasColumnName("textEntryMessage")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TextEntrySubject)
+                    .HasColumnName("textEntrySubject")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.Recipient)
+                    .WithMany(p => p.CharacterMail)
+                    .HasForeignKey(d => d.RecipientId)
+                    .HasConstraintName("FK__character_mail_recipientId__character_id");
             });
 
             modelBuilder.Entity<CharacterPath>(entity =>

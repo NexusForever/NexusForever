@@ -18,6 +18,7 @@ using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Mail;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network;
@@ -94,6 +95,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint PetGuid { get; set; }
 
+        public Dictionary<ulong, MailItem> AvailableMail { get; private set; } = new Dictionary<ulong, MailItem>();
+
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
@@ -169,6 +172,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach(CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
+
+            foreach (CharacterMail mail in model.CharacterMail)
+                AvailableMail.Add(mail.Id, new MailItem(mail));
         }
 
         public override void Update(double lastTick)
@@ -342,46 +348,7 @@ namespace NexusForever.WorldServer.Game.Entity
             TitleManager.SendTitles();
             SpellManager.SendInitialPackets();
             PetCustomisationManager.SendInitialPackets();
-
-            Session.EnqueueMessageEncrypted(new ServerMailAvailable
-            {
-                Unknown0 = true,
-                MailList = new List<NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailItem>
-                {
-                    new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailItem
-                    {
-                        MailId = 445382167,
-                        SenderType = Mail.Static.SenderType.Player,
-                        Subject = "Jesus",
-                        Message = "Christ",
-                        TextEntrySubject = 0,
-                        TextEntryMessage = 0,
-                        CreatureId = 0,
-                        CurrencyGiftType = 2,
-                        CurrencyGiftAmount = 0,
-                        CostOnDeliveryAmount = 250,
-                        ExpiryTimeInDays = 10f,
-                        Flags = Mail.Static.MailFlag.None,
-                        SenderRealm = 1,
-                        SenderCharacterId = 2,
-                        Attachments = new List<NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment>
-                        {
-                            new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment
-                            {
-                                ItemId = 50762,
-                                Amount = 1,
-                                Unknown3 = 1
-                            },
-                            new NexusForever.WorldServer.Mail.Network.Message.Model.Shared.MailAttachment
-                            {
-                                ItemId = 82671,
-                                Amount = 1,
-                                Unknown3 = 2
-                            }
-                        }
-                    }
-                }
-            });
+            MailManager.SendInitialPackets(Session);
         }
 
         public ItemProficiency GetItemProficiences()
@@ -642,6 +609,8 @@ namespace NexusForever.WorldServer.Game.Entity
             CostumeManager.Save(context);
             PetCustomisationManager.Save(context);
             SpellManager.Save(context);
+
+            MailManager.Save(this, context);
         }
 
         /// <summary>
