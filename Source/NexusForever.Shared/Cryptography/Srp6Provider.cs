@@ -36,7 +36,7 @@ namespace NexusForever.Shared.Cryptography
             using (var sha256 = new SHA256Managed())
             {
                 byte[] P = sha256.ComputeHash(Encoding.ASCII.GetBytes($"{I}:{p}"));
-                BigInteger x = Hash(new BigInteger(s, true), new BigInteger(P, true));
+                BigInteger x = Hash(true, new BigInteger(s, true), new BigInteger(P, true));
                 return BigInteger.ModPow(g, x, N).ToByteArray();
             }
         }
@@ -54,7 +54,7 @@ namespace NexusForever.Shared.Cryptography
         public byte[] GenerateServerCredentials()
         {
             b = RandomProvider.GetUnsignedBigInteger(128u);
-            BigInteger k = Hash(N, g);
+            BigInteger k = Hash(true, N, g);
             B = (k * v + BigInteger.ModPow(g, b, N)) % N;
             return B.ToByteArray(true);
         }
@@ -69,7 +69,7 @@ namespace NexusForever.Shared.Cryptography
                 throw new CryptographicException();
 
             A = a;
-            u = Hash(A, B);
+            u = Hash(true, A, B);
             S = BigInteger.ModPow(A * BigInteger.ModPow(v, u, N), b, N);
         }
 
@@ -90,24 +90,18 @@ namespace NexusForever.Shared.Cryptography
             if (A == BigInteger.Zero || B == BigInteger.Zero || S == BigInteger.Zero)
                 throw new CryptographicException("Missing data from previous operations: A, B, S");
 
-            /*using (var sha256 = new SHA256Managed())
+            using (var sha256 = new SHA256Managed())
             {
-                byte[] IHash = sha256.ComputeHash(I);
-                BigInteger hash = Hash(Hash(N) ^ Hash(g),
+                var IHash = sha256.ComputeHash(I);
+                BigInteger serverM1 = Hash(false, Hash(false, N) ^ Hash(false, g),
                     new BigInteger(IHash, true), s, A, B, K);
 
-                byte[] bytes = hash.ToByteArray(true);
-                ReverseBytesAsUInt32(bytes);
-                hash = new BigInteger(bytes, true);
+                if (!clientM1.SequenceEqual(serverM1.ToByteArray(true)))
+                    return false;
 
-                if (M1 != hash)
-                {
-
-                }
-            }*/
-
-            M1 = new BigInteger(clientM1, true);
-            return true;
+                M1 = new BigInteger(clientM1, true);
+                return true;
+            }
         }
 
         /// <summary>
@@ -118,14 +112,14 @@ namespace NexusForever.Shared.Cryptography
             if (A == BigInteger.Zero || M1 == BigInteger.Zero || K == BigInteger.Zero)
                 throw new CryptographicException("Missing data from previous operations: A, M1, K");
 
-            M2 = Hash(A, M1, K);
+            M2 = Hash(true, A, M1, K);
 
             byte[] M2Bytes = M2.ToByteArray(true);
             ReverseBytesAsUInt32(M2Bytes);
             return M2Bytes;
         }
 
-        private static BigInteger Hash(params BigInteger[] integers)
+        private static BigInteger Hash(bool reverse, params BigInteger[] integers)
         {
             using (var sha256 = new SHA256Managed())
             {
@@ -145,7 +139,8 @@ namespace NexusForever.Shared.Cryptography
                 }
 
                 byte[] hash = sha256.Hash;
-                ReverseBytesAsUInt32(hash);
+                if (reverse)
+                    ReverseBytesAsUInt32(hash);
                 return new BigInteger(hash, true);
             }
         }
@@ -155,12 +150,16 @@ namespace NexusForever.Shared.Cryptography
         /// </summary>
         private static BigInteger ShaInterleave(BigInteger key)
         {
-            byte[] T = key
-                .ToByteArray(true)
+            byte[] keyBytes = key.ToByteArray(true);
+            byte[] T = keyBytes
                 .Reverse()
                 .ToArray();
 
-            int length = Math.Max(4, Array.IndexOf<byte>(T, 0) + 1);
+            int first0 = Array.IndexOf<byte>(keyBytes, 0);
+            int length = 4;
+
+            if (first0 >= 0 && first0 < T.Length-4)
+                length = T.Length - first0;
 
             byte[] E = new byte[length / 2];
             for (uint i = 0u; i < E.Length; i++)

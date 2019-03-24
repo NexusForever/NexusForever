@@ -21,9 +21,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 if (account == null)
                     throw new InvalidPacketValueException($"Failed to find account, Id:{helloRealm.AccountId}, Email:{helloRealm.Email}, SessionKey:{helloRealm.SessionKey}!");
 
-                session.Account           = account;
-                session.CanProcessPackets = true;
+                session.Initialise(account);
                 session.SetEncryptionKey(helloRealm.SessionKey);
+                session.CanProcessPackets = true;
             }));
         }
     }

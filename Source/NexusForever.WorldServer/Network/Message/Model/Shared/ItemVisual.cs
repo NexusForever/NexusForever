@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         public ItemSlot Slot { get; set; }
         public ushort DisplayId { get; set; }
         public ushort ColourSetId { get; set; }
-        public uint DyeData { get; set; }
+        public int DyeData { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

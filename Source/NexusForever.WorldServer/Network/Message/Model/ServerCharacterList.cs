@@ -44,10 +44,10 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public ushort WorldZoneId { get; set; }
             public ushort RealmId { get; set; }
             public UnknownStructure2 Unknown3C { get; } = new UnknownStructure2();
-            public byte Unknown50 { get; set; }
+            public byte Path { get; set; }
             public bool IsLocked { get; set; }
             public bool Unknown58 { get; set; }
-            public uint Unknown5C { get; set; }
+            public uint GearMask { get; set; }
             public List<uint> Labels { get; } = new List<uint>();
             public List<uint> Values { get; } = new List<uint>();
             public List<float> Bones { get; } = new List<float>();
@@ -77,10 +77,10 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
                 Unknown3C.Write(writer);
 
-                writer.Write(Unknown50, 3);
+                writer.Write(Path, 3);
                 writer.Write(IsLocked);
                 writer.Write(Unknown58);
-                writer.Write(Unknown5C);
+                writer.Write(GearMask);
 
                 writer.Write(Labels.Count, 4);
                 for (int i = 0; i < Labels.Count; i++)
@@ -135,7 +135,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Unknown3C);
             writer.Write(Unknown40);
             writer.Write(Unknown44);
-            writer.Write(Unknown48);
+            writer.Write(Unknown48, 14);
             writer.Write(Unknown4C);
         }
     }

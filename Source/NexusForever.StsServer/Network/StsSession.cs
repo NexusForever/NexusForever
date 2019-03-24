@@ -22,6 +22,7 @@ namespace NexusForever.StsServer.Network
 
         private Arc4Provider clientEncryption;
         private Arc4Provider serverEncryption;
+        private Arc4Provider serverNewEncryption;
 
         private FragmentedStsPacket onDeck;
         private readonly ConcurrentQueue<ClientStsPacket> incomingPackets = new ConcurrentQueue<ClientStsPacket>();
@@ -84,12 +85,6 @@ namespace NexusForever.StsServer.Network
                     }
                 }
             }
-        }
-
-        protected override void OnDisconnect()
-        {
-            base.OnDisconnect();
-            // TODO...
         }
 
         public override void Update(double lastTick)
@@ -172,13 +167,19 @@ namespace NexusForever.StsServer.Network
                 SendRaw(buffer);
             }
 
+            if (serverNewEncryption != null)
+            {
+                serverEncryption = serverNewEncryption;
+                serverNewEncryption = null;
+            }
+
             log.Trace($"Sent packet response {packet.StatusCode}, {packet.Status}");
         }
 
         public void InitialiseEncryption(byte[] key)
         {
             clientEncryption = new Arc4Provider(key);
-            serverEncryption = new Arc4Provider(key);
+            serverNewEncryption = new Arc4Provider(key);
             log.Trace($"Initialised RC4, Key: {BitConverter.ToString(key).Replace("-", "")}");
         }
     }

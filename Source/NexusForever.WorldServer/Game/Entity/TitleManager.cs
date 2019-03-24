@@ -70,13 +70,11 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             if (!activeSaved)
             {
-                var model = new Character
-                {
-                    Id    = player.CharacterId,
-                    Title = activeTitleId
-                };
+                // character is attached in Player::Save, this will only be local lookup
+                Character character = context.Character.Find(player.CharacterId);
+                character.Title = activeTitleId;
 
-                EntityEntry<Character> entity = context.Attach(model);
+                EntityEntry<Character> entity = context.Entry(character);
                 entity.Property(p => p.Title).IsModified = true;
 
                 activeSaved = true;

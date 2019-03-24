@@ -42,7 +42,7 @@ namespace NexusForever.WorldServer.Game.Map
             }
         }
 
-        protected override void OnAddToMap(Player player)
+        public override void OnAddToMap(Player player)
         {
             if (residence == null)
                 throw new InvalidOperationException();
@@ -275,7 +275,7 @@ namespace NexusForever.WorldServer.Game.Map
 
             if (update.DecorType != DecorType.Crate)
             {
-                if (update.Scale < decor.Entry.MinScale || update.Scale > decor.Entry.MaxScale)
+                if (update.Scale < 0f)
                     throw new InvalidPacketValueException();
 
                 // new decor is being placed directly in the world

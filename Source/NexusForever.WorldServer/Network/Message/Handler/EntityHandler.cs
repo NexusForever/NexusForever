@@ -1,4 +1,5 @@
-﻿using NexusForever.Shared.Network.Message;
+using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -10,23 +11,31 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientEntityCommand)]
         public static void HandleClientEntityCommand(WorldSession session, ClientEntityCommand entityCommand)
         {
+            WorldEntity mover = session.Player;
+            if (session.Player.ControlGuid != session.Player.Guid)
+                mover = session.Player.GetVisible<WorldEntity>(session.Player.ControlGuid);
+
             foreach ((EntityCommand id, IEntityCommand command) in entityCommand.Commands)
             {
                 switch (command)
                 {
                     case SetPositionCommand setPosition:
-                        session.Player.CancelSpellsOnMove();
-                        session.Player.Map.EnqueueRelocate(session.Player, setPosition.Position.Vector);
+                    {
+                        // this is causing issues after moving to soon after mounting:
+                        // session.Player.CancelSpellsOnMove();
+
+                        mover.Map.EnqueueRelocate(mover, setPosition.Position.Vector);
                         break;
+                    }
                     case SetRotationCommand setRotation:
-                        session.Player.Rotation = setRotation.Position.Vector;
+                        mover.Rotation = setRotation.Position.Vector;
                         break;
                 }
             }
 
-            session.Player.EnqueueToVisible(new ServerEntityCommand
+            mover.EnqueueToVisible(new ServerEntityCommand
             {
-                Guid     = session.Player.Guid,
+                Guid     = mover.Guid,
                 Time     = entityCommand.Time,
                 Unknown2 = true,
                 Commands = entityCommand.Commands

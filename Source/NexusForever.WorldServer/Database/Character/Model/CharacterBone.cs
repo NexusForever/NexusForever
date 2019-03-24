@@ -9,6 +9,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte BoneIndex { get; set; }
         public float Bone { get; set; }
 
-        public Character IdNavigation { get; set; }
+        public virtual Character IdNavigation { get; set; }
     }
 }

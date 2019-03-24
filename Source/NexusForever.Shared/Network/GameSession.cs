@@ -188,7 +188,7 @@ namespace NexusForever.Shared.Network
                 catch (InvalidPacketValueException exception)
                 {
                     log.Error(exception);
-                    OnDisconnect();
+                    RequestedDisconnect = true;
                 }
                 catch (Exception exception)
                 {

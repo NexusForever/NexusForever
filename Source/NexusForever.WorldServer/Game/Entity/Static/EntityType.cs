@@ -34,6 +34,10 @@
         Trap,
         Destructibledoor,
         Pickup,
-        SimpleCollidable
+        SimpleCollidable,
+        HousingMannequin,
+        HousingHarvestPlug,
+        HousingPlant,
+        Lockbox
     }
 }

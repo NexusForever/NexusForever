@@ -9,5 +9,6 @@ namespace NexusForever.WorldServer.Game.Spell
         public SpellInfo RootSpellInfo { get; set; }
         public bool UserInitiatedSpellCast { get; set; }
         public uint PrimaryTargetId { get; set; }
+        public ushort TaxiNode { get; set; }
     }
 }

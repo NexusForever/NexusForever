@@ -52,15 +52,15 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-        public class UnknownStructure : IWritable
+        public class CharacterEntitlement : IWritable
         {
-            public ushort Unknown0 { get; set; }
-            public uint Unknown4 { get; set; }
+            public Entitlement Entitlement { get; set; }
+            public uint Count { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0);
-                writer.Write(Unknown4);
+                writer.Write(Entitlement, 14u);
+                writer.Write(Count);
             }
         }
 
@@ -78,7 +78,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public List<Pet> Pets { get; } = new List<Pet>();
         public uint UnknownB8 { get; set; }
         public ushort UnknownBC { get; set; }
-        public uint UnknownC0 { get; set; }
+        public int ActiveCostumeIndex { get; set; }
         public uint UnknownC4 { get; set; }
         public uint UnknownC8 { get; set; }
         public List<ushort> KnownDyes { get; } = new List<ushort>();
@@ -86,7 +86,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public float GearScore { get; set; }
         public bool IsPvpServer { get; set; }
         public uint Unknown4DC { get; set; }
-        public List<UnknownStructure> Unknown4E4 { get; } = new List<UnknownStructure>();
+        public List<CharacterEntitlement> CharacterEntitlements { set; get; } = new List<CharacterEntitlement>();
 
         public void Write(GamePacketWriter writer)
         {
@@ -112,7 +112,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             writer.Write(UnknownB8);
             writer.Write(UnknownBC);
-            writer.Write(UnknownC0);
+            writer.Write(ActiveCostumeIndex);
             writer.Write(UnknownC4);
             writer.Write(UnknownC8);
 
@@ -126,8 +126,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(IsPvpServer);
             writer.Write(Unknown4DC);
 
-            writer.Write(Unknown4E4.Count);
-            Unknown4E4.ForEach(u => u.Write(writer));
+            writer.Write(CharacterEntitlements.Count);
+            CharacterEntitlements.ForEach(u => u.Write(writer));
         }
     }
 }

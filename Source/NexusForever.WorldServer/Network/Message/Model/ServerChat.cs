@@ -24,8 +24,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public string Name { get; set; }
         public string Realm { get; set; }
-        
-        public ulong Guid { get; set; } 
+        public ulong Guid { get; set; }
         public string Text { get; set; }
 
         public List<ChatFormat> Formats { get; set; } = new List<ChatFormat>();
@@ -52,7 +51,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             Formats.ForEach(linkedItem => linkedItem.Write(writer));
 
             writer.Write(CrossFaction);
-            writer.Write(0, 16u); 
+            writer.Write(0, 16u);
 
             writer.Write(Guid, 32u); // UnitId?
             writer.Write(0, 8u); // Premium

@@ -21,6 +21,12 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
+        private static ulong ItemLocationToDragDropData(InventoryLocation location, ushort slot)
+        {
+            // TODO: research this more, client version of this is more complex
+            return ((ulong)location << 8) | slot;
+        }
+
         private readonly ulong characterId;
         private readonly Player player;
         private readonly Dictionary<InventoryLocation, Bag> bags = new Dictionary<InventoryLocation, Bag>();
@@ -70,30 +76,128 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO: tick items with limited lifespans
         }
 
+        public void Save(CharacterContext context)
+        {
+            foreach (Item item in bags.Values
+                .Where(b => b.Location != InventoryLocation.Ability)
+                .SelectMany(i => i))
+                item.Save(context);
+
+            foreach (Item item in deletedItems)
+                item.Save(context);
+            deletedItems.Clear();
+        }
+
         /// <summary>
         /// Returns <see cref="ItemVisual"/> for any visible items.
         /// </summary>
-        public IEnumerable<ItemVisual> GetItemVisuals()
+        public IEnumerable<ItemVisual> GetItemVisuals(Costume costume)
         {
             Bag bag = GetBag(InventoryLocation.Equipped);
             Debug.Assert(bag != null);
 
             foreach (Item item in bag)
             {
-                ushort displayId = item.DisplayId;
-                if (displayId == 0)
-                    continue;
-
                 Item2TypeEntry itemTypeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
-                yield return new ItemVisual
-                {
-                    Slot        = (ItemSlot)itemTypeEntry.ItemSlotId,
-                    DisplayId   = displayId,
-                     // TODO: send colour and dye data
-                    ColourSetId = 0,
-                    DyeData     = 0
-                };
+
+                ItemVisual visual = GetItemVisual((ItemSlot)itemTypeEntry.ItemSlotId, costume);
+                if (visual != null)
+                    yield return visual;
             }
+        }
+
+        /// <summary>
+        /// Returns <see cref="ItemVisual"/> for supplied <see cref="ItemSlot"/>.
+        /// </summary>
+        private ItemVisual GetItemVisual(ItemSlot itemSlot, Costume costume)
+        {
+            ImmutableList<EquippedItem> indexes = AssetManager.GetEquippedBagIndexes(itemSlot);
+            if (indexes == null || indexes.Count != 1)
+                throw new ArgumentOutOfRangeException();
+
+            EquippedItem index = indexes[0];
+
+            CostumeItem costumeItem = null;
+            if (costume != null)
+            {
+                if (index == EquippedItem.WeaponPrimary)
+                    costumeItem = costume.GetItem(CostumeItemSlot.Weapon);
+                else if (index >= EquippedItem.Chest && index <= EquippedItem.Hands)
+                {
+                    // skip any slot that is hidden
+                    if ((costume.Mask & (1 << (int)index)) == 0)
+                        return new ItemVisual
+                        {
+                            Slot = itemSlot
+                        };
+
+                    costumeItem = costume.GetItem((CostumeItemSlot)index);
+                }
+            }
+
+            Bag bag = GetBag(InventoryLocation.Equipped);
+            Debug.Assert(bag != null);
+            Item item = bag.GetItem((uint)index);
+
+            return new ItemVisual
+            {
+                Slot      = itemSlot,
+                DisplayId = Item.GetDisplayId(costumeItem != null ? costumeItem.Entry : item?.Entry),
+                DyeData   = costumeItem?.DyeData ?? 0
+            };
+        }
+
+        /// <summary>
+        /// Update <see cref="ItemVisual"/> and broadcast <see cref="ServerItemVisualUpdate"/> for optional supplied <see cref="Costume"/>.
+        /// </summary>
+        public void VisualUpdate(Costume costume)
+        {
+            var itemVisualUpdate = new ServerItemVisualUpdate
+            {
+                Guid = player.Guid
+            };
+
+            itemVisualUpdate.ItemVisuals.Add(VisualUpdate(ItemSlot.WeaponPrimary, costume));
+            for (ItemSlot index = ItemSlot.ArmorChest; index <= ItemSlot.ArmorHands; index++)
+                itemVisualUpdate.ItemVisuals.Add(VisualUpdate(index, costume));
+
+            if (!player.IsLoading)
+                player.EnqueueToVisible(itemVisualUpdate, true);
+        }
+
+        /// <summary>
+        /// Update <see cref="ItemVisual"/> and broadcast <see cref="ServerItemVisualUpdate"/> for supplied <see cref="Item"/>
+        /// </summary>
+        private void VisualUpdate(Item item)
+        {
+            if (item == null)
+                throw new ArgumentNullException();
+
+            var itemVisualUpdate = new ServerItemVisualUpdate
+            {
+                Guid = player.Guid
+            };
+
+            Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
+
+            Costume costume = null;
+            if (player.CostumeIndex >= 0)
+                costume = player.CostumeManager.GetCostume((byte)player.CostumeIndex);
+
+            itemVisualUpdate.ItemVisuals.Add(VisualUpdate((ItemSlot)typeEntry.ItemSlotId, costume));
+
+            if (!player.IsLoading)
+                player.EnqueueToVisible(itemVisualUpdate, true);
+        }
+
+        /// <summary>
+        /// Update visual for supplied <see cref="ItemSlot"/> and optional <see cref="Costume"/>.
+        /// </summary>
+        private ItemVisual VisualUpdate(ItemSlot slot, Costume costume)
+        {
+            ItemVisual visual = GetItemVisual(slot, costume);
+            player?.SetAppearance(visual);
+            return visual;
         }
 
         /// <summary>
@@ -355,6 +459,29 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Return <see cref="Item"/> with supplied guid.
+        /// </summary>
+        public Item GetItem(ulong guid)
+        {
+            foreach (Bag bag in bags.Values)
+                foreach (Item item in bag)
+                    if (item.Guid == guid)
+                        return item;
+
+            return null;
+        }
+
+        public Item GetSpell(Spell4BaseEntry spell4BaseEntry)
+        {
+            Bag bag = GetBag(InventoryLocation.Ability);
+            foreach (Item item in bag)
+                if (item.SpellEntry == spell4BaseEntry)
+                    return item;
+
+            return null;
+        }
+
+        /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
         public Item ItemDelete(ItemLocation from)
@@ -437,8 +564,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             bag.AddItem(item);
 
-            if (bag.Location == InventoryLocation.Equipped)
-                SendItemVisualUpdate(item);
+            if (player != null && bag.Location == InventoryLocation.Equipped)
+                VisualUpdate(item);
         }
 
         /// <summary>
@@ -456,41 +583,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             bag.RemoveItem(item);
 
-            if (bag.Location == InventoryLocation.Equipped)
-                SendItemVisualUpdate(item);
-        }
-
-        /// <summary>
-        /// Broadcast <see cref="ServerItemVisualUpdate"/> for supplied <see cref="Item"/>, this will update the players look in the world.
-        /// </summary>
-        private void SendItemVisualUpdate(Item item)
-        {
-            if (item == null)
-                throw new ArgumentNullException();
-
-            Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
-            if (typeEntry.ItemSlotId == 0)
-                throw new ArgumentException($"Item {item.Entry.Id} isn't equippable!");
-
-            if (!player?.IsLoading ?? false)
-            {
-                bool visible = item.Location != InventoryLocation.None;
-                player.EnqueueToVisible(new ServerItemVisualUpdate
-                {
-                    Guid        = player.Guid,
-                    ItemVisuals = new List<ItemVisual>
-                    {
-                        new ItemVisual
-                        {
-                            Slot        = (ItemSlot)typeEntry.ItemSlotId,
-                            DisplayId   = (ushort)(visible ? item.DisplayId : 0),
-                            // TODO: send colour and dye data
-                            ColourSetId = 0,
-                            DyeData     = 0
-                        }
-                    }
-                }, true);
-            }
+            if (player != null && bag.Location == InventoryLocation.Equipped)
+                VisualUpdate(item);
         }
 
         /// <summary>
@@ -516,12 +610,6 @@ namespace NexusForever.WorldServer.Game.Entity
             return bags.TryGetValue(location, out Bag container) ? container : null;
         }
 
-        private static ulong ItemLocationToDragDropData(InventoryLocation location, ushort slot)
-        {
-            // TODO: research this more, client version of this is more complex
-            return ((ulong)location << 8) | slot;
-        }
-
         public IEnumerator<Bag> GetEnumerator()
         {
             return bags.Values.GetEnumerator();
@@ -530,28 +618,6 @@ namespace NexusForever.WorldServer.Game.Entity
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        public void Save(CharacterContext context)
-        {
-            foreach (Item item in bags.Values
-                .Where(b => b.Location != InventoryLocation.Ability)
-                .SelectMany(i => i))
-                item.Save(context);
-
-            foreach (Item item in deletedItems)
-                item.Save(context);
-            deletedItems.Clear();
-        }
-
-        public Item GetItemByGuid(ulong guid)
-        {
-            foreach (Bag bag in bags.Values)
-                foreach (Item item in bag)
-                    if (item.Guid == guid)
-                        return item;
-
-            return null;
         }
     }
 }

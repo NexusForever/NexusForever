@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Configuration;
 
 namespace NexusForever.Shared.Database.Auth.Model
@@ -15,7 +17,10 @@ namespace NexusForever.Shared.Database.Auth.Model
         }
 
         public virtual DbSet<Account> Account { get; set; }
+        public virtual DbSet<AccountCostumeUnlock> AccountCostumeUnlock { get; set; }
+        public virtual DbSet<AccountGenericUnlock> AccountGenericUnlock { get; set; }
         public virtual DbSet<Server> Server { get; set; }
+        public virtual DbSet<ServerMessage> ServerMessage { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -76,6 +81,58 @@ namespace NexusForever.Shared.Database.Auth.Model
                     .HasDefaultValueSql("''");
             });
 
+            modelBuilder.Entity<AccountCostumeUnlock>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.ItemId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_costume_unlock");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ItemId)
+                    .HasColumnName("itemId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Timestamp)
+                    .HasColumnName("timestamp")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.AccountCostumeUnlock)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_costume_item_id__account_id");
+            });
+
+            modelBuilder.Entity<AccountGenericUnlock>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Entry })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_generic_unlock");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Entry)
+                    .HasColumnName("entry")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Timestamp)
+                    .HasColumnName("timestamp")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.AccountGenericUnlock)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_generic_unlock_id__account_id");
+            });
+
             modelBuilder.Entity<Server>(entity =>
             {
                 entity.ToTable("server");
@@ -103,6 +160,28 @@ namespace NexusForever.Shared.Database.Auth.Model
                 entity.Property(e => e.Type)
                     .HasColumnName("type")
                     .HasDefaultValueSql("'0'");
+            });
+
+            modelBuilder.Entity<ServerMessage>(entity =>
+            {
+                entity.HasKey(e => new { e.Index, e.Language })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("server_message");
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Language)
+                    .HasColumnName("language")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Message)
+                    .IsRequired()
+                    .HasColumnName("message")
+                    .HasColumnType("varchar(256)")
+                    .HasDefaultValueSql("''");
             });
         }
     }
