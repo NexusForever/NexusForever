@@ -184,6 +184,12 @@ namespace NexusForever.WorldServer.Game.Mail
                 };
 
                 EntityEntry<MailModel> entity = context.Attach(model);
+                if ((saveMask & MailSaveMask.Flags) != 0)
+                {
+                    model.Flags = Convert.ToByte(Flags);
+                    entity.Property(p => p.Flags).IsModified = true;
+                }
+
                 if ((saveMask & MailSaveMask.CurrencyChange) != 0)
                 {
                     model.HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency);

@@ -11,6 +11,7 @@ using System.Linq;
 using NLog;
 using NexusForever.WorldServer.Database.Character;
 using System.Threading.Tasks;
+using NexusForever.WorldServer.Game.Map;
 
 namespace NexusForever.WorldServer.Game.Mail
 {
@@ -63,10 +64,27 @@ namespace NexusForever.WorldServer.Game.Mail
             Task.WaitAll(tasks.ToArray());
         }
 
-        public static void SendMail(WorldSession session, ClientMailSend clientMailSend)
+        public static bool IsTargetMailBoxInRange(WorldSession session, uint unitId)
         {
-            bool isCod = clientMailSend.CreditsRequsted > 0;
-            MailItem newMail = new MailItem(2, session.Player, clientMailSend.Subject, clientMailSend.Message, isCod ? clientMailSend.CreditsRequsted : clientMailSend.CreditsSent, isCod, DeliveryTime.Instant);
+            float searchDistance = 20f;
+
+            session.Player.Map.Search(
+                session.Player.Position,
+                searchDistance,
+                new SearchCheckRangeMailboxOnly(session.Player.Position, searchDistance, session.Player),
+                out List<GridEntity> intersectedEntities
+            );
+
+            if (intersectedEntities.FirstOrDefault(c => c.Guid == unitId) != null)
+                return true;
+
+            return false;
+        }
+
+        public static void SendMailToPlayer(WorldSession session, ClientMailSend clientMailSend, Character targetCharacter)
+        {
+            bool isCod = clientMailSend.CreditsRequested > 0;
+            MailItem newMail = new MailItem(targetCharacter.Id, session.Player, clientMailSend.Subject, clientMailSend.Message, isCod ? clientMailSend.CreditsRequested : clientMailSend.CreditsSent, isCod, DeliveryTime.Instant);
 
             queuedMail.Add(newMail.Id, newMail);
         }
