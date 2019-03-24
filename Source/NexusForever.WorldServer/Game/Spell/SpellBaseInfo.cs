@@ -52,6 +52,8 @@ namespace NexusForever.WorldServer.Game.Spell
         /// </summary>
         public SpellInfo GetSpellInfo(byte tier)
         {
+            if (tier < 1)
+                tier = 1;
             return spellInfoStore[tier - 1];
         }
     }

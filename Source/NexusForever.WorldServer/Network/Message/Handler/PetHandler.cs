@@ -14,9 +14,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (spell == null)
                 throw new InvalidPacketValueException();
 
+            byte tier = session.Player.SpellManager.GetSpellTier(spell.Info.Entry.Id);
             session.Player.CastSpell(new SpellParameters
             {
-                SpellInfo = spell.Info.GetSpellInfo(spell.Tier)
+                SpellInfo = spell.Info.GetSpellInfo(tier)
             });
         }
 

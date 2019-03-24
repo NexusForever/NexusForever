@@ -62,6 +62,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 EntityModel = BuildEntityModel(),
                 CreateFlags   = (byte)CreateFlags,
                 Stats       = Stats.Values.ToList(),
+
                 Commands =
                 {
                     {

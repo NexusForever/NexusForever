@@ -1,4 +1,4 @@
-﻿using NexusForever.Shared.Network;
+using NexusForever.Shared.Network;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {

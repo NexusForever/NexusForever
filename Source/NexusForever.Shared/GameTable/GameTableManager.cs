@@ -180,6 +180,7 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<DyeColorRampEntry> DyeColorRamp { get; private set; }
 
+        [GameData]
         public static GameTable<EldanAugmentationEntry> EldanAugmentation { get; private set; }
         public static GameTable<EldanAugmentationCategoryEntry> EldanAugmentationCategory { get; private set; }
         public static GameTable<EmoteSequenceTransitionEntry> EmoteSequenceTransition { get; private set; }
@@ -513,6 +514,8 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<SpellCoolDownEntry> SpellCoolDown { get; private set; }
 
         public static GameTable<SpellEffectTypeEntry> SpellEffectType { get; private set; }
+
+        [GameData]
         public static GameTable<SpellLevelEntry> SpellLevel { get; private set; }
         public static GameTable<SpellPhaseEntry> SpellPhase { get; private set; }
         public static GameTable<Spline2Entry> Spline2 { get; private set; }
