@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         protected override IEntityModel BuildEntityModel()
         {
-            return new SimpleEntityModel
+            return new MailboxEntityModel
             {
                 CreatureId = CreatureId
             };
