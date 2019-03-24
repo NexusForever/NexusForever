@@ -26,6 +26,18 @@ namespace NexusForever.WorldServer.Database.Character
                 return context.Character.DefaultIfEmpty().Max(s => s.Id);
         }
 
+        public static async Task<Model.Character> GetCharacterById(ulong characterId)
+        {
+            using (var context = new CharacterContext())
+                return await context.Character.FirstOrDefaultAsync(e => e.Id == characterId);
+        }
+
+        public static async Task<Model.Character> GetCharacterByName(string name)
+        {
+            using (var context = new CharacterContext())
+                return await context.Character.FirstOrDefaultAsync(e => e.Name == name);
+        }
+
         public static ulong GetNextItemId()
         {
             using (var context = new CharacterContext())
