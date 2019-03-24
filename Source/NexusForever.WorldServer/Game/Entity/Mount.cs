@@ -59,7 +59,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public override ServerEntityCreate BuildCreatePacket()
         {
             ServerEntityCreate entityCreate = base.BuildCreatePacket();
-            entityCreate.Unknown68 = 904575;
+            entityCreate.Time = 904575;
             return entityCreate;
         }
 

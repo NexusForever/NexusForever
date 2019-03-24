@@ -14,7 +14,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         #region Unknown Structures
 
-        public class UnknownStructure88 : IWritable
+        public class SpellInit : IWritable
         {
             public void Write(GamePacketWriter writer)
             {
@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
                         writer.Write(Unknown0);
                         break;
                     case 1:
-                        writer.Write(Unknown1, 17);
+                        writer.Write(Unknown1, 17u);
                         break;
                 }
             }
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Type, 2);
+                writer.Write(Type, 2u);
 
                 switch (Type)
                 {
@@ -62,7 +62,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
                         break;
                     case 1:
                         writer.Write(Unknown1);
-                        writer.Write(Unknown2, 14);
+                        writer.Write(Unknown2, 14u);
                         break;
                 }
             }
@@ -99,20 +99,20 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public byte CreateFlags { get; set; }
         public IEntityModel EntityModel { get; set; }
         public List<StatValue> Stats { get; set; } = new List<StatValue>();
-        public uint Unknown68 { get; set; }
+        public uint Time { get; set; }
         public Dictionary<EntityCommand, IEntityCommand> Commands { get; set; } = new Dictionary<EntityCommand, IEntityCommand>();
         public List<PropertyValue> Properties { get; set; } = new List<PropertyValue>();
         public List<ItemVisual> VisibleItems { get; set; } = new List<ItemVisual>();
-        public List<UnknownStructure88> Unknown88 { get; } = new List<UnknownStructure88>();
-        public uint Unknown8C { get; set; }
+        public List<SpellInit> SpellInitData { get; } = new List<SpellInit>();
+        public uint CurrentSpellUniqueId { get; set; }
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
-        public uint Unknown98 { get; set; }
-        public ulong Unknown9C { get; set; }
+        public uint UnitTagOwner { get; set; }
+        public ulong GroupTagOwner { get; set; }
         public UnknownStructureA8 UnknownA8 { get; set; } = new UnknownStructureA8();
         public UnknownStructureB0 UnknownB0 { get; set; } = new UnknownStructureB0();
         public UnknownStructureC8 UnknownC8 { get; set; } = new UnknownStructureC8();
-        public ushort UnknownD4 { get; set; }
+        public ushort MiniMapMarker { get; set; }
         public uint DisplayInfo { get; set; }
         public ushort OutfitInfo { get; set; }
 
@@ -126,7 +126,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write((byte)Stats.Count, 5);
             Stats.ForEach(o => o.Write(writer));
 
-            writer.Write(Unknown68);
+            writer.Write(Time);
 
             writer.Write((byte)Commands.Count, 5);
             foreach (KeyValuePair<EntityCommand, IEntityCommand> pair in Commands)
@@ -141,20 +141,20 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write((byte)VisibleItems.Count, 7);
             VisibleItems.ForEach(o => o.Write(writer));
 
-            writer.Write((short)Unknown88.Count, 9);
-            Unknown88.ForEach(o => o.Write(writer));
+            writer.Write((short)SpellInitData.Count, 9);
+            SpellInitData.ForEach(o => o.Write(writer));
 
-            writer.Write(Unknown8C);
+            writer.Write(CurrentSpellUniqueId);
             writer.Write(Faction1, 14);
             writer.Write(Faction2, 14);
-            writer.Write(Unknown98);
-            writer.Write(Unknown9C);
+            writer.Write(UnitTagOwner);
+            writer.Write(GroupTagOwner);
 
             UnknownA8.Write(writer);
             UnknownB0.Write(writer);
             UnknownC8.Write(writer);
 
-            writer.Write(UnknownD4, 14);
+            writer.Write(MiniMapMarker, 14);
             writer.Write(DisplayInfo, 17);
             writer.Write(OutfitInfo, 15);
         }

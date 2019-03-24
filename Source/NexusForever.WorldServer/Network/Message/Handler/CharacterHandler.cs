@@ -17,10 +17,12 @@ using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell;
+using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
 using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
+using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -207,7 +209,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
                 }
 
-                for(int i = 0; i < characterCreate.Bones.Count; ++i)
+                for (int i = 0; i < characterCreate.Bones.Count; ++i)
                 {
                     character.CharacterBone.Add(new CharacterBone
                     {
@@ -215,15 +217,47 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Bone = characterCreate.Bones[i]
                     });
                 }
+
                 //TODO: handle starting locations per race
                 character.LocationX = -7683.809f;
                 character.LocationY = -942.5914f;
                 character.LocationZ = -666.6343f;
                 character.WorldId = 870;
 
+                character.ActiveSpec = 0;
+
+                // create initial LAS abilities
+                UILocation location = 0;
+                foreach (SpellLevelEntry spellLevelEntry in GameTableManager.SpellLevel.Entries
+                    .Where(s => s.ClassId == character.Class && s.CharacterLevel == 1))
+                {
+                    Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spellLevelEntry.Spell4Id);
+                    if (spell4Entry == null)
+                        continue;
+
+                    character.CharacterSpell.Add(new CharacterSpell
+                    {
+                        Id           = character.Id,
+                        Spell4BaseId = spell4Entry.Spell4BaseIdBaseSpell,
+                        Tier         = 1
+                    });
+
+                    character.CharacterActionSetShortcut.Add(new CharacterActionSetShortcut
+                    {
+                        Id           = character.Id,
+                        SpecIndex    = 0,
+                        Location     = (ushort)location,
+                        ShortcutType = (byte)ShortcutType.Spell,
+                        ObjectId     = spell4Entry.Spell4BaseIdBaseSpell,
+                        Tier         = 1
+                    });
+
+                    location++;
+                }
+
                 // create a temporary inventory to create starting gear
                 var inventory = new Inventory(character.Id, creationEntry);
-                var items = inventory
+                IEnumerable<Item> items = inventory
                     .SelectMany(b => b)
                     .Select(i => i);
 
@@ -355,6 +389,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleClientTarget(WorldSession session, ClientEntitySelect target)
         {
             session.Player.TargetGuid = target.Guid;
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientRequestPlayed)]
+        public static void HandleClientRequestPlayed(WorldSession session, ClientRequestPlayed requestPlayed)
+        {
+            double diff = session.Player.GetTimeSinceLastSave();
+            session.EnqueueMessageEncrypted(new ServerPlayerPlayed
+            {
+                CreateTime        = session.Player.CreateTime,
+                TimePlayedSession = (uint)(session.Player.TimePlayedSession + diff),
+                TimePlayedTotal   = (uint)(session.Player.TimePlayedTotal + diff),
+                TimePlayedLevel   = (uint)(session.Player.TimePlayedLevel + diff)
+            });
         }
 
         [MessageHandler(GameMessageOpcode.ClientRapidTransport)]
