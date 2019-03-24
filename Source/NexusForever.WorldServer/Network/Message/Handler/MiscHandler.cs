@@ -1,8 +1,10 @@
-﻿using NexusForever.Shared.Network.Message;
+using NexusForever.Shared.Game.Events;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using System.Threading.Tasks;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -23,20 +25,24 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientPlayerInfoRequest)]
         public static void HandlePlayerInfoRequest(WorldSession session, ClientPlayerInfoRequest request)
         {
-            Character character = CharacterDatabase.GetCharacterById(request.CharacterId);
-            if (character != null)
-                session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
+            session.EnqueueEvent(new TaskGenericEvent<Character>(CharacterDatabase.GetCharacterById(request.CharacterId),
+                character =>
                 {
-                    Unk0 = 0,
-                    Realm = WorldServer.RealmId,
-                    CharacterId = character.Id,
-                    Name = character.Name,
-                    Faction = (Faction)character.FactionId,
-                    Path = (Path)character.ActivePath,
-                    Class = (Class)character.Class,
-                    Level = character.Level,
-                    LastOnlineInDays = -1f
-                });
+                    if (character != null)
+                        session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
+                        {
+                            Unk0 = 0,
+                            Realm = WorldServer.RealmId,
+                            CharacterId = character.Id,
+                            Name = character.Name,
+                            Faction = (Faction)character.FactionId,
+                            Path = (Path)character.ActivePath,
+                            Class = (Class)character.Class,
+                            Level = character.Level,
+                            LastOnlineInDays = -1f
+                        });
+                }));
+            
         }
     }
 }
