@@ -81,10 +81,18 @@ namespace NexusForever.WorldServer.Game.Mail
             return false;
         }
 
-        public static void SendMailToPlayer(WorldSession session, ClientMailSend clientMailSend, Character targetCharacter)
+        public static void SendMailToPlayer(WorldSession session, ClientMailSend clientMailSend, Character targetCharacter, out MailItem newMail)
         {
+            newMail = null;
             bool isCod = clientMailSend.CreditsRequested > 0;
-            MailItem newMail = new MailItem(targetCharacter.Id, session.Player, clientMailSend.Subject, clientMailSend.Message, isCod ? clientMailSend.CreditsRequested : clientMailSend.CreditsSent, isCod, DeliveryTime.Instant);
+
+            // TODO: Deduct Credit Cost (if creditsSend > 0)
+
+            // TODO: Get Items and attach to mail, confirming that the items are tradeable, etc.
+
+            // TODO: Calculate & Deduct Mail Cost
+
+            newMail = new MailItem(targetCharacter.Id, session.Player, clientMailSend.Subject, clientMailSend.Message, isCod ? clientMailSend.CreditsRequested : clientMailSend.CreditsSent, isCod, DeliveryTime.Instant);
 
             queuedMail.Add(newMail.Id, newMail);
         }

@@ -126,13 +126,17 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
                 if (clientMailSend.CreditsRequested > 0 && clientMailSend.CreditsSent > 0)
                     result = GenericError.Mail_CanNotHaveCoDAndGift;
 
-                if ((clientMailSend.Items.Count > 0 || clientMailSend.CreditsRequested > 0 || clientMailSend.CreditsSent > 0) && !MailManager.IsTargetMailBoxInRange(session, clientMailSend.UnitId))
+                if ((clientMailSend.Items.Count > 0 && clientMailSend.Items[0] > 0 || clientMailSend.CreditsRequested > 0 || clientMailSend.CreditsSent > 0) && !MailManager.IsTargetMailBoxInRange(session, clientMailSend.UnitId))
                     result = GenericError.Mail_FailedToCreate;
 
-                if(result == GenericError.Ok)
+                if (result == GenericError.Ok)
                 {
-                    MailManager.SendMailToPlayer(session, clientMailSend, targetCharacter);
+                    MailManager.SendMailToPlayer(session, clientMailSend, targetCharacter, out MailItem newMail);
+                    if (newMail == null)
+                        result = GenericError.Mail_FailedToCreate;
                 }
+                    
+
             }
             else
                 result = GenericError.Mail_CannotFindPlayer;
