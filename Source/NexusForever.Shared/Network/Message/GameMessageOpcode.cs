@@ -162,7 +162,7 @@ namespace NexusForever.Shared.Network.Message
         ClientRealmList                 = 0x07A4,
         ClientCharacterSelect           = 0x07DD,
         ClientCharacterList             = 0x07E0,
-        ClientVendor                    = 0x07EA,
+        ClientEntityInteract                    = 0x07EA,
         ClientPetCustomisation          = 0x07ED,
         ServerSpellGo                   = 0x07F4,
         Server07F5                      = 0x07F5, // spell related
