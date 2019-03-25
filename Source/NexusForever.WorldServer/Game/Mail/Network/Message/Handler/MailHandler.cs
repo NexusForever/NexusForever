@@ -122,12 +122,26 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientMailTakeCash)]
         public static void HandleMailTakeCash(WorldSession session, ClientMailTakeCash clientMailTakeCash)
         {
-            log.Info($"{clientMailTakeCash.MailId}, {clientMailTakeCash.UnitId}");
+            GenericError result = GenericError.Ok;
+
+            if (clientMailTakeCash.UnitId <= 0 || !MailManager.IsTargetMailBoxInRange(session, clientMailTakeCash.UnitId))
+                result = GenericError.Mail_MailBoxOutOfRange;
+
+            if (result == GenericError.Ok)
+            {
+                MailItem mailItem = session.Player.AvailableMail[clientMailTakeCash.MailId];
+                if (mailItem != null)
+                {
+                    session.Player.CurrencyManager.CurrencyAddAmount((byte)mailItem.CurrencyType, mailItem.CurrencyAmount);
+                    mailItem.PayOrTakeCash();
+                }
+            }
+
             session.EnqueueMessageEncrypted(new ServerMailResult
             {
                 Action = 2,
                 MailId = clientMailTakeCash.MailId,
-                Result = 0
+                Result = result
             });
         }
 
@@ -149,7 +163,10 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
                     if (clientMailSend.CreditsRequested > 0 && clientMailSend.CreditsSent > 0)
                         result = GenericError.Mail_CanNotHaveCoDAndGift;
 
-                    if ((clientMailSend.Items.Count > 0 && clientMailSend.Items[0] > 0 || clientMailSend.CreditsRequested > 0 || clientMailSend.CreditsSent > 0) && !MailManager.IsTargetMailBoxInRange(session, clientMailSend.UnitId))
+                    if ((clientMailSend.Items.Count > 0 && clientMailSend.Items[0] > 0) && !MailManager.IsTargetMailBoxInRange(session, clientMailSend.UnitId))
+                        result = GenericError.Mail_FailedToCreate;
+
+                    if (clientMailSend.CreditsRequested > 0 && clientMailSend.Items.Count <= 0)
                         result = GenericError.Mail_FailedToCreate;
 
                     if (result == GenericError.Ok)
