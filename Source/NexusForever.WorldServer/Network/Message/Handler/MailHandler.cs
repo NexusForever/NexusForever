@@ -68,16 +68,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 if (result == GenericError.Ok)
                 {
                     session.Player.CurrencyManager.CurrencySubtractAmount(1, mailItem.CurrencyAmount);
-                    mailItem.PayOrTakeCash();
+                    MailManager.PayCOD(session, mailItem);
                 }
-
-                session.EnqueueMessageEncrypted(new ServerMailResult
-                {
-                    Action = 3,
-                    MailId = mailItem.Id,
-                    Result = result
-                });
             }
+            else
+                result = GenericError.Mail_Squelched;
+
+            session.EnqueueMessageEncrypted(new ServerMailResult
+            {
+                Action = 3,
+                MailId = mailItem.Id,
+                Result = result
+            });
         }
 
         /// <summary>
