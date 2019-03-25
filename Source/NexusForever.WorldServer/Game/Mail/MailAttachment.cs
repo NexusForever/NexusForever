@@ -18,6 +18,29 @@ namespace NexusForever.WorldServer.Game.Mail
 
         private MailAttachmentSaveMask saveMask;
 
+        public bool IsPendingDelete => ((saveMask & MailAttachmentSaveMask.Delete) != 0);
+
+        /// <summary>
+        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="MailAttachmentModel"/>
+        /// </summary>
+        /// <param name="model"></param>
+        public MailAttachment(MailAttachmentModel model)
+        {
+            Id = model.Id;
+            ItemId = model.ItemId;
+            Index = model.Index;
+            Amount = model.Amount;
+
+            saveMask = MailAttachmentSaveMask.None;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="MailAttachment"/>
+        /// </summary>
+        /// <param name="mailId"></param>
+        /// <param name="itemId"></param>
+        /// <param name="index"></param>
+        /// <param name="amount"></param>
         public MailAttachment(ulong mailId, uint itemId, uint index, uint amount)
         {
             Id = mailId;

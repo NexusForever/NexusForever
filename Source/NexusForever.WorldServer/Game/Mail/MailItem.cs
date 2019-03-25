@@ -8,7 +8,7 @@ using NexusForever.WorldServer.Game.Mail.Static;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using MailModel = NexusForever.WorldServer.Database.Character.Model.CharacterMail;
 
 namespace NexusForever.WorldServer.Game.Mail
@@ -67,15 +67,19 @@ namespace NexusForever.WorldServer.Game.Mail
 
         public DeliveryTime DeliveryTime { get; }
         public DateTime CreateTime { get; }
-        public float ExpiryTime => 30f;
+        public float ExpiryTime => 30f; // TODO: Make this configurable
 
         private MailSaveMask saveMask;
 
         public bool IsPendingDelete => ((saveMask & MailSaveMask.Delete) != 0);
 
-        private readonly SortedDictionary</*index*/uint, MailAttachment> mailAttachments = new SortedDictionary</*index*/uint, MailAttachment>();
+        private readonly List<MailAttachment> mailAttachments = new List<MailAttachment>();
         private readonly HashSet<MailAttachment> deletedAttachments = new HashSet<MailAttachment>();
 
+        /// <summary>
+        /// Create a new <see cref="MailItem"/> from an existing <see cref="MailModel"/>
+        /// </summary>
+        /// <param name="model"></param>
         public MailItem(MailModel model)
         {
             Id = model.Id;
@@ -93,7 +97,7 @@ namespace NexusForever.WorldServer.Game.Mail
             CreateTime = model.CreateTime;
 
             foreach (CharacterMailAttachment mailAttachment in model.CharacterMailAttachment)
-                mailAttachments.Add(mailAttachment.Index, new MailAttachment(model.Id, mailAttachment.ItemId, mailAttachment.Index, mailAttachment.Amount));
+                mailAttachments.Add(new MailAttachment(mailAttachment));
 
             saveMask = MailSaveMask.None;
         }
@@ -193,12 +197,21 @@ namespace NexusForever.WorldServer.Game.Mail
                         model.HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency);
                         entity.Property(p => p.HasPaidOrCollectedCurrency).IsModified = true;
                     }
+
+                    if ((saveMask & MailSaveMask.RecipientChange) != 0)
+                    {
+                        model.RecipientId = RecipientId;
+                        entity.Property(p => p.RecipientId).IsModified = true;
+
+                        model.Subject = Subject;
+                        entity.Property(p => p.Subject).IsModified = true;
+                    }
                 }
 
                 saveMask = MailSaveMask.None;
             }
 
-            foreach (MailAttachment mailAttachment in mailAttachments.Values)
+            foreach (MailAttachment mailAttachment in mailAttachments)
                 mailAttachment.Save(context);
 
             foreach (MailAttachment mailAttachment in deletedAttachments)
@@ -210,7 +223,7 @@ namespace NexusForever.WorldServer.Game.Mail
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public MailAttachment GetAttachment(uint index)
+        public MailAttachment GetAttachment(int index)
         {
             return mailAttachments[index];
         }
@@ -220,7 +233,7 @@ namespace NexusForever.WorldServer.Game.Mail
         /// </summary>
         public IEnumerable<MailAttachment> GetAttachments()
         {
-            return mailAttachments.Values;
+            return mailAttachments;
         }
 
         /// <summary>
@@ -237,18 +250,67 @@ namespace NexusForever.WorldServer.Game.Mail
         public void PayOrTakeCash()
         {
             HasPaidOrCollectedCurrency = true;
+            MarkAsNotReturnable();
         }
 
+        /// <summary>
+        /// Mark this <see cref="MailItem"/> as not returnable
+        /// </summary>
+        public void MarkAsNotReturnable()
+        {
+            Flags = MailFlag.NotReturnable;
+        }
+
+        /// <summary>
+        /// Return this <see cref="MailItem"/> to sender
+        /// </summary>
+        public void ReturnMail()
+        {
+            RecipientId = SenderId;
+            Subject = "Returned: " + Subject;
+            MarkAsNotReturnable();
+        }
+
+        /// <summary>
+        /// Returns whether this item is ready to be delivered based on <see cref="DeliveryTime"/>
+        /// </summary>
+        /// <returns></returns>
+        public bool IsReadyToDeliver()
+        {
+            if (DeliveryTime == DeliveryTime.Instant)
+                return true;
+
+            if (DeliveryTime == DeliveryTime.Hour)
+                return DateTime.Now
+                    .Subtract(CreateTime)
+                    .TotalHours > 1;
+
+            if (DeliveryTime == DeliveryTime.Day)
+                return DateTime.Now
+                    .Subtract(CreateTime)
+                    .TotalDays > 1;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Add a <see cref="MailAttachment"/> to this <see cref="MailItem"/>.
+        /// </summary>
+        /// <param name="mailAttachment"></param>
         public void AttachmentAdd(MailAttachment mailAttachment)
         {
-            mailAttachments.Add(mailAttachment.Index, mailAttachment);
+            mailAttachments.Add(mailAttachment);
         }
 
-        public void AttachmentDelete(MailAttachment mailAttachment)
+        /// <summary>
+        /// Remove a <see cref="MailAttachment"/> from this <see cref="MailItem"/>
+        /// </summary>
+        /// <param name="mailAttachment"></param>
+        public void AttachmentDelete(MailAttachment mailAttachment, int index)
         {
             mailAttachment.EnqueueDelete();
 
-            mailAttachments.Remove(mailAttachment.Index);
+            mailAttachments.RemoveAt(index);
             deletedAttachments.Add(mailAttachment);
         }
     }

@@ -484,7 +484,29 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
-        public Item ItemDelete(ItemLocation from)
+        public Item ItemDelete(Item item, byte reason = 15)
+        {
+            Bag srcBag = GetBag(item.Location);
+            if (srcBag == null)
+                throw new InvalidPacketValueException();
+
+            srcBag.RemoveItem(item);
+            item.EnqueueDelete();
+            deletedItems.Add(item);
+
+            player.Session.EnqueueMessageEncrypted(new ServerItemDelete
+            {
+                Guid = item.Guid,
+                Reason = reason
+            });
+
+            return item;
+        }
+
+        /// <summary>
+        /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
+        /// </summary>
+        public Item ItemDelete(ItemLocation from, byte reason = 15)
         {
             Bag srcBag = GetBag(from.Location);
             if (srcBag == null)
@@ -500,10 +522,23 @@ namespace NexusForever.WorldServer.Game.Entity
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
-                Guid = srcItem.Guid
+                Guid = srcItem.Guid,
+                Reason = reason
             });
 
             return srcItem;
+        }
+
+        /// <summary>
+        /// Check if the <see cref="InventoryLocation.Inventory"/> for <see cref="Player"/> is full
+        /// </summary>
+        /// <returns></returns>
+        public bool IsInventoryFull()
+        {
+            Bag bag = GetBag(InventoryLocation.Inventory);
+            uint bagIndex = bag.GetFirstAvailableBagIndex();
+
+            return bagIndex >= uint.MaxValue;
         }
 
         /// <summary>

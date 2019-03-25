@@ -1,19 +1,15 @@
-﻿using NexusForever.Shared;
-using NexusForever.WorldServer.Database.Character.Model;
+﻿using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Mail.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using NLog;
 using NexusForever.WorldServer.Database.Character;
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Game.Map;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.GameTable;
+using NexusForever.Shared.Network;
 
 namespace NexusForever.WorldServer.Game.Mail
 {
@@ -38,14 +34,31 @@ namespace NexusForever.WorldServer.Game.Mail
             nextMailId = CharacterDatabase.GetNextMailId() + 1ul;
         }
 
+        /// <summary>
+        /// Called every tick
+        /// </summary>
+        /// <param name="lastTick"></param>
         public static void Update(double lastTick)
         {
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
                 var tasks = new List<Task>();
-                foreach (MailItem mailItem in queuedMail.Values)
+                foreach (MailItem mailItem in queuedMail.Values.ToList())
+                {
                     tasks.Add(CharacterDatabase.SaveMail(mailItem));
+                    if (mailItem.IsReadyToDeliver())
+                    {
+                        // Deliver mail if user is online
+                        WorldSession targetSession = NetworkManager<WorldSession>.GetSession(c => c.Player?.CharacterId == mailItem.RecipientId);
+                        if(targetSession != null)
+                        {
+                            targetSession.Player.AvailableMail.TryAdd(mailItem.Id, mailItem);
+                            SendAvailableMail(targetSession, targetSession.Player.AvailableMail.Values.ToList());
+                        }
+                        queuedMail.Remove(mailItem.Id);
+                    }
+                }
 
                 Task.WaitAll(tasks.ToArray());
 
@@ -53,10 +66,15 @@ namespace NexusForever.WorldServer.Game.Mail
             }
         }
 
+        /// <summary>
+        /// Called by <see cref="Player"/> to save <see cref="MailItem"/> to database
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="context"></param>
         public static void Save(Player player, CharacterContext context)
         {
             var tasks = new List<Task>();
-            foreach (MailItem mail in player.AvailableMail.Values)
+            foreach (MailItem mail in player.AvailableMail.Values.ToList())
             {
                 if (mail.IsPendingDelete)
                     player.AvailableMail.Remove(mail.Id);
@@ -66,6 +84,12 @@ namespace NexusForever.WorldServer.Game.Mail
             Task.WaitAll(tasks.ToArray());
         }
 
+        /// <summary>
+        /// Checks to see if the targeted <see cref="Mailbox"/> is in range
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="unitId"></param>
+        /// <returns></returns>
         public static bool IsTargetMailBoxInRange(WorldSession session, uint unitId)
         {
             float searchDistance = 20f;
@@ -83,12 +107,18 @@ namespace NexusForever.WorldServer.Game.Mail
             return false;
         }
 
+        /// <summary>
+        /// Method to process send <see cref="Player"/> to <see cref="Player"/> mails
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="clientMailSend"></param>
+        /// <param name="targetCharacter"></param>
+        /// <param name="newMail"></param>
         public static void SendMailToPlayer(WorldSession session, ClientMailSend clientMailSend, Character targetCharacter, out MailItem newMail)
         {
             newMail = null;
             bool isCod = clientMailSend.CreditsRequested > 0;
 
-            // TODO: Deduct Credit Cost (if creditsSend > 0)
             if (!isCod && clientMailSend.CreditsSent > 0)
                 session.Player.CurrencyManager.CurrencySubtractAmount(1, clientMailSend.CreditsSent);
 
@@ -109,7 +139,7 @@ namespace NexusForever.WorldServer.Game.Mail
                         if (mailAttachment != null)
                             mailAttachments.Add(mailAttachment);
 
-                        session.Player.Inventory.ItemDelete(item);
+                        session.Player.Inventory.ItemDelete(item, 20);
                     }
                 }
                 foreach (MailAttachment mailAttachment in mailAttachments)
@@ -118,29 +148,81 @@ namespace NexusForever.WorldServer.Game.Mail
 
             // TODO: Calculate & Deduct Mail Cost
 
-            // TODO: Handle queued mail
-            queuedMail.Add(newMail.Id, newMail);
+            // TODO: Handle queued mailn
+            queuedMail.TryAdd(newMail.Id, newMail);
+        }
+        
+        // TODO: Handle sending mail from creatures using mail templates
+
+        // TODO: Handle sending mail from auctions to users upon auction end
+
+        // TODO: Handle sending mail from GMs to replace missing items, 
+
+        /// <summary>
+        /// Handles returning a <see cref="MailItem"/> to sender
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="mailItem"></param>
+        public static void ReturnMail(WorldSession session, MailItem mailItem)
+        {
+            mailItem.ReturnMail();
+
+            session.Player.AvailableMail.Remove(mailItem.Id);
+            queuedMail.TryAdd(mailItem.Id, mailItem);
         }
 
+        /// <summary>
+        /// Called by <see cref="Player"/> to send available mail on entering map
+        /// </summary>
+        /// <param name="session"></param>
         public static void SendInitialPackets(WorldSession session)
         {
             SendAvailableMail(session, session.Player.AvailableMail.Values.ToList());
         }
 
+        /// <summary>
+        /// Execute <see cref="ServerMailAvailable"/> with appropriate <see cref="MailItem"/>
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="mails"></param>
         public static void SendAvailableMail(WorldSession session, List<MailItem> mails)
         {
-            ServerMailAvailable message = new ServerMailAvailable();
+            ServerMailAvailable serverMailAvailable = new ServerMailAvailable();
+            serverMailAvailable.MailList = new List<ServerMailAvailable.Mail>();
 
-            message.MailList = new List<ServerMailAvailable.Mail>();
-            mails.ForEach(c => message.MailList.Add(ConverMailItemToServerMail(c)));
+            foreach (MailItem mail in mails)
+                if (mail.IsReadyToDeliver())
+                {
+                    serverMailAvailable.MailList.Add(ConvertMailItemToServerMail(mail));
 
-            // Include mail that should have been delivered to them but wasn't in their model
-            queuedMail.Values.Where(c => c.RecipientId == session.Player.CharacterId).ToList().ForEach(c => message.MailList.Add(ConverMailItemToServerMail(c)));
+                    if (queuedMail.ContainsKey(mail.Id))
+                        queuedMail.Remove(mail.Id);
+                }
+                else if(!queuedMail.ContainsKey(mail.Id))
+                {
+                    queuedMail.TryAdd(mail.Id, mail);
+                    session.Player.AvailableMail.Remove(mail.Id);
+                }
 
-            session.EnqueueMessageEncrypted(message);
+            // Add queued items which have not been saved to the DB, yet
+            foreach(MailItem mailItem in queuedMail.Values.ToList())
+                if (mailItem.IsReadyToDeliver())
+                {
+                    serverMailAvailable.MailList.Add(ConvertMailItemToServerMail(mailItem));
+
+                    queuedMail.Remove(mailItem.Id);
+                    session.Player.AvailableMail.TryAdd(mailItem.Id, mailItem);
+                }
+
+            session.EnqueueMessageEncrypted(serverMailAvailable);
         }
 
-        public static ServerMailAvailable.Mail ConverMailItemToServerMail(MailItem mailItem)
+        /// <summary>
+        /// Handles converting <see cref="MailItem"/> to <see cref="ServerMailAvailable.Mail"/> for the client to process
+        /// </summary>
+        /// <param name="mailItem"></param>
+        /// <returns></returns>
+        public static ServerMailAvailable.Mail ConvertMailItemToServerMail(MailItem mailItem)
         {
             var serverMailItem = new ServerMailAvailable.Mail
             {
@@ -161,12 +243,19 @@ namespace NexusForever.WorldServer.Game.Mail
             };
 
             List<ServerMailAvailable.Attachment> mailAttachments = new List<ServerMailAvailable.Attachment>();
-            mailItem.GetAttachments().ToList().ForEach(c => mailAttachments.Add(ConvertMailAttachmentToServerMailAttachment(c)));
+            foreach (MailAttachment mailAttachment in mailItem.GetAttachments().ToList())
+                mailAttachments.Add(ConvertMailAttachmentToServerMailAttachment(mailAttachment));
+
             serverMailItem.Attachments = mailAttachments;
 
             return serverMailItem;
         }
 
+        /// <summary>
+        /// Handles converting <see cref="MailAttachment"/> to <see cref="ServerMailAvailable.Attachment"/> for the client to process
+        /// </summary>
+        /// <param name="attachment"></param>
+        /// <returns></returns>
         public static ServerMailAvailable.Attachment ConvertMailAttachmentToServerMailAttachment(MailAttachment attachment)
         {
             var serverMailAttachment = new ServerMailAvailable.Attachment
