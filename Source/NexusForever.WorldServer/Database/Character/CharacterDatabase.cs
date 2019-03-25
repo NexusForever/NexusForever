@@ -72,6 +72,7 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterActionSetShortcut)
                         .Include(c => c.CharacterActionSetAmp)
                         .Include(c => c.CharacterMail)
+                            .ThenInclude(c => c.CharacterMailAttachment)
                     .ToListAsync();
             }
         }
