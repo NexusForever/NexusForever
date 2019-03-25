@@ -8,31 +8,40 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerPlayerInfoFullResponse, MessageDirection.Server)]
     public class ServerPlayerInfoFullResponse : IWritable
     {
-        public byte Unk0 { get; set; } = 0;
-        public ushort Realm { get; set; }
-        public ulong CharacterId { get; set; }
-        public string Name { get; set; }
-        public Faction Faction { get; set; }
-        public bool Unk1 { get; set; } = true;
+        public Base BaseData { get; set; }
+
+        public class Base : IWritable
+        {
+            public byte ResultCode { get; set; }
+            public TargetPlayerIdentity Identity { get; set; }
+            public string Name { get; set; }
+            public Faction Faction { get; set; }
+
+            public void Write(GamePacketWriter writer)
+            {
+                writer.Write(ResultCode, 3u);
+                Identity.Write(writer);
+                writer.WriteStringFixed(Name);
+                writer.Write(Faction, 14u);
+            }
+        }
+
+        public bool IsClassPathSet { get; set; } = true;
         public Path Path { get; set; }
         public Class Class { get; set; }
         public uint Level { get; set; }
-        public bool Unk2 { get; set; } = true;
-        public float LastOnlineInDays { get; set; }
+        public bool IsLastLoggedOnInDaysSet { get; set; } = true;
+        public float LastLoggedInDays { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unk0, 3);
-            writer.Write(Realm, 14u);
-            writer.Write(CharacterId);
-            writer.WriteStringFixed(Name);
-            writer.Write((ushort)Faction, 14);
-            writer.Write(Unk1);
-            writer.Write((byte)Path, 3);
-            writer.Write((ushort)Class, 14);
+            BaseData.Write(writer);
+            writer.Write(IsClassPathSet);
+            writer.Write(Path, 3u);
+            writer.Write(Class, 14u);
             writer.Write(Level);
-            writer.Write(Unk2);
-            writer.Write(LastOnlineInDays);
+            writer.Write(IsLastLoggedOnInDaysSet);
+            writer.Write(LastLoggedInDays);
         }
     }
 }

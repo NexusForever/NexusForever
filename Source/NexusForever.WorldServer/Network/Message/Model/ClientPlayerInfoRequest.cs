@@ -1,21 +1,19 @@
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ClientPlayerInfoRequest, MessageDirection.Client)]
     public class ClientPlayerInfoRequest : IReadable
     {
-        public byte Unknown0 { get; private set; }
-        public ushort Unknown1 { get; private set; }
-        public ulong CharacterId { get; private set; }
+        public byte Type { get; private set; }
+        public TargetPlayerIdentity Identity { get; } = new TargetPlayerIdentity();
 
         public void Read(GamePacketReader reader)
         {
-            Unknown0 = reader.ReadByte(4);
-            Unknown1 = reader.ReadUShort(14);
-            CharacterId = reader.ReadULong();
+            Type = reader.ReadByte(4u);
+            Identity.Read(reader);
         }
     }
 }
