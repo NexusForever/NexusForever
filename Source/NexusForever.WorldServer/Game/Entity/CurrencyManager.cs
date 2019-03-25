@@ -152,7 +152,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (!currencies.TryGetValue(currencyId, out Currency currency))
                 return false;
 
-            return currency.Amount < amount;
+            return currency.Amount >= amount;
         }
 
         public void Save(CharacterContext context)
