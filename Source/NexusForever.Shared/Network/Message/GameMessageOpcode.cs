@@ -115,6 +115,9 @@ namespace NexusForever.Shared.Network.Message
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
         ServerClientLogout              = 0x0594,
+        ClientPlayerInfoRequest         = 0x0597,
+        ServerPlayerInfoBasicResponse   = 0x0598,
+        ServerPlayerInfoFullResponse    = 0x0599,
         ServerAvailableMail             = 0x05A3,
         Server0635                      = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
