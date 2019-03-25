@@ -158,6 +158,15 @@ namespace NexusForever.WorldServer.Game.Mail
 
         // TODO: Handle sending mail from GMs to replace missing items, 
 
+        public static void PayCOD(WorldSession session, MailItem mailItem)
+        {
+            mailItem.PayOrTakeCash();
+
+            MailItem newMail = new MailItem(mailItem.SenderId, session.Player, $"Cash from: {mailItem.Subject}", "", mailItem.CurrencyAmount, false, DeliveryTime.Instant);
+
+            queuedMail.TryAdd(newMail.Id, newMail);
+        }
+
         /// <summary>
         /// Handles returning a <see cref="MailItem"/> to sender
         /// </summary>
