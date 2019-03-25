@@ -36,6 +36,7 @@ namespace NexusForever.Shared.Network.Message
         ClientMailOpen                  = 0x0122,
         ClientMailPayCOD                = 0x0123,
         ClientMailReturn                = 0x0124,
+        ClientMailTakeAllFromSelection  = 0x0125,
         ClientMailTakeAttachment        = 0x0126,
         ClientMailTakeCash              = 0x0127,
         ServerMountUnlocked             = 0x0129,
@@ -162,7 +163,7 @@ namespace NexusForever.Shared.Network.Message
         ClientRealmList                 = 0x07A4,
         ClientCharacterSelect           = 0x07DD,
         ClientCharacterList             = 0x07E0,
-        ClientEntityInteract                    = 0x07EA,
+        ClientEntityInteract            = 0x07EA,
         ClientPetCustomisation          = 0x07ED,
         ServerSpellGo                   = 0x07F4,
         Server07F5                      = 0x07F5, // spell related

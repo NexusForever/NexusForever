@@ -2,19 +2,21 @@
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Mail;
+using NexusForever.WorldServer.Game.Mail.Static;
 using NexusForever.WorldServer.Game.Static;
-using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
-using System.Collections.Generic;
 
-namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
+namespace NexusForever.WorldServer.Network.Message.Handler
 {
     class MailHandler
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Handles deletion of a <see cref="MailItem"/>
+        /// </summary>
         [MessageHandler(GameMessageOpcode.ClientMailDelete)]
         public static void HandleMailDelete(WorldSession session, ClientMailDelete clientMailDelete)
         {
@@ -37,6 +39,9 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
                 }
         }
 
+        /// <summary>
+        /// Handles the client opening a new <see cref="MailItem"/>
+        /// </summary>
         [MessageHandler(GameMessageOpcode.ClientMailOpen)]
         public static void HandleMailOpen(WorldSession session, ClientMailOpen clientMailOpen)
         {
@@ -45,6 +50,9 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
                     mailItem.MarkAsRead();
         }
 
+        /// <summary>
+        /// Handles the client request to pay the credits requested for a <see cref="MailItem"/>
+        /// </summary>
         [MessageHandler(GameMessageOpcode.ClientMailPayCOD)]
         public static void HandleMailPayCOD(WorldSession session, ClientMailPayCOD clientMailPayCOD)
         {
@@ -72,21 +80,41 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
             }
         }
 
+        /// <summary>
+        /// Handles returning a <see cref="MailItem"/> to its original sender
+        /// </summary>
         [MessageHandler(GameMessageOpcode.ClientMailReturn)]
         public static void HandleMailReturn(WorldSession session, ClientMailReturn clientMailReturn)
         {
+            GenericError result = GenericError.Ok;
+
+            if(session.Player.AvailableMail.TryGetValue(clientMailReturn.MailId, out MailItem mailItem))
+            {
+                if ((mailItem.Flags & MailFlag.NotReturnable) != 0)
+                    result = GenericError.Mail_CannotReturn;
+
+                if (result == GenericError.Ok)
+                {
+                    MailManager.ReturnMail(session, mailItem);
+                    session.EnqueueMessageEncrypted(new ServerMailUnavailable
+                    {
+                        MailId = clientMailReturn.MailId
+                    });
+                }
+            }
             session.EnqueueMessageEncrypted(new ServerMailResult
             {
                 Action = 1,
                 MailId = clientMailReturn.MailId,
-                Result = 0
-            });
-            session.EnqueueMessageEncrypted(new ServerMailUnavailable
-            {
-                MailId = clientMailReturn.MailId
+                Result = result
             });
         }
 
+        // TODO: Implement ClientMailTakeAllFromSelection
+
+        /// <summary>
+        /// Handles a client request to retrieve a <see cref="MailAttachment"/> from a <see cref="MailItem"/>
+        /// </summary>
         [MessageHandler(GameMessageOpcode.ClientMailTakeAttachment)]
         public static void HandleMailTakeAttackment(WorldSession session, ClientMailTakeAttachment clientMailTakeAttachment)
         {
@@ -103,9 +131,10 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
                 session.Player.AvailableMail.TryGetValue(clientMailTakeAttachment.MailId, out MailItem mailItem);
                 if (mailItem != null)
                 {
-                    MailAttachment mailAttachment = mailItem.GetAttachment(clientMailTakeAttachment.Index);
-                    mailItem.AttachmentDelete(mailAttachment);
-                    session.Player.Inventory.ItemCreate(mailAttachment.ItemId, mailAttachment.Amount);                    
+                    MailAttachment mailAttachment = mailItem.GetAttachment((int)clientMailTakeAttachment.Index);
+                    mailItem.AttachmentDelete(mailAttachment, (int)clientMailTakeAttachment.Index);
+                    mailItem.MarkAsNotReturnable();
+                    session.Player.Inventory.ItemCreate(mailAttachment.ItemId, mailAttachment.Amount, 4);
                 }
                 else
                     result = GenericError.Mail_InvalidInventorySlot;
@@ -119,6 +148,9 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
             });
         }
 
+        /// <summary>
+        /// Handles a client request to retrieve the currency sent with a <see cref="MailItem"/>
+        /// </summary>
         [MessageHandler(GameMessageOpcode.ClientMailTakeCash)]
         public static void HandleMailTakeCash(WorldSession session, ClientMailTakeCash clientMailTakeCash)
         {
@@ -145,6 +177,9 @@ namespace NexusForever.WorldServer.Game.Mail.Network.Message.Handler
             });
         }
 
+        /// <summary>
+        /// Handles a client request to send a mail to another player
+        /// </summary>
         [MessageHandler(GameMessageOpcode.ClientMailSend)]
         public static void HandleMailSend(WorldSession session, ClientMailSend clientMailSend)
         {
