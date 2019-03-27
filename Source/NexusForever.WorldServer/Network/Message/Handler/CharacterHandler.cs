@@ -73,6 +73,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (server == null)
                 throw new InvalidPacketValueException();
 
+            // clicking back or selecting the current realm also triggers this packet, client crashes if we don't ignore it
+            if (server.Model.Id == WorldServer.RealmId)
+                return;
+
             byte[] sessionKey = RandomProvider.GetBytes(16u);
             session.EnqueueEvent(new TaskEvent(AuthDatabase.UpdateAccountSessionKey(session.Account, sessionKey),
                 () =>
