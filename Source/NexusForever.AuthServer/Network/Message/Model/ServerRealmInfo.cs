@@ -11,9 +11,9 @@ namespace NexusForever.AuthServer.Network.Message.Model
         public byte[] SessionKey { get; set; }
         public uint AccountId { get; set; }
         public string Realm { get; set; }
-        public uint Unknown1 { get; set; }
+        public uint Flags { get; set; }
         public byte Type { get; set; }
-        public uint Unknown3 { get; set; }
+        public uint NoteTextId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -22,9 +22,9 @@ namespace NexusForever.AuthServer.Network.Message.Model
             writer.WriteBytes(SessionKey, 16u);
             writer.Write(AccountId);
             writer.WriteStringWide(Realm);
-            writer.Write(Unknown1);
+            writer.Write(Flags);
             writer.Write(Type, 2);
-            writer.Write(Unknown3, 21);
+            writer.Write(NoteTextId, 21u);
         }
     }
 }
