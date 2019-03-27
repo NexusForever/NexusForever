@@ -150,11 +150,13 @@ namespace NexusForever.Shared.Network.Message
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
         ClientTitleSet                  = 0x078E,
+        ServerNewRealm                  = 0x07A1,
         ClientRealmList                 = 0x07A4,
         ClientCharacterSelect           = 0x07DD,
         ClientCharacterList             = 0x07E0,
         ClientVendor                    = 0x07EA,
         ClientPetCustomisation          = 0x07ED,
+        ClientSelectRealm               = 0x07DF,
         ServerSpellGo                   = 0x07F4,
         Server07F5                      = 0x07F5, // spell related
         Server07F6                      = 0x07F6, // spell related

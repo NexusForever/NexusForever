@@ -6,7 +6,7 @@ namespace NexusForever.AuthServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerRealmInfo, MessageDirection.Server)]
     public class ServerRealmInfo : IWritable
     {
-        public uint Host { get; set; }
+        public uint Address { get; set; }
         public ushort Port { get; set; }
         public byte[] SessionKey { get; set; }
         public uint AccountId { get; set; }
@@ -17,7 +17,7 @@ namespace NexusForever.AuthServer.Network.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Host);
+            writer.Write(Address);
             writer.Write(Port);
             writer.WriteBytes(SessionKey, 16u);
             writer.Write(AccountId);

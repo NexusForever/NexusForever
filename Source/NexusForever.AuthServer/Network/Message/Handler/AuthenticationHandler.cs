@@ -7,6 +7,7 @@ using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.Network.Message;
+using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Handler
 {
@@ -50,7 +51,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 session.EnqueueMessageEncrypted(new ServerRealmMessages
                 {
                     Messages = ServerManager.ServerMessages
-                        .Select(m => new ServerRealmMessages.Message
+                        .Select(m => new NetworkMessage
                         {
                             Index    = m.Index,
                             Messages = m.Messages
@@ -67,7 +68,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                         AccountId  = account.Id,
                         SessionKey = sessionKey,
                         Realm      = server.Model.Name,
-                        Host       = server.Address,
+                        Address    = server.Address,
                         Port       = server.Model.Port,
                         Type       = server.Model.Type
                     });

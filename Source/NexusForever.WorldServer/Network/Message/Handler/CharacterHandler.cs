@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared.Cryptography;
+using NexusForever.Shared.Database.Auth;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
@@ -24,6 +26,7 @@ using NexusForever.WorldServer.Network.Message.Static;
 using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
+using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -32,21 +35,60 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientRealmList)]
         public static void HandleRealmList(WorldSession session, ClientRealmList realmList)
         {
-            var serverRealmList = new ServerRealmList();
+            var serverRealmList = new ServerRealmList
+            {
+                Messages = ServerManager.ServerMessages
+                    .Select(m => new NetworkMessage
+                    {
+                        Index    = m.Index,
+                        Messages = m.Messages
+                    })
+                    .ToList()
+            };
+
             foreach (ServerInfo server in ServerManager.Servers)
             {
-                // TODO: finish this...
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
                 {
-                    Unknown0   = 1,
-                    Realm      = server.Model.Name,
+                    RealmId    = server.Model.Id,
+                    RealmName  = server.Model.Name,
                     Type       = (RealmType)server.Model.Type,
                     Status     = RealmStatus.Up,
-                    Population = RealmPopulation.Low
+                    Population = RealmPopulation.Low,
+                    Unknown8   = new byte[16],
+                    AccountRealmInfo = new ServerRealmList.RealmInfo.AccountRealmData
+                    {
+                        RealmId = server.Model.Id
+                    }
                 });
             }
 
             session.EnqueueMessageEncrypted(serverRealmList);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientSelectRealm)]
+        public static void HandleSelectRealm(WorldSession session, ClientSelectRealm selectRealm)
+        {
+            ServerInfo server = ServerManager.Servers.SingleOrDefault(s => s.Model.Id == selectRealm.RealmId);
+            if (server == null)
+                throw new InvalidPacketValueException();
+
+            byte[] sessionKey = RandomProvider.GetBytes(16u);
+            session.EnqueueEvent(new TaskEvent(AuthDatabase.UpdateAccountSessionKey(session.Account, sessionKey),
+                () =>
+            {
+                session.EnqueueMessageEncrypted(new ServerNewRealm
+                {
+                    SessionKey  = sessionKey,
+                    GatewayData = new ServerNewRealm.Gateway
+                    {
+                        Address = server.Address,
+                        Port    = server.Model.Port
+                    },
+                    RealmName   = server.Model.Name,
+                    Type        = (RealmType)server.Model.Type
+                });
+            }));
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterList)]
