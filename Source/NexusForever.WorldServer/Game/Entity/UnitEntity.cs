@@ -86,5 +86,16 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (spell.IsMovingInterrupted() && spell.IsCasting)
                     spell.CancelCast(CastResult.CasterMovement);
         }
+
+        /// <summary>
+        /// Cancel a <see cref="Spell"/> based on its casting id
+        /// </summary>
+        /// <param name="castingId">Casting ID of the spell to cancel</param>
+        public void CancelSpellCast(uint castingId)
+        {
+            foreach (Spell.Spell spell in pendingSpells)
+                if(spell.CastingId == castingId)
+                    spell.CancelCast(CastResult.SpellCancelled);
+        }
     }
 }

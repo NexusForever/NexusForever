@@ -36,6 +36,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             });
         }
 
+        [MessageHandler(GameMessageOpcode.ClientSpellStopCast)]
+        public static void HandleSpellStopCast(WorldSession session, ClientSpellStopCast spellStopCast)
+        {
+            session.Player.CancelSpellCast(spellStopCast.CastingId);
+        }
+
         [MessageHandler(GameMessageOpcode.Client009A)]
         public static void HandleCastSpell(WorldSession session, Client009A castSpell)
         {
