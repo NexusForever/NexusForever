@@ -17,6 +17,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
 
         public void Write(GamePacketWriter writer)
         {
+            VelocityData = new Velocity();
             VelocityData.Write(writer);
             writer.Write(Blend);
         }

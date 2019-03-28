@@ -7,6 +7,7 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
+using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Spell
@@ -92,6 +93,30 @@ namespace NexusForever.WorldServer.Game.Spell
             player.TeleportTo((ushort)worldLocation.WorldId, worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
         }
 
+        [SpellEffectHandler(SpellEffectType.LearnDyeColor)]
+        private void HandleEffectLearnDyeColor(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            if (!(target is Player player))
+                return;
+
+            player.Session.GenericUnlockManager.Unlock((ushort)info.Entry.DataBits00);
+        }
+
+        [SpellEffectHandler(SpellEffectType.UnlockMount)]
+        private void HandleEffectUnlockMount(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            if (!(target is Player player))
+                return;
+
+            Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(info.Entry.DataBits00);
+            player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+
+            player.Session.EnqueueMessageEncrypted(new ServerUnlockMount
+            {
+                Spell4Id = info.Entry.DataBits00
+            });
+        }
+
         [SpellEffectHandler(SpellEffectType.UnlockPetFlair)]
         private void HandleEffectUnlockPetFlair(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
@@ -99,6 +124,21 @@ namespace NexusForever.WorldServer.Game.Spell
                 return;
 
             player.PetCustomisationManager.UnlockFlair((ushort)info.Entry.DataBits00);
+        }
+
+        [SpellEffectHandler(SpellEffectType.UnlockVanityPet)]
+        private void HandleEffectUnlockVanityPet(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            if (!(target is Player player))
+                return;
+
+            Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(info.Entry.DataBits00);
+            player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+
+            player.Session.EnqueueMessageEncrypted(new ServerUnlockMount
+            {
+                Spell4Id = info.Entry.DataBits00
+            });
         }
 
         [SpellEffectHandler(SpellEffectType.SummonVanityPet)]

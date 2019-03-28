@@ -18,6 +18,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
 
         public void Write(GamePacketWriter writer)
         {
+            MoveData = new Move();
             MoveData.Write(writer);
             writer.Write(Blend);
         }
