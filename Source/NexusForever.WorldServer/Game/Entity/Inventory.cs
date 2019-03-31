@@ -620,7 +620,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if ((item.Charges <= 0 && item.Entry.MaxCharges > 1)|| (item.StackCount <= 0 && item.Entry.MaxStackCount > 1))
                 return false;
 
-            if(item.Charges >= 1)
+            if(item.Charges >= 1 && item.Entry.MaxStackCount == 1)
                 item.Charges--;
 
             if (item.Entry.MaxStackCount > 1 && item.StackCount > 0)
