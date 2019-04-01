@@ -25,7 +25,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 foreach(WorldSession session in allSessions)
                     session.EnqueueMessageEncrypted(new ServerRealmBroadcast
                     {
-                        Unknown0 = byte.Parse(parameters[0].ToString()),
+                        Tier = byte.Parse(parameters[0].ToString()),
                         Message = string.Join(" ", parameters, 1, parameters.Length - 1)
                     });
             }
