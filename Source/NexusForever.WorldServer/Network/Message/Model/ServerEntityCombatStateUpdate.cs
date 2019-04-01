@@ -7,12 +7,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerEntityCombatStateUpdate, MessageDirection.Server)]
     class ServerEntityCombatStateUpdate : IWritable
     {
-        public uint Guid { get; set; }
+        public uint UnitId { get; set; }
         public bool CombatState { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
+            writer.Write(UnitId);
             writer.Write(CombatState);
         }
     }
