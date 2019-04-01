@@ -180,7 +180,7 @@ namespace NexusForever.Shared.Network.Message
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
         ServerVehiclePassengerAdd       = 0x086F,
-        ServerEntityCombatUpdate        = 0x089A,
+        ServerEntityCombatStateUpdate   = 0x089A,
         Server089B                      = 0x089B, // mount related
         Server08B3                      = 0x08B3,
         ServerSetUnitPathType           = 0x08B8,
