@@ -4,16 +4,16 @@ using NexusForever.WorldServer.Game.Social;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEntityCombatStateUpdate, MessageDirection.Server)]
-    class ServerEntityCombatStateUpdate : IWritable
+    [Message(GameMessageOpcode.ServerUnitEnteredCombat, MessageDirection.Server)]
+    class ServerUnitEnteredCombat : IWritable
     {
         public uint UnitId { get; set; }
-        public bool CombatState { get; set; }
+        public bool InCombat { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(UnitId);
-            writer.Write(CombatState);
+            writer.Write(InCombat);
         }
     }
 }
