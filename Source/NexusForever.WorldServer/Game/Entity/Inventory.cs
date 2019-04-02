@@ -452,10 +452,16 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        /// <summary>
+        /// Split a subset of <see cref="Item"/> to create a new <see cref="Item"/> of split amount
+        /// </summary>
         public void ItemSplit(ulong itemGuid, ItemLocation newItemLocation, uint count)
         {
             Item item = GetItem(itemGuid);
             if (item == null)
+                throw new InvalidPacketValueException();
+
+            if (item.Entry.MaxStackCount <= 1)
                 throw new InvalidPacketValueException();
 
             if (count >= item.StackCount)
