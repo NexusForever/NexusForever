@@ -217,6 +217,9 @@ namespace NexusForever.WorldServer.Game.Entity
                             if (item == null)
                                 return GenericError.MailInvalidInventorySlot;
 
+                            if (item.Location == InventoryLocation.Equipped)
+                                return GenericError.MailInvalidInventorySlot;
+
                             // TODO: Check the Item can be traded.
                             items.Add(item);
                         }

@@ -206,6 +206,7 @@ namespace NexusForever.Shared.Network.Message
         ServerInspectPlayerResponse     = 0x0553,
         ServerItemSwap                  = 0x0568,
         ServerItemMove                  = 0x0569,
+        ServerItemError                 = 0x056A,
         BiInputKeySet                   = 0x056F,
         ClientRequestInputKeySet        = 0x0570,
         ClientSetInputKeySet            = 0x0571,
