@@ -1,13 +1,13 @@
-using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ServerRealmBroadcast, MessageDirection.Server)]
     public class ServerRealmBroadcast : IWritable
     {
-        public byte Tier { get; set; } // 0 = Notification Windows & Chat Message; 1 = Notification Message centre screen & Chat Message; 2 = Chat Message
+        public BroadcastTier Tier { get; set; }
         public string Message { get; set; }
 
         public void Write(GamePacketWriter writer)

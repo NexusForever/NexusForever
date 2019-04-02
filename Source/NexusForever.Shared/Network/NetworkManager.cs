@@ -30,12 +30,14 @@ namespace NexusForever.Shared.Network
             return sessions.SingleOrDefault(func);
         }
 
+        public static IEnumerable<T> GetSessions()
+        {
+            return sessions.Select(i => i);
+        }
+
         public static IEnumerable<T> GetSessions(Func<T, bool> func = null)
         {
-            if (func != null)
-                return sessions.Where(func);
-            else
-                return sessions;
+            return sessions.Where(func);
         }
 
         public static void Shutdown()
