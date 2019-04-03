@@ -92,6 +92,7 @@ namespace NexusForever.Shared.Network.Message
         ServerRealmInfo                 = 0x03DB,
         ServerRealmEncrypted            = 0x03DC,
         ClientCheat                     = 0x03E0,
+        ServerRealmBroadcast            = 0x03E1,
         Server0497                      = 0x0497, // guild info
         ClientCastSpell                 = 0x04DB,
         ServerHousingResidenceDecor     = 0x04DE,
