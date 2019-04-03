@@ -263,6 +263,17 @@ namespace NexusForever.WorldServer.Game.Entity
             return itemVisuals.Values;
         }
 
+        public void SetDisplayInfo(uint displayInfo)
+        {
+            DisplayInfo = displayInfo;
+
+            EnqueueToVisible(new ServerEntityVisualUpdate
+            {
+                UnitId = Guid,
+                DisplayInfo = DisplayInfo
+            }, true);
+        }
+
         /// <summary>
         /// Enqueue broadcast of <see cref="IWritable"/> to all visible <see cref="Player"/>'s in range.
         /// </summary>
