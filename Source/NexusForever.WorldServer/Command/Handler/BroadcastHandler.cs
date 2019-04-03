@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Command.Attributes;
@@ -25,16 +24,15 @@ namespace NexusForever.WorldServer.Command.Handler
                 context.SendMessageAsync("Parameters are invalid.");
                 return Task.CompletedTask;
             }
-                
 
             BroadcastTier broadcastTier = (BroadcastTier)byte.Parse(parameters[0]);
-            if(broadcastTier > BroadcastTier.Low)
+            if (broadcastTier > BroadcastTier.Low)
             {
                 context.SendMessageAsync("Invalid broadcast tier.");
                 return Task.CompletedTask;
             }
 
-            List <WorldSession> allSessions = NetworkManager<WorldSession>.GetSessions().ToList();
+            IEnumerable<WorldSession> allSessions = NetworkManager<WorldSession>.GetSessions();
             foreach (WorldSession session in allSessions)
             {
                 session.EnqueueMessageEncrypted(new ServerRealmBroadcast
