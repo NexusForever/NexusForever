@@ -10,6 +10,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -33,7 +34,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
                 catch (Exception e)
                 {
-                    log.Warn(e.Message);
+                    log.Warn($"{e.Message}: {e.StackTrace}");
                 }
             }
             else
