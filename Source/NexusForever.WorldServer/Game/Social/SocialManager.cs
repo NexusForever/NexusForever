@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Social.Model;
@@ -124,7 +126,7 @@ namespace NexusForever.WorldServer.Game.Social
                 Channel = chat.Channel,
                 Name    = session.Player.Name,
                 Text    = chat.Message,
-                Formats = ParseChatLinks(session, chat).ToList(),
+                Formats = ParseChatLinks(session, chat.Formats).ToList(),
             };
 
             session.Player.Map.Search(
@@ -138,32 +140,63 @@ namespace NexusForever.WorldServer.Game.Social
             SendChatAccept(session);            
         }
 
-        private static IEnumerable<ChatFormat> ParseChatLinks(WorldSession session, ClientChat chat)
+        /// <summary>
+        /// Parses chat links from <see cref="ChatFormat"/> delivered by <see cref="ClientChat"/>
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="chat"></param>
+        /// <returns></returns>
+        public static IEnumerable<ChatFormat> ParseChatLinks(WorldSession session, List<ChatFormat> chatFormats)
         {
-            foreach (ChatFormat format in chat.Formats)
+            foreach (ChatFormat format in chatFormats)
             {
-                switch (format.FormatModel)
-                {
-                    case ChatFormatItemGuid chatFormatItemGuid:
+                yield return ParseChatFormat(session, format);
+            }
+        }
+
+        /// <summary>
+        /// Parses a <see cref="ChatFormat"/> to return a formatted <see cref="ChatFormat"/>
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        private static ChatFormat ParseChatFormat(WorldSession session, ChatFormat format)
+        {
+            switch (format.FormatModel)
+            {
+                case ChatFormatItemId chatFormatItemId:
+                    {
+                        Item2Entry item = GameTableManager.Item.GetEntry(chatFormatItemId.ItemId);
+
+                        return new ChatFormat
+                        {
+                            Type = ChatFormatType.ItemItemId,
+                            StartIndex = format.StartIndex,
+                            StopIndex = format.StopIndex,
+                            FormatModel = new ChatFormatItemId
+                            {
+                                ItemId = item.Id
+                            }
+                        };
+                    }
+                case ChatFormatItemGuid chatFormatItemGuid:
                     {
                         Item item = session.Player.Inventory.GetItem(chatFormatItemGuid.Guid);
+
                         // TODO: this probably needs to be a full item response
-                        yield return new ChatFormat
+                        return new ChatFormat
                         {
-                            Type        = ChatFormatType.ItemItemId,
-                            StartIndex  = 0,
-                            StopIndex   = 0,
+                            Type = ChatFormatType.ItemItemId,
+                            StartIndex = format.StartIndex,
+                            StopIndex = format.StopIndex,
                             FormatModel = new ChatFormatItemId
                             {
                                 ItemId = item.Entry.Id
                             }
                         };
-                        break;
                     }
-                    default:
-                        yield return format;
-                        break;
-                }
+                default:
+                    return format;
             }
         }
 
