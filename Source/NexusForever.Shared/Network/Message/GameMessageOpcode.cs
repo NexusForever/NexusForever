@@ -94,6 +94,7 @@ namespace NexusForever.Shared.Network.Message
         ServerRealmInfo                 = 0x03DB,
         ServerRealmEncrypted            = 0x03DC,
         ClientCheat                     = 0x03E0,
+        ServerRealmBroadcast            = 0x03E1,
         ClientItemGenericUnlock         = 0x0400,
         Server0497                      = 0x0497, // guild info
         ClientCastSpell                 = 0x04DB,
@@ -184,6 +185,7 @@ namespace NexusForever.Shared.Network.Message
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
         ServerVehiclePassengerAdd       = 0x086F,
+        ServerUnitEnteredCombat         = 0x089A,
         Server089B                      = 0x089B, // mount related
         Server08B3                      = 0x08B3,
         ServerSetUnitPathType           = 0x08B8,
