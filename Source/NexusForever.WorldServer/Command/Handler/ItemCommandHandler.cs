@@ -22,7 +22,11 @@ namespace NexusForever.WorldServer.Command.Handler
             if (parameters.Length > 1)
                 amount = uint.Parse(parameters[1]);
 
-            context.Session.Player.Inventory.ItemCreate(uint.Parse(parameters[0]), amount);
+            uint charges = 0;
+            if (parameters.Length > 2)
+                charges = uint.Parse(parameters[2]);
+
+            context.Session.Player.Inventory.ItemCreate(uint.Parse(parameters[0]), amount, 49, charges);
             return Task.CompletedTask;
         }
     }

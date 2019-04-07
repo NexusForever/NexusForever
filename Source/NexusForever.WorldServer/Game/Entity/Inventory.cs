@@ -304,19 +304,19 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(uint itemId, uint count, byte reason = 49)
+        public void ItemCreate(uint itemId, uint count, byte reason = 49, uint charges = 0)
         {
             Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
-            ItemCreate(itemEntry, count, reason);
+            ItemCreate(itemEntry, count, reason, charges);
         }
 
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(Item2Entry itemEntry, uint count, byte reason = 49)
+        public void ItemCreate(Item2Entry itemEntry, uint count, byte reason = 49, uint charges = 0)
         {
             if (itemEntry == null)
                 throw new ArgumentNullException();
@@ -342,7 +342,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (bagIndex == uint.MaxValue)
                     return;
 
-                var item = new Item(characterId, itemEntry, Math.Min(count, itemEntry.MaxStackCount));
+                var item = new Item(characterId, itemEntry, Math.Min(count, itemEntry.MaxStackCount), charges);
                 AddItem(item, InventoryLocation.Inventory, bagIndex);
 
                 if (!player?.IsLoading ?? false)
@@ -603,6 +603,40 @@ namespace NexusForever.WorldServer.Game.Entity
                 StackCount = stackCount,
                 Reason     = 0
             });
+        }
+
+        /// <summary>
+        /// Apply stack updates and deletion to <see cref="Item"/> on use
+        /// </summary>
+        public bool ItemUse(Item item)
+        {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item), "Item is null.");
+
+            // This should only apply for re-usable items, like Quest Clickies.
+            if (item.Entry.MaxCharges == 0 && item.Entry.MaxStackCount == 1)
+                return true;
+
+            if ((item.Charges <= 0 && item.Entry.MaxCharges > 1)|| (item.StackCount <= 0 && item.Entry.MaxStackCount > 1))
+                return false;
+
+            if(item.Charges >= 1 && item.Entry.MaxStackCount == 1)
+                item.Charges--;
+
+            if (item.Entry.MaxStackCount > 1 && item.StackCount > 0)
+                ItemStackCountUpdate(item, item.StackCount - 1);
+
+            // TODO: Set Deletion reason to 1, when consuming a single charge item.
+            if ((item.StackCount == 0 && item.Entry.MaxStackCount > 1) || (item.Charges == 0 && item.Entry.MaxCharges > 0))
+            {
+                ItemDelete(new ItemLocation
+                {
+                    Location = item.Location,
+                    BagIndex = item.BagIndex
+                });
+            }
+
+            return true;
         }
 
         private Bag GetBag(InventoryLocation location)
