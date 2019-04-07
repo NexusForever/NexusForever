@@ -1,0 +1,12 @@
+{
+    "Network": {
+        "Host": "0.0.0.0",
+        "Port": 23115
+    },
+    "Database": {
+      "Auth": {
+        "ConnectionString": "server=127.0.0.1;port=3306;user=root;password=1337;database=nexus_forever_auth",
+        "Provider": "MySQL"
+      }
+    }
+}
