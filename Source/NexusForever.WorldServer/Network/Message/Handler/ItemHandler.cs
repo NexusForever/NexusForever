@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientItemSplit)]
         public static void HandleItemSplit(WorldSession session, ClientItemSplit itemSplit)
         {
-            session.Player.Inventory.ItemSplit();
+            session.Player.Inventory.ItemSplit(itemSplit.Guid, itemSplit.Location, itemSplit.Count);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemDelete)]

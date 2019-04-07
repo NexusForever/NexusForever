@@ -329,9 +329,15 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 foreach (Item item in bag.Where(i => i.Entry.Id == itemEntry.Id))
                 {
-                    uint stackCount = Math.Min(itemEntry.MaxStackCount - item.StackCount, itemEntry.MaxStackCount);
-                    ItemStackCountUpdate(item, item.StackCount + stackCount);
-                    count -= stackCount;
+                    if (count == 0u)
+                        break;
+
+                    if (item.StackCount == itemEntry.MaxStackCount)
+                        continue;
+
+                    uint newStackCount = Math.Min(item.StackCount + count, itemEntry.MaxStackCount);
+                    count -= newStackCount - item.StackCount;
+                    ItemStackCountUpdate(item, newStackCount);
                 }
             }
 
@@ -384,11 +390,10 @@ namespace NexusForever.WorldServer.Game.Entity
             Item dstItem = dstBag.GetItem(to.BagIndex);
             try
             {
-                RemoveItem(srcItem);
-
                 if (dstItem == null)
                 {
                     // no item at destination, just a simple move
+                    RemoveItem(srcItem);
                     AddItem(srcItem, to.Location, to.BagIndex);
 
                     player.Session.EnqueueMessageEncrypted(new ServerItemMove
@@ -400,9 +405,28 @@ namespace NexusForever.WorldServer.Game.Entity
                         }
                     });
                 }
+                else if (srcItem.Entry.Id == dstItem.Entry.Id)
+                {
+                    // item at destination with same entry, try and stack
+                    uint newStackCount = Math.Min(dstItem.StackCount + srcItem.StackCount, dstItem.Entry.MaxStackCount);
+                    uint oldStackCount = srcItem.StackCount - (newStackCount - dstItem.StackCount);
+                    ItemStackCountUpdate(dstItem, newStackCount);
+
+                    if (oldStackCount == 0u)
+                    {
+                        ItemDelete(new ItemLocation
+                        {
+                            Location = srcItem.Location,
+                            BagIndex = srcItem.BagIndex
+                        });
+                    }  
+                    else
+                        ItemStackCountUpdate(srcItem, oldStackCount);
+                }
                 else
                 {
                     // item at destination, swap with source item
+                    RemoveItem(srcItem);
                     RemoveItem(dstItem);
                     AddItem(srcItem, to.Location, to.BagIndex);
                     AddItem(dstItem, from.Location, from.BagIndex);
@@ -429,9 +453,45 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
-        public void ItemSplit()
+        /// <summary>
+        /// Split a subset of <see cref="Item"/> to create a new <see cref="Item"/> of split amount
+        /// </summary>
+        public void ItemSplit(ulong itemGuid, ItemLocation newItemLocation, uint count)
         {
-            // TODO
+            Item item = GetItem(itemGuid);
+            if (item == null)
+                throw new InvalidPacketValueException();
+
+            if (item.Entry.MaxStackCount <= 1u)
+                throw new InvalidPacketValueException();
+
+            if (count >= item.StackCount)
+                throw new InvalidPacketValueException();
+
+            Bag dstBag = GetBag(newItemLocation.Location);
+            if (dstBag == null)
+                throw new InvalidPacketValueException();
+
+            Item dstItem = dstBag.GetItem(newItemLocation.BagIndex);
+            if (dstItem != null)
+                throw new InvalidPacketValueException();
+
+            var newItem = new Item(characterId, item.Entry, Math.Min(count, item.Entry.MaxStackCount));
+            AddItem(newItem, newItemLocation.Location, newItemLocation.BagIndex);
+
+            if (!player?.IsLoading ?? false)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerItemAdd
+                {
+                    InventoryItem = new InventoryItem
+                    {
+                        Item = newItem.BuildNetworkItem(),
+                        Reason = 49
+                    }
+                });
+            }
+
+            ItemStackCountUpdate(item, item.StackCount - count);
         }
 
         /// <summary>
