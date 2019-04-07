@@ -9,14 +9,11 @@ using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class SpellHandler
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
-
         [MessageHandler(GameMessageOpcode.ClientCastSpell)]
         public static void HandleCastSpell(WorldSession session, ClientCastSpell castSpell)
         {

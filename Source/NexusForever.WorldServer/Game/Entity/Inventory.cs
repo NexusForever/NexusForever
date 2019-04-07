@@ -611,7 +611,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public bool ItemUse(Item item)
         {
             if (item == null)
-                throw new ArgumentNullException($"Item is null.");
+                throw new ArgumentNullException(nameof(item), "Item is null.");
 
             // This should only apply for re-usable items, like Quest Clickies.
             if (item.Entry.MaxCharges == 0 && item.Entry.MaxStackCount == 1)
@@ -628,11 +628,13 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // TODO: Set Deletion reason to 1, when consuming a single charge item.
             if ((item.StackCount == 0 && item.Entry.MaxStackCount > 1) || (item.Charges == 0 && item.Entry.MaxCharges > 0))
+            {
                 ItemDelete(new ItemLocation
                 {
                     Location = item.Location,
                     BagIndex = item.BagIndex
                 });
+            }
 
             return true;
         }

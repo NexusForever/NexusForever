@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
@@ -8,7 +6,6 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Spell
 {

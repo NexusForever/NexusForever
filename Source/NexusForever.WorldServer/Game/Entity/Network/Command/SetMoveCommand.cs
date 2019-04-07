@@ -1,24 +1,21 @@
 using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetMove)]
     public class SetMoveCommand : IEntityCommand
     {
-        public Move MoveData { get; set; }
+        public Move MoveData { get; set; } = new Move();
         public bool Blend { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            MoveData = new Move();
             MoveData.Read(reader);
             Blend = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
-            MoveData = new Move();
             MoveData.Write(writer);
             writer.Write(Blend);
         }

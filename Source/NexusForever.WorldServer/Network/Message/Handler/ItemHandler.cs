@@ -1,23 +1,19 @@
-﻿using NexusForever.Shared.GameTable;
+﻿using System.Threading.Tasks;
+using NexusForever.Shared.Game.Events;
+using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
-using NLog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class ItemHandler
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
-
         [MessageHandler(GameMessageOpcode.ClientItemMove)]
         public static void HandleItemMove(WorldSession session, ClientItemMove itemMove)
         {
@@ -37,85 +33,69 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemUse)]
-        public static void HandleClientItemUse(WorldSession session, ClientItemUse itemUse)
+        public static void HandleItemUse(WorldSession session, ClientItemUse itemUse)
         {
-            Item item = session.Player.Inventory.GetItem(itemUse.Location, itemUse.BagIndex);
+            Item item = session.Player.Inventory.GetItem(itemUse.Location);
             if (item == null)
                 throw new InvalidPacketValueException();
 
             ItemSpecialEntry itemSpecial = GameTableManager.ItemSpecial.GetEntry(item.Entry.ItemSpecialId00);
-            if(itemSpecial == null)
+            if (itemSpecial == null)
                 throw new InvalidPacketValueException();
 
-            if (itemSpecial.Spell4IdOnActivate > 0)
+            if (itemSpecial.Spell4IdOnActivate > 0u)
+            {
                 if (session.Player.Inventory.ItemUse(item))
-                    session.Player.CastSpell(itemSpecial.Spell4IdOnActivate, new SpellParameters());
+                {
+                    session.Player.CastSpell(itemSpecial.Spell4IdOnActivate, new SpellParameters
+                    {
+                        PrimaryTargetId = itemUse.TargetUnitId,
+                        Position        = itemUse.Position
+                    });
+                }
+            }
         }
 
-        [MessageHandler(GameMessageOpcode.ClientItemUseDye)]
-        public static void HandleClientItemUseDye(WorldSession session, ClientItemUseDye itemUseDye)
+        [MessageHandler(GameMessageOpcode.ClientItemGenericUnlock)]
+        public static void HandleItemGenericUnlock(WorldSession session, ClientItemGenericUnlock itemGenericUnlock)
         {
-            Item item = session.Player.Inventory.GetItem(itemUseDye.Location, itemUseDye.BagIndex);
+            Item item = session.Player.Inventory.GetItem(itemGenericUnlock.Location);
             if (item == null)
                 throw new InvalidPacketValueException();
-            
-            if(item.Entry.GenericUnlockSetId > 0)
-            {
-                GenericUnlockEntryEntry entry = GameTableManager.GenericUnlockEntry.GetEntry(item.Entry.GenericUnlockSetId);
-                if (entry != null)
-                    if (!session.GenericUnlockManager.IsDyeUnlocked(entry.UnlockObject))
-                        if(session.Player.Inventory.ItemUse(item))
-                        {
-                            session.GenericUnlockManager.Unlock((ushort)entry.Id);
-                            return;
-                        }
-            }
-            
-            session.EnqueueMessageEncrypted(new ServerChat
-            {
-                Guid = session.Player.Guid,
-                Channel = Game.Social.ChatChannel.System,
-                Text = $"Item not implemented for use."
-            });
+
+            GenericUnlockEntryEntry entry = GameTableManager.GenericUnlockEntry.GetEntry(item.Entry.GenericUnlockSetId);
+            if (entry == null)
+                throw new InvalidPacketValueException();
+
+            // TODO: should some client error be shown for this?
+            if (!session.GenericUnlockManager.IsUnlocked((GenericUnlockType)entry.GenericUnlockTypeEnum, entry.UnlockObject))
+                return;
+
+            if (session.Player.Inventory.ItemUse(item))
+                session.GenericUnlockManager.Unlock((ushort)entry.Id);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemUseDecor)]
-        public static void HandleClientItemUseDecor(WorldSession session, ClientItemUseDecor itemUseDecor)
+        public static void HandleItemUseDecor(WorldSession session, ClientItemUseDecor itemUseDecor)
         {
             Item item = session.Player.Inventory.GetItem(itemUseDecor.ItemGuid);
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            if(item.Entry.HousingDecorInfoId > 0)
-            {
-                HousingDecorInfoEntry entry = GameTableManager.HousingDecorInfo.GetEntry(item.Entry.HousingDecorInfoId);
-                if(entry != null)
-                {
-                    if (!(session.Player.Map is ResidenceMap residenceMap))
-                    {
-                        session.EnqueueMessageEncrypted(new ServerChat
-                        {
-                            Guid = session.Player.Guid,
-                            Channel = Game.Social.ChatChannel.System,
-                            Text = "You need to be on a housing map to use this command!"
-                        });
-                        return;
-                    }
+            HousingDecorInfoEntry entry = GameTableManager.HousingDecorInfo.GetEntry(item.Entry.HousingDecorInfoId);
+            if (entry == null)
+                throw new InvalidPacketValueException();
 
-                    if(session.Player.Inventory.ItemUse(item))
-                    {
-                        residenceMap.DecorCreate(entry, 1);
-                        return;
-                    }
-                }
-            }
-
-            session.EnqueueMessageEncrypted(new ServerChat
+            Task<Residence> task = ResidenceManager.GetResidence(session.Player.Name);
+            session.EnqueueEvent(new TaskGenericEvent<Residence>(task,
+                residence =>
             {
-                Guid = session.Player.Guid,
-                Channel = Game.Social.ChatChannel.System,
-                Text = $"Item not implemented for use."
-            });
+                if (residence == null)
+                    residence = ResidenceManager.CreateResidence(session.Player);
+
+                if (session.Player.Inventory.ItemUse(item))
+                    residence.DecorCreate(entry);
+            }));
         }
     }
 }
