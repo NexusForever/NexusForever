@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Shared.Configuration;
+using NexusForever.Shared.Database;
 
 namespace MainSite
 {
@@ -17,6 +19,8 @@ namespace MainSite
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            ConfigurationManager<AuthServerConfiguration>.Initialise("AuthServer.json");
+            DatabaseManager.Initialise(ConfigurationManager<AuthServerConfiguration>.Config.Database);
         }
 
         public IConfiguration Configuration { get; }
