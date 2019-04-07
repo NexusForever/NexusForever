@@ -219,6 +219,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (pathRewardEntry.PathRewardFlags > 0)
                     continue;
 
+                if (pathRewardEntry.PathRewardTypeEnum != 0)
+                    continue;
+
                 if (pathRewardEntry.Item2Id == 0 && pathRewardEntry.Spell4Id == 0 && pathRewardEntry.CharacterTitleId == 0)
                     continue;
 
@@ -229,10 +232,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     continue;
 
                 GrantPathReward(pathRewardEntry);
-                GetPathEntry(path).LevelRewarded = (byte)level;
-                // TODO: Play Level up effect
-                break;
             }
+
+            GetPathEntry(path).LevelRewarded = (byte)level;
+            player.CastSpell(53234, new Spell.SpellParameters());
         }
 
         /// <summary>
@@ -247,8 +250,12 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO: Check if there's bag space. Otherwise queue? Or is there an overflow inventory?
             if (pathRewardEntry.Item2Id > 0)
                 player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, 4);
-            
-            // TODO: Grant Spell rewards (needs PR #76)
+
+            if (pathRewardEntry.Spell4Id > 0)
+            {
+                Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(pathRewardEntry.Spell4Id);
+                player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+            }
 
             if (pathRewardEntry.CharacterTitleId > 0)
                 player.TitleManager.AddTitle((ushort)pathRewardEntry.CharacterTitleId);
