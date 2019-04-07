@@ -192,7 +192,7 @@ namespace NexusForever.Shared.Network.Message
         ClientCostumeItemUnlock         = 0x090F,
         ServerPlayerCurrencyChanged     = 0x0919,
         ServerCooldownList              = 0x091B,
-        Server092C                      = 0x092C,
+        ServerRewardPropertySet         = 0x092C,
         ServerItemVisualUpdate          = 0x0933,
         ServerEntityFaction             = 0x0934,
         ServerEntityStatUpdate          = 0x0935, // 0x0938??

@@ -116,6 +116,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         },
                         new ServerAccountEntitlements.AccountEntitlementInfo
                         {
+                            Entitlement = Entitlement.ExtraDecorSlots,
+                            Count       = 2000
+                        },
+                        new ServerAccountEntitlements.AccountEntitlementInfo
+                        {
                             Entitlement = Entitlement.ChuaWarriorUnlock,
                             Count       = 1
                         },

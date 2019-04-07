@@ -284,17 +284,22 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new Server00F1());
             SetControl(this);
 
-            // this seems to set values at the client by id, needs more research
-            // id 11 is related to costume slots
-            Session.EnqueueMessageEncrypted(new Server092C
+            // TODO: Move to Unlocks/Rewards Handler. A lot of these are tied to Entitlements which display in the character sheet, but don't actually unlock anything without this packet.
+            Session.EnqueueMessageEncrypted(new ServerRewardPropertySet
             {
-                Variables = new List<Server092C.Variable>
+                Variables = new List<ServerRewardPropertySet.RewardProperty>
                 {
-                    new Server092C.Variable
+                    new ServerRewardPropertySet.RewardProperty
                     {
-                        Id    = 11,
+                        Id    = RewardProperty.CostumeSlots,
                         Type  = 1,
                         Value = CostumeManager.CostumeCap
+                    },
+                    new ServerRewardPropertySet.RewardProperty
+                    {
+                        Id    = RewardProperty.ExtraDecorSlots,
+                        Type  = 1,
+                        Value = 2000
                     }
                 }
             });
