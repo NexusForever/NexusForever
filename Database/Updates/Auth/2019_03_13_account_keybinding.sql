@@ -1,4 +1,4 @@
-CREATE TABLE `account_keybinding` (
+CREATE TABLE IF NOT EXISTS `account_keybinding` (
     `id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
     `inputActionId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
     `deviceEnum00` INT(10) UNSIGNED NOT NULL DEFAULT '0',

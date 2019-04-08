@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
@@ -14,12 +13,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            uint Count = reader.ReadUInt();
-            for (uint i = 0u; i < Count; i++)
+            uint count = reader.ReadUInt();
+            for (uint i = 0u; i < count; i++)
             {
-                Binding binding = new Binding();
+                var binding = new Binding();
                 binding.Read(reader);
-
                 Bindings.Add(binding);
             }
 
@@ -28,7 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Bindings.Count, 32u);
+            writer.Write(Bindings.Count);
             Bindings.ForEach(b => b.Write(writer));
             writer.Write(CharacterId);
         }

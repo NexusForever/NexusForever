@@ -1,33 +1,26 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth.Model;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NetworkBinding = NexusForever.WorldServer.Network.Message.Model.Shared.Binding;
 
 namespace NexusForever.WorldServer.Game.Setting
 {
-    public class KeybindingManager : ISaveAuth, ISaveCharacter, IUpdate
+    public class KeybindingManager : ISaveAuth, ISaveCharacter
     {
         private readonly Player player;
-        private Keybinding accountKeybindings;
-        private Keybinding characterKeybindings;
+        private readonly KeybindingSet accountKeybindings;
+        private readonly KeybindingSet characterKeybindings;
 
         public KeybindingManager(Player owner, Account accountModel, Character characterModel)
         {
-            player = owner;
-            accountKeybindings   = new Keybinding(accountModel);
-            characterKeybindings = new Keybinding(characterModel);
+            player               = owner;
+            accountKeybindings   = new KeybindingSet(accountModel);
+            characterKeybindings = new KeybindingSet(characterModel);
         }
 
         public void Save(AuthContext context)
@@ -40,10 +33,6 @@ namespace NexusForever.WorldServer.Game.Setting
             characterKeybindings.Save(context);
         }
 
-        public void Update(double lastTick)
-        {
-        }
-
         public void SaveKeybinding(BiInputKeySet biInputKeySet)
         {
             if (biInputKeySet.CharacterId == 0)
@@ -54,41 +43,39 @@ namespace NexusForever.WorldServer.Game.Setting
 
         public void SendInputKeySet()
         {
-            List <NetworkBinding> networkBindings = new List<NetworkBinding>();
-            foreach (Binding binding in player.InputKeySet == InputSets.Character ? characterKeybindings.bindings.Values : accountKeybindings.bindings.Values)
+            var networkBindings = new List<NetworkBinding>();
+            foreach (Keybinding binding in player.InputKeySet == InputSets.Character ? characterKeybindings : accountKeybindings)
                 networkBindings.Add(BuildNetworkBinding(binding));
                 
             player.Session.EnqueueMessageEncrypted(new BiInputKeySet
             {
-                Bindings = networkBindings,
-                CharacterId = player.InputKeySet == InputSets.Character ? player.CharacterId : 0,
+                Bindings    = networkBindings,
+                CharacterId = player.InputKeySet == InputSets.Character ? player.CharacterId : 0ul
             });
         }
 
         public void SendInputKeySet(ulong characterId)
         {
-            List <NetworkBinding> networkBindings = new List<NetworkBinding>();
-            foreach (Binding binding in player.InputKeySet == InputSets.Character ? characterKeybindings.bindings.Values : accountKeybindings.bindings.Values)
-            {
+            var networkBindings = new List<NetworkBinding>();
+            foreach (Keybinding binding in characterId != 0ul ? characterKeybindings : accountKeybindings)
                 networkBindings.Add(BuildNetworkBinding(binding));
-            }
                 
             player.Session.EnqueueMessageEncrypted(new BiInputKeySet
             {
-                Bindings = networkBindings,
-                CharacterId = player.InputKeySet == InputSets.Character ? player.CharacterId : 0,
+                Bindings    = networkBindings,
+                CharacterId = player.InputKeySet == InputSets.Character ? player.CharacterId : 0ul
             });
         }
 
         public void SendInitialPackets()
         {
-            if (characterKeybindings.bindings.Count + accountKeybindings.bindings.Count == 0)
+            if (characterKeybindings.Count + accountKeybindings.Count == 0u)
                 return;
 
             SendInputKeySet();
         }
 
-        private NetworkBinding BuildNetworkBinding(Binding binding)
+        private NetworkBinding BuildNetworkBinding(Keybinding binding)
         {
             var networkBinding = new NetworkBinding
             {

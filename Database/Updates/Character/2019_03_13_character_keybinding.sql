@@ -1,4 +1,4 @@
-CREATE TABLE `character_keybinding` (
+CREATE TABLE IF NOT EXISTS `character_keybinding` (
     `id` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
     `inputActionId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
     `deviceEnum00` INT(10) UNSIGNED NOT NULL DEFAULT '0',

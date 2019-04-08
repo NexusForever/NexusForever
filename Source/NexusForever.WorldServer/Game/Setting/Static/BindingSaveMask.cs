@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Game.Setting.Static
     {
         None            = 0x0000,
         Create          = 0x0001,
-        Keep            = 0x0002,
+        Delete          = 0x0002,
         DeviceEnum00    = 0x0004,
         DeviceEnum01    = 0x0008, 
         DeviceEnum02    = 0x0010, 

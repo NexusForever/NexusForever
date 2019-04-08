@@ -201,7 +201,6 @@ namespace NexusForever.WorldServer.Game.Entity
             TitleManager.Update(lastTick);
             SpellManager.Update(lastTick);
             CostumeManager.Update(lastTick);
-            KeybindingManager.Update(lastTick);
 
             timeToSave -= lastTick;
             if (timeToSave <= 0d)

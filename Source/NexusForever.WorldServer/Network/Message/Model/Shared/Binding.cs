@@ -1,4 +1,3 @@
-using System;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 

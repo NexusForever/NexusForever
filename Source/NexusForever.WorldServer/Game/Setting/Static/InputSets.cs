@@ -7,6 +7,6 @@ namespace NexusForever.WorldServer.Game.Setting.Static
         Default3    = 2,
         Account     = 3,
         Character   = 4,
-	MaxValue    = 5
+	    MaxValue    = 5
     }
 }
