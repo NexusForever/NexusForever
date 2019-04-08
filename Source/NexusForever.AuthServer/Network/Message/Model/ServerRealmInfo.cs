@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerRealmInfo, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerRealmInfo)]
     public class ServerRealmInfo : IWritable
     {
         public uint Address { get; set; }

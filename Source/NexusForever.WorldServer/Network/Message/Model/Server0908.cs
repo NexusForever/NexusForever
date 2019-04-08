@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server0908, MessageDirection.Server)]
+    [Message(GameMessageOpcode.Server0908)]
     public class Server0908 : IWritable
     {
         public uint CasterId { get; set; }

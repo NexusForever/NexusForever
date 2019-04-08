@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientRequestActionSetChanges, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientRequestActionSetChanges)]
     public class ClientRequestActionSetChanges : IReadable
     {
         public class ActionTier : IReadable

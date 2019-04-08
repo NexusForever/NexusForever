@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientItemUse, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientItemUse)]
     public class ClientItemUse : IReadable
     {
         public uint CastingId { get; private set; }

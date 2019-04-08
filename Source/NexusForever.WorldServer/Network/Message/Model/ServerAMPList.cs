@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerAmpList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerAmpList)]
     public class ServerAmpList : IWritable
     {
         public byte SpecIndex { get; set; }

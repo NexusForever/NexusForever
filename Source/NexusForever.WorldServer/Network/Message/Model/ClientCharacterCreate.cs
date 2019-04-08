@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCharacterCreate, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientCharacterCreate)]
     public class ClientCharacterCreate : IReadable
     {
         public uint CharacterCreationId { get; private set; }

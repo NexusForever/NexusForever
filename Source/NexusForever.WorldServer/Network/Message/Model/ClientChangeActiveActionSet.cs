@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientChangeActiveActionSet, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientChangeActiveActionSet)]
     public class ClientChangeActiveActionSet : IReadable
     {
         public byte ActionSetIndex { get; private set; }

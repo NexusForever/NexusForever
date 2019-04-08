@@ -5,7 +5,7 @@ using RewardPropertyEnum = NexusForever.WorldServer.Game.Entity.Static.RewardPro
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerRewardPropertySet, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerRewardPropertySet)]
     public class ServerRewardPropertySet : IWritable
     {
         public class RewardProperty : IWritable

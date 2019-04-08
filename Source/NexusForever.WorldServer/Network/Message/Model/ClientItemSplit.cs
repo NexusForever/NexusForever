@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientItemSplit, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientItemSplit)]
     public class ClientItemSplit : IReadable
     {
         public ulong Guid { get; private set; }

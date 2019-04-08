@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerRealmEncrypted, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerRealmEncrypted)]
     public class ServerRealmEncrypted : IWritable
     {
         public byte[] Data { get; set; }

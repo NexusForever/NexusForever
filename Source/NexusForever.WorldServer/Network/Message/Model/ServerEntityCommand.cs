@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity.Network;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEntityCommand, MessageDirection.Client | MessageDirection.Server)]
-    public class ServerEntityCommand : IReadable, IWritable
+    [Message(GameMessageOpcode.ServerEntityCommand)]
+    public class ServerEntityCommand : IWritable
     {
         public uint Guid { get; set; }
         public uint Time { get; set; }
         public bool Unknown1 { get; set; }
         public bool Unknown2 { get; set; }
         public List<(EntityCommand, IEntityCommand)> Commands { get; set; } = new List<(EntityCommand, IEntityCommand)>();
-
-        public void Read(GamePacketReader reader)
-        {
-            throw new NotImplementedException();
-        }
 
         public void Write(GamePacketWriter writer)
         {

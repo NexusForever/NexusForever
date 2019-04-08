@@ -5,7 +5,7 @@ using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerRealmMessages, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerRealmMessages)]
     public class ServerRealmMessages : IWritable
     {
         public List<NetworkMessage> Messages { get; set; } = new List<NetworkMessage>();

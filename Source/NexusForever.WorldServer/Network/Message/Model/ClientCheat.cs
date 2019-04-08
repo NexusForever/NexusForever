@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCheat, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientCheat)]
     public class ClientCheat : IReadable
     {
         public void Read(GamePacketReader reader)

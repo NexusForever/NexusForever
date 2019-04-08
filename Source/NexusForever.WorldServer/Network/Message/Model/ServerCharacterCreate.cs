@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCharacterCreate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCharacterCreate)]
     public class ServerCharacterCreate : IWritable
     {
         public ulong CharacterId { get; set; }

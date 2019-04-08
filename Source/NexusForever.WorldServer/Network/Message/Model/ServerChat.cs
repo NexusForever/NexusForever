@@ -7,7 +7,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerChat, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerChat)]
     class ServerChat : IWritable
     {
         public ChatChannel Channel { get; set; }

@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientRealmList, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientRealmList)]
     public class ClientRealmList : IReadable
     {
         public void Read(GamePacketReader reader)

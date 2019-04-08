@@ -9,7 +9,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEntityCreate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerEntityCreate)]
     public class ServerEntityCreate : IWritable
     {
         #region Unknown Structures

@@ -6,7 +6,7 @@ using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerHousingPlots, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerHousingPlots)]
     public class ServerHousingPlots : IWritable
     {
         public class Plot : IWritable

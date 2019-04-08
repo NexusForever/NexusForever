@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 namespace NexusForever.WorldServer.Network.Message.Model
 {
 
-    [Message(GameMessageOpcode.ServerPathUnlockResult, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPathUnlockResult)]
     public class ServerPathUnlockResult : IWritable
     {
         public byte Result { get; set; }

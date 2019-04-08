@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCooldownList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCooldownList)]
     public class ServerCooldownList : IWritable
     {
         public List<Cooldown> Cooldowns { get; set; } = new List<Cooldown>();

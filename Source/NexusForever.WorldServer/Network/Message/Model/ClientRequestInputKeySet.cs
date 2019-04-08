@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientRequestInputKeySet, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientRequestInputKeySet)]
     public class ClientRequestInputKeySet : IReadable
     {
         public ulong CharacterId { get; private set; }

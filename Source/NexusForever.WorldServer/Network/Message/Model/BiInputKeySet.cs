@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.BiInputKeySet, MessageDirection.Client | MessageDirection.Server)]
+    [Message(GameMessageOpcode.BiInputKeySet)]
     public class BiInputKeySet : IReadable, IWritable
     {
         public List<Binding> Bindings { get; set; } = new List<Binding>();

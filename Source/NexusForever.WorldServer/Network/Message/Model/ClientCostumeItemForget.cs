@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCostumeItemForget, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientCostumeItemForget)]
     public class ClientCostumeItemForget : IReadable
     {
         public uint ItemId { get; private set; }

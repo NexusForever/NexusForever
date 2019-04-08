@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientSummonVanityPet, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientSummonVanityPet)]
     public class ClientSummonVanityPet : IReadable
     {
         public uint Spell4BaseId { get; private set; }

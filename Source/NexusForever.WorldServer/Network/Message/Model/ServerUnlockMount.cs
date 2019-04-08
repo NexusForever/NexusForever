@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerUnlockMount, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerUnlockMount)]
     public class ServerUnlockMount : IWritable
     {
         public uint Spell4Id { get; set; }

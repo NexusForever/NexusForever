@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientHelloAuth, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientHelloAuth)]
     public class ClientHelloAuth : IReadable
     {
         public class HardwareInformation : IReadable

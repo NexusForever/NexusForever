@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Social;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientEmote, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientEmote)]
     public class ClientEmote : IReadable
     {
         public uint EmoteId { get; private set; }

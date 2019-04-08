@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCharacterLogoutStart, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCharacterLogoutStart)]
     public class ServerCharacterLogoutStart : IWritable
     {
         public uint TimeTillLogout { get; set; }

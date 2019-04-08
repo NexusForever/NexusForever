@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 namespace NexusForever.WorldServer.Network.Message.Model
 {
 
-    [Message(GameMessageOpcode.ClientLogout, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientLogout)]
     public class ClientLogout : IReadable
     {
         public void Read(GamePacketReader reader)

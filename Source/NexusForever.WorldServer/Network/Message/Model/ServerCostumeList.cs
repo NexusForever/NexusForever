@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCostumeList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCostumeList)]
     public class ServerCostumeList : IWritable
     {
         public List<Costume> Costumes { get; set; } = new List<Costume>();

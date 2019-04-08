@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientVendor, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientVendor)]
     public class ClientVendor : IReadable
     {
         public uint Guid { get; private set; }

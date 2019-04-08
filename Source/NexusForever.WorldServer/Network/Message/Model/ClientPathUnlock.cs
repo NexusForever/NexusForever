@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPathUnlock, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientPathUnlock)]
     public class ClientPathUnlock : IReadable
     {
         public Path Path { get; private set; }

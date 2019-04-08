@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCostumeSave, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCostumeSave)]
     public class ServerCostumeSave : IWritable
     {
         public int Index { get; set; }

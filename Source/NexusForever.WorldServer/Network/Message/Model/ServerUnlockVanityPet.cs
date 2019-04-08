@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerUnlockVanityPet, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerUnlockVanityPet)]
     public class ServerUnlockVanityPet : IWritable
     {
         public uint Spell4Id { get; set; }

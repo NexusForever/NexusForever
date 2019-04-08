@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerHousingPrivacy, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerHousingPrivacy)]
     public class ServerHousingPrivacy : IWritable
     {
         public ulong ResidenceId { get; set; }

@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientSelectRealm, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientSelectRealm)]
     public class ClientSelectRealm : IReadable
     {
         public uint RealmId { get; private set; }

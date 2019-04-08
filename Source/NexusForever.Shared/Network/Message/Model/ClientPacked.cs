@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Shared.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPacked, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientPacked)]
     public class ClientPacked : IReadable
     {
         public byte[] Data { get; private set; }

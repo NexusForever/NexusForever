@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCostumeItemList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCostumeItemList)]
     public class ServerCostumeItemList : IWritable
     {
         public List<uint> Items { get; set; } = new List<uint>();

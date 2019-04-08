@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server07F9, MessageDirection.Server)]
+    [Message(GameMessageOpcode.Server07F9)]
     public class Server07F9 : IWritable
     {
         public uint ServerUniqueId { get; set; }

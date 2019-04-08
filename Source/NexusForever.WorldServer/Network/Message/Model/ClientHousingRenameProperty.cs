@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientHousingRenameProperty, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientHousingRenameProperty)]
     public class ClientHousingRenameProperty : IReadable
     {
         public TargetPlayerIdentity PlayerIdentity { get; } = new TargetPlayerIdentity();

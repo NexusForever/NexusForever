@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientItemUseDecor, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientItemUseDecor)]
     public class ClientItemUseDecor : IReadable
     {
         public ulong ItemGuid { get; private set; }

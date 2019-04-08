@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Social;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEmote, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerEmote)]
     class ServerEmote : IWritable
     {
         public uint Guid { get; set; }

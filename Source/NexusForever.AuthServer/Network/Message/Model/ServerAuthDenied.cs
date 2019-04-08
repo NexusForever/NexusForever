@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerAuthDenied, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerAuthDenied)]
     public class ServerAuthDenied : IWritable
     {
         public NpLoginResult LoginResult { get; set; }

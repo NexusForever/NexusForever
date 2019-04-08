@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientItemGenericUnlock, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientItemGenericUnlock)]
     public class ClientItemGenericUnlock : IReadable
     {
         public ItemLocation Location { get; } = new ItemLocation();

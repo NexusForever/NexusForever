@@ -6,7 +6,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server07FD, MessageDirection.Server)]
+    [Message(GameMessageOpcode.Server07FD)]
     public class Server07FD : IWritable
     {
         public uint Time { get; set; }

@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCostume, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCostume)]
     public class ServerCostume : IWritable
     {
         public Costume Costume { get; set; }

@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerHousingVendorList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerHousingVendorList)]
     public class ServerHousingVendorList : IWritable
     {
         public class PlugItem : IWritable

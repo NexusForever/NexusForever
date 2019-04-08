@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerAccountEntitlements, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerAccountEntitlements)]
     public class ServerAccountEntitlements : IWritable
     {
         public class AccountEntitlementInfo : IWritable

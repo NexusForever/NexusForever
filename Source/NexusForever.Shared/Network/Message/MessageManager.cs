@@ -40,12 +40,12 @@ namespace NexusForever.Shared.Network.Message
                 if (attribute == null)
                     continue;
 
-                if ((attribute.Direction & MessageDirection.Client) != 0)
+                if (typeof(IReadable).IsAssignableFrom(type))
                 {
                     NewExpression @new = Expression.New(type.GetConstructor(Type.EmptyTypes));
                     messageFactories.Add(attribute.Opcode, Expression.Lambda<MessageFactoryDelegate>(@new).Compile());
                 }
-                if ((attribute.Direction & MessageDirection.Server) != 0)
+                if (typeof(IWritable).IsAssignableFrom(type))
                     messageOpcodes.Add(type, attribute.Opcode);
             }
 

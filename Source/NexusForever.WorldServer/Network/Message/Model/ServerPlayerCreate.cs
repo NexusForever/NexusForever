@@ -7,7 +7,7 @@ using FactionId = NexusForever.WorldServer.Game.Entity.Static.Faction;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPlayerCreate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPlayerCreate)]
     public class ServerPlayerCreate : IWritable
     {
         public class Faction : IWritable

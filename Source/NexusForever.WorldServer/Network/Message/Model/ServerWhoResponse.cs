@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerWhoResponse, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerWhoResponse)]
     public class ServerWhoResponse : IWritable
     {
         public class WhoPlayer : IWritable

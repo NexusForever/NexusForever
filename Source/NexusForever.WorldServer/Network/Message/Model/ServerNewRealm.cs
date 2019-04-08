@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerNewRealm, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerNewRealm)]
     public class ServerNewRealm : IWritable
     {
         public class Gateway : IWritable

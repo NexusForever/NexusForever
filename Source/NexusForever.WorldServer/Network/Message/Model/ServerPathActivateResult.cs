@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 namespace NexusForever.WorldServer.Network.Message.Model
 {
 
-    [Message(GameMessageOpcode.ServerPathActivateResult, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPathActivateResult)]
     public class ServerPathActivateResult : IWritable
     {
         public byte Result { get; set; }

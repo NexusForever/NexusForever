@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerVehiclePassengerAdd, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerVehiclePassengerAdd)]
     public class ServerVehiclePassengerAdd : IWritable
     {
         public uint Self { get; set; }

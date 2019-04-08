@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientSpellStopCast, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientSpellStopCast)]
     public class ClientSpellStopCast : IReadable
     {
         public uint CastingId { get; private set; } // first value of 0x7FD response, probably global increment

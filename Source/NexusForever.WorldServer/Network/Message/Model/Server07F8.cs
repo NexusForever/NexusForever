@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server07F8, MessageDirection.Server)]
+    [Message(GameMessageOpcode.Server07F8)]
     public class Server07F8 : IWritable
     {
         public class UnknownStructure0 : IWritable

@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerItemDelete, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerItemDelete)]
     public class ServerItemDelete : IWritable
     {
         public ulong Guid { get; set; }

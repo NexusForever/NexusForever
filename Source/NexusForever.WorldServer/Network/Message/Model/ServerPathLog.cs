@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPathLog, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPathLog)]
     public class ServerPathLog : IWritable
     {
 

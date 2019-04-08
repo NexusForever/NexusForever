@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPlayerPlayed, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPlayerPlayed)]
     public class ServerPlayerPlayed : IWritable
     {
         public DateTime CreateTime { get; set; }

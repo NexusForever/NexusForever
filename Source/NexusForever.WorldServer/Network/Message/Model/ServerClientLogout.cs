@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 namespace NexusForever.WorldServer.Network.Message.Model
 {
 
-    [Message(GameMessageOpcode.ServerClientLogout, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerClientLogout)]
     public class ServerClientLogout : IWritable
     {
         public bool Requested { get; set; }

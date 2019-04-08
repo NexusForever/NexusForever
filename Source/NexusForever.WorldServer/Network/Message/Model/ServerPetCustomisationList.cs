@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPetCustomizationList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPetCustomizationList)]
     public class ServerPetCustomisationList : IWritable
     {
         public NetworkBitArray UnlockedFlair { get; set; } = new NetworkBitArray(512);

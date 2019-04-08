@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPathCurrentEpisode, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPathCurrentEpisode)]
     public class ServerPathCurrentEpisode : IWritable
     {
         public ushort Unknown0 { get; set; }

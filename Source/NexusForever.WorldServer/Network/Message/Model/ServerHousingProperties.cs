@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerHousingProperties, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerHousingProperties)]
     public class ServerHousingProperties : IWritable
     {
         public class Residence : IWritable

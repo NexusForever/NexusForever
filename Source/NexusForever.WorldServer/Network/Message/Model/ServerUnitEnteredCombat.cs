@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Social;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerUnitEnteredCombat, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerUnitEnteredCombat)]
     class ServerUnitEnteredCombat : IWritable
     {
         public uint UnitId { get; set; }

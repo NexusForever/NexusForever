@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerChangeWorld, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerChangeWorld)]
     public class ServerChangeWorld : IWritable
     {
         public ushort WorldId { get; set; }

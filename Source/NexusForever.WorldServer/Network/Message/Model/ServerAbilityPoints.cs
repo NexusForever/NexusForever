@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerAbilityPoints, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerAbilityPoints)]
     public class ServerAbilityPoints : IWritable
     {
         public uint AbilityPoints { get; set; }

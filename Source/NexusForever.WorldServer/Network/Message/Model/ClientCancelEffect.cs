@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCancelEffect, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientCancelEffect)]
     public class ClientCancelEffect : IReadable
     {
         public uint ServerUniqueId { get; private set; }

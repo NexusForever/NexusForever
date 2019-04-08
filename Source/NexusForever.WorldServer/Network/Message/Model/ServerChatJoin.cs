@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Social;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerChatJoin, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerChatJoin)]
     class ServerChatJoin : IWritable
     {
         public ChatChannel Channel { get; set; }

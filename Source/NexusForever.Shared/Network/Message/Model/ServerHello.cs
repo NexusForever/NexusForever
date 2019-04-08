@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Shared.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerHello, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerHello)]
     public class ServerHello : IWritable
     {
         public uint AuthVersion { get; set; }

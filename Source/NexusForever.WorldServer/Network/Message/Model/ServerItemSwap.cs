@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerItemSwap, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerItemSwap)]
     public class ServerItemSwap : IWritable
     {
         public ItemDragDrop To { get; set; }

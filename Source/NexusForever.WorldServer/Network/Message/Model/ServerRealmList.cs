@@ -6,7 +6,7 @@ using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerRealmList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerRealmList)]
     public class ServerRealmList : IWritable
     {
         public class RealmInfo : IWritable

@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientHousingPlugUpdate, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientHousingPlugUpdate)]
     public class ClientHousingPlugUpdate : IReadable
     {
         public TargetPlayerIdentity TargetPlayerIdentity { get; } = new TargetPlayerIdentity();

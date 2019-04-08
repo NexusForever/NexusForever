@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerRealmBroadcast, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerRealmBroadcast)]
     public class ServerRealmBroadcast : IWritable
     {
         public BroadcastTier Tier { get; set; }

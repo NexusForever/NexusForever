@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientHousingResidencePrivacyLevel, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientHousingResidencePrivacyLevel)]
     public class ClientHousingSetPrivacyLevel : IReadable
     {
         public ResidencePrivacyLevel PrivacyLevel { get; private set; }

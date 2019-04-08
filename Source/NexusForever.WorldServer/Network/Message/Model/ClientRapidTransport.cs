@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientRapidTransport, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientRapidTransport)]
     public class ClientRapidTransport : IReadable
     {
         public ushort TaxiNode { get; private set; }

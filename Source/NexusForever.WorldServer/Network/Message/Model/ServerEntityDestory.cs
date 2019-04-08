@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEntityDestory, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerEntityDestory)]
     public class ServerEntityDestory : IWritable
     {
         public uint Guid { get; set; }

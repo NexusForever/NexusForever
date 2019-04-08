@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Shared.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientEncrypted, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientEncrypted)]
     public class ClientEncrypted : IReadable
     {
         public byte[] Data { get; private set; }

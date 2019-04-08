@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientHousingVisit, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientHousingVisit)]
     public class ClientHousingVisit : IReadable
     {
         public ulong Unknown0 { get; private set; }

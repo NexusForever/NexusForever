@@ -7,7 +7,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerSpellGo, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerSpellGo)]
     public class ServerSpellGo : IWritable
     {
         public class TargetInfo : IWritable // same used for 0x0818

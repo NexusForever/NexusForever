@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerItemVisualUpdate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerItemVisualUpdate)]
     public class ServerItemVisualUpdate : IWritable
     {
         public uint Guid { get; set; }

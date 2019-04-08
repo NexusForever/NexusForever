@@ -6,7 +6,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerActionSet, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerActionSet)]
     public class ServerActionSet : IWritable
     {
         public class Action : IWritable

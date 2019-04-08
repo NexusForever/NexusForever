@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Setting.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientSetInputKeySet, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientSetInputKeySet)]
     public class ClientSetInputKeySet : IReadable
     {
         public InputSets InputKeySetEnum { get; private set; }
