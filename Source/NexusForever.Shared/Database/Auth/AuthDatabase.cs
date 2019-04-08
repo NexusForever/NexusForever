@@ -49,6 +49,7 @@ namespace NexusForever.Shared.Database.Auth
                 return await context.Account
                     .Include(a => a.AccountCostumeUnlock)
                     .Include(a => a.AccountGenericUnlock)
+                    .Include(a => a.AccountKeybinding)
                     .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 

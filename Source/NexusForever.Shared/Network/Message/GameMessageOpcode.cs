@@ -115,7 +115,9 @@ namespace NexusForever.Shared.Network.Message
         ServerSpellList                 = 0x0551,
         ServerItemSwap                  = 0x0568,
         ServerItemMove                  = 0x0569,
-        Server0570                      = 0x0570, // keybind related
+        BiInputKeySet                   = 0x056F,
+        ClientRequestInputKeySet        = 0x0570,
+        ClientSetInputKeySet            = 0x0571,
         ClientHelloRealm                = 0x058F,
         ServerAuthAccepted              = 0x0591,
         ClientHelloAuth                 = 0x0592,
