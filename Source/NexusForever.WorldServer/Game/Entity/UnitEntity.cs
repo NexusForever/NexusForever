@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -93,9 +94,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <param name="castingId">Casting ID of the spell to cancel</param>
         public void CancelSpellCast(uint castingId)
         {
-            foreach (Spell.Spell spell in pendingSpells)
-                if(spell.CastingId == castingId)
-                    spell.CancelCast(CastResult.SpellCancelled);
+            Spell.Spell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
+            spell?.CancelCast(CastResult.SpellCancelled);
         }
     }
 }

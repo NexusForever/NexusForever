@@ -15,12 +15,12 @@ namespace NexusForever.WorldServer.Game.Spell
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
+        public uint CastingId { get; }
         public bool IsCasting => status == SpellStatus.Casting;
         public bool IsFinished => status == SpellStatus.Finished;
 
         private readonly UnitEntity caster;
         private readonly SpellParameters parameters;
-        public readonly uint CastingId;
         private SpellStatus status;
 
         private readonly List<SpellTargetInfo> targets = new List<SpellTargetInfo>();
