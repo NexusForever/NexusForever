@@ -15,12 +15,12 @@ namespace NexusForever.WorldServer.Game.Spell
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
+        public uint CastingId { get; }
         public bool IsCasting => status == SpellStatus.Casting;
         public bool IsFinished => status == SpellStatus.Finished;
 
         private readonly UnitEntity caster;
         private readonly SpellParameters parameters;
-        private readonly uint castingId;
         private SpellStatus status;
 
         private readonly List<SpellTargetInfo> targets = new List<SpellTargetInfo>();
@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             this.caster     = caster;
             this.parameters = parameters;
-            castingId       = GlobalSpellManager.NextCastingId;
+            CastingId       = GlobalSpellManager.NextCastingId;
             status          = SpellStatus.Initiating;
 
             if (parameters.RootSpellInfo == null)
@@ -159,7 +159,7 @@ namespace NexusForever.WorldServer.Game.Spell
             {
                 player.Session.EnqueueMessageEncrypted(new Server07F9
                 {
-                    ServerUniqueId = castingId,
+                    ServerUniqueId = CastingId,
                     CastResult     = result,
                     CancelCast     = true
                 });
@@ -249,7 +249,7 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             caster.EnqueueToVisible(new ServerSpellStart
             {
-                CastingId              = castingId,
+                CastingId              = CastingId,
                 CasterId               = caster.Guid,
                 PrimaryTargetId        = caster.Guid,
                 Spell4Id               = parameters.SpellInfo.Entry.Id,
@@ -267,7 +267,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             caster.EnqueueToVisible(new ServerSpellFinish
             {
-                ServerUniqueId = castingId,
+                ServerUniqueId = CastingId,
             }, true);
         }
 
@@ -275,7 +275,7 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             var serverSpellGo = new ServerSpellGo
             {
-                ServerUniqueId     = castingId,
+                ServerUniqueId     = CastingId,
                 PrimaryDestination = new Position(caster.Position),
                 Phase              = -1
             };
