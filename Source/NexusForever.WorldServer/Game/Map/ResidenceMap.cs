@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Map
 
             if (info.ResidenceId != 0u)
             {
-                residence = ResidenceManager.GetResidence(info.ResidenceId);
+                residence = ResidenceManager.GetCachedResidence(info.ResidenceId);
                 if (residence == null)
                     throw new InvalidOperationException();
             }
@@ -387,6 +387,11 @@ namespace NexusForever.WorldServer.Game.Map
         {
             if (!residence.CanModifyResidence(player.CharacterId))
                 throw new InvalidPacketValueException();
+
+            if (housingSetPrivacyLevel.PrivacyLevel == ResidencePrivacyLevel.Public)
+                ResidenceManager.RegisterResidenceVists(residence.Id, residence.OwnerName, residence.Name);
+            else
+                ResidenceManager.DeregisterResidenceVists(residence.Id);
 
             residence.PrivacyLevel = housingSetPrivacyLevel.PrivacyLevel;
             SendHousingPrivacy();

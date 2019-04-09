@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
@@ -12,6 +14,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class HousingHandler
     {
+        [MessageHandler(GameMessageOpcode.ClientHousingResidencePrivacyLevel)]
         public static void HandleHousingSetPrivacyLevel(WorldSession session, ClientHousingSetPrivacyLevel housingSetPrivacyLevel)
         {
             if (!(session.Player.Map is ResidenceMap residenceMap))
@@ -83,13 +86,57 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             residenceMap.Rename(session.Player, housingRenameProperty);
         }
 
+        [MessageHandler(GameMessageOpcode.ClientHousingRandomCommunityList)]
+        public static void HandleHousingRandomCommunityList(WorldSession session, ClientHousingRandomCommunityList housingRandomCommunityList)
+        {
+            session.EnqueueMessageEncrypted(new ServerHousingRandomCommunityList
+            {
+                Communities =
+                {
+                    new ServerHousingRandomCommunityList.Community
+                    {
+                        RealmId        = WorldServer.RealmId,
+                        NeighborhoodId = 123,
+                        Name           = "Blame Maxtor for working on WoW instead",
+                        Owner          = "Not Yet Implemented!"
+                    }
+                }
+            });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientHousingRandomResidenceList)]
+        public static void HandleHousingRandomResidenceList(WorldSession session, ClientHousingRandomResidenceList housingRandomResidenceList)
+        {
+            var serverHousingRandomResidenceList = new ServerHousingRandomResidenceList();
+            foreach (PublicResidence residence in ResidenceManager.GetRandomVisitableResidences())
+            {
+                serverHousingRandomResidenceList.Residences.Add(new ServerHousingRandomResidenceList.Residence
+                {
+                    RealmId     = WorldServer.RealmId,
+                    ResidenceId = residence.ResidenceId,
+                    Owner       = residence.Owner,
+                    Name        = residence.Name
+                });
+            }
+
+            session.EnqueueMessageEncrypted(serverHousingRandomResidenceList);
+        }
+
         [MessageHandler(GameMessageOpcode.ClientHousingVisit)]
         public static void HandleHousingVisit(WorldSession session, ClientHousingVisit housingVisit)
         {
             if (!(session.Player.Map is ResidenceMap))
                 throw new InvalidPacketValueException();
 
-            session.EnqueueEvent(new TaskGenericEvent<Residence>(ResidenceManager.GetResidence(housingVisit.PlayerName),
+            Task<Residence> residenceTask;
+            if (housingVisit.TargetResidenceName != "")
+                residenceTask = ResidenceManager.GetResidence(housingVisit.TargetResidenceName);
+            else if (housingVisit.TargetResidence.ResidenceId != 0ul)
+                residenceTask = ResidenceManager.GetResidence(housingVisit.TargetResidence.ResidenceId);
+            else
+                throw new NotImplementedException();
+
+            session.EnqueueEvent(new TaskGenericEvent<Residence>(residenceTask,
                 residence =>
             {
                 if (residence == null)

@@ -10,6 +10,7 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private WorldEntry entry;
         private readonly Dictionary</*instanceId*/ uint, T> instances = new Dictionary<uint, T>();
+        private readonly Queue<T> pendingInstances = new Queue<T>();
         private readonly QueuedCounter instanceCounter = new QueuedCounter();
         
         public void Initialise(MapInfo info, Player player)
@@ -25,6 +26,9 @@ namespace NexusForever.WorldServer.Game.Map
 
         public void Update(double lastTick)
         {
+            while (pendingInstances.TryDequeue(out T instance))
+                instances.Add(instanceCounter.Dequeue(), instance);
+
             foreach (T map in instances.Values)
                 map.Update(lastTick);
         }
@@ -45,7 +49,7 @@ namespace NexusForever.WorldServer.Game.Map
 
             T newInstance = new T();
             newInstance.Initialise(info, player);
-            instances.Add(instanceCounter.Dequeue(), newInstance);
+            pendingInstances.Enqueue(newInstance);
             return newInstance;
         }
 
