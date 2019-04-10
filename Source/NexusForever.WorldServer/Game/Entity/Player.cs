@@ -471,9 +471,18 @@ namespace NexusForever.WorldServer.Game.Entity
 
             logoutManager = new LogoutManager(timeToLogout, reason, requested);
 
-            Session.EnqueueMessageEncrypted(new ServerCharacterLogoutStart
+            Session.EnqueueMessageEncrypted(new ServerLogoutUpdate
             {
-                TimeTillLogout = (uint)timeToLogout * 1000
+                TimeTillLogout     = (uint)timeToLogout * 1000,
+                Unknown0           = false,
+                SignatureBonusData = new ServerLogoutUpdate.SignatureBonuses
+                {
+                    // see FillSignatureBonuses in ExitWindow.lua for more information
+                    Xp                = 0,
+                    ElderPoints       = 0,
+                    Currencies        = new ulong[15],
+                    AccountCurrencies = new ulong[19]
+                }
             });
         }
 
@@ -497,7 +506,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (logoutManager == null)
                 throw new InvalidPacketValueException();
 
-            Session.EnqueueMessageEncrypted(new ServerClientLogout
+            Session.EnqueueMessageEncrypted(new ServerLogout
             {
                 Requested = logoutManager.Requested,
                 Reason    = logoutManager.Reason

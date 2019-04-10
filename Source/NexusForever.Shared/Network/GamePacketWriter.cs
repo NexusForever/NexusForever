@@ -120,6 +120,15 @@ namespace NexusForever.Shared.Network
                 WriteBits(value, 8);
         }
 
+        public void Write(ulong[] data, uint elements = 0u)
+        {
+            if (elements != 0 && elements != data.Length)
+                throw new ArgumentException();
+
+            foreach (ulong value in data)
+                Write(value);
+        }
+
         public void WriteStringWide(string value)
         {
             byte[] data = Encoding.Unicode.GetBytes(value ?? "");

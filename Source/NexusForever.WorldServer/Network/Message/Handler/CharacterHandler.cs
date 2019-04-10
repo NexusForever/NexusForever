@@ -415,17 +415,17 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }
         }
 
-        [MessageHandler(GameMessageOpcode.ClientCharacterLogout)]
-        public static void HandleCharacterLogout(WorldSession session, ClientCharacterLogout characterLogout)
+        [MessageHandler(GameMessageOpcode.ClientLogoutRequest)]
+        public static void HandleRequestLogout(WorldSession session, ClientLogoutRequest logoutRequest)
         {
-            if (characterLogout.Initiated)
+            if (logoutRequest.Initiated)
                 session.Player.LogoutStart();
             else
                 session.Player.LogoutCancel();
         }
 
-        [MessageHandler(GameMessageOpcode.ClientLogout)]
-        public static void HandleLogout(WorldSession session, ClientLogout logout)
+        [MessageHandler(GameMessageOpcode.ClientLogoutConfirm)]
+        public static void HandleLogoutConfirm(WorldSession session, ClientLogoutConfirm logoutConfirm)
         {
             session.Player.LogoutFinish();
         }

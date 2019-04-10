@@ -1,7 +1,7 @@
 ﻿using NexusForever.Shared;
 using NexusForever.WorldServer.Network.Message.Model;
 
-namespace NexusForever.WorldServer.Game
+namespace NexusForever.WorldServer.Game.Entity
 {
     public class LogoutManager : IUpdate
     {
