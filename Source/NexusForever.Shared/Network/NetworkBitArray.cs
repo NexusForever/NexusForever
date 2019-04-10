@@ -24,7 +24,7 @@ namespace NexusForever.Shared.Network
                 throw new ArgumentOutOfRangeException();
 
             uint offset = !reverse ? 7 - (position % 8) : position % 8;
-            buffer[index] |= (byte)(1 << (int)offset);
+            buffer[index] |= (byte)(value ? 1u : 0u << (int)offset);
         }
 
         /// <summary>
