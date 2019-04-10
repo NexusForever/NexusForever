@@ -80,6 +80,7 @@ namespace NexusForever.Shared.Network.Message
         ServerExperienceGained          = 0x01AC,
         ServerUnlockVanityPet           = 0x01AE,
         ClientVehicleDisembark          = 0x01AF,
+        ServerZoneMap                   = 0x01B4,
         ServerChatJoin                  = 0x01BC,
         ServerChatAccept                = 0x01C2,
         ClientChat                      = 0x01C3,

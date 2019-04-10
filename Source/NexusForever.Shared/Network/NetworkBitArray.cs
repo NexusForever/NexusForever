@@ -17,13 +17,13 @@ namespace NexusForever.Shared.Network
         /// <summary>
         /// Set bit at supplied position to value.
         /// </summary>
-        public void SetBit(uint position, bool value)
+        public void SetBit(uint position, bool value, bool reverse = false)
         {
             uint index = position / 8;
             if (index > buffer.Length)
                 throw new ArgumentOutOfRangeException();
 
-            uint offset = 7 - (position % 8);
+            uint offset = !reverse ? 7 - (position % 8) : position % 8;
             buffer[index] |= (byte)(1 << (int)offset);
         }
 
