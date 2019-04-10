@@ -9,6 +9,7 @@ using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.IO.Map;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.Character;
@@ -101,6 +102,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.EnqueueEvent(new TaskGenericEvent<List<Character>>(CharacterDatabase.GetCharacters(session.Account.Id),
                 characters =>
             {
+                byte MaxCharacterLevelAchieved = 1;
+                var mapFiles = new Dictionary<ushort, MapFile>();
+
                 session.Characters.Clear();
                 session.Characters.AddRange(characters);
 
@@ -132,15 +136,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     }
                 });
 
-                session.EnqueueMessageEncrypted(new ServerMaxCharacterLevelAchieved
-                {
-                    Level = 50
-                });
-
                 var serverCharacterList = new ServerCharacterList
                 {
                     RealmId = WorldServer.RealmId
                 };
+
                 foreach (Character character in characters)
                 {
                     var listCharacter = new ServerCharacterList.Character
@@ -153,10 +153,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Faction     = character.FactionId,
                         Level       = character.Level,
                         WorldId     = character.WorldId,
-                        WorldZoneId = 5967,
                         RealmId     = WorldServer.RealmId,
                         Path        = (byte)character.ActivePath
                     };
+
+                    if (character.Level > MaxCharacterLevelAchieved)
+                        MaxCharacterLevelAchieved = (byte)character.Level;
+
+                    if (!mapFiles.TryGetValue(character.WorldId, out MapFile mapFile))
+                    {
+                        WorldEntry entry = GameTableManager.World.GetEntry(character.WorldId);
+                        mapFile = BaseMap.LoadMapFile(entry.AssetPath);
+                        mapFiles.Add(character.WorldId, mapFile);
+                    }
+
+                    listCharacter.WorldZoneId = (ushort)mapFile.GetWorldAreaId(new Vector3(character.LocationX, character.LocationY, character.LocationZ));
 
                     // create a temporary Inventory and CostumeManager to show equipped gear
                     var inventory      = new Inventory(null, character);
@@ -193,6 +204,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                     serverCharacterList.Characters.Add(listCharacter);
                 }
+
+                session.EnqueueMessageEncrypted(new ServerMaxCharacterLevelAchieved
+                {
+                    Level = MaxCharacterLevelAchieved
+                });
 
                 session.EnqueueMessageEncrypted(serverCharacterList);
             }));
