@@ -101,6 +101,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.EnqueueEvent(new TaskGenericEvent<List<Character>>(CharacterDatabase.GetCharacters(session.Account.Id),
                 characters =>
             {
+                byte MaxCharacterLevelAchieved = 1;
+
                 session.Characters.Clear();
                 session.Characters.AddRange(characters);
 
@@ -132,15 +134,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     }
                 });
 
-                session.EnqueueMessageEncrypted(new ServerMaxCharacterLevelAchieved
-                {
-                    Level = 50
-                });
-
                 var serverCharacterList = new ServerCharacterList
                 {
                     RealmId = WorldServer.RealmId
                 };
+
                 foreach (Character character in characters)
                 {
                     var listCharacter = new ServerCharacterList.Character
@@ -153,10 +151,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Faction     = character.FactionId,
                         Level       = character.Level,
                         WorldId     = character.WorldId,
-                        WorldZoneId = 5967,
+                        WorldZoneId = character.WorldZoneId,
                         RealmId     = WorldServer.RealmId,
                         Path        = (byte)character.ActivePath
                     };
+
+                    MaxCharacterLevelAchieved = (byte)Math.Max(MaxCharacterLevelAchieved, character.Level);
 
                     // create a temporary Inventory and CostumeManager to show equipped gear
                     var inventory      = new Inventory(null, character);
@@ -193,6 +193,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                     serverCharacterList.Characters.Add(listCharacter);
                 }
+
+                session.EnqueueMessageEncrypted(new ServerMaxCharacterLevelAchieved
+                {
+                    Level = MaxCharacterLevelAchieved
+                });
 
                 session.EnqueueMessageEncrypted(serverCharacterList);
             }));

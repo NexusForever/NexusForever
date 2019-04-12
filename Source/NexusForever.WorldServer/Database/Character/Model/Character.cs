@@ -36,6 +36,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public float LocationY { get; set; }
         public float LocationZ { get; set; }
         public ushort WorldId { get; set; }
+        public ushort WorldZoneId { get; set; }
         public ushort Title { get; set; }
         public uint ActivePath { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
