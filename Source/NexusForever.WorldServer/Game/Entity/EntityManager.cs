@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
@@ -10,7 +9,6 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.IO.Map;
 using NexusForever.WorldServer.Database.World;
-using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NLog;
@@ -25,14 +23,11 @@ namespace NexusForever.WorldServer.Game.Entity
         private delegate WorldEntity EntityFactoryDelegate();
         private static ImmutableDictionary<EntityType, EntityFactoryDelegate> entityFactories;
 
-        public static ImmutableDictionary<uint, VendorInfo> VendorInfo { get; private set; }
-
         private static ImmutableDictionary<Stat, StatAttribute> statAttributes;
 
         public static void Initialise()
         {
             InitialiseEntityFactories();
-            InitialiseEntityVendorInfo();
             InitialiseEntityStats();
 
             CalculateEntityAreaData();
@@ -55,39 +50,6 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             entityFactories = builder.ToImmutable();
-        }
-
-        private static void InitialiseEntityVendorInfo()
-        {
-            ImmutableDictionary<uint, EntityVendor> vendors = WorldDatabase.GetEntityVendors()
-                .GroupBy(v => v.Id)
-                .ToImmutableDictionary(g => g.Key, g => g.First());
-
-            ImmutableDictionary<uint, ImmutableList<EntityVendorCategory>> vendorCategories = WorldDatabase.GetEntityVendorCategories()
-                .GroupBy(c => c.Id)
-                .ToImmutableDictionary(g => g.Key, g => g.ToImmutableList());
-
-            ImmutableDictionary<uint, ImmutableList<EntityVendorItem>> vendorItems = WorldDatabase.GetEntityVendorItems()
-                .GroupBy(i => i.Id)
-                .ToImmutableDictionary(g => g.Key, g => g.ToImmutableList());
-
-            // category with no items
-            foreach (uint source in vendorCategories.Keys.Except(vendorItems.Keys))
-            {
-                
-            }
-
-            // items with no category
-            foreach (uint source in vendorItems.Keys.Except(vendorCategories.Keys))
-            {
-
-            }
-
-            VendorInfo = vendorCategories.Keys
-                .Select(i => new VendorInfo(vendors[i], vendorCategories[i], vendorItems[i]))
-                .ToImmutableDictionary(v => v.Id, v => v);
-
-            log.Info($"Loaded vendor information for {VendorInfo.Count} {(VendorInfo.Count > 1 ? "entities" : "entity")}.");
         }
 
         private static void InitialiseEntityStats()

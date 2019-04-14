@@ -3,7 +3,6 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Network.Message.Model;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -24,8 +23,11 @@ namespace NexusForever.WorldServer.Game.Entity
             base.Initialise(model);
             CreatureId = model.Creature;
 
-            if (EntityManager.VendorInfo.TryGetValue(model.Id, out VendorInfo vendorInfo))
-                VendorInfo = vendorInfo;
+            if (model.EntityVendor != null)
+            {
+                CreateFlags |= EntityCreateFlag.Vendor;
+                VendorInfo = new VendorInfo(model);
+            }
 
             CalculateProperties();
         }
@@ -37,13 +39,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 CreatureId = CreatureId,
                 QuestChecklistIdx = 0
             };
-        }
-
-        public override ServerEntityCreate BuildCreatePacket()
-        {
-            ServerEntityCreate entityCreate = base.BuildCreatePacket();
-            entityCreate.CreateFlags = (byte)(VendorInfo != null ? 4 : 0); // show vendor icon above entity
-            return entityCreate;
         }
 
         private void CalculateProperties()
