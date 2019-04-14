@@ -148,8 +148,6 @@ namespace NexusForever.WorldServer.Game.Entity
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new KeybindingManager(this, session.Account, model);
 
-            SetStat(Stat.Sheathed, 1u);
-
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
             Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
@@ -174,7 +172,7 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (CharacterStat statModel in model.CharacterStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
-            SetStat(Stat.Dash, 100f);
+            SetStat(Stat.Sheathed, 1u);
         }
 
         public override void Update(double lastTick)

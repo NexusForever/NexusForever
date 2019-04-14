@@ -31,6 +31,12 @@ namespace NexusForever.WorldServer.Game.Entity
             set => SetStat(Stat.Level, value);
         }
 
+        public bool Sheathed
+        {
+            get => Convert.ToBoolean(GetStatInteger(Stat.Sheathed) ?? 0u);
+            set => SetStat(Stat.Sheathed, Convert.ToUInt32(value));
+        }
+
         /// <summary>
         /// Guid of the <see cref="WorldEntity"/> currently targeted.
         /// </summary>
