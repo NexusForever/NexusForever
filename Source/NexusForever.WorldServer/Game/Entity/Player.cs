@@ -172,7 +172,7 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (CharacterStat statModel in model.CharacterStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
-            SetStat(Stat.Dash, 100f);
+            SetStat(Stat.Sheathed, 1u);
         }
 
         public override void Update(double lastTick)

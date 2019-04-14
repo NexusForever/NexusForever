@@ -55,5 +55,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }));
             
         }
+
+        [MessageHandler(GameMessageOpcode.ClientToggleWeapons)]
+        public static void HandleWeaponToggle(WorldSession session, ClientToggleWeapons toggleWeapons)
+        {
+            session.Player.Sheathed = toggleWeapons.ToggleState;
+        }
     }
 }
