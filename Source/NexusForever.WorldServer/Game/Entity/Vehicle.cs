@@ -39,9 +39,9 @@ namespace NexusForever.WorldServer.Game.Entity
             // temp
             SetProperty(Property.BaseHealth, 800.0f, 800.0f);
 
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, 3));
-            Stats.Add((Stat)15, new StatValue((Stat)15, 0));
+            SetStat(Stat.Health, 800u);
+            SetStat(Stat.Level, 3u);
+            SetStat(Stat.Sheathed, 800u);
         }
 
         protected override IEntityModel BuildEntityModel()

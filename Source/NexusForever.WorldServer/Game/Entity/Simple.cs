@@ -7,7 +7,7 @@ using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 namespace NexusForever.WorldServer.Game.Entity
 {
     [DatabaseEntity(EntityType.Simple)]
-    public class Simple : WorldEntity, IDatabaseEntity
+    public class Simple : WorldEntity
     {
         public uint CreatureId { get; private set; }
 
@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
         }
 
-        public void Initialise(EntityModel model)
+        public override void Initialise(EntityModel model)
         {
             CreatureId = model.Creature;
             Rotation   = new Vector3(model.Rx, model.Ry, model.Rz);

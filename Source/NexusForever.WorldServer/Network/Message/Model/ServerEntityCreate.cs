@@ -124,7 +124,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(CreateFlags);
 
             writer.Write((byte)Stats.Count, 5);
-            Stats.ForEach(o => o.Write(writer));
+            Stats.ForEach(o => o.WriteInitial(writer));
 
             writer.Write(Time);
 

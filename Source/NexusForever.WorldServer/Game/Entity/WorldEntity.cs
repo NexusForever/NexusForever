@@ -1,12 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -15,13 +18,18 @@ namespace NexusForever.WorldServer.Game.Entity
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Dictionary<Stat, StatValue> Stats { get; } = new Dictionary<Stat, StatValue>();
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
 
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
+
+        public uint Level
+        {
+            get => GetStatInteger(Stat.Level) ?? 1u;
+            set => SetStat(Stat.Level, value);
+        }
 
         /// <summary>
         /// Guid of the <see cref="WorldEntity"/> currently targeted.
@@ -33,6 +41,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint ControllerGuid { get; set; }
 
+        protected readonly Dictionary<Stat, StatValue> stats = new Dictionary<Stat, StatValue>();
+
         private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
 
         /// <summary>
@@ -41,6 +51,21 @@ namespace NexusForever.WorldServer.Game.Entity
         protected WorldEntity(EntityType type)
         {
             Type = type;
+        }
+
+        /// <summary>
+        /// Initialise <see cref="WorldEntity"/> from an existing database model.
+        /// </summary>
+        public virtual void Initialise(EntityModel model)
+        {
+            Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
+            DisplayInfo = model.DisplayInfo;
+            OutfitInfo  = model.OutfitInfo;
+            Faction1    = (Faction)model.Faction1;
+            Faction2    = (Faction)model.Faction2;
+
+            foreach (EntityStat statModel in model.EntityStat)
+                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
         }
 
         protected abstract IEntityModel BuildEntityModel();
@@ -61,7 +86,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Type        = Type,
                 EntityModel = BuildEntityModel(),
                 CreateFlags   = (byte)CreateFlags,
-                Stats       = Stats.Values.ToList(),
+                Stats       = stats.Values.ToList(),
 
                 Commands =
                 {
@@ -104,6 +129,90 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Return the <see cref="float"/> value of the supplied <see cref="Stat"/>.
+        /// </summary>
+        protected float? GetStatFloat(Stat stat)
+        {
+            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            if (attribute?.Type != StatType.Float)
+                throw new ArgumentException();
+
+            if (!stats.TryGetValue(stat, out StatValue statValue))
+                return null;
+
+            return statValue.Value;
+        }
+
+        /// <summary>
+        /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/>.
+        /// </summary>
+        protected uint? GetStatInteger(Stat stat)
+        {
+            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            if (attribute?.Type != StatType.Integer)
+                throw new ArgumentException();
+
+            if (!stats.TryGetValue(stat, out StatValue statValue))
+                return null;
+
+            return (uint)statValue.Value;
+        }
+
+        /// <summary>
+        /// Set <see cref="Stat"/> to the supplied <see cref="float"/> value.
+        /// </summary>
+        protected void SetStat(Stat stat, float value)
+        {
+            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            if (attribute?.Type != StatType.Float)
+                throw new ArgumentException();
+
+            if (stats.TryGetValue(stat, out StatValue statValue))
+                statValue.Value = value;
+            else
+            {
+                statValue = new StatValue(stat, value);
+                stats.Add(stat, statValue);
+            }
+
+            if (attribute.SendUpdate)
+            {
+                EnqueueToVisible(new ServerEntityStatUpdateFloat
+                {
+                    UnitId = Guid,
+                    Stat   = statValue
+                }, true);
+            }
+        }
+
+        /// <summary>
+        /// Set <see cref="Stat"/> to the supplied <see cref="uint"/> value.
+        /// </summary>
+        protected void SetStat(Stat stat, uint value)
+        {
+            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            if (attribute?.Type != StatType.Integer)
+                throw new ArgumentException();
+
+            if (stats.TryGetValue(stat, out StatValue statValue))
+                statValue.Value = value;
+            else
+            {
+                statValue = new StatValue(stat, value);
+                stats.Add(stat, statValue);
+            }
+
+            if (attribute.SendUpdate)
+            {
+                EnqueueToVisible(new ServerEntityStatUpdateInteger
+                {
+                    UnitId = Guid,
+                    Stat   = statValue
+                }, true);
+            }
+        }
+
+        /// <summary>
         /// Update <see cref="ItemVisual"/> for multiple supplied <see cref="ItemSlot"/>.
         /// </summary>
         public void SetAppearance(IEnumerable<ItemVisual> visuals)
@@ -140,8 +249,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             foreach (WorldEntity entity in visibleEntities.Values)
             {
-                var player = entity as Player;
-                if (player == null)
+                if (!(entity is Player player))
                     continue;
 
                 if (!includeSelf && (Guid == entity.Guid || ControllerGuid == entity.Guid))

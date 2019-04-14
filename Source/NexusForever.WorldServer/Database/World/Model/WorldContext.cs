@@ -22,6 +22,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         public virtual DbSet<EntityVendor> EntityVendor { get; set; }
         public virtual DbSet<EntityVendorCategory> EntityVendorCategory { get; set; }
         public virtual DbSet<EntityVendorItem> EntityVendorItem { get; set; }
+        public virtual DbSet<EntityStat> EntityStat { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -168,6 +169,31 @@ namespace NexusForever.WorldServer.Database.World.Model
                     .WithMany(p => p.EntityVendorItem)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__entity_vendor_item_id__entity_id");
+            });
+
+            modelBuilder.Entity<EntityStat>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Stat });
+
+                entity.ToTable("entity_stats");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Stat)
+                    .HasColumnName("stat")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.EntityStat)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__entity_stats_stat_id_entity_id");
             });
         }
     }

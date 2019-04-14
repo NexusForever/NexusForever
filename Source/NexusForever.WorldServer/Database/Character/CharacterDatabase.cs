@@ -75,6 +75,7 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterCurrency)
                         .Include(c => c.CharacterPath)
                         .Include(c => c.CharacterTitle)
+                        .Include(c => c.CharacterStat)
                         .Include(c => c.CharacterCostume)
                             .ThenInclude(c => c.CharacterCostumeItem)
                         .Include(c => c.CharacterPetCustomisation)

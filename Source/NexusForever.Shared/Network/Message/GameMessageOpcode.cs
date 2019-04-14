@@ -204,9 +204,11 @@ namespace NexusForever.Shared.Network.Message
         ServerPlayerCurrencyChanged     = 0x0919,
         ServerCooldownList              = 0x091B,
         ServerRewardPropertySet         = 0x092C,
+        ServerUpdateHealth              = 0x092F,
         ServerItemVisualUpdate          = 0x0933,
         ServerEntityFaction             = 0x0934,
-        ServerEntityStatUpdate          = 0x0935, // 0x0938??
+        ServerEntityStatUpdateFloat     = 0x0935,
+        ServerEntityStatUpdateInteger   = 0x0938,
         Server093A                      = 0x093A,
         ServerEmote                     = 0x093C,
         ClientItemUse                   = 0x0943,
