@@ -1,17 +1,15 @@
-﻿using System.Numerics;
-using NexusForever.Shared.GameTable;
+﻿using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
-using NexusForever.WorldServer.Database.World.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     [DatabaseEntity(EntityType.NonPlayer)]
-    public class NonPlayer : UnitEntity, IDatabaseEntity
+    public class NonPlayer : UnitEntity
     {
         public uint CreatureId { get; private set; }
         public VendorInfo VendorInfo { get; private set; }
@@ -21,23 +19,15 @@ namespace NexusForever.WorldServer.Game.Entity
         {
         }
 
-        public void Initialise(EntityModel model)
+        public override void Initialise(EntityModel model)
         {
-            CreatureId  = model.Creature;
-            DisplayInfo = model.DisplayInfo;
-            OutfitInfo  = model.OutfitInfo;
-            Faction1    = (Faction)model.Faction1;
-            Faction2    = (Faction)model.Faction2;
-            Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
+            base.Initialise(model);
+            CreatureId = model.Creature;
 
             if (EntityManager.VendorInfo.TryGetValue(model.Id, out VendorInfo vendorInfo))
                 VendorInfo = vendorInfo;
 
             CalculateProperties();
-
-            // FIXME: move to WorldEntity?
-            foreach(EntityStat stat in model.EntityStat)
-                    Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, stat.Value));
         }
 
         protected override IEntityModel BuildEntityModel()

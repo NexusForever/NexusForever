@@ -22,12 +22,12 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private delegate IDatabaseEntity DatabaseEntityFactoryDelegate();
-        private static ImmutableDictionary<EntityType, DatabaseEntityFactoryDelegate> databaseEntityFactories;
+        private delegate WorldEntity EntityFactoryDelegate();
+        private static ImmutableDictionary<EntityType, EntityFactoryDelegate> entityFactories;
 
         public static ImmutableDictionary<uint, VendorInfo> VendorInfo { get; private set; }
-        public static ImmutableDictionary<uint, EntityStat> EntityStat { get; private set; }
 
+        private static ImmutableDictionary<Stat, StatAttribute> statAttributes;
 
         public static void Initialise()
         {
@@ -40,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private static void InitialiseEntityFactories()
         {
-            var builder = ImmutableDictionary.CreateBuilder<EntityType, DatabaseEntityFactoryDelegate>();
+            var builder = ImmutableDictionary.CreateBuilder<EntityType, EntityFactoryDelegate>();
 
             foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
@@ -51,10 +51,10 @@ namespace NexusForever.WorldServer.Game.Entity
                 ConstructorInfo constructor = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
 
                 NewExpression @new = Expression.New(constructor);
-                builder.Add(attribute.EntityType, Expression.Lambda<DatabaseEntityFactoryDelegate>(@new).Compile());
+                builder.Add(attribute.EntityType, Expression.Lambda<EntityFactoryDelegate>(@new).Compile());
             }
 
-            databaseEntityFactories = builder.ToImmutable();
+            entityFactories = builder.ToImmutable();
         }
 
         private static void InitialiseEntityVendorInfo()
@@ -92,9 +92,19 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private static void InitialiseEntityStats()
         {
-            ImmutableDictionary<uint, EntityStat> stats = WorldDatabase.GetEntityStats()
-                .GroupBy(v => v.Id)
-                .ToImmutableDictionary(g => g.Key, g => g.First());
+            var builder = ImmutableDictionary.CreateBuilder<Stat, StatAttribute>();
+
+            foreach (FieldInfo field in typeof(Stat).GetFields())
+            {
+                StatAttribute attribute = field.GetCustomAttribute<StatAttribute>();
+                if (attribute == null)
+                    continue;
+
+                Stat stat = (Stat)field.GetValue(null);
+                builder.Add(stat, attribute);
+            }
+
+            statAttributes = builder.ToImmutable();
         }
 
         [Conditional("DEBUG")]
@@ -128,11 +138,19 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Return a new <see cref="IDatabaseEntity"/> for supplied <see cref="EntityType"/>.
+        /// Return a new <see cref="WorldEntity"/> of supplied <see cref="EntityType"/>.
         /// </summary>
-        public static IDatabaseEntity NewEntity(EntityType type)
+        public static WorldEntity NewEntity(EntityType type)
         {
-            return databaseEntityFactories.TryGetValue(type, out DatabaseEntityFactoryDelegate factory) ? factory.Invoke() : null;
+            return entityFactories.TryGetValue(type, out EntityFactoryDelegate factory) ? factory.Invoke() : null;
+        }
+
+        /// <summary>
+        /// Return <see cref="StatAttribute"/> for supplied <see cref="Stat"/>.
+        /// </summary>
+        public static StatAttribute GetStatAttribute(Stat stat)
+        {
+            return statAttributes.TryGetValue(stat, out StatAttribute value) ? value : null;
         }
     }
 }

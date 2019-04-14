@@ -1,141 +1,142 @@
-﻿using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Shared.Network;
+using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class StatValue : IWritable
+    public class StatValue
     {
-        public enum StatType
+        public Stat Stat { get; }
+        public StatType Type { get; }
+
+        public float Value
         {
-            Int,
-            Float,
-            Unknown
+            get => value;
+            set
+            {
+                this.value = value;
+                saveMask |= StatSaveMask.Value;
+            }
         }
 
-        public Stat Stat { get; private set; }
-        public StatType Type { get; }
-        public float Value { get; set; }
-        public StatSaveMask SaveMask { get; set; }
+        private float value;
 
+        public uint Data { get; set; }
+
+        private StatSaveMask saveMask;
+
+        /// <summary>
+        /// Create a new <see cref="StatValue"/> from an existing database model.
+        /// </summary>
+        public StatValue(CharacterStat model)
+        {
+            Stat  = (Stat)model.Stat;
+            Type  = EntityManager.GetStatAttribute(Stat).Type;
+            Value = model.Value;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="StatValue"/> from an existing database model.
+        /// </summary>
+        public StatValue(EntityStat model)
+        {
+            Stat  = (Stat)model.Stat;
+            Type  = EntityManager.GetStatAttribute(Stat).Type;
+            Value = model.Value;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="StatValue"/> from supplied <see cref="Stat"/> and value.
+        /// </summary>
         public StatValue(Stat stat, uint value)
         {
-            Stat  = stat;
-            Type = GetStatType(stat);
-            Value = value;
+            Stat     = stat;
+            Type     = StatType.Integer;
+            Value    = value;
+            saveMask = StatSaveMask.Create;
         }
 
+        /// <summary>
+        /// Create a new <see cref="StatValue"/> from supplied <see cref="Stat"/> and value.
+        /// </summary>
         public StatValue(Stat stat, float value)
         {
-            Stat  = stat;
-            Type = GetStatType(stat);
-            Value = value;
+            Stat     = stat;
+            Type     = StatType.Float;
+            Value    = value;
+            saveMask = StatSaveMask.Create;
         }
 
-        public static StatType GetStatType(Stat stat)
+        public void SaveCharacter(ulong characterId, CharacterContext context)
         {
-            switch(stat)
+            if (saveMask == StatSaveMask.None)
+                return;
+
+            if ((saveMask & StatSaveMask.Create) != 0)
             {
-                case Stat.Health:
-                case Stat.Level:
-                case Stat.MentorLevel:
-                case Stat.StandState:
-                case Stat.Sheathed:
-                case (Stat)17:
-                case Stat.Shield:
-                case (Stat)21:
-                case (Stat)22:
-                case (Stat)26:
-                    return StatType.Int;
-
-                case Stat.Focus:
-                case Stat.Resource0:
-                case Stat.Resource1:
-                case Stat.Resource2:
-                case Stat.Resource3:
-                case Stat.Resource4:
-                case Stat.Resource5:
-                case Stat.Resource6:
-                case Stat.Dash:
-                case (Stat)19:
-                case (Stat)23:
-                case (Stat)24:
-                case (Stat)25:
-                    return StatType.Float;
-
-                default:
-                    return StatType.Unknown;
+                context.Add(new CharacterStat
+                {
+                    Id    = characterId,
+                    Stat  = (byte)Stat,
+                    Value = Value
+                });
             }
-        }
-
-        public static bool SendUpdate(Stat stat)
-        {
-            switch(stat)
+            else
             {
-                case Stat.Focus:
-                case Stat.Resource0:
-                case Stat.Resource1:
-                case Stat.Resource2:
-                case Stat.Resource3:
-                case Stat.Resource4:
-                case Stat.Resource5:
-                case Stat.Resource6:
-                case Stat.Dash:
-                case Stat.Level:
-                case Stat.MentorLevel:
-                case Stat.Sheathed:
-                case (Stat)17:
-                case (Stat)19:
-                case Stat.Shield:
-                case (Stat)21:
-                case (Stat)22:
-                case (Stat)23:
-                case (Stat)24:
-                case (Stat)25:
-                case (Stat)26:
-                    return true;
+                var statModel = new CharacterStat
+                {
+                    Id   = characterId,
+                    Stat = (byte)Stat
+                };
 
-                case Stat.Health:
-                default:
-                    return false;
+                EntityEntry<CharacterStat> statEntity = context.Attach(statModel);
+                if ((saveMask & StatSaveMask.Value) != 0)
+                {
+                    statModel.Value = Value;
+                    statEntity.Property(p => p.Value).IsModified = true;
+                }
             }
+
+            saveMask = StatSaveMask.None;
         }
 
-        public void Write(GamePacketWriter writer)
+        /*public void SaveEntity(CharacterContext context)
         {
-            writer.Write(Stat, 5);
-            writer.Write(Type, 2);
+        }*/
+
+        public void WriteInitial(GamePacketWriter writer)
+        {
+            writer.Write(Stat, 5u);
+            writer.Write(Type, 2u);
 
             switch (Type)
             {
-                case StatType.Int:
+                case StatType.Integer:
                     writer.Write((uint)Value);
                     break;
                 case StatType.Float:
                     writer.Write(Value);
                     break;
-                case StatType.Unknown:
-                    writer.Write(0u);
-                    writer.Write(0u);
+                case StatType.Data:
+                    writer.Write((uint)Value);
+                    writer.Write(Data);
                     break;
             }
         }
 
         public void WriteUpdate(GamePacketWriter writer)
         {
-            writer.Write(Stat, 5);
+            writer.Write(Stat, 5u);
 
             switch (Type)
             {
-                case StatType.Int:
+                case StatType.Integer:
                     writer.Write((uint)Value);
                     break;
                 case StatType.Float:
                     writer.Write(Value);
-                    break;
-                case StatType.Unknown:
-                    writer.Write(0u);
-                    writer.Write(0u);
                     break;
             }
         }

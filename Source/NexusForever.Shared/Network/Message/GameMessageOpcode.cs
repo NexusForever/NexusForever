@@ -208,7 +208,7 @@ namespace NexusForever.Shared.Network.Message
         ServerItemVisualUpdate          = 0x0933,
         ServerEntityFaction             = 0x0934,
         ServerEntityStatUpdateFloat     = 0x0935,
-        ServerEntityStatUpdateInt       = 0x0938,
+        ServerEntityStatUpdateInteger   = 0x0938,
         Server093A                      = 0x093A,
         ServerEmote                     = 0x093C,
         ClientItemUse                   = 0x0943,

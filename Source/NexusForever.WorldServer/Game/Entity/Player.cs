@@ -41,8 +41,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public Class Class { get; }
         public List<float> Bones { get; } = new List<float>();
 
-        public byte Level { get; private set; }
-
         public Path Path
         {
             get => path;
@@ -168,13 +166,13 @@ namespace NexusForever.WorldServer.Game.Entity
                     DisplayId = a.DisplayId
                 }));
 
-            foreach(CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
+            foreach (CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
 
-            foreach(CharacterStat stat in model.CharacterStat)
-                Stats.Add((Stat)stat.Stat, new StatValue((Stat)stat.Stat, stat.Value));
+            foreach (CharacterStat statModel in model.CharacterStat)
+                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
-            Level = (byte)GetStatValue(Stat.Level);
+            SetStat(Stat.Dash, 100f);
         }
 
         public override void Update(double lastTick)
@@ -615,36 +613,8 @@ namespace NexusForever.WorldServer.Game.Entity
             model.TimePlayedTotal = (uint)TimePlayedTotal;
             entity.Property(p => p.TimePlayedTotal).IsModified = true;
 
-            foreach (KeyValuePair<Stat, StatValue> stat in Stats)
-            {
-                if (stat.Value.SaveMask != StatSaveMask.None)
-                {
-                    if ((stat.Value.SaveMask & StatSaveMask.Create) != 0)
-                    {
-                        context.Add(new CharacterStat
-                        {
-                            Id = CharacterId,
-                            Stat = (byte)stat.Key,
-                            Value = stat.Value.Value
-                        });
-                    }
-                    else
-                    {
-                        var statModel = new CharacterStat
-                        {
-                            Id = CharacterId,
-                            Stat = (byte)stat.Key
-                        };
-
-                        EntityEntry<CharacterStat> statEntity = context.Attach(statModel);
-                        statModel.Value = stat.Value.Value;
-
-                        statEntity.Property(p => p.Value).IsModified = true;
-                    }
-
-                    stat.Value.SaveMask = StatSaveMask.None;
-                }
-            }
+            foreach (StatValue stat in stats.Values)
+                stat.SaveCharacter(CharacterId, context);
 
             Inventory.Save(context);
             CurrencyManager.Save(context);
@@ -662,27 +632,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public double GetTimeSinceLastSave()
         {
             return SaveDuration - timeToSave;
-        }
-
-        public void LevelUp()
-        {
-            Level = (byte)GetStatValue(Stat.Level);
-
-            // TODO: XP stuff etc.
-
-            Spell4Entry spell4Entry = GameTableManager.Spell4.Entries
-                .Where(e => e.Spell4BaseIdBaseSpell == 53378 && e.TierIndex == Level)
-                .FirstOrDefault();
-
-            SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4Entry.Spell4BaseIdBaseSpell);
-            SpellInfo spellInfo = spellBaseInfo.GetSpellInfo((byte)spell4Entry.TierIndex);
-
-            CastSpell(new SpellParameters
-            {
-                SpellInfo = spellInfo
-            });
-
-            // FIXME: SpellFinish (0x07FE) needs to be sent, or you have an endless loop of "level up" on screen
         }
     }
 }
