@@ -90,6 +90,7 @@ namespace NexusForever.Shared.Network.Message
         ServerQuestInit                 = 0x035F,
         ClientEmote                     = 0x037E,
         ClientCostumeItemForget         = 0x038B,
+        ClientPackedWorld               = 0x038C,
         Server03AA                      = 0x03AA, // friendship account related
         Server03BE                      = 0x03BE, // friendship related
         ServerRealmInfo                 = 0x03DB,
