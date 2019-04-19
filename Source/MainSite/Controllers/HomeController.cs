@@ -33,7 +33,7 @@ namespace MainSite.Controllers
                 {
                     try
                     {
-                        AuthDatabase.CreateAccount(newUser.Email, newUser.Password);
+                        AuthDatabase.CreateAccount(newUser.Email.ToLower(), newUser.Password);
                         return View("RegisterSuccess");
                     }
                     catch(Exception ex)
