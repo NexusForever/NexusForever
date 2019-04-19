@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
             base.Initialise(model);
 
             SetStat(Stat.StandState, StandState.State0); // Closed on spawn
-            SetProperty(Property.BaseHealth, 101f, 101f); // Sniffs showed all doors had 101hp for me.
+            SetBaseProperty(Property.BaseHealth, 101f); // Sniffs showed all doors had 101hp for me.
         }
 
         protected override IEntityModel BuildEntityModel()

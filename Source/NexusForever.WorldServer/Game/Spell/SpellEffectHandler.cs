@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
@@ -6,6 +7,7 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Spell.Event;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -20,6 +22,24 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             // TODO: calculate damage
             info.AddDamage((DamageType)info.Entry.DamageType, 1337);
+        }
+
+        [SpellEffectHandler(SpellEffectType.UnitPropertyModifier)]
+        private void HandleEffectPropertyModifier(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            // TODO: Handle NPCs and other Entities.
+
+            if (!(target is Player player))
+                return;
+
+            PropertyModifier modifier = new PropertyModifier(info.Entry.DataBits01, BitConverter.Int32BitsToSingle((int)info.Entry.DataBits02), BitConverter.Int32BitsToSingle((int)info.Entry.DataBits03));
+            player.AddSpellModifierProperty((Property)info.Entry.DataBits00, parameters.SpellInfo.Entry.Id, modifier);
+
+            if (info.Entry.DurationTime > 0d)
+                events.EnqueueEvent(new SpellEvent(info.Entry.DurationTime / 1000d, () =>
+                {
+                    player.RemoveSpellProperty((Property)info.Entry.DataBits00, parameters.SpellInfo.Entry.Id);
+                }));
         }
 
         [SpellEffectHandler(SpellEffectType.Proxy)]
@@ -81,8 +101,30 @@ namespace NexusForever.WorldServer.Game.Spell
             if (player.Map.CanEnter(mount, position))
                 player.Map.EnqueueAdd(mount, position);
 
-            // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464
-            // FIXME: also cast 80530,Mount Sprint  - Tier 2,36122
+            // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464 -- upon further investigation, this appeared to only trigger for characters who were created earlier in the game's lifetime.
+            // Expert - 52543
+
+            // TODO: There are other Riding Skills which need to be added when the player has them as known effects.
+            uint mountSpeedSpell4Id = 0;
+            switch (mount.MountType)
+            {
+                case PetType.GroundMount: // Cast 80530, Mount Sprint  - Tier 2, 36122
+                    mountSpeedSpell4Id = 80530;
+                    break;
+                case PetType.HoverBoard: // Cast 80531, Hoverboard Sprint  - Tier 2, 36122
+                    mountSpeedSpell4Id = 80531;
+                    break;
+                default:
+                    mountSpeedSpell4Id = 80530;
+                    break;
+
+            }
+            player.CastSpell(mountSpeedSpell4Id, new SpellParameters
+            {
+                ParentSpellInfo = parameters.SpellInfo,
+                RootSpellInfo = parameters.RootSpellInfo,
+                UserInitiatedSpellCast = false
+            });
         }
 
         [SpellEffectHandler(SpellEffectType.Teleport)]

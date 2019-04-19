@@ -41,6 +41,7 @@ namespace NexusForever.Database.Character
         public DbSet<GuildAchievementModel> GuildAchievement { get; set; }
         public DbSet<GuildDataModel> GuildData { get; set; }
         public DbSet<ItemModel> Item { get; set; }
+        public DbSet<PropertyBaseModel> PropertyBase { get; set; }
         public DbSet<ResidenceModel> Residence { get; set; }
         public DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public DbSet<ResidencePlotModel> ResidencePlot { get; set; }
@@ -1893,6 +1894,702 @@ namespace NexusForever.Database.Character
                     .HasForeignKey(d => d.OwnerId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK__item_ownerId__character_id");
+            });
+
+            modelBuilder.Entity<PropertyBaseModel>(entity =>
+            {
+                entity.HasKey(e => new { e.Type, e.Subtype, e.Property, })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("property_base");
+
+                entity.Property(e => e.Type)
+                    .ValueGeneratedNever()
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Property)
+                    .ValueGeneratedNever()
+                    .HasColumnName("property")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Subtype)
+                    .ValueGeneratedNever()
+                    .HasColumnName("subtype")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ModType)
+                    .HasColumnName("modType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Note)
+                    .IsRequired()
+                    .HasColumnName("note")
+                    .HasColumnType("varchar(100)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasData(
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 0,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Strength"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 1,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Dexterity"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 2,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Technology"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 3,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Magic"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 4,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Wisdom"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 7,
+                        ModType = 1,
+                        Value = 200,
+                        Note = "Player - Base HP per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 9,
+                        ModType = 0,
+                        Value = 500,
+                        Note = "Player - Base Endurance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 16,
+                        ModType = 0,
+                        Value = 0.0225f,
+                        Note = "Player - Base Endurance Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 18,
+                        Note = "Player - Base Assault Rating per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 18,
+                        Note = "Player - Base Support Rating per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 38,
+                        ModType = 0,
+                        Value = 200,
+                        Note = "Player - Base Dash Energy"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 39,
+                        ModType = 0,
+                        Value = 0.045f,
+                        Note = "Player - Base Dash Energy Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 41,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Shield Capacity Base"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 100,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Movement Speed"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 101,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Avoid Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 102,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Crit Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 107,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Focus Recovery In Combat"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 108,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Focus Recovery Out of Combat"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 112,
+                        ModType = 0,
+                        Value = 0.3f,
+                        Note = "Player - Base Multi-Hit Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 130,
+                        ModType = 0,
+                        Value = 0.8f,
+                        Note = "Player - Base Gravity Multiplier"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 150,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Physical"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 151,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Tech"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 152,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Magic"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 154,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Mutli-Hit Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 155,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Damage Reflect Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 191,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Mount Movement Speed"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 195,
+                        ModType = 0,
+                        Value = 0.3f,
+                        Note = "Player - Base Glance Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 1,
+                        Property = 10,
+                        ModType = 2,
+                        Value = 1000,
+                        Note = "Class - Warrior - Base Kinetic Energy Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 17,
+                        ModType = 2,
+                        Value = 1,
+                        Note = "Warrior - Base Kinetic Energy Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 2,
+                        Property = 10,
+                        ModType = 2,
+                        Value = 100,
+                        Note = "Class - Engineer - Base Volatile Energy Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 3,
+                        Property = 10,
+                        ModType = 2,
+                        Value = 5,
+                        Note = "Class - Esper - Base Psi Point Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 4,
+                        Property = 10,
+                        ModType = 2,
+                        Value = 4,
+                        Note = "Class - Medic - Base Medic Core Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 5,
+                        Property = 12,
+                        ModType = 2,
+                        Value = 100,
+                        Note = "Class - Stalker - Base Suit Power Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 5,
+                        Property = 19,
+                        ModType = 2,
+                        Value = 0.035f,
+                        Note = "Class - Stalker - Base Suit Power Regeneration Rate"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 7,
+                        Property = 13,
+                        ModType = 2,
+                        Value = 100,
+                        Note = "Class - Spellslinger - Base Spell Power Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 1,
+                        Property = 7,
+                        ModType = 1,
+                        Value = 75,
+                        Note = "Item - Chest - HP per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 2,
+                        Property = 7,
+                        ModType = 1,
+                        Value = 75,
+                        Note = "Item - Legs - HP per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 3,
+                        Property = 7,
+                        ModType = 1,
+                        Value = 45,
+                        Note = "Item - Head - HP per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 4,
+                        Property = 7,
+                        ModType = 1,
+                        Value = 60,
+                        Note = "Item - Shoulder - HP per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 5,
+                        Property = 7,
+                        ModType = 1,
+                        Value = 45,
+                        Note = "Item - Feet - HP per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 6,
+                        Property = 7,
+                        ModType = 1,
+                        Value = 45,
+                        Note = "Item - Hands - HP per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 1,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 4.5f,
+                        Note = "Item - Chest - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 2,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 4.5f,
+                        Note = "Item - Legs - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 3,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 2.7f,
+                        Note = "Item - Head - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 4,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Shoulder - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 5,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 2.7f,
+                        Note = "Item - Feet - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 6,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 2.7f,
+                        Note = "Item - Hands - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 7,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Tool - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 20,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 83.53f,
+                        Note = "Item - Weapon - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 58,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Support System - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 59,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Augment - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 60,
+                        Property = 35,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Implant - Attack Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 1,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 4.5f,
+                        Note = "Item - Chest - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 2,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 4.5f,
+                        Note = "Item - Legs - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 3,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 2.7f,
+                        Note = "Item - Head - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 4,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Shoulder - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 5,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 2.7f,
+                        Note = "Item - Feet - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 6,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 2.7f,
+                        Note = "Item - Hands - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 7,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Tool - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 20,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 83.53f,
+                        Note = "Item - Weapon - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 58,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Support System - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 59,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Augment - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 60,
+                        Property = 36,
+                        ModType = 1,
+                        Value = 3.6f,
+                        Note = "Item - Implant - Support Power per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 43,
+                        Property = 41,
+                        ModType = 1,
+                        Value = 225,
+                        Note = "Item - Shield - Shield Capacity per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 1,
+                        Property = 42,
+                        ModType = 1,
+                        Value = 25,
+                        Note = "Item - Chest - Armor per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 2,
+                        Property = 42,
+                        ModType = 1,
+                        Value = 25,
+                        Note = "Item - Legs - Armor per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 3,
+                        Property = 42,
+                        ModType = 1,
+                        Value = 15,
+                        Note = "Item - Head - Armor per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 4,
+                        Property = 42,
+                        ModType = 1,
+                        Value = 20,
+                        Note = "Item - Shoulder - Armor per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 5,
+                        Property = 42,
+                        ModType = 1,
+                        Value = 15,
+                        Note = "Item - Feet - Armor per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 6,
+                        Property = 42,
+                        ModType = 1,
+                        Value = 15,
+                        Note = "Item - Hands - Armor per Eff. Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 43,
+                        Property = 175,
+                        ModType = 0,
+                        Value = 0.625f,
+                        Note = "Item - Shield - Base Shield Mitigation Percent"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 43,
+                        Property = 176,
+                        ModType = 0,
+                        Value = 0.15f,
+                        Note = "Item - Shield - Base Shield Regen Percent"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 2,
+                        Subtype = 43,
+                        Property = 178,
+                        ModType = 0,
+                        Value = 5130,
+                        Note = "Item - Shield - Base Shield Reboot Rate (ms)"
+                    });
             });
 
             modelBuilder.Entity<ResidenceModel>(entity =>

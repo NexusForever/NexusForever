@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -19,7 +20,7 @@ namespace NexusForever.WorldServer.Game
 {
     public sealed class AssetManager : Singleton<AssetManager>
     {
-        public static ImmutableDictionary<InventoryLocation, uint> InventoryLocationCapacities { get; private set; }
+        public ImmutableDictionary<InventoryLocation, uint> InventoryLocationCapacities { get; private set; }
 
         /// <summary>
         /// Id to be assigned to the next created character.
@@ -36,8 +37,13 @@ namespace NexusForever.WorldServer.Game
 
         private ImmutableDictionary<(Race, Faction, CharacterCreationStart), Location> characterCreationData;
         private ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
+        private ImmutableList<PropertyValue> characterBaseProperties;
+        private ImmutableDictionary<Class, ImmutableList<PropertyValue>> characterClassBaseProperties;
 
         private ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
+        private ImmutableDictionary<uint /*item2CategoryId*/, float /*modifier*/> itemArmorModifiers;
+        private ImmutableDictionary<ItemSlot, ImmutableDictionary<Property, float>> innatePropertiesLevelScaling;
+        private ImmutableDictionary<ItemSlot, ImmutableDictionary<Property, float>> innatePropertiesFlat;
 
         private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
         private ImmutableDictionary</*creatureId*/uint, /*targetGroupIds*/ImmutableList<uint>> creatureAssociatedTargetGroups;
@@ -55,8 +61,12 @@ namespace NexusForever.WorldServer.Game
 
             CacheCharacterCreate();
             CacheCharacterCustomisations();
+            CacheCharacterBaseProperties();
+            CacheCharacterClassBaseProperties();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
+            CacheItemArmorModifiers();
+            CacheItemInnateProperties();
             CacheTutorials();
             CacheCreatureTargetGroups();
             CacheRewardPropertiesByTier();
@@ -101,6 +111,48 @@ namespace NexusForever.WorldServer.Game
             }
 
             characterCustomisations = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
+        }
+
+        private void CacheCharacterBaseProperties()
+        {
+            var entries = ImmutableList.CreateBuilder<PropertyValue>();
+            foreach (PropertyBaseModel propertyModel in DatabaseManager.Instance.CharacterDatabase.GetProperties(0))
+            {
+                var newPropValue = new PropertyValue((Property)propertyModel.Property, propertyModel.Value, propertyModel.Value);
+                entries.Add(newPropValue);
+            }
+
+            characterBaseProperties = entries.ToImmutable();
+        }
+
+        private void CacheCharacterClassBaseProperties()
+        {
+            ImmutableDictionary<Class, ImmutableList<PropertyValue>>.Builder entries = ImmutableDictionary.CreateBuilder<Class, ImmutableList<PropertyValue>>();
+            var classList = GameTableManager.Instance.Class.Entries;
+
+            List<PropertyBaseModel> classPropertyBases = DatabaseManager.Instance.CharacterDatabase.GetProperties(1);
+            foreach (ClassEntry classEntry in classList)
+            {
+                Class @class = (Class)classEntry.Id;
+
+                if (entries.ContainsKey(@class))
+                    continue;
+
+                ImmutableList<PropertyValue>.Builder propertyList = ImmutableList.CreateBuilder<PropertyValue>();
+                foreach (PropertyBaseModel propertyModel in classPropertyBases)
+                {
+                    if (propertyModel.Subtype != (uint)@class)
+                        continue;
+
+                    var newPropValue = new PropertyValue((Property)propertyModel.Property, propertyModel.Value, propertyModel.Value);
+                    propertyList.Add(newPropValue);
+                }
+                ImmutableList<PropertyValue> classProperties = propertyList.ToImmutable();
+
+                entries.Add(@class, classProperties);
+            }
+            
+            characterClassBaseProperties = entries.ToImmutable();
         }
 
         public void CacheInventoryBagCapacities()
@@ -166,6 +218,45 @@ namespace NexusForever.WorldServer.Game
 
             creatureAssociatedTargetGroups = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
+        
+        private void CacheItemArmorModifiers()
+        {
+            var armorMods = ImmutableDictionary.CreateBuilder<uint, float>();
+            foreach (Item2CategoryEntry entry in GameTableManager.Instance.Item2Category.Entries.Where(i => i.Item2FamilyId == 1))
+                armorMods.Add(entry.Id, entry.ArmorModifier);
+
+            itemArmorModifiers = armorMods.ToImmutable();
+        }
+
+        private void CacheItemInnateProperties()
+        {
+            ImmutableDictionary<ItemSlot, ImmutableDictionary<Property, float>>.Builder propFlat = ImmutableDictionary.CreateBuilder<ItemSlot, ImmutableDictionary<Property, float>>();
+            ImmutableDictionary<ItemSlot, ImmutableDictionary<Property, float>>.Builder propScaling = ImmutableDictionary.CreateBuilder<ItemSlot, ImmutableDictionary<Property, float>>();
+
+            foreach (var slot in DatabaseManager.Instance.CharacterDatabase.GetProperties(2).GroupBy(x => x.Subtype).Select(i => i.First()))
+            {
+                ImmutableDictionary<Property, float>.Builder subtypePropFlat = ImmutableDictionary.CreateBuilder<Property, float>();
+                ImmutableDictionary<Property, float>.Builder subtypePropScaling = ImmutableDictionary.CreateBuilder<Property, float>();
+                foreach (PropertyBaseModel propertyBase in DatabaseManager.Instance.CharacterDatabase.GetProperties(2).Where(i => i.Subtype == slot.Subtype))
+                {
+                    switch (propertyBase.ModType)
+                    {
+                        case 0:
+                            subtypePropFlat.Add((Property)propertyBase.Property, propertyBase.Value);
+                            break;
+                        case 1:
+                            subtypePropScaling.Add((Property)propertyBase.Property, propertyBase.Value);
+                            break;
+                    }
+                }
+
+                propFlat.Add((ItemSlot)slot.Subtype, subtypePropFlat.ToImmutable());
+                propScaling.Add((ItemSlot)slot.Subtype, subtypePropScaling.ToImmutable());
+            }
+
+            innatePropertiesFlat = propFlat.ToImmutable();
+            innatePropertiesLevelScaling = propScaling.ToImmutable();
+        }
 
         private void CacheRewardPropertiesByTier()
         {
@@ -197,11 +288,77 @@ namespace NexusForever.WorldServer.Game
         }
 
         /// <summary>
+        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="PropertyValue"/> for any character
+        /// </summary>
+        public ImmutableList<PropertyValue> GetCharacterBaseProperties()
+        {
+            return characterBaseProperties;
+        }
+
+        /// <summary>
+        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="PropertyValue"/> for a character class
+        /// </summary>
+        public ImmutableList<PropertyValue> GetCharacterClassBaseProperties(Class @class)
+        {
+            return characterClassBaseProperties.TryGetValue(@class, out ImmutableList<PropertyValue> propertyValues) ? propertyValues : null;
+        }
+
+        /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="ItemDisplaySourceEntryEntry"/>'s for the supplied itemSource.
         /// </summary>
         public ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
         {
             return itemDisplaySourcesEntry.TryGetValue(itemSource, out ImmutableList<ItemDisplaySourceEntryEntry> entries) ? entries : null;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Dictionary{TKey, TValue}"/> containing <see cref="Property"/> and associated values for given Item.
+        /// </summary>
+        public Dictionary<Property, float> GetInnateProperties(ItemSlot itemSlot, uint effectiveLevel, uint categoryId, float supportPowerPercentage)
+        {
+            Dictionary<Property, float> innateProperties = new Dictionary<Property, float>();
+
+            var innatePropScaling = innatePropertiesLevelScaling.ContainsKey(itemSlot) ? innatePropertiesLevelScaling[itemSlot] : new Dictionary<Property, float>().ToImmutableDictionary();
+            var innatePropFlat = innatePropertiesFlat.ContainsKey(itemSlot) ? innatePropertiesFlat[itemSlot] : new Dictionary<Property, float>().ToImmutableDictionary();
+
+            // TODO: Shield reboot, max % and tick % are all the same right now. Investigate how these stats are calculated and add to method.
+            foreach (KeyValuePair<Property, float> entry in innatePropFlat)
+                innateProperties.TryAdd(entry.Key, entry.Value);
+
+            foreach (KeyValuePair<Property, float> entry in innatePropScaling)
+            {
+                var value = entry.Value;
+
+                if (entry.Key == Property.AssaultRating)
+                {
+                    if (supportPowerPercentage == 1f)
+                        value = 0f;
+                    else if (supportPowerPercentage == 0.5f)
+                        value *= 0.3333f;
+                }
+
+                if (entry.Key == Property.SupportRating)
+                {
+                    if (supportPowerPercentage == -1f)
+                        value = 0f;
+                    else if (supportPowerPercentage == -0.5f)
+                        value *= 0.3333f;
+                }
+
+                // TODO: Ensure correct values after 50 effective level. There are diminishing returns after 50 effective level to Armor.
+                // At 51+ it changes to Effective Level 50 Amount + (Base Value * (EffectiveLevel - 50)).
+                // i.e. Eff. Level 60 Medium Chest Armor: (50 * 25) + (8.5 * (60 - 50)) = 1335 (http://www.jabbithole.com/items/corruption-resistant-jacket-48097)
+                if (entry.Key == Property.Armor)
+                    if (itemArmorModifiers.TryGetValue(categoryId, out float armorMod))
+                        value *= armorMod;
+
+                if (innateProperties.ContainsKey(entry.Key))
+                    innateProperties[entry.Key] = innateProperties[entry.Key] + (uint)Math.Floor(value * effectiveLevel);
+                else
+                    innateProperties.TryAdd(entry.Key, (uint)Math.Floor(value * effectiveLevel));
+            }
+
+            return innateProperties;
         }
 
         /// <summary>

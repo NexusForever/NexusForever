@@ -14,8 +14,8 @@
         Prerequisite    = 11,
         Path            = 52,
         Vital           = 73,
-        SpellObj        = 129,
-		    /// <summary>
+        SpellKnown      = 129,
+        /// <summary>
         /// Checks for an ObjectId, which is a hashed petflair id.
         /// </summary>
         HoverboardFlair = 190,
@@ -30,6 +30,7 @@
         SpellBaseId     = 214,
         Plane           = 232,
         BaseFaction     = 250,
+        Unhealthy       = 269,
         PurchasedTitle  = 288
     }
 }

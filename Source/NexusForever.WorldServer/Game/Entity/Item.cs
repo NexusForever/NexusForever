@@ -155,6 +155,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private ItemSaveMask saveMask;
 
+        public Dictionary<Property, float> InnateProperties { get; private set; } = new Dictionary<Property, float>();
+
         /// <summary>
         /// Create a new <see cref="Item"/> from an existing database model.
         /// </summary>
@@ -171,7 +173,10 @@ namespace NexusForever.WorldServer.Game.Entity
             durability       = model.Durability;
 
             if ((InventoryLocation)model.Location != InventoryLocation.Ability)
-                Info = ItemManager.Instance.GetItemInfo(model.ItemId);
+            {
+                Info             = ItemManager.Instance.GetItemInfo(model.ItemId);
+                InnateProperties = AssetManager.Instance.GetInnateProperties((ItemSlot)Info.TypeEntry.ItemSlotId, Info.Entry.PowerLevel, Info.Entry.Item2CategoryId, Info.Entry.SupportPowerPercentage);
+            }
             else
                 SpellEntry = GameTableManager.Instance.Spell4Base.GetEntry(model.ItemId);
             
@@ -192,6 +197,7 @@ namespace NexusForever.WorldServer.Game.Entity
             charges          = initialCharges;
             durability       = 1.0f;
             Info             = info;
+            InnateProperties = AssetManager.Instance.GetInnateProperties((ItemSlot)Info.TypeEntry.ItemSlotId, Info.Entry.PowerLevel, Info.Entry.Item2CategoryId, Info.Entry.SupportPowerPercentage);
 
             saveMask         = ItemSaveMask.Create;
         }
