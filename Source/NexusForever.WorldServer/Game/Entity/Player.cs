@@ -527,7 +527,18 @@ namespace NexusForever.WorldServer.Game.Entity
             if (entry == null)
                 throw new ArgumentException();
 
-            TeleportTo(entry, new Vector3(x, y, z), instanceId, residenceId);
+            if (Enum.IsDefined(typeof(BlacklistZoneIds), (int)worldId))
+            {
+                Session.EnqueueMessageEncrypted(new ServerChat
+                {
+                    Channel = ChatChannel.System,
+                    Text = ($"{(BlacklistZoneIds)worldId} (ID: {worldId}) is currently a blacklisted zone.")
+                });
+            }
+            else
+            {
+                TeleportTo(entry, new Vector3(x, y, z), instanceId, residenceId);
+            }
         }
 
         /// <summary>
