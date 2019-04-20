@@ -7,8 +7,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ClientPathActivate)]
     public class ClientPathActivate : IReadable
     {
-        public Path Path { get; private set; }
-        public bool UseTokens { get; private set; }
+        public Path Path { get; set; }
+        public bool UseTokens { get; set; }
 
         public void Read(GamePacketReader reader)
         {

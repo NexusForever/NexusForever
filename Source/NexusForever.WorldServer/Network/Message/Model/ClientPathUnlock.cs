@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ClientPathUnlock)]
     public class ClientPathUnlock : IReadable
     {
-        public Path Path { get; private set; }
+        public Path Path { get; set; }
 
         public void Read(GamePacketReader reader)
         {
