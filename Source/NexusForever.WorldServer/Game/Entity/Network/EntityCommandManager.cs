@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -8,29 +7,47 @@ namespace NexusForever.WorldServer.Game.Entity.Network
 {
     public static class EntityCommandManager
     {
-        private delegate IEntityCommand EntityFactoryDelegate();
-        private static ImmutableDictionary<EntityCommand, EntityFactoryDelegate> entityFactories;
+        private delegate IEntityCommandModel EntityCommandFactoryDelegate();
+        private static ImmutableDictionary<EntityCommand, EntityCommandFactoryDelegate> entityCommandFactories;
+        private static ImmutableDictionary<Type, EntityCommand> entityCommands;
 
         public static void Initialise()
         {
-            var factories = new Dictionary<EntityCommand, EntityFactoryDelegate>();
+            var factoryBuilder = ImmutableDictionary.CreateBuilder<EntityCommand, EntityCommandFactoryDelegate>();
+            var commandBuilder = ImmutableDictionary.CreateBuilder<Type, EntityCommand>();
 
             foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                IEnumerable<EntityCommandAttribute> attributes = type.GetCustomAttributes<EntityCommandAttribute>(false);
-                foreach (EntityCommandAttribute attribute in attributes)
-                {
-                    NewExpression @new = Expression.New(type.GetConstructor(Type.EmptyTypes));
-                    factories.Add(attribute.Command, Expression.Lambda<EntityFactoryDelegate>(@new).Compile());
-                }
+                EntityCommandAttribute attribute = type.GetCustomAttribute<EntityCommandAttribute>();
+                if (attribute == null)
+                    continue;
+
+                NewExpression @new = Expression.New(type.GetConstructor(Type.EmptyTypes));
+                factoryBuilder.Add(attribute.Command, Expression.Lambda<EntityCommandFactoryDelegate>(@new).Compile());
+                commandBuilder.Add(type, attribute.Command);
             }
 
-            entityFactories = factories.ToImmutableDictionary();
+            entityCommandFactories = factoryBuilder.ToImmutable();
+            entityCommands = commandBuilder.ToImmutable();
         }
 
-        public static IEntityCommand GetCommand(EntityCommand command)
+        /// <summary>
+        /// Return a new <see cref="IEntityCommandModel"/> of supplied <see cref="EntityCommand"/>.
+        /// </summary>
+        public static IEntityCommandModel NewEntityCommand(EntityCommand command)
         {
-            return entityFactories.TryGetValue(command, out EntityFactoryDelegate factory) ? factory.Invoke() : null;
+            return entityCommandFactories.TryGetValue(command, out EntityCommandFactoryDelegate factory) ? factory.Invoke() : null;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="EntityCommand"/> for supplied <see cref="Type"/>.
+        /// </summary>
+        public static EntityCommand? GetCommand(Type type)
+        {
+            if (entityCommands.TryGetValue(type, out EntityCommand command))
+                return command;
+
+            return null;
         }
     }
 }

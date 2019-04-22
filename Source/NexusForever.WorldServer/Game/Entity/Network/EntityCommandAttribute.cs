@@ -2,7 +2,7 @@
 
 namespace NexusForever.WorldServer.Game.Entity.Network
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class EntityCommandAttribute : Attribute
     {
         public EntityCommand Command { get; }

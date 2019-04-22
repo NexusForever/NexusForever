@@ -4,9 +4,10 @@ using System.Linq;
 using System.Numerics;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
-using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
@@ -24,6 +25,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public ushort OutfitInfo { get; protected set; }
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
+
+        public MovementManager MovementManager { get; private set; }
 
         public uint Level
         {
@@ -74,43 +77,38 @@ namespace NexusForever.WorldServer.Game.Entity
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
         }
 
-        protected abstract IEntityModel BuildEntityModel();
+        public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
+        {
+            MovementManager = new MovementManager(this, vector, Rotation);
+            base.OnAddToMap(map, guid, vector);
+        }
+
+        public override void OnRemoveFromMap()
+        {
+            base.OnRemoveFromMap();
+            MovementManager = null;
+        }
 
         /// <summary>
         /// Invoked each world tick with the delta since the previous tick occured.
         /// </summary>
         public override void Update(double lastTick)
         {
-            // deliberately empty
+            MovementManager.Update(lastTick);
         }
+
+        protected abstract IEntityModel BuildEntityModel();
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
             return new ServerEntityCreate
             {
-                Guid        = Guid,
-                Type        = Type,
-                EntityModel = BuildEntityModel(),
-                CreateFlags   = (byte)CreateFlags,
-                Stats       = stats.Values.ToList(),
-
-                Commands =
-                {
-                    {
-                        EntityCommand.SetPosition,
-                        new SetPositionCommand
-                        {
-                            Position = new Position(Position)
-                        }
-                    },
-                    {
-                        EntityCommand.SetRotation,
-                        new SetRotationCommand
-                        {
-                            Position = new Position(Rotation)
-                        }
-                    }
-                },
+                Guid         = Guid,
+                Type         = Type,
+                EntityModel  = BuildEntityModel(),
+                CreateFlags  = (byte)CreateFlags,
+                Stats        = stats.Values.ToList(),
+                Commands     = MovementManager.ToList(),
                 VisibleItems = itemVisuals.Values.ToList(),
                 Properties   = Properties.Values.ToList(),
                 Faction1     = Faction1,
@@ -119,7 +117,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 OutfitInfo   = OutfitInfo
             };
         }
-
 
         protected void SetProperty(Property property, float value, float baseValue = 0.0f)
         {

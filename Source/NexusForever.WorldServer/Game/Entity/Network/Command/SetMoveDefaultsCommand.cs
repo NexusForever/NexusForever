@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetMoveDefaults)]
-    public class SetMoveDefaultsCommand : IEntityCommand
+    public class SetMoveDefaultsCommand : IEntityCommandModel
     {
         public bool Blend { get; set; }
 

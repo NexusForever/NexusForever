@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetRotationSpin)]
-    public class SetRotationSpinCommand : IEntityCommand
+    public class SetRotationSpinCommand : IEntityCommandModel
     {
         public Position Rotation { get; set; } 
         public uint FlightTime { get; set; }

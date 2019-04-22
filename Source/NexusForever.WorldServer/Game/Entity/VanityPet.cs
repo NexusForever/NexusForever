@@ -66,7 +66,7 @@ namespace NexusForever.WorldServer.Game.Entity
             entityCreate.Faction1 = Faction1;
             entityCreate.Faction2 = Faction2;
 
-            entityCreate.Commands = new Dictionary<EntityCommand, IEntityCommand>
+            /*entityCreate.Commands = new Dictionary<EntityCommand, IEntityCommand>
             {
                 {
                     EntityCommand.SetPlatform,
@@ -114,7 +114,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     {
                     }
                 }
-            };
+            };*/
 
             return entityCreate;
         }

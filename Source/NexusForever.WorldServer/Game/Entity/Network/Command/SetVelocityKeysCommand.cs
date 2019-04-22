@@ -6,7 +6,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetVelocityKeys)]
-    public class SetVelocityKeysCommand : IEntityCommand
+    public class SetVelocityKeysCommand : IEntityCommandModel
     {
         public List<uint> Times = new List<uint>();
         public List<Velocity> Velocities = new List<Velocity>();

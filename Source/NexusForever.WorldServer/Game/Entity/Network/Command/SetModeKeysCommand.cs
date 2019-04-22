@@ -6,7 +6,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetModeKeys)]
-    public class SetModeKeysCommand : IEntityCommand
+    public class SetModeKeysCommand : IEntityCommandModel
     {
         public List<uint> Times = new List<uint>();
         public List<uint> Modes = new List<uint>();

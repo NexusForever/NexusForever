@@ -3,7 +3,7 @@
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetVelocityDefaults)]
-    public class SetVelocityDefaultsCommand : IEntityCommand
+    public class SetVelocityDefaultsCommand : IEntityCommandModel
     {
         public bool Blend { get; set; }
 

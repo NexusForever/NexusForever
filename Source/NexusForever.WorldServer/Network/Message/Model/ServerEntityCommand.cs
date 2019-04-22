@@ -10,19 +10,19 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public uint Guid { get; set; }
         public uint Time { get; set; }
-        public bool Unknown1 { get; set; }
-        public bool Unknown2 { get; set; }
-        public List<(EntityCommand, IEntityCommand)> Commands { get; set; } = new List<(EntityCommand, IEntityCommand)>();
+        public bool TimeReset { get; set; }
+        public bool ServerControlled { get; set; }
+        public List<(EntityCommand, IEntityCommandModel)> Commands { get; set; } = new List<(EntityCommand, IEntityCommandModel)>();
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Guid);
             writer.Write(Time);
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
+            writer.Write(TimeReset);
+            writer.Write(ServerControlled);
 
-            writer.Write((byte)Commands.Count, 5);
-            foreach ((EntityCommand id, IEntityCommand command) in Commands)
+            writer.Write((byte)Commands.Count, 5u);
+            foreach ((EntityCommand id, IEntityCommandModel command) in Commands)
             {
                 writer.Write(id, 5);
                 command.Write(writer);

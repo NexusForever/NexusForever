@@ -161,5 +161,27 @@ namespace NexusForever.Shared.Network
             byte[] data = ReadBytes(length);
             return Encoding.Unicode.GetString(data);
         }
+
+        public float ReadPackedFloat()
+        {
+            float UnpackFloat(ushort packed)
+            {
+                uint v3 = packed & 0xFFFF7FFF;
+                uint v4 = (packed & 0xFFFF8000) << 16;
+
+                if ((v3 & 0x7C00) != 0)
+                    return BitConverter.Int32BitsToSingle((int)(v4 | ((v3 + 0x1C000) << 13)));
+                if ((v3 & 0x3FF) == 0)
+                    return BitConverter.Int32BitsToSingle((int) (v4 | v3));
+
+                uint v6 = (v3 & 0x3FF) << 13;
+                uint i = 113;
+                for (; v6 <= 0x7FFFFF; --i)
+                    v6 *= 2;
+                return BitConverter.Int32BitsToSingle((int)(v4 | (i << 23) | v6 & 0x7FFFFF));
+            }
+
+            return UnpackFloat(ReadUShort());
+        }
     }
 }

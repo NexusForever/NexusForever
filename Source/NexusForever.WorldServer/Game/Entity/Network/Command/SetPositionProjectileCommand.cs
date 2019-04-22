@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetPositionProjectile)]
-    public class SetPositionProjectileCommand : IEntityCommand
+    public class SetPositionProjectileCommand : IEntityCommandModel
     {
         public Position Position { get; set; } 
         public Position Rotation { get; set; }

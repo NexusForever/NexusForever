@@ -100,7 +100,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public IEntityModel EntityModel { get; set; }
         public List<StatValue> Stats { get; set; } = new List<StatValue>();
         public uint Time { get; set; }
-        public Dictionary<EntityCommand, IEntityCommand> Commands { get; set; } = new Dictionary<EntityCommand, IEntityCommand>();
+        public List<(EntityCommand, IEntityCommandModel)> Commands { get; set; } = new List<(EntityCommand, IEntityCommandModel)>();
         public List<PropertyValue> Properties { get; set; } = new List<PropertyValue>();
         public List<ItemVisual> VisibleItems { get; set; } = new List<ItemVisual>();
         public List<SpellInit> SpellInitData { get; } = new List<SpellInit>();
@@ -129,10 +129,10 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Time);
 
             writer.Write((byte)Commands.Count, 5);
-            foreach (KeyValuePair<EntityCommand, IEntityCommand> pair in Commands)
+            foreach ((EntityCommand command, IEntityCommandModel entityCommand) in Commands)
             {
-                writer.Write(pair.Key, 5);
-                pair.Value.Write(writer);
+                writer.Write(command, 5);
+                entityCommand.Write(writer);
             }
 
             writer.Write((byte)Properties.Count);

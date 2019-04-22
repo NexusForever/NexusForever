@@ -6,7 +6,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetPositionMultiSpline)]
-    public class SetPositionMultiSplineCommand : IEntityCommand
+    public class SetPositionMultiSplineCommand : IEntityCommandModel
     {
         public List<uint> SplineIds = new List<uint>();
         public ushort Speed { get; set; }

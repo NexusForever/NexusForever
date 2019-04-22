@@ -3,7 +3,7 @@
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetStateDefault)]
-    public class SetStateDefaultCommand : IEntityCommand
+    public class SetStateDefaultCommand : IEntityCommandModel
     {
         public bool Strafe { get; set; }
 

@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetScale)]
-    public class SetScaleCommand : IEntityCommand
+    public class SetScaleCommand : IEntityCommandModel
     {
         public ushort Scale { get; set; }
         public bool Blend { get; set; }

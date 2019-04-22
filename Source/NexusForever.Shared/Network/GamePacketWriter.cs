@@ -147,5 +147,25 @@ namespace NexusForever.Shared.Network
             Write(str.Length, 16);
             WriteBytes(data);
         }
+
+        public void WritePackedFloat(float value)
+        {
+            ushort PackFloat(float unpacked)
+            {
+                uint v1 = (uint)BitConverter.SingleToInt32Bits(unpacked);
+                uint v2 = v1 & 0x7FFFFFFF;
+                uint v3 = (v1 >> 16) & 0x8000;
+
+                if ((v1 & 0x7FFFFFFF) < 0x33800000)
+                    return (ushort)v3;
+                if (v2 <= 0x387FEFFF)
+                    return (ushort)(v3 | ((((v1 & 0x7FFFFF | 0x800000u) >> (int)(113 - ((v1 & 0x7FFFFFFFu) >> 23))) + 4096) >> 13));
+                if (v2 > 0x47FFEFFF)
+                    return (ushort)(v3 | 0x43FF);
+                return (ushort)(v3 | ((v2 - 0x37FFF000) >> 13));
+            }
+
+            Write(PackFloat(value));
+        }
     }
 }

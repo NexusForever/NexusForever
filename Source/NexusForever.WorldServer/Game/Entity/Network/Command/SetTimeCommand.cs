@@ -3,7 +3,7 @@
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetTime)]
-    public class SetTimeCommand : IEntityCommand
+    public class SetTimeCommand : IEntityCommandModel
     {
         public uint Time { get; set; }
 

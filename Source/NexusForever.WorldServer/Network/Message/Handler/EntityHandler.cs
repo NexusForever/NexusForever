@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (session.Player.ControlGuid != session.Player.Guid)
                 mover = session.Player.GetVisible<WorldEntity>(session.Player.ControlGuid);
 
-            foreach ((EntityCommand id, IEntityCommand command) in entityCommand.Commands)
+            foreach ((EntityCommand id, IEntityCommandModel command) in entityCommand.Commands)
             {
                 switch (command)
                 {
@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 Guid     = mover.Guid,
                 Time     = entityCommand.Time,
-                Unknown2 = true,
+                ServerControlled = true,
                 Commands = entityCommand.Commands
             });
         }

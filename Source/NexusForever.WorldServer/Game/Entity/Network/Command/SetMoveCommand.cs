@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetMove)]
-    public class SetMoveCommand : IEntityCommand
+    public class SetMoveCommand : IEntityCommandModel
     {
         public Move MoveData { get; set; } = new Move();
         public bool Blend { get; set; }

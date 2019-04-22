@@ -25,7 +25,6 @@ using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using NexusForever.WorldServer.Game.Spell;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -89,7 +88,11 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Guid of the <see cref="Vehicle"/> the <see cref="Player"/> is a passenger on.
         /// </summary>
-        public uint VehicleGuid { get; set; }
+        public uint VehicleGuid
+        {
+            get => MovementManager.GetPlatform() ?? 0u;
+            set => MovementManager.SetPlatform(value);
+        }
 
         /// <summary>
         /// Guid of the <see cref="VanityPet"/> currently summoned by the <see cref="Player"/>.
@@ -186,6 +189,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 logoutManager.Update(lastTick);
             }
             
+            base.Update(lastTick);
             TitleManager.Update(lastTick);
             SpellManager.Update(lastTick);
             CostumeManager.Update(lastTick);
@@ -366,39 +370,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 MapManager.AddToMap(this, pendingTeleport.Info, pendingTeleport.Vector);
                 pendingTeleport = null;
             }
-        }
-
-        public override ServerEntityCreate BuildCreatePacket()
-        {
-            ServerEntityCreate entityCreate = base.BuildCreatePacket();
-            if (VehicleGuid == 0u)
-                return entityCreate;
-
-            entityCreate.Commands = new Dictionary<EntityCommand, IEntityCommand>
-            {
-                {
-                    EntityCommand.SetPlatform,
-                    new SetPlatformCommand
-                    {
-                        UnitId = VehicleGuid
-                    }
-                },
-                {
-                    EntityCommand.SetPosition,
-                    new SetPositionCommand
-                    {
-                        Position = new Position(new Vector3(0f,0f,0f))
-                    }
-                },
-                {
-                    EntityCommand.SetRotation,
-                    new SetRotationCommand
-                    {
-                        Position = new Position(new Vector3(0f,0f,0f))
-                    }
-                }
-            };
-            return entityCreate;
         }
 
         public override void AddVisible(GridEntity entity)

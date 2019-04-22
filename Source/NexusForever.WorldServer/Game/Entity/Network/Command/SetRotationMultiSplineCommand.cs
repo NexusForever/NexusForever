@@ -1,16 +1,14 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using NexusForever.Shared.Network;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetRotationMultiSpline)]
-    public class SetRotationMultiSplineCommand : IEntityCommand
+    public class SetRotationMultiSplineCommand : IEntityCommandModel
     {
-        public List<uint> SplineIds = new List<uint>();
+        public List<uint> SplineIds { get; set; } = new List<uint>();
 
-        public ushort Speed { get; set; }
+        public float Speed { get; set; }
         public float Position { get; set; }
         public float TakeoffLocationHeight { get; set; }
         public float LandingLocationHeight { get; set; }
@@ -22,12 +20,11 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
 
         public void Read(GamePacketReader reader)
         {
-            uint Count = reader.ReadUShort(10u);
-
-            for (int i = 0; i < Count; i++)
+            uint count = reader.ReadUShort(10u);
+            for (int i = 0; i < count; i++)
                 SplineIds.Add(reader.ReadUInt());
 
-            Speed = reader.ReadUShort();
+            Speed = reader.ReadPackedFloat();
             Position = reader.ReadUInt();
             TakeoffLocationHeight = reader.ReadUInt();
             LandingLocationHeight = reader.ReadUInt();
@@ -40,10 +37,10 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
         public void Write(GamePacketWriter writer)
         {
             writer.Write(SplineIds.Count, 10u);
-            foreach (var splineId in SplineIds)
+            foreach (uint splineId in SplineIds)
                 writer.Write(splineId);
 
-            writer.Write(Speed);
+            writer.WritePackedFloat(Speed);
             writer.Write(Position);
             writer.Write(TakeoffLocationHeight);
             writer.Write(LandingLocationHeight);

@@ -1,18 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using NexusForever.Shared.Network;
+using NexusForever.WorldServer.Game.Entity.Movement.Spline.Static;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetPositionSpline)]
-    public class SetPositionSplineCommand : IEntityCommand
+    public class SetPositionSplineCommand : IEntityCommandModel
     {
         public uint SplineId { get; set; }
         public float Speed { get; set; }
-        public uint Position { get; set; }
-        public Formation FormationData { get; set; }
-        public byte Mode { get; set; }
+        public float Position { get; set; }
+        public Formation FormationData { get; set; } = new Formation();
+        public SplineMode Mode { get; set; }
         public uint Offset { get; set; }
         public bool Blend { get; set; }
         public bool IsContinuing { get; set; }
@@ -20,15 +18,13 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
 
         public void Read(GamePacketReader reader)
         {
-            FormationData = new Formation();
-
-            SplineId= reader.ReadUInt();
-            Speed   = reader.ReadUInt();
+            SplineId = reader.ReadUInt();
+            Speed = reader.ReadUInt();
             Position = reader.ReadUInt();
             FormationData.Read(reader);
-            Mode    = reader.ReadByte(4u);
-            Offset  = reader.ReadUInt();
-            Blend   = reader.ReadBit();
+            Mode = reader.ReadEnum<SplineMode>(4u);
+            Offset = reader.ReadUInt();
+            Blend = reader.ReadBit();
             IsContinuing = reader.ReadBit();
             AdjustSpeedToLength = reader.ReadBit();
         }
