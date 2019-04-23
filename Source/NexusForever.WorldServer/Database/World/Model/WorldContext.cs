@@ -95,6 +95,10 @@ namespace NexusForever.WorldServer.Database.World.Model
                 entity.Property(e => e.Z)
                     .HasColumnName("z")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.QuestChecklistIdx)
+                    .HasColumnName("questChecklistIdx")
+                    .HasDefaultValueSql("'0'");
             });
 
             modelBuilder.Entity<EntityVendor>(entity =>

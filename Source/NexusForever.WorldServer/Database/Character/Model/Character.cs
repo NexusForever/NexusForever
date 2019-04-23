@@ -16,14 +16,15 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterCostume = new HashSet<CharacterCostume>();
             CharacterCurrency = new HashSet<CharacterCurrency>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
+            CharacterDatacube = new HashSet<CharacterDatacube>();
             CharacterPath = new HashSet<CharacterPath>();
             CharacterPetCustomisation = new HashSet<CharacterPetCustomisation>();
             CharacterPetFlair = new HashSet<CharacterPetFlair>();
             CharacterSpell = new HashSet<CharacterSpell>();
+            CharacterStat = new HashSet<CharacterStat>();
             CharacterTitle = new HashSet<CharacterTitle>();
             CharacterKeybinding = new HashSet<CharacterKeybinding>();
             Item = new HashSet<Item>();
-            CharacterStat = new HashSet<CharacterStat>();
         }
 
         public ulong Id { get; set; }
@@ -57,6 +58,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual ICollection<CharacterCostume> CharacterCostume { get; set; }
         public virtual ICollection<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual ICollection<CharacterDatacube> CharacterDatacube { get; set; }
         public virtual ICollection<CharacterPath> CharacterPath { get; set; }
         public virtual ICollection<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual ICollection<CharacterPetFlair> CharacterPetFlair { get; set; }

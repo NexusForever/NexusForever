@@ -27,6 +27,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         public ushort OutfitInfo { get; set; }
         public ushort Faction1 { get; set; }
         public ushort Faction2 { get; set; }
+        public byte QuestChecklistIdx { get; set; }
 
         public EntityVendor EntityVendor { get; set; }
         public ICollection<EntityVendorCategory> EntityVendorCategory { get; set; }

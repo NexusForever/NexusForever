@@ -118,6 +118,24 @@ namespace NexusForever.WorldServer.Game.Entity
             };
         }
 
+        // TODO: research the difference between a standard activation and cast activation
+
+        /// <summary>
+        /// Invoked when <see cref="WorldEntity"/> is activated.
+        /// </summary>
+        public virtual void OnActivate(Player activator)
+        {
+            // deliberately empty
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="WorldEntity"/> is cast activated.
+        /// </summary>
+        public virtual void OnActivateCast(Player activator)
+        {
+            // deliberately empty
+        }
+
         protected void SetProperty(Property property, float value, float baseValue = 0.0f)
         {
             if (Properties.ContainsKey(property))
