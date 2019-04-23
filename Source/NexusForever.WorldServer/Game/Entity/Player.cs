@@ -110,6 +110,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public CostumeManager CostumeManager { get; }
         public PetCustomisationManager PetCustomisationManager { get; }
         public KeybindingManager KeybindingManager { get; }
+        public DatacubeManager DatacubeManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -150,6 +151,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager    = new SpellManager(this, model);
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new KeybindingManager(this, session.Account, model);
+            DatacubeManager = new DatacubeManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -351,6 +353,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.SendInitialPackets();
             PetCustomisationManager.SendInitialPackets();
             KeybindingManager.SendInitialPackets();
+            DatacubeManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -595,6 +598,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PetCustomisationManager.Save(context);
             KeybindingManager.Save(context);
             SpellManager.Save(context);
+            DatacubeManager.Save(context);
         }
 
         /// <summary>

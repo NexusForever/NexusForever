@@ -84,6 +84,7 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterSpell)
                         .Include(c => c.CharacterActionSetShortcut)
                         .Include(c => c.CharacterActionSetAmp)
+                        .Include(c => c.CharacterDatacube)
                     .ToListAsync();
             }
         }

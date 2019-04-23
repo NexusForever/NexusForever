@@ -10,9 +10,11 @@ namespace NexusForever.Shared.Network.Message
         ServerPlayerEnteredWorld        = 0x0061,
         ServerAuthEncrypted             = 0x0076,
         ServerLogoutUpdate              = 0x0092,
+        ClientActivateUnitCast          = 0x0097, // not sure about the name - almost the same as 0x00B3, but also initiates 0x07FD
         ServerChangeWorld               = 0x00AD,
         ClientRequestActionSetChanges   = 0x00B1,
         Server00B2                      = 0x00B2, // this triggers the client to send 0xB1
+        ClientActivateUnit              = 0x00B3,
         ServerBuybackItemUpdated        = 0x00BA,
         ClientBuybackItemFromVendor     = 0x00BB,
         ServerBuybackItems              = 0x00BC,
@@ -25,6 +27,9 @@ namespace NexusForever.Shared.Network.Message
         ServerCostumeList               = 0x00D9,
         ServerCharacterCreate           = 0x00DC,
         ServerChannelUpdateLoot         = 0x00DD,
+        ServerDatacubeUpdateList        = 0x00E0,
+        ServerDatacubeUpdate            = 0x00E1,
+        ServerDatacubeVolumeUpdate      = 0x00E2,
         Server00F1                      = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
         ServerCharacterFlagsUpdated     = 0x00FE,
         Server0104                      = 0x0104, // Galactic Archive

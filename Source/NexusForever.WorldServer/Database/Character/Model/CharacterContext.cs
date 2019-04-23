@@ -27,17 +27,18 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterCostumeItem> CharacterCostumeItem { get; set; }
         public virtual DbSet<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual DbSet<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual DbSet<CharacterDatacube> CharacterDatacube { get; set; }
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual DbSet<CharacterPetFlair> CharacterPetFlair { get; set; }
         public virtual DbSet<CharacterSpell> CharacterSpell { get; set; }
+        public virtual DbSet<CharacterStat> CharacterStat { get; set; }
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
         public virtual DbSet<CharacterKeybinding> CharacterKeybinding { get; set; }
         public virtual DbSet<Item> Item { get; set; }
         public virtual DbSet<Residence> Residence { get; set; }
         public virtual DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public virtual DbSet<ResidencePlot> ResidencePlot { get; set; }
-        public virtual DbSet<CharacterStat> CharacterStat { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -383,10 +384,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.ToTable("character_keybinding");
 
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
-                    .HasDefaultValueSql("'0'");
-
                 entity.Property(e => e.InputActionId)
                     .HasColumnName("inputActionId")
                     .HasDefaultValueSql("'0'")
@@ -444,6 +441,37 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterKeybinding)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_keybinding_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterDatacube>(entity =>
+            {
+                entity.HasKey(e => new {e.Id, e.Type, e.DatacubeId})
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_datacube");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.DatacubeId)
+                    .HasColumnName("datacube")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.Progress)
+                    .HasColumnName("progress")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterDatacube)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_datacube_id__character_id");
             });
 
             modelBuilder.Entity<CharacterPath>(entity =>
