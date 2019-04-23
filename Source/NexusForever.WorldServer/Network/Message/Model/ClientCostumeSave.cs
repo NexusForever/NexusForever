@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCostumeSave, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientCostumeSave)]
     public class ClientCostumeSave : IReadable
     {
         public class CostumeItem : IReadable

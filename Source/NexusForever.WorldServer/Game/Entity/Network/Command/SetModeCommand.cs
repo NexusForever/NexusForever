@@ -3,7 +3,7 @@
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetMode)]
-    public class SetModeCommand : IEntityCommand
+    public class SetModeCommand : IEntityCommandModel
     {
         public uint Mode { get; set; }
 

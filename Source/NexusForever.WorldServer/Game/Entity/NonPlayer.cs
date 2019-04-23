@@ -1,16 +1,14 @@
-﻿using System.Numerics;
-using NexusForever.Shared.GameTable;
+﻿using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Network.Message.Model;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     [DatabaseEntity(EntityType.NonPlayer)]
-    public class NonPlayer : UnitEntity, IDatabaseEntity
+    public class NonPlayer : UnitEntity
     {
         public uint CreatureId { get; private set; }
         public VendorInfo VendorInfo { get; private set; }
@@ -20,27 +18,18 @@ namespace NexusForever.WorldServer.Game.Entity
         {
         }
 
-        public void Initialise(EntityModel model)
+        public override void Initialise(EntityModel model)
         {
-            CreatureId  = model.Creature;
-            DisplayInfo = model.DisplayInfo;
-            OutfitInfo  = model.OutfitInfo;
-            Faction1    = (Faction)model.Faction1;
-            Faction2    = (Faction)model.Faction2;
-            Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
+            base.Initialise(model);
+            CreatureId = model.Creature;
 
-            if (EntityManager.VendorInfo.TryGetValue(model.Id, out VendorInfo vendorInfo))
-                VendorInfo = vendorInfo;
+            if (model.EntityVendor != null)
+            {
+                CreateFlags |= EntityCreateFlag.Vendor;
+                VendorInfo = new VendorInfo(model);
+            }
 
             CalculateProperties();
-
-            // temp shit
-            Stats.Add(Stat.Health, new StatValue(Stat.Health, 800));
-            Stats.Add(Stat.Level, new StatValue(Stat.Level, 1));
-            Stats.Add((Stat)15, new StatValue((Stat)15, 1));
-            Stats.Add((Stat)20, new StatValue((Stat)20, 1));
-            Stats.Add((Stat)21, new StatValue((Stat)21, 1));
-            Stats.Add((Stat)22, new StatValue((Stat)22, 1));
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -50,13 +39,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 CreatureId = CreatureId,
                 QuestChecklistIdx = 0
             };
-        }
-
-        public override ServerEntityCreate BuildCreatePacket()
-        {
-            ServerEntityCreate entityCreate = base.BuildCreatePacket();
-            entityCreate.CreateFlags = (byte)(VendorInfo != null ? 4 : 0); // show vendor icon above entity
-            return entityCreate;
         }
 
         private void CalculateProperties()

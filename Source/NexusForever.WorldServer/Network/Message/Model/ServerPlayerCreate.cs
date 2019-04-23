@@ -7,7 +7,7 @@ using FactionId = NexusForever.WorldServer.Game.Entity.Static.Faction;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPlayerCreate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPlayerCreate)]
     public class ServerPlayerCreate : IWritable
     {
         public class Faction : IWritable
@@ -76,7 +76,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint UnknownA0 { get; set; }
         public Faction FactionData { get; set; }
         public List<Pet> Pets { get; } = new List<Pet>();
-        public uint UnknownB8 { get; set; }
+        public uint InputKeySet { get; set; }
         public ushort UnknownBC { get; set; }
         public int ActiveCostumeIndex { get; set; }
         public uint UnknownC4 { get; set; }
@@ -110,7 +110,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Pets.Count);
             Pets.ForEach(p => p.Write(writer));
 
-            writer.Write(UnknownB8);
+            writer.Write(InputKeySet);
             writer.Write(UnknownBC);
             writer.Write(ActiveCostumeIndex);
             writer.Write(UnknownC4);

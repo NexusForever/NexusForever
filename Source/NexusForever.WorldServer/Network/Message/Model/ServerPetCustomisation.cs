@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPetCustomisation, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPetCustomisation)]
     public class ServerPetCustomisation : IWritable
     {
         public PetCustomisation PetCustomisation { get; set; }

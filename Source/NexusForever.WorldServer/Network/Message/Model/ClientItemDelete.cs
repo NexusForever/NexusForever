@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientItemDelete, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientItemDelete)]
     public class ClientItemDelete : IReadable
     {
         public ItemLocation From { get; } = new ItemLocation();

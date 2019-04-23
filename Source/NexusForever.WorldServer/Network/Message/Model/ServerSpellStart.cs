@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerSpellStart, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerSpellStart)]
     public class ServerSpellStart : IWritable
     {
         public class InitialPosition : IWritable

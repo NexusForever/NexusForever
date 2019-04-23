@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCostumeItemUnlockMultiple, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCostumeItemUnlockMultiple)]
     public class ServerCostumeItemUnlockMultiple : IWritable
     {
         public CostumeUnlockResult Result { get; set; }

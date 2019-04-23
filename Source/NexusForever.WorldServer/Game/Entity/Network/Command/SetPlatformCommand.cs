@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetPlatform)]
-    public class SetPlatformCommand : IEntityCommand
+    public class SetPlatformCommand : IEntityCommandModel
     {
         public uint UnitId { get; set; }
 

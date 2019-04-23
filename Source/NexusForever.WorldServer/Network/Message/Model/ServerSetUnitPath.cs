@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerSetUnitPathType, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerSetUnitPathType)]
     public class ServerSetUnitPathType : IWritable
     {
         public uint Guid { get; set; }

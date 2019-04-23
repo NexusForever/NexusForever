@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientRequestAmpReset, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientRequestAmpReset)]
     public class ClientRequestAmpReset : IReadable
     {
         public byte ActionSetIndex { get; private set; }

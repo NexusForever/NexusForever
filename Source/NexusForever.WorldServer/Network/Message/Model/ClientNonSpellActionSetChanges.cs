@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientNonSpellActionSetChanges, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientNonSpellActionSetChanges)]
     public class ClientNonSpellActionSetChanges : IReadable
     {
         public UILocation ActionBarIndex { get; private set; }

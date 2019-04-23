@@ -9,6 +9,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         {
             EntityVendorCategory = new HashSet<EntityVendorCategory>();
             EntityVendorItem = new HashSet<EntityVendorItem>();
+            EntityStat = new HashSet<EntityStat>();
         }
 
         public uint Id { get; set; }
@@ -26,9 +27,11 @@ namespace NexusForever.WorldServer.Database.World.Model
         public ushort OutfitInfo { get; set; }
         public ushort Faction1 { get; set; }
         public ushort Faction2 { get; set; }
+        public byte QuestChecklistIdx { get; set; }
 
         public EntityVendor EntityVendor { get; set; }
         public ICollection<EntityVendorCategory> EntityVendorCategory { get; set; }
         public ICollection<EntityVendorItem> EntityVendorItem { get; set; }
+        public ICollection<EntityStat> EntityStat { get; set; }
     }
 }

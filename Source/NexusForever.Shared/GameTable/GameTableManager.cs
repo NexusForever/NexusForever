@@ -173,8 +173,13 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<CustomizationParameterEntry> CustomizationParameter { get; private set; }
         public static GameTable<CustomizationParameterMapEntry> CustomizationParameterMap { get; private set; }
         public static GameTable<DailyLoginRewardEntry> DailyLoginReward { get; private set; }
+
+        [GameData]
         public static GameTable<DatacubeEntry> Datacube { get; private set; }
+
+        [GameData]
         public static GameTable<DatacubeVolumeEntry> DatacubeVolume { get; private set; }
+
         public static GameTable<DistanceDamageModifierEntry> DistanceDamageModifier { get; private set; }
 
         [GameData]
@@ -282,7 +287,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<ItemSetEntry> ItemSet { get; private set; }
         public static GameTable<ItemSetBonusEntry> ItemSetBonus { get; private set; }
         public static GameTable<ItemSlotEntry> ItemSlot { get; private set; }
+
+        [GameData]
         public static GameTable<ItemSpecialEntry> ItemSpecial { get; private set; }
+
         public static GameTable<ItemStatEntry> ItemStat { get; private set; }
         public static GameTable<LanguageEntry> Language { get; private set; }
         public static GameTable<LevelDifferentialAttributeEntry> LevelDifferentialAttribute { get; private set; }
@@ -518,8 +526,13 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<SpellLevelEntry> SpellLevel { get; private set; }
         public static GameTable<SpellPhaseEntry> SpellPhase { get; private set; }
+
+        [GameData]
         public static GameTable<Spline2Entry> Spline2 { get; private set; }
+
+        [GameData]
         public static GameTable<Spline2NodeEntry> Spline2Node { get; private set; }
+
         public static GameTable<StoreDisplayInfoEntry> StoreDisplayInfo { get; private set; }
         public static GameTable<StoreKeywordEntry> StoreKeyword { get; private set; }
         public static GameTable<StoreLinkEntry> StoreLink { get; private set; }

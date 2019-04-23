@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server07FA, MessageDirection.Server)]
+    [Message(GameMessageOpcode.Server07FA)]
     public class Server07FA : IWritable
     {
         public uint CastingId { get; set; }

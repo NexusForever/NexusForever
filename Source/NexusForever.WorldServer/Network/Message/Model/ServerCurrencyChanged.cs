@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPlayerCurrencyChanged, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPlayerCurrencyChanged)]
     public class ServerPlayerCurrencyChanged : IWritable
     {
         public byte CurrencyId { get; set; }

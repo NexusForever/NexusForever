@@ -74,6 +74,11 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        public bool IsUnlocked(GenericUnlockType type, uint objectId)
+        {
+            return unlocks.Values.Any(e => e.Type == type && e.Entry.UnlockObject == objectId);
+        }
+
         public bool IsDyeUnlocked(uint dyeColourRampId)
         {
             return unlocks.Values

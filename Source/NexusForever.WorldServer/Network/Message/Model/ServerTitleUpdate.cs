@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerTitleUpdate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerTitleUpdate)]
     public class ServerTitleUpdate : IWritable
     {
         public ushort TitleId { get; set; }

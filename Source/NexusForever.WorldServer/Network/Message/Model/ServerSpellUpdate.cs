@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerSpellUpdate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerSpellUpdate)]
     public class ServerSpellUpdate : IWritable
     {
         public uint Spell4BaseId { get; set; }

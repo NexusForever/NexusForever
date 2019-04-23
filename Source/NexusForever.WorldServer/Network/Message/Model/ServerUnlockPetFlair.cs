@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerUnlockPetFlair, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerUnlockPetFlair)]
     public class ServerUnlockPetFlair : IWritable
     {
         public ushort PetFlairId { get; set; }

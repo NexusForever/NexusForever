@@ -7,7 +7,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientHousingDecorUpdate, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientHousingDecorUpdate)]
     public class ClientHousingDecorUpdate : IReadable
     {
         public DecorUpdateOperation Operation { get; private set; }

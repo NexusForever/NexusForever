@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerChangeActiveActionSet, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerChangeActiveActionSet)]
     public class ServerChangeActiveActionSet : IWritable
     {
         public byte ActionSetIndex { get; set; }

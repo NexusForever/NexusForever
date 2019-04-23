@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Client009A, MessageDirection.Client)]
+    [Message(GameMessageOpcode.Client009A)]
     public class Client009A : IReadable
     {
         public uint Unknown0 { get; private set; } // first value of 0x7FD response, probably global increment

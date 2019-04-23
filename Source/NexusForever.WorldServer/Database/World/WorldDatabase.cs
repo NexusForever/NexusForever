@@ -13,6 +13,10 @@ namespace NexusForever.WorldServer.Database.World
         {
             using (var context = new WorldContext())
                 return context.Entity.Where(e => e.World == world)
+                    .Include(e => e.EntityVendor)
+                    .Include(e => e.EntityVendorCategory)
+                    .Include(e => e.EntityVendorItem)
+                    .Include(e => e.EntityStat)
                     .AsNoTracking()
                     .ToImmutableList();
         }
@@ -37,30 +41,6 @@ namespace NexusForever.WorldServer.Database.World
                
                 context.SaveChanges();
             }
-        }
-
-        public static ImmutableList<EntityVendor> GetEntityVendors()
-        {
-            using (var context = new WorldContext())
-                return context.EntityVendor
-                    .AsNoTracking()
-                    .ToImmutableList();
-        }
-
-        public static ImmutableList<EntityVendorCategory> GetEntityVendorCategories()
-        {
-            using (var context = new WorldContext())
-                return context.EntityVendorCategory
-                    .AsNoTracking()
-                    .ToImmutableList();
-        }
-
-        public static ImmutableList<EntityVendorItem> GetEntityVendorItems()
-        {
-            using (var context = new WorldContext())
-                return context.EntityVendorItem
-                    .AsNoTracking()
-                    .ToImmutableList();
         }
     }
 }

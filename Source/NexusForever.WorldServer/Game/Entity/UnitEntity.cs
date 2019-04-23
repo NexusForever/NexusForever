@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -85,6 +86,16 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (Spell.Spell spell in pendingSpells)
                 if (spell.IsMovingInterrupted() && spell.IsCasting)
                     spell.CancelCast(CastResult.CasterMovement);
+        }
+
+        /// <summary>
+        /// Cancel a <see cref="Spell"/> based on its casting id
+        /// </summary>
+        /// <param name="castingId">Casting ID of the spell to cancel</param>
+        public void CancelSpellCast(uint castingId)
+        {
+            Spell.Spell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
+            spell?.CancelCast(CastResult.SpellCancelled);
         }
     }
 }

@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerAuthAccepted, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerAuthAccepted)]
     public class ServerAuthAccepted : IWritable
     {
         public uint Unknown { get; set; }

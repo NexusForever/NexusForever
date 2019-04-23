@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerSpellFinish, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerSpellFinish)]
 
     public class ServerSpellFinish : IWritable
     {

@@ -2,7 +2,7 @@
 
 namespace NexusForever.WorldServer.Game.Entity.Network
 {
-    public interface IEntityCommand
+    public interface IEntityCommandModel
     {
         void Read(GamePacketReader reader);
         void Write(GamePacketWriter writer);

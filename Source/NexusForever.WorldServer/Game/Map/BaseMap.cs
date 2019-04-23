@@ -214,11 +214,11 @@ namespace NexusForever.WorldServer.Game.Map
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
                 // non issue once all entities types are handled
-                IDatabaseEntity entity = EntityManager.NewEntity((EntityType)model.Type) ?? EntityManager.NewEntity(EntityType.Simple);
+                WorldEntity entity = EntityManager.NewEntity((EntityType)model.Type) ?? EntityManager.NewEntity(EntityType.Simple);
                 entity.Initialise(model);
 
                 var vector = new Vector3(model.X, model.Y, model.Z);
-                AddEntity(grid, entity as GridEntity, vector);
+                AddEntity(grid, entity, vector);
             }
         }
 

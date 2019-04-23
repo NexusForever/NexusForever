@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerItemAdd, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerItemAdd)]
     public class ServerItemAdd : IWritable
     {
         public InventoryItem InventoryItem { get; set; }

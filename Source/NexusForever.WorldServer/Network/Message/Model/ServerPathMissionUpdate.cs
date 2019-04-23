@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPathMissionUpdate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerPathMissionUpdate)]
     public class ServerPathMissionUpdate : IWritable
     {
         public ushort MissionId { get; set; }

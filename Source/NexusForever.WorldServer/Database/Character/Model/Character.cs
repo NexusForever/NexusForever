@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Database.Character.Model
 {
@@ -14,11 +16,14 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterCostume = new HashSet<CharacterCostume>();
             CharacterCurrency = new HashSet<CharacterCurrency>();
             CharacterCustomisation = new HashSet<CharacterCustomisation>();
+            CharacterDatacube = new HashSet<CharacterDatacube>();
             CharacterPath = new HashSet<CharacterPath>();
             CharacterPetCustomisation = new HashSet<CharacterPetCustomisation>();
             CharacterPetFlair = new HashSet<CharacterPetFlair>();
             CharacterSpell = new HashSet<CharacterSpell>();
+            CharacterStat = new HashSet<CharacterStat>();
             CharacterTitle = new HashSet<CharacterTitle>();
+            CharacterKeybinding = new HashSet<CharacterKeybinding>();
             Item = new HashSet<Item>();
         }
 
@@ -35,10 +40,14 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public float LocationY { get; set; }
         public float LocationZ { get; set; }
         public ushort WorldId { get; set; }
+        public ushort WorldZoneId { get; set; }
         public ushort Title { get; set; }
         public uint ActivePath { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }
+        public uint TimePlayedTotal { get; set; }
+        public uint TimePlayedLevel { get; set; }
         public sbyte ActiveCostumeIndex { get; set; }
+        public sbyte InputKeySet { get; set; }
         public byte ActiveSpec { get; set; }
 
         public virtual Residence Residence { get; set; }
@@ -49,11 +58,14 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual ICollection<CharacterCostume> CharacterCostume { get; set; }
         public virtual ICollection<CharacterCurrency> CharacterCurrency { get; set; }
         public virtual ICollection<CharacterCustomisation> CharacterCustomisation { get; set; }
+        public virtual ICollection<CharacterDatacube> CharacterDatacube { get; set; }
         public virtual ICollection<CharacterPath> CharacterPath { get; set; }
         public virtual ICollection<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual ICollection<CharacterPetFlair> CharacterPetFlair { get; set; }
         public virtual ICollection<CharacterSpell> CharacterSpell { get; set; }
+        public virtual ICollection<CharacterStat> CharacterStat { get; set; }
         public virtual ICollection<CharacterTitle> CharacterTitle { get; set; }
+        public virtual ICollection<CharacterKeybinding> CharacterKeybinding { get; set; }
         public virtual ICollection<Item> Item { get; set; }
     }
 }

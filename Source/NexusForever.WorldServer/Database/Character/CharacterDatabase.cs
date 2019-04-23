@@ -26,6 +26,18 @@ namespace NexusForever.WorldServer.Database.Character
                 return context.Character.DefaultIfEmpty().Max(s => s.Id);
         }
 
+        public static async Task<Model.Character> GetCharacterById(ulong characterId)
+        {
+            using (var context = new CharacterContext())
+                return await context.Character.FirstOrDefaultAsync(e => e.Id == characterId);
+        }
+
+        public static async Task<Model.Character> GetCharacterByName(string name)
+        {
+            using (var context = new CharacterContext())
+                return await context.Character.FirstOrDefaultAsync(e => e.Name == name);
+        }
+
         public static ulong GetNextItemId()
         {
             using (var context = new CharacterContext())
@@ -63,13 +75,16 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterCurrency)
                         .Include(c => c.CharacterPath)
                         .Include(c => c.CharacterTitle)
+                        .Include(c => c.CharacterStat)
                         .Include(c => c.CharacterCostume)
                             .ThenInclude(c => c.CharacterCostumeItem)
                         .Include(c => c.CharacterPetCustomisation)
                         .Include(c => c.CharacterPetFlair)
+                        .Include(c => c.CharacterKeybinding)
                         .Include(c => c.CharacterSpell)
                         .Include(c => c.CharacterActionSetShortcut)
                         .Include(c => c.CharacterActionSetAmp)
+                        .Include(c => c.CharacterDatacube)
                     .ToListAsync();
             }
         }
@@ -95,6 +110,18 @@ namespace NexusForever.WorldServer.Database.Character
             }
         }
 
+        public static async Task<Residence> GetResidence(ulong residenceId)
+        {
+            using (var context = new CharacterContext())
+            {
+                return await context.Residence
+                    .Include(r => r.ResidenceDecor)
+                    .Include(r => r.ResidencePlot)
+                    .Include(r => r.Owner)
+                    .SingleOrDefaultAsync(r => r.Id == residenceId);
+            }
+        }
+
         public static async Task<Residence> GetResidence(string name)
         {
             using (var context = new CharacterContext())
@@ -105,7 +132,17 @@ namespace NexusForever.WorldServer.Database.Character
                     .Include(r => r.Owner)
                     .SingleOrDefaultAsync(r => r.Owner.Name == name);
             }
+        }
 
+        public static List<Residence> GetPublicResidences()
+        {
+            using (var context = new CharacterContext())
+            {
+                return context.Residence
+                    .Include(r => r.Owner)
+                    .Where(r => r.PrivacyLevel == 0)
+                    .ToList();
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCharacterList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerCharacterList)]
     public class ServerCharacterList : IWritable
     {
         public class Character : IWritable

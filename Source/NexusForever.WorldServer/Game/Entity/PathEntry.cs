@@ -62,9 +62,9 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             CharacterId = model.Id;
             Path = (Path)model.Path;
-            Unlocked = Convert.ToBoolean(model.Unlocked);
-            TotalXp = model.TotalXp;
-            LevelRewarded = model.LevelRewarded;
+            unlocked = Convert.ToBoolean(model.Unlocked);
+            totalXp = model.TotalXp;
+            levelRewarded = model.LevelRewarded;
             
             saveMask = PathSaveMask.None;
         }
@@ -76,7 +76,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             CharacterId = owner;
             Path = path;
-            Unlocked = isUnlocked;
+            unlocked = isUnlocked;
 
             saveMask = PathSaveMask.Create;
         }

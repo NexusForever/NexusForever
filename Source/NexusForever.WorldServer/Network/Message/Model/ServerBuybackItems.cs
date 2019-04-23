@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerBuybackItems, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerBuybackItems)]
     public class ServerBuybackItems : IWritable
     {
         public List<BuybackItem> BuybackItems { get; } = new List<BuybackItem>();

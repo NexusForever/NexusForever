@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message
 {
-    [Message(GameMessageOpcode.ServerGenericUnlock, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerGenericUnlock)]
     public class ServerGenericUnlock : IWritable
     {
         public ushort GenericUnlockEntryId { get; set; }

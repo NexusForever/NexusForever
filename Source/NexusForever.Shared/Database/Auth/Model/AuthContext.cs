@@ -19,6 +19,7 @@ namespace NexusForever.Shared.Database.Auth.Model
         public virtual DbSet<Account> Account { get; set; }
         public virtual DbSet<AccountCostumeUnlock> AccountCostumeUnlock { get; set; }
         public virtual DbSet<AccountGenericUnlock> AccountGenericUnlock { get; set; }
+        public virtual DbSet<AccountKeybinding> AccountKeybinding { get; set; }
         public virtual DbSet<Server> Server { get; set; }
         public virtual DbSet<ServerMessage> ServerMessage { get; set; }
 
@@ -182,6 +183,76 @@ namespace NexusForever.Shared.Database.Auth.Model
                     .HasColumnName("message")
                     .HasColumnType("varchar(256)")
                     .HasDefaultValueSql("''");
+            });
+
+            modelBuilder.Entity<AccountKeybinding>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.InputActionId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_keybinding");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.InputActionId)
+                    .HasColumnName("inputActionId")
+                    .HasDefaultValueSql("'0'")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.DeviceEnum00)
+                    .HasColumnName("deviceEnum00")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.DeviceEnum01)
+                    .HasColumnName("deviceEnum01")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.DeviceEnum02)
+                    .HasColumnName("deviceEnum02")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Code00)
+                    .HasColumnName("code00")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Code01)
+                    .HasColumnName("code01")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Code02)
+                    .HasColumnName("code02")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.MetaKeys00)
+                    .HasColumnName("metaKeys00")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.MetaKeys01)
+                    .HasColumnName("metaKeys01")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.MetaKeys02)
+                    .HasColumnName("metaKeys02")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.EventTypeEnum00)
+                    .HasColumnName("eventTypeEnum00")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.EventTypeEnum01)
+                    .HasColumnName("eventTypeEnum01")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.EventTypeEnum02)
+                    .HasColumnName("eventTypeEnum02")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.AccountKeybinding)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_keybinding_id__account_id");
             });
         }
     }

@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientSellItemToVendor, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientSellItemToVendor)]
     public class ClientVendorSell : IReadable
     {
         public ItemLocation ItemLocation { get; } = new ItemLocation();

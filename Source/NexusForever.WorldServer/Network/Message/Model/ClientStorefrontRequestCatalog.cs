@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientStorefrontRequestCatalog, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientStorefrontRequestCatalog)]
     public class ClientStorefrontRequestCatalog : IReadable
     {
         public ushort Unknown0 { get; private set; }

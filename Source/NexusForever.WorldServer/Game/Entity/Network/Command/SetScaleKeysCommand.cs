@@ -6,7 +6,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetScaleKeys)]
-    public class SetScaleKeysCommand : IEntityCommand
+    public class SetScaleKeysCommand : IEntityCommandModel
     {
         public List<uint> Times = new List<uint>();
         public byte Type { get; set; }

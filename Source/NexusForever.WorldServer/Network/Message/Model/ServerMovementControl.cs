@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerMovementControl, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerMovementControl)]
     public class ServerMovementControl : IWritable
     {
         public uint Ticket { get; set; }

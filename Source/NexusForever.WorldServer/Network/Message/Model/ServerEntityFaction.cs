@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEntityFaction, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerEntityFaction)]
     public class ServerEntityFaction : IWritable
     {
         public uint UnitId { get; set; }

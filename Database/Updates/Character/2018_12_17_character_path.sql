@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS `character_path` (
 );
 
 ALTER TABLE `character` 
-ADD `activePath` int(10) unsigned NOT NULL DEFAULT '0',
-ADD `pathActivatedTimestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ADD `activePath` int(10) unsigned NOT NULL DEFAULT '0' AFTER `title`,
+ADD `pathActivatedTimestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `activePath`;

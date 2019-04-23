@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server06B6, MessageDirection.Server)]
+    [Message(GameMessageOpcode.Server06B6)]
     public class Server06B6 : IWritable
     {
         public ushort Unknown0 { get; set; }

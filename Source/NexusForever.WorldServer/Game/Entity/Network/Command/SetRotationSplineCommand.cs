@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetRotationSpline)]
-    public class SetRotationSplineCommand : IEntityCommand
+    public class SetRotationSplineCommand : IEntityCommandModel
     {
         public uint SplineId { get; set; }
         public ushort Speed { get; set; }

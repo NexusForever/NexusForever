@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCastSpell, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientCastSpell)]
     public class ClientCastSpell : IReadable
     {
         public ushort BagIndex { get; private set; }

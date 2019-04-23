@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerMaxCharacterLevelAchieved, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerMaxCharacterLevelAchieved)]
     public class ServerMaxCharacterLevelAchieved : IWritable
     {
         public uint Level { get; set; }

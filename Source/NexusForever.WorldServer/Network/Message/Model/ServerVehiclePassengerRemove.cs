@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerVehiclePassengerRemove, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerVehiclePassengerRemove)]
     public class ServerVehiclePassengerRemove : IWritable
     {
         public uint Self { get; set; }

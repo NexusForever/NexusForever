@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerChatAccept, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerChatAccept)]
     class ServerChatAccept : IWritable
     {
         public string Name { get; set; }

@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerBuybackItemRemoved, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerBuybackItemRemoved)]
     public class ServerBuybackItemRemoved : IWritable
     {
         public uint UniqueId { get; set; }

@@ -6,7 +6,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetMoveKeys)]
-    public class SetMoveKeysCommand : IEntityCommand
+    public class SetMoveKeysCommand : IEntityCommandModel
     {
         public List<uint> Times = new List<uint>();
         public List<Move> Moves = new List<Move>();

@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPetCustomisation, MessageDirection.Client)]
+    [Message(GameMessageOpcode.ClientPetCustomisation)]
     public class ClientPetCustomisation : IReadable
     {
         public PetType PetType { get; private set; }

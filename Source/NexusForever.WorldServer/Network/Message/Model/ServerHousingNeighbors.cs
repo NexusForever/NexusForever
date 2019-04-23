@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerHousingNeighbors, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerHousingNeighbors)]
     public class ServerHousingNeighbors : IWritable
     {
         public void Write(GamePacketWriter writer)

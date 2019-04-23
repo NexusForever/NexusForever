@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Game.Housing
     {
         public ulong Id { get; }
         public ulong OwnerId { get; }
+        public string OwnerName { get; }
         public byte PropertyInfoId { get; }
 
         public string Name
@@ -192,6 +193,7 @@ namespace NexusForever.WorldServer.Game.Housing
         {
             Id                  = model.Id;
             OwnerId             = model.OwnerId;
+            OwnerName           = model.Owner.Name;
             PropertyInfoId      = model.PropertyInfoId;
             name                = model.Name;
             privacyLevel        = (ResidencePrivacyLevel)model.PrivacyLevel;
@@ -227,6 +229,7 @@ namespace NexusForever.WorldServer.Game.Housing
         {
             Id             = ResidenceManager.NextResidenceId;
             OwnerId        = player.CharacterId;
+            OwnerName      = player.Name;
             PropertyInfoId = 35; // TODO: 35 is default for single residence, this will need to change for communities
             name           = $"{player.Name}'s House";
             privacyLevel   = ResidencePrivacyLevel.Public;
@@ -285,6 +288,11 @@ namespace NexusForever.WorldServer.Game.Housing
                     {
                         model.Name = Name;
                         entity.Property(p => p.Name).IsModified = true;
+                    }
+                    if ((saveMask & ResidenceSaveMask.PrivacyLevel) != 0)
+                    {
+                        model.PrivacyLevel = (byte)PrivacyLevel;
+                        entity.Property(p => p.PrivacyLevel).IsModified = true;
                     }
                     if ((saveMask & ResidenceSaveMask.Wallpaper) != 0)
                     {

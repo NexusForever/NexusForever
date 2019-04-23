@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerGenericUnlockResult, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerGenericUnlockResult)]
     public class ServerGenericUnlockResult : IWritable
     {
         public GenericUnlockResult Result { get; set; }

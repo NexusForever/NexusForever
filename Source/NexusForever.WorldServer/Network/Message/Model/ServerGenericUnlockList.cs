@@ -4,7 +4,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerGenericUnlockList, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerGenericUnlockList)]
     public class ServerGenericUnlockList : IWritable
     {
         public List<uint> Unlocks { get; set; } = new List<uint>();

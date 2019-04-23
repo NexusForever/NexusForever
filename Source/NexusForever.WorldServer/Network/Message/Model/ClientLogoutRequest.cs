@@ -3,8 +3,8 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCharacterLogout, MessageDirection.Client)]
-    public class ClientCharacterLogout : IReadable
+    [Message(GameMessageOpcode.ClientLogoutRequest)]
+    public class ClientLogoutRequest : IReadable
     {
         public bool Initiated { get; private set; }
 

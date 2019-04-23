@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerSpellCastResult, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerSpellCastResult)]
     public class ServerSpellCastResult : IWritable
     {
         public uint Unknown0 { get; set; }

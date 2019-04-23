@@ -8,11 +8,14 @@ using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     public class PathManager: ISaveCharacter, IEnumerable<PathEntry>
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         private const uint MaxPathCount = 4u;
         private const uint MaxPathLevel = 30u;
 
@@ -216,6 +219,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (pathRewardEntry.PathRewardFlags > 0)
                     continue;
 
+                if (pathRewardEntry.PathRewardTypeEnum != 0)
+                    continue;
+
                 if (pathRewardEntry.Item2Id == 0 && pathRewardEntry.Spell4Id == 0 && pathRewardEntry.CharacterTitleId == 0)
                     continue;
 
@@ -226,10 +232,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     continue;
 
                 GrantPathReward(pathRewardEntry);
-                GetPathEntry(path).LevelRewarded = (byte)level;
-                // TODO: Play Level up effect
-                break;
             }
+
+            GetPathEntry(path).LevelRewarded = (byte)level;
+            player.CastSpell(53234, new Spell.SpellParameters());
         }
 
         /// <summary>
@@ -244,8 +250,12 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO: Check if there's bag space. Otherwise queue? Or is there an overflow inventory?
             if (pathRewardEntry.Item2Id > 0)
                 player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, 4);
-            
-            // TODO: Grant Spell rewards (needs PR #76)
+
+            if (pathRewardEntry.Spell4Id > 0)
+            {
+                Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(pathRewardEntry.Spell4Id);
+                player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+            }
 
             if (pathRewardEntry.CharacterTitleId > 0)
                 player.TitleManager.AddTitle((ushort)pathRewardEntry.CharacterTitleId);
@@ -272,10 +282,15 @@ namespace NexusForever.WorldServer.Game.Entity
                 pathEntry.Save(context);
         }
 
+        public void SendInitialPackets()
+        {
+            SendPathLogPacket();
+        }
+
         /// <summary>
         /// Used to update the Player's Path Log.
         /// </summary>
-        public void SendPathLogPacket()
+        private void SendPathLogPacket()
         {
             player.Session.EnqueueMessageEncrypted(new ServerPathLog
             {

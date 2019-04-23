@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerItemStackCountUpdate, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerItemStackCountUpdate)]
     public class ServerItemStackCountUpdate : IWritable
     {
         public ulong Guid { get; set; }

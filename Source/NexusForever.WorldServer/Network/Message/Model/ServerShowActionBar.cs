@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerShowActionBar, MessageDirection.Server)]
+    [Message(GameMessageOpcode.ServerShowActionBar)]
     public class ServerShowActionBar : IWritable
     {
         public ShortcutSet ShortcutSet { get; set; }

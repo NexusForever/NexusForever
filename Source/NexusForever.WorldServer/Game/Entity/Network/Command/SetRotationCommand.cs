@@ -3,7 +3,7 @@ using NexusForever.Shared.Network;
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
 {
     [EntityCommand(EntityCommand.SetRotation)]
-    public class SetRotationCommand : IEntityCommand
+    public class SetRotationCommand : IEntityCommandModel
     {
         public Position Position { get; set; }
         public bool Blend { get; set; }

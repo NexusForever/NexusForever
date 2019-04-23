@@ -304,19 +304,19 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(uint itemId, uint count, byte reason = 49)
+        public void ItemCreate(uint itemId, uint count, byte reason = 49, uint charges = 0)
         {
             Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
-            ItemCreate(itemEntry, count, reason);
+            ItemCreate(itemEntry, count, reason, charges);
         }
 
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(Item2Entry itemEntry, uint count, byte reason = 49)
+        public void ItemCreate(Item2Entry itemEntry, uint count, byte reason = 49, uint charges = 0)
         {
             if (itemEntry == null)
                 throw new ArgumentNullException();
@@ -329,9 +329,15 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 foreach (Item item in bag.Where(i => i.Entry.Id == itemEntry.Id))
                 {
-                    uint stackCount = Math.Min(itemEntry.MaxStackCount - item.StackCount, itemEntry.MaxStackCount);
-                    ItemStackCountUpdate(item, item.StackCount + stackCount);
-                    count -= stackCount;
+                    if (count == 0u)
+                        break;
+
+                    if (item.StackCount == itemEntry.MaxStackCount)
+                        continue;
+
+                    uint newStackCount = Math.Min(item.StackCount + count, itemEntry.MaxStackCount);
+                    count -= newStackCount - item.StackCount;
+                    ItemStackCountUpdate(item, newStackCount);
                 }
             }
 
@@ -342,7 +348,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (bagIndex == uint.MaxValue)
                     return;
 
-                var item = new Item(characterId, itemEntry, Math.Min(count, itemEntry.MaxStackCount));
+                var item = new Item(characterId, itemEntry, Math.Min(count, itemEntry.MaxStackCount), charges);
                 AddItem(item, InventoryLocation.Inventory, bagIndex);
 
                 if (!player?.IsLoading ?? false)
@@ -384,11 +390,10 @@ namespace NexusForever.WorldServer.Game.Entity
             Item dstItem = dstBag.GetItem(to.BagIndex);
             try
             {
-                RemoveItem(srcItem);
-
                 if (dstItem == null)
                 {
                     // no item at destination, just a simple move
+                    RemoveItem(srcItem);
                     AddItem(srcItem, to.Location, to.BagIndex);
 
                     player.Session.EnqueueMessageEncrypted(new ServerItemMove
@@ -400,9 +405,28 @@ namespace NexusForever.WorldServer.Game.Entity
                         }
                     });
                 }
+                else if (srcItem.Entry.Id == dstItem.Entry.Id)
+                {
+                    // item at destination with same entry, try and stack
+                    uint newStackCount = Math.Min(dstItem.StackCount + srcItem.StackCount, dstItem.Entry.MaxStackCount);
+                    uint oldStackCount = srcItem.StackCount - (newStackCount - dstItem.StackCount);
+                    ItemStackCountUpdate(dstItem, newStackCount);
+
+                    if (oldStackCount == 0u)
+                    {
+                        ItemDelete(new ItemLocation
+                        {
+                            Location = srcItem.Location,
+                            BagIndex = srcItem.BagIndex
+                        });
+                    }  
+                    else
+                        ItemStackCountUpdate(srcItem, oldStackCount);
+                }
                 else
                 {
                     // item at destination, swap with source item
+                    RemoveItem(srcItem);
                     RemoveItem(dstItem);
                     AddItem(srcItem, to.Location, to.BagIndex);
                     AddItem(dstItem, from.Location, from.BagIndex);
@@ -429,9 +453,45 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
-        public void ItemSplit()
+        /// <summary>
+        /// Split a subset of <see cref="Item"/> to create a new <see cref="Item"/> of split amount
+        /// </summary>
+        public void ItemSplit(ulong itemGuid, ItemLocation newItemLocation, uint count)
         {
-            // TODO
+            Item item = GetItem(itemGuid);
+            if (item == null)
+                throw new InvalidPacketValueException();
+
+            if (item.Entry.MaxStackCount <= 1u)
+                throw new InvalidPacketValueException();
+
+            if (count >= item.StackCount)
+                throw new InvalidPacketValueException();
+
+            Bag dstBag = GetBag(newItemLocation.Location);
+            if (dstBag == null)
+                throw new InvalidPacketValueException();
+
+            Item dstItem = dstBag.GetItem(newItemLocation.BagIndex);
+            if (dstItem != null)
+                throw new InvalidPacketValueException();
+
+            var newItem = new Item(characterId, item.Entry, Math.Min(count, item.Entry.MaxStackCount));
+            AddItem(newItem, newItemLocation.Location, newItemLocation.BagIndex);
+
+            if (!player?.IsLoading ?? false)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerItemAdd
+                {
+                    InventoryItem = new InventoryItem
+                    {
+                        Item = newItem.BuildNetworkItem(),
+                        Reason = 49
+                    }
+                });
+            }
+
+            ItemStackCountUpdate(item, item.StackCount - count);
         }
 
         /// <summary>
@@ -603,6 +663,40 @@ namespace NexusForever.WorldServer.Game.Entity
                 StackCount = stackCount,
                 Reason     = 0
             });
+        }
+
+        /// <summary>
+        /// Apply stack updates and deletion to <see cref="Item"/> on use
+        /// </summary>
+        public bool ItemUse(Item item)
+        {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item), "Item is null.");
+
+            // This should only apply for re-usable items, like Quest Clickies.
+            if (item.Entry.MaxCharges == 0 && item.Entry.MaxStackCount == 1)
+                return true;
+
+            if ((item.Charges <= 0 && item.Entry.MaxCharges > 1)|| (item.StackCount <= 0 && item.Entry.MaxStackCount > 1))
+                return false;
+
+            if(item.Charges >= 1 && item.Entry.MaxStackCount == 1)
+                item.Charges--;
+
+            if (item.Entry.MaxStackCount > 1 && item.StackCount > 0)
+                ItemStackCountUpdate(item, item.StackCount - 1);
+
+            // TODO: Set Deletion reason to 1, when consuming a single charge item.
+            if ((item.StackCount == 0 && item.Entry.MaxStackCount > 1) || (item.Charges == 0 && item.Entry.MaxCharges > 0))
+            {
+                ItemDelete(new ItemLocation
+                {
+                    Location = item.Location,
+                    BagIndex = item.BagIndex
+                });
+            }
+
+            return true;
         }
 
         private Bag GetBag(InventoryLocation location)

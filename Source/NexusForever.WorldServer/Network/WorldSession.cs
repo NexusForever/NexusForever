@@ -6,6 +6,7 @@ using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.Shared.Network.Message.Model;
+using NexusForever.Shared.Network.Packet;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -66,6 +67,13 @@ namespace NexusForever.WorldServer.Network
         {
             ulong key = PacketCrypt.GetKeyFromTicket(sessionKey);
             encryption = new PacketCrypt(key);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientPackedWorld)]
+        public void HandlePackedWorld(ClientPackedWorld packedWorld)
+        {
+            var packet = new ClientGamePacket(packedWorld.Data);
+            HandlePacket(packet);
         }
     }
 }

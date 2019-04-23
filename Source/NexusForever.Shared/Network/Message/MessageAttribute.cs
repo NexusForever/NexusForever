@@ -6,12 +6,10 @@ namespace NexusForever.Shared.Network.Message
     public class MessageAttribute : Attribute
     {
         public GameMessageOpcode Opcode { get; }
-        public MessageDirection Direction { get; }
 
-        public MessageAttribute(GameMessageOpcode opcode, MessageDirection direction)
+        public MessageAttribute(GameMessageOpcode opcode)
         {
-            Opcode    = opcode;
-            Direction = direction;
+            Opcode = opcode;
         }
     }
 }

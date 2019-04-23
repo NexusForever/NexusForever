@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.Server08B3, MessageDirection.Server)]
+    [Message(GameMessageOpcode.Server08B3)]
     public class Server08B3 : IWritable
     {
         public uint MountGuid { get; set; }
