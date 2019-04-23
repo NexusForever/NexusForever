@@ -384,6 +384,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.ToTable("character_keybinding");
 
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.InputActionId)
                     .HasColumnName("inputActionId")
                     .HasDefaultValueSql("'0'")

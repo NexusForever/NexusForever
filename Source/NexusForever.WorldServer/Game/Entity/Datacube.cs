@@ -1,32 +1,72 @@
-using System;
-using NexusForever.WorldServer.Database;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NetworkDatacube = NexusForever.WorldServer.Network.Message.Model.Shared.Datacube;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     public class Datacube
     {
-        public ushort DatacubeId { get; set; }
-        public uint Progress { get; set; }
+        public ushort Id { get; }
+        public DatacubeType Type { get; }
 
-        public DatacubeSaveMask saveMask { get; set; }
-
-        public Datacube()
+        public uint Progress
         {
+            get => progress;
+            set
+            {
+                progress = value;
+                saveMask |= DatacubeSaveMask.Progress;
+            }
         }
 
-        public Datacube(NetworkDatacube networkDatacube)
+        private uint progress;
+
+        private DatacubeSaveMask saveMask;
+
+        /// <summary>
+        /// Create a new <see cref="Datacube"/> from the supplied id, <see cref="DatacubeType"/> and progress.
+        /// </summary>
+        public Datacube(ushort id, DatacubeType type, uint progress)
         {
-            DatacubeId  = networkDatacube.DatacubeId;
-            Progress    = networkDatacube.Progress;
+            Id       = id;
+            Type     = type;
+            Progress = progress;
+
+            saveMask = DatacubeSaveMask.Create;
         }
 
-        public Datacube(CharacterDatacube characterDatacube)
+        /// <summary>
+        /// Create a new <see cref="Datacube"/> from an existing database model.
+        /// </summary>
+        public Datacube(CharacterDatacube model)
         {
-            DatacubeId  = characterDatacube.DatacubeId;
-            Progress    = characterDatacube.Progress;
+            Id       = model.DatacubeId;
+            Type     = (DatacubeType)model.Type;
+            Progress = model.Progress;
+        }
+
+        public void Save(CharacterContext context, ulong characterId)
+        {
+            if (saveMask == DatacubeSaveMask.None)
+                return;
+
+            var model = new CharacterDatacube
+            {
+                Id         = characterId,
+                Type       = (byte)Type,
+                DatacubeId = Id,
+                Progress   = Progress
+            };
+
+            if ((saveMask & DatacubeSaveMask.Create) != 0)
+                context.Add(model);
+            else if ((saveMask & DatacubeSaveMask.Progress) != 0)
+            {
+                EntityEntry<CharacterDatacube> entity = context.Attach(model);
+                entity.Property(p => p.Progress).IsModified = true;
+            }
+
+            saveMask = DatacubeSaveMask.None;
         }
     }
 }

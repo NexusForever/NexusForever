@@ -173,8 +173,13 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<CustomizationParameterEntry> CustomizationParameter { get; private set; }
         public static GameTable<CustomizationParameterMapEntry> CustomizationParameterMap { get; private set; }
         public static GameTable<DailyLoginRewardEntry> DailyLoginReward { get; private set; }
+
+        [GameData]
         public static GameTable<DatacubeEntry> Datacube { get; private set; }
+
+        [GameData]
         public static GameTable<DatacubeVolumeEntry> DatacubeVolume { get; private set; }
+
         public static GameTable<DistanceDamageModifierEntry> DistanceDamageModifier { get; private set; }
 
         [GameData]

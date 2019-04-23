@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Shared;
+using NexusForever.Shared.GameTable;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -9,165 +9,111 @@ using NetworkDatacube = NexusForever.WorldServer.Network.Message.Model.Shared.Da
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class DatacubeManager : ISaveCharacter, IUpdate
+    public class DatacubeManager : ISaveCharacter
     {
+        private static uint DatacubeHash(ushort id, DatacubeType type)
+        {
+            return ((uint)id << 16) | (uint)type;
+        }
+
         private readonly Player player;
-        public List<Datacube> DatacubeData { get; } = new List<Datacube>();
-        public List<Datacube> DatacubeVolumeData { get; } = new List<Datacube>();
+        private readonly Dictionary<uint, Datacube> datacubes = new Dictionary<uint, Datacube>();
 
-        private DatacubeDataSaveMask SaveMask { get; set; }
-
+        /// <summary>
+        /// Create a new <see cref="DatacubeManager"/> from an existing database model.
+        /// </summary>
         public DatacubeManager(Player owner, Character characterModel)
         {
             player = owner;
             
-            foreach(CharacterDatacube datacube in characterModel.CharacterDatacube)
+            foreach (CharacterDatacube model in characterModel.CharacterDatacube)
             {
-                if ((DatacubeType)datacube.Type == DatacubeType.Journal)
-                    DatacubeVolumeData.Add(new Datacube(datacube));
-                else
-                    DatacubeData.Add(new Datacube(datacube));
+                Datacube datacube = new Datacube(model);
+                uint hash = DatacubeHash(datacube.Id, datacube.Type);
+                datacubes.Add(hash, datacube);
             }
-        }
-
-        public void AddDatacube(Datacube datacube)
-        {
-            DatacubeData.Add(datacube);
-            SendDatacube(datacube);
-        }
-
-        public void AddDatacubeVolume(Datacube datacube)
-        {
-            DatacubeVolumeData.Add(datacube);
-            SendDatacubeVolume(datacube);
         }
 
         public void Save(CharacterContext context)
         {
-            if (SaveMask == DatacubeDataSaveMask.None) 
-                return;
-
-            if ((SaveMask & DatacubeDataSaveMask.Datacube) != 0)
-            {
-                foreach(Datacube datacube in DatacubeData)
-                {
-                    if (datacube.saveMask == DatacubeSaveMask.None)
-                        continue;
-
-                    var model = new CharacterDatacube
-                    {
-                        Id = player.CharacterId,
-                        Type = (byte)DatacubeType.Datacube,
-                        DatacubeId = datacube.DatacubeId
-                    };
-
-                    if ((datacube.saveMask & DatacubeSaveMask.Create) != 0)
-                    {
-                        model.Progress = datacube.Progress;
-                        context.Add(model);
-                    }
-                    else if ((datacube.saveMask & DatacubeSaveMask.Modify) != 0)
-                    {
-                        EntityEntry<CharacterDatacube> entity = context.Attach(model);
-                        model.Progress = datacube.Progress;
-                        entity.Property(p => p.Progress).IsModified = true;
-                    }
-
-                    datacube.saveMask = DatacubeSaveMask.None;
-                }
-            }
-
-            if ((SaveMask & DatacubeDataSaveMask.DatacubeVolume) != 0)
-            {
-                foreach(Datacube datacube in DatacubeVolumeData)
-                {
-                    if (datacube.saveMask == DatacubeSaveMask.None)
-                        continue;
-
-                    var model = new CharacterDatacube
-                    {
-                        Id = player.CharacterId,
-                        Type = (byte)DatacubeType.Journal,
-                        DatacubeId = datacube.DatacubeId
-                    };
-
-                    if ((datacube.saveMask & DatacubeSaveMask.Create) != 0)
-                    {
-                        model.Progress = datacube.Progress;
-                        context.Add(model);
-                    }
-                    else if ((datacube.saveMask & DatacubeSaveMask.Modify) != 0)
-                    {
-                        EntityEntry<CharacterDatacube> entity = context.Attach(model);
-                        model.Progress = datacube.Progress;
-                        entity.Property(p => p.Progress).IsModified = true;
-                    }
-
-                    datacube.saveMask = DatacubeSaveMask.None;
-                }
-            }
-
-            SaveMask = DatacubeDataSaveMask.None;
+            foreach (Datacube datacube in datacubes.Values)
+                datacube.Save(context, player.CharacterId);
         }
 
-        public void Update(double lastTick)
+        /// <summary>
+        /// Return <see cref="Datacube"/> with supplied id and <see cref="DatacubeType"/>.
+        /// </summary>
+        public Datacube GetDatacube(ushort id, DatacubeType type)
         {
+            uint hash = DatacubeHash(id, type);
+            return datacubes.TryGetValue(hash, out Datacube datacube) ? datacube : null;
         }
 
-        private void SendDatacubeList()
+        /// <summary>
+        /// Create a new <see cref="Datacube"/> of type <see cref="DatacubeType.Datacube"/> with supplied id and progress.
+        /// </summary>
+        public void AddDatacube(ushort id, uint progress)
         {
-            List<NetworkDatacube> datacubeData = new List<NetworkDatacube>();
-            List<NetworkDatacube> datacubeVolumeData = new List<NetworkDatacube>();
+            if (GameTableManager.Datacube.GetEntry(id) == null)
+                throw new ArgumentException();
+            
+            var datacube = new Datacube(id, DatacubeType.Datacube, progress);
+            datacubes.Add(DatacubeHash(id, DatacubeType.Datacube), datacube);
 
-            foreach (Datacube datacube in DatacubeData)
-                datacubeData.Add(BuildNetworkDatacube(datacube));
+            SendDatacube(datacube);
+        }
 
-            foreach (Datacube datacube in DatacubeVolumeData)
-                datacubeVolumeData.Add(BuildNetworkDatacube(datacube));
+        /// <summary>
+        /// Create a new <see cref="Datacube"/> of type <see cref="DatacubeType.Journal"/> with supplied id and progress.
+        /// </summary>
+        public void AddDatacubeVolume(ushort id, uint progress)
+        {
+            if (GameTableManager.DatacubeVolume.GetEntry(id) == null)
+                throw new ArgumentException();
 
-            player.Session.EnqueueMessageEncrypted(new ServerDatacubeUpdateList
+            var datacube = new Datacube(id, DatacubeType.Journal, progress);
+            datacubes.Add(DatacubeHash(id, DatacubeType.Journal), datacube);
+
+            SendDatacubeVolume(datacube);
+        }
+
+        public void SendInitialPackets()
+        {
+            var datacubeUpdateList = new ServerDatacubeUpdateList();
+            foreach (Datacube datacube in datacubes.Values)
             {
-                DatacubeData        = datacubeData,
-                DatacubeVolumeData  = datacubeVolumeData
-            });
+                if (datacube.Type == DatacubeType.Datacube)
+                    datacubeUpdateList.DatacubeData.Add(BuildNetworkDatacube(datacube));
+                else
+                    datacubeUpdateList.DatacubeVolumeData.Add(BuildNetworkDatacube(datacube));
+            }
+
+            player.Session.EnqueueMessageEncrypted(datacubeUpdateList);
         }
 
         public void SendDatacube(Datacube datacube)
         {
-            NetworkDatacube networkDatacube = BuildNetworkDatacube(datacube);
-            SaveMask |= DatacubeDataSaveMask.Datacube;
-
             player.Session.EnqueueMessageEncrypted(new ServerDatacubeUpdate
             {
-                DatacubeData = networkDatacube
+                DatacubeData = BuildNetworkDatacube(datacube)
             });
         }
 
         public void SendDatacubeVolume(Datacube datacube)
         {
-            NetworkDatacube networkDatacube = BuildNetworkDatacube(datacube);
-            SaveMask |= DatacubeDataSaveMask.DatacubeVolume;
-
             player.Session.EnqueueMessageEncrypted(new ServerDatacubeVolumeUpdate
             {
-                DatacubeVolumeData = networkDatacube
+                DatacubeVolumeData = BuildNetworkDatacube(datacube)
             });
-        }
-
-        public void SendInitialPackets()
-        {
-            SendDatacubeList();
         }
 
         private NetworkDatacube BuildNetworkDatacube(Datacube datacube)
         {
-            var networkDatacube = new NetworkDatacube
+            return new NetworkDatacube
             {
-                DatacubeId  = datacube.DatacubeId, 
-                Progress    = datacube.Progress 
+                DatacubeId = datacube.Id,
+                Progress   = datacube.Progress
             };
-
-            return networkDatacube;
         }
     }
 }
