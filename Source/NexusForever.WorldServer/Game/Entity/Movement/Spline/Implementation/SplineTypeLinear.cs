@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline.Implementation
             }
             else
             {
-                for (int i = (int)BottomReverseIndex; i > TopReverseIndex; i--)
+                for (int i = (int)BottomReverseIndex; i >= TopReverseIndex; i--)
                 {
                     if (p <= points[i - 1].Length)
                     {

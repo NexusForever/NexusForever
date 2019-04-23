@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline.Implementation
             }
             else
             {
-                for (int i = (int)BottomReverseIndex; i > TopReverseIndex; i--)
+                for (int i = (int)BottomReverseIndex; i >= TopReverseIndex; i--)
                 {
                     if (p <= points[i - 1].Length)
                     {
@@ -64,7 +64,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline.Implementation
         public override float CalculateLengths(List<SplinePoint> points)
         {
             float totalLength = 0f;
-            for (var i = 1; i < points.Count - 2; i++)
+            for (int i = (int)BottomIndex; i <= TopIndex; i++)
             {
                 SplinePoint p0 = points[i - 1];
                 SplinePoint p1 = points[i];
