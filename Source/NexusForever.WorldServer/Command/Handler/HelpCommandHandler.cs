@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -17,7 +18,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
         }
 
-        protected override async Task HandleCommandAsync(CommandContext context, string c, string[] parameters)
+        protected override async Task HandleCommandAsync(CommandContext context, string c, string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             IEnumerable<ICommandHandler> commandHandlers = CommandManager.GetCommandHandlers();
             var allCommands = commandHandlers

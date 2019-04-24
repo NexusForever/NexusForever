@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -13,7 +15,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         [SubCommandHandler("unlockflair", "petFlairId - Unlock a pet flair")]
-        public Task AddFlairSubCommandHandler(CommandContext context, string command, string[] parameters)
+        public Task AddFlairSubCommandHandler(CommandContext context, string command, string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             if (parameters.Length != 1)
                 return Task.CompletedTask;

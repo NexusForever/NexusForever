@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using NexusForever.Shared.GameTable;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -16,7 +18,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         [SubCommandHandler("unlock", "genericUnlockEntryId - Unlock generic unlock entry.")]
-        public Task UnlockSubCommand(CommandContext context, string command, string[] parameters)
+        public Task UnlockSubCommand(CommandContext context, string command, string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             if (parameters.Length != 1)
                 return Task.CompletedTask;
@@ -26,7 +28,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         [SubCommandHandler("unlockall", "genericUnlockType - Unlock all generic unlocks of type.")]
-        public Task UnlockAllSubCommand(CommandContext context, string command, string[] parameters)
+        public Task UnlockAllSubCommand(CommandContext context, string command, string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             if (parameters.Length != 1)
                 return Task.CompletedTask;
@@ -36,7 +38,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         [SubCommandHandler("list", "List all acquired generic unlock entries.")]
-        public async Task ListUnlocksSubCommand(CommandContext context, string command, string[] parameters)
+        public async Task ListUnlocksSubCommand(CommandContext context, string command, string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             await context.SendMessageAsync("Acquired generic unlock entries:");
 

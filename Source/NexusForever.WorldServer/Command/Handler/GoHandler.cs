@@ -6,6 +6,7 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -25,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
             if (world != null && world.LocalizedTextIdName != 0)
                 yield return world.LocalizedTextIdName;
         }
-        protected override async Task HandleCommandAsync(CommandContext context, string command, string[] parameters)
+        protected override async Task HandleCommandAsync(CommandContext context, string command, string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             string zoneName = string.Join(" ", parameters);
 

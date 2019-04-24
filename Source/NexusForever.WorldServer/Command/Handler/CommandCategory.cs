@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -36,15 +37,16 @@ namespace NexusForever.WorldServer.Command.Handler
 
                 #region Debug
 
-                Debug.Assert(parameterInfo.Length == 3);
+                Debug.Assert(parameterInfo.Length == 4);
                 Debug.Assert(method.ReturnType == typeof(Task));
                 Debug.Assert(typeof(CommandContext) == parameterInfo[0].ParameterType);
                 Debug.Assert(typeof(string) == parameterInfo[1].ParameterType);
                 Debug.Assert(typeof(string[]) == parameterInfo[2].ParameterType);
+                Debug.Assert(typeof(IEnumerable<ChatFormat>) == parameterInfo[3].ParameterType);
 
                 #endregion
 
-                helpBuilder.Append($"   {attribute.Command} - ");
+                    helpBuilder.Append($"   {attribute.Command} - ");
                 if (string.IsNullOrWhiteSpace(attribute.HelpText))
                     helpBuilder.AppendLine("No help available.");
                 else
@@ -59,7 +61,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         protected sealed override async Task HandleCommandAsync(CommandContext context, string command,
-            string[] parameters)
+            string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             if (parameters.Length > 0)
             {
@@ -69,7 +71,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                await (commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
+                await (commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray(), chatLinks) ??
                       Task.CompletedTask);
             }
             else
@@ -78,6 +80,6 @@ namespace NexusForever.WorldServer.Command.Handler
             // TODO
         }
 
-        private delegate Task SubCommandHandler(CommandContext context, string subCommand, string[] parameters);
+        private delegate Task SubCommandHandler(CommandContext context, string subCommand, string[] parameters, IEnumerable<ChatFormat> chatLinks);
     }
 }

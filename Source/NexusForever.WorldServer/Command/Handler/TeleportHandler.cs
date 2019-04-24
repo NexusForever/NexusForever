@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -13,7 +15,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
         }
 
-        protected override Task HandleCommandAsync(CommandContext context, string command, string[] parameters)
+        protected override Task HandleCommandAsync(CommandContext context, string command, string[] parameters, IEnumerable<ChatFormat> chatLinks)
         {
             WorldSession session = context.Session;
             if (parameters.Length == 4)

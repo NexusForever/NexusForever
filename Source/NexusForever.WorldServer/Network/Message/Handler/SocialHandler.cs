@@ -7,8 +7,8 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Model;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -26,33 +26,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 try
                 {
-                    string messageToProcess = chat.Message;
-
-                    if(chat.Formats.Count > 0)
-                    {
-                        IEnumerable<Model.Shared.ChatFormat> chatLinks = SocialManager.ParseChatLinks(session, chat.Formats);
-
-                        foreach (Model.Shared.ChatFormat chatFormat in chatLinks)
-                        {
-                            string messageAddition = "";
-                            if (chatFormat.Type == Game.Social.Static.ChatFormatType.ItemItemId)
-                            {
-                                ChatFormatItemId formatModel = (ChatFormatItemId)chatFormat.FormatModel;
-                                messageAddition = "{itemId:" + formatModel.ItemId +"}";
-                            }
-
-                            messageToProcess = messageToProcess.Remove(chatFormat.StartIndex, chatFormat.StopIndex - chatFormat.StartIndex).Insert(chatFormat.StartIndex, messageAddition);
-                        }
-                    }
-
-                    CommandManager.HandleCommand(session, messageToProcess, true);
+                    IEnumerable<ChatFormat> chatLinks = SocialManager.ParseChatLinks(session, chat.Formats);
+                    CommandManager.HandleCommand(session, chat.Message, true, chatLinks);
                     //CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
                     //CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
                     //handler?.Invoke(session, parameters);
                 }
                 catch (Exception e)
                 {
-                    log.Warn(e.Message);
+                    log.Warn($"{e.Message}: {e.StackTrace}");
                 }
             }
             else

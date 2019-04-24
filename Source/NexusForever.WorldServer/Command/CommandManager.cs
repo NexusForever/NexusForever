@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Command.Handler;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Command
@@ -31,17 +32,17 @@ namespace NexusForever.WorldServer.Command
             return commandHandlers.OrderBy(i => i.Order);
         }
 
-        public static bool HandleCommand(WorldSession session, string commandText, bool isFromChat)
+        public static bool HandleCommand(WorldSession session, string commandText, bool isFromChat, IEnumerable<ChatFormat> chatLinks = null)
         {
-            return HandleCommand(new WorldSessionCommandContext(session), commandText, isFromChat);
+            return HandleCommand(new WorldSessionCommandContext(session), commandText, isFromChat, chatLinks);
         }
 
-        public static bool HandleCommand(CommandContext context, string commandText, bool isFromChat)
+        public static bool HandleCommand(CommandContext context, string commandText, bool isFromChat, IEnumerable<ChatFormat> chatLinks = null)
         {
-            return HandleCommandAsync(context, commandText, isFromChat).GetAwaiter().GetResult();
+            return HandleCommandAsync(context, commandText, isFromChat, chatLinks).GetAwaiter().GetResult();
         }
 
-        public static async Task<bool> HandleCommandAsync(CommandContext session, string commandText, bool isFromChat)
+        public static async Task<bool> HandleCommandAsync(CommandContext session, string commandText, bool isFromChat, IEnumerable<ChatFormat> chatLinks = null)
         {
             if (isFromChat)
             {
@@ -53,10 +54,10 @@ namespace NexusForever.WorldServer.Command
 
             foreach (ICommandHandler command in GetCommandHandlers())
             {
-                if (!await command.HandlesAsync(session, commandText))
+                if (!await command.HandlesAsync(session, commandText, chatLinks))
                     continue;
 
-                await command.HandleAsync(session, commandText);
+                await command.HandleAsync(session, commandText, chatLinks);
                 return true;
             }
 

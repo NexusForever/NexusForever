@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -14,8 +15,8 @@ namespace NexusForever.WorldServer.Command.Handler
         public abstract int Order { get; }
 
         public abstract IEnumerable<string> GetCommands();
-        public abstract Task HandleAsync(CommandContext session, string text);
-        public abstract Task<bool> HandlesAsync(CommandContext session, string input);
+        public abstract Task HandleAsync(CommandContext session, string text, IEnumerable<ChatFormat> chatLinks);
+        public abstract Task<bool> HandlesAsync(CommandContext session, string input, IEnumerable<ChatFormat> chatLinks);
 
         protected static void ParseCommand(string value, out string command, out string[] parameters)
         {
