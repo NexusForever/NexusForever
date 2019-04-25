@@ -159,6 +159,10 @@ namespace NexusForever.WorldServer.Game.Entity
             Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
             Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
             Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
+            // sprint
+            Properties.Add(Property.ResourceMax0, new PropertyValue(Property.ResourceMax0, 500f, 500f));
+            // dash
+            Properties.Add(Property.ResourceMax7, new PropertyValue(Property.ResourceMax7, 200f, 200f));
 
             Costume costume = null;
             if (CostumeIndex >= 0)
@@ -179,6 +183,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
             SetStat(Stat.Sheathed, 1u);
+
+            // temp
+            SetStat(Stat.Dash, 200F);
+            // sprint
+            SetStat(Stat.Resource0, 500f);
+            SetStat(Stat.Shield, 450u);
         }
 
         public override void Update(double lastTick)
