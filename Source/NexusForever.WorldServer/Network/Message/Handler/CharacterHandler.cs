@@ -385,7 +385,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 ImmutableList<CharacterCustomizationEntry> entries = AssetManager.GetPrimaryCharacterCustomisation(race, sex, primaryLabel, primaryValue);
                 if (entries == null)
                     return null;
-                if (entries.Count == 1)
+                if (entries[0].CharacterCustomizationLabelId00 != 0 && entries[0].Value00 != 0 )
                     return entries[0];
 
                 // customisation has multiple results, filter with secondary label and value 
