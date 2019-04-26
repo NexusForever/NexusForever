@@ -49,7 +49,12 @@ namespace NexusForever.WorldServer.Game
             var entries = new Dictionary<uint, List<CharacterCustomizationEntry>>();
             foreach (CharacterCustomizationEntry entry in GameTableManager.CharacterCustomization.Entries)
             {
-                uint primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
+                uint primaryKey;
+                if(entry.Value00 == 0 && entry.CharacterCustomizationLabelId00 == 0)
+                    primaryKey = (entry.Value01 << 24) | (entry.CharacterCustomizationLabelId01 << 16) | (entry.Gender << 8) | entry.RaceId;
+                else
+                    primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
+
                 if (!entries.ContainsKey(primaryKey))
                     entries.Add(primaryKey, new List<CharacterCustomizationEntry>());
 
