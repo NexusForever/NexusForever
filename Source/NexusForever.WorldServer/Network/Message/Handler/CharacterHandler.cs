@@ -256,6 +256,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 foreach ((uint label, uint value) in customisations)
                 {
+                    //TODO: why do we store this?
                     character.CharacterCustomisation.Add(new CharacterCustomisation
                     {
                         Label = label,
@@ -263,7 +264,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
 
                     CharacterCustomizationEntry entry = GetCharacterCustomisation(customisations, creationEntry.RaceId, creationEntry.Sex, label, value);
-                    if (entry == null)
+                    if (entry == null || character.CharacterAppearance.FirstOrDefault(a => a.Slot == (byte)entry.ItemSlotId) != null)
                         continue;
 
                     character.CharacterAppearance.Add(new CharacterAppearance
@@ -383,15 +384,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             CharacterCustomizationEntry GetCharacterCustomisation(Dictionary<uint, uint> customisations, uint race, uint sex, uint primaryLabel, uint primaryValue)
             {
                 ImmutableList<CharacterCustomizationEntry> entries = AssetManager.GetPrimaryCharacterCustomisation(race, sex, primaryLabel, primaryValue);
+
                 if (entries == null)
                     return null;
-                if (entries[0].CharacterCustomizationLabelId00 != 0 && entries[0].Value00 != 0 )
+
+                if (entries[0].CharacterCustomizationLabelId00 != 0 || entries.Count == 1)
                     return entries[0];
 
                 // customisation has multiple results, filter with secondary label and value 
                 uint secondaryLabel = entries.First(e => e.CharacterCustomizationLabelId01 != 0).CharacterCustomizationLabelId01;
                 uint secondaryValue = customisations[secondaryLabel];
-
                 CharacterCustomizationEntry entry = entries.SingleOrDefault(e => e.CharacterCustomizationLabelId01 == secondaryLabel && e.Value01 == secondaryValue);
                 return entry ?? entries.Single(e => e.CharacterCustomizationLabelId01 == 0 && e.Value01 == 0);
             }
