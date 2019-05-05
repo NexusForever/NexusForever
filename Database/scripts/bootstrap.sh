@@ -24,9 +24,15 @@ mysql -v -u root -D nexus_forever_character < $DIR/../Base/Character.sql
 mysql -v -u root -D nexus_forever_world < $DIR/../Base/World.sql
 
 echo "Running update scripts"
-find $DIR/../Updates/Auth/ -name '*.sql' -exec sh -c "mysql -u root -D nexus_forever_auth < {}" \;
-find $DIR/../Updates/Character/ -name '*.sql' -exec sh -c "mysql -u root -D nexus_forever_character < {}" \;
-find $DIR/../Updates/World/ -name '*.sql' -exec sh -c "mysql -u root -D nexus_forever_world < {}" \;
+for file in $(find $DIR/../Updates/Auth/ -name '*.sql' | sort); do
+    mysql -u root -D nexus_forever_auth < $file;
+done;
+for file in $(find $DIR/../Updates/Character/ -name '*.sql' | sort); do
+    mysql -u root -D nexus_forever_character < $file;
+done;
+for file in $(find $DIR/../Updates/World/ -name '*.sql' | sort); do
+    mysql -u root -D nexus_forever_world < $file;
+done;
 
 echo "Inserting server information"
 mysql -v -u root -D nexus_forever_auth -e "INSERT INTO server (name, host, port, type) VALUES ('NexusForever', '127.0.0.1', 24000, 0);"
