@@ -34,12 +34,14 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte Sex { get; set; }
         public byte Race { get; set; }
         public byte Class { get; set; }
-        public byte Level { get; set; }
         public ushort FactionId { get; set; }
         public DateTime CreateTime { get; set; }
         public float LocationX { get; set; }
         public float LocationY { get; set; }
         public float LocationZ { get; set; }
+        public float RotationX { get; set; }
+        public float RotationY { get; set; }
+        public float RotationZ { get; set; }
         public ushort WorldId { get; set; }
         public ushort WorldZoneId { get; set; }
         public ushort Title { get; set; }
@@ -50,6 +52,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public byte ActiveSpec { get; set; }
         public uint TimePlayedTotal { get; set; }
         public uint TimePlayedLevel { get; set; }
+        public uint Xp { get; set; }
+        public uint RestXp { get; set; }
 
         public virtual Residence Residence { get; set; }
         public virtual ICollection<CharacterActionSetAmp> CharacterActionSetAmp { get; set; }

@@ -37,6 +37,7 @@ namespace NexusForever.WorldServer.Game
 
         private static ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
         private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
+        private static ImmutableDictionary<uint /*MinXpForLevel*/, byte /*Level*/> xpPerLevel;
 
         private static ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
 
@@ -51,6 +52,7 @@ namespace NexusForever.WorldServer.Game
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
             CacheTutorials();
+            CacheXpPerLevel();
         }
 
         private static void CacheCharacterCustomisations()
@@ -130,6 +132,18 @@ namespace NexusForever.WorldServer.Game
             zoneTutorials = zoneEntries.ToImmutable();
         }
 
+        private static void CacheXpPerLevel()
+        {
+            var entries = new Dictionary<uint, byte>();
+            foreach (XpPerLevelEntry entry in GameTableManager.XpPerLevel.Entries)
+            {
+                if (!entries.ContainsKey(entry.MinXpForLevel))
+                    entries.Add(entry.MinXpForLevel, (byte)entry.Id);
+            }
+
+            xpPerLevel = entries.ToImmutableDictionary(e => e.Key, e => e.Value);
+        }
+
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
         /// </summary>
@@ -161,6 +175,13 @@ namespace NexusForever.WorldServer.Game
         public static uint GetTutorialIdForZone(uint zoneId)
         {
             return zoneTutorials.TryGetValue(zoneId, out uint tutorialId) ? tutorialId : 0;
+        }
+
+        public static byte Xp2Level(uint xp)
+        {
+            return xpPerLevel.OrderByDescending(x => x.Key)
+                .Where(x => x.Key <= xp)
+                .First().Value;
         }
     }
 }

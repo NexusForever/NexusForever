@@ -150,14 +150,22 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Race        = (Race)character.Race,
                         Class       = (Class)character.Class,
                         Faction     = character.FactionId,
-                        Level       = character.Level,
                         WorldId     = character.WorldId,
                         WorldZoneId = character.WorldZoneId,
                         RealmId     = WorldServer.RealmId,
                         Path        = (byte)character.ActivePath
                     };
 
-                    MaxCharacterLevelAchieved = (byte)Math.Max(MaxCharacterLevelAchieved, character.Level);
+                    foreach(CharacterStat stat in character.CharacterStat)
+                    {
+                        if ((Stat)stat.Stat == Stat.Level)
+                        {
+                            listCharacter.Level = (uint)stat.Value;
+                            break;
+                        }
+                    }
+
+                    MaxCharacterLevelAchieved = (byte)Math.Max(MaxCharacterLevelAchieved, listCharacter.Level);
 
                     // create a temporary Inventory and CostumeManager to show equipped gear
                     var inventory      = new Inventory(null, character);
@@ -218,6 +226,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             try
             {
+                byte creationLevel = 1;
                 // TODO: validate name and path
 
                 CharacterCreationEntry creationEntry = GameTableManager.CharacterCreation.GetEntry(characterCreate.CharacterCreationId);
@@ -283,18 +292,42 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
                 }
 
-                //TODO: handle starting locations per race
-                character.LocationX = -7683.809f;
-                character.LocationY = -942.5914f;
-                character.LocationZ = -666.6343f;
-                character.WorldId = 870;
+                creationLevel = AssetManager.Xp2Level(creationEntry.Xp);
+
+                WorldLocation2Entry worldLocation;
+                if ((CharacterCreationStart)creationEntry.CharacterCreationStartEnum == CharacterCreationStart.Nexus)
+                {
+                    // veteran
+                    if (((Race)creationEntry.RaceId == Race.Human && (Faction)creationEntry.FactionId == Faction.Exile) || (Race)creationEntry.RaceId == Race.Granok)
+                        worldLocation = GameTableManager.WorldLocation2.GetEntry(1594);
+                    else if ((Race)creationEntry.RaceId == Race.Chua || (Race)creationEntry.RaceId == Race.Draken)
+                        worldLocation = GameTableManager.WorldLocation2.GetEntry(8223);
+                    else if (((Race)creationEntry.RaceId == Race.Human && (Faction)creationEntry.FactionId == Faction.Dominion) || (Race)creationEntry.RaceId == Race.Mechari)
+                        worldLocation = GameTableManager.WorldLocation2.GetEntry(18987);
+                    else // Aurin / Modresh
+                        worldLocation = GameTableManager.WorldLocation2.GetEntry(37015);
+                }
+                else
+                {
+                    // CharacterCreationStart.PreTutorial | novice - nexus virtuality
+                    worldLocation = GameTableManager.WorldLocation2.GetEntry(51596);
+                }
+
+                character.LocationX     = worldLocation.Position0;
+                character.LocationY     = worldLocation.Position1;
+                character.LocationZ     = worldLocation.Position2;
+                character.RotationX     = worldLocation.Facing0;
+                character.RotationY     = worldLocation.Facing1;
+                character.RotationZ     = worldLocation.Facing2;
+                character.WorldId       = (ushort)worldLocation.WorldId;
+                character.WorldZoneId   = (ushort)worldLocation.WorldZoneId;
 
                 character.ActiveSpec = 0;
 
                 // create initial LAS abilities
                 UILocation location = 0;
                 foreach (SpellLevelEntry spellLevelEntry in GameTableManager.SpellLevel.Entries
-                    .Where(s => s.ClassId == character.Class && s.CharacterLevel == 1))
+                    .Where(s => s.ClassId == character.Class && s.CharacterLevel <= creationLevel))
                 {
                     Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spellLevelEntry.Spell4Id);
                     if (spell4Entry == null)
@@ -349,7 +382,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.Level,
-                    Value = 1
+                    Value = creationLevel
                 });
                 character.CharacterStats.Add(new CharacterStats
                 {

@@ -99,10 +99,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnType("tinyint(4)")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.Level)
-                    .HasColumnName("level")
-                    .HasDefaultValueSql("'0'");
-
                 entity.Property(e => e.LocationX)
                     .HasColumnName("locationX")
                     .HasDefaultValueSql("'0'");
@@ -113,6 +109,18 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.LocationZ)
                     .HasColumnName("locationZ")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.RotationX)
+                    .HasColumnName("rotationX")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.RotationY)
+                    .HasColumnName("rotationY")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.RotationZ)
+                    .HasColumnName("rotationZ")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Name)
@@ -152,6 +160,14 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.WorldZoneId)
                     .HasColumnName("worldZoneId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Xp)
+                    .HasColumnName("xp")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.RestXp)
+                    .HasColumnName("restXp")
                     .HasDefaultValueSql("'0'");
             });
 

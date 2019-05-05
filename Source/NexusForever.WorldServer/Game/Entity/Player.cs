@@ -142,6 +142,7 @@ namespace NexusForever.WorldServer.Game.Entity
             InputKeySet     = (InputSets)model.InputKeySet;
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
+            Rotation        = new Vector3(model.RotationX, model.RotationY, model.RotationZ);
 
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
@@ -274,7 +275,8 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerChangeWorld
             {
                 WorldId  = (ushort)map.Entry.Id,
-                Position = new Position(vector)
+                Position = new Position(vector),
+                Yaw = Rotation.X
             });
 
             base.OnAddToMap(map, guid, vector);
@@ -648,6 +650,15 @@ namespace NexusForever.WorldServer.Game.Entity
 
                     model.LocationZ = Position.Z;
                     entity.Property(p => p.LocationZ).IsModified = true;
+
+                    model.RotationX = Rotation.X;
+                    entity.Property(p => p.RotationX).IsModified = true;
+
+                    model.RotationY = Rotation.Y;
+                    entity.Property(p => p.RotationY).IsModified = true;
+
+                    model.RotationZ = Rotation.Z;
+                    entity.Property(p => p.RotationZ).IsModified = true;
 
                     model.WorldId = (ushort)Map.Entry.Id;
                     entity.Property(p => p.WorldId).IsModified = true;

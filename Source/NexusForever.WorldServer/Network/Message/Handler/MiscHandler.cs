@@ -32,6 +32,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 if (character == null)
                     throw new InvalidPacketValueException();
 
+                byte characterLevel = 1;
+                foreach(CharacterStat stat in character.CharacterStat)
+                {
+                    if ((Stat)stat.Stat == Stat.Level)
+                    {
+                        characterLevel = (byte)stat.Value;
+                        break;
+                    }
+                }
+
                 session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
                 {
                     BaseData = new ServerPlayerInfoFullResponse.Base
@@ -48,7 +58,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     IsClassPathSet = true,
                     Path = (Path)character.ActivePath,
                     Class = (Class)character.Class,
-                    Level = character.Level,
+                    Level = characterLevel,
                     IsLastLoggedOnInDaysSet = false,
                     LastLoggedInDays = -1f
                 });
