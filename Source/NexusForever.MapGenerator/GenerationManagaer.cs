@@ -3,6 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Threading;
 using Nexus.Archive;
 using NexusForever.MapGenerator.GameTable;
 using NexusForever.MapGenerator.IO.Area;
@@ -13,7 +15,7 @@ using NLog;
 
 namespace NexusForever.MapGenerator
 {
-    public static class GenerationManagaer
+    public static class GenerationManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -23,14 +25,20 @@ namespace NexusForever.MapGenerator
 
             Directory.CreateDirectory("map");
 
+            List<Thread> threadList = new List<Thread>();
             foreach (WorldEntry entry in GameTableManager.World.Entries
                 .Where(e => e.AssetPath != string.Empty)
                 .GroupBy(e => e.AssetPath)
                 .Select(g => g.First())
                 .ToArray())
             {
-                ProcessWorld(entry);
+                Thread thread = new Thread(() => ProcessWorld(entry));
+                threadList.Add(thread);
+                thread.Start();
             }
+            
+            foreach (Thread thread in threadList)
+                thread.Join();
         }
 
         /// <summary>

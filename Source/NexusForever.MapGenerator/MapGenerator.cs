@@ -35,7 +35,7 @@ namespace NexusForever.MapGenerator
             if ((flags & Flags.Extration) != 0)
                 ExtractionManager.Initialise();
             if ((flags & Flags.Generation) != 0)
-                GenerationManagaer.Initialise();
+                GenerationManager.Initialise();
 
             log.Info("Finished!");
             Console.ReadLine();
