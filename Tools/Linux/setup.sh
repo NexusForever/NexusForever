@@ -16,24 +16,23 @@ if [ "$DB_PW" != "" ]; then
 fi
 
 # Making sure that paths are correct
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DIR=$(dirname "${BASH_SOURCE[0]}")
 
 # Making sure that DIR is not empty
 if [ "${DIR}" = "" ] || [ ! -d "${DIR}" ]; then
         echo "Source directory is empty?!"
         exit
 fi
-cd ${DIR} || exit "Something went wrong"
 
 # Switching into the correct root directory
-DIR="${DIR}/../../"
+DIR="${DIR}/../.."
 cd ${DIR}
 
 # Cleaning
 echo "Cleaning the directory from previous setups"
-rm -rf ${DIR}/Source/NexusForever.AuthServer/bin;
-rm -rf ${DIR}/Source/NexusForever.StsServer/bin;
-rm -rf ${DIR}/Source/NexusForever.WorldServer/bin;
+rm -rf ./Source/NexusForever.AuthServer/bin;
+rm -rf ./Source/NexusForever.StsServer/bin;
+rm -rf ./Source/NexusForever.WorldServer/bin;
 
 # Shamelessly stolen from the wiki @Ahoiahoi
 # And slightly modified
@@ -47,20 +46,21 @@ for server in WorldServer StsServer AuthServer; do
         cd ..
 done
 
-cd ${DIR}/Source/NexusForever.WorldServer/
+cd ./NexusForever.WorldServer/
 sed -i -e "s|\(.*MapPath\": \"\)\(.*\)|\1${PWD}\/bin\/\2|" ./bin/Debug/${framework_version}/WorldServer.json
 mkdir ./bin/Debug/${framework_version}/tbl
 cp -r ${TABLE_PATH}/* ./bin/Debug/${framework_version}/tbl
+cd ..
 
 # Setting up maps
-cd ${DIR}/Source/NexusForever.MapGenerator/
+cd ./NexusForever.MapGenerator/
 dotnet run $GAME_PATH/Patch/
 cp -a ./map ./../NexusForever.WorldServer/bin/map
 rm -rf ./map
 rm -rf ./tbl
 
 # Setting up db
-cd ${DIR};
+cd ../../
 chmod 755 ./Database/scripts/bootstrap.sh
 ./Database/scripts/bootstrap.sh
 

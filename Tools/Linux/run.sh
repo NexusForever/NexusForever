@@ -1,21 +1,28 @@
 # Making sure that paths are correct
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DIR=$(dirname "${BASH_SOURCE[0]}")
 
 # Making sure that DIR is not empty
 if [ "${DIR}" = "" ] || [ ! -d "${DIR}" ]; then
         echo "Source directory is empty?!"
         exit
 fi
-cd ${DIR} || exit "Something went wrong"
 
-DIR="${DIR}/../../"
+DIR="${DIR}/../.."
 cd ${DIR}/Source
 
 export TERM=vt100
 for server in StsServer AuthServer; do
-        cd NexusForever.${server}
-        dotnet run&
-        cd ..
+        if [ $(ps aux | grep NexusForever.${server} | wc -l) -eq 1 ]; then
+                cd NexusForever.${server}
+                dotnet run&
+                cd ..
+        else
+                echo "${server} already running!"
+        fi;
 done
-cd NexusForever.WorldServer
-dotnet run
+if [ $(ps aux | grep NexusForever.WorldServer | wc -l) -eq 1 ]; then
+        cd NexusForever.WorldServer
+        dotnet run
+else   
+        echo "WorldServer already running!"
+fi;
