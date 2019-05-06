@@ -41,6 +41,9 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
         public virtual DbSet<CharacterZonemapHexgroup> CharacterZonemapHexgroup { get; set; }
         public virtual DbSet<Item> Item { get; set; }
+        public virtual DbSet<RealmConfig> RealmConfig { get; set; }
+        public virtual DbSet<RealmConfigCustomLocation> RealmConfigCustomLocation { get; set; }
+        public virtual DbSet<RealmConfigStartingLocation> RealmConfigStartingLocation { get; set; }
         public virtual DbSet<Residence> Residence { get; set; }
         public virtual DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public virtual DbSet<ResidencePlot> ResidencePlot { get; set; }
@@ -869,6 +872,109 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterZonemapHexgroup)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_zonemap_hexgroup_id__character_id");
+            });
+
+            modelBuilder.Entity<RealmConfig>(entity =>
+            {
+                entity.ToTable("realmconfig");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Active)
+                    .HasColumnName("active")
+                    .HasDefaultValueSql("'0'");
+            });
+
+            modelBuilder.Entity<RealmConfigCustomLocation>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.CustomLocationId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("realmconfig_custom_location");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CustomLocationId)
+                    .HasColumnName("customLocationId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Position0)
+                    .HasColumnName("position0")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Position1)
+                    .HasColumnName("position1")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Position2)
+                    .HasColumnName("position2")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Facing0)
+                    .HasColumnName("facing0")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Facing1)
+                    .HasColumnName("facing1")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Facing2)
+                    .HasColumnName("facing2")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Facing3)
+                    .HasColumnName("facing3")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.WorldZoneId)
+                    .HasColumnName("worldZoneId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.RealmConfigCustomLocation)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__realmconfig_custom_location_id__realmconfig_id");
+            });
+
+            modelBuilder.Entity<RealmConfigStartingLocation>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Race, e.FactionId, e.LocationId, e.CharacterCreationStart })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("realmconfig_starting_location");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Race)
+                    .HasColumnName("race")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.FactionId)
+                    .HasColumnName("factionId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.LocationId)
+                    .HasColumnName("locationId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.CharacterCreationStart)
+                    .HasColumnName("characterCreationStart")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.RealmConfigStartingLocation)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__realmconfig_starting_location_id__realmconfig_id");
             });
 
             modelBuilder.Entity<Item>(entity =>

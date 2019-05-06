@@ -145,10 +145,22 @@ namespace NexusForever.WorldServer.Database.Character
             }
         }
 
+
         public static ulong GetNextMailId()
         {
             using (var context = new CharacterContext())
                 return context.CharacterMail.DefaultIfEmpty().Max(s => s.Id);
+        }
+
+        public static RealmConfig GetActiveRealmConfig()
+        {
+            using (var context = new CharacterContext())
+            {
+                return context.RealmConfig
+                    .Include(c => c.RealmConfigCustomLocation)
+                    .Include(c => c.RealmConfigStartingLocation)
+                    .FirstOrDefault(c => c.Active == 1);
+            }
         }
     }
 }

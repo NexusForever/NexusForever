@@ -20,6 +20,7 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Quest;
+using NexusForever.WorldServer.Game.RealmConfig;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network;
@@ -49,6 +50,8 @@ namespace NexusForever.WorldServer
             DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
 
             GameTableManager.Initialise();
+            RealmConfigManager.Initialise();
+
             MapManager.Initialise();
             SearchManager.Initialise();
             EntityManager.Initialise();

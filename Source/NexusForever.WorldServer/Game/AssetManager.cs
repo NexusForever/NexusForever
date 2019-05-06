@@ -57,7 +57,7 @@ namespace NexusForever.WorldServer.Game
 
         private static void CacheCharacterCustomisations()
         {
-            var entries = new Dictionary<uint, List<CharacterCustomizationEntry>>();
+            Dictionary<uint, List<CharacterCustomizationEntry>> entries = new Dictionary<uint, List<CharacterCustomizationEntry>>();
             foreach (CharacterCustomizationEntry entry in GameTableManager.CharacterCustomization.Entries)
             {
                 uint primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
@@ -72,7 +72,7 @@ namespace NexusForever.WorldServer.Game
 
         private static void CacheInventoryEquipSlots()
         {
-            var entries = new Dictionary<ItemSlot, List<EquippedItem>>();
+            Dictionary<ItemSlot, List<EquippedItem>> entries = new Dictionary<ItemSlot, List<EquippedItem>>();
             foreach (FieldInfo field in typeof(ItemSlot).GetFields())
             {
                 foreach (EquippedItemAttribute attribute in field.GetCustomAttributes<EquippedItemAttribute>())
@@ -90,22 +90,22 @@ namespace NexusForever.WorldServer.Game
 
         public static void CacheInventoryBagCapacities()
         {
-            var entries = new Dictionary<InventoryLocation, uint>();
+            ImmutableDictionary<InventoryLocation, uint>.Builder entries = ImmutableDictionary.CreateBuilder<InventoryLocation, uint>();
             foreach (FieldInfo field in typeof(InventoryLocation).GetFields())
             {
                 foreach (InventoryLocationAttribute attribute in field.GetCustomAttributes<InventoryLocationAttribute>())
                 {
-                    InventoryLocation location = (InventoryLocation)field.GetValue(null);
+                    var location = (InventoryLocation)field.GetValue(null);
                     entries.Add(location, attribute.DefaultCapacity);
                 }
             }
 
-            InventoryLocationCapacities = entries.ToImmutableDictionary();
+            InventoryLocationCapacities = entries.ToImmutable();
         }
 
         private static void CacheItemDisplaySourceEntries()
         {
-            var entries = new Dictionary<uint, List<ItemDisplaySourceEntryEntry>>();
+            Dictionary<uint, List<ItemDisplaySourceEntryEntry>> entries = new Dictionary<uint, List<ItemDisplaySourceEntryEntry>>();
             foreach (ItemDisplaySourceEntryEntry entry in GameTableManager.ItemDisplaySourceEntry.Entries)
             {
                 if (!entries.ContainsKey(entry.ItemSourceId))
@@ -134,14 +134,14 @@ namespace NexusForever.WorldServer.Game
 
         private static void CacheXpPerLevel()
         {
-            var entries = new Dictionary<uint, byte>();
+            ImmutableDictionary<uint, byte>.Builder entries = ImmutableDictionary.CreateBuilder<uint, byte>();
             foreach (XpPerLevelEntry entry in GameTableManager.XpPerLevel.Entries)
             {
                 if (!entries.ContainsKey(entry.MinXpForLevel))
                     entries.Add(entry.MinXpForLevel, (byte)entry.Id);
             }
 
-            xpPerLevel = entries.ToImmutableDictionary(e => e.Key, e => e.Value);
+            xpPerLevel = entries.ToImmutable();
         }
 
         /// <summary>
@@ -179,9 +179,9 @@ namespace NexusForever.WorldServer.Game
 
         public static byte Xp2Level(uint xp)
         {
-            return xpPerLevel.OrderByDescending(x => x.Key)
-                .Where(x => x.Key <= xp)
-                .First().Value;
+            return xpPerLevel
+                .OrderByDescending(x => x.Key)
+                .First(x => x.Key <= xp).Value;
         }
     }
 }

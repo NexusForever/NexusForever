@@ -18,6 +18,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.RealmConfig;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -293,25 +294,23 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
 
                 creationLevel = AssetManager.Xp2Level(creationEntry.Xp);
+                uint startingLocationId;
+                StartingLocation startingLocation = RealmConfigManager.ActiveRealmConfig.StartingLocations
+                        .FirstOrDefault(s =>
+                            s.Race == (Race) creationEntry.RaceId &&
+                            s.FactionId == (Faction) creationEntry.FactionId &&
+                            s.CharacterCreationStart == (CharacterCreationStart) creationEntry.CharacterCreationStartEnum);
+
+                if (startingLocation == null || startingLocation.LocationId < 1)
+                    startingLocationId = 51596;
+                else
+                    startingLocationId = startingLocation.LocationId;
 
                 WorldLocation2Entry worldLocation;
-                if ((CharacterCreationStart)creationEntry.CharacterCreationStartEnum == CharacterCreationStart.Nexus)
-                {
-                    // veteran
-                    if (((Race)creationEntry.RaceId == Race.Human && (Faction)creationEntry.FactionId == Faction.Exile) || (Race)creationEntry.RaceId == Race.Granok)
-                        worldLocation = GameTableManager.WorldLocation2.GetEntry(1594);
-                    else if ((Race)creationEntry.RaceId == Race.Chua || (Race)creationEntry.RaceId == Race.Draken)
-                        worldLocation = GameTableManager.WorldLocation2.GetEntry(8223);
-                    else if (((Race)creationEntry.RaceId == Race.Human && (Faction)creationEntry.FactionId == Faction.Dominion) || (Race)creationEntry.RaceId == Race.Mechari)
-                        worldLocation = GameTableManager.WorldLocation2.GetEntry(18987);
-                    else // Aurin / Modresh
-                        worldLocation = GameTableManager.WorldLocation2.GetEntry(37015);
-                }
+                if (!RealmConfigManager.ActiveRealmConfig.CustomLocations.TryGetValue(startingLocationId, out CustomLocation customLocation))
+                    worldLocation = GameTableManager.WorldLocation2.GetEntry(startingLocationId);
                 else
-                {
-                    // CharacterCreationStart.PreTutorial | novice - nexus virtuality
-                    worldLocation = GameTableManager.WorldLocation2.GetEntry(51596);
-                }
+                    worldLocation = customLocation.ToWorldLocation();
 
                 character.LocationX     = worldLocation.Position0;
                 character.LocationY     = worldLocation.Position1;
