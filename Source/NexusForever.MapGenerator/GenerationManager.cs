@@ -66,8 +66,6 @@ namespace NexusForever.MapGenerator
                 {
                     try
                     {
-                        List<Task<WritableMapFileCell>> cellTaskList = new List<Task<WritableMapFileCell>>();
-
                         var mapFileGrid = new WritableMapFileGrid(x, y);
                         var areaFile = new AreaFile(stream);
                         foreach (IReadable areaChunk in areaFile.Chunks)
