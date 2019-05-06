@@ -19,7 +19,7 @@ fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # Making sure that DIR is not empty
-if [ "${DIR}" = "" ]; then
+if [ "${DIR}" = "" ] || [ ! -d "${DIR}" ]; then
         echo "Source directory is empty?!"
         exit
 fi
