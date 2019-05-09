@@ -3,6 +3,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Nexus.Archive;
 using NexusForever.MapGenerator.GameTable;
 using NexusForever.MapGenerator.IO.Area;
@@ -13,7 +16,7 @@ using NLog;
 
 namespace NexusForever.MapGenerator
 {
-    public static class GenerationManagaer
+    public static class GenerationManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -23,14 +26,18 @@ namespace NexusForever.MapGenerator
 
             Directory.CreateDirectory("map");
 
+            List<Task> taskList = new List<Task>();
             foreach (WorldEntry entry in GameTableManager.World.Entries
                 .Where(e => e.AssetPath != string.Empty)
                 .GroupBy(e => e.AssetPath)
                 .Select(g => g.First())
                 .ToArray())
             {
-                ProcessWorld(entry);
+                Task task = Task.Factory.StartNew(() => ProcessWorld(entry));
+                taskList.Add(task);
             }
+
+            Task.WaitAll(taskList.ToArray<Task>());
         }
 
         /// <summary>
@@ -60,7 +67,6 @@ namespace NexusForever.MapGenerator
                     try
                     {
                         var mapFileGrid = new WritableMapFileGrid(x, y);
-
                         var areaFile = new AreaFile(stream);
                         foreach (IReadable areaChunk in areaFile.Chunks)
                         {
@@ -69,10 +75,7 @@ namespace NexusForever.MapGenerator
                                 case Chnk chnk:
                                 {
                                     foreach (ChnkCell cell in chnk.Cells.Where(c => c != null))
-                                    {
-                                        var mapFileCell = new WritableMapFileCell(cell);
-                                        mapFileGrid.AddCell(mapFileCell);
-                                    }
+                                        mapFileGrid.AddCell(new WritableMapFileCell(cell));
                                     break;
                                 }
                             }
