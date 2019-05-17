@@ -15,11 +15,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
             // probably, x, y, z, yaw, pitch
             public class UnknownStructure2 : IWritable
             {
-                public uint Unknown0 { get; set; }
-                public uint Unknown4 { get; set; }
-                public uint Unknown8 { get; set; }
-                public uint UnknownC { get; set; }
-                public uint Unknown10 { get; set; }
+                public float Unknown0 { get; set; }
+                public float Unknown4 { get; set; }
+                public float Unknown8 { get; set; }
+                public float UnknownC { get; set; }
+                public float Unknown10 { get; set; }
 
                 public void Write(GamePacketWriter writer)
                 {
@@ -96,7 +96,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-        public ulong Id { get; set; }
+        public ulong ServerTime { get; set; }
         public List<Character> Characters { get; } = new List<Character>();
         public List<uint> Unknown14 { get; } = new List<uint>();
         public List<uint> Unknown1C { get; } = new List<uint>();
@@ -112,7 +112,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Id);
+            writer.Write(ServerTime);
             writer.Write(Characters.Count);
 
             foreach (Character character in Characters)

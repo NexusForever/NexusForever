@@ -138,6 +138,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 var serverCharacterList = new ServerCharacterList
                 {
+                    ServerTime = (ulong)DateTime.Now.ToFileTime(),
                     RealmId = WorldServer.RealmId
                 };
 
