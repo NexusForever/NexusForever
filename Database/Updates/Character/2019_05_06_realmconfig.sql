@@ -37,38 +37,54 @@ INSERT INTO `realmconfig`(`id`, `active`) VALUES(1, 1);
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 1, 167, 1594, 3);
 #human novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 1, 167, 51596, 4);
+#human 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 1, 167, 15408, 5);
 
 #granok veteran
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 3, 167, 1594, 3);
 #granok novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 3, 167, 51596, 4);
+#granok 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 3, 167, 15408, 5);
 
 #chua veteran
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 13, 166, 8223, 3);
 #chua novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 13, 166, 51596, 4);
+#chua 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 13, 166, 36729, 5);
 
 #draken veteran
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 5, 166, 8223, 3);
 #draken novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 5, 166, 51596, 4);
+#draken 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 5, 166, 36729, 5);
 
 #cassian veteran
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 1, 166, 18987, 3);
 #cassian novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 1, 166, 51596, 4);
+#cassian 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 1, 166, 36729, 5);
 
 #mechari veteran
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 12, 166, 18987, 3);
 #mechari novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 12, 166, 51596, 4);
+#mechari 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 12, 166, 36729, 5);
 
 #aurin veteran
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 4, 167, 37015, 3);
 #aurin novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 4, 167, 51596, 4);
+#aurin 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 4, 167, 15408, 5);
 
 #mordesh veteran
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 16, 167, 37015, 3);
 #mordesh novice
 INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 16, 167, 51596, 4);
+#mordesh 50
+INSERT INTO `realmconfig_starting_location`(`id`, `race`, `factionId`, `locationId`, `characterCreationStart`) VALUES(1, 16, 167, 15408, 5);
