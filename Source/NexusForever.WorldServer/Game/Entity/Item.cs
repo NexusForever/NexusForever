@@ -28,7 +28,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 return (ushort)entry.ItemDisplayId;
 
             List<ItemDisplaySourceEntryEntry> entries = AssetManager.GetItemDisplaySource(entry.ItemSourceId)
-                .Where(e => e.Item2TypeId == entry.Item2TypeId)
+                .Where(e => e.Item2TypeId == entry.Item2TypeId && ((entry.RequiredLevel >= e.ItemMinLevel && entry.RequiredLevel <= e.ItemMaxLevel) || entry.RequiredLevel == 0))
                 .ToList();
 
             if (entries.Count == 1)
@@ -44,6 +44,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             // TODO: research this...
+            // this should not be reached anymore
             throw new NotImplementedException();
         }
 

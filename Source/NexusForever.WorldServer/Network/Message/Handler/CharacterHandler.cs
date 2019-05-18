@@ -139,7 +139,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 var serverCharacterList = new ServerCharacterList
                 {
                     ServerTime = (ulong)DateTime.Now.ToFileTime(),
-                    RealmId = WorldServer.RealmId
+                    RealmId = WorldServer.RealmId,
+                    FreeLevel50 = true
                 };
 
                 foreach (Character character in characters)
@@ -154,6 +155,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Faction     = character.FactionId,
                         WorldId     = character.WorldId,
                         WorldZoneId = character.WorldZoneId,
+                        LocationData = new ServerCharacterList.Character.Location
+                        {
+                            Position = new Position(new Vector3(character.LocationX, character.LocationY, character.LocationZ)),
+                            Yaw = character.RotationX,
+                            Pitch = character.RotationY
+                        },
                         RealmId     = WorldServer.RealmId,
                         Path        = (byte)character.ActivePath
                     };
@@ -326,29 +333,33 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 // create initial LAS abilities
                 UILocation location = 0;
+
                 foreach (SpellLevelEntry spellLevelEntry in GameTableManager.SpellLevel.Entries
                     .Where(s => s.ClassId == character.Class && s.CharacterLevel <= creationLevel))
                 {
                     Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spellLevelEntry.Spell4Id);
-                    if (spell4Entry == null)
+                    if (spell4Entry == null || spell4Entry.TierIndex > 1)
                         continue;
 
                     character.CharacterSpell.Add(new CharacterSpell
                     {
                         Id           = character.Id,
                         Spell4BaseId = spell4Entry.Spell4BaseIdBaseSpell,
-                        Tier         = 1
+                        Tier         = (byte)spell4Entry.TierIndex
                     });
 
-                    character.CharacterActionSetShortcut.Add(new CharacterActionSetShortcut
+                    if ((int)location < 8)
                     {
-                        Id           = character.Id,
-                        SpecIndex    = 0,
-                        Location     = (ushort)location,
-                        ShortcutType = (byte)ShortcutType.Spell,
-                        ObjectId     = spell4Entry.Spell4BaseIdBaseSpell,
-                        Tier         = 1
-                    });
+                        character.CharacterActionSetShortcut.Add(new CharacterActionSetShortcut
+                        {
+                            Id           = character.Id,
+                            SpecIndex    = 0,
+                            Location     = (ushort)location,
+                            ShortcutType = (byte)ShortcutType.Spell,
+                            ObjectId     = spell4Entry.Spell4BaseIdBaseSpell,
+                            Tier         = (byte)spell4Entry.TierIndex
+                        });
+                    }
 
                     location++;
                 }

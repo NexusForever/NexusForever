@@ -66,6 +66,11 @@ namespace NexusForever.WorldServer.Game.Entity
                 Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(itemEntry.Item2TypeId);
                 if (typeEntry.ItemSlotId == 0)
                     ItemCreate(itemEntry, 1u);
+                // TODO: implement/equip bags - skip for now
+                else if (typeEntry.ItemSlotId == 47)
+                {
+                    //bags.Add(InventoryLocation.Inventory, new Bag(InventoryLocation.Inventory, itemEntry.MaxStackCount));
+                }
                 else
                     ItemCreate(itemEntry);
             }

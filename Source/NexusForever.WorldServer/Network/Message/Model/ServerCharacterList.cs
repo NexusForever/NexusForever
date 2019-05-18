@@ -12,22 +12,17 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public class Character : IWritable
         {
-            // probably, x, y, z, yaw, pitch
-            public class UnknownStructure2 : IWritable
+            public class Location : IWritable
             {
-                public float Unknown0 { get; set; }
-                public float Unknown4 { get; set; }
-                public float Unknown8 { get; set; }
-                public float UnknownC { get; set; }
-                public float Unknown10 { get; set; }
+                public Position Position { get; set; }
+                public float Yaw { get; set; }
+                public float Pitch { get; set; }
 
                 public void Write(GamePacketWriter writer)
                 {
-                    writer.Write(Unknown0);
-                    writer.Write(Unknown4);
-                    writer.Write(Unknown8);
-                    writer.Write(UnknownC);
-                    writer.Write(Unknown10);
+                    Position.Write(writer);
+                    writer.Write(Yaw);
+                    writer.Write(Pitch);
                 }
             }
 
@@ -43,15 +38,15 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public ushort WorldId { get; set; }
             public ushort WorldZoneId { get; set; }
             public ushort RealmId { get; set; }
-            public UnknownStructure2 Unknown3C { get; } = new UnknownStructure2();
+            public Location LocationData { get; set; } = new Location();
             public byte Path { get; set; }
-            public bool IsLocked { get; set; }
-            public bool Unknown58 { get; set; }
+            public bool Disabled { get; set; }
+            public bool RequiresRename { get; set; }
             public uint GearMask { get; set; }
             public List<uint> Labels { get; } = new List<uint>();
             public List<uint> Values { get; } = new List<uint>();
             public List<float> Bones { get; } = new List<float>();
-            public uint Unknown74 { get; set; }
+            public float LastLoggedOutDays { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -75,11 +70,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write(WorldZoneId, 15);
                 writer.Write(RealmId, 14);
 
-                Unknown3C.Write(writer);
+                LocationData.Write(writer);
 
                 writer.Write(Path, 3);
-                writer.Write(IsLocked);
-                writer.Write(Unknown58);
+                writer.Write(Disabled);
+                writer.Write(RequiresRename);
                 writer.Write(GearMask);
 
                 writer.Write(Labels.Count, 4);
@@ -92,7 +87,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 foreach (float value in Bones)
                     writer.Write(value);
 
-                writer.Write(Unknown74);
+                writer.Write(LastLoggedOutDays);
             }
         }
 
@@ -108,7 +103,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint Unknown40 { get; set; }
         public uint Unknown44 { get; set; }
         public ushort Unknown48 { get; set; }
-        public bool Unknown4C { get; set; }
+        public bool FreeLevel50 { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -136,7 +131,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Unknown40);
             writer.Write(Unknown44);
             writer.Write(Unknown48, 14);
-            writer.Write(Unknown4C);
+            writer.Write(FreeLevel50);
         }
     }
 }
