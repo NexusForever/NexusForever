@@ -165,7 +165,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Path        = (byte)character.ActivePath
                     };
 
-                    foreach(CharacterStat stat in character.CharacterStat)
+                    foreach(CharacterStats stat in character.CharacterStats)
                     {
                         if ((Stat)stat.Stat == Stat.Level)
                         {

@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Game
 
         private static ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
         private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
-        private static ImmutableDictionary<uint /*MinXpForLevel*/, byte /*Level*/> xpPerLevel;
+        private static ImmutableList<uint /*MinXpForLevel*/> xpPerLevel;
 
         private static ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
 
@@ -134,12 +134,9 @@ namespace NexusForever.WorldServer.Game
 
         private static void CacheXpPerLevel()
         {
-            ImmutableDictionary<uint, byte>.Builder entries = ImmutableDictionary.CreateBuilder<uint, byte>();
+            ImmutableList<uint>.Builder entries = ImmutableList.CreateBuilder<uint>();
             foreach (XpPerLevelEntry entry in GameTableManager.XpPerLevel.Entries)
-            {
-                if (!entries.ContainsKey(entry.MinXpForLevel))
-                    entries.Add(entry.MinXpForLevel, (byte)entry.Id);
-            }
+                entries.Add(entry.MinXpForLevel);
 
             xpPerLevel = entries.ToImmutable();
         }
@@ -179,9 +176,8 @@ namespace NexusForever.WorldServer.Game
 
         public static byte Xp2Level(uint xp)
         {
-            return xpPerLevel
-                .OrderByDescending(x => x.Key)
-                .First(x => x.Key <= xp).Value;
+            int index = xpPerLevel.BinarySearch(xp);
+            return index < 0 ? (byte) ~index : (byte) ++index;
         }
     }
 }

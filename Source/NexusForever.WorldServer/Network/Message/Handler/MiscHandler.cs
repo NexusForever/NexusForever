@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     throw new InvalidPacketValueException();
 
                 byte characterLevel = 1;
-                foreach(CharacterStat stat in character.CharacterStat)
+                foreach(CharacterStats stat in character.CharacterStats)
                 {
                     if ((Stat)stat.Stat == Stat.Level)
                     {
