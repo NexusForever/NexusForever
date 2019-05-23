@@ -4,6 +4,7 @@ using System.Linq;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
@@ -33,9 +34,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private double costumeSwapCooldown;
 
         /// <summary>
-        /// Create a new <see cref="CurrencyManager"/> from existing <see cref="Account"/> and <see cref="Character"/> database models.
+        /// Create a new <see cref="CurrencyManager"/> from existing <see cref="AccountModel"/> and <see cref="Character"/> database models.
         /// </summary>
-        public CostumeManager(Player owner, Account accountModel, Character characterModel)
+        public CostumeManager(Player owner, AccountModel accountModel, Character characterModel)
         {
             player = owner;
 

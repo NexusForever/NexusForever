@@ -1,5 +1,6 @@
 ﻿using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -26,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CostumeUnlock"/> from supplied <see cref="GenericUnlockEntryEntry"/>.
         /// </summary>
-        public GenericUnlock(Account account, GenericUnlockEntryEntry entry)
+        public GenericUnlock(AccountModel account, GenericUnlockEntryEntry entry)
         {
             Entry     = entry;
             accountId = account.Id;

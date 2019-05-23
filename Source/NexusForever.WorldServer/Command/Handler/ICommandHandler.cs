@@ -7,6 +7,7 @@ namespace NexusForever.WorldServer.Command.Handler
     public interface ICommandHandler
     {
         int Order { get; }
+        int MinimumStatus { get; }
         IEnumerable<string> GetCommands();
         Task<bool> HandlesAsync(CommandContext session, string input);
         Task HandleAsync(CommandContext session, string text);

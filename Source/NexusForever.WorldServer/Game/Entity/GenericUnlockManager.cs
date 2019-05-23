@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -18,9 +19,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly Dictionary<uint, GenericUnlock> unlocks = new Dictionary<uint, GenericUnlock>();
 
         /// <summary>
-        /// Create a new <see cref="GenericUnlockManager"/> from <see cref="Account"/> database model.
+        /// Create a new <see cref="GenericUnlockManager"/> from <see cref="AccountModel"/> database model.
         /// </summary>
-        public GenericUnlockManager(WorldSession session, Account model)
+        public GenericUnlockManager(WorldSession session, AccountModel model)
         {
             this.session = session;
 

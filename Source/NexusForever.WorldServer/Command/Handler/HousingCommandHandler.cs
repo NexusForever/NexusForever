@@ -12,6 +12,7 @@ namespace NexusForever.WorldServer.Command.Handler
 {
     public class HousingCommandHandler : CommandCategory
     {
+        [Name("Housing")]
         public HousingCommandHandler()
             : base(true, "house")
         {

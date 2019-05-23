@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Setting.Static;
@@ -36,7 +37,7 @@ namespace NexusForever.WorldServer.Game.Setting
         /// <summary>
         /// Create a new <see cref="KeybindingSet"/> from an existing database model.
         /// </summary>
-        public KeybindingSet(Account model)
+        public KeybindingSet(AccountModel model)
         {
             Owner    = model.Id;
             InputSet = InputSets.Account;

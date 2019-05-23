@@ -11,7 +11,7 @@ namespace NexusForever.WorldServer.Command.Handler
 {
     public class HelpCommandHandler : NamedCommand
     {
-
+        [Name("Help")]
         public HelpCommandHandler()
             : base(false, "help", "h", "?")
         {

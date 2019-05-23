@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
@@ -16,7 +17,7 @@ namespace NexusForever.WorldServer.Game.Setting
         private readonly KeybindingSet accountKeybindings;
         private readonly KeybindingSet characterKeybindings;
 
-        public KeybindingManager(Player owner, Account accountModel, Character characterModel)
+        public KeybindingManager(Player owner, AccountModel accountModel, Character characterModel)
         {
             player               = owner;
             accountKeybindings   = new KeybindingSet(accountModel);

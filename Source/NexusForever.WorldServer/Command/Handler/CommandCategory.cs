@@ -13,17 +13,25 @@ namespace NexusForever.WorldServer.Command.Handler
 {
     public abstract class CommandCategory : NamedCommand
     {
-        private readonly ImmutableDictionary<string, SubCommandHandler> subCommands;
+        private readonly ImmutableDictionary<string, SubCommandInstance> subCommands;
         public override string HelpText { get; }
 
         protected CommandCategory(bool requiresSession, params string[] categoryNames)
             : base(requiresSession, categoryNames)
         {
-            var helpBuilder = new StringBuilder();
+            string topLevelCommand = "";
+            var NameAttributeValue = GetType().GetCustomAttributes(typeof(NameAttribute), true);
+            if (NameAttributeValue.Length > 0)
+            {
+                var nameAttribute = (NameAttribute)NameAttributeValue[0];
+                topLevelCommand = nameAttribute.Name.Replace(" ", string.Empty);
+            }
+            
+                var helpBuilder = new StringBuilder();
             helpBuilder.AppendLine("--- sub commands");
 
-            Dictionary<string, SubCommandHandler> commandHandlers =
-                new Dictionary<string, SubCommandHandler>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, SubCommandInstance> commandHandlers =
+                new Dictionary<string, SubCommandInstance>(StringComparer.OrdinalIgnoreCase);
             foreach (MethodInfo method in GetType().GetMethods()
                     .Where(i => !i.IsStatic && !i.IsAbstract && i.ReturnType == typeof(Task)))
                 // Support for multiple attributes.
@@ -50,8 +58,8 @@ namespace NexusForever.WorldServer.Command.Handler
                 else
                     helpBuilder.AppendLine(attribute.HelpText);
 
-                commandHandlers.Add(attribute.Command,
-                    (SubCommandHandler) Delegate.CreateDelegate(typeof(SubCommandHandler), this, method));
+                SubCommandInstance subCommand = new SubCommandInstance(topLevelCommand, attribute.Command, (SubCommandHandler)Delegate.CreateDelegate(typeof(SubCommandHandler), this, method));
+                commandHandlers.Add(attribute.Command, subCommand);
             }
 
             subCommands = commandHandlers.ToImmutableDictionary();
@@ -63,14 +71,17 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             if (parameters.Length > 0)
             {
-                if (!subCommands.TryGetValue(parameters[0], out SubCommandHandler commandCallback))
+                if (!subCommands.TryGetValue(parameters[0], out SubCommandInstance commandCallback))
                 {
                     await SendHelpAsync(context);
                     return;
                 }
 
-                await (commandCallback?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
-                      Task.CompletedTask);
+                if (HasPermission(context.Session.Account.Status, commandCallback))
+                    await (commandCallback.Handler?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
+                        Task.CompletedTask);
+                else
+                    await context.SendMessageAsync($"Your account status is too low for this subcommand: !{command} {string.Join(' ', parameters)} ({context.Session.Account.Status} | {commandCallback.MinimumStatus})");
             }
             else
                 await SendHelpAsync(context);
@@ -78,6 +89,6 @@ namespace NexusForever.WorldServer.Command.Handler
             // TODO
         }
 
-        private delegate Task SubCommandHandler(CommandContext context, string subCommand, string[] parameters);
+        public delegate Task SubCommandHandler(CommandContext context, string subCommand, string[] parameters);
     }
 }
