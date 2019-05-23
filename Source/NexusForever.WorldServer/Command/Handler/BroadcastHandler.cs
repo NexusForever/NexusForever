@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-    [Name("Broadcast")]
+    [Name("Broadcast", Permission.CommandBroadcast)]
     public class BroadcastHandler : NamedCommand
     {
         public BroadcastHandler()

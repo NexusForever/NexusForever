@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NexusForever.WorldServer.Game.Account.Static;
+using System;
 
 namespace NexusForever.WorldServer.Command.Attributes
 {
@@ -7,11 +8,13 @@ namespace NexusForever.WorldServer.Command.Attributes
     {
         public string Command { get; }
         public string HelpText { get; }
+        public Permission RequiredPermission { get; }
 
-        public SubCommandHandlerAttribute(string command, string helpText = null)
+        public SubCommandHandlerAttribute(string command, string helpText = null, Permission requiredPermission = Permission.Everything)
         {
             Command = command;
             HelpText = helpText;
+            RequiredPermission = requiredPermission;
         }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NLog;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-    [Name("Path")]
+    [Name("Path", Permission.None)]
     public class PathCommandHandler : CommandCategory
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
@@ -16,7 +17,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
         }
 
-        [SubCommandHandler("activate", "pathId - Activate a path for this player.")]
+        [SubCommandHandler("activate", "pathId - Activate a path for this player.", Permission.CommandPathActivate)]
         public Task AddPathActivateSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length <= 0)
@@ -31,7 +32,7 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
-        [SubCommandHandler("unlock", "pathId - Unlock a path for this player.")]
+        [SubCommandHandler("unlock", "pathId - Unlock a path for this player.", Permission.CommandPathUnlock)]
         public Task AddPathUnlockSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length > 0)
@@ -43,7 +44,7 @@ namespace NexusForever.WorldServer.Command.Handler
             return Task.CompletedTask;
         }
 
-        [SubCommandHandler("addxp", "xp - Add the XP value to the player's curent Path XP.")]
+        [SubCommandHandler("addxp", "xp - Add the XP value to the player's curent Path XP.", Permission.CommandPathAddXp)]
         public Task AddPathAddXPSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length > 0)

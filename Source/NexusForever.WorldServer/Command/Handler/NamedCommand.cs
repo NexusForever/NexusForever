@@ -8,13 +8,14 @@ using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.Shared.Configuration;
 using Microsoft.Extensions.Configuration;
+using NexusForever.WorldServer.Game.Account;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     public abstract class NamedCommand : CommandHandlerBase
     {
         public override int Order { get; } = 100;
-        public override int MinimumStatus { get; } = Enum.GetValues(typeof(AccountStatus)).Cast<int>().Last();
+        public override Permission RequiredPermission { get; } = Permission.Everything;
         public virtual string HelpText { get; }
         public bool SupportsHelp => !string.IsNullOrWhiteSpace(HelpText);
 
@@ -31,16 +32,9 @@ namespace NexusForever.WorldServer.Command.Handler
             if (NameAttributeValue.Length > 0)
             {
                 var nameAttribute = (NameAttribute)NameAttributeValue[0];
-                string command = nameAttribute.Name.Replace(" ", string.Empty);
+                RequiredPermission = nameAttribute.PermissionRequired;
 
-                IEnumerable<KeyValuePair<string, string>> commandConfiguration = ConfigurationManager<WorldServerConfiguration>.GetConfiguration().GetSection("Commands").AsEnumerable();
-                foreach(var section in commandConfiguration)
-                {
-                    var sectionKey = section.Key.Replace(" ", string.Empty).Split(":");
-                    // The below IF statement checks if this Key is for this NamedCommand
-                    if (sectionKey.Contains(command) && sectionKey.Contains("MinimumStatus") && sectionKey.Length - 1 == 3)
-                        MinimumStatus = int.Parse(section.Value);
-                }
+                Logger.Trace($"{nameAttribute.Name} default permission: {RequiredPermission}");
             }
     }
 
@@ -58,10 +52,12 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            if (HasPermission(session.Session.Account.Status))
+            bool isConsole = session.Session == null;
+
+            if (isConsole || RoleManager.HasPermission(session.Session, RequiredPermission))
                 await HandleCommandAsync(session, command, parameters);
             else
-                await session.SendMessageAsync($"Your account status is too low for this command: !{command} {string.Join(' ', parameters)} ({session.Session.Account.Status} | {MinimumStatus})");
+                await session.SendMessageAsync($"Your account status is too low for this command: !{command} (Requires permission: {RequiredPermission})");
         }
 
         private bool IsHelpRequest(string text)

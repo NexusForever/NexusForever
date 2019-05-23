@@ -11,26 +11,13 @@ namespace NexusForever.WorldServer.Command.Handler
 {
     public class SubCommandInstance
     {
-        public int MinimumStatus { get; }
+        public Permission RequiredPermission { get; }
         public SubCommandHandler Handler { get; }
 
-        public SubCommandInstance(string command, string subCommand, SubCommandHandler handler)
+        public SubCommandInstance(SubCommandHandler handler, Permission requiredPermission = Permission.Everything)
         {
             Handler = handler;
-
-            IEnumerable<KeyValuePair<string, string>> commandData = ConfigurationManager<WorldServerConfiguration>.GetConfiguration().GetSection("Commands").AsEnumerable();
-            foreach (var section in commandData)
-            {
-                var sectionKey = section.Key.Replace(" ", string.Empty).Split(":");
-
-                // The below IF statement checks if this Key is for this NamedCommand
-                if (sectionKey.Contains(command) && 
-                    sectionKey.Contains(subCommand) &&
-                    sectionKey.Contains("SubCommands") &&
-                    sectionKey.Contains("MinimumStatus") &&
-                    sectionKey.Length <= 8)
-                    MinimumStatus = int.Parse(section.Value);
-            }
+            RequiredPermission = requiredPermission;
         }
     }
 }

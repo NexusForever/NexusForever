@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth.Model;
 
@@ -50,25 +51,44 @@ namespace NexusForever.Shared.Database.Auth
                     .Include(a => a.AccountCostumeUnlock)
                     .Include(a => a.AccountGenericUnlock)
                     .Include(a => a.AccountKeybinding)
+                    .Include(a => a.AccountPermission)
+                    .Include(a => a.AccountRole)
                     .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 
         /// <summary>
         /// Create a new account with the supplied email and password, the password will have a verifier generated that is inserted into the database.
         /// </summary>
-        public static void CreateAccount(string email, string password)
+        public static void CreateAccount(string email, string password, ulong defaultRole, ulong[] extraRoles = null)
         {
             using (var context = new AuthContext())
             {
                 byte[] s = RandomProvider.GetBytes(16u);
                 byte[] v = Srp6Provider.GenerateVerifier(s, email, password);
 
-                context.Account.Add(new Account
+                Account newAccount = new Account
                 {
                     Email = email,
-                    S     = s.ToHexString(),
-                    V     = v.ToHexString()
+                    S = s.ToHexString(),
+                    V = v.ToHexString()
+                };
+
+                // Add default role
+                newAccount.AccountRole.Add(new AccountRole
+                {
+                    RoleId = defaultRole
                 });
+
+                if (extraRoles != null)
+                {
+                    foreach (ulong role in extraRoles)
+                        newAccount.AccountRole.Add(new AccountRole
+                        {
+                            RoleId = role
+                        });
+                }
+
+                context.Account.Add(newAccount);
 
                 context.SaveChanges();
             }
@@ -133,6 +153,17 @@ namespace NexusForever.Shared.Database.Auth
                 return context.ServerMessage
                     .AsNoTracking()
                     .ToImmutableList();
+        }
+
+        public static ImmutableList<Role> GetRoles()
+        {
+            using (var context = new AuthContext())
+            {
+                return context.Role
+                    .Include(a => a.RolePermission)
+                    .AsNoTracking()
+                    .ToImmutableList();
+            }
         }
     }
 }

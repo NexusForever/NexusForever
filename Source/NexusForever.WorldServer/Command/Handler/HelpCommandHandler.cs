@@ -6,12 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Game.Account.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
+    [Name("Help", Permission.None)]
     public class HelpCommandHandler : NamedCommand
     {
-        [Name("Help")]
         public HelpCommandHandler()
             : base(false, "help", "h", "?")
         {

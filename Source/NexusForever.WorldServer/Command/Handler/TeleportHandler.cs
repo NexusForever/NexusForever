@@ -1,11 +1,12 @@
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-    [Name("Teleport")]
+    [Name("Teleport", Permission.CommandTeleport)]
     public class TeleportHandler : NamedCommand
     {
         public TeleportHandler()

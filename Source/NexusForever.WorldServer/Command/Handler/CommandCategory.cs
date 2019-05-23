@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Game.Account;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -58,7 +59,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 else
                     helpBuilder.AppendLine(attribute.HelpText);
 
-                SubCommandInstance subCommand = new SubCommandInstance(topLevelCommand, attribute.Command, (SubCommandHandler)Delegate.CreateDelegate(typeof(SubCommandHandler), this, method));
+                SubCommandInstance subCommand = new SubCommandInstance((SubCommandHandler)Delegate.CreateDelegate(typeof(SubCommandHandler), this, method), attribute.RequiredPermission);
                 commandHandlers.Add(attribute.Command, subCommand);
             }
 
@@ -77,11 +78,13 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                if (HasPermission(context.Session.Account.Status, commandCallback))
+                bool isConsole = context.Session == null;
+
+                if (isConsole || RoleManager.HasPermission(context.Session, commandCallback.RequiredPermission))
                     await (commandCallback.Handler?.Invoke(context, parameters[0], parameters.Skip(1).ToArray()) ??
                         Task.CompletedTask);
                 else
-                    await context.SendMessageAsync($"Your account status is too low for this subcommand: !{command} {string.Join(' ', parameters)} ({context.Session.Account.Status} | {commandCallback.MinimumStatus})");
+                    await context.SendMessageAsync($"Your account status is too low for this subcommand: !{command} {string.Join(' ', parameters)} (Requires permission: {commandCallback.RequiredPermission})");
             }
             else
                 await SendHelpAsync(context);

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using NexusForever.WorldServer.Game.Account;
 using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map;
@@ -111,7 +112,7 @@ namespace NexusForever.WorldServer.Game.Social
             {
                 Name = session.Player.Name,
                 Guid = session.Player.Guid,
-                GM   = (AccountStatus)session.Account.Status >= AccountStatus.GameMaster,
+                GM   = RoleManager.HasPermission(session, Permission.GMFlag),
             });
         }
 
@@ -125,7 +126,7 @@ namespace NexusForever.WorldServer.Game.Social
                 Guid    = session.Player.Guid,
                 Channel = chat.Channel,
                 Name    = session.Player.Name,
-                GM      = (AccountStatus)session.Account.Status >= AccountStatus.GameMaster,
+                GM      = RoleManager.HasPermission(session, Permission.GMFlag),
                 Text    = chat.Message,
                 Formats = ParseChatLinks(session, chat).ToList(),
             };

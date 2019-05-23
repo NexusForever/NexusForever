@@ -20,6 +20,10 @@ namespace NexusForever.Shared.Database.Auth.Model
         public virtual DbSet<AccountCostumeUnlock> AccountCostumeUnlock { get; set; }
         public virtual DbSet<AccountGenericUnlock> AccountGenericUnlock { get; set; }
         public virtual DbSet<AccountKeybinding> AccountKeybinding { get; set; }
+        public virtual DbSet<AccountPermission> AccountPermission { get; set; }
+        public virtual DbSet<AccountRole> AccountRole { get; set; }
+        public virtual DbSet<Role> Role { get; set; }
+        public virtual DbSet<RolePermission> RolePermission { get; set; }
         public virtual DbSet<Server> Server { get; set; }
         public virtual DbSet<ServerMessage> ServerMessage { get; set; }
 
@@ -80,11 +84,6 @@ namespace NexusForever.Shared.Database.Auth.Model
                     .HasColumnName("v")
                     .HasColumnType("varchar(512)")
                     .HasDefaultValueSql("''");
-
-                entity.Property(e => e.Status)
-                    .HasColumnName("status")
-                    .HasColumnType("tinyint")
-                    .HasDefaultValueSql("1");
             });
 
             modelBuilder.Entity<AccountCostumeUnlock>(entity =>
@@ -137,6 +136,83 @@ namespace NexusForever.Shared.Database.Auth.Model
                     .WithMany(p => p.AccountGenericUnlock)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__account_generic_unlock_id__account_id");
+            });
+
+            modelBuilder.Entity<AccountPermission>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.PermissionId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_permission");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PermissionId)
+                    .HasColumnName("permissionId");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.AccountPermission)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_permission_id__account_id");
+            });
+
+            modelBuilder.Entity<AccountRole>(entity =>
+            {
+                entity.HasKey(e => new { e.AccountId, e.RoleId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_role");
+
+                entity.Property(e => e.AccountId)
+                    .HasColumnName("id");
+
+                entity.Property(e => e.RoleId)
+                    .HasColumnName("roleId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.AccountRole)
+                    .HasForeignKey(d => d.AccountId)
+                    .HasConstraintName("FK__account_role_id__account_id");
+            });
+
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.HasKey(e => new { e.Id })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("role");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(50)")
+                    .HasDefaultValueSql("''");
+            });
+
+            modelBuilder.Entity<RolePermission>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.PermissionId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("role_permission");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.PermissionId)
+                    .HasColumnName("permissionId");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.RolePermission)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__role_permission_id__role_id");
             });
 
             modelBuilder.Entity<Server>(entity =>

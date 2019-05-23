@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Game.Account.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-    [Name("Items")]
+    [Name("Items", Permission.None)]
     public class ItemCommandHandler : CommandCategory
     {
         public ItemCommandHandler()
@@ -12,7 +13,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
         }
 
-        [SubCommandHandler("add", "itemId [quantity] - Add an item to inventory, optionally specifying quantity")]
+        [SubCommandHandler("add", "itemId [quantity] - Add an item to inventory, optionally specifying quantity", Permission.CommandItemAdd)]
         public Task AddItemSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length <= 0)
