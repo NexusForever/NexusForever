@@ -56,7 +56,7 @@ namespace NexusForever.WorldServer.Game.Spell
             if (!(target is Player player))
                 return;
 
-            if (player.VehicleGuid != 0u)
+            if (!player.CanMount())
                 return;
 
             var mount = new Mount(player, parameters.SpellInfo.Entry.Id, info.Entry.DataBits00, info.Entry.DataBits01, info.Entry.DataBits04);

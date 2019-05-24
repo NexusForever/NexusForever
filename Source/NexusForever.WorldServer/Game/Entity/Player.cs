@@ -490,6 +490,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 pet?.RemoveFromMap();
                 VanityPetGuid = null;
             }
+            
+            DestroyDependents();
 
             base.OnRemoveFromMap();
 
@@ -666,6 +668,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
                 vanityPetId = pet?.Creature.Id;
             }
+            
+            if (VehicleGuid != 0u)
+                Dismount();
 
             var info = new MapInfo(entry, instanceId, residenceId);
             pendingTeleport = new PendingTeleport(info, vector, vanityPetId);
@@ -788,6 +793,42 @@ namespace NexusForever.WorldServer.Game.Entity
                 Channel = ChatChannel.System,
                 Text    = text
             });
+        }
+        
+        /// Returns whether this <see cref="Player"/> is allowed to summon or be added to a mount
+        /// </summary>
+        public bool CanMount()
+        {
+            return VehicleGuid == 0u && pendingTeleport == null && logoutManager == null;
+        }
+
+        /// <summary>
+        /// Dismounts this <see cref="Player"/> from a vehicle that it's attached to
+        /// </summary>
+        public void Dismount()
+        {
+            if (VehicleGuid != 0u)
+            {
+                Vehicle vehicle = GetVisible<Vehicle>(VehicleGuid);
+                vehicle.PassengerRemove(this);
+            }
+        }
+
+        /// <summary>
+        /// Remove all entities associated with the <see cref="Player"/>
+        /// </summary>
+        private void DestroyDependents()
+        {
+            // TODO: Enqueue re-creation of necessary entities
+            if (VehicleGuid != 0u)
+            {
+                Vehicle vehicle = GetVisible<Vehicle>(VehicleGuid);
+                if(vehicle != null)
+                    vehicle.Destroy();
+                VehicleGuid = 0u;
+            }
+
+            // TODO: Remove pets, scanbots, vanity pets
         }
 
         public void Save(AuthContext context)
