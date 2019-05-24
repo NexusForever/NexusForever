@@ -20,6 +20,7 @@ namespace NexusForever.WorldServer
         public MapConfig Map { get; set; }
         public bool UseCache { get; set; } = false;
         public ushort RealmId { get; set; }
+        public string MessageOfTheDay { get; set; }
         public uint LengthOfInGameDay { get; set; }
         public bool CrossFactionChat { get; set; } = true;
     }

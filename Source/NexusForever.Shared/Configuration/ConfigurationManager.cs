@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace NexusForever.Shared.Configuration
 {
@@ -14,6 +15,14 @@ namespace NexusForever.Shared.Configuration
         {
             SharedConfiguration.Initialise(file);
             Config = SharedConfiguration.Configuration.Get<T>();
+        }
+
+        public bool Save()
+        {
+            if (SharedConfiguration.Save<T>(Config))
+                return true;
+            else
+                return false;
         }
     }
 }
