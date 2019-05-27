@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth;
 using NexusForever.Shared.Database.Auth.Model;
@@ -298,6 +299,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
+            SendInGameTime();
             PathManager.SendInitialPackets();
             BuybackManager.SendBuybackItems(this);
 
@@ -534,6 +536,24 @@ namespace NexusForever.WorldServer.Game.Entity
             var info = new MapInfo(entry, instanceId, residenceId);
             pendingTeleport = new PendingTeleport(info, vector);
             RemoveFromMap();
+        }
+
+        /// <summary>
+        /// Used to send the current in game time to this player
+        /// </summary>
+        private void SendInGameTime()
+        {
+            uint lengthOfInGameDayInSeconds = ConfigurationManager<WorldServerConfiguration>.Config.LengthOfInGameDay;
+            if (lengthOfInGameDayInSeconds == 0u)
+                lengthOfInGameDayInSeconds = (uint)TimeSpan.FromHours(3.5d).TotalSeconds; // Live servers were 3.5h per in game day
+
+            double timeOfDay = DateTime.UtcNow.Subtract(DateTime.UnixEpoch).TotalSeconds / lengthOfInGameDayInSeconds % 1;
+
+            Session.EnqueueMessageEncrypted(new ServerTimeOfDay
+            {
+                TimeOfDay = (uint)(timeOfDay * TimeSpan.FromDays(1).TotalSeconds),
+                LengthOfDay = lengthOfInGameDayInSeconds
+            });
         }
 
         public void Save(AuthContext context)

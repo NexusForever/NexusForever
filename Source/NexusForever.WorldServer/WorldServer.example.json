@@ -20,5 +20,6 @@
     "Map": {
         "MapPath": "map"
     },
-    "RealmId": 1
+    "RealmId": 1,
+    "LengthOfInGameDay": 12600
 }

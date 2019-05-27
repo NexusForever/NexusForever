@@ -196,6 +196,7 @@ namespace NexusForever.Shared.Network.Message
         Server0817                      = 0x0817, // spell related
         ClientStorefrontRequestCatalog  = 0x082D,
         ClientSummonVanityPet           = 0x082F,
+        ServerTimeOfDay                 = 0x0845,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
         ServerVehiclePassengerAdd       = 0x086F,
