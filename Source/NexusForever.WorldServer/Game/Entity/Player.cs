@@ -231,8 +231,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 // prevent packets from being processed until asynchronous player save task is complete
                 Session.CanProcessPackets = false;
             }
-
-            base.Update(lastTick);
         }
 
         protected override IEntityModel BuildEntityModel()
