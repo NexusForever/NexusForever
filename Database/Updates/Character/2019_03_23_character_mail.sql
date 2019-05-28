@@ -32,6 +32,9 @@ CREATE TABLE IF NOT EXISTS `character_mail_attachment` (
   CONSTRAINT `FK__character_mail_attachment_itemGuid__item_id` FOREIGN KEY (`itemGuid`) REFERENCES `item` (`id`) ON DELETE CASCADE
 );
 
+ALTER TABLE `item`
+DROP FOREIGN KEY `FK__item_ownerId__character_id`;
+
 -- Dumping structure for table nexus_forever_character.item
 ALTER TABLE `item` 
   CHANGE COLUMN `ownerId` `ownerId` BIGINT(20) UNSIGNED NULL DEFAULT NULL AFTER `id`,
