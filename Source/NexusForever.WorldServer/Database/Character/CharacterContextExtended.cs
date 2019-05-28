@@ -16,6 +16,26 @@ namespace NexusForever.WorldServer.Database.Character
             modelBuilder.Entity<CharacterCostumeItem>()
                 .Property(p => p.Slot)
                 .ValueGeneratedNever();
+
+            modelBuilder.Entity<CharacterDatacube>()
+                .Property(p => p.Type)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<CharacterDatacube>()
+                .Property(p => p.Datacube)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<CharacterKeybinding>()
+                .Property(p => p.InputActionId)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<CharacterMailAttachment>()
+                .Property(p => p.Index)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<CharacterStats>()
+                .Property(p => p.Stat)
+                .ValueGeneratedNever();
         }
     }
 }

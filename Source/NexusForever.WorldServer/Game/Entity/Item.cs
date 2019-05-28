@@ -212,7 +212,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if ((saveMask & ItemSaveMask.Create) != 0)
             {
-                // item doesn't exist in database, all infomation must be saved
+                // item doesn't exist in database, all information must be saved
                 context.Add(new ItemModel
                 {
                     Id                 = Guid,
@@ -240,7 +240,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 // item already exists in database, save only data that has been modified
                 var model = new ItemModel
                 {
-                    Id = Guid,
+                    Id = Guid
                 };
 
                 // could probably clean this up with reflection, works for the time being
@@ -310,6 +310,37 @@ namespace NexusForever.WorldServer.Game.Entity
             };
 
             return networkItem;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="CurrencyType"/> this <see cref="Item"/> sells for at a vendor.
+        /// </summary>
+        public CurrencyType GetVendorSellCurrency(byte index)
+        {
+            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
+                return (CurrencyType)Entry.CurrencyTypeIdSellToVendor[index];
+
+            return CurrencyType.None;
+        }
+
+        /// <summary>
+        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="Item"/> sells for at a vendor.
+        /// </summary>
+        public uint GetVendorSellAmount(byte index)
+        {
+            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
+                return Entry.CurrencyAmountSellToVendor[index];
+
+            // most items that sell for credits have their sell amount calculated and not stored in the tbl
+            return CalculateVendorSellAmount();
+        }
+
+        private uint CalculateVendorSellAmount()
+        {
+            // TODO: Rawaho was lazy and didn't finish this
+            // GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(559);
+            // uint cost = Entry.PowerLevel * entry.Dataint01;
+            return 0u;
         }
     }
 }

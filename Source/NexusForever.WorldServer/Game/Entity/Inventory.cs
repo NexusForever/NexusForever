@@ -544,28 +544,6 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
-        public Item ItemDelete(Item item, byte reason = 15)
-        {
-            Bag srcBag = GetBag(item.Location);
-            if (srcBag == null)
-                throw new InvalidPacketValueException();
-
-            srcBag.RemoveItem(item);
-            item.EnqueueDelete();
-            deletedItems.Add(item);
-
-            player.Session.EnqueueMessageEncrypted(new ServerItemDelete
-            {
-                Guid = item.Guid,
-                Reason = reason
-            });
-
-            return item;
-        }
-
-        /// <summary>
-        /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
-        /// </summary>
         public Item ItemDelete(ItemLocation from, byte reason = 15)
         {
             Bag srcBag = GetBag(from.Location);
@@ -592,7 +570,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Remove <see cref="Item"/> from this player's inventory without deleting the item from the DB
         /// </summary>
-        public Item ItemRemove(Item srcItem, byte reason = 49)
+        public void ItemRemove(Item srcItem, byte reason = 49)
         {
             if (srcItem == null)
                 throw new InvalidPacketValueException("Item could not be found");
@@ -602,15 +580,13 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new InvalidPacketValueException();
 
             srcBag.RemoveItem(srcItem);
-            deletedItems.Add(srcItem);
+            srcItem.CharacterId = null;
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
                 Guid = srcItem.Guid,
                 Reason = reason
             });
-
-            return srcItem;
         }
 
         /// <summary>

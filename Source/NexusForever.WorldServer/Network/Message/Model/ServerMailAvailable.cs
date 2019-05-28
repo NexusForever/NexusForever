@@ -1,7 +1,8 @@
-﻿using NexusForever.Shared.Network;
+﻿using System.Collections.Generic;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Mail.Static;
-using System.Collections.Generic;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -42,7 +43,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             public ulong MailId { get; set; }
             public SenderType SenderType { get; set; }
-            public ushort Unknown0 { get; set; } = 0; // 14
+            public ushort Unknown0 { get; set; }
             public string Subject { get; set; }
             public string Message { get; set; }
             public uint TextEntrySubject { get; set; }
@@ -52,9 +53,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public ulong CurrencyGiftAmount { get; set; }
             public ulong CostOnDeliveryAmount { get; set; }
             public float ExpiryTimeInDays { get; set; }
-            public MailFlag Flags { get; set; } = MailFlag.None;
-            public ushort SenderRealm { get; set; } // Replace with CharacterIdentity from Contacts branch
-            public ulong SenderCharacterId { get; set; } // Replace with CharacterIdentity from Contacts branch
+            public MailFlag Flags { get; set; }
+            public TargetPlayerIdentity Sender { get; set; } = new TargetPlayerIdentity();
             public List<Attachment> Attachments { get; set; } = new List<Attachment>();
 
             public void Write(GamePacketWriter writer)
@@ -72,20 +72,20 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write(CostOnDeliveryAmount);
                 writer.Write(ExpiryTimeInDays);
                 writer.Write(Flags, 32);
-                writer.Write(SenderRealm, 14);
-                writer.Write(SenderCharacterId);
+                writer.Write(Sender.RealmId, 14);
+                writer.Write(Sender.CharacterId);
 
                 writer.Write(Attachments.Count);
                 Attachments.ForEach(v => v.Write(writer));
             }
         }
 
-        public bool Unknown0 { get; set; } = true;
+        public bool NewMail { get; set; } = true;
         public List<Mail> MailList { get; set; } = new List<Mail>();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0);
+            writer.Write(NewMail);
 
             writer.Write(MailList.Count);
             MailList.ForEach(v => v.Write(writer));

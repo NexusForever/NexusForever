@@ -1,30 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Database;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Mail.Static;
-using NLog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using MailModel = NexusForever.WorldServer.Database.Character.Model.CharacterMail;
 
 namespace NexusForever.WorldServer.Game.Mail
 {
-    public class MailItem
+    public class MailItem : IEnumerable<MailAttachment>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         public ulong Id { get; }
 
-        public ulong RecipientId {
+        public ulong RecipientId
+        {
             get => recipientId;
             private set
             {
                 if (value == recipientId)
-                    throw new ArgumentException("Receipient ID must be different than current receipient.");
+                    throw new ArgumentException("Recipient ID must be different than current recipient.");
                 recipientId = value;
                 saveMask |= MailSaveMask.RecipientChange;
             }
@@ -32,20 +28,20 @@ namespace NexusForever.WorldServer.Game.Mail
         private ulong recipientId;
 
         public SenderType SenderType { get; }
-        public ulong SenderId { get; private set; } = 0;
+        public ulong SenderId { get; }
+        public uint CreatureId { get; }
 
         public string Subject { get; private set; } = "";
-        public string Message { get; private set; } = "";
-
-        public uint TextEntrySubject { get; } = 0;
-        public uint TextEntryMessage { get; } = 0;
-        public uint CreatureId { get; } = 0;
+        public string Message { get; } = "";
+        public uint TextEntrySubject { get; }
+        public uint TextEntryMessage { get; }
 
         public CurrencyType CurrencyType { get; }
         public ulong CurrencyAmount { get; }
         public bool IsCashOnDelivery { get; }
 
-        public bool HasPaidOrCollectedCurrency {
+        public bool HasPaidOrCollectedCurrency
+        {
             get => hasPaidOrCollectedCurrency;
             private set
             {
@@ -55,7 +51,8 @@ namespace NexusForever.WorldServer.Game.Mail
         }
         private bool hasPaidOrCollectedCurrency;
 
-        public MailFlag Flags {
+        public MailFlag Flags
+        {
             get => flags;
             private set
             {
@@ -69,32 +66,34 @@ namespace NexusForever.WorldServer.Game.Mail
         public DateTime CreateTime { get; }
         public float ExpiryTime => 30f; // TODO: Make this configurable
 
-        private MailSaveMask saveMask;
+        /// <summary>
+        /// Returns if <see cref="MailItem"/> is enqueued to be deleted from the database.
+        /// </summary>
+        public bool PendingDelete => (saveMask & MailSaveMask.Delete) != 0;
 
-        public bool IsPendingDelete => ((saveMask & MailSaveMask.Delete) != 0);
+        private MailSaveMask saveMask;
 
         private readonly List<MailAttachment> mailAttachments = new List<MailAttachment>();
         private readonly HashSet<MailAttachment> deletedAttachments = new HashSet<MailAttachment>();
 
         /// <summary>
-        /// Create a new <see cref="MailItem"/> from an existing <see cref="MailModel"/>
+        /// Create a new <see cref="MailItem"/> from an existing <see cref="MailModel"/>.
         /// </summary>
-        /// <param name="model"></param>
         public MailItem(MailModel model)
         {
-            Id = model.Id;
-            recipientId = model.RecipientId;
-            SenderType = (SenderType)model.SenderType;
-            SenderId = model.SenderId;
-            Subject = model.Subject;
-            Message = model.Message;
-            CurrencyType = (CurrencyType)model.CurrencyType;
-            CurrencyAmount = model.CurrencyAmount;
-            IsCashOnDelivery = Convert.ToBoolean(model.IsCashOnDelivery);
+            Id                         = model.Id;
+            recipientId                = model.RecipientId;
+            SenderType                 = (SenderType)model.SenderType;
+            SenderId                   = model.SenderId;
+            Subject                    = model.Subject;
+            Message                    = model.Message;
+            CurrencyType               = (CurrencyType)model.CurrencyType;
+            CurrencyAmount             = model.CurrencyAmount;
+            IsCashOnDelivery           = Convert.ToBoolean(model.IsCashOnDelivery);
             hasPaidOrCollectedCurrency = Convert.ToBoolean(model.HasPaidOrCollectedCurrency);
-            flags = (MailFlag)model.Flags;
-            DeliveryTime = (DeliveryTime)model.DeliveryTime;
-            CreateTime = model.CreateTime;
+            flags                      = (MailFlag)model.Flags;
+            DeliveryTime               = (DeliveryTime)model.DeliveryTime;
+            CreateTime                 = model.CreateTime;
 
             foreach (CharacterMailAttachment mailAttachment in model.CharacterMailAttachment)
                 mailAttachments.Add(new MailAttachment(mailAttachment));
@@ -103,34 +102,43 @@ namespace NexusForever.WorldServer.Game.Mail
         }
 
         /// <summary>
-        /// Create a new <see cref="MailItem"/> for a new sent mail
+        /// Create a new <see cref="MailItem"/> from supplied <see cref="MailParameters"/>.
         /// </summary>
-        /// <param name="newRecipientId"></param>
-        /// <param name="sender"></param>
-        /// <param name="subject"></param>
-        /// <param name="message"></param>
-        /// <param name="currencyAmount"></param>
-        /// <param name="isCOD"></param>
-        /// <param name="deliveryTime"></param>
-        /// <param name="attachedItems"></param>
-        public MailItem(ulong newRecipientId, Player sender, string subject, string message, ulong currencyAmount, bool isCOD, DeliveryTime deliveryTime)
+        public MailItem(MailParameters parameters)
         {
-            Id = MailManager.NextMailId;
-            recipientId = newRecipientId;
-            SenderType = SenderType.Player;
-            SenderId = sender.CharacterId;
-            Subject = subject;
-            Message = message;
-            CurrencyType = CurrencyType.Credits;
-            CurrencyAmount = currencyAmount;
-            if (isCOD)
-                IsCashOnDelivery = true;
-            hasPaidOrCollectedCurrency = false;
-            flags = MailFlag.None;
-            DeliveryTime = deliveryTime;
-            CreateTime = DateTime.Now;
+            Id          = AssetManager.NextMailId;
+            recipientId = parameters.RecipientCharacterId;
+            SenderType  = parameters.MessageType;
 
-            saveMask = MailSaveMask.Create;
+            if (SenderType == SenderType.Player || SenderType == SenderType.GM)
+                SenderId = parameters.SenderCharacterId;
+            else
+                CreatureId = parameters.CreatureId;
+
+            if (parameters.SubjectStringId != 0u)
+                TextEntrySubject = parameters.SubjectStringId;
+            else
+                Subject = parameters.Subject;
+
+            if (parameters.BodyStringId != 0u)
+                TextEntryMessage = parameters.BodyStringId;
+            else
+                Message = parameters.Body;
+
+            CurrencyType = CurrencyType.Credits;
+
+            if (parameters.CodAmount > 0ul)
+            {
+                CurrencyAmount = parameters.CodAmount;
+                IsCashOnDelivery = true;
+            }
+            else
+                CurrencyAmount = parameters.MoneyToGive;
+
+            DeliveryTime = parameters.DeliveryTime;
+            CreateTime   = DateTime.Now;
+
+            saveMask     = MailSaveMask.Create;
         }
 
         /// <summary>
@@ -143,30 +151,28 @@ namespace NexusForever.WorldServer.Game.Mail
 
         public void Save(CharacterContext context)
         {
-            log.Info($"Save called on {Id}");
-
             if (saveMask != MailSaveMask.None)
             {
                 if ((saveMask & MailSaveMask.Create) != 0)
                 {
                     context.Add(new MailModel
                     {
-                        Id = Id,
-                        RecipientId = RecipientId,
-                        SenderType = (byte)SenderType,
-                        SenderId = SenderId,
-                        Subject = Subject,
-                        Message = Message,
-                        TextEntrySubject = TextEntrySubject,
-                        TextEntryMessage = TextEntryMessage,
-                        CreatureId = CreatureId,
-                        CurrencyType = Convert.ToByte(CurrencyType),
-                        CurrencyAmount = CurrencyAmount,
-                        IsCashOnDelivery = Convert.ToByte(IsCashOnDelivery),
+                        Id                         = Id,
+                        RecipientId                = RecipientId,
+                        SenderType                 = (byte)SenderType,
+                        SenderId                   = SenderId,
+                        Subject                    = Subject,
+                        Message                    = Message,
+                        TextEntrySubject           = TextEntrySubject,
+                        TextEntryMessage           = TextEntryMessage,
+                        CreatureId                 = CreatureId,
+                        CurrencyType               = (byte)CurrencyType,
+                        CurrencyAmount             = CurrencyAmount,
+                        IsCashOnDelivery           = Convert.ToByte(IsCashOnDelivery),
                         HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency),
-                        Flags = (byte)Flags,
-                        DeliveryTime = (byte)DeliveryTime,
-                        CreateTime = CreateTime
+                        Flags                      = (byte)Flags,
+                        DeliveryTime               = (byte)DeliveryTime,
+                        CreateTime                 = CreateTime
                     });
                 }
                 else if ((saveMask & MailSaveMask.Delete) != 0)
@@ -216,24 +222,16 @@ namespace NexusForever.WorldServer.Game.Mail
 
             foreach (MailAttachment mailAttachment in deletedAttachments)
                 mailAttachment.Save(context);
+
+            deletedAttachments.Clear();
         }
 
         /// <summary>
-        /// Returns the specific <see cref="MailAttachment"/> based on its index
+        /// Returns the specific <see cref="MailAttachment"/> based on its index.
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public MailAttachment GetAttachment(int index)
+        public MailAttachment GetAttachment(uint index)
         {
-            return mailAttachments[index];
-        }
-
-        /// <summary>
-        /// Return all <see cref="MailAttachment"/> for the <see cref="MailItem"/>.
-        /// </summary>
-        public IEnumerable<MailAttachment> GetAttachments()
-        {
-            return mailAttachments;
+            return index < mailAttachments.Count ? mailAttachments[(int)index] : null;
         }
 
         /// <summary>
@@ -245,7 +243,7 @@ namespace NexusForever.WorldServer.Game.Mail
         }
 
         /// <summary>
-        /// Mark this <see cref="MailItem"/> as paid, or taken the currency attached
+        /// Mark this <see cref="MailItem"/> as paid, or taken the currency attached.
         /// </summary>
         public void PayOrTakeCash()
         {
@@ -254,27 +252,26 @@ namespace NexusForever.WorldServer.Game.Mail
         }
 
         /// <summary>
-        /// Mark this <see cref="MailItem"/> as not returnable
+        /// Mark this <see cref="MailItem"/> as not returnable.
         /// </summary>
         public void MarkAsNotReturnable()
         {
-            Flags = MailFlag.NotReturnable;
+            Flags |= MailFlag.NotReturnable;
         }
 
         /// <summary>
-        /// Return this <see cref="MailItem"/> to sender
+        /// Return this <see cref="MailItem"/> to sender.
         /// </summary>
         public void ReturnMail()
         {
             RecipientId = SenderId;
-            Subject = "Returned: " + Subject;
+            Subject = $"Returned: {Subject}";
             MarkAsNotReturnable();
         }
 
         /// <summary>
-        /// Returns whether this item is ready to be delivered based on <see cref="DeliveryTime"/>
+        /// Returns whether this item is ready to be delivered based on <see cref="DeliveryTime"/>.
         /// </summary>
-        /// <returns></returns>
         public bool IsReadyToDeliver()
         {
             if (DeliveryTime == DeliveryTime.Instant)
@@ -296,22 +293,30 @@ namespace NexusForever.WorldServer.Game.Mail
         /// <summary>
         /// Add a <see cref="MailAttachment"/> to this <see cref="MailItem"/>.
         /// </summary>
-        /// <param name="mailAttachment"></param>
         public void AttachmentAdd(MailAttachment mailAttachment)
         {
             mailAttachments.Add(mailAttachment);
         }
 
         /// <summary>
-        /// Remove a <see cref="MailAttachment"/> from this <see cref="MailItem"/>
+        /// Remove a <see cref="MailAttachment"/> from this <see cref="MailItem"/>.
         /// </summary>
-        /// <param name="mailAttachment"></param>
-        public void AttachmentDelete(MailAttachment mailAttachment, int index)
+        public void AttachmentDelete(MailAttachment mailAttachment, uint index)
         {
             mailAttachment.EnqueueDelete();
 
-            mailAttachments.RemoveAt(index);
+            mailAttachments.RemoveAt((int)index);
             deletedAttachments.Add(mailAttachment);
+        }
+
+        public IEnumerator<MailAttachment> GetEnumerator()
+        {
+            return mailAttachments.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

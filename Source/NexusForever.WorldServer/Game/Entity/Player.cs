@@ -99,8 +99,6 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint PetGuid { get; set; }
 
-        public Dictionary<ulong, MailItem> AvailableMail { get; private set; } = new Dictionary<ulong, MailItem>();
-
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
@@ -113,6 +111,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public PetCustomisationManager PetCustomisationManager { get; }
         public KeybindingManager KeybindingManager { get; }
         public DatacubeManager DatacubeManager { get; }
+        public MailManager MailManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -145,15 +144,16 @@ namespace NexusForever.WorldServer.Game.Entity
             TimePlayedLevel = model.TimePlayedLevel;
 
             // managers
-            CostumeManager  = new CostumeManager(this, session.Account, model);
-            Inventory       = new Inventory(this, model);
-            CurrencyManager = new CurrencyManager(this, model);
-            PathManager     = new PathManager(this, model);
-            TitleManager    = new TitleManager(this, model);
-            SpellManager    = new SpellManager(this, model);
+            CostumeManager          = new CostumeManager(this, session.Account, model);
+            Inventory               = new Inventory(this, model);
+            CurrencyManager         = new CurrencyManager(this, model);
+            PathManager             = new PathManager(this, model);
+            TitleManager            = new TitleManager(this, model);
+            SpellManager            = new SpellManager(this, model);
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new KeybindingManager(this, session.Account, model);
             DatacubeManager         = new DatacubeManager(this, model);
+            MailManager             = new MailManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -181,7 +181,7 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
 
-            foreach (CharacterStat statModel in model.CharacterStat)
+            foreach (CharacterStats statModel in model.CharacterStats)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
             SetStat(Stat.Sheathed, 1u);
@@ -191,9 +191,6 @@ namespace NexusForever.WorldServer.Game.Entity
             // sprint
             SetStat(Stat.Resource0, 500f);
             SetStat(Stat.Shield, 450u);
-
-            foreach (CharacterMail mail in model.CharacterMail)
-                AvailableMail.Add(mail.Id, new MailItem(mail));
         }
 
         public override void Update(double lastTick)
@@ -376,7 +373,7 @@ namespace NexusForever.WorldServer.Game.Entity
             PetCustomisationManager.SendInitialPackets();
             KeybindingManager.SendInitialPackets();
             DatacubeManager.SendInitialPackets();
-            MailManager.SendInitialPackets(Session);
+            MailManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -622,7 +619,7 @@ namespace NexusForever.WorldServer.Game.Entity
             KeybindingManager.Save(context);
             SpellManager.Save(context);
             DatacubeManager.Save(context);
-            MailManager.Save(this, context);
+            MailManager.Save(context);
         }
 
         /// <summary>

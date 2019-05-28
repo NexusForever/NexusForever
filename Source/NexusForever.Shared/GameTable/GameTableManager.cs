@@ -300,7 +300,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<LiveEventDisplayItemEntry> LiveEventDisplayItem { get; private set; }
         public static GameTable<LoadingScreenTipEntry> LoadingScreenTip { get; private set; }
         public static GameTable<LocalizedEnumEntry> LocalizedEnum { get; private set; }
+
+        [GameData]
         public static GameTable<LocalizedTextEntry> LocalizedText { get; private set; }
+
         public static GameTable<LootPinataInfoEntry> LootPinataInfo { get; private set; }
         public static GameTable<LootSpellEntry> LootSpell { get; private set; }
         public static GameTable<LuaEventEntry> LuaEvent { get; private set; }

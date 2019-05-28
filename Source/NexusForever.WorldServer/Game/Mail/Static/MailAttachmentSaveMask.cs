@@ -8,8 +8,8 @@ namespace NexusForever.WorldServer.Game.Mail.Static
     [Flags]
     public enum MailAttachmentSaveMask
     {
-        None                = 0x0000,
-        Create              = 0x0001,
-        Delete              = 0x0002
+        None   = 0x0000,
+        Create = 0x0001,
+        Delete = 0x0002
     }
 }

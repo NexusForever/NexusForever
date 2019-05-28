@@ -39,7 +39,7 @@ namespace NexusForever.Shared.Network.Message
         ServerCharacterList             = 0x0117,
         ClientMailDelete                = 0x011E,
         ClientMailOpen                  = 0x0122,
-        ClientMailPayCOD                = 0x0123,
+        ClientMailPayCod                = 0x0123,
         ClientMailReturn                = 0x0124,
         ClientMailTakeAllFromSelection  = 0x0125,
         ClientMailTakeAttachment        = 0x0126,

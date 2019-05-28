@@ -1,56 +1,40 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Mail.Static;
-using MailAttachmentModel = NexusForever.WorldServer.Database.Character.Model.CharacterMailAttachment;
-using ItemModel = NexusForever.WorldServer.Database.Character.Model.Item;
+using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 
 namespace NexusForever.WorldServer.Game.Mail
 {
     public class MailAttachment: ISaveCharacter
     {
         public ulong Id { get; }
-        public ulong ItemGuid { get; }
         public uint Index { get; }
-
-        public Entity.Item Item { get; private set; }
+        public ItemEntity Item { get; }
 
         private MailAttachmentSaveMask saveMask;
 
-        public bool IsPendingDelete => ((saveMask & MailAttachmentSaveMask.Delete) != 0);
-
         /// <summary>
-        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="MailAttachmentModel"/>
+        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="CharacterMailAttachment"/> model.
         /// </summary>
         /// <param name="model"></param>
-        public MailAttachment(MailAttachmentModel model)
+        public MailAttachment(CharacterMailAttachment model)
         {
-            Id = model.Id;
-            ItemGuid = model.ItemGuid;
-            Index = model.Index;
-
-            Item = new Entity.Item(CharacterDatabase.GetItemById(model.ItemGuid));
+            Id       = model.Id;
+            Index    = model.Index;
+            Item     = new ItemEntity(model.ItemGu);
 
             saveMask = MailAttachmentSaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="MailAttachment"/>
+        /// Create a new <see cref="MailAttachment"/>.
         /// </summary>
-        /// <param name="mailId"></param>
-        /// <param name="itemGuid"></param>
-        /// <param name="index"></param>
-        /// <param name="amount"></param>
-        public MailAttachment(ulong mailId, ulong itemGuid, uint index, Entity.Item item = null)
+        public MailAttachment(ulong mailId, uint index, ItemEntity item)
         {
-            Id = mailId;
-            ItemGuid = itemGuid;
-            Index = index;
-
-            if (item != null)
-                Item = item;
+            Id       = mailId;
+            Index    = index;
+            Item     = item;
 
             saveMask = MailAttachmentSaveMask.Create;
         }
@@ -69,18 +53,18 @@ namespace NexusForever.WorldServer.Game.Mail
             {
                 if ((saveMask & MailAttachmentSaveMask.Create) != 0)
                 {
-                    context.Add(new MailAttachmentModel
+                    context.Add(new CharacterMailAttachment
                     {
-                        Id = Id,
-                        Index = Index,
-                        ItemGuid = ItemGuid
+                        Id       = Id,
+                        Index    = Index,
+                        ItemGuid = Item.Guid
                     });
                 }
                 else if ((saveMask & MailAttachmentSaveMask.Delete) != 0)
                 {
-                    var model = new MailAttachmentModel
+                    var model = new CharacterMailAttachment
                     {
-                        Id = Id,
+                        Id    = Id,
                         Index = Index
                     };
 

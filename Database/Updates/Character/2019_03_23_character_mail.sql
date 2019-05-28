@@ -27,7 +27,9 @@ CREATE TABLE IF NOT EXISTS `character_mail_attachment` (
   `index` int(10) unsigned NOT NULL DEFAULT '0',
   `itemGuid` bigint(20) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`,`index`),
-  CONSTRAINT `FK__character_mail_attachment_id__character_mail_id` FOREIGN KEY (`id`) REFERENCES `character_mail` (`id`) ON DELETE CASCADE
+  UNIQUE INDEX `itemGuid` (`itemGuid`),
+  CONSTRAINT `FK__character_mail_attachment_id__character_mail_id` FOREIGN KEY (`id`) REFERENCES `character_mail` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `FK__character_mail_attachment_itemGuid__item_id` FOREIGN KEY (`itemGuid`) REFERENCES `item` (`id`) ON DELETE CASCADE
 );
 
 -- Dumping structure for table nexus_forever_character.item

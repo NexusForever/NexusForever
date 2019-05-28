@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="StatValue"/> from an existing database model.
         /// </summary>
-        public StatValue(CharacterStat model)
+        public StatValue(CharacterStats model)
         {
             Stat  = (Stat)model.Stat;
             Type  = EntityManager.GetStatAttribute(Stat).Type;
@@ -76,7 +76,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if ((saveMask & StatSaveMask.Create) != 0)
             {
-                context.Add(new CharacterStat
+                context.Add(new CharacterStats
                 {
                     Id    = characterId,
                     Stat  = (byte)Stat,
@@ -85,13 +85,13 @@ namespace NexusForever.WorldServer.Game.Entity
             }
             else
             {
-                var statModel = new CharacterStat
+                var statModel = new CharacterStats
                 {
                     Id   = characterId,
                     Stat = (byte)Stat
                 };
 
-                EntityEntry<CharacterStat> statEntity = context.Attach(statModel);
+                EntityEntry<CharacterStats> statEntity = context.Attach(statModel);
                 if ((saveMask & StatSaveMask.Value) != 0)
                 {
                     statModel.Value = Value;

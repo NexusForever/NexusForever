@@ -3,8 +3,8 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientMailPayCOD)]
-    public class ClientMailPayCOD : IReadable
+    [Message(GameMessageOpcode.ClientMailPayCod)]
+    public class ClientMailPayCod : IReadable
     {
         public ulong MailId { get; private set; }
         public uint UnitId { get; private set; } // Mailbox Entity Guid
@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public void Read(GamePacketReader reader)
         {
             MailId = reader.ReadULong();
-            UnitId  = reader.ReadUInt();
+            UnitId = reader.ReadUInt();
         }
     }
 }

@@ -191,7 +191,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         listCharacter.Bones.Add(bone.Bone);
                     }
 
-                    foreach(CharacterStat stat in character.CharacterStat)
+                    foreach (CharacterStats stat in character.CharacterStats)
                     {
                         if ((Stat)stat.Stat == Stat.Level)
                         {
@@ -326,31 +326,31 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     .Select(i => i);
 
                 //TODO: handle starting stats per class/race
-                character.CharacterStat.Add(new CharacterStat
+                character.CharacterStats.Add(new CharacterStats
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.Health,
                     Value = 800
                 });
-                character.CharacterStat.Add(new CharacterStat
+                character.CharacterStats.Add(new CharacterStats
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.Shield,
                     Value = 450
                 });
-                character.CharacterStat.Add(new CharacterStat
+                character.CharacterStats.Add(new CharacterStats
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.Dash,
                     Value = 200
                 });
-                character.CharacterStat.Add(new CharacterStat
+                character.CharacterStats.Add(new CharacterStats
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.Level,
                     Value = 1
                 });
-                character.CharacterStat.Add(new CharacterStat
+                character.CharacterStats.Add(new CharacterStats
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.StandState,
