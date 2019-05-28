@@ -92,6 +92,17 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
         private byte innateIndex;
+        
+        public ushort BindPoint
+        {
+            get => bindPoint;
+            set
+            {
+                bindPoint = value;
+                saveMask |= PlayerSaveMask.BindPoint;
+            }
+        }
+        private ushort bindPoint;
 
         public DateTime CreateTime { get; }
         public double TimePlayedTotal { get; private set; }
@@ -178,6 +189,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
             innateIndex     = model.InnateIndex;
+            BindPoint       = model.BindPoint;
 
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
@@ -362,6 +374,12 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.InnateIndex).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.BindPoint) != 0)
+                {
+                    model.BindPoint = BindPoint;
+                    entity.Property(p => p.BindPoint).IsModified = true;
+                }
+
                 saveMask = PlayerSaveMask.None;
             }
 
@@ -540,6 +558,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         })
                         .ToList()
                 },
+                BindPoint             = BindPoint,
                 ActiveCostumeIndex    = CostumeIndex,
                 InputKeySet           = (uint)InputKeySet,
                 CharacterEntitlements = Session.EntitlementManager.GetCharacterEntitlements()

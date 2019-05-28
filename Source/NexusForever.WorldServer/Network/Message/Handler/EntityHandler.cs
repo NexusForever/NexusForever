@@ -4,12 +4,14 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Command;
+using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game;
 using NLog;
+using System;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -60,7 +62,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             // TODO: sanity check for range etc.
 
-            entity.OnActivate(session.Player);
+            entity.OnInteract(session.Player);
         }
 
         [MessageHandler(GameMessageOpcode.ClientActivateUnitCast)]
@@ -76,7 +78,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(entity.CreatureId) ?? Enumerable.Empty<uint>())
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroup, targetGroupId, 1u); // Updates the objective, but seems to disable all the other targets. TODO: Investigate
             
-            entity.OnActivateCast(session.Player);
+            entity.OnActivateCast(session.Player, unit.ClientUniqueId);
         }
 
         [MessageHandler(GameMessageOpcode.ClientEntityInteract)]
@@ -152,6 +154,41 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 throw new InvalidPacketValueException();
 
             session.Player.Sit(chair);
+        }
+        
+        [MessageHandler(GameMessageOpcode.ClientActivateUnitInteraction)]
+        public static void HandleActivateUnitDeferred(WorldSession session, ClientActivateUnitInteraction request)
+        {
+            WorldEntity entity = session.Player.GetVisible<WorldEntity>(request.ActivateUnitId);
+            if (entity == null)
+                throw new InvalidPacketValueException();
+
+            entity.OnActivateCast(session.Player, request.ClientUniqueId);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientInteractionResult)]
+        public static void HandleSpellDeferredResult(WorldSession session, ClientSpellInteractionResult result)
+        {
+            log.Info($"{result.CastingId}, {result.Result}, {result.Validation}");
+            Spell spell = session.Player.GetPendingSpell(result.CastingId);
+            if (spell == null)
+                throw new ArgumentNullException($"Spell cast {result.CastingId} not found.");
+
+            if (!spell.IsClientSideInteraction)
+                throw new ArgumentNullException($"Spell missing a ClientSideInteraction.");
+
+            switch (result.Result)
+            {
+                case 0:
+                    spell.FailClientInteraction();
+                    break;
+                case 1:
+                    spell.SucceedClientInteraction();
+                    break;
+                case 2:
+                    spell.CancelCast(Game.Spell.Static.CastResult.ClientSideInteractionFail);
+                    break;
+            }
         }
     }
 }

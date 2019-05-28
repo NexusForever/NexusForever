@@ -2,19 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Character;
 
 namespace NexusForever.Database.Character.Migrations
 {
     [DbContext(typeof(CharacterContext))]
-    partial class CharacterContextModelSnapshot : ModelSnapshot
+    [Migration("20200416021649_Bindpoints")]
+    partial class Bindpoints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.5")
+                .HasAnnotation("ProductVersion", "3.1.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterAchievementModel", b =>
@@ -62,6 +64,7 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue(0ul);
 
                     b.Property<byte>("SpecIndex")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("specIndex")
                         .HasColumnType("tinyint(3) unsigned")
                         .HasDefaultValue((byte)0);
@@ -86,11 +89,13 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue(0ul);
 
                     b.Property<byte>("SpecIndex")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("specIndex")
                         .HasColumnType("tinyint(3) unsigned")
                         .HasDefaultValue((byte)0);
 
                     b.Property<ushort>("Location")
+                        .ValueGeneratedOnAdd()
                         .HasColumnName("location")
                         .HasColumnType("smallint(5) unsigned")
                         .HasDefaultValue((ushort)0);
@@ -918,31 +923,6 @@ namespace NexusForever.Database.Character.Migrations
                     b.ToTable("character_quest_objective");
                 });
 
-            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterReputation", b =>
-                {
-                    b.Property<ulong>("Id")
-                        .HasColumnName("id")
-                        .HasColumnType("bigint(20) unsigned")
-                        .HasDefaultValue(0ul);
-
-                    b.Property<uint>("FactionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("factionId")
-                        .HasColumnType("int(10) unsigned")
-                        .HasDefaultValue(0u);
-
-                    b.Property<float>("Amount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("amount")
-                        .HasColumnType("float")
-                        .HasDefaultValue(0f);
-
-                    b.HasKey("Id", "FactionId")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("character_reputation");
-                });
-
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterSpellModel", b =>
                 {
                     b.Property<ulong>("Id")
@@ -1570,16 +1550,6 @@ namespace NexusForever.Database.Character.Migrations
                         .WithMany("QuestObjective")
                         .HasForeignKey("Id", "QuestId")
                         .HasConstraintName("FK__character_quest_objective_id__character_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterReputation", b =>
-                {
-                    b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
-                        .WithMany("Reputation")
-                        .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_reputation_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -1,9 +1,12 @@
 ﻿using NexusForever.Database.World.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.CSI;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game.Spell;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -37,6 +40,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 CreatureId = CreatureId,
                 QuestChecklistIdx = 0
             };
+        }
+
+        public override void OnActivateSuccess(Player activator)
+        {
+            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
+            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, CreatureId, 1u);
         }
 
         private void CalculateProperties()
