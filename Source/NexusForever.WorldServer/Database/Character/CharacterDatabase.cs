@@ -56,12 +56,6 @@ namespace NexusForever.WorldServer.Database.Character
                 return context.ResidenceDecor.DefaultIfEmpty().Max(r => r.DecorId);
         }
 
-        public static Model.Item GetItemById(ulong id)
-        {
-            using (var context = new CharacterContext())
-                return context.Item.First(e => e.Id == id);
-        }
-
         public static async Task<List<Model.Character>> GetCharacters(uint accountId)
         {
             using (var context = new CharacterContext())
@@ -75,7 +69,7 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterCurrency)
                         .Include(c => c.CharacterPath)
                         .Include(c => c.CharacterTitle)
-                        .Include(c => c.CharacterStat)
+                        .Include(c => c.CharacterStats)
                         .Include(c => c.CharacterCostume)
                             .ThenInclude(c => c.CharacterCostumeItem)
                         .Include(c => c.CharacterPetCustomisation)
@@ -85,6 +79,9 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterActionSetShortcut)
                         .Include(c => c.CharacterActionSetAmp)
                         .Include(c => c.CharacterDatacube)
+                        .Include(c => c.CharacterMail)
+                            .ThenInclude(c => c.CharacterMailAttachment)
+                                .ThenInclude(a => a.ItemGu)
                     .ToListAsync();
             }
         }
@@ -143,6 +140,12 @@ namespace NexusForever.WorldServer.Database.Character
                     .Where(r => r.PrivacyLevel == 0)
                     .ToList();
             }
+        }
+
+        public static ulong GetNextMailId()
+        {
+            using (var context = new CharacterContext())
+                return context.CharacterMail.DefaultIfEmpty().Max(s => s.Id);
         }
     }
 }

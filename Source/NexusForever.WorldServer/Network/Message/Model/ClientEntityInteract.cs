@@ -3,16 +3,16 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ClientVendor)]
-    public class ClientVendor : IReadable
+    [Message(GameMessageOpcode.ClientEntityInteract)]
+    public class ClientEntityInteract : IReadable
     {
         public uint Guid { get; private set; }
-        public byte Unknown0 { get; private set; }
+        public byte Event { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
             Guid     = reader.ReadUInt();
-            Unknown0 = reader.ReadByte(7);
+            Event = reader.ReadByte(7);
         }
     }
 }
