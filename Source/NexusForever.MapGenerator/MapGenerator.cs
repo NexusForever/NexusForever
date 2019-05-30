@@ -25,17 +25,17 @@ namespace NexusForever.MapGenerator
             if (!Directory.Exists(args[0]))
                 throw new DirectoryNotFoundException();
 
-            Flags flags = Flags.Extration | Flags.Generation;
+            Flags flags = Flags.Extraction | Flags.Generation;
             if (args.Length == 2)
                 flags = (Flags)uint.Parse(args[1]);
                 
             ArchiveManager.Initialise(args[0]);
             GameTableManager.Initialise();
 
-            if ((flags & Flags.Extration) != 0)
+            if ((flags & Flags.Extraction) != 0)
                 ExtractionManager.Initialise();
             if ((flags & Flags.Generation) != 0)
-                GenerationManager.Initialise();
+                GenerationManager.Initialise((flags & Flags.GenerationSingleThread) != 0);
 
             log.Info("Finished!");
             Console.ReadLine();

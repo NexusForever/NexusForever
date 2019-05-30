@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Nexus.Archive;
 using NexusForever.MapGenerator.GameTable;
@@ -20,7 +19,7 @@ namespace NexusForever.MapGenerator
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public static void Initialise()
+        public static void Initialise(bool singleThread)
         {
             log.Info("Generatring base map files...");
 
@@ -33,11 +32,17 @@ namespace NexusForever.MapGenerator
                 .Select(g => g.First())
                 .ToArray())
             {
-                Task task = Task.Factory.StartNew(() => ProcessWorld(entry));
-                taskList.Add(task);
+                if (singleThread)
+                    ProcessWorld(entry);
+                else
+                {
+                    Task task = Task.Factory.StartNew(() => ProcessWorld(entry));
+                    taskList.Add(task);
+                }
             }
 
-            Task.WaitAll(taskList.ToArray<Task>());
+            if (!singleThread)
+                Task.WaitAll(taskList.ToArray<Task>());
         }
 
         /// <summary>
