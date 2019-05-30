@@ -313,11 +313,17 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<MapZoneEntry> MapZone { get; private set; }
 
         public static GameTable<MapZoneHexEntry> MapZoneHex { get; private set; }
+
+        [GameData]
         public static GameTable<MapZoneHexGroupEntry> MapZoneHexGroup { get; private set; }
+
+        [GameData]
         public static GameTable<MapZoneHexGroupEntryEntry> MapZoneHexGroupEntry { get; private set; }
         public static GameTable<MapZoneNemesisRegionEntry> MapZoneNemesisRegion { get; private set; }
         public static GameTable<MapZonePOIEntry> MapZonePOI { get; private set; }
         public static GameTable<MapZoneSpriteEntry> MapZoneSprite { get; private set; }
+
+        [GameData]
         public static GameTable<MapZoneWorldJoinEntry> MapZoneWorldJoin { get; private set; }
         public static GameTable<MatchTypeRewardRotationContentEntry> MatchTypeRewardRotationContent { get; private set; }
         public static GameTable<MatchingGameMapEntry> MatchingGameMap { get; private set; }

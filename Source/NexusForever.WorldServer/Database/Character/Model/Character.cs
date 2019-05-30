@@ -23,6 +23,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterSpell = new HashSet<CharacterSpell>();
             CharacterStats = new HashSet<CharacterStats>();
             CharacterTitle = new HashSet<CharacterTitle>();
+            CharacterZonemapHexgroup = new HashSet<CharacterZonemapHexgroup>();
             Item = new HashSet<Item>();
         }
 
@@ -66,6 +67,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual ICollection<CharacterSpell> CharacterSpell { get; set; }
         public virtual ICollection<CharacterStats> CharacterStats { get; set; }
         public virtual ICollection<CharacterTitle> CharacterTitle { get; set; }
+        public virtual ICollection<CharacterZonemapHexgroup> CharacterZonemapHexgroup { get; set; }
         public virtual ICollection<Item> Item { get; set; }
     }
 }

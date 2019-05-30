@@ -80,7 +80,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public double TimePlayedTotal { get; private set; }
         public double TimePlayedLevel { get; private set; }
         public double TimePlayedSession { get; private set; }
-        
+
         /// <summary>
         /// Guid of the <see cref="WorldEntity"/> that currently being controlled by the <see cref="Player"/>.
         /// </summary>
@@ -113,6 +113,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public KeybindingManager KeybindingManager { get; }
         public DatacubeManager DatacubeManager { get; }
         public MailManager MailManager { get; }
+        public ZoneMapManager ZoneMapManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -155,6 +156,7 @@ namespace NexusForever.WorldServer.Game.Entity
             KeybindingManager       = new KeybindingManager(this, session.Account, model);
             DatacubeManager         = new DatacubeManager(this, model);
             MailManager             = new MailManager(this, model);
+            ZoneMapManager          = new ZoneMapManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -204,7 +206,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 logoutManager.Update(lastTick);
             }
-            
+
             base.Update(lastTick);
             TitleManager.Update(lastTick);
             SpellManager.Update(lastTick);
@@ -280,6 +282,8 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO: remove this once pathfinding is implemented
             if (PetGuid > 0)
                 Map.EnqueueRelocate(GetVisible<VanityPet>(PetGuid), vector);
+
+            ZoneMapManager.OnRelocate(vector);
         }
 
         protected override void OnZoneUpdate()
@@ -295,6 +299,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     Text    = $"New Zone: {tt.GetEntry(Zone.LocalizedTextIdName)}"
                 });
             }
+            ZoneMapManager.OnZoneUpdate();
         }
 
         private void SendPacketsAfterAddToMap()
@@ -374,6 +379,7 @@ namespace NexusForever.WorldServer.Game.Entity
             KeybindingManager.SendInitialPackets();
             DatacubeManager.SendInitialPackets();
             MailManager.SendInitialPackets();
+            ZoneMapManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -638,6 +644,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SpellManager.Save(context);
             DatacubeManager.Save(context);
             MailManager.Save(context);
+            ZoneMapManager.Save(context);
         }
 
         /// <summary>
