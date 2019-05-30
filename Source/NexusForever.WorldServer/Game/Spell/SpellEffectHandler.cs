@@ -21,6 +21,17 @@ namespace NexusForever.WorldServer.Game.Spell
             info.AddDamage((DamageType)info.Entry.DamageType, 1337);
         }
 
+        [SpellEffectHandler(SpellEffectType.Proxy)]
+        private void HandleEffectProxy(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            target.CastSpell(info.Entry.DataBits00, new SpellParameters
+            {
+                ParentSpellInfo        = parameters.SpellInfo,
+                RootSpellInfo          = parameters.RootSpellInfo,
+                UserInitiatedSpellCast = false
+            });
+        }
+
         [SpellEffectHandler(SpellEffectType.Disguise)]
         private void HandleEffectDisguise(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
@@ -36,17 +47,6 @@ namespace NexusForever.WorldServer.Game.Spell
                 return;
 
             player.SetDisplayInfo(displayGroupEntry.Creature2DisplayInfoId);
-        }
-
-        [SpellEffectHandler(SpellEffectType.Proxy)]
-        private void HandleEffectProxy(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
-        {
-            target.CastSpell(info.Entry.DataBits00, new SpellParameters
-            {
-                ParentSpellInfo        = parameters.SpellInfo,
-                RootSpellInfo          = parameters.RootSpellInfo,
-                UserInitiatedSpellCast = false
-            });
         }
 
         [SpellEffectHandler(SpellEffectType.SummonMount)]
