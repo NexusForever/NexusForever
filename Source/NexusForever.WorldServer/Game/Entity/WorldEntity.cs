@@ -264,6 +264,20 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Update the display info for the <see cref="WorldEntity"/>, this overrides any other appearance changes.
+        /// </summary>
+        public void SetDisplayInfo(uint displayInfo)
+        {
+            DisplayInfo = displayInfo;
+
+            EnqueueToVisible(new ServerEntityVisualUpdate
+            {
+                UnitId      = Guid,
+                DisplayInfo = DisplayInfo
+            }, true);
+        }
+
+        /// <summary>
         /// Enqueue broadcast of <see cref="IWritable"/> to all visible <see cref="Player"/>'s in range.
         /// </summary>
         public void EnqueueToVisible(IWritable message, bool includeSelf = false)

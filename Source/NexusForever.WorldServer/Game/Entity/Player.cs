@@ -569,6 +569,22 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
+        /// <summary>
+        /// Reset and restore default appearance for <see cref="Player"/>.
+        /// </summary>
+        public void ResetAppearance()
+        {
+            DisplayInfo = 0;
+
+            EnqueueToVisible(new ServerEntityVisualUpdate
+            {
+                UnitId      = Guid,
+                Race        = (byte)Race,
+                Sex         = (byte)Sex,
+                ItemVisuals = GetAppearance().ToList()
+            }, true);
+        }
+
         public void Save(AuthContext context)
         {
             Session.GenericUnlockManager.Save(context);
