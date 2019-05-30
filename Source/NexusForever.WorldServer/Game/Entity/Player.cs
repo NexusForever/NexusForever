@@ -283,7 +283,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (PetGuid > 0)
                 Map.EnqueueRelocate(GetVisible<VanityPet>(PetGuid), vector);
 
-            ZoneMapManager.Update(vector);
+            ZoneMapManager.OnRelocate(vector);
         }
 
         protected override void OnZoneUpdate()

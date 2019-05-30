@@ -8,7 +8,7 @@
         public const int WorldGridCount = 128;
 
         /// <summary>
-        /// Centre grid in the world, this represents postion 0.
+        /// Centre grid in the world, this represents position 0.
         /// </summary>
         public const int WorldGridOrigin = WorldGridCount / 2;
 

@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterSpell> CharacterSpell { get; set; }
         public virtual DbSet<CharacterStats> CharacterStats { get; set; }
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
-        public virtual DbSet<CharacterZoneMapHexGroup> CharacterZoneMapHexGroup { get; set; }
+        public virtual DbSet<CharacterZonemapHexgroup> CharacterZonemapHexgroup { get; set; }
         public virtual DbSet<Item> Item { get; set; }
         public virtual DbSet<Residence> Residence { get; set; }
         public virtual DbSet<ResidenceDecor> ResidenceDecor { get; set; }
@@ -762,7 +762,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasConstraintName("FK__character_title_id__character_id");
             });
 
-            modelBuilder.Entity<CharacterZoneMapHexGroup>(entity =>
+            modelBuilder.Entity<CharacterZonemapHexgroup>(entity =>
             {
                 entity.HasKey(e => new { e.Id, e.ZoneMap, e.HexGroup })
                     .HasName("PRIMARY");
@@ -782,7 +782,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasDefaultValueSql("'0'");
 
                 entity.HasOne(d => d.IdNavigation)
-                    .WithMany(p => p.CharacterZoneMapHexGroup)
+                    .WithMany(p => p.CharacterZonemapHexgroup)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_zonemap_hexgroup_id__character_id");
             });

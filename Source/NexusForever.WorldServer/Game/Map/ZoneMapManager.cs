@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
@@ -11,38 +12,58 @@ namespace NexusForever.WorldServer.Game.Map
 {
     public class ZoneMapManager : ISaveCharacter
     {
-        private const float ZoneMapBoundary = 32768.0F;
+        private const float ZoneMapBoundary = MapDefines.WorldGridOrigin * MapDefines.GridSize;
         private const byte RateLimit = 10;
 
-        private readonly Player player;
-        private ZoneMapCoordinate zoneMapCoordinate = new ZoneMapCoordinate();
-        private readonly Dictionary<ushort /*ZoneMapId*/, ZoneMap> zoneMaps = new Dictionary<ushort, ZoneMap>();
         private ushort currentZoneMap;
+        private ZoneMapCoordinate currentZoneMapCoordinate = new ZoneMapCoordinate();
         private Vector3 lastPosition;
 
+        private readonly Dictionary<ushort /*ZoneMapId*/, ZoneMap> zoneMaps = new Dictionary<ushort, ZoneMap>();
+
+        private readonly Player player;
+
+        /// <summary>
+        /// Create a new <see cref="ZoneMapManager"/> from existing <see cref="Character"/> database model.
+        /// </summary>
         public ZoneMapManager(Player owner, Character characterModel)
         {
             player = owner;
 
-            foreach(CharacterZoneMapHexGroup characterZoneMapHexGroup in characterModel.CharacterZoneMapHexGroup)
+            foreach (CharacterZonemapHexgroup hexGroupModel in characterModel.CharacterZonemapHexgroup)
             {
-                if(!zoneMaps.TryGetValue(characterZoneMapHexGroup.ZoneMap, out ZoneMap zoneMap))
+                if (!zoneMaps.TryGetValue(hexGroupModel.ZoneMap, out ZoneMap zoneMap))
                 {
-                    zoneMap = new ZoneMap(characterZoneMapHexGroup.ZoneMap, player);
-                    zoneMaps.Add(characterZoneMapHexGroup.ZoneMap, zoneMap);
+                    MapZoneEntry entry = GameTableManager.MapZone.GetEntry(hexGroupModel.ZoneMap);
+                    zoneMap = new ZoneMap(entry, player);
+                    zoneMaps.Add(hexGroupModel.ZoneMap, zoneMap);
                 }
 
-                zoneMap.AddHexGroup(characterZoneMapHexGroup.HexGroup, true);
+                zoneMap.AddHexGroup(hexGroupModel.HexGroup, false);
             }
         }
 
         public void Save(CharacterContext context)
         {
-            foreach (var zoneMap in zoneMaps)
-                zoneMap.Value.Save(context);
+            foreach (ZoneMap zoneMap in zoneMaps.Values)
+                zoneMap.Save(context);
         }
 
-        public void Update(Vector3 vector)
+        public void SendInitialPackets()
+        {
+            SendZoneMaps();
+        }
+
+        public void SendZoneMaps()
+        {
+            foreach (ZoneMap zoneMap in zoneMaps.Values)
+                zoneMap.Send();
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="Player"/> moves to a new <see cref="Vector3"/>.
+        /// </summary>
+        public void OnRelocate(Vector3 vector)
         {
             if (player.Zone == null || currentZoneMap == 0 || player.IsLoading)
                 return;
@@ -53,54 +74,54 @@ namespace NexusForever.WorldServer.Game.Map
 
             lastPosition = vector;
 
-            if(zoneMaps.TryGetValue(currentZoneMap, out ZoneMap zoneMap))
-                if (zoneMap.IsComplete)
-                    return;
+            if (zoneMaps.TryGetValue(currentZoneMap, out ZoneMap zoneMap) && zoneMap.IsComplete)
+                return;
 
             ZoneMapCoordinate newZoneMapCoordinate = Points2ZoneMapCoordinate(vector);
-
-            if (zoneMapCoordinate?.X != newZoneMapCoordinate.X || zoneMapCoordinate?.Y != newZoneMapCoordinate.Y)
-                zoneMapCoordinate = newZoneMapCoordinate;
-            else
+            if (currentZoneMapCoordinate?.X == newZoneMapCoordinate.X && currentZoneMapCoordinate?.Y == newZoneMapCoordinate.Y)
                 return;
+
+            currentZoneMapCoordinate = newZoneMapCoordinate;
 
             foreach (MapZoneHexGroupEntry mapZoneHexGroup in GameTableManager.MapZoneHexGroup.Entries.Where(m => m.MapZoneId == currentZoneMap))
             {
-                if (zoneMap != null && zoneMap.ZoneMapHexGroups.ContainsKey((ushort)mapZoneHexGroup.Id))
+                if (zoneMap != null && zoneMap.HasHexGroup((ushort)mapZoneHexGroup.Id))
                     continue;
 
                 // +/-1 is for proximity
                 MapZoneHexGroupEntryEntry mapZoneHexGroupEntry = GameTableManager.MapZoneHexGroupEntry.Entries.
-                    FirstOrDefault(m => m.MapZoneHexGroupId == mapZoneHexGroup.Id &&
-                                        m.HexX >= zoneMapCoordinate.X-1u &&
-                                        m.HexX <= zoneMapCoordinate.X+1u &&
-                                        m.HexY >= zoneMapCoordinate.Y-1u &&
-                                        m.HexY <= zoneMapCoordinate.Y+1u
+                    FirstOrDefault(m => m.MapZoneHexGroupId == mapZoneHexGroup.Id
+                        && m.HexX >= currentZoneMapCoordinate.X - 1u
+                        && m.HexX <= currentZoneMapCoordinate.X + 1u
+                        && m.HexY >= currentZoneMapCoordinate.Y - 1u
+                        && m.HexY <= currentZoneMapCoordinate.Y + 1u
                 );
-
                 if (mapZoneHexGroupEntry == null)
                     continue;
 
-                zoneMap?.AddHexGroup((ushort) mapZoneHexGroup.Id);
+                zoneMap?.AddHexGroup((ushort)mapZoneHexGroup.Id);
             }
         }
 
         private static ZoneMapCoordinate Points2ZoneMapCoordinate(Vector3 position)
         {
-            var coordinate = new ZoneMapCoordinate();
-            float a = (ZoneMapBoundary + position.Z) / 27.712812F + 1.0F;
-            float b = (ZoneMapBoundary + position.X) / 32.0F + 0.5F;
-            float c = a*0.5F+b;
-            float d = c - a * 2;
+            float a = (ZoneMapBoundary + position.Z) / 27.712812f + 1f;
+            float b = (ZoneMapBoundary + position.X) / 32f + 0.5f;
+            float c = a * 0.5f + b;
+            float d = c - a * 2f;
             float e = (float)(d * 0.33333334d + 0.0000099999997d);
 
-            coordinate.X = (ushort)(e * 2.0F + a);
-            coordinate.Y = (ushort)(a * 0.5F);
-
-            return coordinate;
+            return new ZoneMapCoordinate
+            {
+                X = (ushort)(e * 2f + a),
+                Y = (ushort)(a * 0.5f)
+            };
         }
 
-        private void CalculateCurrentZoneMap()
+        /// <summary>
+        /// Invoked when <see cref="Player"/> moves to a new zone.
+        /// </summary>
+        public void OnZoneUpdate()
         {
             // maybe there is a more efficient lookup method @sub_1406FB130 - this works for all zones though
             WorldZoneEntry worldZoneEntry = player.Zone;
@@ -109,14 +130,12 @@ namespace NexusForever.WorldServer.Game.Map
             do
             {
                 zoneMap = GameTableManager.MapZone.Entries.FirstOrDefault(m => m.WorldZoneId == worldZoneEntry.Id);
-
                 if (zoneMap != null || worldZoneEntry == null)
                     break;
 
                 worldZoneEntry = GameTableManager.WorldZone.GetEntry(worldZoneEntry.ParentZoneId);
             }
-            while(worldZoneEntry != null);
-
+            while (worldZoneEntry != null);
 
             if (zoneMap == null)
             {
@@ -127,8 +146,7 @@ namespace NexusForever.WorldServer.Game.Map
 
             if (zoneMap == null)
             {
-                if (currentZoneMap != 0)
-                    OnZoneMapChange((ushort)0u);
+                currentZoneMap = 0;
                 return;
             }
 
@@ -136,30 +154,9 @@ namespace NexusForever.WorldServer.Game.Map
                 return;
 
             if (!zoneMaps.ContainsKey((ushort) zoneMap.Id))
-                zoneMaps.Add((ushort) zoneMap.Id, new ZoneMap(zoneMap, player));
+                zoneMaps.Add((ushort)zoneMap.Id, new ZoneMap(zoneMap, player));
 
-            OnZoneMapChange((ushort) zoneMap.Id);
-        }
-
-        public void OnZoneUpdate()
-        {
-            CalculateCurrentZoneMap();
-        }
-
-        public void OnZoneMapChange(ushort newZoneMap)
-        {
-            currentZoneMap = newZoneMap;
-        }
-
-        public void SendZoneMaps()
-        {
-            foreach (var zoneMap in zoneMaps)
-                zoneMap.Value.Send();
-        }
-
-        public void SendInitialPackets()
-        {
-             SendZoneMaps();
+            currentZoneMap = (ushort)zoneMap.Id;
         }
     }
 }

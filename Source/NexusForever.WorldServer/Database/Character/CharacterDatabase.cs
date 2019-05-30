@@ -82,7 +82,7 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterMail)
                             .ThenInclude(c => c.CharacterMailAttachment)
                                 .ThenInclude(a => a.ItemGu)
-                        .Include(c => c.CharacterZoneMapHexGroup)
+                        .Include(c => c.CharacterZonemapHexgroup)
                     .ToListAsync();
             }
         }

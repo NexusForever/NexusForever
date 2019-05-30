@@ -1,8 +1,9 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Database.Character.Model
 {
-    public partial class CharacterZoneMapHexGroup
+    public partial class CharacterZonemapHexgroup
     {
         public ulong Id { get; set; }
         public ushort ZoneMap { get; set; }
