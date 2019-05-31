@@ -51,6 +51,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Item2Entry Entry { get; }
         public Spell4BaseEntry SpellEntry { get; }
         public ulong Guid { get; }
+        public bool PendingCreate => (saveMask & ItemSaveMask.Create) != 0;
 
         public ulong? CharacterId
         {
