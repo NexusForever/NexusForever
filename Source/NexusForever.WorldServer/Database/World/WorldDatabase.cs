@@ -42,5 +42,11 @@ namespace NexusForever.WorldServer.Database.World
                 context.SaveChanges();
             }
         }
+
+        public static ImmutableList<Tutorial> GetTutorialTriggers()
+        {
+            using (var context = new WorldContext())
+                return context.Tutorial.ToImmutableList();
+        }
     }
 }

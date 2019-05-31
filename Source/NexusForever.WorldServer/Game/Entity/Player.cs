@@ -298,6 +298,13 @@ namespace NexusForever.WorldServer.Game.Entity
                     Channel = ChatChannel.System,
                     Text    = $"New Zone: {tt.GetEntry(Zone.LocalizedTextIdName)}"
                 });
+
+                uint tutorialId = AssetManager.GetTutorialIdForZone(Zone.Id);
+                if (tutorialId > 0)
+                    Session.EnqueueMessageEncrypted(new ServerTutorial
+                    {
+                        TutorialId = tutorialId
+                    });
             }
             ZoneMapManager.OnZoneUpdate();
         }
