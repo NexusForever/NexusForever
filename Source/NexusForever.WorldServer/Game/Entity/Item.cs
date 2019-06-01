@@ -51,7 +51,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public Item2Entry Entry { get; }
         public Spell4BaseEntry SpellEntry { get; }
         public ulong Guid { get; }
-        public bool PendingCreate => (saveMask & ItemSaveMask.Create) != 0;
 
         public ulong? CharacterId
         {
@@ -150,6 +149,11 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         private uint expirationTimeLeft;
+        
+        /// <summary>
+        /// Returns if <see cref="Item"/> is enqueued to be saved to the database.
+        /// </summary>
+        public bool PendingCreate => (saveMask & ItemSaveMask.Create) != 0;
 
         private ItemSaveMask saveMask;
 
