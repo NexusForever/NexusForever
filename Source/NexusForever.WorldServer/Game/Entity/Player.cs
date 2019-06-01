@@ -301,10 +301,12 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 uint tutorialId = AssetManager.GetTutorialIdForZone(Zone.Id);
                 if (tutorialId > 0)
+                {
                     Session.EnqueueMessageEncrypted(new ServerTutorial
                     {
                         TutorialId = tutorialId
                     });
+                }
             }
             ZoneMapManager.OnZoneUpdate();
         }
