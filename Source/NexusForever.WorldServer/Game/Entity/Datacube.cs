@@ -40,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Datacube(CharacterDatacube model)
         {
-            Id       = model.DatacubeId;
+            Id       = model.Datacube;
             Type     = (DatacubeType)model.Type;
             Progress = model.Progress;
         }
@@ -52,10 +52,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
             var model = new CharacterDatacube
             {
-                Id         = characterId,
-                Type       = (byte)Type,
-                DatacubeId = Id,
-                Progress   = Progress
+                Id       = characterId,
+                Type     = (byte)Type,
+                Datacube = Id,
+                Progress = Progress
             };
 
             if ((saveMask & DatacubeSaveMask.Create) != 0)

@@ -4,14 +4,22 @@ namespace NexusForever.Shared.Network
 {
     public class NetworkBitArray
     {
+        public enum BitOrder
+        {
+            LeastSignificantBit,
+            MostSignificantBit
+        }
+
         private readonly byte[] buffer;
+        private readonly BitOrder order;
 
         /// <summary>
         /// Initialise a new <see cref="NetworkBitArray"/> with supplied bit size.
         /// </summary>
-        public NetworkBitArray(uint size)
+        public NetworkBitArray(uint size, BitOrder order)
         {
             buffer = new byte[(size - 1) / 8 + 1];
+            this.order = order;
         }
 
         /// <summary>
@@ -23,8 +31,8 @@ namespace NexusForever.Shared.Network
             if (index > buffer.Length)
                 throw new ArgumentOutOfRangeException();
 
-            uint offset = 7 - (position % 8);
-            buffer[index] |= (byte)(1 << (int)offset);
+            uint offset = order == BitOrder.LeastSignificantBit ? position % 8 : 7 - (position % 8);
+            buffer[index] |= (byte)((value ? 1u : 0u) << (int)offset);
         }
 
         /// <summary>

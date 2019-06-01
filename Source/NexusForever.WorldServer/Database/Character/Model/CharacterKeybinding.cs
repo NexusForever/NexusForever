@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Database.Character.Model
 {

@@ -544,7 +544,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
-        public Item ItemDelete(ItemLocation from)
+        public Item ItemDelete(ItemLocation from, byte reason = 15)
         {
             Bag srcBag = GetBag(from.Location);
             if (srcBag == null)
@@ -555,15 +555,53 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new InvalidPacketValueException();
 
             srcBag.RemoveItem(srcItem);
-            srcItem.EnqueueDelete();
-            deletedItems.Add(srcItem);
+            if (!srcItem.PendingCreate)
+            {
+                srcItem.EnqueueDelete();
+                deletedItems.Add(srcItem);
+            }
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
-                Guid = srcItem.Guid
+                Guid = srcItem.Guid,
+                Reason = reason
             });
 
             return srcItem;
+        }
+
+        /// <summary>
+        /// Remove <see cref="Item"/> from this player's inventory without deleting the item from the DB
+        /// </summary>
+        public void ItemRemove(Item srcItem, byte reason = 49)
+        {
+            if (srcItem == null)
+                throw new InvalidPacketValueException("Item could not be found");
+
+            Bag srcBag = GetBag(srcItem.Location);
+            if (srcBag == null)
+                throw new InvalidPacketValueException();
+
+            srcBag.RemoveItem(srcItem);
+            srcItem.CharacterId = null;
+
+            player.Session.EnqueueMessageEncrypted(new ServerItemDelete
+            {
+                Guid = srcItem.Guid,
+                Reason = reason
+            });
+        }
+
+        /// <summary>
+        /// Check if the <see cref="InventoryLocation.Inventory"/> for <see cref="Player"/> is full
+        /// </summary>
+        /// <returns></returns>
+        public bool IsInventoryFull()
+        {
+            Bag bag = GetBag(InventoryLocation.Inventory);
+            uint bagIndex = bag.GetFirstAvailableBagIndex();
+
+            return bagIndex >= uint.MaxValue;
         }
 
         /// <summary>
@@ -602,8 +640,6 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             if (item == null)
                 throw new ArgumentNullException();
-            if (item.Location != InventoryLocation.None)
-                throw new ArgumentException();
 
             item.Location = location;
             item.BagIndex = bagIndex;
@@ -611,7 +647,7 @@ namespace NexusForever.WorldServer.Game.Entity
             AddItem(item);
         }
 
-        private void AddItem(Item item)
+        public void AddItem(Item item)
         {
             if (item == null)
                 throw new ArgumentNullException();

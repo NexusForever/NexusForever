@@ -10,9 +10,8 @@ using System.Collections.Generic;
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class VendorHandler
-    {
-        [MessageHandler(GameMessageOpcode.ClientVendor)]
-        public static void HandleClientVendor(WorldSession session, ClientVendor vendor)
+    {   
+        public static void HandleClientVendor(WorldSession session, ClientEntityInteract vendor)
         {
             var vendorEntity = session.Player.Map.GetEntity<NonPlayer>(vendor.Guid);
             if (vendorEntity == null)

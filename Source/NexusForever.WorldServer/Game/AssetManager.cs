@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Housing;
 
 namespace NexusForever.WorldServer.Game
 {
@@ -25,8 +22,14 @@ namespace NexusForever.WorldServer.Game
         /// </summary>
         public static ulong NextItemId => nextItemId++;
 
+        /// <summary>
+        /// Id to be assigned to the next created mail.
+        /// </summary>
+        public static ulong NextMailId => nextMailId++;
+
         private static ulong nextCharacterId;
         private static ulong nextItemId;
+        private static ulong nextMailId;
 
         private static ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
@@ -37,6 +40,7 @@ namespace NexusForever.WorldServer.Game
         {
             nextCharacterId = CharacterDatabase.GetNextCharacterId() + 1ul;
             nextItemId      = CharacterDatabase.GetNextItemId() + 1ul;
+            nextMailId      = CharacterDatabase.GetNextMailId() + 1ul;
 
             CacheCharacterCustomisations();
             CacheInventoryEquipSlots();

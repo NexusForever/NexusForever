@@ -6,7 +6,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
     public partial class Item
     {
         public ulong Id { get; set; }
-        public ulong OwnerId { get; set; }
+        public ulong? OwnerId { get; set; }
         public uint ItemId { get; set; }
         public ushort Location { get; set; }
         public uint BagIndex { get; set; }
@@ -16,5 +16,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public uint ExpirationTimeLeft { get; set; }
 
         public virtual Character Owner { get; set; }
+        public virtual CharacterMailAttachment CharacterMailAttachment { get; set; }
     }
 }

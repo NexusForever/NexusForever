@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Database.Character.Model
@@ -7,9 +7,9 @@ namespace NexusForever.WorldServer.Database.Character.Model
     {
         public ulong Id { get; set; }
         public byte Type { get; set; }
-        public ushort DatacubeId { get; set; }
+        public ushort Datacube { get; set; }
         public uint Progress { get; set; }
 
-        public Character IdNavigation { get; set; }
+        public virtual Character IdNavigation { get; set; }
     }
 }

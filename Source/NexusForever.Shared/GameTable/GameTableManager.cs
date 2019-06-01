@@ -300,7 +300,10 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<LiveEventDisplayItemEntry> LiveEventDisplayItem { get; private set; }
         public static GameTable<LoadingScreenTipEntry> LoadingScreenTip { get; private set; }
         public static GameTable<LocalizedEnumEntry> LocalizedEnum { get; private set; }
+
+        [GameData]
         public static GameTable<LocalizedTextEntry> LocalizedText { get; private set; }
+
         public static GameTable<LootPinataInfoEntry> LootPinataInfo { get; private set; }
         public static GameTable<LootSpellEntry> LootSpell { get; private set; }
         public static GameTable<LuaEventEntry> LuaEvent { get; private set; }
@@ -310,11 +313,17 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<MapZoneEntry> MapZone { get; private set; }
 
         public static GameTable<MapZoneHexEntry> MapZoneHex { get; private set; }
+
+        [GameData]
         public static GameTable<MapZoneHexGroupEntry> MapZoneHexGroup { get; private set; }
+
+        [GameData]
         public static GameTable<MapZoneHexGroupEntryEntry> MapZoneHexGroupEntry { get; private set; }
         public static GameTable<MapZoneNemesisRegionEntry> MapZoneNemesisRegion { get; private set; }
         public static GameTable<MapZonePOIEntry> MapZonePOI { get; private set; }
         public static GameTable<MapZoneSpriteEntry> MapZoneSprite { get; private set; }
+
+        [GameData]
         public static GameTable<MapZoneWorldJoinEntry> MapZoneWorldJoin { get; private set; }
         public static GameTable<MatchTypeRewardRotationContentEntry> MatchTypeRewardRotationContent { get; private set; }
         public static GameTable<MatchingGameMapEntry> MatchingGameMap { get; private set; }
