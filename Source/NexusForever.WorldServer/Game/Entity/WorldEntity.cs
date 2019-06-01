@@ -27,6 +27,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
 
+        public ulong ActivePropId { get; private set; }
+
         public MovementManager MovementManager { get; private set; }
 
         public uint Level
@@ -70,10 +72,11 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             CreatureId  = model.Creature;
             Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
-            DisplayInfo = model.DisplayInfo;
-            OutfitInfo  = model.OutfitInfo;
-            Faction1    = (Faction)model.Faction1;
-            Faction2    = (Faction)model.Faction2;
+            DisplayInfo  = model.DisplayInfo;
+            OutfitInfo   = model.OutfitInfo;
+            Faction1     = (Faction)model.Faction1;
+            Faction2     = (Faction)model.Faction2;
+            ActivePropId = model.ActivePropId;
 
             foreach (EntityStats statModel in model.EntityStats)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
@@ -103,7 +106,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            return new ServerEntityCreate
+            ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
             {
                 Guid         = Guid,
                 Type         = Type,
@@ -118,6 +121,17 @@ namespace NexusForever.WorldServer.Game.Entity
                 DisplayInfo  = DisplayInfo,
                 OutfitInfo   = OutfitInfo
             };
+
+            if (ActivePropId > 0)
+            {
+                entityCreatePacket.WorldPlacementData = new ServerEntityCreate.WorldPlacement
+                {
+                    Type = 1,
+                    ActivePropId = ActivePropId
+                };
+            }
+
+            return entityCreatePacket;
         }
 
         // TODO: research the difference between a standard activation and cast activation
