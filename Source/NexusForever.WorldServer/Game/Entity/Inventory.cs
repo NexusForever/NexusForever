@@ -555,8 +555,11 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new InvalidPacketValueException();
 
             srcBag.RemoveItem(srcItem);
-            srcItem.EnqueueDelete();
-            deletedItems.Add(srcItem);
+            if (!srcItem.PendingCreate)
+            {
+                srcItem.EnqueueDelete();
+                deletedItems.Add(srcItem);
+            }
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {

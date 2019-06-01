@@ -149,6 +149,11 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         private uint expirationTimeLeft;
+        
+        /// <summary>
+        /// Returns if <see cref="Item"/> is enqueued to be saved to the database.
+        /// </summary>
+        public bool PendingCreate => (saveMask & ItemSaveMask.Create) != 0;
 
         private ItemSaveMask saveMask;
 
