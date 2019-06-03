@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity;
@@ -20,41 +22,43 @@ namespace NexusForever.WorldServer.Command.Handler
         public Task AddSubCommand(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length != 2)
-                return Task.CompletedTask;
-
-            var currencyId = byte.Parse(parameters[0]);
-            var amount = uint.Parse(parameters[1]);
-
-            if (currencyId > 10 || currencyId == 8 || amount > 100000000)
             {
-                context.SendMessageAsync("Invalid currencyId or amount too high.");
+                context.SendMessageAsync("Parameters are invalid. Please try again.");
                 return Task.CompletedTask;
             }
 
-            context.Session.Player.CurrencyManager.CurrencyAddAmount(currencyId, amount);
-            context.SendMessageAsync($"Granted {amount} to currencyId {currencyId}.");
+            bool currencyParsed = byte.TryParse(parameters[0], out byte currencyId);
+            if (!currencyParsed)
+            {
+                context.SendMessageAsync("Invalid currencyId. Please try again.");
+                return Task.CompletedTask;
+            }
+
+            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
+            if (currencyEntry == null)
+            {
+                context.SendMessageAsync("Invalid currencyId. Please try again.");
+                return Task.CompletedTask;
+            }
+
+            if(!uint.TryParse(parameters[1], out uint amount))
+            {
+                context.SendMessageAsync("Unable to parse amount. Please try again.");
+                return Task.CompletedTask;
+            }
+
+            context.Session.Player.CurrencyManager.CurrencyAddAmount(currencyEntry, amount, true);
             return Task.CompletedTask;
         }
 
         [SubCommandHandler("list", "Lists currency IDs and names")]
         public Task ListSubCommand(CommandContext context, string command, string[] parameters)
         {
-            List<string> Currencies = new List<string>
+            foreach (var entry in GameTableManager.CurrencyType.Entries)
             {
-                "Credits (aka Money!) - currencyId (1)",
-                "Renown - currencyId (2)",
-                "Elder Gems - currencyId (3)",
-                "Crafting Voucher - currencyId (4)",
-                "Prestige - currencyId (5)",
-                "Holiday Currency: Shade's Eve - currencyId (6)",
-                "Glory - currencyId (7)",
-                "Holiday Currency: Winterfest - currencyId (9)",
-                "Triploons - currencyId (10)",
-            };
-
-            foreach (string currencyString in Currencies)
-                context.SendMessageAsync(currencyString);
-
+                context.SendMessageAsync($"ID {entry.Id}: {entry.Description}");
+            }
+                
             return Task.CompletedTask;
         }
     }
