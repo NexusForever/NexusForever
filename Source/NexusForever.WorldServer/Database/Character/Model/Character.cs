@@ -48,6 +48,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public sbyte ActiveCostumeIndex { get; set; }
         public sbyte InputKeySet { get; set; }
         public byte ActiveSpec { get; set; }
+        public byte InnateIndex { get; set; }
         public uint TimePlayedTotal { get; set; }
         public uint TimePlayedLevel { get; set; }
 

@@ -51,7 +51,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask |= PlayerSaveMask.Path;
             }
         }
-
         private Path path;
 
         public sbyte CostumeIndex
@@ -63,6 +62,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask |= PlayerSaveMask.Costume;
             }
         }
+        private sbyte costumeIndex;
 
         public InputSets InputKeySet
         {
@@ -73,9 +73,18 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask |= PlayerSaveMask.InputKeySet;
             }
         }
-
-        private sbyte costumeIndex;
         private InputSets inputKeySet;
+
+        public byte InnateIndex
+        {
+            get => innateIndex;
+            set
+            {
+                innateIndex = value;
+                saveMask |= PlayerSaveMask.Innate;
+            }
+        }
+        private byte innateIndex;
 
         public DateTime CreateTime { get; }
         public double TimePlayedTotal { get; private set; }
@@ -142,6 +151,7 @@ namespace NexusForever.WorldServer.Game.Entity
             InputKeySet     = (InputSets)model.InputKeySet;
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
+            innateIndex     = model.InnateIndex;
 
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
@@ -403,6 +413,10 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager.SendInitialPackets();
             Session.AccountCurrencyManager.SendInitialPackets();
             QuestManager.SendInitialPackets();
+            Session.EnqueueMessageEncrypted(new ServerPlayerInnate
+            {
+                InnateIndex = InnateIndex
+            });
         }
 
         public ItemProficiency GetItemProficiences()
@@ -687,6 +701,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     model.InputKeySet = (sbyte)InputKeySet;
                     entity.Property(p => p.InputKeySet).IsModified = true;
+                }
+
+                if ((saveMask & PlayerSaveMask.Innate) != 0)
+                {
+                    model.InnateIndex = InnateIndex;
+                    entity.Property(p => p.InnateIndex).IsModified = true;
                 }
 
                 saveMask = PlayerSaveMask.None;

@@ -94,6 +94,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("factionId")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.InnateIndex)
+                    .HasColumnName("innateIndex")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.InputKeySet)
                     .HasColumnName("inputKeySet")
                     .HasColumnType("tinyint(4)")
@@ -593,7 +597,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
                 entity.HasOne(d => d.ItemGu)
                     .WithOne(p => p.CharacterMailAttachment)
                     .HasForeignKey<CharacterMailAttachment>(d => d.ItemGuid)
-                    .HasConstraintName("FK_character_mail_attachment_itemGuid__item_id");
+                    .HasConstraintName("FK__character_mail_attachment_itemGuid__item_id");
             });
 
             modelBuilder.Entity<CharacterPath>(entity =>
