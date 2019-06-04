@@ -33,11 +33,14 @@ namespace NexusForever.WorldServer.Game.Spell
 
         private readonly Dictionary<uint, SpellBaseInfo> spellBaseInfoStore = new Dictionary<uint, SpellBaseInfo>();
         private readonly Dictionary<SpellEffectType, SpellEffectDelegate> spellEffectDelegates =  new Dictionary<SpellEffectType, SpellEffectDelegate>();
+        private readonly Dictionary<CastMethod, CastMethodDelegate> castMethodDelegates = new Dictionary<CastMethod, CastMethodDelegate>();
 
         // entry caches
         private ImmutableDictionary<uint, ImmutableList<Spell4Entry>> spellEntries;
         private ImmutableDictionary<uint, ImmutableList<Spell4EffectsEntry>> spellEffectEntries;
         private ImmutableDictionary<uint, ImmutableList<TelegraphDamageEntry>> spellTelegraphEntries;
+        private ImmutableDictionary<uint, ImmutableList<Spell4ThresholdsEntry>> spellThresholdEntries;
+        private ImmutableDictionary<uint, ImmutableList<SpellPhaseEntry>> spellPhaseEntries;
 
         private GlobalSpellManager()
         {
@@ -48,6 +51,7 @@ namespace NexusForever.WorldServer.Game.Spell
             CacheSpellEntries();
             InitialiseSpellInfo();
             InitialiseSpellEffectHandlers();
+            InitialiseCastMethodHandlers();
         }
 
         private void CacheSpellEntries()
@@ -69,6 +73,18 @@ namespace NexusForever.WorldServer.Game.Spell
                 .GroupBy(e => e.Spell4Id)
                 .ToImmutableDictionary(g => g.Key, g => g
                     .Select(e => GameTableManager.Instance.TelegraphDamage.GetEntry(e.TelegraphDamageId))
+                    .ToImmutableList());
+
+            spellThresholdEntries = GameTableManager.Instance.Spell4Thresholds.Entries
+                .GroupBy(e => e.Spell4IdParent)
+                .ToImmutableDictionary(g => g.Key, g => g
+                    .OrderBy(e => e.OrderIndex)
+                    .ToImmutableList());
+
+            spellPhaseEntries = GameTableManager.Instance.SpellPhase.Entries
+                .GroupBy(e => e.Spell4IdOwner)
+                .ToImmutableDictionary(g => g.Key, g => g
+                    .OrderBy(e => e.OrderIndex)
                     .ToImmutableList());
         }
 
@@ -103,6 +119,30 @@ namespace NexusForever.WorldServer.Game.Spell
                     Expression.Lambda<SpellEffectDelegate>(call, spellParameter, targetParameter, effectParameter);
 
                 spellEffectDelegates.Add(attribute.SpellEffectType, lambda.Compile());
+            }
+        }
+
+        private void InitialiseCastMethodHandlers()
+        {
+            foreach (MethodInfo method in Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .SelectMany(t => t.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)))
+            {
+                List<CastMethodHandlerAttribute> attributes = method.GetCustomAttributes<CastMethodHandlerAttribute>().ToList();
+                if (attributes.Count() == 0)
+                    continue;
+                
+                foreach(CastMethodHandlerAttribute attribute in attributes)
+                {
+                    ParameterExpression spellParameter = Expression.Parameter(typeof(Spell));
+
+                    MethodCallExpression call = Expression.Call(spellParameter, method);
+
+                    Expression<CastMethodDelegate> lambda =
+                        Expression.Lambda<CastMethodDelegate>(call, spellParameter);
+
+                    castMethodDelegates.Add(attribute.CastMethod, lambda.Compile());
+                }
             }
         }
 
@@ -143,6 +183,30 @@ namespace NexusForever.WorldServer.Game.Spell
         }
 
         /// <summary>
+        /// Return all <see cref="Spell4ThresholdsEntry"/>'s for the supplied spell id.
+        /// </summary>
+        /// <remarks>
+        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="SpellBaseInfo"/>.
+        /// </remarks>
+        public IEnumerable<Spell4ThresholdsEntry> GetSpell4ThresholdEntries(uint spell4Id)
+        {
+            return spellThresholdEntries.TryGetValue(spell4Id, out ImmutableList<Spell4ThresholdsEntry> entries)
+                ? entries : Enumerable.Empty<Spell4ThresholdsEntry>();
+        }
+
+        /// <summary>
+        /// Return all <see cref="SpellPhaseEntry"/>'s for the supplied spell id.
+        /// </summary>
+        /// <remarks>
+        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="SpellBaseInfo"/>.
+        /// </remarks>
+        public IEnumerable<SpellPhaseEntry> GetSpellPhaseEntries(uint spell4Id)
+        {
+            return spellPhaseEntries.TryGetValue(spell4Id, out ImmutableList<SpellPhaseEntry> entries)
+                ? entries : Enumerable.Empty<SpellPhaseEntry>();
+        }
+
+        /// <summary>
         /// Return <see cref="SpellBaseInfo"/>, if not already cached it will be generated before being returned.
         /// </summary>
         public SpellBaseInfo GetSpellBaseInfo(uint spell4BaseId)
@@ -166,6 +230,14 @@ namespace NexusForever.WorldServer.Game.Spell
         public SpellEffectDelegate GetEffectHandler(SpellEffectType spellEffectType)
         {
             return spellEffectDelegates.TryGetValue(spellEffectType, out SpellEffectDelegate handler) ? handler : null;
+        }
+
+        /// <summary>
+        /// Return <see cref="CastMethodDelegate"/> for supplied <see cref="SpellEffectType"/>.
+        /// </summary>
+        public CastMethodDelegate GetCastMethodHandler(CastMethod castMethod)
+        {
+            return castMethodDelegates.TryGetValue(castMethod, out CastMethodDelegate handler) ? handler : null;
         }
     }
 }

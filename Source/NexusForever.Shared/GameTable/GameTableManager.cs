@@ -536,7 +536,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public GameTable<Spell4TelegraphEntry> Spell4Telegraph { get; private set; }
 
+        [GameData]
         public GameTable<Spell4ThresholdsEntry> Spell4Thresholds { get; private set; }
+
         public GameTable<Spell4TierRequirementsEntry> Spell4TierRequirements { get; private set; }
 
         [GameData]
@@ -552,6 +554,8 @@ namespace NexusForever.Shared.GameTable
 
         [GameData]
         public GameTable<SpellLevelEntry> SpellLevel { get; private set; }
+
+        [GameData]
         public GameTable<SpellPhaseEntry> SpellPhase { get; private set; }
 
         [GameData]

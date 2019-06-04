@@ -133,6 +133,15 @@ namespace NexusForever.WorldServer.Game.Spell
         /// </summary>
         public void Cast()
         {
+            if (Owner.HasSpell(BaseInfo.GetSpellInfo(Tier).Entry.Id, out Spell spell))
+            {
+                if ((spell.CastMethod == CastMethod.RapidTap || spell.CastMethod == CastMethod.ChargeRelease) && !spell.IsFinished)
+                {
+                    spell.Cast();
+                    return;
+                }
+            }
+
             CastSpell();
         }
 
@@ -144,8 +153,17 @@ namespace NexusForever.WorldServer.Game.Spell
             // TODO: Handle continuous casting of spell for Player if button remains depressed
 
             // If the player depresses button after the spell had exceeded its threshold, don't try and recast the spell until button is pressed down again.
-            if (!buttonPressed)
+            if (!buttonPressed && (CastMethod)BaseInfo.Entry.CastMethod != CastMethod.ChargeRelease)
                 return;
+
+            if (Owner.HasSpell(BaseInfo.GetSpellInfo(Tier).Entry.Id, out Spell spell))
+            {
+                if ((spell.CastMethod == CastMethod.RapidTap || spell.CastMethod == CastMethod.ChargeRelease) && !spell.IsFinished)
+                {
+                    spell.Cast();
+                    return;
+                }
+            }
 
             CastSpell();
         }

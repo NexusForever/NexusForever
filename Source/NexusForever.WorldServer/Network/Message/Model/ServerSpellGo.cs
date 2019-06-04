@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public List<TelegraphPosition> TelegraphPositionData { get; set; } = new List<TelegraphPosition>();
         public List<MissileInfo> MissileInfoData { get; set; } = new List<MissileInfo>();
 
-        public sbyte Phase { get; set; }
+        public byte Phase { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

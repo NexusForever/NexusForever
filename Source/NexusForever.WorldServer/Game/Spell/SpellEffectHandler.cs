@@ -1,10 +1,13 @@
+using System;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Spell.Event;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -24,12 +27,29 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.Proxy)]
         private void HandleEffectProxy(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            target.CastSpell(info.Entry.DataBits00, new SpellParameters
+            SpellParameters proxyParameters = new SpellParameters
             {
-                ParentSpellInfo        = parameters.SpellInfo,
-                RootSpellInfo          = parameters.RootSpellInfo,
-                UserInitiatedSpellCast = false
-            });
+                ParentSpellInfo = parameters.SpellInfo,
+                RootSpellInfo = parameters.RootSpellInfo,
+                PrimaryTargetId = target.Guid,
+                UserInitiatedSpellCast = parameters.UserInitiatedSpellCast,
+                IsProxy = true
+            };
+
+            events.EnqueueEvent(new SpellEvent(info.Entry.DelayTime / 1000d, () =>
+            {
+                if (info.Entry.TickTime > 0)
+                {
+                    double tickTime = info.Entry.TickTime;
+                    for (int i = 1; i == info.Entry.DurationTime / tickTime; i++)
+                        events.EnqueueEvent(new SpellEvent(tickTime * i / 1000d, () =>
+                        {
+                            caster.CastSpell(info.Entry.DataBits01, proxyParameters);
+                        }));
+                }
+                else
+                    caster.CastSpell(info.Entry.DataBits00, proxyParameters);
+            }));
         }
 
         [SpellEffectHandler(SpellEffectType.Disguise)]

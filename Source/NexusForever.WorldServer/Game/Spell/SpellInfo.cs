@@ -23,6 +23,8 @@ namespace NexusForever.WorldServer.Game.Spell
 
         public List<TelegraphDamageEntry> Telegraphs { get; }
         public List<Spell4EffectsEntry> Effects { get; }
+        public List<Spell4ThresholdsEntry> Thresholds { get; }
+        public List<SpellPhaseEntry> Phases { get; }
 
         public SpellInfo(SpellBaseInfo spellBaseBaseInfo, Spell4Entry spell4Entry)
         {
@@ -42,6 +44,8 @@ namespace NexusForever.WorldServer.Game.Spell
 
             Telegraphs = GlobalSpellManager.Instance.GetTelegraphDamageEntries(spell4Entry.Id).ToList();
             Effects = GlobalSpellManager.Instance.GetSpell4EffectEntries(spell4Entry.Id).ToList();
+            Thresholds = GlobalSpellManager.Instance.GetSpell4ThresholdEntries(spell4Entry.Id).ToList();
+            Phases = GlobalSpellManager.Instance.GetSpellPhaseEntries(spell4Entry.Id).ToList();
         }
     }
 }
