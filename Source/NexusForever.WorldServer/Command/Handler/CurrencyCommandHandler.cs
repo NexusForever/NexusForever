@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            if(!uint.TryParse(parameters[1], out uint amount))
+            if (!uint.TryParse(parameters[1], out uint amount))
             {
                 context.SendMessageAsync("Unable to parse amount. Please try again.");
                 return Task.CompletedTask;
