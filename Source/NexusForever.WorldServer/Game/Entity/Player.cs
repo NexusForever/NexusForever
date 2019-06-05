@@ -380,6 +380,8 @@ namespace NexusForever.WorldServer.Game.Entity
             DatacubeManager.SendInitialPackets();
             MailManager.SendInitialPackets();
             ZoneMapManager.SendInitialPackets();
+
+            Session.AccountCurrencyManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -588,6 +590,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public void Save(AuthContext context)
         {
             Session.GenericUnlockManager.Save(context);
+            Session.AccountCurrencyManager.Save(context);
             CostumeManager.Save(context);
             KeybindingManager.Save(context);
         }

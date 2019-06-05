@@ -2,6 +2,7 @@
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -26,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CostumeUnlock"/> from supplied item id.
         /// </summary>
-        public CostumeUnlock(Account account, uint itemId)
+        public CostumeUnlock(AccountModel account, uint itemId)
         {
             ItemId    = itemId;
             accountId = account.Id;

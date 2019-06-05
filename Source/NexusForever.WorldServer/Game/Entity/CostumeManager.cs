@@ -13,6 +13,7 @@ using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 using NetworkCostume = NexusForever.WorldServer.Network.Message.Model.Shared.Costume;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -35,7 +36,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CurrencyManager"/> from existing <see cref="Account"/> and <see cref="Character"/> database models.
         /// </summary>
-        public CostumeManager(Player owner, Account accountModel, Character characterModel)
+        public CostumeManager(Player owner, AccountModel accountModel, Character characterModel)
         {
             player = owner;
 
