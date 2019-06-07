@@ -249,7 +249,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // TODO: Check if there's bag space. Otherwise queue? Or is there an overflow inventory?
             if (pathRewardEntry.Item2Id > 0)
-                player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, 4);
+                player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, ItemUpdateReason.PathReward);
 
             if (pathRewardEntry.Spell4Id > 0)
             {

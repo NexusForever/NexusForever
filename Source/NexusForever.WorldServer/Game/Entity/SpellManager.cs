@@ -56,7 +56,7 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (CharacterSpell spellModel in model.CharacterSpell)
             {
                 SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spellModel.Spell4BaseId);
-                Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, 49);
+                Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
                 spells.Add(spellModel.Spell4BaseId, new UnlockedSpell(spellBaseInfo, spellModel, item));
             }
 
@@ -187,7 +187,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (spells.ContainsKey(spell4BaseId))
                 throw new InvalidOperationException();
 
-            Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, 49);
+            Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
 
             var unlockedSpell = new UnlockedSpell(player, spellBaseInfo, tier, item);
             if (!player.IsLoading)
@@ -378,7 +378,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     InventoryItem = new InventoryItem
                     {
                         Item   = spell.BuildNetworkItem(),
-                        Reason = 49
+                        Reason = ItemUpdateReason.NoReason
                     }
                 });
             }
