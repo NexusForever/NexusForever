@@ -34,8 +34,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
-            if (currencyEntry == null)
+            if (GameTableManager.CurrencyType.GetEntry(currencyId) == null)
             {
                 context.SendMessageAsync("Invalid currencyId. Please try again.");
                 return Task.CompletedTask;
@@ -47,7 +46,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            context.Session.Player.CurrencyManager.CurrencyAddAmount(currencyEntry, amount, true);
+            context.Session.Player.CurrencyManager.CurrencyAddAmount((CurrencyType)currencyId, amount, true);
             return Task.CompletedTask;
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -19,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="BuybackItem"/> from sold <see cref="Item"/>.
         /// </summary>
-        public uint AddItem(Item item, uint quantity, List<(byte CurrencyTypeId, ulong CurrencyAmount)> currencyChange)
+        public uint AddItem(Item item, uint quantity, List<(CurrencyType CurrencyTypeId, ulong CurrencyAmount)> currencyChange)
         {
             uint uniqueId = currentUniqueId++;
             buybackItems.Add(uniqueId, new BuybackItem(uniqueId, item, quantity, currencyChange));

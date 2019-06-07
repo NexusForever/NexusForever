@@ -360,12 +360,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 InputKeySet = (uint)InputKeySet
             };
 
-            for (uint i = 1u; i < 17u; i++)
-            {
-                Currency currency = CurrencyManager.GetCurrency(i);
-                if (currency != null)
-                    playerCreate.Money[i - 1] = currency.Amount;
-            }
+            foreach (Currency currency in CurrencyManager)
+                playerCreate.Money[(byte)currency.Id - 1] = currency.Amount;
 
             foreach (Item item in Inventory
                 .Where(b => b.Location != InventoryLocation.Ability)

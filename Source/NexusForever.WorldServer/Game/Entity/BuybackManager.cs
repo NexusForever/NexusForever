@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Shared.Network;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NetworkBuybackItem = NexusForever.WorldServer.Network.Message.Model.Shared.BuybackItem;
@@ -22,7 +23,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="BuybackItem"/> from sold <see cref="Item"/> for <see cref="Player"/>.
         /// </summary>
-        public static void AddItem(Player player, Item item, uint quantity, List<(byte CurrencyTypeId, ulong CurrencyAmount)> currencyChange)
+        public static void AddItem(Player player, Item item, uint quantity, List<(CurrencyType CurrencyTypeId, ulong CurrencyAmount)> currencyChange)
         {
             if (!buybackInfo.ContainsKey(player.CharacterId))
                 buybackInfo.Add(player.CharacterId, new BuybackInfo());
