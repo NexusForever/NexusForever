@@ -44,7 +44,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CharacterCurrency"/>.
         /// </summary>
-        public Currency CurrencyCreate(CurrencyTypeEntry currencyEntry, ulong amount = 0)
+        public Currency CurrencyCreate(CurrencyTypeEntry currencyEntry)
         {
             if (currencyEntry == null)
                 return null;
@@ -52,11 +52,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (currencies.ContainsKey((byte)currencyEntry.Id))
                 throw new ArgumentException($"Currency {currencyEntry.Id} is already added to the player!");
 
-            Currency currency = new Currency(
-                player.CharacterId,
-                currencyEntry,
-                amount
-            );
+            var currency = new Currency(player.CharacterId, currencyEntry);
             currencies.Add((byte)currencyEntry.Id, currency);
             return currency;
         }
@@ -70,11 +66,13 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new ArgumentNullException();
 
             if (isLoot)
+            {
                 player.Session.EnqueueMessageEncrypted(new ServerChannelUpdateLoot
                 {
                     CurrencyId = currency.Id,
                     Amount = amount - currency.Amount
                 });
+            }
 
             currency.Amount = amount;
 
@@ -117,14 +115,13 @@ namespace NexusForever.WorldServer.Game.Entity
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
-            ulong originalAmount = amount;
-
             if (!currencies.TryGetValue((byte)currencyEntry.Id, out Currency currency))
-                currency = CurrencyCreate(currencyEntry, (ulong)amount);
-            
+                currency = CurrencyCreate(currencyEntry);
+
             amount += currency.Amount;
             if (currency.Entry.CapAmount > 0)
                 amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
+
             CurrencyAmountUpdate(currency, amount, isLoot);
         }
 
