@@ -222,7 +222,7 @@ namespace NexusForever.Shared.Network.Message
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
         ClientCostumeItemUnlock         = 0x090F,
-        ServerPlayerCurrencyChanged     = 0x0919,
+        ServerCombatReward              = 0x0919,
         ServerCooldownList              = 0x091B,
         ServerRewardPropertySet         = 0x092C,
         ServerUpdateHealth              = 0x092F,

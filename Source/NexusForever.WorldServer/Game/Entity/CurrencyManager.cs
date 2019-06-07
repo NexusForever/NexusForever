@@ -69,11 +69,11 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new ArgumentNullException();
 
             currency.Amount = amount;
-            
-            player.Session.EnqueueMessageEncrypted(new ServerPlayerCurrencyChanged
+
+            player.Session.EnqueueMessageEncrypted(new ServerCombatReward
             {
-                CurrencyId = currency.Id,
-                Amount = currency.Amount,
+                Stat = (byte)(currency.Id - 1),
+                NewValue = currency.Amount
             });
         }
 
