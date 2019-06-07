@@ -5,6 +5,7 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
@@ -43,7 +44,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CharacterCurrency"/>.
         /// </summary>
-        public Currency CurrencyCreate(CurrencyTypeEntry currencyEntry, ulong amount = 0)
+        public Currency CurrencyCreate(CurrencyTypeEntry currencyEntry)
         {
             if (currencyEntry == null)
                 return null;
@@ -51,11 +52,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (currencies.ContainsKey((byte)currencyEntry.Id))
                 throw new ArgumentException($"Currency {currencyEntry.Id} is already added to the player!");
 
-            Currency currency = new Currency(
-                player.CharacterId,
-                currencyEntry,
-                amount
-            );
+            var currency = new Currency(player.CharacterId, currencyEntry);
             currencies.Add((byte)currencyEntry.Id, currency);
             return currency;
         }
@@ -63,10 +60,19 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         ///Update <see cref="CharacterCurrency"/> with supplied amount.
         /// </summary>
-        private void CurrencyAmountUpdate(Currency currency, ulong amount)
+        private void CurrencyAmountUpdate(Currency currency, ulong amount, bool isLoot = false)
         {
             if (currency == null)
                 throw new ArgumentNullException();
+
+            if (isLoot)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerChannelUpdateLoot
+                {
+                    CurrencyId = currency.Id,
+                    Amount = amount - currency.Amount
+                });
+            }
 
             currency.Amount = amount;
 
@@ -80,50 +86,73 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CharacterCurrency"/>.
         /// </summary>
-        public void CurrencyAddAmount(byte currencyId, ulong amount)
+        public void CurrencyAddAmount(byte currencyId, ulong amount, bool isLoot = false)
         {
             CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
-            CurrencyAddAmount(currencyEntry, amount);
+            CurrencyAddAmount(currencyEntry, amount, isLoot);
         }
 
         /// <summary>
         /// Create a new <see cref="CharacterCurrency"/>.
         /// </summary>
-        public void CurrencyAddAmount(CurrencyTypeEntry currencyEntry, ulong amount)
+        public void CurrencyAddAmount(CurrencyType currencyId, ulong amount, bool isLoot = false)
+        {
+            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry((ulong)currencyId);
+            if (currencyEntry == null)
+                throw new ArgumentNullException();
+
+            CurrencyAddAmount(currencyEntry, amount, isLoot);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="CharacterCurrency"/>.
+        /// </summary>
+        public void CurrencyAddAmount(CurrencyTypeEntry currencyEntry, ulong amount, bool isLoot = false)
         {
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
             if (!currencies.TryGetValue((byte)currencyEntry.Id, out Currency currency))
-                CurrencyCreate(currencyEntry, (ulong)amount);
-            else
-            {
-                amount += currency.Amount;
-                if (currency.Entry.CapAmount > 0)
-                    amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
-                CurrencyAmountUpdate(currency, amount);
-            }
+                currency = CurrencyCreate(currencyEntry);
+
+            amount += currency.Amount;
+            if (currency.Entry.CapAmount > 0)
+                amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
+
+            CurrencyAmountUpdate(currency, amount, isLoot);
         }
 
         /// <summary>
         /// Create a new <see cref="CharacterCurrency"/>.
         /// </summary>
-        public void CurrencySubtractAmount(byte currencyId, ulong amount)
+        public void CurrencySubtractAmount(byte currencyId, ulong amount, bool isLoot = false)
         {
             CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry(currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
-            CurrencySubtractAmount(currencyEntry, amount);
+            CurrencySubtractAmount(currencyEntry, amount, isLoot);
         }
 
         /// <summary>
         /// Create a new <see cref="CharacterCurrency"/>.
         /// </summary>
-        public void CurrencySubtractAmount(CurrencyTypeEntry currencyEntry, ulong amount)
+        public void CurrencySubtractAmount(CurrencyType currencyId, ulong amount, bool isLoot = false)
+        {
+            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry((ulong)currencyId);
+            if (currencyEntry == null)
+                throw new ArgumentNullException();
+
+            CurrencySubtractAmount(currencyEntry, amount, isLoot);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="CharacterCurrency"/>.
+        /// </summary>
+        public void CurrencySubtractAmount(CurrencyTypeEntry currencyEntry, ulong amount, bool isLoot = false)
         {
             if (currencyEntry == null)
                 throw new ArgumentNullException();
@@ -132,7 +161,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new ArgumentException($"Cannot create currency {currencyEntry.Id} with a negative amount!");
             if (currency.Amount < amount)
                 throw new ArgumentException($"Trying to remove more currency {currencyEntry.Id} than the player has!");
-            CurrencyAmountUpdate(currency, currency.Amount - amount);
+            CurrencyAmountUpdate(currency, currency.Amount - amount, isLoot);
         }
 
         public Currency GetCurrency(uint currencyId)

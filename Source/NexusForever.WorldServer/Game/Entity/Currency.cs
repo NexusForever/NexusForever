@@ -50,7 +50,6 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             CharacterId = owner;
             Entry = entry;
-            Amount = amount;
 
             saveMask = CurrencySaveMask.Create;
         }
