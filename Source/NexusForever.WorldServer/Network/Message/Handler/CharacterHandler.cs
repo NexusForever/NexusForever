@@ -106,6 +106,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.Characters.Clear();
                 session.Characters.AddRange(characters);
 
+                session.AccountCurrencyManager.SendCharacterListPacket();
                 session.GenericUnlockManager.SendUnlockList();
                 session.EnqueueMessageEncrypted(new ServerAccountEntitlements
                 {
