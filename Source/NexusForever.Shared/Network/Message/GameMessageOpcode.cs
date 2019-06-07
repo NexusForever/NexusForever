@@ -62,6 +62,7 @@ namespace NexusForever.Shared.Network.Message
         ClientChangeActiveActionSet     = 0x0174,
         ServerChangeActiveActionSet     = 0x0175,
         ClientToggleWeapons             = 0x0177,
+        ServerTutorial                  = 0x0179,
         ServerSpellUpdate               = 0x017B,
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,

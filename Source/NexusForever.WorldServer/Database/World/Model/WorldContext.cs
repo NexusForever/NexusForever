@@ -23,6 +23,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         public virtual DbSet<EntityVendorCategory> EntityVendorCategory { get; set; }
         public virtual DbSet<EntityVendorItem> EntityVendorItem { get; set; }
         public virtual DbSet<EntityStat> EntityStat { get; set; }
+        public virtual DbSet<Tutorial> Tutorial { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -198,6 +199,28 @@ namespace NexusForever.WorldServer.Database.World.Model
                     .WithMany(p => p.EntityStat)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__entity_stats_stat_id_entity_id");
+            });
+
+            modelBuilder.Entity<Tutorial>(entity =>
+            {
+                entity.ToTable("tutorial");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.TriggerId)
+                    .HasColumnName("triggerId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Note)
+                    .HasColumnName("note")
+                    .HasColumnType("varchar(50)")
+                    .HasDefaultValueSql("''");
             });
         }
     }
