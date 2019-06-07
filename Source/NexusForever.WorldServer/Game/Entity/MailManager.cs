@@ -136,7 +136,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Message              = mail.Message,
                 TextEntrySubject     = mail.TextEntrySubject,
                 TextEntryMessage     = mail.TextEntryMessage,
-                CreatureId           = !isPlayer ? (uint)mail.SenderId : 0,
+                CreatureId           = !isPlayer ? mail.CreatureId : 0,
                 CurrencyGiftType     = 0,
                 CurrencyGiftAmount   = !mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,
                 CostOnDeliveryAmount = mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,

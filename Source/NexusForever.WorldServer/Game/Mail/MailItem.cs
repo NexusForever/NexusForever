@@ -87,6 +87,9 @@ namespace NexusForever.WorldServer.Game.Mail
             SenderId                   = model.SenderId;
             Subject                    = model.Subject;
             Message                    = model.Message;
+            TextEntrySubject           = model.TextEntrySubject;
+            TextEntryMessage           = model.TextEntryMessage;
+            CreatureId                 = model.CreatureId;
             CurrencyType               = (CurrencyType)model.CurrencyType;
             CurrencyAmount             = model.CurrencyAmount;
             IsCashOnDelivery           = Convert.ToBoolean(model.IsCashOnDelivery);
