@@ -12,12 +12,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public byte Stat { get; set; }
         public ulong NewValue { get; set; }
-        public uint CombatRewardId { get; set; } = 0;
-        public uint TargetUnitId { get; set; } = 0;
+        public uint CombatRewardId { get; set; }
+        public uint TargetUnitId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Stat, 5); //TODO Investigate
+            writer.Write(Stat, 5);
             writer.Write(NewValue);
             writer.Write(CombatRewardId);
             writer.Write(TargetUnitId);
