@@ -55,6 +55,14 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Return the amount of empty bag indexes.
+        /// </summary>
+        public uint GetFreeBagIndexCount()
+        {
+            return (uint)items.Count(i => i == null);
+        }
+
+        /// <summary>
         /// Add <see cref="Item"/> to the bag at the supplied bag index.
         /// </summary>
         public void AddItem(Item item)

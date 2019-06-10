@@ -417,15 +417,24 @@ namespace NexusForever.Shared.GameTable
         public static GameTable<PublicEventVirtualItemDepotEntry> PublicEventVirtualItemDepot { get; private set; }
         public static GameTable<PublicEventVoteEntry> PublicEventVote { get; private set; }
         public static GameTable<PvPRatingFloorEntry> PvPRatingFloor { get; private set; }
+
+        [GameData]
         public static GameTable<Quest2Entry> Quest2 { get; private set; }
+
+        [GameData]
         public static GameTable<Quest2DifficultyEntry> Quest2Difficulty { get; private set; }
+
         public static GameTable<Quest2RandomTextLineJoinEntry> Quest2RandomTextLineJoin { get; private set; }
+
+        [GameData]
         public static GameTable<Quest2RewardEntry> Quest2Reward { get; private set; }
         public static GameTable<QuestCategoryEntry> QuestCategory { get; private set; }
         public static GameTable<QuestDirectionEntry> QuestDirection { get; private set; }
         public static GameTable<QuestDirectionEntryEntry> QuestDirectionEntry { get; private set; }
         public static GameTable<QuestGroupEntry> QuestGroup { get; private set; }
         public static GameTable<QuestHubEntry> QuestHub { get; private set; }
+
+        [GameData]
         public static GameTable<QuestObjectiveEntry> QuestObjective { get; private set; }
 
         [GameData]
@@ -620,7 +629,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<WorldZoneEntry> WorldZone { get; private set; }
 
+        [GameData]
         public static GameTable<XpPerLevelEntry> XpPerLevel { get; private set; }
+
         public static GameTable<ZoneCompletionEntry> ZoneCompletion { get; private set; }
 
         [GameData("fr-FR.bin")]

@@ -97,13 +97,24 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Return visible <see cref="GridEntity"/> by supplied guid.
+        /// Return visible <see cref="WorldEntity"/> by supplied guid.
         /// </summary>
-        public T GetVisible<T>(uint guid) where T : GridEntity
+        public T GetVisible<T>(uint guid) where T : WorldEntity
         {
             if (!visibleEntities.TryGetValue(guid, out GridEntity entity))
                 return null;
             return (T)entity;
+        }
+
+        /// <summary>
+        /// Return visible <see cref="WorldEntity"/> by supplied creature id.
+        /// </summary>
+        public IEnumerable<T> GetVisibleCreature<T>(uint creatureId) where T : WorldEntity
+        {
+            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
+            foreach (WorldEntity entity in visibleEntities.Values)
+                if (entity.CreatureId == creatureId)
+                    yield return (T)entity;
         }
 
         /// <summary>

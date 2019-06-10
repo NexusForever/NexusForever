@@ -18,6 +18,8 @@ using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Prerequisite;
+using NexusForever.WorldServer.Game.Quest;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network;
@@ -54,7 +56,9 @@ namespace NexusForever.WorldServer
             GlobalMovementManager.Initialise();
 
             AssetManager.Initialise();
+            PrerequisiteManager.Initialise();
             GlobalSpellManager.Initialise();
+            GlobalQuestManager.Initialise();
             ServerManager.Initialise();
 
             ResidenceManager.Initialise();
@@ -74,6 +78,7 @@ namespace NexusForever.WorldServer
                 MapManager.Update(lastTick);
                 ResidenceManager.Update(lastTick);
                 BuybackManager.Update(lastTick);
+                GlobalQuestManager.Update(lastTick);
             });
 
             using (WorldServerEmbeddedWebServer.Initialise())

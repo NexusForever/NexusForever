@@ -8,43 +8,30 @@ namespace NexusForever.Shared.GameTable.Model
         public uint Flags;
         public uint ConLevel;
         public uint Type;
-        public uint Preq_level;
-        public uint Preq_flags;
-        public uint Preq_quest0;
-        public uint Preq_quest01;
-        public uint Preq_quest02;
-        public uint Preq_race;
-        public uint Preq_item;
+        public uint PrerequisiteLevel;
+        public uint PrerequisiteFlags;
+        [GameTableFieldArray(3u)]
+        public uint[] PrerequisiteQuests;
+        public uint PrerequisiteRace;
+        public uint PrerequisiteItem;
         public uint QuestPlayerFactionEnum;
         public uint WorldZoneId;
         public uint LocalizedTextIdCompletionOverride;
-        public uint Reward_xpOverride;
-        public uint Reward_cashOverride;
-        public uint Pushed_itemId0;
-        public uint Pushed_itemId01;
-        public uint Pushed_itemId02;
-        public uint Pushed_itemId03;
-        public uint Pushed_itemId04;
-        public uint Pushed_itemId05;
-        public uint Pushed_itemCount0;
-        public uint Pushed_itemCount01;
-        public uint Pushed_itemCount02;
-        public uint Pushed_itemCount03;
-        public uint Pushed_itemCount04;
-        public uint Pushed_itemCount05;
-        public uint Objective0;
-        public uint Objective01;
-        public uint Objective02;
-        public uint Objective03;
-        public uint Objective04;
-        public uint Objective05;
+        public uint RewardXpOverride;
+        public uint RewardCashOverride;
+        [GameTableFieldArray(6u)]
+        public uint[] PushedItemIds;
+        [GameTableFieldArray(6u)]
+        public uint[] PushedItemCounts;
+        [GameTableFieldArray(6u)]
+        public uint[] Objectives;
         public uint LocalizedTextIdGiverTextUnknown;
         public uint LocalizedTextIdGiverTextAccepted;
         public uint LocalizedTextIdReceiverTextAccepted;
         public uint LocalizedTextIdReceiverTextAchieved;
         public uint LocalizedTextIdGiverSayAccepted;
         public uint LocalizedTextIdReceiverSayCompleted;
-        public uint Preq_class;
+        public uint PrerequisiteClass;
         public uint GroupId;
         public uint FactionIdPreq0;
         public uint FactionIdPreq01;

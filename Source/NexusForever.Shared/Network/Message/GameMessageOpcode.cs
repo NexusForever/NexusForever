@@ -33,6 +33,7 @@ namespace NexusForever.Shared.Network.Message
         Server00F1                      = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
         ServerCharacterFlagsUpdated     = 0x00FE,
         Server0104                      = 0x0104, // Galactic Archive
+        ServerGenericError              = 0x0106,
         ServerHousingPrivacy            = 0x010E,
         ServerCharacter                 = 0x010F, // single character
         ServerItemAdd                   = 0x0111,
@@ -101,8 +102,17 @@ namespace NexusForever.Shared.Network.Message
         ServerPlayerCreate              = 0x025E,
         ServerEntityCreate              = 0x0262,
         ClientCharacterDelete           = 0x0352,
-        ServerEntityDestory             = 0x0355,
+        ServerEntityDestroy             = 0x0355,
+        Server0357                      = 0x0357,
+        ClientQuestAbandon              = 0x035A,
+        ClientQuestAccept               = 0x035B,
+        ServerQuestStateChange          = 0x035C,
+        ClientQuestComplete             = 0x035D,
+        ClientQuestSetIgnore            = 0x035E,
         ServerQuestInit                 = 0x035F,
+        ServerQuestObjectiveUpdate      = 0x0361,
+        ClientQuestSetTracked           = 0x0364,
+        ClientQuestRetry                = 0x0365,
         ClientEmote                     = 0x037E,
         ClientCostumeItemForget         = 0x038B,
         ClientPackedWorld               = 0x038C,
@@ -113,6 +123,8 @@ namespace NexusForever.Shared.Network.Message
         ClientCheat                     = 0x03E0,
         ServerRealmBroadcast            = 0x03E1,
         ClientItemGenericUnlock         = 0x0400,
+        ClientQuestShareResult          = 0x045E,
+        ClientQuestShare                = 0x045F,
         Server0497                      = 0x0497, // guild info
         ClientCastSpell                 = 0x04DB,
         ServerHousingResidenceDecor     = 0x04DE,

@@ -47,7 +47,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
 
             AddCommand(new SetVelocityDefaultsCommand());
             AddCommand(new SetMoveDefaultsCommand());
-            AddCommand(new SetRotationDefaultsCommand());
+            //AddCommand(new SetRotationDefaultsCommand());
         }
 
         public void Update(double lastTick)

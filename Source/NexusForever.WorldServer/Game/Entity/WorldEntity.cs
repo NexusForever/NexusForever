@@ -21,6 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
 
+        public uint CreatureId { get; protected set; }
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
         public Faction Faction1 { get; set; }
@@ -67,6 +68,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
+            CreatureId  = model.Creature;
             Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
             DisplayInfo = model.DisplayInfo;
             OutfitInfo  = model.OutfitInfo;

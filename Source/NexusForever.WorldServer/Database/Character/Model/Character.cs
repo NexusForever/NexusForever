@@ -20,6 +20,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
             CharacterPath = new HashSet<CharacterPath>();
             CharacterPetCustomisation = new HashSet<CharacterPetCustomisation>();
             CharacterPetFlair = new HashSet<CharacterPetFlair>();
+            CharacterQuest = new HashSet<CharacterQuest>();
             CharacterSpell = new HashSet<CharacterSpell>();
             CharacterStats = new HashSet<CharacterStats>();
             CharacterTitle = new HashSet<CharacterTitle>();
@@ -64,6 +65,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual ICollection<CharacterPath> CharacterPath { get; set; }
         public virtual ICollection<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual ICollection<CharacterPetFlair> CharacterPetFlair { get; set; }
+        public virtual ICollection<CharacterQuest> CharacterQuest { get; set; }
         public virtual ICollection<CharacterSpell> CharacterSpell { get; set; }
         public virtual ICollection<CharacterStats> CharacterStats { get; set; }
         public virtual ICollection<CharacterTitle> CharacterTitle { get; set; }

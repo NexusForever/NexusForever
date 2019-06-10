@@ -18,11 +18,12 @@ using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Mail;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.Setting;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -114,10 +115,11 @@ namespace NexusForever.WorldServer.Game.Entity
         public DatacubeManager DatacubeManager { get; }
         public MailManager MailManager { get; }
         public ZoneMapManager ZoneMapManager { get; }
+        public QuestManager QuestManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
-        private double timeToSave = SaveDuration;
+        private UpdateTimer saveTimer = new UpdateTimer(SaveDuration);
         private PlayerSaveMask saveMask;
 
         private LogoutManager logoutManager;
@@ -157,6 +159,7 @@ namespace NexusForever.WorldServer.Game.Entity
             DatacubeManager         = new DatacubeManager(this, model);
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
+            QuestManager            = new QuestManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -211,31 +214,41 @@ namespace NexusForever.WorldServer.Game.Entity
             TitleManager.Update(lastTick);
             SpellManager.Update(lastTick);
             CostumeManager.Update(lastTick);
+            QuestManager.Update(lastTick);
 
-            timeToSave -= lastTick;
-            if (timeToSave <= 0d)
+            saveTimer.Update(lastTick);
+            if (saveTimer.HasElapsed)
             {
                 double timeSinceLastSave = GetTimeSinceLastSave();
                 TimePlayedSession += timeSinceLastSave;
                 TimePlayedLevel += timeSinceLastSave;
                 TimePlayedTotal += timeSinceLastSave;
 
-                timeToSave = SaveDuration;
-
-                Session.EnqueueEvent(new TaskEvent(AuthDatabase.Save(Save),
-                    () =>
-                {
-                    Session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
-                        () =>
-                        {
-                            Session.CanProcessPackets = true;
-                            timeToSave = SaveDuration;
-                        }));
-                }));
-
-                // prevent packets from being processed until asynchronous player save task is complete
-                Session.CanProcessPackets = false;
+                Save();
             }
+        }
+
+        /// <summary>
+        /// Save <see cref="Account"/> and <see cref="Character"/> to the database.
+        /// </summary>
+        public void Save(Action callback = null)
+        {
+            Session.EnqueueEvent(new TaskEvent(AuthDatabase.Save(Save),
+            () =>
+            {
+                Session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+                () =>
+                {
+                    callback?.Invoke();
+                    Session.CanProcessPackets = true;
+                    saveTimer.Resume();
+                }));
+            }));
+
+            saveTimer.Reset(false);
+
+            // prevent packets from being processed until asynchronous player save task is complete
+            Session.CanProcessPackets = false;
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -296,7 +309,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     Guid    = Session.Player.Guid,
                     Channel = ChatChannel.System,
-                    Text    = $"New Zone: {tt.GetEntry(Zone.LocalizedTextIdName)}"
+                    Text    = $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}"
                 });
 
                 uint tutorialId = AssetManager.GetTutorialIdForZone(Zone.Id);
@@ -307,7 +320,10 @@ namespace NexusForever.WorldServer.Game.Entity
                         TutorialId = tutorialId
                     });
                 }
+
+                QuestManager.ObjectiveUpdate(QuestObjectiveType.EnterZone, Zone.Id, 1);
             }
+
             ZoneMapManager.OnZoneUpdate();
         }
 
@@ -385,8 +401,8 @@ namespace NexusForever.WorldServer.Game.Entity
             DatacubeManager.SendInitialPackets();
             MailManager.SendInitialPackets();
             ZoneMapManager.SendInitialPackets();
-
             Session.AccountCurrencyManager.SendInitialPackets();
+            QuestManager.SendInitialPackets();
         }
 
         public ItemProficiency GetItemProficiences()
@@ -432,7 +448,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (entity != this)
             {
-                Session.EnqueueMessageEncrypted(new ServerEntityDestory
+                Session.EnqueueMessageEncrypted(new ServerEntityDestroy
                 {
                     Guid     = entity.Guid,
                     Unknown0 = true
@@ -517,18 +533,18 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             CleanupManager.Track(Session.Account);
 
-            Session.EnqueueEvent(new TaskEvent(AuthDatabase.Save(Save),
-                () =>
+            try
             {
-                Session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
-                    () =>
+                Save(() =>
                 {
                     RemoveFromMap();
                     Session.Player = null;
-
-                    CleanupManager.Untrack(Session.Account);
-                }));
-            }));
+                });
+            }
+            finally
+            {
+                CleanupManager.Untrack(Session.Account);
+            }
         }
 
         /// <summary>
@@ -590,6 +606,17 @@ namespace NexusForever.WorldServer.Game.Entity
                 Sex         = (byte)Sex,
                 ItemVisuals = GetAppearance().ToList()
             }, true);
+        }
+
+        /// <summary>
+        /// Send <see cref="GenericError"/> to <see cref="Player"/>.
+        /// </summary>
+        public void SendGenericError(GenericError error)
+        {
+            Session.EnqueueMessageEncrypted(new ServerGenericError
+            {
+                Error = error
+            });
         }
 
         public void Save(AuthContext context)
@@ -669,6 +696,7 @@ namespace NexusForever.WorldServer.Game.Entity
             DatacubeManager.Save(context);
             MailManager.Save(context);
             ZoneMapManager.Save(context);
+            QuestManager.Save(context);
         }
 
         /// <summary>
@@ -676,7 +704,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public double GetTimeSinceLastSave()
         {
-            return SaveDuration - timeToSave;
+            return SaveDuration - saveTimer.Time;
         }
     }
 }

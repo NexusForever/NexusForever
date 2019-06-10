@@ -83,6 +83,8 @@ namespace NexusForever.WorldServer.Database.Character
                             .ThenInclude(c => c.CharacterMailAttachment)
                                 .ThenInclude(a => a.ItemGu)
                         .Include(c => c.CharacterZonemapHexgroup)
+                        .Include(c => c.CharacterQuest)
+                            .ThenInclude(q => q.CharacterQuestObjective)
                     .ToListAsync();
             }
         }

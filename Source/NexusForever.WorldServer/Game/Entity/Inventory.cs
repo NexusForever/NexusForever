@@ -554,20 +554,49 @@ namespace NexusForever.WorldServer.Game.Entity
             if (srcItem == null)
                 throw new InvalidPacketValueException();
 
-            srcBag.RemoveItem(srcItem);
-            if (!srcItem.PendingCreate)
+            return ItemDelete(srcBag, srcItem, reason);
+        }
+
+        private Item ItemDelete(Bag bag, Item item, byte reason)
+        {
+            bag.RemoveItem(item);
+            if (!item.PendingCreate)
             {
-                srcItem.EnqueueDelete();
-                deletedItems.Add(srcItem);
+                item.EnqueueDelete();
+                deletedItems.Add(item);
             }
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
-                Guid = srcItem.Guid,
+                Guid   = item.Guid,
                 Reason = reason
             });
 
-            return srcItem;
+            return item;
+        }
+
+        /// <summary>
+        /// Delete a supplied amount of an <see cref="Item"/>.
+        /// </summary>
+        public void ItemDelete(uint itemId, uint count = 1u)
+        {
+            Bag bag = GetBag(InventoryLocation.Inventory);
+            foreach (Item item in bag.Where(i => i.Id == itemId))
+            {
+                if (item.StackCount > count)
+                {
+                    ItemStackCountUpdate(item, item.StackCount - count);
+                    count = 0;
+                }
+                else
+                {
+                    ItemDelete(bag, item, 15);
+                    count -= item.StackCount;
+                }
+
+                if (count == 0)
+                    break;
+            }
         }
 
         /// <summary>
@@ -602,6 +631,15 @@ namespace NexusForever.WorldServer.Game.Entity
             uint bagIndex = bag.GetFirstAvailableBagIndex();
 
             return bagIndex >= uint.MaxValue;
+        }
+
+        /// <summary>
+        /// Return the amount of free bag indexes in <see cref="InventoryLocation.Inventory"/>.
+        /// </summary>
+        public uint GetInventoryFreeBagIndexCount()
+        {
+            Bag bag = GetBag(InventoryLocation.Inventory);
+            return bag.GetFreeBagIndexCount();
         }
 
         /// <summary>

@@ -34,6 +34,8 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public virtual DbSet<CharacterPath> CharacterPath { get; set; }
         public virtual DbSet<CharacterPetCustomisation> CharacterPetCustomisation { get; set; }
         public virtual DbSet<CharacterPetFlair> CharacterPetFlair { get; set; }
+        public virtual DbSet<CharacterQuest> CharacterQuest { get; set; }
+        public virtual DbSet<CharacterQuestObjective> CharacterQuestObjective { get; set; }
         public virtual DbSet<CharacterSpell> CharacterSpell { get; set; }
         public virtual DbSet<CharacterStats> CharacterStats { get; set; }
         public virtual DbSet<CharacterTitle> CharacterTitle { get; set; }
@@ -681,6 +683,72 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .WithMany(p => p.CharacterPetFlair)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_pet_flair_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterQuest>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.QuestId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_quest");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.QuestId)
+                    .HasColumnName("questId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Flags)
+                    .HasColumnName("flags")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Reset)
+                    .HasColumnName("reset")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.State)
+                    .HasColumnName("state")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Timer).HasColumnName("timer");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.CharacterQuest)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_quest_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterQuestObjective>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.QuestId, e.Index })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("character_quest_objective");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.QuestId)
+                    .HasColumnName("questId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Progress)
+                    .HasColumnName("progress")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Timer).HasColumnName("timer");
+
+                entity.HasOne(d => d.CharacterQuest)
+                    .WithMany(p => p.CharacterQuestObjective)
+                    .HasForeignKey(d => new { d.Id, d.QuestId })
+                    .HasConstraintName("FK__character_quest_objective_id__character_id");
             });
 
             modelBuilder.Entity<CharacterSpell>(entity =>
