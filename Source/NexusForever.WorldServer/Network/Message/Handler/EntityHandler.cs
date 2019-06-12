@@ -7,6 +7,7 @@ using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 using System;
 using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -70,6 +71,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             // TODO: sanity check for range etc.
 
             session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
+            foreach(uint targetGroupId in TargetGroupManager.GetTargetGroupsForCreatureId(entity.CreatureId))
+                session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroup, targetGroupId, 1u); // Updates the objective, but seems to disable all the other targets. TODO: Investigate
             entity.OnActivateCast(session.Player);
         }
 
