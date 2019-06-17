@@ -91,7 +91,7 @@ namespace NexusForever.WorldServer.Database.Character
         {
             using (var context = new CharacterContext())
             {
-                return context.Character.Where(c => c.Name == characterName).Count() == 0 ? false : true;
+                return context.Character.Any(c => c.Name == characterName);
             }
         }
 
