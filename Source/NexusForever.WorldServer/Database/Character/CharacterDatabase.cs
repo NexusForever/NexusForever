@@ -87,6 +87,14 @@ namespace NexusForever.WorldServer.Database.Character
             }
         }
 
+        public static bool CharacterNameExists(string characterName)
+        {
+            using (var context = new CharacterContext())
+            {
+                return context.Character.Where(c => c.Name == characterName).Count() == 0 ? false : true;
+            }
+        }
+
         public static async Task CreateCharacter(Model.Character character, IEnumerable<ItemEntity> items)
         {
             using (var context = new CharacterContext())

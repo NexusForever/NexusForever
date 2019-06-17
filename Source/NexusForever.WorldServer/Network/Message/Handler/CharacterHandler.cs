@@ -357,6 +357,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Value = 3
                 });
 
+                if (CharacterDatabase.CharacterNameExists(character.Name) == true)
+                {
+                    session.EnqueueMessageEncrypted(new ServerCharacterCreate
+                    {
+                        Result = 0
+                    });
+
+                    return;
+                }
+
                 // TODO: actually error check this
                 session.EnqueueEvent(new TaskEvent(CharacterDatabase.CreateCharacter(character, items),
                     () =>
