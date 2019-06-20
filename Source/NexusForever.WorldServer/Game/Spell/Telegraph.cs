@@ -94,7 +94,6 @@ namespace NexusForever.WorldServer.Game.Spell
 
         private float GridSearchSize()
         {   
-            
             switch ((DamageShape)TelegraphDamage.DamageShapeEnum)
             {
                 case DamageShape.Cone:
@@ -106,7 +105,7 @@ namespace NexusForever.WorldServer.Game.Spell
             }
         }
 
-        public static bool IsPointInPolygon(Vector2[] polygon, Vector2 testPoint)
+        private bool IsPointInPolygon(Vector2[] polygon, Vector2 testPoint)
         {
             bool result = false;
             int j = polygon.Count() - 1;
