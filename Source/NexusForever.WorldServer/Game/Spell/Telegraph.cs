@@ -108,8 +108,8 @@ namespace NexusForever.WorldServer.Game.Spell
         private bool IsPointInPolygon(Vector2[] polygon, Vector2 testPoint)
         {
             bool result = false;
-            int j = polygon.Count() - 1;
-            for (int i = 0; i < polygon.Count(); i++)
+            int j = polygon.Length - 1;
+            for (int i = 0; i < polygon.Length; i++)
             {
                 if (polygon[i].Y < testPoint.Y && polygon[j].Y >= testPoint.Y || polygon[j].Y < testPoint.Y && polygon[i].Y >= testPoint.Y)
                 {
