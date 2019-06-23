@@ -77,14 +77,14 @@ namespace NexusForever.WorldServer.Game.Spell
 
 
                         //Create a polygon to test with the rotated points
-                        List<Vector2> RotatedRectange = new List<Vector2>(){
+                        Vector2[] RotatedRectangle = new Vector2[]{
                             new Vector2(bottomLeft.X, bottomLeft.Z),
                             new Vector2(bottomRight.X, bottomRight.Z),
                             new Vector2(topLeft.X, topLeft.Z),
                             new Vector2(topRight.X, topRight.Z)
                         };
 
-                        return IsPointInPolygon(RotatedRectange.ToArray(), new Vector2(position.X, position.Z)) && position.Y <= Position.Y + Height && Position.Y - Height <= position.Y;
+                        return IsPointInPolygon(RotatedRectangle, new Vector2(position.X, position.Z)) && position.Y <= Position.Y + Height && Position.Y - Height <= position.Y;
                 }
                 default:
                     log.Warn($"Unhandled telegraph shape {(DamageShape)TelegraphDamage.DamageShapeEnum}.");
