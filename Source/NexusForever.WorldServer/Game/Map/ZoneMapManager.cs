@@ -125,12 +125,15 @@ namespace NexusForever.WorldServer.Game.Map
         {
             // maybe there is a more efficient lookup method @sub_1406FB130 - this works for all zones though
             WorldZoneEntry worldZoneEntry = player.Zone;
-            MapZoneEntry zoneMap;
+            MapZoneEntry zoneMap = null;
 
             do
             {
+                if (worldZoneEntry == null)
+                    break;
+
                 zoneMap = GameTableManager.MapZone.Entries.FirstOrDefault(m => m.WorldZoneId == worldZoneEntry.Id);
-                if (zoneMap != null || worldZoneEntry == null)
+                if (zoneMap != null)
                     break;
 
                 worldZoneEntry = GameTableManager.WorldZone.GetEntry(worldZoneEntry.ParentZoneId);
