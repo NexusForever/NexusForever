@@ -177,6 +177,12 @@ namespace NexusForever.WorldServer.Game.Entity
             if (info == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
 
+            if (DisableManager.Instance.IsDisabled(DisableType.Quest, questId))
+            {
+                player.SendSystemMessage($"Unable to add quest {questId} because it is disabled.");
+                return;
+            }
+
             Quest.Quest quest = GetQuest(questId);
             QuestAdd(info, quest, item);
         }
@@ -424,6 +430,12 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             if (GlobalQuestManager.GetQuestInfo(questId) == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
+
+            if (DisableManager.Instance.IsDisabled(DisableType.Quest, questId))
+            {
+                player.SendSystemMessage($"Unable to complete quest {questId} because it is disabled.");
+                return;
+            }
 
             Quest.Quest quest = GetQuest(questId, GetQuestFlags.Active);
             if (quest == null)

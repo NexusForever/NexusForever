@@ -18,6 +18,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         {
         }
 
+        public virtual DbSet<Disable> Disable { get; set; }
         public virtual DbSet<Entity> Entity { get; set; }
         public virtual DbSet<EntitySpline> EntitySpline { get; set; }
         public virtual DbSet<EntityStats> EntityStats { get; set; }
@@ -34,6 +35,28 @@ namespace NexusForever.WorldServer.Database.World.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Disable>(entity =>
+            {
+                entity.HasKey(e => new { e.Type, e.ObjectId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("disable");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ObjectId)
+                    .HasColumnName("objectId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Note)
+                    .IsRequired()
+                    .HasColumnName("note")
+                    .HasColumnType("varchar(500)")
+                    .HasDefaultValueSql("''");
+            });
+
             modelBuilder.Entity<Entity>(entity =>
             {
                 entity.ToTable("entity");

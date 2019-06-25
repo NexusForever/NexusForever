@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.WorldServer.Database.World.Model;
+using Disable = NexusForever.WorldServer.Game.Disable;
 
 namespace NexusForever.WorldServer.Database.World
 {
@@ -47,6 +48,12 @@ namespace NexusForever.WorldServer.Database.World
         {
             using (var context = new WorldContext())
                 return context.Tutorial.ToImmutableList();
+        }
+
+        public static ImmutableList<Model.Disable> GetDisables()
+        {
+            using (var context = new WorldContext())
+                return context.Disable.ToImmutableList();
         }
     }
 }

@@ -63,6 +63,8 @@ namespace NexusForever.WorldServer
 
             ResidenceManager.Initialise();
 
+            DisableManager.Instance.Initialise();
+
             // make sure the assigned realm id in the configuration file exists in the database
             RealmId = ConfigurationManager<WorldServerConfiguration>.Config.RealmId;
             if (ServerManager.Servers.All(s => s.Model.Id != RealmId))

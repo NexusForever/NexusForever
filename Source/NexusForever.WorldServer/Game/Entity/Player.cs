@@ -564,6 +564,12 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void TeleportTo(WorldEntry entry, Vector3 vector, uint instanceId = 0u, ulong residenceId = 0ul)
         {
+            if (DisableManager.Instance.IsDisabled(DisableType.World, entry.Id))
+            {
+                SendSystemMessage($"Unable to teleport to world {entry.Id} because it is disabled.");
+                return;
+            }
+
             if (Map?.Entry.Id == entry.Id)
             {
                 // TODO: don't remove player from map if it's the same as destination
@@ -616,6 +622,15 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerGenericError
             {
                 Error = error
+            });
+        }
+
+        public void SendSystemMessage(string text)
+        {
+            Session.EnqueueMessageEncrypted(new ServerChat
+            {
+                Channel = ChatChannel.System,
+                Text    = text
             });
         }
 
