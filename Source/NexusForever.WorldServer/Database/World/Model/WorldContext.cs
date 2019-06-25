@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared;
@@ -19,10 +19,11 @@ namespace NexusForever.WorldServer.Database.World.Model
         }
 
         public virtual DbSet<Entity> Entity { get; set; }
+        public virtual DbSet<EntitySpline> EntitySpline { get; set; }
+        public virtual DbSet<EntityStats> EntityStats { get; set; }
         public virtual DbSet<EntityVendor> EntityVendor { get; set; }
         public virtual DbSet<EntityVendorCategory> EntityVendorCategory { get; set; }
         public virtual DbSet<EntityVendorItem> EntityVendorItem { get; set; }
-        public virtual DbSet<EntityStat> EntityStat { get; set; }
         public virtual DbSet<Tutorial> Tutorial { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -39,6 +40,10 @@ namespace NexusForever.WorldServer.Database.World.Model
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ActivePropId)
+                    .HasColumnName("activePropId")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Area)
@@ -63,6 +68,10 @@ namespace NexusForever.WorldServer.Database.World.Model
 
                 entity.Property(e => e.OutfitInfo)
                     .HasColumnName("outfitInfo")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.QuestChecklistIdx)
+                    .HasColumnName("questChecklistIdx")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Rx)
@@ -96,10 +105,69 @@ namespace NexusForever.WorldServer.Database.World.Model
                 entity.Property(e => e.Z)
                     .HasColumnName("z")
                     .HasDefaultValueSql("'0'");
+            });
 
-                entity.Property(e => e.QuestChecklistIdx)
-                    .HasColumnName("questChecklistIdx")
+            modelBuilder.Entity<EntitySpline>(entity =>
+            {
+                entity.ToTable("entity_spline");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
                     .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Fx)
+                    .HasColumnName("fx")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Fy)
+                    .HasColumnName("fy")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Fz)
+                    .HasColumnName("fz")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Mode)
+                    .HasColumnName("mode")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Speed)
+                    .HasColumnName("speed")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.SplineId)
+                    .HasColumnName("splineId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithOne(p => p.EntitySpline)
+                    .HasForeignKey<EntitySpline>(d => d.Id)
+                    .HasConstraintName("FK__entity_spline_id__entity_id");
+            });
+
+            modelBuilder.Entity<EntityStats>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Stat })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("entity_stats");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Stat)
+                    .HasColumnName("stat")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.EntityStats)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__entity_stats_stat_id_entity_id");
             });
 
             modelBuilder.Entity<EntityVendor>(entity =>
@@ -126,7 +194,8 @@ namespace NexusForever.WorldServer.Database.World.Model
 
             modelBuilder.Entity<EntityVendorCategory>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.Index });
+                entity.HasKey(e => new { e.Id, e.Index })
+                    .HasName("PRIMARY");
 
                 entity.ToTable("entity_vendor_category");
 
@@ -150,7 +219,8 @@ namespace NexusForever.WorldServer.Database.World.Model
 
             modelBuilder.Entity<EntityVendorItem>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.Index });
+                entity.HasKey(e => new { e.Id, e.Index })
+                    .HasName("PRIMARY");
 
                 entity.ToTable("entity_vendor_item");
 
@@ -176,33 +246,11 @@ namespace NexusForever.WorldServer.Database.World.Model
                     .HasConstraintName("FK__entity_vendor_item_id__entity_id");
             });
 
-            modelBuilder.Entity<EntityStat>(entity =>
-            {
-                entity.HasKey(e => new { e.Id, e.Stat });
-
-                entity.ToTable("entity_stats");
-
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.Stat)
-                    .HasColumnName("stat")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Value)
-                    .HasColumnName("value")
-                    .HasDefaultValueSql("'0'");
-
-                entity.HasOne(d => d.IdNavigation)
-                    .WithMany(p => p.EntityStat)
-                    .HasForeignKey(d => d.Id)
-                    .HasConstraintName("FK__entity_stats_stat_id_entity_id");
-            });
-
             modelBuilder.Entity<Tutorial>(entity =>
             {
+                entity.HasKey(e => new { e.Id, e.Type, e.TriggerId })
+                    .HasName("PRIMARY");
+
                 entity.ToTable("tutorial");
 
                 entity.Property(e => e.Id)
@@ -218,6 +266,7 @@ namespace NexusForever.WorldServer.Database.World.Model
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Note)
+                    .IsRequired()
                     .HasColumnName("note")
                     .HasColumnType("varchar(50)")
                     .HasDefaultValueSql("''");

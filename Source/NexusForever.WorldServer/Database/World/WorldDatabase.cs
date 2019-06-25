@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Database.World
                     .Include(e => e.EntityVendor)
                     .Include(e => e.EntityVendorCategory)
                     .Include(e => e.EntityVendorItem)
-                    .Include(e => e.EntityStat)
+                    .Include(e => e.EntityStats)
                     .AsNoTracking()
                     .ToImmutableList();
         }

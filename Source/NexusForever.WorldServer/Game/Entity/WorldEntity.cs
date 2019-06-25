@@ -75,7 +75,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction1    = (Faction)model.Faction1;
             Faction2    = (Faction)model.Faction2;
 
-            foreach (EntityStat statModel in model.EntityStat)
+            foreach (EntityStats statModel in model.EntityStats)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
         }
 

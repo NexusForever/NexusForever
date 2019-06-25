@@ -7,9 +7,9 @@ namespace NexusForever.WorldServer.Database.World.Model
     {
         public Entity()
         {
+            EntityStats = new HashSet<EntityStats>();
             EntityVendorCategory = new HashSet<EntityVendorCategory>();
             EntityVendorItem = new HashSet<EntityVendorItem>();
-            EntityStat = new HashSet<EntityStat>();
         }
 
         public uint Id { get; set; }
@@ -28,10 +28,12 @@ namespace NexusForever.WorldServer.Database.World.Model
         public ushort Faction1 { get; set; }
         public ushort Faction2 { get; set; }
         public byte QuestChecklistIdx { get; set; }
+        public ulong ActivePropId { get; set; }
 
-        public EntityVendor EntityVendor { get; set; }
-        public ICollection<EntityVendorCategory> EntityVendorCategory { get; set; }
-        public ICollection<EntityVendorItem> EntityVendorItem { get; set; }
-        public ICollection<EntityStat> EntityStat { get; set; }
+        public virtual EntitySpline EntitySpline { get; set; }
+        public virtual EntityVendor EntityVendor { get; set; }
+        public virtual ICollection<EntityStats> EntityStats { get; set; }
+        public virtual ICollection<EntityVendorCategory> EntityVendorCategory { get; set; }
+        public virtual ICollection<EntityVendorItem> EntityVendorItem { get; set; }
     }
 }
