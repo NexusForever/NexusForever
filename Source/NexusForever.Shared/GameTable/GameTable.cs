@@ -156,88 +156,92 @@ namespace NexusForever.Shared.GameTable
             for (int i = 0; i < lookup.Length; i++)
                 lookup[i] = -1;
 
-            for (int i = 0; i < (int)header.RecordCount; i++)
+            uint recordSize = (uint)(header.RecordSize * header.RecordCount);
+
+            // build string table
+            reader.BaseStream.Position = headerSize + (uint)header.RecordOffset + recordSize;
+            int stringTableSize = (int)(header.TotalRecordSize - header.RecordSize * header.RecordCount);
+            using (var stringTable = new StringTable(reader.ReadBytes(stringTableSize)))
             {
-                long recordStartPosition = headerSize + (long)header.RecordOffset + (long)header.RecordSize * i;
-                if (reader.BaseStream.Position != recordStartPosition)
-                    reader.BaseStream.Position = recordStartPosition;
-
-                T entry = new T();
-
-                int fieldIndex = 0;
-                FieldInfo[] typeFields = attributeCache.Keys.ToArray();
-                foreach (FieldInfo modelField in typeFields)
+                for (int i = 0; i < (int)header.RecordCount; i++)
                 {
-                    GameTableFieldArrayAttribute attribute = attributeCache[modelField];
-                    if (attribute != null)
+                    long recordStartPosition = headerSize + (long)header.RecordOffset + (long)header.RecordSize * i;
+                    if (reader.BaseStream.Position != recordStartPosition)
+                        reader.BaseStream.Position = recordStartPosition;
+
+                    T entry = new T();
+
+                    int fieldIndex = 0;
+                    FieldInfo[] typeFields = attributeCache.Keys.ToArray();
+                    foreach (FieldInfo modelField in typeFields)
                     {
-                        Array array = Array.CreateInstance(modelField.FieldType.GetElementType(), attribute.Length);
-                        for (uint j = 0u; j < attribute.Length; j++)
+                        GameTableFieldArrayAttribute attribute = attributeCache[modelField];
+                        if (attribute != null)
+                        {
+                            Array array = Array.CreateInstance(modelField.FieldType.GetElementType(), attribute.Length);
+                            for (uint j = 0u; j < attribute.Length; j++)
+                            {
+                                DataType dataType = fields[fieldIndex++].Type;
+                                switch (dataType)
+                                {
+                                    case DataType.UInt:
+                                        array.SetValue(reader.ReadUInt32(), j);
+                                        break;
+                                    case DataType.Single:
+                                        array.SetValue(reader.ReadSingle(), j);
+                                        break;
+                                    case DataType.Boolean:
+                                        array.SetValue(Convert.ToBoolean(reader.ReadUInt32()), j);
+                                        break;
+                                    case DataType.ULong:
+                                        array.SetValue(reader.ReadUInt64(), j);
+                                        break;
+                                }
+                            }
+
+                            modelField.SetValue(entry, array);
+                        }
+                        else
                         {
                             DataType dataType = fields[fieldIndex++].Type;
                             switch (dataType)
                             {
                                 case DataType.UInt:
-                                    array.SetValue(reader.ReadUInt32(), j);
+                                    modelField.SetValue(entry, reader.ReadUInt32());
                                     break;
                                 case DataType.Single:
-                                    array.SetValue(reader.ReadSingle(), j);
+                                    modelField.SetValue(entry, reader.ReadSingle());
                                     break;
                                 case DataType.Boolean:
-                                    array.SetValue(Convert.ToBoolean(reader.ReadUInt32()), j);
+                                    modelField.SetValue(entry, Convert.ToBoolean(reader.ReadUInt32()));
                                     break;
                                 case DataType.ULong:
-                                    array.SetValue(reader.ReadUInt64(), j);
+                                    modelField.SetValue(entry, reader.ReadUInt64());
                                     break;
-                            }
-                        }
+                                case DataType.String:
+                                    {
+                                        uint offset1 = reader.ReadUInt32();
+                                        uint offset2 = reader.ReadUInt32();
+                                        uint offset3 = Math.Max(offset1, offset2);
 
-                        modelField.SetValue(entry, array);
-                    }
-                    else
-                    {
-                        DataType dataType = fields[fieldIndex++].Type;
-                        switch (dataType)
-                        {
-                            case DataType.UInt:
-                                modelField.SetValue(entry, reader.ReadUInt32());
-                                break;
-                            case DataType.Single:
-                                modelField.SetValue(entry, reader.ReadSingle());
-                                break;
-                            case DataType.Boolean:
-                                modelField.SetValue(entry, Convert.ToBoolean(reader.ReadUInt32()));
-                                break;
-                            case DataType.ULong:
-                                modelField.SetValue(entry, reader.ReadUInt64());
-                                break;
-                            case DataType.String:
-                            {
-                                uint offset1 = reader.ReadUInt32();
-                                uint offset2 = reader.ReadUInt32();
-                                uint offset3 = Math.Max(offset1, offset2);
+                                        string @string = stringTable.GetEntry(offset3 - recordSize);
+                                        modelField.SetValue(entry, @string);
 
-                                long position = reader.BaseStream.Position;
-                                reader.BaseStream.Position =
-                                    headerSize + (long)header.RecordOffset + offset3;
-
-                                modelField.SetValue(entry, reader.ReadWideString());
-                                reader.BaseStream.Position = position;
-
-                                if (fieldIndex < typeFields.Length - 1)
-                                    if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
-                                        reader.BaseStream.Position += 4;
-                                break;
+                                        if (fieldIndex < typeFields.Length - 1)
+                                            if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
+                                                reader.BaseStream.Position += 4;
+                                        break;
+                                    }
                             }
                         }
                     }
+
+                    Entries[i] = entry;
+
+                    // id will always be the first column
+                    var id = (uint)typeFields[0].GetValue(entry);
+                    lookup[id] = i;
                 }
-
-                Entries[i] = entry;
-
-                // id will always be the first column
-                var id = (uint)typeFields[0].GetValue(entry);
-                lookup[id] = i;
             }
         }
 
