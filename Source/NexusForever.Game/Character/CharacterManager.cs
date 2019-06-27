@@ -77,7 +77,12 @@ namespace NexusForever.Game.Character
             var entries = new Dictionary<uint, List<CharacterCustomizationEntry>>();
             foreach (CharacterCustomizationEntry entry in GameTableManager.Instance.CharacterCustomization.Entries)
             {
-                uint primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
+                uint primaryKey;
+                if (entry.CharacterCustomizationLabelId00 == 0 && entry.CharacterCustomizationLabelId01 > 0)
+                    primaryKey = (entry.Value01 << 24) | (entry.CharacterCustomizationLabelId01 << 16) | (entry.Gender << 8) | entry.RaceId;
+                else
+                    primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
+
                 if (!entries.ContainsKey(primaryKey))
                     entries.Add(primaryKey, new List<CharacterCustomizationEntry>());
 
@@ -168,6 +173,61 @@ namespace NexusForever.Game.Character
         public ILocation GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart)
         {
             return characterCreationData.TryGetValue((race, faction, creationStart), out ILocation location) ? location : null;
+        }
+
+        /// <summary>
+        /// Returns matching <see cref="CharacterCustomizationEntry"/> given input parameters
+        /// </summary>
+        public IEnumerable<CharacterCustomizationEntry> GetCharacterCustomisation(Dictionary<uint, uint> customisations, uint race, uint sex, uint primaryLabel, uint primaryValue)
+        {
+            ImmutableList<CharacterCustomizationEntry> entries = GetPrimaryCharacterCustomisation(race, sex, primaryLabel, primaryValue);
+            if (entries == null)
+                return Enumerable.Empty<CharacterCustomizationEntry>();
+
+            List<CharacterCustomizationEntry> customizationEntries = new List<CharacterCustomizationEntry>();
+
+            // Customisation has multiple results, filter with a non-zero secondary KvP.
+            List<CharacterCustomizationEntry> primaryEntries = entries.Where(e => e.CharacterCustomizationLabelId01 != 0).ToList();
+            if (primaryEntries.Count > 0)
+            {
+                // This will check all entries where there is a primary AND secondary KvP.
+                foreach (CharacterCustomizationEntry customizationEntry in primaryEntries)
+                {
+                    // Missing primary KvP in table, skipping.
+                    if (customizationEntry.CharacterCustomizationLabelId00 == 0)
+                        continue;
+
+                    // Secondary KvP not found in customisation list, skipping.
+                    if (!customisations.ContainsKey(customizationEntry.CharacterCustomizationLabelId01))
+                        continue;
+
+                    // Returning match found for primary KvP and secondary KvP
+                    if (customisations[customizationEntry.CharacterCustomizationLabelId01] == customizationEntry.Value01)
+                        customizationEntries.Add(customizationEntry);
+                }
+
+                // Return the matching value when the primary KvP matching the table's secondary KvP
+                CharacterCustomizationEntry entry = entries.FirstOrDefault(e => e.CharacterCustomizationLabelId01 == primaryLabel && e.Value01 == primaryValue);
+                if (entry != null)
+                    customizationEntries.Add(entry);
+            }
+            
+            if (customizationEntries.Count == 0)
+            {
+                // Return the matching value when the primary KvP matches the table's primary KvP, and no secondary KvP is present.
+                CharacterCustomizationEntry entry = entries.FirstOrDefault(e => e.CharacterCustomizationLabelId00 == primaryLabel && e.Value00 == primaryValue);
+                if (entry != null)
+                    customizationEntries.Add(entry);
+                else
+                {
+                    entry = entries.Single(e => e.CharacterCustomizationLabelId01 == 0 && e.Value01 == 0);
+                    if (entry != null)
+                        customizationEntries.Add(entry);
+                }
+            }
+
+            // Ensure we only return 1 entry per ItemSlot.
+            return customizationEntries.GroupBy(i => i.ItemSlotId).Select(i => i.First());
         }
 
         /// <summary>

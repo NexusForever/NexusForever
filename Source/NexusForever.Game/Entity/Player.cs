@@ -13,6 +13,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
+using NexusForever.Game.Character;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -59,7 +60,8 @@ namespace NexusForever.Game.Entity
             Costume     = 0x0004,
             InputKeySet = 0x0008,
             Flags       = 0x0020,
-            Innate      = 0x0080
+            Innate      = 0x0080,
+            Appearance  = 0x0100
         }
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
@@ -71,8 +73,8 @@ namespace NexusForever.Game.Entity
 
         public ulong CharacterId { get; }
         public string Name { get; }
-        public Sex Sex { get; }
-        public Race Race { get; }
+        public Sex Sex { get; private set; }
+        public Race Race { get; private set; }
         public Class Class { get; }
         public List<float> Bones { get; } = new();
 
@@ -187,6 +189,16 @@ namespace NexusForever.Game.Entity
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
+         /// <summary>
+        /// Character Customisation models. Stored for modification purposes.
+        /// </summary>
+        private Dictionary</*label*/uint, ICustomisation> characterCustomisations = new Dictionary<uint, ICustomisation>();
+        private HashSet<ICustomisation> deletedCharacterCustomisations = new HashSet<ICustomisation>();
+        private Dictionary<ItemSlot, IAppearance> characterAppearances = new Dictionary<ItemSlot, IAppearance>();
+        private HashSet<IAppearance> deletedCharacterAppearances = new HashSet<IAppearance>();
+        private List<IBone> characterBones = new List<IBone>();
+        private HashSet<IBone> deletedCharacterBones = new HashSet<IBone>();
+
         private UpdateTimer saveTimer = new(SaveDuration);
         private PlayerSaveMask saveMask;
 
@@ -274,8 +286,18 @@ namespace NexusForever.Game.Entity
                     DisplayId = a.DisplayId
                 }));
 
+                // Store Character Customisation models in memory so if changes occur, they can be removed.
+            foreach (CharacterAppearanceModel characterAppearance in model.Appearance)
+                characterAppearances.Add((ItemSlot)characterAppearance.Slot, new Appearance(characterAppearance));
+
+            foreach (CharacterCustomisationModel characterCustomisation in model.Customisation)
+                characterCustomisations.Add(characterCustomisation.Label, new Customisation(characterCustomisation));
+
             foreach (CharacterBoneModel bone in model.Bone.OrderBy(bone => bone.BoneIndex))
+            {
                 Bones.Add(bone.Bone);
+                characterBones.Add(new Bone(bone));
+            }
 
             SetStat(Stat.Sheathed, 1u);
 
@@ -435,6 +457,33 @@ namespace NexusForever.Game.Entity
                     model.InnateIndex = InnateIndex;
                     entity.Property(p => p.InnateIndex).IsModified = true;
                 }
+
+                 if ((saveMask & PlayerSaveMask.Appearance) != 0)
+                {
+                    model.Race = (byte)Race;
+                    entity.Property(p => p.Race).IsModified = true;
+
+                    model.Sex = (byte)Sex;
+                    entity.Property(p => p.Sex).IsModified = true;
+
+                    foreach (Appearance characterAppearance in deletedCharacterAppearances)
+                        characterAppearance.Save(context);
+                    foreach (Bone characterBone in deletedCharacterBones)
+                        characterBone.Save(context);
+                    foreach (Customisation characterCustomisation in deletedCharacterCustomisations)
+                        characterCustomisation.Save(context);
+
+                    deletedCharacterAppearances.Clear();
+                    deletedCharacterBones.Clear();
+                    deletedCharacterCustomisations.Clear();
+
+                    foreach (Appearance characterAppearance in characterAppearances.Values)
+                        characterAppearance.Save(context);
+                    foreach (Bone characterBone in characterBones)
+                        characterBone.Save(context);
+                    foreach (Customisation characterCustomisation in characterCustomisations.Values)
+                        characterCustomisation.Save(context);
+                } 
 
                 saveMask = PlayerSaveMask.None;
             }
@@ -1111,6 +1160,138 @@ namespace NexusForever.Game.Entity
             {
                 Flags = flags
             });
+        }
+
+        /// <summary>
+        /// Modifies the appearance customisation of this <see cref="Player"/>. Called directly by a packet handler.
+        /// </summary>
+        public void SetCharacterCustomisation(Dictionary<uint, uint> customisations, List<float> bones, Race newRace, Sex newSex, bool usingServiceTokens)
+        {
+            // Set Sex and Race
+            Sex = newSex;
+            Race = newRace; // TODO: Ensure new Race is on the same faction
+
+            List<ItemSlot> itemSlotsModified = new List<ItemSlot>();
+            // Build models for all new customisations and store in customisations caches. The client sends through everything needed on every change.
+            foreach ((uint label, uint value) in customisations)
+            {
+                if (characterCustomisations.TryGetValue(label, out ICustomisation customisation))
+                    customisation.Value = value;
+                else
+                    characterCustomisations.TryAdd(label, new Customisation(CharacterId, label, value));
+
+                foreach(CharacterCustomizationEntry entry in CharacterManager.Instance.GetCharacterCustomisation(customisations, (uint)newRace, (uint)newSex, label, value))
+                {
+                    if (characterAppearances.TryGetValue((ItemSlot)entry.ItemSlotId, out IAppearance appearance))
+                        appearance.DisplayId = (ushort)entry.ItemDisplayId;
+                    else
+                        characterAppearances.TryAdd((ItemSlot)entry.ItemSlotId, new Appearance(CharacterId, (ItemSlot)entry.ItemSlotId, (ushort)entry.ItemDisplayId));
+
+                    // This is to track slots which are modified
+                    itemSlotsModified.Add((ItemSlot)entry.ItemSlotId);
+                }
+            }
+
+            for (int i = 0; i < bones.Count; i++)
+            {
+                if (i > characterBones.Count - 1)
+                    characterBones.Add(new Bone(CharacterId, (byte)i, bones[i]));
+                else
+                {
+                    var bone = characterBones.FirstOrDefault(x => x.BoneIndex == i);
+                    if (bone != null)
+                        bone.BoneValue = bones[i];
+                }
+            }
+
+            // Cleanup the unused customisations
+            foreach (ItemSlot slot in characterAppearances.Keys.Except(itemSlotsModified).ToList())
+            {
+                if (characterAppearances.TryGetValue(slot, out IAppearance appearance))
+                {
+                    characterAppearances.Remove(slot);
+                    appearance.Delete();
+                    deletedCharacterAppearances.Add(appearance);
+                }
+            }
+            foreach (uint key in characterCustomisations.Keys.Except(customisations.Keys).ToList())
+            {
+                if (characterCustomisations.TryGetValue(key, out ICustomisation customisation))
+                {
+                    characterCustomisations.Remove(key);
+                    customisation.Delete();
+                    deletedCharacterCustomisations.Add(customisation);
+                }
+            }
+            if (Bones.Count > bones.Count)
+            {
+                for (int i = Bones.Count; i >= bones.Count; i--)
+                {
+                    IBone bone = characterBones[i - 1];
+
+                    if (bone != null)
+                    {
+                        characterBones.RemoveAt(i - 1);
+                        bone.Delete();
+                        deletedCharacterBones.Add(bone);
+                    }
+                }
+            }
+
+            // Update Player appearance values
+            SetAppearance(characterAppearances.Values
+                .Select(a => new ItemVisual
+                {
+                    Slot = a.ItemSlot,
+                    DisplayId = a.DisplayId
+                }));
+
+            Bones.Clear();
+            foreach (Bone bone in characterBones.OrderBy(bone => bone.BoneIndex))
+                Bones.Add(bone.BoneValue);
+
+            // Update surrounding entities, including the player, with new appearance
+            EmitVisualUpdate();
+
+            // TODO: Charge the player for service
+
+            // Enqueue the appearance changes to be saved to the DB.
+            saveMask |= PlayerSaveMask.Appearance;
+        }
+
+        /// <summary>
+        /// Update surrounding <see cref="IWorldEntity"/>, including the <see cref="IPlayer"/>, with a fresh appearance dataset.
+        /// </summary>
+        public void EmitVisualUpdate()
+        {
+            ICostume costume = null;
+            if (CostumeManager.CostumeIndex >= 0)
+                costume = CostumeManager.GetCostume((byte)CostumeManager.CostumeIndex);
+
+            var entityVisualUpdate = new ServerEntityVisualUpdate
+            {
+                UnitId = Guid,
+                Sex = (byte)Sex,
+                Race = (byte)Race
+            };
+
+            foreach (Appearance characterAppearance in characterAppearances.Values)
+                entityVisualUpdate.ItemVisuals.Add(new ItemVisual
+                {
+                    Slot = characterAppearance.ItemSlot,
+                    DisplayId = characterAppearance.DisplayId
+                });
+
+            foreach (var itemVisual in Inventory.GetItemVisuals(costume))
+                entityVisualUpdate.ItemVisuals.Add(itemVisual);
+
+            EnqueueToVisible(entityVisualUpdate, true);
+
+            EnqueueToVisible(new ServerEntityBoneUpdate
+            {
+                UnitId = Guid,
+                Bones = Bones.ToList()
+            }, true);
         }
     }
 }

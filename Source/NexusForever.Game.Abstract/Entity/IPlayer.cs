@@ -190,5 +190,15 @@ namespace NexusForever.Game.Abstract.Entity
         bool HasFlag(CharacterFlag flag);
 
         void SendCharacterFlagsUpdated();
+
+        /// <summary>
+        /// Modifies the appearance customisation of this <see cref="Player"/>. Called directly by a packet handler.
+        /// </summary>
+        void SetCharacterCustomisation(Dictionary<uint, uint> customisations, List<float> bones, Race newRace, Sex newSex, bool usingServiceTokens);
+
+        /// <summary>
+        /// Update surrounding <see cref="IWorldEntity"/>, including the <see cref="IPlayer"/>, with a fresh appearance dataset.
+        /// </summary>
+        void EmitVisualUpdate();
     }
 }
