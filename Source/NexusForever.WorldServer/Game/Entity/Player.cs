@@ -386,7 +386,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 playerCreate.Inventory.Add(new InventoryItem
                 {
                     Item   = item.BuildNetworkItem(),
-                    Reason = 49
+                    Reason = ItemUpdateReason.NoReason
                 });
             }
 

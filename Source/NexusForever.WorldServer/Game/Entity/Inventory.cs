@@ -215,7 +215,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> from supplied <see cref="Spell4BaseEntry"/> in the first available <see cref="InventoryLocation.Ability"/> bag slot.
         /// </summary>
-        public Item SpellCreate(Spell4BaseEntry spell4BaseEntry, byte reason)
+        public Item SpellCreate(Spell4BaseEntry spell4BaseEntry, ItemUpdateReason reason)
         {
             if (spell4BaseEntry == null)
                 throw new ArgumentNullException();
@@ -268,7 +268,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     InventoryItem = new InventoryItem
                     {
                         Item = item.BuildNetworkItem(),
-                        Reason = 49
+                        Reason = ItemUpdateReason.NoReason
                     }
                 });
             }
@@ -304,7 +304,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(uint itemId, uint count, byte reason = 49, uint charges = 0)
+        public void ItemCreate(uint itemId, uint count, ItemUpdateReason reason = ItemUpdateReason.NoReason, uint charges = 0)
         {
             Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
             if (itemEntry == null)
@@ -316,7 +316,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(Item2Entry itemEntry, uint count, byte reason = 49, uint charges = 0)
+        public void ItemCreate(Item2Entry itemEntry, uint count, ItemUpdateReason reason = ItemUpdateReason.NoReason, uint charges = 0)
         {
             if (itemEntry == null)
                 throw new ArgumentNullException();
@@ -486,7 +486,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     InventoryItem = new InventoryItem
                     {
                         Item = newItem.BuildNetworkItem(),
-                        Reason = 49
+                        Reason = ItemUpdateReason.NoReason
                     }
                 });
             }
@@ -544,7 +544,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
-        public Item ItemDelete(ItemLocation from, byte reason = 15)
+        public Item ItemDelete(ItemLocation from, ItemUpdateReason reason = ItemUpdateReason.Loot)
         {
             Bag srcBag = GetBag(from.Location);
             if (srcBag == null)
@@ -602,7 +602,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Remove <see cref="Item"/> from this player's inventory without deleting the item from the DB
         /// </summary>
-        public void ItemRemove(Item srcItem, byte reason = 49)
+        public void ItemRemove(Item srcItem, ItemUpdateReason reason = ItemUpdateReason.NoReason)
         {
             if (srcItem == null)
                 throw new InvalidPacketValueException("Item could not be found");
@@ -767,7 +767,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     Location = item.Location,
                     BagIndex = item.BagIndex
-                });
+                }, ItemUpdateReason.ConsumeCharge);
             }
 
             return true;
