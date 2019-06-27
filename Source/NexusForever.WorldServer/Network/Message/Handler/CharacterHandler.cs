@@ -20,6 +20,7 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
@@ -27,7 +28,6 @@ using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
-using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -219,6 +219,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             try
             {
                 // TODO: validate name and path
+                if (CharacterDatabase.CharacterNameExists(characterCreate.Name))
+                {
+                    session.EnqueueMessageEncrypted(new ServerCharacterCreate
+                    {
+                        Result = CharacterModifyResult.CreateFailed_UniqueName
+                    });
+
+                    return;
+                }
 
                 CharacterCreationEntry creationEntry = GameTableManager.CharacterCreation.GetEntry(characterCreate.CharacterCreationId);
                 if (creationEntry == null)
@@ -357,16 +366,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Stat  = (byte)Stat.StandState,
                     Value = 3
                 });
-
-                if (CharacterDatabase.CharacterNameExists(character.Name) == true)
-                {
-                    session.EnqueueMessageEncrypted(new ServerCharacterCreate
-                    {
-                        Result = CharacterModifyResult.CreateFailed_UniqueName
-                    });
-
-                    return;
-                }
 
                 // TODO: actually error check this
                 session.EnqueueEvent(new TaskEvent(CharacterDatabase.CreateCharacter(character, items),
