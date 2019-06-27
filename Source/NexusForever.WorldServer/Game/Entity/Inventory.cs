@@ -557,7 +557,7 @@ namespace NexusForever.WorldServer.Game.Entity
             return ItemDelete(srcBag, srcItem, reason);
         }
 
-        private Item ItemDelete(Bag bag, Item item, byte reason)
+        private Item ItemDelete(Bag bag, Item item, ItemUpdateReason reason)
         {
             bag.RemoveItem(item);
             if (!item.PendingCreate)
@@ -590,7 +590,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 }
                 else
                 {
-                    ItemDelete(bag, item, 15);
+                    ItemDelete(bag, item, ItemUpdateReason.Loot);
                     count -= item.StackCount;
                 }
 
