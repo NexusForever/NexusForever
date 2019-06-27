@@ -1,5 +1,6 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -8,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public ulong CharacterId { get; set; }
         public uint WorldId { get; set; }
-        public byte Result { get; set; }
+        public CharacterModifyResult Result { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

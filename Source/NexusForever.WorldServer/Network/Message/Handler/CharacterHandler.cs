@@ -20,6 +20,7 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
@@ -219,6 +220,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             try
             {
                 // TODO: validate name and path
+                if (CharacterDatabase.CharacterNameExists(characterCreate.Name))
+                {
+                    session.EnqueueMessageEncrypted(new ServerCharacterCreate
+                    {
+                        Result = CharacterModifyResult.CreateFailed_UniqueName
+                    });
+
+                    return;
+                }
 
                 CharacterCreationEntry creationEntry = GameTableManager.CharacterCreation.GetEntry(characterCreate.CharacterCreationId);
                 if (creationEntry == null)
@@ -367,7 +377,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     {
                         CharacterId = character.Id,
                         WorldId     = character.WorldId,
-                        Result      = 3
+                        Result      = CharacterModifyResult.CreateOk
                     });
                 }));
             }
@@ -375,7 +385,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.EnqueueMessageEncrypted(new ServerCharacterCreate
                 {
-                    Result = 0
+                    Result = CharacterModifyResult.CreateFailed
                 });
 
                 throw;
