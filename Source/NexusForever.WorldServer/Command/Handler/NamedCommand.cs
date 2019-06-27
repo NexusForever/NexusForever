@@ -65,9 +65,9 @@ namespace NexusForever.WorldServer.Command.Handler
                                        RequiresSession && session.Session != null || !RequiresSession));
         }
 
-        public virtual Task SendHelpAsync(CommandContext session)
+        public virtual Task SendHelpAsync(CommandContext context)
         {
-            return session.SendMessageAsync(HelpText);
+            return context.SendMessageAsync(HelpText);
         }
     }
 }
