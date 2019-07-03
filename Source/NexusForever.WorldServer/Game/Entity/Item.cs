@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (entry.ItemDisplayId > 0)
                     return (ushort)entry.ItemDisplayId; // This is what the preview window shows for "Frozen Wrangler Mitts" (Item2Id: 28366).
 
-                ItemDisplaySourceEntryEntry fallbackVisual = entries.FirstOrDefault(e => e.ItemMaxLevel == entry.PowerLevel);
+                ItemDisplaySourceEntryEntry fallbackVisual = entries.FirstOrDefault(e => entry.PowerLevel >= e.ItemMinLevel && entry.PowerLevel <= e.ItemMaxLevel);
                 if (fallbackVisual != null)
                     return (ushort)fallbackVisual.ItemDisplayId;
             }
