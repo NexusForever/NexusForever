@@ -259,15 +259,47 @@ namespace NexusForever.WorldServer.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(QuestObjectiveType type, uint data, uint progress)
         {
+            if (PendingDelete)
+                return;
+
+            // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (QuestObjective objective in objectives
-                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data))
+                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data).OrderByDescending(o => o.Index))
             {
+                if (objective.IsComplete())
+                    continue;
+
                 if (!CanUpdateObjective(objective))
                     continue;
 
                 objective.ObjectiveUpdate(progress);
                 SendQuestObjectiveUpdate(objective);
             }
+
+            if (objectives.All(o => o.IsComplete()) && State != QuestState.Achieved)
+                State = QuestState.Achieved;
+        }
+
+        /// <summary>
+        /// Update any <see cref="QuestObjective"/>'s with supplied ID with progress.
+        /// </summary>
+        public void ObjectiveUpdate(uint id, uint progress)
+        {
+            if (PendingDelete)
+                return;
+
+            QuestObjective objective = objectives.FirstOrDefault(i => i.Entry.Id == id);
+            if (objective == null)
+                return;
+
+            if (objective.IsComplete())
+                return;
+
+            if (!CanUpdateObjective(objective))
+                return;
+
+            objective.ObjectiveUpdate(progress);
+            SendQuestObjectiveUpdate(objective);
 
             if (objectives.All(o => o.IsComplete()))
                 State = QuestState.Achieved;

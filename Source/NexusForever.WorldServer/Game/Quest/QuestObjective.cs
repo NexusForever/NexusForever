@@ -121,10 +121,10 @@ namespace NexusForever.WorldServer.Game.Quest
         {
             // dynamic objectives have their progress based on percentage rather than count
             return (Type == QuestObjectiveType.KillCreature
-                || Type == QuestObjectiveType.Unknown8
+                || Type == QuestObjectiveType.KillTargetGroups
                 || Type == QuestObjectiveType.Unknown15
-                || Type == QuestObjectiveType.Unknown16
-                || Type == QuestObjectiveType.Unknown46)
+                || Type == QuestObjectiveType.KillTargetGroup
+                || Type == QuestObjectiveType.KillCreature2)
                 && Entry.Count > 1u
                 && (Entry.Flags & 0x0200) == 0;
         }

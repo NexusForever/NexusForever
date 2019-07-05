@@ -7,6 +7,7 @@ using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Game
 {
@@ -39,6 +40,7 @@ namespace NexusForever.WorldServer.Game
         private ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
         private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
+        private ImmutableDictionary</*creatureId*/uint, /*targetGroupIds*/ImmutableList<uint>> creatureAssociatedTargetGroups;
 
         private AssetManager()
         {
@@ -55,6 +57,7 @@ namespace NexusForever.WorldServer.Game
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
             CacheTutorials();
+            CacheCreatureTargetGroups();
         }
 
         private void CacheCharacterCustomisations()
@@ -134,6 +137,26 @@ namespace NexusForever.WorldServer.Game
             zoneTutorials = zoneEntries.ToImmutable();
         }
 
+        private void CacheCreatureTargetGroups()
+        {
+            var entries = ImmutableDictionary.CreateBuilder<uint, List<uint>>();
+            foreach (TargetGroupEntry entry in GameTableManager.Instance.TargetGroup.Entries)
+            {
+                if ((TargetGroupType)entry.Type != TargetGroupType.CreatureIdGroup)
+                    continue;
+
+                foreach (uint creatureId in entry.DataEntries)
+                {
+                    if (!entries.ContainsKey(creatureId))
+                        entries.Add(creatureId, new List<uint>());
+
+                    entries[creatureId].Add(entry.Id);
+                }
+            }
+
+            creatureAssociatedTargetGroups = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
+        }
+
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
         /// </summary>
@@ -165,6 +188,14 @@ namespace NexusForever.WorldServer.Game
         public uint GetTutorialIdForZone(uint zoneId)
         {
             return zoneTutorials.TryGetValue(zoneId, out uint tutorialId) ? tutorialId : 0;
+        }
+
+        /// <summary>
+        /// Returns an <see cref="ImmutableList{T}"/> containing all TargetGroup ID's associated with the creatureId.
+        /// </summary>
+        public ImmutableList<uint> GetTargetGroupsForCreatureId(uint creatureId)
+        {
+            return creatureAssociatedTargetGroups.TryGetValue(creatureId, out ImmutableList<uint> entries) ? entries : new List<uint>().ToImmutableList();
         }
     }
 }
