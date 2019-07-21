@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System;
 
 namespace NexusForever.WorldServer.Game.Storefront.Static
 {
+    [Flags]
     public enum DisplayFlag
     {
-        None        = 0,
-        New         = 1,
-        Recommended = 2,
-        Popular     = 4,
-        LimitedTime = 8
+        None        = 0x00,
+        New         = 0x01,
+        Recommended = 0x02,
+        Popular     = 0x04,
+        LimitedTime = 0x08
     }
 }

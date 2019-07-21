@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Storefront.Static;
@@ -20,80 +19,69 @@ namespace NexusForever.WorldServer.Game.Storefront
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private static ImmutableDictionary<uint, Category> StoreCategoryCache { get; set; }
-        private static List<ServerStoreCategories.StoreCategory> ServerStoreCategoryList { get; set; } = new List<ServerStoreCategories.StoreCategory>();
+        private static ImmutableDictionary<uint, Category> storeCategories;
+        private static ImmutableList<ServerStoreCategories.StoreCategory> serverStoreCategoryCache;
 
-        private static ImmutableDictionary<uint, OfferGroup> StoreOfferCache { get; set; }
-        private static List<ServerStoreOffers.OfferGroup> ServerStoreOfferList { get; set; } = new List<ServerStoreOffers.OfferGroup>();
+        private static ImmutableDictionary<uint, OfferGroup> offerGroups;
+        private static ImmutableList<ServerStoreOffers.OfferGroup> serverStoreOfferGroupCache;
 
-        private static ImmutableDictionary</*offerId*/uint, /*offerGroupId*/uint> OfferItemLookupCache { get; set; }
-
-        public static float ForcedProtobucksPrice { get; private set; } = 0f;
-        public static float ForcedOmnibitsPrice { get; private set; } = 0f;
-        public static bool CurrencyProtobucksEnabled { get; private set; } = true;
-        public static bool CurrencyOmnibitsEnabled { get; private set; } = true;
+        private static ImmutableDictionary</*offerId*/uint, /*offerGroupId*/uint> offerGroupLookup;
 
         public static void Initialise()
         {
-            LoadConfig();
-
             InitialiseStoreCategories();
             InitialiseStoreOfferGroups();
 
             BuildNetworkPackets();
 
-            log.Info($"Initialised {StoreCategoryCache.Count} categories with {StoreOfferCache.Count} offers");
-        }
-
-        private static void LoadConfig()
-        {
-            ForcedProtobucksPrice = ConfigurationManager<WorldServerConfiguration>.Config.Store.ForcedProtobucksPrice;
-            ForcedOmnibitsPrice = ConfigurationManager<WorldServerConfiguration>.Config.Store.ForcedOmnibitsPrice;
-            CurrencyProtobucksEnabled = ConfigurationManager<WorldServerConfiguration>.Config.Store.CurrencyProtobucksEnabled;
-            CurrencyOmnibitsEnabled = ConfigurationManager<WorldServerConfiguration>.Config.Store.CurrencyOmnibitsEnabled;
-        }
-
-        private static void BuildNetworkPackets()
-        {
-            foreach (Category category in StoreCategoryCache.Values)
-                ServerStoreCategoryList.Add(category.BuildNetworkPacket());
-
-            foreach (OfferGroup offerGroup in StoreOfferCache.Values)
-                ServerStoreOfferList.Add(offerGroup.BuildNetworkPacket());
+            log.Info($"Initialised {storeCategories.Count} categories with {offerGroups.Count} offers groups.");
         }
 
         private static void InitialiseStoreCategories()
         {
-            IEnumerable<StoreCategory> StoreCategories = WorldDatabase.GetStoreCategories()
+            IEnumerable<StoreCategory> storeCategoryModels = WorldDatabase.GetStoreCategories()
                 .OrderBy(i => i.Id)
-                .Where(x => x.Id != 26 && Convert.ToBoolean(x.Visible) == true); // Remove parent category placeholder
+                .Where(x => x.ParentId != 0 // exclude top level parent category placeholder
+                    && Convert.ToBoolean(x.Visible));
 
-            var categoryList = ImmutableDictionary.CreateBuilder<uint, Category>();
-            foreach (StoreCategory category in StoreCategories)
-                categoryList.Add(category.Id, new Category(category));
+            var builder = ImmutableDictionary.CreateBuilder<uint, Category>();
+            foreach (StoreCategory category in storeCategoryModels)
+                builder.Add(category.Id, new Category(category));
 
-            StoreCategoryCache = categoryList.ToImmutable();
+            storeCategories = builder.ToImmutable();
         }
 
         private static void InitialiseStoreOfferGroups()
         {
-            IEnumerable<StoreOfferGroup> StoreOfferGroups = WorldDatabase.GetStoreOfferGroups()
+            IEnumerable<StoreOfferGroup> offerGroupModels = WorldDatabase.GetStoreOfferGroups()
                 .OrderBy(i => i.Id)
-                .Where(x => Convert.ToBoolean(x.Visible) == true);
+                .Where(x => Convert.ToBoolean(x.Visible));
 
-            var offerGroupList = ImmutableDictionary.CreateBuilder<uint, OfferGroup>();
-            var offerItems = ImmutableDictionary.CreateBuilder<uint, uint>();
-
-            foreach (StoreOfferGroup offerGroup in StoreOfferGroups)
+            var offerGroupBuilder = ImmutableDictionary.CreateBuilder<uint, OfferGroup>();
+            var offerBuilder      = ImmutableDictionary.CreateBuilder<uint, uint>();
+            foreach (StoreOfferGroup offerGroup in offerGroupModels)
             {
-                offerGroupList.Add(offerGroup.Id, new OfferGroup(offerGroup));
+                offerGroupBuilder.Add(offerGroup.Id, new OfferGroup(offerGroup));
 
-                foreach (var offerItem in offerGroup.StoreOfferItem)
-                    offerItems.Add(offerItem.Id, offerGroup.Id); // Cache the offer item's group ID, to lookup the entry.
+                foreach (StoreOfferItem offerItem in offerGroup.StoreOfferItem)
+                    offerBuilder.Add(offerItem.Id, offerGroup.Id); // Cache the offer item's group ID, to lookup the entry.
             }
                 
-            StoreOfferCache = offerGroupList.ToImmutable();
-            OfferItemLookupCache = offerItems.ToImmutable();
+            offerGroups      = offerGroupBuilder.ToImmutable();
+            offerGroupLookup = offerBuilder.ToImmutable();
+        }
+
+        private static void BuildNetworkPackets()
+        {
+            var categoryBuilder = ImmutableList.CreateBuilder<ServerStoreCategories.StoreCategory>();
+            foreach (Category category in storeCategories.Values)
+                categoryBuilder.Add(category.BuildNetworkPacket());
+            serverStoreCategoryCache = categoryBuilder.ToImmutable();
+
+            var offerBuilder = ImmutableList.CreateBuilder<ServerStoreOffers.OfferGroup>();
+            foreach (OfferGroup offerGroup in offerGroups.Values)
+                offerBuilder.Add(offerGroup.BuildNetworkPacket());
+            serverStoreOfferGroupCache = offerBuilder.ToImmutable();
         }
 
         /// <summary>
@@ -101,15 +89,10 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// </summary>
         public static OfferItem GetStoreOfferItem(uint offerId)
         {
-            if(OfferItemLookupCache.TryGetValue(offerId, out uint offerGroupId))
-            {
-                if (StoreOfferCache.TryGetValue(offerGroupId, out OfferGroup offerGroup))
-                {
-                    return offerGroup.GetOfferItem(offerId);
-                }
-            }
+            if (!offerGroupLookup.TryGetValue(offerId, out uint offerGroupId))
+                return null;
 
-            return null;
+            return offerGroups.TryGetValue(offerGroupId, out OfferGroup offerGroup) ? offerGroup.GetOfferItem(offerId) : null;
         }
 
         /// <summary>
@@ -124,33 +107,26 @@ namespace NexusForever.WorldServer.Game.Storefront
 
         private static void SendStoreCategories(WorldSession session)
         {
-            ServerStoreCategories serverCategories = new ServerStoreCategories
+            session.EnqueueMessageEncrypted(new ServerStoreCategories
             {
-                StoreCategories = ServerStoreCategoryList.ToList(),
-                Unknown4 = 4
-            };
-
-            session.EnqueueMessageEncrypted(serverCategories);
+                StoreCategories = serverStoreCategoryCache.ToList(),
+                RealCurrency    = RealCurrency.Usd
+            });
         }
 
         private static void SendStoreOffers(WorldSession session)
         {
-            List<ServerStoreOffers.OfferGroup> offersToSend = new List<ServerStoreOffers.OfferGroup>();
-            uint count = 0;
-
-            foreach(ServerStoreOffers.OfferGroup offerGroup in ServerStoreOfferList)
+            var storeOffers = new ServerStoreOffers();
+            for (int i = 0; i < serverStoreOfferGroupCache.Count; i++)
             {
-                count++;
-                offersToSend.Add(offerGroup);
+                storeOffers.OfferGroups.Add(serverStoreOfferGroupCache[i]);
+
                 // Ensure we only send 20 Offer Groups per packet. This is the same as Live.
-                if(count == 20 || ServerStoreOfferList.IndexOf(offerGroup) == ServerStoreOfferList.Count - 1)
+                if (i != 0 && i % 20 == 0
+                    || i == serverStoreOfferGroupCache.Count - 1)
                 {
-                    session.EnqueueMessageEncrypted(new ServerStoreOffers
-                    {
-                        OfferGroups = offersToSend
-                    });
-                    offersToSend.RemoveRange(0, (int)count);
-                    count = 0;
+                    session.EnqueueMessageEncrypted(storeOffers);
+                    storeOffers.OfferGroups.Clear();
                 }
             }
         }

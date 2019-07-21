@@ -43,30 +43,6 @@ namespace NexusForever.WorldServer.Database.World
             }
         }
 
-        public static ImmutableList<EntityVendor> GetEntityVendors()
-        {
-            using (var context = new WorldContext())
-                return context.EntityVendor
-                    .AsNoTracking()
-                    .ToImmutableList();
-        }
-
-        public static ImmutableList<EntityVendorCategory> GetEntityVendorCategories()
-        {
-            using (var context = new WorldContext())
-                return context.EntityVendorCategory
-                    .AsNoTracking()
-                    .ToImmutableList();
-        }
-
-        public static ImmutableList<EntityVendorItem> GetEntityVendorItems()
-        {
-            using (var context = new WorldContext())
-                return context.EntityVendorItem
-                    .AsNoTracking()
-                    .ToImmutableList();
-        }
-
         public static ImmutableList<Tutorial> GetTutorialTriggers()
         {
             using (var context = new WorldContext())

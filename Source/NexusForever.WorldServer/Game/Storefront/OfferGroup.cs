@@ -1,56 +1,63 @@
-﻿using NexusForever.WorldServer.Database.World.Model;
-using NexusForever.WorldServer.Game.Storefront.Static;
-using NexusForever.WorldServer.Network.Message.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
+using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.WorldServer.Game.Storefront.Static;
+using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
 {
     public class OfferGroup
     {
+        public struct Category
+        {
+            public uint Id { get; set; }
+            public uint Index { get; set; }
+        }
+
         public uint Id { get; }
         public DisplayFlag DisplayFlags { get; }
         public string Name { get; }
         public string Description { get; }
-        public ushort Field2 { get; }
+        public ushort DisplayInfoOverride { get; }
         public bool Visible { get; }
-        public uint[] CategoryArray { get; }
-        public uint[] CategoryIndexArray { get; }
+        public ImmutableList<Category> Categories { get; }
 
-        public Dictionary</*offerId*/uint, OfferItem> offerItems = new Dictionary<uint, OfferItem>();
+        private readonly Dictionary</*offerId*/uint, OfferItem> offerItems = new Dictionary<uint, OfferItem>();
 
+        /// <summary>
+        /// Create a new <see cref="OfferGroup"/> from an existing database model.
+        /// </summary>
         public OfferGroup(StoreOfferGroup model)
         {
-            Id = model.Id;
+            Id           = model.Id;
             DisplayFlags = (DisplayFlag)model.DisplayFlags;
-            Name = model.Name;
-            Description = model.Description;
-            Field2 = model.Field2;
-            Visible = Convert.ToBoolean(model.Visible);
+            Name         = model.Name;
+            Description  = model.Description;
+            DisplayInfoOverride = model.DisplayInfoOverride;
+            Visible      = Convert.ToBoolean(model.Visible);
 
-            CategoryArray = CalculateCategoryArray(model.StoreOfferGroupCategory);
-            CategoryIndexArray = CalculateCategoryArray(model.StoreOfferGroupCategory, true);
+            var builder = ImmutableList.CreateBuilder<Category>();
+            foreach (StoreOfferGroupCategory categoryModel in model.StoreOfferGroupCategory)
+            {
+                if (Convert.ToBoolean(categoryModel.Visible))
+                {
+                    builder.Add(new Category
+                    {
+                        Id    = categoryModel.CategoryId,
+                        Index = categoryModel.Index
+                    });
+                }
+            }
+
+            Categories = builder.ToImmutable();
 
             foreach (StoreOfferItem offerItem in model.StoreOfferItem)
             {
-                OfferItem offer = new OfferItem(offerItem);
+                var offer = new OfferItem(offerItem);
                 offerItems.Add(offer.Id, offer);
             }
-        }
-
-        private uint[] CalculateCategoryArray(IEnumerable<StoreOfferGroupCategory> offerGroupCategories, bool indexCheck = false)
-        {
-            List<uint> CategoryArray = new List<uint>();
-
-            foreach (StoreOfferGroupCategory category in offerGroupCategories)
-            {
-                if (Convert.ToBoolean(category.Visible))
-                    CategoryArray.Add(!indexCheck ? category.CategoryId : category.Index);
-            }
-
-            return CategoryArray.ToArray();
         }
 
         /// <summary>
@@ -61,25 +68,25 @@ namespace NexusForever.WorldServer.Game.Storefront
             return offerItems.TryGetValue(offerId, out OfferItem offerItem) ? offerItem : null;
         }
 
-        private IEnumerable<ServerStoreOffers.OfferGroup.Offer> GetOfferNetworkPackets()
-        {
-            foreach (OfferItem offer in offerItems.Values)
-                yield return offer.BuildNetworkPacket();
-        }
-
         public ServerStoreOffers.OfferGroup BuildNetworkPacket()
         {
             return new ServerStoreOffers.OfferGroup
             {
-                Id = Id,
-                DisplayFlags = DisplayFlags,
-                OfferGroupName = Name,
-                OfferGroupDescription = Description,
-                Unknown2 = Field2,
-                ArraySize = (uint)CategoryArray.Length,
-                CategoryArray = CategoryArray,
-                CategoryIndexArray = CategoryIndexArray,
-                Offers = GetOfferNetworkPackets().ToList()
+                Id                  = Id,
+                DisplayFlags        = DisplayFlags,
+                Name                = Name,
+                Description         = Description,
+                DisplayInfoOverride = DisplayInfoOverride,
+                Categories          = Categories
+                    .Select(c => new ServerStoreOffers.OfferGroup.Category
+                    {
+                        Id    = c.Id,
+                        Index = c.Index
+                    })
+                    .ToList(),
+                Offers = offerItems.Values
+                    .Select(i => i.BuildNetworkPacket())
+                    .ToList()
             };
         }
     }

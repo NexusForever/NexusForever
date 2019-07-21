@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
@@ -10,8 +10,8 @@ namespace NexusForever.WorldServer.Game.Account
 {
     class AccountCurrency
     {
-        public AccountCurrencyType CurrencyId { get; private set; }
-        public AccountCurrencyTypeEntry Entry { get; private set; }
+        public AccountCurrencyType CurrencyId { get; }
+        public AccountCurrencyTypeEntry Entry { get; }
         public ulong Amount { get; private set; }
 
         private readonly uint accountId;

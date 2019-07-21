@@ -49,6 +49,8 @@ namespace NexusForever.WorldServer
             ConfigurationManager<WorldServerConfiguration>.Initialise("WorldServer.json");
             DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
 
+            DisableManager.Instance.Initialise();
+
             GameTableManager.Initialise();
             MapManager.Initialise();
             SearchManager.Initialise();
@@ -64,8 +66,6 @@ namespace NexusForever.WorldServer
 
             ResidenceManager.Initialise();
             GlobalStorefrontManager.Initialise();
-
-            DisableManager.Instance.Initialise();
 
             // make sure the assigned realm id in the configuration file exists in the database
             RealmId = ConfigurationManager<WorldServerConfiguration>.Config.RealmId;

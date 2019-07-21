@@ -54,13 +54,13 @@ CREATE TABLE IF NOT EXISTS `store_offer_group` (
   `displayFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `name` varchar(50) NOT NULL DEFAULT '',
   `description` varchar(500) NOT NULL DEFAULT '',
-  `field_2` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `displayInfoOverride` smallint(5) unsigned NOT NULL DEFAULT '0',
   `visible` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 );
 
 -- Dumping data for table nexus_forever_world-prod.store_offer_group: ~350 rows (approximately)
-INSERT INTO `store_offer_group` (`id`, `displayFlags`, `name`, `description`, `field_2`, `visible`) VALUES
+INSERT INTO `store_offer_group` (`id`, `displayFlags`, `name`, `description`, `displayInfoOverride`, `visible`) VALUES
 	(0, 0, 'PLACEHOLDER', '', 0, 0),
 	(1533, 4, 'Fortune Coins', 'Use a Fortune Coin in Madame Fay\'s Fortunes to acquire treasures and have a chance to receive rare and unique items. To spend your Coins, click on the Fortunes icon on the bottom bar of the main UI. This purchase can be spent by any character on your account when claimed.', 0, 1),
 	(1537, 4, 'Service Tokens', 'Use Service Tokens to recustomize at the Chop Shop, manage rune slots (reroll and unlock), recover runes, bypass timers for wake here, recall, or rapid transport, and more. This purchase can be spent by any character on your account when claimed.', 0, 1),

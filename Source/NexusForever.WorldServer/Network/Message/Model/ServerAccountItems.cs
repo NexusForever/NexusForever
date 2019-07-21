@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(AccountItems.Count, 32u);
+            writer.Write(AccountItems.Count);
             AccountItems.ForEach(w => w.Write(writer));
         }
     }

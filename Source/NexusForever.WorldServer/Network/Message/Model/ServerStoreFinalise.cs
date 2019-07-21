@@ -1,6 +1,5 @@
-﻿using NexusForever.Shared.Network;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {

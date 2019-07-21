@@ -1,41 +1,42 @@
-﻿using NexusForever.Shared.GameTable;
+using System;
+using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NexusForever.WorldServer.Game.Storefront
 {
     public class OfferItemData
     {
-        public uint OfferId { get; private set; }
-        public ushort ItemId { get; private set; }
-        public uint Type { get; private set; }
-        public uint Amount { get; private set; }
+        public uint OfferId { get; }
+        public ushort ItemId { get; }
+        public uint Type { get; }
+        public uint Amount { get; }
 
-        public AccountItemEntry Entry { get; private set; }
+        public AccountItemEntry Entry { get; }
 
+        /// <summary>
+        /// Create a new <see cref="OfferItemData"/>
+        /// </summary>
         public OfferItemData(StoreOfferItemData model)
         {
             OfferId = model.Id;
-            ItemId = model.ItemId;
-            Type = model.Type;
-            Amount = model.Amount;
+            ItemId  = model.ItemId;
+            Type    = model.Type;
+            Amount  = model.Amount;
 
             Entry = GameTableManager.AccountItem.GetEntry(ItemId);
             if (Entry == null)
-                throw new ArgumentOutOfRangeException("ItemId");
+                throw new ArgumentException("ItemId");
         }
 
         public ServerStoreOffers.OfferGroup.Offer.OfferItemData BuildNetworkPacket()
         {
             return new ServerStoreOffers.OfferGroup.Offer.OfferItemData
             {
-                Type = Type,
+                Type          = Type,
                 AccountItemId = ItemId,
-                Amount = Amount
+                Amount        = Amount
             };
         }
     }

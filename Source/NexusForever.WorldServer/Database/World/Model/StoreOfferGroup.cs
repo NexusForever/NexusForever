@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Database.World.Model
@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Database.World.Model
         public uint DisplayFlags { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public ushort Field2 { get; set; }
+        public ushort DisplayInfoOverride { get; set; }
         public byte Visible { get; set; }
 
         public virtual ICollection<StoreOfferGroupCategory> StoreOfferGroupCategory { get; set; }

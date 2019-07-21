@@ -329,8 +329,8 @@ namespace NexusForever.WorldServer.Database.World.Model
                     .HasColumnName("displayFlags")
                     .HasDefaultValueSql("'0'");
 
-                entity.Property(e => e.Field2)
-                    .HasColumnName("field_2")
+                entity.Property(e => e.DisplayInfoOverride)
+                    .HasColumnName("displayInfoOverride")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Name)
