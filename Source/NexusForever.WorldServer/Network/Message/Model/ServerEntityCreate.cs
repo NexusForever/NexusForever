@@ -44,12 +44,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-        public class UnknownStructureB0 : IWritable
+        public class WorldPlacement : IWritable
         {
             public byte Type { get; set; }
             public bool Unknown0 { get; set; }
-            public ulong Unknown1 { get; set; }
-            public ushort Unknown2 { get; set; }
+            public ulong ActivePropId { get; set; }
+            public ushort SocketId { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -61,8 +61,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
                         writer.Write(Unknown0);
                         break;
                     case 1:
-                        writer.Write(Unknown1);
-                        writer.Write(Unknown2, 14u);
+                        writer.Write(ActivePropId);
+                        writer.Write(SocketId, 14u);
                         break;
                 }
             }
@@ -110,7 +110,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint UnitTagOwner { get; set; }
         public ulong GroupTagOwner { get; set; }
         public UnknownStructureA8 UnknownA8 { get; set; } = new UnknownStructureA8();
-        public UnknownStructureB0 UnknownB0 { get; set; } = new UnknownStructureB0();
+        public WorldPlacement WorldPlacementData { get; set; } = new WorldPlacement();
         public UnknownStructureC8 UnknownC8 { get; set; } = new UnknownStructureC8();
         public ushort MiniMapMarker { get; set; }
         public uint DisplayInfo { get; set; }
@@ -151,7 +151,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(GroupTagOwner);
 
             UnknownA8.Write(writer);
-            UnknownB0.Write(writer);
+            WorldPlacementData.Write(writer);
             UnknownC8.Write(writer);
 
             writer.Write(MiniMapMarker, 14);
