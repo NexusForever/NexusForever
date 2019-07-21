@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.WorldServer.Database.World.Model;
-using Disable = NexusForever.WorldServer.Game.Disable;
 
 namespace NexusForever.WorldServer.Database.World
 {
@@ -54,6 +53,27 @@ namespace NexusForever.WorldServer.Database.World
         {
             using (var context = new WorldContext())
                 return context.Disable.ToImmutableList();
+        }
+
+        public static ImmutableList<StoreCategory> GetStoreCategories()
+        {
+            using (var context = new WorldContext())
+                return context.StoreCategory
+                    .AsNoTracking()
+                    .ToImmutableList();
+        }
+
+        public static ImmutableList<StoreOfferGroup> GetStoreOfferGroups()
+        {
+            using (var context = new WorldContext())
+                return context.StoreOfferGroup
+                    .Include(e => e.StoreOfferGroupCategory)
+                    .Include(e => e.StoreOfferItem)
+                        .ThenInclude(e => e.StoreOfferItemData)
+                    .Include(e => e.StoreOfferItem)
+                        .ThenInclude(e => e.StoreOfferItemPrice)
+                    .AsNoTracking()
+                    .ToImmutableList();
         }
     }
 }

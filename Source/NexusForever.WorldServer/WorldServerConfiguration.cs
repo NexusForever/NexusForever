@@ -1,4 +1,4 @@
-﻿using NexusForever.Shared.Configuration;
+using NexusForever.Shared.Configuration;
 
 namespace NexusForever.WorldServer
 {

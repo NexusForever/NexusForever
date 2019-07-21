@@ -1,4 +1,4 @@
-﻿namespace NexusForever.WorldServer.Game.Static
+namespace NexusForever.WorldServer.Game.Static
 {
     public enum DisableType
     {
@@ -6,6 +6,8 @@
         Spell,
         BaseSpell,
         Item,
-        World
+        World,
+        Currency,
+        AccountCurrency
     }
 }

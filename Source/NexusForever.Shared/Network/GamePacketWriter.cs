@@ -103,6 +103,14 @@ namespace NexusForever.Shared.Network
             WriteBits(value, bits);
         }
 
+        public void Write(long value, uint bits = 64)
+        {
+            if (bits > sizeof(double) * 8)
+                throw new ArgumentException();
+
+            Write((ulong)value, bits);
+        }
+
         public void Write<T>(T value, uint bits = 64u) where T : Enum, IConvertible
         {
             if (bits > sizeof(ulong) * 8)
