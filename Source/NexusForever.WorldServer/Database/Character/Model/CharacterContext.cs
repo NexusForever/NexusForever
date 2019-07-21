@@ -90,6 +90,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("'CURRENT_TIMESTAMP'");
 
+                entity.Property(e => e.DeleteTime)
+                    .HasColumnName("deleteTime")
+                    .HasColumnType("datetime");
+
                 entity.Property(e => e.FactionId)
                     .HasColumnName("factionId")
                     .HasDefaultValueSql("'0'");
@@ -116,10 +120,13 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Name)
-                    .IsRequired()
                     .HasColumnName("name")
                     .HasColumnType("varchar(50)")
                     .HasDefaultValueSql("''");
+
+                entity.Property(e => e.OriginalName)
+                    .HasColumnName("originalName")
+                    .HasColumnType("varchar(50)");
 
                 entity.Property(e => e.PathActivatedTimestamp)
                     .HasColumnName("pathActivatedTimestamp")

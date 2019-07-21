@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth;
 using NexusForever.Shared.Game;
@@ -143,6 +144,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 foreach (Character character in characters)
                 {
+                    if (character.DeleteTime != null)
+                        continue;
+
                     var listCharacter = new ServerCharacterList.Character
                     {
                         Id          = character.Id,
@@ -409,9 +413,73 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterDelete)]
-        public static void HandleCreateDelete(WorldSession session, ClientCharacterDelete characterDelete)
+        public static void HandleCharacterDelete(WorldSession session, ClientCharacterDelete characterDelete)
         {
+            Character characterToDelete = session.Characters.FirstOrDefault(c => c.Id == characterDelete.CharacterId);
 
+            CharacterModifyResult GetResult()
+            {
+                if (characterToDelete == null)
+                    return CharacterModifyResult.DeleteFailed;
+
+                // TODO: Not sure if this is definitely the case, but put it in for good measure
+                if (characterToDelete.CharacterMail.Count > 0)
+                {
+                    foreach (CharacterMail characterMail in characterToDelete.CharacterMail)
+                    {
+                        if (characterMail.CharacterMailAttachment.Count > 0)
+                            return CharacterModifyResult.DeleteFailed;
+                    }
+                }
+
+                // TODO: Ensure character is not a guild master
+
+                return CharacterModifyResult.DeleteOk;
+            }
+
+            CharacterModifyResult result = GetResult();
+            if (result != CharacterModifyResult.DeleteOk)
+            {
+                session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
+                {
+                    Result = result
+                });
+                return;
+            }
+
+            session.CanProcessPackets = false;
+
+            void Save(CharacterContextExtended context)
+            {
+                var model = new Character
+                {
+                    Id = characterToDelete.Id
+                };
+
+                EntityEntry<Character> entity = context.Attach(model);
+
+                model.DeleteTime = DateTime.UtcNow;
+                entity.Property(e => e.DeleteTime).IsModified = true;
+                
+                model.OriginalName = characterToDelete.Name;
+                entity.Property(e => e.OriginalName).IsModified = true;
+
+                model.Name = null;
+                entity.Property(e => e.Name).IsModified = true;
+            }
+
+            session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+                () =>
+            {
+                session.CanProcessPackets = true;
+
+                // TODO: De-register from any character cache
+
+                session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
+                {
+                    Result = result
+                });
+            }));
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterSelect)]
