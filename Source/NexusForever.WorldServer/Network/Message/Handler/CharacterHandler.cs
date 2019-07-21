@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth;
 using NexusForever.Shared.Game;
@@ -28,7 +29,6 @@ using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -438,47 +438,48 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }
 
             CharacterModifyResult result = GetResult();
-            if (result == CharacterModifyResult.DeleteOk)
+            if (result != CharacterModifyResult.DeleteOk)
             {
-                session.CanProcessPackets = false;
-
-                void Save(CharacterContextExtended context)
-                {
-                    var model = new Character
-                    {
-                        Id = characterToDelete.Id
-                    };
-
-                    EntityEntry<Character> entity = context.Attach(model);
-
-                    model.DeleteTime = DateTime.UtcNow;
-                    entity.Property(e => e.DeleteTime).IsModified = true;
-                    
-                    model.OriginalName = characterToDelete.Name;
-                    entity.Property(e => e.OriginalName).IsModified = true;
-
-                    model.Name = null;
-                    entity.Property(e => e.Name).IsModified = true;
-                }
-
-                session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
-                    () =>
-                {
-                    session.CanProcessPackets = true;
-
-                    // TODO: De-register from any character cache
-
-                    session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
-                    {
-                        Result = result
-                    });
-                }));
-            }
-            else
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
                 {
                     Result = result
                 });
+                return;
+            }
+
+            session.CanProcessPackets = false;
+
+            void Save(CharacterContextExtended context)
+            {
+                var model = new Character
+                {
+                    Id = characterToDelete.Id
+                };
+
+                EntityEntry<Character> entity = context.Attach(model);
+
+                model.DeleteTime = DateTime.UtcNow;
+                entity.Property(e => e.DeleteTime).IsModified = true;
+                
+                model.OriginalName = characterToDelete.Name;
+                entity.Property(e => e.OriginalName).IsModified = true;
+
+                model.Name = null;
+                entity.Property(e => e.Name).IsModified = true;
+            }
+
+            session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+                () =>
+            {
+                session.CanProcessPackets = true;
+
+                // TODO: De-register from any character cache
+
+                session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
+                {
+                    Result = result
+                });
+            }));
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterSelect)]
