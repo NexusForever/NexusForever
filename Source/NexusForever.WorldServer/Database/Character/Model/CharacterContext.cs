@@ -946,6 +946,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("groundWallpaperId")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.MusicId)
+                    .HasColumnName("musicId")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasColumnName("name")
