@@ -29,6 +29,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public ulong ActivePropId { get; private set; }
 
+        public Vector3 LeashPosition { get; protected set; }
+        public float LeashRange { get; protected set; } = 15f;
         public MovementManager MovementManager { get; private set; }
 
         public uint Level
@@ -70,8 +72,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
-            CreatureId  = model.Creature;
-            Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
+            CreatureId   = model.Creature;
+            Rotation     = new Vector3(model.Rx, model.Ry, model.Rz);
             DisplayInfo  = model.DisplayInfo;
             OutfitInfo   = model.OutfitInfo;
             Faction1     = (Faction)model.Faction1;
@@ -84,6 +86,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
+            LeashPosition   = vector;
             MovementManager = new MovementManager(this, vector, Rotation);
             base.OnAddToMap(map, guid, vector);
         }

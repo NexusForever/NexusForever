@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using NexusForever.Shared.IO;
 
@@ -44,17 +43,13 @@ namespace NexusForever.MapGenerator.IO.Area
             2312
         };
 
-        [Flags]
-        public enum Flags
-        {
-            HeightMap = 0x00000001,
-            Area      = 0x10000000
-        }
-
         public uint X { get; }
         public uint Y { get; }
+        public ChnkCellFlags Flags { get; private set; }
 
-        public uint[] WorldAreaIds = new uint[4];
+        public uint[] WorldAreaIds { get; } = new uint[4];
+        public ushort[,] Heightmap { get; } = new ushort[19, 19];
+
         public HashSet<IReadable> Chunks { get; } = new HashSet<IReadable>();
 
         public ChnkCell(uint x, uint y)
@@ -65,20 +60,27 @@ namespace NexusForever.MapGenerator.IO.Area
 
         public void Read(BinaryReader reader)
         {
-            Flags flags = (Flags)reader.ReadUInt32();
+            Flags = (ChnkCellFlags)reader.ReadUInt32();
 
             for (int i = 0; i < 32; i++)
             {
-                Flags flag = (Flags)(1 << i);
-                if ((flags & flag) == 0)
+                ChnkCellFlags flag = (ChnkCellFlags)(1 << i);
+                if ((Flags & flag) == 0)
                     continue;
 
                 switch (flag)
                 {
-                    case Flags.Area:
+                    case ChnkCellFlags.Area:
                     {
                         for (int j = 0; j < 4; j++)
                             WorldAreaIds[j] = reader.ReadUInt32();
+                        break;
+                    }
+                    case ChnkCellFlags.HeightMap:
+                    {
+                        for (int y = 0; y < 19; y++)
+                            for (int x = 0; x < 19; x++)
+                                Heightmap[x, y] = reader.ReadUInt16();
                         break;
                     }
                     // unhandled flag, skip data

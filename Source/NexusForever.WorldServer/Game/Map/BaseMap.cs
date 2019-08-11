@@ -275,5 +275,14 @@ namespace NexusForever.WorldServer.Game.Map
 
             entity.OnRelocate(vector);
         }
+
+        /// <summary>
+        /// Return terrain height at supplied position.
+        /// </summary>
+        public float GetTerrainHeight(float x, float z)
+        {
+            // TODO: handle cases for water and props
+            return File.GetTerrainHeight(new Vector3(x, 0, z));
+        }
     }
 }
