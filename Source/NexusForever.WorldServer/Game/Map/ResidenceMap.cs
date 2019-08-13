@@ -10,11 +10,13 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Housing.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
     public class ResidenceMap : BaseMap
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         public ulong Id => residence?.Id ?? 0ul;
         // housing maps have unlimited vision range.
         public override float VisionRange { get; protected set; } = -1f;
@@ -153,7 +155,8 @@ namespace NexusForever.WorldServer.Game.Map
                     Scale       = decor.Scale,
                     Position    = decor.Position,
                     Rotation    = decor.Rotation,
-                    DecorInfoId = decor.Entry.Id
+                    DecorInfoId = decor.Entry.Id,
+                    ParentDecorId = decor.DecorParentId
                 });
 
                 if (i == decors.Length - 1)
@@ -331,6 +334,13 @@ namespace NexusForever.WorldServer.Game.Map
                     // world->world
                     var position = new Vector3(update.Position.X, update.Position.Y + 0.835f, update.Position.Z);
                     decor.Move(update.DecorType, position, update.Rotation, update.Scale);
+
+                    //update decor link if applicable
+                    if (update.ParentDecorId != 0u)
+                    {
+                        decor.DecorParentId = update.ParentDecorId;
+                        log.Info($"Updating Decor Link for {update.DecorId} set to {update.ParentDecorId}.");
+                    }
                 }
             }
 
@@ -348,7 +358,8 @@ namespace NexusForever.WorldServer.Game.Map
                         Scale       = decor.Scale,
                         Position    = decor.Position,
                         Rotation    = decor.Rotation,
-                        DecorInfoId = decor.Entry.Id
+                        DecorInfoId = decor.Entry.Id,
+                        ParentDecorId = decor.DecorParentId
                     }
                 }
             });

@@ -6,11 +6,14 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Housing.Static;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
+ 
     public class Decor : ISaveCharacter
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         public ulong Id { get; }
         public ulong DecorId { get; }
         public HousingDecorInfoEntry Entry { get; }
@@ -63,6 +66,17 @@ namespace NexusForever.WorldServer.Game.Housing
 
         private float scale;
 
+        public ulong DecorParentId
+        {
+            get => decorParentId;
+            set
+            {
+                decorParentId = value;
+                saveMask |= DecorSaveMask.DecorParentId;
+            }
+        }
+        private ulong decorParentId;
+
         private DecorSaveMask saveMask;
 
         /// <summary>
@@ -77,6 +91,7 @@ namespace NexusForever.WorldServer.Game.Housing
             position = new Vector3(model.X, model.Y, model.Z);
             rotation = new Quaternion(model.Qx, model.Qy, model.Qz, model.Qw);
             scale    = model.Scale;
+            decorParentId = model.DecorParentId;
 
             saveMask = DecorSaveMask.None;
         }
@@ -125,7 +140,8 @@ namespace NexusForever.WorldServer.Game.Housing
                     Qy          = Rotation.Y,
                     Qz          = Rotation.Z,
                     Qw          = Rotation.W,
-                    Scale       = Scale
+                    Scale       = Scale,
+                    DecorParentId = DecorParentId
                 });
             }
             else if ((saveMask & DecorSaveMask.Delete) != 0)
@@ -178,6 +194,12 @@ namespace NexusForever.WorldServer.Game.Housing
                 {
                     model.Scale = Scale;
                     entity.Property(p => p.Scale).IsModified = true;
+                }
+                if ((saveMask & DecorSaveMask.DecorParentId) != 0)
+                {
+                    model.DecorParentId = DecorParentId;
+                    entity.Property(p => p.DecorParentId).IsModified = true;
+                    log.Info($"Saving Decor Link for {Id} to {DecorParentId}.");
                 }
             }
 

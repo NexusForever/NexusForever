@@ -14,6 +14,7 @@ namespace NexusForever.WorldServer.Game.Housing.Static
         Type               = 0x0004,
         Position           = 0x0008,
         Rotation           = 0x0010,
-        Scale              = 0x0020
+        Scale              = 0x0020,
+        DecorParentId      = 0x0040
     }
 }
