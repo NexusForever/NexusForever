@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using NexusForever.Shared.Database.Auth.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game
 {
@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Game
         /// <summary>
         /// Start tracking supplied <see cref="Account"/> for pending character cleanup.
         /// </summary>
-        public static void Track(Account account)
+        public static void Track(AccountModel account)
         {
             pendingCleanup.Add(account.Id);
         }
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game
         /// <summary>
         /// Stops tracking supplied <see cref="Account"/> for pending character cleanup.
         /// </summary>
-        public static void Untrack(Account account)
+        public static void Untrack(AccountModel account)
         {
             pendingCleanup.Remove(account.Id);
         }
@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Game
         /// <summary>
         /// Returns if supplied <see cref="Account"/> has a character pending cleanup.
         /// </summary>
-        public static bool HasPendingCleanup(Account account)
+        public static bool HasPendingCleanup(AccountModel account)
         {
             return pendingCleanup.Contains(account.Id);
         }

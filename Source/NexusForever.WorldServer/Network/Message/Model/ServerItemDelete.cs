@@ -1,5 +1,6 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -7,7 +8,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     public class ServerItemDelete : IWritable
     {
         public ulong Guid { get; set; }
-        public byte Reason { get; set; } = 0x15;
+        public ItemUpdateReason Reason { get; set; } = ItemUpdateReason.Loot;
 
         public void Write(GamePacketWriter writer)
         {

@@ -136,7 +136,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Message              = mail.Message,
                 TextEntrySubject     = mail.TextEntrySubject,
                 TextEntryMessage     = mail.TextEntryMessage,
-                CreatureId           = !isPlayer ? (uint)mail.SenderId : 0,
+                CreatureId           = !isPlayer ? mail.CreatureId : 0,
                 CurrencyGiftType     = 0,
                 CurrencyGiftAmount   = !mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,
                 CostOnDeliveryAmount = mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,
@@ -222,10 +222,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     }
 
                     uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
-                    if (!player.CurrencyManager.CanAfford(1, cost))
+                    if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, cost))
                         return GenericError.MailInsufficientFunds;
 
-                    if (!player.CurrencyManager.CanAfford(1, mailSend.CreditsSent))
+                    if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, mailSend.CreditsSent))
                         return GenericError.MailInsufficientFunds;
 
                     return GenericError.Ok;
@@ -252,10 +252,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     SendMail(parameters, items);
 
                     uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
-                    player.CurrencyManager.CurrencySubtractAmount(1, cost);
+                    player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
 
                     if (mailSend.CreditsSent > 0ul)
-                        player.CurrencyManager.CurrencySubtractAmount(1, mailSend.CreditsSent);
+                        player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, mailSend.CreditsSent);
 
                 }
 
@@ -414,7 +414,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (!availableMail.TryGetValue(mailId, out mail))
                     return GenericError.MailDoesNotExist;
 
-                if (!player.CurrencyManager.CanAfford(1, mail.CurrencyAmount))
+                if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, mail.CurrencyAmount))
                     return GenericError.MailInsufficientFunds;
 
                 if (mail.HasPaidOrCollectedCurrency)
@@ -426,7 +426,7 @@ namespace NexusForever.WorldServer.Game.Entity
             GenericError result = GetResult();
             if (result == GenericError.Ok)
             {
-                player.CurrencyManager.CurrencySubtractAmount(1, mail.CurrencyAmount);
+                player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, mail.CurrencyAmount);
                 mail.PayOrTakeCash();
 
                 var parameters = new MailParameters
@@ -557,7 +557,7 @@ namespace NexusForever.WorldServer.Game.Entity
             GenericError result = GetResult();
             if (result == GenericError.Ok)
             {
-                player.CurrencyManager.CurrencyAddAmount((byte)mailItem.CurrencyType, mailItem.CurrencyAmount);
+                player.CurrencyManager.CurrencyAddAmount(mailItem.CurrencyType, mailItem.CurrencyAmount);
                 mailItem.PayOrTakeCash();
             }
 

@@ -4,43 +4,58 @@ namespace NexusForever.WorldServer.Game
 {
     public class UpdateTimer : IUpdate
     {
-        public bool HasElapsed => time <= 0d;
+        public bool HasElapsed => Time <= 0d;
+        public double Time { get; private set; }
+        public bool IsTicking { get; private set; }
 
         private readonly double duration;
 
-        private double time;
-        private bool isTicking;
-
+        /// <summary>
+        /// Create a new <see cref="UpdateTimer"/> with supplied starting duration.
+        /// </summary>
         public UpdateTimer(double duration, bool start = true)
         {
             this.duration = duration;
-            isTicking = start;
+            Time          = duration;
+            IsTicking     = start;
         }
 
         public void Update(double lastTick)
         {
-            if (!isTicking)
+            if (!IsTicking)
                 return;
 
-            time -= lastTick;
-            if (time <= 0d)
-                isTicking = false;
+            Time -= lastTick;
+            if (Time <= 0d)
+            {
+                Time = 0d;
+                IsTicking = false;
+            }
         }
 
-        public void Reset()
+        /// <summary>
+        /// Reset timer, setting duration to the default value.
+        /// </summary>
+        public void Reset(bool start = true)
         {
-            time = duration;
-            isTicking = true;
+            Time = duration;
+            IsTicking = start;
         }
 
+        /// <summary>
+        /// Resume timer allowing it to tick during an update.
+        /// </summary>
         public void Resume()
         {
-            isTicking = true;
+            IsTicking = true;
         }
 
+        /// <summary>
+        /// Pause timer preventing it from ticking during an update.
+        /// </summary>
         public void Pause()
         {
-            isTicking = false;
+            IsTicking = false;
         }
     }
 }

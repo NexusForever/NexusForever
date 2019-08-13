@@ -56,14 +56,16 @@ namespace NexusForever.Shared.GameTable
         {
             Entries = new TextTableEntry[fields.Length];
 
-            for (int i = 0; i < fields.Length; i++)
+            // build string table
+            reader.BaseStream.Position = Marshal.SizeOf<TextTableHeader>() + (long)header.StringTableOffset;
+            using (var stringTable = new StringTable(reader.ReadBytes((int)header.StringTableLength * 2)))
             {
-                TextTableField field = fields[i];
-                reader.BaseStream.Position
-                    = (long)((ulong)Marshal.SizeOf<TextTableHeader>() + header.NameOffset + field.Offset * 2);
-
-                string @string = reader.ReadWideString();
-                Entries[i] = new TextTableEntry(header.Language, field.Id, @string);
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    TextTableField field = fields[i];
+                    string @string = stringTable.GetEntry(field.Offset * 2);
+                    Entries[i] = new TextTableEntry(header.Language, field.Id, @string);
+                }
             }
         }
 

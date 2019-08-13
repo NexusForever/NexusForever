@@ -21,11 +21,16 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
 
+        public uint CreatureId { get; protected set; }
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
 
+        public ulong ActivePropId { get; private set; }
+
+        public Vector3 LeashPosition { get; protected set; }
+        public float LeashRange { get; protected set; } = 15f;
         public MovementManager MovementManager { get; private set; }
 
         public uint Level
@@ -67,18 +72,21 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
-            Rotation    = new Vector3(model.Rx, model.Ry, model.Rz);
-            DisplayInfo = model.DisplayInfo;
-            OutfitInfo  = model.OutfitInfo;
-            Faction1    = (Faction)model.Faction1;
-            Faction2    = (Faction)model.Faction2;
+            CreatureId   = model.Creature;
+            Rotation     = new Vector3(model.Rx, model.Ry, model.Rz);
+            DisplayInfo  = model.DisplayInfo;
+            OutfitInfo   = model.OutfitInfo;
+            Faction1     = (Faction)model.Faction1;
+            Faction2     = (Faction)model.Faction2;
+            ActivePropId = model.ActivePropId;
 
-            foreach (EntityStat statModel in model.EntityStat)
+            foreach (EntityStats statModel in model.EntityStats)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
         }
 
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
+            LeashPosition   = vector;
             MovementManager = new MovementManager(this, vector, Rotation);
             base.OnAddToMap(map, guid, vector);
         }
@@ -101,7 +109,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            return new ServerEntityCreate
+            ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
             {
                 Guid         = Guid,
                 Type         = Type,
@@ -116,6 +124,17 @@ namespace NexusForever.WorldServer.Game.Entity
                 DisplayInfo  = DisplayInfo,
                 OutfitInfo   = OutfitInfo
             };
+
+            if (ActivePropId > 0)
+            {
+                entityCreatePacket.WorldPlacementData = new ServerEntityCreate.WorldPlacement
+                {
+                    Type = 1,
+                    ActivePropId = ActivePropId
+                };
+            }
+
+            return entityCreatePacket;
         }
 
         // TODO: research the difference between a standard activation and cast activation

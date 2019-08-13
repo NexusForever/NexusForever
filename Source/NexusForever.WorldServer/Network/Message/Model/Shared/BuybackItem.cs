@@ -1,5 +1,6 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model.Shared
 {
@@ -15,7 +16,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         public uint Unk7 { get; set; }
         public byte[] Unk8 { get; set; } = new byte[20];
         public byte[] Unk9 { get; set; } = new byte[32];
-        public byte[] CurrencyTypeId { get; set; } = new byte[2];
+        public CurrencyType[] CurrencyTypeId { get; set; } = new CurrencyType[2];
         public ulong[] CurrencyAmount { get; set; } = new ulong[2];
         public uint UnkE { get; set; }
 
@@ -32,9 +33,8 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             writer.WriteBytes(Unk8, 20u);
             writer.WriteBytes(Unk9, 32u);
 
-            foreach (ulong amount in CurrencyAmount)
-                writer.Write(amount);
-            foreach (byte type in CurrencyTypeId)
+            writer.Write(CurrencyAmount, 2u);
+            foreach (CurrencyType type in CurrencyTypeId)
                 writer.Write(type, 4u);
 
             writer.Write(UnkE);

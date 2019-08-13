@@ -11,12 +11,10 @@ namespace NexusForever.Shared.GameTable.Model
         public uint WorldZoneId;
         public uint MinLevel;
         public uint MaxLevel;
-        public uint Quest00;
-        public uint Quest01;
-        public uint Quest02;
-        public uint State00;
-        public uint State01;
-        public uint State02;
+        [GameTableFieldArray(3u)]
+        public uint[] Quests;
+        [GameTableFieldArray(3u)]
+        public uint[] States;
         public uint FactionId;
         public uint ClassId;
         public uint RaceId;

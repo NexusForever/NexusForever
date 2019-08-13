@@ -6,6 +6,7 @@ using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 using System;
+using NexusForever.WorldServer.Game.Quest.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -68,6 +69,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             // TODO: sanity check for range etc.
 
+            session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
             entity.OnActivateCast(session.Player);
         }
 
@@ -76,6 +78,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             switch (entityInteraction.Event)
             {
+                case 37: // Quest NPC
+                {
+                    session.EnqueueMessageEncrypted(new Server0357
+                    {
+                        UnitId = entityInteraction.Guid
+                    });
+                    break;
+                }
                 case 49: // Handle Vendor
                     VendorHandler.HandleClientVendor(session, entityInteraction);
                     break;
@@ -83,7 +93,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     var mailboxEntity = session.Player.Map.GetEntity<Mailbox>(entityInteraction.Guid);
                     break;
                 case 8: // "HousingGuildNeighborhoodBrokerOpen"
-                case 37: // Quest NPC
                 case 40:
                 case 41: // "ResourceConversionOpen"
                 case 42: // "ToggleAbilitiesWindow"

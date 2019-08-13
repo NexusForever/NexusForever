@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using CommandLine;
 using NexusForever.MapGenerator.GameTable;
 using NLog;
 
@@ -19,26 +20,36 @@ namespace NexusForever.MapGenerator
         {
             Console.Title = Title;
 
-            if (args.Length == 0)
-                throw new ArgumentException();
-
-            if (!Directory.Exists(args[0]))
-                throw new DirectoryNotFoundException();
-
-            Flags flags = Flags.Extraction | Flags.Generation;
-            if (args.Length == 2)
-                flags = (Flags)uint.Parse(args[1]);
-                
-            ArchiveManager.Initialise(args[0]);
-            GameTableManager.Initialise();
-
-            if ((flags & Flags.Extraction) != 0)
-                ExtractionManager.Initialise();
-            if ((flags & Flags.Generation) != 0)
-                GenerationManager.Initialise((flags & Flags.GenerationSingleThread) != 0);
+            Parser.Default.ParseArguments<Parameters>(args)
+                .WithParsed(ParameterOk);
 
             log.Info("Finished!");
             Console.ReadLine();
+        }
+
+        private static void ParameterOk(Parameters parameters)
+        {
+            if (!Directory.Exists(parameters.PatchPath))
+                throw new DirectoryNotFoundException();
+
+            ArchiveManager.Initialise(parameters.PatchPath);
+            GameTableManager.Initialise();
+
+            if (parameters.Extract)
+                ExtractionManager.Initialise();
+            if (parameters.Generate)
+            {
+                GenerationManager.Initialise();
+
+                var start = DateTime.UtcNow;
+                if (parameters.WorldId.HasValue)
+                    GenerationManager.GenerateWorld(parameters.WorldId.Value, parameters.GridX, parameters.GridY);
+                else
+                    GenerationManager.GenerateWorlds(true);
+
+                TimeSpan span = DateTime.UtcNow - start;
+                log.Info($"Generated base maps in {span.TotalSeconds}s.");
+            }
         }
     }
 }

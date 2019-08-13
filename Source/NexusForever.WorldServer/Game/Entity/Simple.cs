@@ -10,7 +10,6 @@ namespace NexusForever.WorldServer.Game.Entity
     [DatabaseEntity(EntityType.Simple)]
     public class Simple : UnitEntity
     {
-        public uint CreatureId { get; private set; }
         public byte QuestChecklistIdx { get; private set; }
 
         public Simple()
@@ -21,7 +20,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void Initialise(EntityModel model)
         {
             base.Initialise(model);
-            CreatureId        = model.Creature;
             QuestChecklistIdx = model.QuestChecklistIdx;
         }
 

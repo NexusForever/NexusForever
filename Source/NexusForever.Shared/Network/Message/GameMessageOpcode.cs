@@ -30,9 +30,11 @@ namespace NexusForever.Shared.Network.Message
         ServerDatacubeUpdateList        = 0x00E0,
         ServerDatacubeUpdate            = 0x00E1,
         ServerDatacubeVolumeUpdate      = 0x00E2,
+        ServerCharacterDeleteResult     = 0x00E6,
         Server00F1                      = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
         ServerCharacterFlagsUpdated     = 0x00FE,
         Server0104                      = 0x0104, // Galactic Archive
+        ServerGenericError              = 0x0106,
         ServerHousingPrivacy            = 0x010E,
         ServerCharacter                 = 0x010F, // single character
         ServerItemAdd                   = 0x0111,
@@ -58,10 +60,11 @@ namespace NexusForever.Shared.Network.Message
         ServerAbilityPoints             = 0x0169,
         ClientNonSpellActionSetChanges  = 0x016A,
         ServerShowActionBar             = 0x016C,
-        ClientChangeInnate              = 0x016F,
+        ClientInnateChange              = 0x016F,
         ClientChangeActiveActionSet     = 0x0174,
         ServerChangeActiveActionSet     = 0x0175,
         ClientToggleWeapons             = 0x0177,
+        ServerTutorial                  = 0x0179,
         ServerSpellUpdate               = 0x017B,
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
@@ -73,7 +76,7 @@ namespace NexusForever.Shared.Network.Message
         ServerTitles                    = 0x018B,
         ServerPlayerChanged             = 0x019B,
         ServerActionSet                 = 0x019D,
-        ServerStanceChanged             = 0x019F,
+        ServerPlayerInnateSet           = 0x019F,
         ServerAbilities                 = 0x01A0,
         ServerAmpList                   = 0x01A3,
         ServerPathUpdateXP              = 0x01AA,
@@ -100,8 +103,17 @@ namespace NexusForever.Shared.Network.Message
         ServerPlayerCreate              = 0x025E,
         ServerEntityCreate              = 0x0262,
         ClientCharacterDelete           = 0x0352,
-        ServerEntityDestory             = 0x0355,
+        ServerEntityDestroy             = 0x0355,
+        Server0357                      = 0x0357,
+        ClientQuestAbandon              = 0x035A,
+        ClientQuestAccept               = 0x035B,
+        ServerQuestStateChange          = 0x035C,
+        ClientQuestComplete             = 0x035D,
+        ClientQuestSetIgnore            = 0x035E,
         ServerQuestInit                 = 0x035F,
+        ServerQuestObjectiveUpdate      = 0x0361,
+        ClientQuestSetTracked           = 0x0364,
+        ClientQuestRetry                = 0x0365,
         ClientEmote                     = 0x037E,
         ClientCostumeItemForget         = 0x038B,
         ClientPackedWorld               = 0x038C,
@@ -112,6 +124,8 @@ namespace NexusForever.Shared.Network.Message
         ClientCheat                     = 0x03E0,
         ServerRealmBroadcast            = 0x03E1,
         ClientItemGenericUnlock         = 0x0400,
+        ClientQuestShareResult          = 0x045E,
+        ClientQuestShare                = 0x045F,
         Server0497                      = 0x0497, // guild info
         ClientCastSpell                 = 0x04DB,
         ServerHousingResidenceDecor     = 0x04DE,
@@ -177,6 +191,7 @@ namespace NexusForever.Shared.Network.Message
         Server068B                      = 0x068B, // pet customization something
         ServerUnlockPetFlair            = 0x068D,
         ServerChangePetStance           = 0x068F,
+        ServerPublicEventStart          = 0x0700,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
         ClientTitleSet                  = 0x078E,
@@ -206,6 +221,8 @@ namespace NexusForever.Shared.Network.Message
         Server0814                      = 0x0814, // spell related
         Server0816                      = 0x0816, // spell related: broadcast parts of 0x07FF?
         Server0817                      = 0x0817, // spell related
+        ClientStorefrontPurchaseAccount = 0x0828,
+        ClientStorefrontPurchaseCharacter = 0x082A,
         ClientStorefrontRequestCatalog  = 0x082D,
         ClientSummonVanityPet           = 0x082F,
         ServerTimeOfDay                 = 0x0845,
@@ -221,7 +238,7 @@ namespace NexusForever.Shared.Network.Message
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
         ClientCostumeItemUnlock         = 0x090F,
-        ServerPlayerCurrencyChanged     = 0x0919,
+        ServerCombatReward              = 0x0919,
         ServerCooldownList              = 0x091B,
         ServerRewardPropertySet         = 0x092C,
         ServerUpdateHealth              = 0x092F,
@@ -234,10 +251,18 @@ namespace NexusForever.Shared.Network.Message
         ClientItemUse                   = 0x0943,
         ClientWhoRequest                = 0x0959,
         ServerWhoResponse               = 0x095A,
-        ServerGrantAccountCurrency      = 0x0967,
+        ServerAccountCurrencySet        = 0x0966,
+        ServerAccountCurrencyGrant      = 0x0967,
         ServerAccountEntitlements       = 0x0968,
+        ServerAccountItems              = 0x096D,
+        ServerAccountItemCooldownSet    = 0x0974,
+        ServerAccountItemAdd            = 0x0975,
+        ServerAccountItemsPending       = 0x0979,
         ServerGenericUnlockList         = 0x0981,
         ServerGenericUnlock             = 0x0982,
-        ServerGenericUnlockResult       = 0x0985
+        ServerGenericUnlockResult       = 0x0985,
+        ServerStoreFinalise             = 0x0987,
+        ServerStoreCategories           = 0x0988,
+        ServerStoreOffers               = 0x098B,
     }
 }

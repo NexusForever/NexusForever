@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS `entity_spline` (
+    `id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `splineId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `mode` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+    `speed` FLOAT NOT NULL DEFAULT '0',
+    `fx` FLOAT NOT NULL DEFAULT '0',
+    `fy` FLOAT NOT NULL DEFAULT '0',
+    `fz` FLOAT NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`),
+    CONSTRAINT `FK__entity_spline_id__entity_id` FOREIGN KEY (`id`) REFERENCES `entity` (`id`) ON DELETE CASCADE
+);

@@ -9,6 +9,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message;
 using NexusForever.WorldServer.Network.Message.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -20,7 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="GenericUnlockManager"/> from <see cref="Account"/> database model.
         /// </summary>
-        public GenericUnlockManager(WorldSession session, Account model)
+        public GenericUnlockManager(WorldSession session, AccountModel model)
         {
             this.session = session;
 

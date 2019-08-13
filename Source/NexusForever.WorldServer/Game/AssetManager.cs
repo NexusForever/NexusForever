@@ -4,6 +4,8 @@ using System.Reflection;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database.Character;
+using NexusForever.WorldServer.Database.World;
+using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game
@@ -36,6 +38,8 @@ namespace NexusForever.WorldServer.Game
         private static ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
         private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
+        private static ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
+
         public static void Initialise()
         {
             nextCharacterId = CharacterDatabase.GetNextCharacterId() + 1ul;
@@ -46,6 +50,7 @@ namespace NexusForever.WorldServer.Game
             CacheInventoryEquipSlots();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
+            CacheTutorials();
         }
 
         private static void CacheCharacterCustomisations()
@@ -110,6 +115,21 @@ namespace NexusForever.WorldServer.Game
             itemDisplaySourcesEntry = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
+        private static void CacheTutorials()
+        {
+            var zoneEntries =  ImmutableDictionary.CreateBuilder<uint, uint>();
+            foreach (Tutorial tutorial in WorldDatabase.GetTutorialTriggers())
+            {
+                if (tutorial.TriggerId == 0) // Don't add Tutorials with no trigger ID
+                    continue;
+
+                if (tutorial.Type == 29 && !zoneEntries.ContainsKey(tutorial.TriggerId))
+                    zoneEntries.Add(tutorial.TriggerId, tutorial.Id);
+            }
+
+            zoneTutorials = zoneEntries.ToImmutable();
+        }
+
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
         /// </summary>
@@ -133,6 +153,14 @@ namespace NexusForever.WorldServer.Game
         public static ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
         {
             return itemDisplaySourcesEntry.TryGetValue(itemSource, out ImmutableList<ItemDisplaySourceEntryEntry> entries) ? entries : null;
+        }
+
+        /// <summary>
+        /// Returns a Tutorial ID if it's found in the Zone Tutorials cache
+        /// </summary>
+        public static uint GetTutorialIdForZone(uint zoneId)
+        {
+            return zoneTutorials.TryGetValue(zoneId, out uint tutorialId) ? tutorialId : 0;
         }
     }
 }

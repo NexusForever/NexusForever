@@ -7,6 +7,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
+using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -94,7 +95,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     residence = ResidenceManager.CreateResidence(session.Player);
 
                 if (session.Player.Inventory.ItemUse(item))
-                    residence.DecorCreate(entry);
+                {
+                    if (session.Player.Map is ResidenceMap residenceMap)
+                        residenceMap.DecorCreate(entry, 1);
+                    else
+                        residence.DecorCreate(entry);
+                }
             }));
         }
     }

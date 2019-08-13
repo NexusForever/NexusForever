@@ -18,7 +18,7 @@ namespace NexusForever.Shared.GameTable
         public ulong LongNameOffset;
         public ulong RecordCount;
         public ulong RecordOffset;
-        public ulong NameCount;
-        public ulong NameOffset;
+        public ulong StringTableLength;
+        public ulong StringTableOffset;
     }
 }

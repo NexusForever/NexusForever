@@ -10,7 +10,6 @@ namespace NexusForever.WorldServer.Game.Entity
     [DatabaseEntity(EntityType.NonPlayer)]
     public class NonPlayer : UnitEntity
     {
-        public uint CreatureId { get; private set; }
         public VendorInfo VendorInfo { get; private set; }
 
         public NonPlayer()
@@ -21,7 +20,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void Initialise(EntityModel model)
         {
             base.Initialise(model);
-            CreatureId = model.Creature;
 
             if (model.EntityVendor != null)
             {

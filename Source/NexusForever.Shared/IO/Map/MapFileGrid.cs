@@ -56,8 +56,8 @@ namespace NexusForever.Shared.IO.Map
         /// </summary>
         public float GetTerrainHeight(Vector3 vector)
         {
-            // TODO
-            return 1337f;
+            MapFileCell cell = GetCell(vector);
+            return cell?.GetTerrainHeight(vector) ?? 0f;
         }
 
         private MapFileCell GetCell(Vector3 vector)

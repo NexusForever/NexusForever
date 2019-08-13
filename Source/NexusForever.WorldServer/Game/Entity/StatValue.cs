@@ -40,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="StatValue"/> from an existing database model.
         /// </summary>
-        public StatValue(EntityStat model)
+        public StatValue(EntityStats model)
         {
             Stat  = (Stat)model.Stat;
             Type  = EntityManager.GetStatAttribute(Stat).Type;
