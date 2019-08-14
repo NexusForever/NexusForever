@@ -6,14 +6,12 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Housing.Static;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
  
     public class Decor : ISaveCharacter
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         public ulong Id { get; }
         public ulong DecorId { get; }
         public HousingDecorInfoEntry Entry { get; }
@@ -199,7 +197,6 @@ namespace NexusForever.WorldServer.Game.Housing
                 {
                     model.DecorParentId = DecorParentId;
                     entity.Property(p => p.DecorParentId).IsModified = true;
-                    log.Info($"Saving Decor Link for {Id} to {DecorParentId}.");
                 }
             }
 

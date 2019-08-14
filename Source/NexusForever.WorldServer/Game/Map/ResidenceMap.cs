@@ -10,13 +10,11 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Housing.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
     public class ResidenceMap : BaseMap
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         public ulong Id => residence?.Id ?? 0ul;
         // housing maps have unlimited vision range.
         public override float VisionRange { get; protected set; } = -1f;
@@ -282,7 +280,8 @@ namespace NexusForever.WorldServer.Game.Map
                     throw new InvalidPacketValueException();
 
                 // new decor is being placed directly in the world
-                decor.Position = update.Position;
+                var position = new Vector3(update.Position.X, update.Position.Y + 0.835f, update.Position.Z);
+                decor.Position = position;
                 decor.Rotation = update.Rotation;
                 decor.Scale    = update.Scale;
             }
@@ -314,6 +313,13 @@ namespace NexusForever.WorldServer.Game.Map
                 throw new InvalidPacketValueException();
 
             // TODO: research 0.835f
+            // in meantime workaround checks for House PlotIndex and sets hardcoded offset
+            var position = new Vector3(update.Position.X, update.Position.Y, update.Position.Z);
+            if (update.PlotIndex != 0)
+            {
+                position.Y += 0.835f;
+                position.Z += 0.01f;
+            }
             if (decor.Type == DecorType.Crate)
             {
                 if (decor.Entry.Creature2IdActiveProp != 0u)
@@ -322,7 +328,6 @@ namespace NexusForever.WorldServer.Game.Map
                 }
 
                 // crate->world
-                var position = new Vector3(update.Position.X, update.Position.Y + 0.835f, update.Position.Z);
                 decor.Move(update.DecorType, position, update.Rotation, update.Scale);
             }
             else
@@ -332,15 +337,8 @@ namespace NexusForever.WorldServer.Game.Map
                 else
                 {
                     // world->world
-                    var position = new Vector3(update.Position.X, update.Position.Y + 0.835f, update.Position.Z);
                     decor.Move(update.DecorType, position, update.Rotation, update.Scale);
-
-                    //update decor link if applicable
-                    if (update.ParentDecorId != 0u)
-                    {
-                        decor.DecorParentId = update.ParentDecorId;
-                        log.Info($"Updating Decor Link for {update.DecorId} set to {update.ParentDecorId}.");
-                    }
+                    decor.DecorParentId = update.ParentDecorId;
                 }
             }
 
