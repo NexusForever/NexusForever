@@ -281,7 +281,12 @@ namespace NexusForever.WorldServer.Game.Map
                     throw new InvalidPacketValueException();
 
                 // new decor is being placed directly in the world
-                var position = new Vector3(update.Position.X, update.Position.Y + 0.835f, update.Position.Z);
+                var position = new Vector3(update.Position.X, update.Position.Y, update.Position.Z);
+                if (update.PlotIndex != 0)
+                {
+                    position.Y += 0.835f;
+                    position.Z += 0.01f;
+                }
                 decor.Position = position;
                 decor.Rotation = update.Rotation;
                 decor.Scale    = update.Scale;
