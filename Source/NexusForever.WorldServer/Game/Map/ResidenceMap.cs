@@ -115,6 +115,7 @@ namespace NexusForever.WorldServer.Game.Map
                         Roof              = residence.Roof,
                         Door              = residence.Door,
                         Ground            = residence.Ground,
+                        Music             = residence.Music,
                         Sky               = residence.Sky,
                         Flags             = residence.Flags,
                         ResourceSharing   = residence.ResourceSharing,
@@ -414,7 +415,36 @@ namespace NexusForever.WorldServer.Game.Map
             if (!residence.CanModifyResidence(player.CharacterId))
                 throw new InvalidPacketValueException();
 
-            // TODO
+            if (housingRemodel.RoofDecorInfoId != 0u)
+            {
+                residence.Roof = (ushort)housingRemodel.RoofDecorInfoId;
+            }
+            if (housingRemodel.WallpaperId != 0u)
+            {
+                residence.Wallpaper = (ushort)housingRemodel.WallpaperId;
+            }
+            if (housingRemodel.EntrywayDecorInfoId != 0u)
+            {
+                residence.Entryway = (ushort)housingRemodel.EntrywayDecorInfoId;
+            }
+            if (housingRemodel.DoorDecorInfoId != 0u)
+            {
+                residence.Door = (ushort)housingRemodel.DoorDecorInfoId;
+                }
+            if (housingRemodel.SkyWallpaperId != 0u)
+            {
+                residence.Sky = (ushort)housingRemodel.SkyWallpaperId;
+            }
+            if (housingRemodel.MusicId != 0u)
+            {
+                residence.Music = (ushort)housingRemodel.MusicId;
+            }
+            if (housingRemodel.GroundWallpaperId != 0u)
+            {
+                residence.Ground = (ushort)housingRemodel.GroundWallpaperId;
+            }
+
+            SendHousingProperties();
         }
     }
 }
