@@ -29,6 +29,7 @@ using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
+using NexusForever.Shared.Database.Auth.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -110,32 +111,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 session.AccountCurrencyManager.SendCharacterListPacket();
                 session.GenericUnlockManager.SendUnlockList();
-                session.EnqueueMessageEncrypted(new ServerAccountEntitlements
+
+                var accountEntitlements = new ServerAccountEntitlements();
+                foreach (var entitlement in AuthDatabase.GetEntitlements(session.Account.Id))
                 {
-                    Entitlements =
+                    accountEntitlements.Entitlements.Add(new ServerAccountEntitlements.AccountEntitlementInfo()
                     {
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.BaseCharacterSlots,
-                            Count       = 12
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ExtraDecorSlots,
-                            Count       = 2000
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ChuaWarriorUnlock,
-                            Count       = 1
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.AurinEngineerUnlock,
-                            Count       = 1
-                        }
-                    }
-                });
+                        Entitlement = (Entitlement)entitlement.EntitlementId,
+                        Count = entitlement.Amount
+                    });
+                }
+
+                session.EnqueueMessageEncrypted(accountEntitlements);
 
                 var serverCharacterList = new ServerCharacterList
                 {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -133,6 +134,17 @@ namespace NexusForever.Shared.Database.Auth
             using (var context = new AuthContext())
                 return context.ServerMessage
                     .AsNoTracking()
+                    .ToImmutableList();
+        }
+
+        /// <summary>
+        /// Get Account Entitlements
+        /// </summary>
+        public static ImmutableList<AccountEntitlements> GetEntitlements(uint accountId)
+        {
+            using (var context = new AuthContext())
+                return context.AccountEntitlements
+                    .Where(c => c.Id == accountId)
                     .ToImmutableList();
         }
     }
