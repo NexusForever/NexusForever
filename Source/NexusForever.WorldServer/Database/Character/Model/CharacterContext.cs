@@ -1066,6 +1066,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("scale")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.ColourShiftId)
+                    .HasColumnName("colourShiftId")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.X)
                     .HasColumnName("x")
                     .HasDefaultValueSql("'0'");

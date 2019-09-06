@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace NexusForever.WorldServer.Game.Housing.Static
 {
@@ -15,6 +15,7 @@ namespace NexusForever.WorldServer.Game.Housing.Static
         Position           = 0x0008,
         Rotation           = 0x0010,
         Scale              = 0x0020,
-        DecorParentId      = 0x0040
+        DecorParentId      = 0x0040,
+        ColourShiftId      = 0x0100
     }
 }
