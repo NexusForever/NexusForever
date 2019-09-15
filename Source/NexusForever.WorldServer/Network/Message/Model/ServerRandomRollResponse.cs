@@ -1,21 +1,20 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ServerRandomRollResponse)]
     public class ServerRandomRollResponse : IWritable
     {
-        public ushort RealmId { set; get; }
-        public ulong CharacterId { set; get; }
-        public int MinRandom { get; set; }
-        public int MaxRandom { get; set; }
+        public TargetPlayerIdentity TargetPlayerIdentity { get; set; }
+        public uint MinRandom { get; set; }
+        public uint MaxRandom { get; set; }
         public int RandomRollResult { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(RealmId, 14u);
-            writer.Write(CharacterId);
+            TargetPlayerIdentity.Write(writer);
             writer.Write(MinRandom);
             writer.Write(MaxRandom);
             writer.Write(RandomRollResult);

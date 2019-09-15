@@ -1,29 +1,28 @@
 ﻿using System;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ClientRandomRollRequest)]
     public class ClientRandomRollRequest : IReadable
     {
-        // Note that for /roll on the command line, the first two fields below,
-        // realmId, characterId, and Unknown0-3 are 0.
+        // Note that for /roll on the command line, 
+        // the TargetPlayerIdentity's realmId and
+        // characterId, as well as Unknown0 are 0.
         // As such, these fields are currently unused.
-        public ushort RealmId { get; set; }
-        public ulong CharacterId { get; set; }
-        public int MinRandom { get; set; }
-        public int MaxRandom { get; set; }
-        public int Unknown0 { get; set; }
-        public Random rnd = new Random();
+        public TargetPlayerIdentity TargetPlayerIdentity { get; } = new TargetPlayerIdentity();
+        public uint MinRandom { get; private set; }
+        public uint MaxRandom { get; private set; }
+        public uint Unknown0 { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            RealmId = reader.ReadUShort(14u);
-            CharacterId = reader.ReadULong();
-            MinRandom = reader.ReadInt();
-            MaxRandom = reader.ReadInt();
-            Unknown0 = reader.ReadInt();
+            TargetPlayerIdentity.Read(reader);
+            MinRandom = reader.ReadUInt();
+            MaxRandom = reader.ReadUInt();
+            Unknown0 = reader.ReadUInt();
         }
     }
 }
