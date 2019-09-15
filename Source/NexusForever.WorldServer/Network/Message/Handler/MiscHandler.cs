@@ -61,5 +61,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             session.Player.Sheathed = toggleWeapons.ToggleState;
         }
+
+        [MessageHandler(GameMessageOpcode.ClientRandomRollRequest)]
+        public static void HandleRandomRoll(WorldSession session, ClientRandomRollRequest randomRoll)
+        {
+            session.EnqueueMessageEncrypted(new ServerRandomRollResponse
+            {
+                realmId = WorldServer.RealmId,
+                characterId = session.Player.CharacterId,
+                MinRandom = randomRoll.MinRandom,
+                MaxRandom = randomRoll.MaxRandom,
+                RandomRollResult = randomRoll.rnd.Next(randomRoll.MinRandom, randomRoll.MaxRandom)
+            });
+        }
     }
 }
