@@ -67,8 +67,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             session.EnqueueMessageEncrypted(new ServerRandomRollResponse
             {
-                realmId = WorldServer.RealmId,
-                characterId = session.Player.CharacterId,
+                RealmId = WorldServer.RealmId,
+                CharacterId = session.Player.CharacterId,
                 MinRandom = randomRoll.MinRandom,
                 MaxRandom = randomRoll.MaxRandom,
                 RandomRollResult = randomRoll.rnd.Next(randomRoll.MinRandom, randomRoll.MaxRandom)

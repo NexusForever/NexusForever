@@ -10,8 +10,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
         // Note that for /roll on the command line, the first two fields below,
         // realmId, characterId, and Unknown0-3 are 0.
         // As such, these fields are currently unused.
-        public ushort realmId { get; set; }
-        public ulong characterId { get; set; }
+        public ushort RealmId { get; set; }
+        public ulong CharacterId { get; set; }
         public int MinRandom { get; set; }
         public int MaxRandom { get; set; }
         public int Unknown0 { get; set; }
@@ -19,12 +19,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            realmId = reader.ReadUShort(14u);
-            characterId = reader.ReadULong();
+            RealmId = reader.ReadUShort(14u);
+            CharacterId = reader.ReadULong();
             MinRandom = reader.ReadInt();
             MaxRandom = reader.ReadInt();
             Unknown0 = reader.ReadInt();
         }
-
     }
 }
