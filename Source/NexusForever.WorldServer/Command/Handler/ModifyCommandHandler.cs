@@ -5,15 +5,15 @@ using NexusForever.WorldServer.Command.Contexts;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-    [Name("DisplayInfo")]
-    public class DisplayInfoCommandHandler : CommandCategory
+    [Name("Modify")]
+    public class ModifyCommandHandler : CommandCategory
     {
-        public DisplayInfoCommandHandler()
-            : base(true, "displayInfo")
+        public ModifyCommandHandler()
+            : base(true, "modify")
         {
         }
 
-        [SubCommandHandler("id", "displayInfoID - Change your look to match that of a creature.")]
+        [SubCommandHandler("displayInfo", "id - Change your look to match that of a creature.")]
         public Task DisplayInfoSubCommandHandler(CommandContext context, string command, string[] parameters)
         {
             if (parameters.Length < 1 || parameters.Length > 1)
