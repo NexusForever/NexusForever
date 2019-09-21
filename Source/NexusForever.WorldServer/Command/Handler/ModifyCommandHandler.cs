@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("displayInfo", "id - Change your look to match that of a creature.")]
         public Task DisplayInfoSubCommandHandler(CommandContext context, string command, string[] parameters)
         {
-            if (parameters.Length < 1 || parameters.Length > 1)
+            if (parameters.Length != 1)
             {
                 context.SendMessageAsync("Parameters are invalid. Please try again.");
                 return Task.CompletedTask;
@@ -28,7 +28,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            if (GameTableManager.Creature2.GetEntry(displayInfo) == null)
+            if (GameTableManager.Creature2DisplayInfo.GetEntry(displayInfo) == null)
             {
                 context.SendMessageAsync("Invalid displayInfo. Please try again.");
                 return Task.CompletedTask;
