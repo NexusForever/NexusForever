@@ -55,6 +55,14 @@ namespace NexusForever.Shared
         }
 
         /// <summary>
+        /// Calculate a <see cref="Vector3"/> in degrees from this point to another.
+        /// </summary>
+        public static Vector3 GetRotationToVector(this Vector3 source, Vector3 dest)
+        {
+            return Quaternion.CreateFromAxisAngle(source, source.GetAngle(dest)).ToEulerDegrees();
+        }
+
+        /// <summary>
         /// Convert <see cref="Quaternion"/> to <see cref="Vector3"/> in degrees.
         /// </summary>
         public static Vector3 ToEulerDegrees(this Quaternion q)

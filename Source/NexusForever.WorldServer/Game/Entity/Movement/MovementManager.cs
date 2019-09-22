@@ -207,6 +207,10 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
             StopSpline();
             splinePath = new SplinePath(nodes, type, mode, speed);
 
+            float angle = MathF.Atan2(nodes.Last().Z - nodes.First().Z, nodes.Last().X - nodes.First().X);
+            Vector3 endPointOffset = nodes.Last().GetPoint2D(angle, 10f);
+            owner.Rotation = nodes.Last().GetRotationToVector(endPointOffset); // TODO: Can this automatically be applied when SetRotationCommand is added to the command queue?
+
             splineCommand = EntityCommand.SetPositionPath;
             AddCommand(new SetPositionPathCommand
             {
@@ -214,6 +218,18 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
                 Speed     = speed,
                 Type      = type,
                 Mode      = mode
+            });
+
+            AddCommand(new SetRotationFacePositionCommand
+            {
+                Position = new Position(endPointOffset),
+                Blend = true
+            });
+
+            AddCommand(new SetRotationCommand
+            {
+                Position = new Position(owner.Rotation),
+                Blend = true
             });
 
             // TODO: retail sent SetStateKeysCommand which sets the state for a limited time
