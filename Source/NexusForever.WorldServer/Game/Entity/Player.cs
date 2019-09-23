@@ -171,6 +171,8 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
 
+            Session.EntitlementManager.OnNewCharacter(model);
+
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
             Properties.Add(Property.ShieldCapacityMax, new PropertyValue(Property.ShieldCapacityMax, 0f, 450f));
@@ -382,8 +384,15 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     FactionId = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 },
-                ActiveCostumeIndex = CostumeIndex,
-                InputKeySet = (uint)InputKeySet
+                ActiveCostumeIndex    = CostumeIndex,
+                InputKeySet           = (uint)InputKeySet,
+                CharacterEntitlements = Session.EntitlementManager.GetCharacterEntitlements()
+                    .Select(e => new ServerPlayerCreate.CharacterEntitlement
+                    {
+                        Entitlement = e.Type,
+                        Count       = e.Amount
+                    })
+                    .ToList()
             };
 
             foreach (Currency currency in CurrencyManager)
@@ -652,6 +661,8 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Session.GenericUnlockManager.Save(context);
             Session.AccountCurrencyManager.Save(context);
+            Session.EntitlementManager.Save(context);
+
             CostumeManager.Save(context);
             KeybindingManager.Save(context);
         }
@@ -732,6 +743,8 @@ namespace NexusForever.WorldServer.Game.Entity
             MailManager.Save(context);
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
+
+            Session.EntitlementManager.Save(context);
         }
 
         /// <summary>

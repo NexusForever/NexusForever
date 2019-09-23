@@ -110,31 +110,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 session.AccountCurrencyManager.SendCharacterListPacket();
                 session.GenericUnlockManager.SendUnlockList();
+
                 session.EnqueueMessageEncrypted(new ServerAccountEntitlements
                 {
-                    Entitlements =
-                    {
-                        new ServerAccountEntitlements.AccountEntitlementInfo
+                    Entitlements = session.EntitlementManager.GetAccountEntitlements()
+                        .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
                         {
-                            Entitlement = Entitlement.BaseCharacterSlots,
-                            Count       = 12
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ExtraDecorSlots,
-                            Count       = 2000
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ChuaWarriorUnlock,
-                            Count       = 1
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.AurinEngineerUnlock,
-                            Count       = 1
-                        }
-                    }
+                            Entitlement = e.Type,
+                            Count       = e.Amount
+                        })
+                        .ToList()
                 });
 
                 var serverCharacterList = new ServerCharacterList

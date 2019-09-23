@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Configuration;
@@ -19,6 +19,7 @@ namespace NexusForever.Shared.Database.Auth.Model
         public virtual DbSet<Account> Account { get; set; }
         public virtual DbSet<AccountCostumeUnlock> AccountCostumeUnlock { get; set; }
         public virtual DbSet<AccountCurrency> AccountCurrency { get; set; }
+        public virtual DbSet<AccountEntitlement> AccountEntitlement { get; set; }
         public virtual DbSet<AccountGenericUnlock> AccountGenericUnlock { get; set; }
         public virtual DbSet<AccountKeybinding> AccountKeybinding { get; set; }
         public virtual DbSet<Server> Server { get; set; }
@@ -134,6 +135,31 @@ namespace NexusForever.Shared.Database.Auth.Model
                     .HasConstraintName("FK__account_currency_id__account_id");
             });
 
+            modelBuilder.Entity<AccountEntitlement>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.EntitlementId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_entitlement");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.EntitlementId)
+                    .HasColumnName("entitlementId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Amount)
+                    .HasColumnName("amount")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithMany(p => p.AccountEntitlement)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_entitlements_id__account_id");
+            });
+
             modelBuilder.Entity<AccountGenericUnlock>(entity =>
             {
                 entity.HasKey(e => new { e.Id, e.Entry })
@@ -173,8 +199,7 @@ namespace NexusForever.Shared.Database.Auth.Model
 
                 entity.Property(e => e.InputActionId)
                     .HasColumnName("inputActionId")
-                    .HasDefaultValueSql("'0'")
-                    .ValueGeneratedNever();
+                    .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.Code00)
                     .HasColumnName("code00")
