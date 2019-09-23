@@ -29,7 +29,6 @@ using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
-using NexusForever.Shared.Database.Auth.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -112,17 +111,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.AccountCurrencyManager.SendCharacterListPacket();
                 session.GenericUnlockManager.SendUnlockList();
 
-                var accountEntitlements = new ServerAccountEntitlements();
-                foreach (var entitlement in AuthDatabase.GetEntitlements(session.Account.Id))
+                session.EnqueueMessageEncrypted(new ServerAccountEntitlements
                 {
-                    accountEntitlements.Entitlements.Add(new ServerAccountEntitlements.AccountEntitlementInfo()
-                    {
-                        Entitlement = (Entitlement)entitlement.EntitlementId,
-                        Count = entitlement.Amount
-                    });
-                }
-
-                session.EnqueueMessageEncrypted(accountEntitlements);
+                    Entitlements = session.EntitlementManager.GetAccountEntitlements()
+                        .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
+                        {
+                            Entitlement = e.Type,
+                            Count       = e.Amount
+                        })
+                        .ToList()
+                });
 
                 var serverCharacterList = new ServerCharacterList
                 {

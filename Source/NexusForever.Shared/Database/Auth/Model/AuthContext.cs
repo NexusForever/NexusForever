@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared.Configuration;
@@ -19,7 +19,7 @@ namespace NexusForever.Shared.Database.Auth.Model
         public virtual DbSet<Account> Account { get; set; }
         public virtual DbSet<AccountCostumeUnlock> AccountCostumeUnlock { get; set; }
         public virtual DbSet<AccountCurrency> AccountCurrency { get; set; }
-        public virtual DbSet<AccountEntitlements> AccountEntitlements { get; set; }
+        public virtual DbSet<AccountEntitlement> AccountEntitlement { get; set; }
         public virtual DbSet<AccountGenericUnlock> AccountGenericUnlock { get; set; }
         public virtual DbSet<AccountKeybinding> AccountKeybinding { get; set; }
         public virtual DbSet<Server> Server { get; set; }
@@ -135,12 +135,12 @@ namespace NexusForever.Shared.Database.Auth.Model
                     .HasConstraintName("FK__account_currency_id__account_id");
             });
 
-            modelBuilder.Entity<AccountEntitlements>(entity =>
+            modelBuilder.Entity<AccountEntitlement>(entity =>
             {
                 entity.HasKey(e => new { e.Id, e.EntitlementId })
                     .HasName("PRIMARY");
 
-                entity.ToTable("account_entitlements");
+                entity.ToTable("account_entitlement");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -155,7 +155,7 @@ namespace NexusForever.Shared.Database.Auth.Model
                     .HasDefaultValueSql("'0'");
 
                 entity.HasOne(d => d.IdNavigation)
-                    .WithMany(p => p.AccountEntitlements)
+                    .WithMany(p => p.AccountEntitlement)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__account_entitlements_id__account_id");
             });
