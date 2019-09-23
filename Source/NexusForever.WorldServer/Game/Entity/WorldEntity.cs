@@ -27,7 +27,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
 
-        public ulong ActivePropId { get; private set; }
+        public ulong ActivePropId { get; protected set; }
+        public ushort SocketId { get; protected set; }
 
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
@@ -78,7 +79,9 @@ namespace NexusForever.WorldServer.Game.Entity
             OutfitInfo   = model.OutfitInfo;
             Faction1     = (Faction)model.Faction1;
             Faction2     = (Faction)model.Faction2;
-            ActivePropId = model.ActivePropId;
+
+            if (ActivePropId == 0)
+                ActivePropId = model.ActivePropId;
 
             foreach (EntityStats statModel in model.EntityStats)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
@@ -125,12 +128,13 @@ namespace NexusForever.WorldServer.Game.Entity
                 OutfitInfo   = OutfitInfo
             };
 
-            if (ActivePropId > 0)
+            if (ActivePropId > 0 || SocketId > 0)
             {
                 entityCreatePacket.WorldPlacementData = new ServerEntityCreate.WorldPlacement
                 {
                     Type = 1,
-                    ActivePropId = ActivePropId
+                    ActivePropId = ActivePropId,
+                    SocketId = SocketId
                 };
             }
 

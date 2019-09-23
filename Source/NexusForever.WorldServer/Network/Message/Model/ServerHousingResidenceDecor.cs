@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public uint DecorData { get; set; }
             public uint HookBagIndex { get; set; }
             public uint HookIndex { get; set; }
-            public uint PlotIndex { get; set; }
+            public uint PlotIndex { get; set; } = uint.MaxValue;
             public float Scale { get; set; }
             public Vector3 Position { get; set; } = new Vector3();
             public Quaternion Rotation { get; set; } = new Quaternion();

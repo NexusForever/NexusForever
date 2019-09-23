@@ -110,7 +110,7 @@ namespace NexusForever.WorldServer.Database.Character
 
         public static async Task SaveResidence(ResidenceEntity residence)
         {
-            using (var context = new CharacterContext())
+            using (var context = new CharacterContextExtended())
             {
                 residence.Save(context);
                 await context.SaveChangesAsync();

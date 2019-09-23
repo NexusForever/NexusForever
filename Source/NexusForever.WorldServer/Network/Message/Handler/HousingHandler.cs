@@ -9,11 +9,14 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Housing.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class HousingHandler
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         [MessageHandler(GameMessageOpcode.ClientHousingResidencePrivacyLevel)]
         public static void HandleHousingSetPrivacyLevel(WorldSession session, ClientHousingSetPrivacyLevel housingSetPrivacyLevel)
         {
@@ -53,7 +56,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientHousingPlugUpdate)]
         public static void HandleHousingPlugUpdate(WorldSession session, ClientHousingPlugUpdate housingPlugUpdate)
         {
-            // TODO
+            if (!(session.Player.Map is ResidenceMap residenceMap))
+                throw new InvalidPacketValueException();
+
+            switch (housingPlugUpdate.Operation)
+            {
+                case PlugUpdateOperation.Place:
+                    residenceMap.SetPlug(session.Player, housingPlugUpdate);
+                    break;
+                case PlugUpdateOperation.Remove:
+                    residenceMap.RemovePlug(session.Player, housingPlugUpdate);
+                    break;
+                default:
+                    log.Warn($"Operation {housingPlugUpdate.Operation} is unhandled.");
+                    break;
+            }
         }
 
         [MessageHandler(GameMessageOpcode.ClientHousingVendorList)]

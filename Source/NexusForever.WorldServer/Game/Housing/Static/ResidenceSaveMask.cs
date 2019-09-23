@@ -23,6 +23,7 @@ namespace NexusForever.WorldServer.Game.Housing.Static
         Decor           = 0x0800,
         Plot            = 0x1000,
         PrivacyLevel    = 0x2000,
-        Music           = 0x4000
+        Music           = 0x4000,
+        ResidenceInfo   = 0x8000
     }
 }

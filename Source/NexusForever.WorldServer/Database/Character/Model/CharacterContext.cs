@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared;
@@ -992,6 +992,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.PropertyInfoId)
                     .HasColumnName("propertyInfoId")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ResidenceInfoId)
+                    .HasColumnName("residenceInfoId")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.ResourceSharing)
