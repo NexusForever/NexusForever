@@ -1034,6 +1034,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("decorId")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.ColourShiftId)
+                    .HasColumnName("colourShiftId")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.DecorInfoId)
                     .HasColumnName("decorInfoId")
                     .HasDefaultValueSql("'0'");

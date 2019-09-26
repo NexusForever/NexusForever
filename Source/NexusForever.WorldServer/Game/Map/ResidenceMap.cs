@@ -147,15 +147,16 @@ namespace NexusForever.WorldServer.Game.Map
                 Decor decor = decors[i];
                 residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
                 {
-                    RealmId     = WorldServer.RealmId,
-                    DecorId     = decor.DecorId,
-                    ResidenceId = residence.Id,
-                    DecorType   = decor.Type,
-                    Scale       = decor.Scale,
-                    Position    = decor.Position,
-                    Rotation    = decor.Rotation,
-                    DecorInfoId = decor.Entry.Id,
-                    ParentDecorId = decor.DecorParentId
+                    RealmId       = WorldServer.RealmId,
+                    DecorId       = decor.DecorId,
+                    ResidenceId   = residence.Id,
+                    DecorType     = decor.Type,
+                    Scale         = decor.Scale,
+                    Position      = decor.Position,
+                    Rotation      = decor.Rotation,
+                    DecorInfoId   = decor.Entry.Id,
+                    ParentDecorId = decor.DecorParentId,
+                    ColourShift   = decor.ColourShiftId
                 });
 
                 if (i == decors.Length - 1)
@@ -277,17 +278,20 @@ namespace NexusForever.WorldServer.Game.Map
                 player.CurrencyManager.CurrencySubtractAmount((byte)entry.CostCurrencyTypeId, entry.Cost);*/
             }
 
-            if (update.ColourShiftId != 0u)
-            {
-                ColorShiftEntry colourEntry = GameTableManager.ColorShift.GetEntry(update.ColourShiftId);
-                if (colourEntry == null)
-                    throw new InvalidPacketValueException();
-
-                // TODO: colour shift
-            }
-
             Decor decor = residence.DecorCreate(entry);
             decor.Type = update.DecorType;
+
+            if (update.ColourShiftId != decor.ColourShiftId)
+            {
+                if (update.ColourShiftId != 0u)
+                {
+                    ColorShiftEntry colourEntry = GameTableManager.ColorShift.GetEntry(update.ColourShiftId);
+                    if (colourEntry == null)
+                        throw new InvalidPacketValueException();
+                }
+
+                decor.ColourShiftId = update.ColourShiftId;
+            }
 
             if (update.DecorType != DecorType.Crate)
             {
@@ -314,7 +318,8 @@ namespace NexusForever.WorldServer.Game.Map
                         Scale       = decor.Scale,
                         Position    = decor.Position,
                         Rotation    = decor.Rotation,
-                        DecorInfoId = decor.Entry.Id
+                        DecorInfoId = decor.Entry.Id,
+                        ColourShift = decor.ColourShiftId
                     }
                 }
             });
@@ -326,7 +331,19 @@ namespace NexusForever.WorldServer.Game.Map
             if (decor == null)
                 throw new InvalidPacketValueException();
 
-            var position = CalculateDecorPosition(update);
+            if (update.ColourShiftId != decor.ColourShiftId)
+            {
+                if (update.ColourShiftId != 0u)
+                {
+                    ColorShiftEntry colourEntry = GameTableManager.ColorShift.GetEntry(update.ColourShiftId);
+                    if (colourEntry == null)
+                        throw new InvalidPacketValueException();
+                }
+
+                decor.ColourShiftId = update.ColourShiftId;
+            }
+
+            Vector3 position = CalculateDecorPosition(update);
             if (decor.Type == DecorType.Crate)
             {
                 if (decor.Entry.Creature2IdActiveProp != 0u)
@@ -356,15 +373,16 @@ namespace NexusForever.WorldServer.Game.Map
                 {
                     new ServerHousingResidenceDecor.Decor
                     {
-                        RealmId     = WorldServer.RealmId,
-                        DecorId     = decor.DecorId,
-                        ResidenceId = residence.Id,
-                        DecorType   = decor.Type,
-                        Scale       = decor.Scale,
-                        Position    = decor.Position,
-                        Rotation    = decor.Rotation,
-                        DecorInfoId = decor.Entry.Id,
-                        ParentDecorId = decor.DecorParentId
+                        RealmId       = WorldServer.RealmId,
+                        DecorId       = decor.DecorId,
+                        ResidenceId   = residence.Id,
+                        DecorType     = decor.Type,
+                        Scale         = decor.Scale,
+                        Position      = decor.Position,
+                        Rotation      = decor.Rotation,
+                        DecorInfoId   = decor.Entry.Id,
+                        ParentDecorId = decor.DecorParentId,
+                        ColourShift   = decor.ColourShiftId
                     }
                 }
             });

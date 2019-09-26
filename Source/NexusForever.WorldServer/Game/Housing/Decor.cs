@@ -72,7 +72,20 @@ namespace NexusForever.WorldServer.Game.Housing
                 saveMask |= DecorSaveMask.DecorParentId;
             }
         }
+
         private ulong decorParentId;
+
+        public ushort ColourShiftId
+        {
+            get => colourShiftId;
+            set
+            {
+                colourShiftId = value;
+                saveMask |= DecorSaveMask.ColourShiftId;
+            }
+        }
+
+        private ushort colourShiftId;
 
         private DecorSaveMask saveMask;
 
@@ -81,14 +94,15 @@ namespace NexusForever.WorldServer.Game.Housing
         /// </summary>
         public Decor(ResidenceDecor model)
         {
-            Id       = model.Id;
-            DecorId  = model.DecorId;
-            Entry    = GameTableManager.HousingDecorInfo.GetEntry(model.DecorInfoId);
-            type     = (DecorType)model.DecorType;
-            position = new Vector3(model.X, model.Y, model.Z);
-            rotation = new Quaternion(model.Qx, model.Qy, model.Qz, model.Qw);
-            scale    = model.Scale;
+            Id            = model.Id;
+            DecorId       = model.DecorId;
+            Entry         = GameTableManager.HousingDecorInfo.GetEntry(model.DecorInfoId);
+            type          = (DecorType)model.DecorType;
+            position      = new Vector3(model.X, model.Y, model.Z);
+            rotation      = new Quaternion(model.Qx, model.Qy, model.Qz, model.Qw);
+            scale         = model.Scale;
             decorParentId = model.DecorParentId;
+            colourShiftId = model.ColourShiftId;
 
             saveMask = DecorSaveMask.None;
         }
@@ -126,19 +140,20 @@ namespace NexusForever.WorldServer.Game.Housing
                 // decor doesn't exist in database, all infomation must be saved
                 context.Add(new ResidenceDecor
                 {
-                    Id          = Id,
-                    DecorId     = DecorId,
-                    DecorInfoId = Entry.Id,
-                    DecorType   = (uint)Type,
-                    X           = Position.X,
-                    Y           = Position.Y,
-                    Z           = Position.Z,
-                    Qx          = Rotation.X,
-                    Qy          = Rotation.Y,
-                    Qz          = Rotation.Z,
-                    Qw          = Rotation.W,
-                    Scale       = Scale,
-                    DecorParentId = DecorParentId
+                    Id            = Id,
+                    DecorId       = DecorId,
+                    DecorInfoId   = Entry.Id,
+                    DecorType     = (uint)Type,
+                    X             = Position.X,
+                    Y             = Position.Y,
+                    Z             = Position.Z,
+                    Qx            = Rotation.X,
+                    Qy            = Rotation.Y,
+                    Qz            = Rotation.Z,
+                    Qw            = Rotation.W,
+                    Scale         = Scale,
+                    DecorParentId = DecorParentId,
+                    ColourShiftId = ColourShiftId
                 });
             }
             else if ((saveMask & DecorSaveMask.Delete) != 0)
@@ -196,6 +211,11 @@ namespace NexusForever.WorldServer.Game.Housing
                 {
                     model.DecorParentId = DecorParentId;
                     entity.Property(p => p.DecorParentId).IsModified = true;
+                }
+                if ((saveMask & DecorSaveMask.ColourShiftId) != 0)
+                {
+                    model.ColourShiftId = ColourShiftId;
+                    entity.Property(p => p.ColourShiftId).IsModified = true;
                 }
             }
 

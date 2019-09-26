@@ -18,6 +18,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public float Qz { get; set; }
         public float Qw { get; set; }
         public ulong DecorParentId { get; set; }
+        public ushort ColourShiftId { get; set; }
 
         public virtual Residence IdNavigation { get; set; }
     }
