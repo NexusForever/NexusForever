@@ -1,0 +1,4 @@
+ALTER TABLE `residence`
+	ADD COLUMN `musicId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0' AFTER `groundWallpaperId`;
+ALTER TABLE `residence_decor`
+	ADD COLUMN `decorParentId` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' AFTER `qw`;

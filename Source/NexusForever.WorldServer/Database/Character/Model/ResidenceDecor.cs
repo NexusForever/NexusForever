@@ -17,6 +17,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public float Qy { get; set; }
         public float Qz { get; set; }
         public float Qw { get; set; }
+        public ulong DecorParentId { get; set; }
 
         public virtual Residence IdNavigation { get; set; }
     }
