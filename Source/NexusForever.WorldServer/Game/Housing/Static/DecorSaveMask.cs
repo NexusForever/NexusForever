@@ -16,6 +16,6 @@ namespace NexusForever.WorldServer.Game.Housing.Static
         Rotation           = 0x0010,
         Scale              = 0x0020,
         DecorParentId      = 0x0040,
-        ColourShiftId      = 0x0100
+        ColourShiftId      = 0x0080
     }
 }

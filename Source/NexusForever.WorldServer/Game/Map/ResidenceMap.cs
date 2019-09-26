@@ -289,9 +289,9 @@ namespace NexusForever.WorldServer.Game.Map
                     if (colourEntry == null)
                         throw new InvalidPacketValueException();
                 }
+
                 decor.ColourShiftId = update.ColourShiftId;
             }
-
 
             if (update.DecorType != DecorType.Crate)
             {
