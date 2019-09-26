@@ -5,12 +5,12 @@ namespace NexusForever.Shared.Network.Message
         State                           = 0x0000,
         State2                          = 0x0001,
         ServerHello                     = 0x0003,
-        Client009A                      = 0x009A, // client spell cast request, very similiar to 0x04DB, but for non-abilities -> mount, teleport, etc.
         ServerMaxCharacterLevelAchieved = 0x0036,
         ServerPlayerEnteredWorld        = 0x0061,
         ServerAuthEncrypted             = 0x0076,
         ServerLogoutUpdate              = 0x0092,
         ClientActivateUnitCast          = 0x0097, // not sure about the name - almost the same as 0x00B3, but also initiates 0x07FD
+        Client009A                      = 0x009A, // client spell cast request, very similiar to 0x04DB, but for non-abilities -> mount, teleport, etc.
         ServerChangeWorld               = 0x00AD,
         ClientRequestActionSetChanges   = 0x00B1,
         Server00B2                      = 0x00B2, // this triggers the client to send 0xB1

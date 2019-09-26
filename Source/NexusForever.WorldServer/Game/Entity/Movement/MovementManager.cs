@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
 
         private EntityCommand splineCommand;
         private SplinePath splinePath;
-        private double timeToSplineGridUpdate;
+        private readonly UpdateTimer splineGridUpdateTimer = new UpdateTimer(SplineGridUpdateTime);
 
         private bool isDirty;
 
@@ -66,12 +66,12 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
 
                 UpdateSplineCommand();
 
-                timeToSplineGridUpdate -= lastTick;
-                if (timeToSplineGridUpdate <= 0d)
+                splineGridUpdateTimer.Update(lastTick);
+                if (splineGridUpdateTimer.HasElapsed)
                 {
                     // update grid position with the interpolated position on the spline
                     owner.Map.EnqueueRelocate(owner, splinePath.GetPosition());
-                    timeToSplineGridUpdate = SplineGridUpdateTime;
+                    splineGridUpdateTimer.Reset();
                 }
             }
         }
@@ -297,6 +297,28 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
         {
             List<Vector3> nodes = generator.CalculatePath();
             LaunchSpline(nodes, SplineType.Linear, mode, speed);
+        }
+
+        public void Follow(WorldEntity entity, float distance)
+        {
+            AddCommand(new SetRotationFaceUnitCommand
+            {
+                UnitId = entity.Guid
+            });
+
+            // angle is directly behind entity being followed
+            float angle = -entity.Rotation.X;
+            angle += MathF.PI / 2;
+
+            var generator = new DirectMovementGenerator
+            {
+                Begin = splinePath?.GetPosition() ?? owner.Position,
+                Final = entity.Position.GetPoint2D(angle, distance),
+                Map   = entity.Map
+            };
+
+            // TODO: calculate speed based on entity being followed.
+            LaunchGenerator(generator, 8f);
         }
 
         private T GetCommand<T>() where T : IEntityCommandModel

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 
 namespace NexusForever.Shared
@@ -92,6 +92,11 @@ namespace NexusForever.Shared
             float x = v.X + MathF.Cos(angle) * distance;
             float z = v.Z + MathF.Sin(angle) * distance;
             return new Vector3(x, v.Y, z);
+        }
+
+        public static float GetDistance(this Vector3 v1, Vector3 v2)
+        {
+            return MathF.Sqrt(MathF.Pow(v1.X - v2.X, 2) + MathF.Pow(v1.Z - v2.Z, 2));
         }
     }
 }

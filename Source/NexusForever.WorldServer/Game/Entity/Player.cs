@@ -108,7 +108,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Guid of the <see cref="VanityPet"/> currently summoned by the <see cref="Player"/>.
         /// </summary>
-        public uint PetGuid { get; set; }
+        public uint? VanityPetGuid { get; set; }
 
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
@@ -292,8 +292,16 @@ namespace NexusForever.WorldServer.Game.Entity
             base.OnAddToMap(map, guid, vector);
             map.OnAddToMap(this);
 
-            SendPacketsAfterAddToMap();
+            // resummon vanity pet if it existed before teleport
+            if (pendingTeleport?.VanityPetId != null)
+            {
+                var vanityPet = new VanityPet(this, pendingTeleport.VanityPetId.Value);
+                map.EnqueueAdd(vanityPet, Position);
+            }
 
+            pendingTeleport = null;
+
+            SendPacketsAfterAddToMap();
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
             IsLoading = false;
@@ -303,10 +311,6 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.OnRelocate(vector);
             saveMask |= PlayerSaveMask.Location;
-
-            // TODO: remove this once pathfinding is implemented
-            if (PetGuid > 0)
-                Map.EnqueueRelocate(GetVisible<VanityPet>(PetGuid), vector);
 
             ZoneMapManager.OnRelocate(vector);
         }
@@ -438,13 +442,18 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnRemoveFromMap()
         {
+            // enqueue removal of existing vanity pet if summoned
+            if (VanityPetGuid != null)
+            {
+                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
+                pet?.RemoveFromMap();
+                VanityPetGuid = null;
+            }
+
             base.OnRemoveFromMap();
 
             if (pendingTeleport != null)
-            {
                 MapManager.AddToMap(this, pendingTeleport.Info, pendingTeleport.Vector);
-                pendingTeleport = null;
-            }
         }
 
         public override void AddVisible(GridEntity entity)
@@ -598,8 +607,16 @@ namespace NexusForever.WorldServer.Game.Entity
                 // TODO: don't remove player from map if it's the same as destination
             }
 
+            // store vanity pet summoned before teleport so it can be summoned again after being added to the new map
+            uint? vanityPetId = null;
+            if (VanityPetGuid != null)
+            {
+                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
+                vanityPetId = pet?.Creature.Id;
+            }
+
             var info = new MapInfo(entry, instanceId, residenceId);
-            pendingTeleport = new PendingTeleport(info, vector);
+            pendingTeleport = new PendingTeleport(info, vector, vanityPetId);
             RemoveFromMap();
         }
 

@@ -167,6 +167,14 @@ namespace NexusForever.WorldServer.Game.Spell
             if (!(target is Player player))
                 return;
 
+            // enqueue removal of existing vanity pet if summoned
+            if (player.VanityPetGuid != null)
+            {
+                VanityPet oldVanityPet = player.GetVisible<VanityPet>(player.VanityPetGuid.Value);
+                oldVanityPet?.RemoveFromMap();
+                player.VanityPetGuid = 0u;
+            }
+
             var vanityPet = new VanityPet(player, info.Entry.DataBits00);
             player.Map.EnqueueAdd(vanityPet, player.Position);
         }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -41,6 +41,17 @@ namespace NexusForever.WorldServer.Game.Entity
             Map.EnqueueRelocate(this, position);
         }
 
+        /// <summary>
+        /// Invoked when <see cref="GridEntity"/> is enqueued to be added to <see cref="BaseMap"/>.
+        /// </summary>
+        public virtual void OnEnqueueAddToMap()
+        {
+            // deliberately empty
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="GridEntity"/> is added to <see cref="BaseMap"/>.
+        /// </summary>
         public virtual void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
             Guid     = guid;
@@ -49,6 +60,17 @@ namespace NexusForever.WorldServer.Game.Entity
             UpdateVision();
         }
 
+        /// <summary>
+        /// Invoked when <see cref="GridEntity"/> is enqueued to be removed from <see cref="BaseMap"/>.
+        /// </summary>
+        public virtual void OnEnqueueRemoveFromMap()
+        {
+            // deliberately empty
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="GridEntity"/> is removed from <see cref="BaseMap"/>.
+        /// </summary>
         public virtual void OnRemoveFromMap()
         {
             foreach (GridEntity entity in visibleEntities.Values.ToList())
@@ -60,6 +82,9 @@ namespace NexusForever.WorldServer.Game.Entity
             Map  = null;
         }
 
+        /// <summary>
+        /// Invoked when <see cref="GridEntity"/> is relocated.
+        /// </summary>
         public virtual void OnRelocate(Vector3 vector)
         {
             Position = vector;
@@ -78,12 +103,20 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Returns if <see cref="GridEntity"/> can see supplied <see cref="GridEntity"/>.
+        /// </summary>
+        public virtual bool CanSeeEntity(GridEntity entity)
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Add tracked <see cref="GridEntity"/> that is in vision range.
         /// </summary>
         public virtual void AddVisible(GridEntity entity)
         {
-            /*if (!CanSeeEntity(entity))
-                return;*/
+            if (!CanSeeEntity(entity))
+                return;
 
             visibleEntities.Add(entity.Guid, entity);
         }
