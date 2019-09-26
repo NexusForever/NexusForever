@@ -11,10 +11,19 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly ulong characterId;
 
         /// <summary>
+        /// Create a new <see cref="CharacterEntitlement"/> from an existing database model.
+        /// </summary>
+        public CharacterEntitlement(CharacterEntitlementModel model, EntitlementEntry entry)
+            : base(entry, model.Amount, false)
+        {
+            characterId = model.Id;
+        }
+
+        /// <summary>
         /// Create a new <see cref="CharacterEntitlement"/> from supplied <see cref="EntitlementEntry"/> and value.
         /// </summary>
         public CharacterEntitlement(ulong characterId, EntitlementEntry entry, uint value)
-            : base(entry, value)
+            : base(entry, value, true)
         {
             this.characterId = characterId;
         }

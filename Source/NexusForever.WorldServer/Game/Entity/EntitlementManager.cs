@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (entry == null)
                     throw new DatabaseDataException($"Account {model.Id} has invalid entitlement {entitlementModel.EntitlementId} stored!");
 
-                var entitlement = new AccountEntitlement(entitlementModel.Id, entry, entitlementModel.Amount);
+                var entitlement = new AccountEntitlement(entitlementModel, entry);
                 accountEntitlements.Add(entitlement.Type, entitlement);
             }
         }
@@ -89,7 +89,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (entry == null)
                     throw new DatabaseDataException($"Character {model.Id} has invalid entitlement {entitlementModel.EntitlementId} stored!");
 
-                var entitlement = new CharacterEntitlement(entitlementModel.Id, entry, entitlementModel.Amount);
+                var entitlement = new CharacterEntitlement(entitlementModel, entry);
                 characterEntitlements.Add(entitlement.Type, entitlement);
             }
         }

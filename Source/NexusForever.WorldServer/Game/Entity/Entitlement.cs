@@ -34,11 +34,13 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Entitlement"/> with supplied <see cref="EntitlementEntry"/> and value.
         /// </summary>
-        protected Entitlement(EntitlementEntry entry, uint value)
+        protected Entitlement(EntitlementEntry entry, uint value, bool save)
         {
-            Entry    = entry;
-            amount   = value;
-            saveMask = SaveMask.Create;
+            Entry  = entry;
+            amount = value;
+
+            if (save)
+                saveMask = SaveMask.Create;
         }
     }
 }

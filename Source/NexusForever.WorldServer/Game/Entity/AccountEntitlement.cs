@@ -11,10 +11,19 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly uint accountId;
 
         /// <summary>
+        /// Create a new <see cref="AccountEntitlement"/> from an existing database model.
+        /// </summary>
+        public AccountEntitlement(AccountEntitlementModel model, EntitlementEntry entry)
+            : base(entry, model.Amount, false)
+        {
+            accountId = model.Id;
+        }
+
+        /// <summary>
         /// Create a new <see cref="AccountEntitlement"/> from supplied <see cref="EntitlementEntry"/> and value.
         /// </summary>
         public AccountEntitlement(uint accountId, EntitlementEntry entry, uint value)
-            : base(entry, value)
+            : base(entry, value, true)
         {
             this.accountId = accountId;
         }
