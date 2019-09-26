@@ -246,6 +246,20 @@ namespace NexusForever.WorldServer.Game.Map
             EnqueueToAll(residenceDecor);
         }
 
+        private Vector3 CalculateDecorPosition(ClientHousingDecorUpdate.DecorUpdate update)
+        {
+            // TODO: research 0.835f
+            // in meantime workaround checks for House PlotIndex and sets hardcoded offset
+            var position = new Vector3(update.Position.X, update.Position.Y, update.Position.Z);
+            if (update.PlotIndex != 0)
+            {
+                position.Y += 0.835f;
+                position.Z += 0.01f;
+            }
+
+            return position;
+        }
+
         private void DecorCreate(Player player, ClientHousingDecorUpdate.DecorUpdate update)
         {
             HousingDecorInfoEntry entry = GameTableManager.HousingDecorInfo.GetEntry(update.DecorInfoId);
@@ -281,13 +295,7 @@ namespace NexusForever.WorldServer.Game.Map
                     throw new InvalidPacketValueException();
 
                 // new decor is being placed directly in the world
-                var position = new Vector3(update.Position.X, update.Position.Y, update.Position.Z);
-                if (update.PlotIndex != 0)
-                {
-                    position.Y += 0.835f;
-                    position.Z += 0.01f;
-                }
-                decor.Position = position;
+                decor.Position = CalculateDecorPosition(update);
                 decor.Rotation = update.Rotation;
                 decor.Scale    = update.Scale;
             }
@@ -318,14 +326,7 @@ namespace NexusForever.WorldServer.Game.Map
             if (decor == null)
                 throw new InvalidPacketValueException();
 
-            // TODO: research 0.835f
-            // in meantime workaround checks for House PlotIndex and sets hardcoded offset
-            var position = new Vector3(update.Position.X, update.Position.Y, update.Position.Z);
-            if (update.PlotIndex != 0)
-            {
-                position.Y += 0.835f;
-                position.Z += 0.01f;
-            }
+            var position = CalculateDecorPosition(update);
             if (decor.Type == DecorType.Crate)
             {
                 if (decor.Entry.Creature2IdActiveProp != 0u)
@@ -421,33 +422,19 @@ namespace NexusForever.WorldServer.Game.Map
                 throw new InvalidPacketValueException();
 
             if (housingRemodel.RoofDecorInfoId != 0u)
-            {
                 residence.Roof = (ushort)housingRemodel.RoofDecorInfoId;
-            }
             if (housingRemodel.WallpaperId != 0u)
-            {
                 residence.Wallpaper = (ushort)housingRemodel.WallpaperId;
-            }
             if (housingRemodel.EntrywayDecorInfoId != 0u)
-            {
                 residence.Entryway = (ushort)housingRemodel.EntrywayDecorInfoId;
-            }
             if (housingRemodel.DoorDecorInfoId != 0u)
-            {
                 residence.Door = (ushort)housingRemodel.DoorDecorInfoId;
-                }
             if (housingRemodel.SkyWallpaperId != 0u)
-            {
                 residence.Sky = (ushort)housingRemodel.SkyWallpaperId;
-            }
             if (housingRemodel.MusicId != 0u)
-            {
                 residence.Music = (ushort)housingRemodel.MusicId;
-            }
             if (housingRemodel.GroundWallpaperId != 0u)
-            {
                 residence.Ground = (ushort)housingRemodel.GroundWallpaperId;
-            }
 
             SendHousingProperties();
         }

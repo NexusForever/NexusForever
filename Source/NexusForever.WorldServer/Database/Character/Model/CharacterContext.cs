@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NexusForever.Shared;
@@ -1012,6 +1012,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("decorInfoId")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.DecorParentId)
+                    .HasColumnName("decorParentId")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.DecorType)
                     .HasColumnName("decorType")
                     .HasDefaultValueSql("'0'");
@@ -1034,10 +1038,6 @@ namespace NexusForever.WorldServer.Database.Character.Model
 
                 entity.Property(e => e.Scale)
                     .HasColumnName("scale")
-                    .HasDefaultValueSql("'0'");
-
-                entity.Property(e => e.DecorParentId)
-                    .HasColumnName("decorParentId")
                     .HasDefaultValueSql("'0'");
 
                 entity.Property(e => e.X)

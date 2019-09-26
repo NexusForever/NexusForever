@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.GameTable;
@@ -9,7 +9,6 @@ using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
- 
     public class Decor : ISaveCharacter
     {
         public ulong Id { get; }
