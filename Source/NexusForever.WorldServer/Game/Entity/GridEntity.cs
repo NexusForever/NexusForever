@@ -6,6 +6,7 @@ using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Map.Search;
 
 namespace NexusForever.WorldServer.Game.Entity
 {

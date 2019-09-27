@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using NexusForever.WorldServer.Game.Entity;
 
-namespace NexusForever.WorldServer.Game.Map
+namespace NexusForever.WorldServer.Game.Map.Search
 {
     public class SearchCheckRangeMailboxOnly : SearchCheckRange
     {

@@ -12,6 +12,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Map.Search;
 using NLog;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 using Path = System.IO.Path;

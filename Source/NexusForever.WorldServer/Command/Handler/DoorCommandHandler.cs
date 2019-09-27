@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Map.Search;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

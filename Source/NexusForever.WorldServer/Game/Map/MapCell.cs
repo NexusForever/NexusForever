@@ -5,6 +5,7 @@ using System.Numerics;
 using NexusForever.Shared;
 using NexusForever.Shared.Game.Map;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Map.Search;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
