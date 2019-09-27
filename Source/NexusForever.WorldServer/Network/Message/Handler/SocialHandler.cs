@@ -49,21 +49,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientEmote)]
         public static void HandleEmote(WorldSession session, ClientEmote emote)
         {
-            uint emoteId = emote.EmoteId;
-            uint standState = 0;
-            if (emoteId != 0)
+            StandState standState = StandState.Stand;
+            if (emote.EmoteId != 0)
             {
-                EmotesEntry entry = GameTableManager.Emotes.GetEntry(emoteId);
+                EmotesEntry entry = GameTableManager.Emotes.GetEntry(emote.EmoteId);
                 if (entry == null)
                     throw (new InvalidPacketValueException("HandleEmote: Invalid EmoteId"));
 
-                standState = entry.StandState;
+                standState = (StandState)entry.StandState;
             }
+
             session.Player.EnqueueToVisible(new ServerEmote
             {
-                Guid = session.Player.Guid,
+                Guid       = session.Player.Guid,
                 StandState = standState,
-                EmoteId = emoteId
+                EmoteId    = emote.EmoteId
             });
         }
 
