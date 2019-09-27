@@ -199,6 +199,18 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/> as an <see cref="Enum"/>.
+        /// </summary>
+        public T? GetStatEnum<T>(Stat stat) where T : struct, Enum
+        {
+            uint? value = GetStatInteger(stat);
+            if (value == null)
+                return null;
+
+            return (T)Enum.ToObject(typeof(T), value.Value);
+        }
+
+        /// <summary>
         /// Set <see cref="Stat"/> to the supplied <see cref="float"/> value.
         /// </summary>
         protected void SetStat(Stat stat, float value)
@@ -253,6 +265,14 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Set <see cref="Stat"/> to the supplied <see cref="Enum"/> value.
+        /// </summary>
+        protected void SetStat<T>(Stat stat, T value) where T : Enum, IConvertible
+        {
+            SetStat(stat, value.ToUInt32(null));
+        }
+
+        /// <summary>
         /// Update <see cref="ItemVisual"/> for multiple supplied <see cref="ItemSlot"/>.
         /// </summary>
         public void SetAppearance(IEnumerable<ItemVisual> visuals)
@@ -301,6 +321,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void EnqueueToVisible(IWritable message, bool includeSelf = false)
         {
+            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
             foreach (WorldEntity entity in visibleEntities.Values)
             {
                 if (!(entity is Player player))
