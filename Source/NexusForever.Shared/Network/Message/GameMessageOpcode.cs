@@ -148,6 +148,7 @@ namespace NexusForever.Shared.Network.Message
         ClientHousingRandomCommunityList = 0x052C,
         ClientHousingRandomResidenceList = 0x052D,
         ClientHousingVisit              = 0x0531,
+        ServerHousingResult             = 0x0536,
         ClientHousingEditMode           = 0x053C,
         ServerSpellList                 = 0x0551,
         ClientInspectPlayerRequest      = 0x0552,

@@ -27,6 +27,18 @@ namespace NexusForever.WorldServer.Game.Housing
 
         private DecorType type;
 
+        public uint PlotIndex
+        {
+            get => plotIndex;
+            set
+            {
+                plotIndex = value;
+                saveMask |= DecorSaveMask.PlotIndex;
+            }
+        }
+
+        private uint plotIndex;
+
         public Vector3 Position
         {
             get => position;
@@ -98,6 +110,7 @@ namespace NexusForever.WorldServer.Game.Housing
             DecorId       = model.DecorId;
             Entry         = GameTableManager.Instance.HousingDecorInfo.GetEntry(model.DecorInfoId);
             type          = (DecorType)model.DecorType;
+            plotIndex     = model.PlotIndex;
             position      = new Vector3(model.X, model.Y, model.Z);
             rotation      = new Quaternion(model.Qx, model.Qy, model.Qz, model.Qw);
             scale         = model.Scale;
@@ -144,6 +157,7 @@ namespace NexusForever.WorldServer.Game.Housing
                     DecorId       = DecorId,
                     DecorInfoId   = Entry.Id,
                     DecorType     = (uint)Type,
+                    PlotIndex     = PlotIndex,
                     X             = Position.X,
                     Y             = Position.Y,
                     Z             = Position.Z,
@@ -181,6 +195,11 @@ namespace NexusForever.WorldServer.Game.Housing
                 {
                     model.DecorType = (uint)Type;
                     entity.Property(p => p.DecorType).IsModified = true;
+                }
+                if ((saveMask & DecorSaveMask.PlotIndex) != 0)
+                {
+                    model.PlotIndex = PlotIndex;
+                    entity.Property(p => p.PlotIndex).IsModified = true;
                 }
                 if ((saveMask & DecorSaveMask.Position) != 0)
                 {
