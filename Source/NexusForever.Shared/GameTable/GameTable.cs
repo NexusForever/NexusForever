@@ -5,12 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.GameTable.Static;
 using NexusForever.Shared.Network;
+using NLog;
 
 namespace NexusForever.Shared.GameTable
 {
     public class GameTable<T> where T : class, new()
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         private const int minimumBufferSize = 1024;
         private const int maximumBufferSize = 16 * 1024;
         private const int recordSizeMultiplier = 32; // How many records do we want buffered.
@@ -140,8 +145,18 @@ namespace NexusForever.Shared.GameTable
                 if (attribute != null)
                 {
                     Type elementType = modelField.FieldType.GetElementType();
-                    for (uint i = 0u; i < attribute.Length; i++)
-                        ValidateModelField(fields[fieldIndex++].Type, elementType);
+                    if (elementType == null)
+                    {
+                        Type spellEffectData = typeof(SpellEffectDataDefault);
+                        FieldInfo[] spellEffectFields = spellEffectData.GetFields();
+                        for (uint i = 0u; i < attribute.Length; i++)
+                            fieldIndex++;
+                        // TODO: Figure out how to validate length of values instead of exact matches, because the derived structure contains the real typings we want
+                        //ValidateModelField(fields[fieldIndex++].Type, spellEffectFields[i].FieldType);
+                    }
+                    else
+                        for (uint i = 0u; i < attribute.Length; i++)
+                            ValidateModelField(fields[fieldIndex++].Type, elementType);
                 }
                 else
                     ValidateModelField(fields[fieldIndex++].Type, modelField.FieldType);
@@ -178,28 +193,62 @@ namespace NexusForever.Shared.GameTable
                         GameTableFieldArrayAttribute attribute = attributeCache[modelField];
                         if (attribute != null)
                         {
-                            Array array = Array.CreateInstance(modelField.FieldType.GetElementType(), attribute.Length);
-                            for (uint j = 0u; j < attribute.Length; j++)
+                            if (modelField.FieldType.GetElementType() != null)
                             {
-                                DataType dataType = fields[fieldIndex++].Type;
-                                switch (dataType)
+                                Array array = Array.CreateInstance(modelField.FieldType.GetElementType(), attribute.Length);
+                                for (uint j = 0u; j < attribute.Length; j++)
                                 {
-                                    case DataType.UInt:
-                                        array.SetValue(reader.ReadUInt32(), j);
-                                        break;
-                                    case DataType.Single:
-                                        array.SetValue(reader.ReadSingle(), j);
-                                        break;
-                                    case DataType.Boolean:
-                                        array.SetValue(Convert.ToBoolean(reader.ReadUInt32()), j);
-                                        break;
-                                    case DataType.ULong:
-                                        array.SetValue(reader.ReadUInt64(), j);
-                                        break;
+                                    DataType dataType = fields[fieldIndex++].Type;
+                                    switch (dataType)
+                                    {
+                                        case DataType.UInt:
+                                            array.SetValue(reader.ReadUInt32(), j);
+                                            break;
+                                        case DataType.Single:
+                                            array.SetValue(reader.ReadSingle(), j);
+                                            break;
+                                        case DataType.Boolean:
+                                            array.SetValue(Convert.ToBoolean(reader.ReadUInt32()), j);
+                                            break;
+                                        case DataType.ULong:
+                                            array.SetValue(reader.ReadUInt64(), j);
+                                            break;
+                                    }
                                 }
-                            }
 
-                            modelField.SetValue(entry, array);
+                                modelField.SetValue(entry, array);
+                            }
+                            else
+                            {
+                                ICustomGameTableStructure customGameTableStructure = null;
+                                if (entry is Spell4EffectsEntry spell4Effects)
+                                    customGameTableStructure = GameTableManager.GetSpellEffectData(spell4Effects.EffectType);
+
+                                for (uint j = 0u; j < attribute.Length; j++)
+                                {
+                                    FieldInfo customField = customGameTableStructure.GetType().GetFields()[j];
+                                    switch (Type.GetTypeCode(customField.FieldType))
+                                    {
+                                        case TypeCode.UInt32:
+                                            customField.SetValue(customGameTableStructure, reader.ReadUInt32());
+                                            break;
+                                        case TypeCode.Single:
+                                            customField.SetValue(customGameTableStructure, reader.ReadSingle());
+                                            break;
+                                        case TypeCode.Boolean:
+                                            customField.SetValue(customGameTableStructure, Convert.ToBoolean(reader.ReadUInt32()));
+                                            break;
+                                        case TypeCode.UInt64:
+                                            customField.SetValue(customGameTableStructure, reader.ReadUInt64());
+                                            break;
+                                    }
+
+                                    fieldIndex++;
+                                }
+
+                                modelField.SetValue(entry, customGameTableStructure);
+                            }
+                            
                         }
                         else
                         {

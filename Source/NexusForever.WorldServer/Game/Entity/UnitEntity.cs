@@ -41,7 +41,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spell4Id);
             if (spell4Entry == null)
-                throw new ArgumentOutOfRangeException();
+                return;
+                //throw new ArgumentOutOfRangeException("spell4Id", $"{spell4Id} not found in Spell4 Entries.");
 
             CastSpell(spell4Entry.Spell4BaseIdBaseSpell, (byte)spell4Entry.TierIndex, parameters);
         }

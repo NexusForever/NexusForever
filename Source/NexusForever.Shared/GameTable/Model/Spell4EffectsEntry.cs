@@ -1,3 +1,5 @@
+using NexusForever.Shared.GameTable.Static;
+
 namespace NexusForever.Shared.GameTable.Model
 {
     public class Spell4EffectsEntry
@@ -11,16 +13,8 @@ namespace NexusForever.Shared.GameTable.Model
         public uint TickTime;
         public uint DurationTime;
         public uint Flags;
-        public uint DataBits00;
-        public uint DataBits01;
-        public uint DataBits02;
-        public uint DataBits03;
-        public uint DataBits04;
-        public uint DataBits05;
-        public uint DataBits06;
-        public uint DataBits07;
-        public uint DataBits08;
-        public uint DataBits09;
+        [GameTableFieldArray(10)]
+        public ICustomGameTableStructure DataBits;
         public uint InnateCostPerTickType0;
         public uint InnateCostPerTickType1;
         public uint InnateCostPerTick0;

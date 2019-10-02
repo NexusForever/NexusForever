@@ -804,5 +804,20 @@ namespace NexusForever.Shared.GameTable
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        public static ICustomGameTableStructure GetSpellEffectData(uint effectType)
+        {
+            switch (effectType)
+            {
+                case 8:
+                    return new SpellEffectDataDamage();
+                case 11:
+                    return new SpellEffectDataUnitPropertyModifier();
+                case 26:
+                    return new SpellEffectDataProxy();
+                default:
+                    return new SpellEffectDataDefault();
+            }
+        }
     }
 }
