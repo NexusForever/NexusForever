@@ -8,6 +8,7 @@ namespace NexusForever.WorldServer.Game.Static
         Item,
         World,
         Currency,
-        AccountCurrency
+        AccountCurrency,
+        Achievement
     }
 }

@@ -12,6 +12,8 @@ namespace NexusForever.Shared.Network.Message
         ClientActivateUnitCast          = 0x0097, // not sure about the name - almost the same as 0x00B3, but also initiates 0x07FD
         Client009A                      = 0x009A, // client spell cast request, very similiar to 0x04DB, but for non-abilities -> mount, teleport, etc.
         ServerChangeWorld               = 0x00AD,
+        ServerAchievementInit           = 0x00AE,
+        ServerAchievementUpdate         = 0x00AF,
         ClientRequestActionSetChanges   = 0x00B1,
         Server00B2                      = 0x00B2, // this triggers the client to send 0xB1
         ClientActivateUnit              = 0x00B3,
@@ -192,6 +194,7 @@ namespace NexusForever.Shared.Network.Message
         ServerUnlockPetFlair            = 0x068D,
         ServerChangePetStance           = 0x068F,
         ServerPublicEventStart          = 0x0700,
+        ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
         ClientTitleSet                  = 0x078E,

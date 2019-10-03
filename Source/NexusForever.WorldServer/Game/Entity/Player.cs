@@ -15,6 +15,7 @@ using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -125,6 +126,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public MailManager MailManager { get; }
         public ZoneMapManager ZoneMapManager { get; }
         public QuestManager QuestManager { get; }
+        public CharacterAchievementManager AchievementManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -170,6 +172,7 @@ namespace NexusForever.WorldServer.Game.Entity
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
+            AchievementManager      = new CharacterAchievementManager(this, model);
 
             Session.EntitlementManager.OnNewCharacter(model);
 
@@ -426,6 +429,8 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager.SendInitialPackets();
             Session.AccountCurrencyManager.SendInitialPackets();
             QuestManager.SendInitialPackets();
+            AchievementManager.SendInitialPackets();
+
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
                 InnateIndex = InnateIndex
@@ -760,6 +765,7 @@ namespace NexusForever.WorldServer.Game.Entity
             MailManager.Save(context);
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
+            AchievementManager.Save(context);
 
             Session.EntitlementManager.Save(context);
         }

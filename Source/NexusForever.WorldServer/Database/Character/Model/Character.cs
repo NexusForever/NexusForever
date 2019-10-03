@@ -7,6 +7,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
     {
         public Character()
         {
+            CharacterAchievement = new HashSet<CharacterAchievement>();
             CharacterActionSetAmp = new HashSet<CharacterActionSetAmp>();
             CharacterActionSetShortcut = new HashSet<CharacterActionSetShortcut>();
             CharacterAppearance = new HashSet<CharacterAppearance>();
@@ -56,6 +57,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public string OriginalName { get; set; }
 
         public virtual Residence Residence { get; set; }
+        public virtual ICollection<CharacterAchievement> CharacterAchievement { get; set; }
         public virtual ICollection<CharacterActionSetAmp> CharacterActionSetAmp { get; set; }
         public virtual ICollection<CharacterActionSetShortcut> CharacterActionSetShortcut { get; set; }
         public virtual ICollection<CharacterAppearance> CharacterAppearance { get; set; }
