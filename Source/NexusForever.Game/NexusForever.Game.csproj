@@ -19,8 +19,4 @@
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Combat\" />
-  </ItemGroup>
-
 </Project>

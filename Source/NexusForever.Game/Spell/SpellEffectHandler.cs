@@ -1,6 +1,7 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Combat;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
@@ -19,21 +20,14 @@ namespace NexusForever.Game.Spell
             if (!target.CanAttack(spell.Caster))
                 return;
 
-            // TODO: Merge DamageCalculator, uncomment below lines, and delete the hardcoded values before target takes damage.
+            uint damage = 0;
+            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType00, info.Entry.ParameterValue00);
+            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType01, info.Entry.ParameterValue01);
+            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType02, info.Entry.ParameterValue02);
+            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType03, info.Entry.ParameterValue03);
 
-            // uint damage = 0;
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType00, info.Entry.ParameterValue00);
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType01, info.Entry.ParameterValue01);
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType02, info.Entry.ParameterValue02);
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType03, info.Entry.ParameterValue03);
+            DamageCalculator.Instance.CalculateDamage(spell.Caster, target, spell, ref info, (DamageType)info.Entry.DamageType, damage);
 
-            // DamageCalculator.Instance.CalculateDamage(caster, target, this, info, (DamageType)info.Entry.DamageType, damage);
-
-            info.AddDamage((DamageType)info.Entry.DamageType, 50);
-            info.Damage.ShieldAbsorbAmount = 25;
-            info.Damage.AdjustedDamage = 50;
-            
-            // TODO: Deal damage
             target.TakeDamage(spell.Caster, info.Damage);
         }
 
