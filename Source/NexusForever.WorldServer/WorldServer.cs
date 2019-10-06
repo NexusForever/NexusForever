@@ -29,6 +29,7 @@ using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
 using NexusForever.WorldServer.Game.TextFilter;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Game.Combat;
 
 namespace NexusForever.WorldServer
 {
@@ -96,6 +97,8 @@ namespace NexusForever.WorldServer
             ServerManager.Instance.Initialise(RealmId); 
 
             MessageManager.Instance.Initialise();
+            DamageCalculator.Instance.Initialise();
+
             NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
 
             TextFilterManager.Instance.Initialise();
