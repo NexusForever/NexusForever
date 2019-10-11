@@ -202,7 +202,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<Faction2Entry> Faction2 { get; private set; }
 
+        [GameData]
         public static GameTable<Faction2RelationshipEntry> Faction2Relationship { get; private set; }
+
         public static GameTable<FinishingMoveDeathVisualEntry> FinishingMoveDeathVisual { get; private set; }
         public static GameTable<FullScreenEffectEntry> FullScreenEffect { get; private set; }
 

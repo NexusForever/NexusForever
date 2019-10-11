@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared.GameTable;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Movement;
@@ -295,6 +296,28 @@ namespace NexusForever.WorldServer.Game.Entity
             }
             else
                 itemVisuals.Remove(visual.Slot);
+        }
+
+        /// <summary>
+        /// Get a <see cref="Reaction"/> value for this <see cref="WorldEntity"/> towards a supplied <see cref="WorldEntity"/>
+        /// </summary>
+        public Reaction GetReaction(WorldEntity entity)
+        {
+            int relationValue = GetRelationship((uint)entity.Faction1, (uint)entity.Faction2);
+
+            // TODO: There are a handful of relationships that aren't Hostile, Neutral, or Friendly. Investigate what the values mean.
+            return relationValue > -1 && Enum.IsDefined(typeof(Reaction), relationValue) ? (Reaction)relationValue : Reaction.Unknown;
+        }
+
+        /// <summary>
+        /// Return a relationship value between 2 supplied factions
+        /// </summary>
+        private int GetRelationship(uint faction1, uint faction2)
+        {
+            int faction1Relationship = AssetManager.GetRelationshipValue((uint)Faction1, faction1);
+            int faction2Relationship = AssetManager.GetRelationshipValue((uint)Faction2, faction2);
+
+            return faction1Relationship == faction2Relationship ? faction1Relationship : -1;
         }
 
         public IEnumerable<ItemVisual> GetAppearance()

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
@@ -12,6 +13,7 @@ namespace NexusForever.WorldServer.Game
 {
     public static class AssetManager
     {
+
         public static ImmutableDictionary<InventoryLocation, uint> InventoryLocationCapacities { get; private set; }
 
         /// <summary>
@@ -35,6 +37,8 @@ namespace NexusForever.WorldServer.Game
 
         private static ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
+        public static ImmutableDictionary</*factionId*/uint, ImmutableDictionary</*targetFactionId*/uint, /*factionLevel*/uint>> factionRelationships;
+
         private static ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
         private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
@@ -47,6 +51,7 @@ namespace NexusForever.WorldServer.Game
             nextMailId      = CharacterDatabase.GetNextMailId() + 1ul;
 
             CacheCharacterCustomisations();
+            CacheFactionLevels();
             CacheInventoryEquipSlots();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
@@ -66,6 +71,67 @@ namespace NexusForever.WorldServer.Game
             }
 
             characterCustomisations = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
+        }
+
+        private static void CacheFactionLevels()
+        {
+            ImmutableDictionary<uint, ImmutableDictionary<uint, uint>>.Builder entries = ImmutableDictionary.CreateBuilder<uint, ImmutableDictionary<uint, uint>>();
+            var relationships = GameTableManager.Faction2Relationship.Entries;
+
+            foreach (Faction2RelationshipEntry relationship in relationships.OrderBy(i => i.FactionId0))
+            {
+                ImmutableDictionary<uint, uint>.Builder relationshipList = ImmutableDictionary.CreateBuilder<uint, uint>();
+                relationshipList.Add(relationship.FactionId1, relationship.FactionLevel);
+                foreach (uint child in GetFactionChildren(relationship.FactionId1))
+                    relationshipList.Add(child, relationship.FactionLevel);
+
+                if (entries.ContainsKey(relationship.FactionId0))
+                {
+                    entries[relationship.FactionId0].ToList().ForEach(x => relationshipList[x.Key] = x.Value);
+                    entries[relationship.FactionId0] = relationshipList.ToImmutable();
+                }
+                else
+                    entries.Add(relationship.FactionId0, relationshipList.ToImmutable());
+            }
+
+            foreach (Faction2RelationshipEntry relationship in relationships.OrderBy(i => i.FactionId1))
+            {
+                ImmutableDictionary<uint, uint>.Builder relationshipList = ImmutableDictionary.CreateBuilder<uint, uint>();
+                relationshipList.Add(relationship.FactionId0, relationship.FactionLevel);
+                foreach (uint child in GetFactionChildren(relationship.FactionId0))
+                    relationshipList.Add(child, relationship.FactionLevel);
+
+                if (entries.ContainsKey(relationship.FactionId1))
+                {
+                    entries[relationship.FactionId1].ToList().ForEach(x => relationshipList[x.Key] = x.Value);
+                    entries[relationship.FactionId1] = relationshipList.ToImmutable();
+                }
+                else
+                    entries.Add(relationship.FactionId1, relationshipList.ToImmutable());
+            }
+
+            factionRelationships = entries.ToImmutable();
+        }
+
+        private static IEnumerable<uint> GetFactionChildren(uint parentId)
+        {
+            List<uint> childIds = new List<uint>();
+
+            List<uint> parents = new List<uint>
+            {
+                parentId
+            };
+            while (parents.Count > 0)
+            {
+                var value = parents.ToList()[0];
+                var children = GameTableManager.Faction2.Entries.Where(x => x.Faction2IdParent == value);
+                childIds.AddRange(children.Select(i => i.Id));
+                parents.AddRange(children.Select(i => i.Id));
+
+                parents.RemoveAt(0);
+            }
+
+            return childIds.Distinct();
         }
 
         private static void CacheInventoryEquipSlots()
@@ -153,6 +219,17 @@ namespace NexusForever.WorldServer.Game
         public static ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
         {
             return itemDisplaySourcesEntry.TryGetValue(itemSource, out ImmutableList<ItemDisplaySourceEntryEntry> entries) ? entries : null;
+        }
+
+        /// <summary>
+        /// Returns an <see cref="int"/> value describing the relationship between 2 faction IDs
+        /// </summary>
+        /// <param name="unitFaction"></param>
+        /// <param name="targetFaction"></param>
+        /// <returns></returns>
+        public static int GetRelationshipValue(uint unitFaction, uint targetFaction)
+        {
+            return factionRelationships.TryGetValue(unitFaction, out ImmutableDictionary<uint, uint> relationships) ? relationships.TryGetValue(targetFaction, out uint value) ? (int)value : -1 : -1;
         }
 
         /// <summary>
