@@ -1,10 +1,10 @@
 using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Game.Housing
@@ -92,7 +92,7 @@ namespace NexusForever.WorldServer.Game.Housing
         /// <summary>
         /// Create a new <see cref="Decor"/> from an existing database model.
         /// </summary>
-        public Decor(ResidenceDecor model)
+        public Decor(ResidenceDecorModel model)
         {
             Id            = model.Id;
             DecorId       = model.DecorId;
@@ -138,7 +138,7 @@ namespace NexusForever.WorldServer.Game.Housing
             if ((saveMask & DecorSaveMask.Create) != 0)
             {
                 // decor doesn't exist in database, all infomation must be saved
-                context.Add(new ResidenceDecor
+                context.Add(new ResidenceDecorModel
                 {
                     Id            = Id,
                     DecorId       = DecorId,
@@ -158,7 +158,7 @@ namespace NexusForever.WorldServer.Game.Housing
             }
             else if ((saveMask & DecorSaveMask.Delete) != 0)
             {
-                var model = new ResidenceDecor
+                var model = new ResidenceDecorModel
                 {
                     Id      = Id,
                     DecorId = DecorId
@@ -169,14 +169,14 @@ namespace NexusForever.WorldServer.Game.Housing
             else
             {
                 // decor already exists in database, save only data that has been modified
-                var model = new ResidenceDecor
+                var model = new ResidenceDecorModel
                 {
                     Id      = Id,
                     DecorId = DecorId
                 };
 
                 // could probably clean this up with reflection, works for the time being
-                EntityEntry<ResidenceDecor> entity = context.Attach(model);
+                EntityEntry<ResidenceDecorModel> entity = context.Attach(model);
                 if ((saveMask & DecorSaveMask.Type) != 0)
                 {
                     model.DecorType = (uint)Type;

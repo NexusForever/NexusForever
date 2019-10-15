@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Mail.Static;
 using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 
@@ -15,14 +15,14 @@ namespace NexusForever.WorldServer.Game.Mail
         private MailAttachmentSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="CharacterMailAttachment"/> model.
+        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="MailAttachmentModel"/> model.
         /// </summary>
         /// <param name="model"></param>
-        public MailAttachment(CharacterMailAttachment model)
+        public MailAttachment(MailAttachmentModel model)
         {
             Id       = model.Id;
             Index    = model.Index;
-            Item     = new ItemEntity(model.ItemGu);
+            Item     = new ItemEntity(model.Item);
 
             saveMask = MailAttachmentSaveMask.None;
         }
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Game.Mail
             {
                 if ((saveMask & MailAttachmentSaveMask.Create) != 0)
                 {
-                    context.Add(new CharacterMailAttachment
+                    context.Add(new MailAttachmentModel
                     {
                         Id       = Id,
                         Index    = Index,
@@ -62,7 +62,7 @@ namespace NexusForever.WorldServer.Game.Mail
                 }
                 else if ((saveMask & MailAttachmentSaveMask.Delete) != 0)
                 {
-                    var model = new CharacterMailAttachment
+                    var model = new MailAttachmentModel
                     {
                         Id    = Id,
                         Index = Index

@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -18,11 +18,11 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CurrencyManager"/> from <see cref="Player"/> database model.
         /// </summary>
-        public CurrencyManager(Player owner, Character model)
+        public CurrencyManager(Player owner, CharacterModel model)
         {
             player = owner;
 
-            foreach (CharacterCurrency currencyModel in model.CharacterCurrency)
+            foreach (CharacterCurrencyModel currencyModel in model.Currencies)
             {
                 var currency = new Currency(currencyModel);
                 currencies.Add(currency.Id, currency);

@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NexusForever.AuthServer.Network.Message.Model;
 using NexusForever.AuthServer.Network.Message.Static;
+using NexusForever.Database.Auth.Model;
+using NexusForever.Shared;
 using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database.Auth;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.Network.Message;
@@ -30,7 +32,8 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 return;
             }
 
-            session.EnqueueEvent(new TaskGenericEvent<Account>(AuthDatabase.GetAccountAsync(helloAuth.Email, helloAuth.GameToken.Guid),
+            Guid gameToken = helloAuth.GameToken.Guid;
+            session.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.AuthDatabase.GetAccountAsync(helloAuth.Email, gameToken.ToByteArray().ToHexString()),
                 account =>
             {
                 if (account == null)
@@ -60,7 +63,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 });
 
                 byte[] sessionKey = RandomProvider.GetBytes(16u);
-                session.EnqueueEvent(new TaskEvent(AuthDatabase.UpdateAccountSessionKey(account, sessionKey),
+                session.EnqueueEvent(new TaskEvent(DatabaseManager.AuthDatabase.UpdateAccountSessionKey(account, sessionKey),
                     () =>
                 {
                     session.EnqueueMessageEncrypted(new ServerRealmInfo

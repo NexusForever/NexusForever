@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.WorldServer.Database.World;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
+using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Game.Storefront.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -39,13 +39,13 @@ namespace NexusForever.WorldServer.Game.Storefront
 
         private static void InitialiseStoreCategories()
         {
-            IEnumerable<StoreCategory> storeCategoryModels = WorldDatabase.GetStoreCategories()
+            IEnumerable<StoreCategoryModel> storeCategoryModels = DatabaseManager.WorldDatabase.GetStoreCategories()
                 .OrderBy(i => i.Id)
                 .Where(x => x.ParentId != 0 // exclude top level parent category placeholder
                     && Convert.ToBoolean(x.Visible));
 
             var builder = ImmutableDictionary.CreateBuilder<uint, Category>();
-            foreach (StoreCategory category in storeCategoryModels)
+            foreach (StoreCategoryModel category in storeCategoryModels)
                 builder.Add(category.Id, new Category(category));
 
             storeCategories = builder.ToImmutable();
@@ -53,17 +53,17 @@ namespace NexusForever.WorldServer.Game.Storefront
 
         private static void InitialiseStoreOfferGroups()
         {
-            IEnumerable<StoreOfferGroup> offerGroupModels = WorldDatabase.GetStoreOfferGroups()
+            IEnumerable<StoreOfferGroupModel> offerGroupModels = DatabaseManager.WorldDatabase.GetStoreOfferGroups()
                 .OrderBy(i => i.Id)
                 .Where(x => Convert.ToBoolean(x.Visible));
 
             var offerGroupBuilder = ImmutableDictionary.CreateBuilder<uint, OfferGroup>();
             var offerBuilder      = ImmutableDictionary.CreateBuilder<uint, uint>();
-            foreach (StoreOfferGroup offerGroup in offerGroupModels)
+            foreach (StoreOfferGroupModel offerGroup in offerGroupModels)
             {
                 offerGroupBuilder.Add(offerGroup.Id, new OfferGroup(offerGroup));
 
-                foreach (StoreOfferItem offerItem in offerGroup.StoreOfferItem)
+                foreach (StoreOfferItemModel offerItem in offerGroup.Items)
                     offerBuilder.Add(offerItem.Id, offerGroup.Id); // Cache the offer item's group ID, to lookup the entry.
             }
                 

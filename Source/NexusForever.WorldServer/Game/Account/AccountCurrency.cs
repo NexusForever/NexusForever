@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Account.Static;
-using AccountCurrencyModel = NexusForever.Shared.Database.Auth.Model.AccountCurrency;
 using ServerAccountCurrency = NexusForever.WorldServer.Network.Message.Model.Shared.AccountCurrency;
 
 namespace NexusForever.WorldServer.Game.Account
 {
-    class AccountCurrency
+    public class AccountCurrency
     {
         public AccountCurrencyType CurrencyId { get; }
         public AccountCurrencyTypeEntry Entry { get; }

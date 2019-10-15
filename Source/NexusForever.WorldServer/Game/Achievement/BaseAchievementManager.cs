@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using NexusForever.Database.Character;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Prerequisite;

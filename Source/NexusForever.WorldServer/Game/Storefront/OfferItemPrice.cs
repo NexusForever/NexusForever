@@ -1,5 +1,5 @@
 using System;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
 using NexusForever.WorldServer.Game.Storefront.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Create a new <see cref="OfferItemPrice"/> from an existing database model.
         /// </summary>
-        public OfferItemPrice(StoreOfferItemPrice model)
+        public OfferItemPrice(StoreOfferItemPriceModel model)
         {
             OfferId               = model.Id;
             CurrencyId            = model.CurrencyId;

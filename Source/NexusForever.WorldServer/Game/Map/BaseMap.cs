@@ -4,17 +4,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared.Configuration;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.IO.Map;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map.Search;
 using NLog;
-using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 using Path = System.IO.Path;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -74,7 +74,7 @@ namespace NexusForever.WorldServer.Game.Map
         private void CacheEntitySpawns()
         {
             uint count = 0u;
-            foreach (EntityModel model in WorldDatabase.GetEntities((ushort)Entry.Id))
+            foreach (EntityModel model in DatabaseManager.WorldDatabase.GetEntities((ushort)Entry.Id))
             {
                 entityCache.AddEntity(model);
                 count++;

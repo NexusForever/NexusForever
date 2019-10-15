@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using NLog;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
@@ -25,6 +24,7 @@ using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
 using NexusForever.WorldServer.Network;
+using NLog;
 
 namespace NexusForever.WorldServer
 {
@@ -49,6 +49,7 @@ namespace NexusForever.WorldServer
 
             ConfigurationManager<WorldServerConfiguration>.Initialise("WorldServer.json");
             DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Config.Database);
+            DatabaseManager.Migrate();
 
             DisableManager.Instance.Initialise();
 

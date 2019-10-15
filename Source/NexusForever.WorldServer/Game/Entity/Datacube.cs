@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -38,7 +39,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Datacube"/> from an existing database model.
         /// </summary>
-        public Datacube(CharacterDatacube model)
+        public Datacube(CharacterDatacubeModel model)
         {
             Id       = model.Datacube;
             Type     = (DatacubeType)model.Type;
@@ -50,7 +51,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (saveMask == DatacubeSaveMask.None)
                 return;
 
-            var model = new CharacterDatacube
+            var model = new CharacterDatacubeModel
             {
                 Id       = characterId,
                 Type     = (byte)Type,
@@ -62,7 +63,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 context.Add(model);
             else if ((saveMask & DatacubeSaveMask.Progress) != 0)
             {
-                EntityEntry<CharacterDatacube> entity = context.Attach(model);
+                EntityEntry<CharacterDatacubeModel> entity = context.Attach(model);
                 entity.Property(p => p.Progress).IsModified = true;
             }
 

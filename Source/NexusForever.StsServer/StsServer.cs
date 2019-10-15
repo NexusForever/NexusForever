@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using NLog;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Network;
 using NexusForever.StsServer.Network;
 using NexusForever.StsServer.Network.Message;
+using NLog;
 
 namespace NexusForever.StsServer
 {
@@ -29,8 +29,8 @@ namespace NexusForever.StsServer
             log.Info("Initialising...");
 
             ConfigurationManager<StsServerConfiguration>.Initialise("StsServer.json");
-
             DatabaseManager.Initialise(ConfigurationManager<StsServerConfiguration>.Config.Database);
+            
             MessageManager.Initialise();
             NetworkManager<StsSession>.Initialise(ConfigurationManager<StsServerConfiguration>.Config.Network);
 

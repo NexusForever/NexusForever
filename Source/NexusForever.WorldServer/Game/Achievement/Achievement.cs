@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
+using NexusForever.Database.Character;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using AchievementNetworkModel = NexusForever.WorldServer.Network.Message.Model.Shared.Achievement;
 
 namespace NexusForever.WorldServer.Game.Achievement

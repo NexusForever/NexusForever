@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
 using NexusForever.WorldServer.Game.Storefront.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Create a new <see cref="OfferGroup"/> from an existing database model.
         /// </summary>
-        public OfferGroup(StoreOfferGroup model)
+        public OfferGroup(StoreOfferGroupModel model)
         {
             Id           = model.Id;
             DisplayFlags = (DisplayFlag)model.DisplayFlags;
@@ -39,7 +39,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             Visible      = Convert.ToBoolean(model.Visible);
 
             var builder = ImmutableList.CreateBuilder<Category>();
-            foreach (StoreOfferGroupCategory categoryModel in model.StoreOfferGroupCategory)
+            foreach (StoreOfferGroupCategoryModel categoryModel in model.Categories)
             {
                 if (Convert.ToBoolean(categoryModel.Visible))
                 {
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Game.Storefront
 
             Categories = builder.ToImmutable();
 
-            foreach (StoreOfferItem offerItem in model.StoreOfferItem)
+            foreach (StoreOfferItemModel offerItem in model.Items)
             {
                 var offer = new OfferItem(offerItem);
                 offerItems.Add(offer.Id, offer);

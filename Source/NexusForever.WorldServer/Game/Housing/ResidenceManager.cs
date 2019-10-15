@@ -3,11 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NexusForever.Database.Character.Model;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Game.Entity;
-using ResidenceModel = NexusForever.WorldServer.Database.Character.Model.Residence;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
@@ -38,10 +38,10 @@ namespace NexusForever.WorldServer.Game.Housing
 
         public static void Initialise()
         {
-            nextResidenceId = CharacterDatabase.GetNextResidenceId() + 1ul;
-            nextDecorId     = CharacterDatabase.GetNextDecorId() + 1ul;
+            nextResidenceId = DatabaseManager.CharacterDatabase.GetNextResidenceId() + 1ul;
+            nextDecorId     = DatabaseManager.CharacterDatabase.GetNextDecorId() + 1ul;
 
-            foreach (ResidenceModel residence in CharacterDatabase.GetPublicResidences())
+            foreach (ResidenceModel residence in DatabaseManager.CharacterDatabase.GetPublicResidences())
                 RegisterResidenceVists(residence.Id, residence.Owner.Name, residence.Name);
         }
 
@@ -52,7 +52,7 @@ namespace NexusForever.WorldServer.Game.Housing
             {
                 var tasks = new List<Task>();
                 foreach (Residence residence in residences.Values)
-                    tasks.Add(CharacterDatabase.SaveResidence(residence));
+                    tasks.Add(DatabaseManager.CharacterDatabase.Save(residence.Save));
 
                 Task.WaitAll(tasks.ToArray());
 
@@ -80,7 +80,7 @@ namespace NexusForever.WorldServer.Game.Housing
             if (residence != null)
                 return residence;
 
-            ResidenceModel model = await CharacterDatabase.GetResidence(residenceId);
+            ResidenceModel model = await DatabaseManager.CharacterDatabase.GetResidence(residenceId);
             if (model == null)
                 return null;
 
@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Housing
             if (ownerCache.TryGetValue(name, out ulong residenceId))
                 return GetCachedResidence(residenceId);
 
-            ResidenceModel model = await CharacterDatabase.GetResidence(name);
+            ResidenceModel model = await DatabaseManager.CharacterDatabase.GetResidence(name);
             if (model == null)
                 return null;
 

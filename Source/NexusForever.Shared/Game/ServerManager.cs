@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.Shared.Database.Auth;
+using NexusForever.Shared.Database;
 
 namespace NexusForever.Shared.Game
 {
@@ -17,14 +17,14 @@ namespace NexusForever.Shared.Game
 
         private static void InitialiseServers()
         {
-            Servers = AuthDatabase.GetServers()
+            Servers = DatabaseManager.AuthDatabase.GetServers()
                 .Select(s => new ServerInfo(s))
                 .ToImmutableList();
         }
 
         private static void InitialiseServerMessages()
         {
-            ServerMessages = AuthDatabase.GetServerMessages()
+            ServerMessages = DatabaseManager.AuthDatabase.GetServerMessages()
                 .GroupBy(m => m.Index)
                 .Select(g => new ServerMessageInfo(g))
                 .ToImmutableList();

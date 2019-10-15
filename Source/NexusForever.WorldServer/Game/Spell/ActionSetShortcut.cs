@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Game.Entity.Static;
 
@@ -66,7 +66,7 @@ namespace NexusForever.WorldServer.Game.Spell
         /// <summary>
         /// Create a new <see cref="ActionSetShortcut"/> from an existing database model.
         /// </summary>
-        public ActionSetShortcut(ActionSet actionSet, CharacterActionSetShortcut model)
+        public ActionSetShortcut(ActionSet actionSet, CharacterActionSetShortcutModel model)
         {
             this.actionSet = actionSet;
             Location       = (UILocation)model.Location;
@@ -96,7 +96,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if ((saveMask & ShortcutSaveMask.Create) != 0)
             {
-                var model = new CharacterActionSetShortcut
+                var model = new CharacterActionSetShortcutModel
                 {
                     Id           = actionSet.Owner,
                     SpecIndex    = actionSet.Index,
@@ -110,7 +110,7 @@ namespace NexusForever.WorldServer.Game.Spell
             }
             else
             {
-                var model = new CharacterActionSetShortcut
+                var model = new CharacterActionSetShortcutModel
                 {
                     Id        = actionSet.Owner,
                     SpecIndex = actionSet.Index,
@@ -121,7 +121,7 @@ namespace NexusForever.WorldServer.Game.Spell
                     context.Entry(model).State = EntityState.Deleted;
                 else
                 {
-                    EntityEntry<CharacterActionSetShortcut> entity = context.Attach(model);
+                    EntityEntry<CharacterActionSetShortcutModel> entity = context.Attach(model);
                     if ((saveMask & ShortcutSaveMask.ShortcutType) != 0)
                     {
                         model.ShortcutType = (byte)ShortcutType;

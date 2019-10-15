@@ -1,9 +1,9 @@
-﻿using NexusForever.Shared.GameTable;
+﻿using NexusForever.Database.World.Model;
+using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.Initialise(model);
 
-            if (model.EntityVendor != null)
+            if (model.Vendor != null)
             {
                 CreateFlags |= EntityCreateFlag.Vendor;
                 VendorInfo = new VendorInfo(model);

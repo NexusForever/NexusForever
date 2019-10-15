@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using ItemModel = NexusForever.WorldServer.Database.Character.Model.Item;
 using NetworkItem = NexusForever.WorldServer.Network.Message.Model.Shared.Item;
 
 namespace NexusForever.WorldServer.Game.Entity

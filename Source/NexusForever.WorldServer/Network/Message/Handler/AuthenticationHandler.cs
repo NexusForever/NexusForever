@@ -1,5 +1,5 @@
-﻿using NexusForever.Shared.Database.Auth;
-using NexusForever.Shared.Database.Auth.Model;
+﻿using NexusForever.Database.Auth.Model;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             // prevent packets from being processed until asynchronous account select task is complete
             session.CanProcessPackets = false;
 
-            session.EnqueueEvent(new TaskGenericEvent<Account>(AuthDatabase.GetAccountAsync(helloRealm.Email, helloRealm.SessionKey),
+            session.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.AuthDatabase.GetAccountAsync(helloRealm.Email, helloRealm.SessionKey),
                 account =>
             {
                 if (account == null)

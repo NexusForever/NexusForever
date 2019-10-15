@@ -5,8 +5,6 @@ os: linux
 dist: xenial
 services:
   - mysql
-before_script:
-  - ./Database/scripts/bootstrap.sh
 script:
   - dotnet build ./Source/NexusForever.AuthServer
   - dotnet build ./Source/NexusForever.StsServer

@@ -1,7 +1,7 @@
 using System;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Create a new <see cref="OfferItemData"/>
         /// </summary>
-        public OfferItemData(StoreOfferItemData model)
+        public OfferItemData(StoreOfferItemDataModel model)
         {
             OfferId = model.Id;
             ItemId  = model.ItemId;

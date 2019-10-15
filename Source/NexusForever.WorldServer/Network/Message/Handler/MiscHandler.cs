@@ -1,8 +1,8 @@
+using NexusForever.Database.Character.Model;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientPlayerInfoRequest)]
         public static void HandlePlayerInfoRequest(WorldSession session, ClientPlayerInfoRequest request)
         {
-            session.EnqueueEvent(new TaskGenericEvent<Character>(CharacterDatabase.GetCharacterById(request.Identity.CharacterId),
+            session.EnqueueEvent(new TaskGenericEvent<CharacterModel>(DatabaseManager.CharacterDatabase.GetCharacterById(request.Identity.CharacterId),
                 character =>
             {
                 if (character == null)

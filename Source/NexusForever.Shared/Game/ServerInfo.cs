@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Database.Auth.Model;
 using NLog;
 
 namespace NexusForever.Shared.Game
@@ -11,10 +11,10 @@ namespace NexusForever.Shared.Game
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public Server Model { get; }
+        public ServerModel Model { get; }
         public uint Address { get; }
 
-        public ServerInfo(Server model)
+        public ServerInfo(ServerModel model)
         {
             try
             {

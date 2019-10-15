@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NetworkBinding = NexusForever.WorldServer.Network.Message.Model.Shared.Binding;
 
@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Game.Setting
         /// <summary>
         /// Create a new <see cref="Keybinding"/> from an existing database model.
         /// </summary>
-        public Keybinding(ulong owner, AccountKeybinding model)
+        public Keybinding(ulong owner, AccountKeybindingModel model)
         {
             Owner           = owner;
             InputActionId   = model.InputActionId;
@@ -62,7 +62,7 @@ namespace NexusForever.WorldServer.Game.Setting
         /// <summary>
         /// Create a new <see cref="Keybinding"/> from an existing database model.
         /// </summary>
-        public Keybinding(ulong owner, CharacterKeybinding model)
+        public Keybinding(ulong owner, CharacterKeybindingModel model)
         {
             Owner           = owner;
             InputActionId   = model.InputActionId;
@@ -106,7 +106,7 @@ namespace NexusForever.WorldServer.Game.Setting
         {
             if ((saveMask & BindingSaveMask.Create) != 0)
             {
-                var model = new CharacterKeybinding
+                var model = new CharacterKeybindingModel
                 {
                     Id              = Owner,
                     InputActionId   = InputActionId,
@@ -128,7 +128,7 @@ namespace NexusForever.WorldServer.Game.Setting
             }
             else 
             {
-                var model = new CharacterKeybinding
+                var model = new CharacterKeybindingModel
                 {
                     Id            = Owner,
                     InputActionId = InputActionId
@@ -138,7 +138,7 @@ namespace NexusForever.WorldServer.Game.Setting
                     context.Entry(model).State = EntityState.Deleted;
                 else
                 {
-                    EntityEntry<CharacterKeybinding> entity = context.Attach(model);
+                    EntityEntry<CharacterKeybindingModel> entity = context.Attach(model);
 
                     if ((saveMask & BindingSaveMask.DeviceEnum00) != 0)
                     {
@@ -221,7 +221,7 @@ namespace NexusForever.WorldServer.Game.Setting
         {
             if ((saveMask & BindingSaveMask.Create) != 0)
             {
-                var model = new AccountKeybinding
+                var model = new AccountKeybindingModel
                 {
                     Id              = (uint)Owner,
                     InputActionId   = InputActionId,
@@ -243,7 +243,7 @@ namespace NexusForever.WorldServer.Game.Setting
             }
             else 
             {
-                var model = new AccountKeybinding
+                var model = new AccountKeybindingModel
                 {
                     Id              = (uint)Owner,
                     InputActionId   = InputActionId
@@ -253,7 +253,7 @@ namespace NexusForever.WorldServer.Game.Setting
                     context.Entry(model).State = EntityState.Deleted;
                 else
                 {
-                    EntityEntry<AccountKeybinding> entity = context.Attach(model);
+                    EntityEntry<AccountKeybindingModel> entity = context.Attach(model);
 
                     if ((saveMask & BindingSaveMask.DeviceEnum00) != 0)
                     {

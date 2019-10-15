@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
 using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Game.Storefront.Static;
@@ -23,9 +23,9 @@ namespace NexusForever.WorldServer.Game.Storefront
         private readonly ImmutableDictionary<AccountCurrencyType, OfferItemPrice> prices;
 
         /// <summary>
-        /// Create a new <see cref="StoreOfferItem"/> from an existing database model.
+        /// Create a new <see cref="StoreOfferItemModel"/> from an existing database model.
         /// </summary>
-        public OfferItem(StoreOfferItem model)
+        public OfferItem(StoreOfferItemModel model)
         {
             Id           = model.Id;
             Name         = model.Name;
@@ -36,13 +36,13 @@ namespace NexusForever.WorldServer.Game.Storefront
             Visible      = Convert.ToBoolean(model.Visible);
 
             var itemBuilder = ImmutableList.CreateBuilder<OfferItemData>();
-            foreach (StoreOfferItemData itemData in model.StoreOfferItemData)
+            foreach (StoreOfferItemDataModel itemData in model.Items)
                 itemBuilder.Add(new OfferItemData(itemData));
 
             items = itemBuilder.ToImmutable();
 
             var priceBuilder = ImmutableDictionary.CreateBuilder<AccountCurrencyType, OfferItemPrice>();
-            foreach (StoreOfferItemPrice price in model.StoreOfferItemPrice)
+            foreach (StoreOfferItemPriceModel price in model.Prices)
             {
                 if (DisableManager.Instance.IsDisabled(DisableType.AccountCurrency, price.CurrencyId))
                     continue;

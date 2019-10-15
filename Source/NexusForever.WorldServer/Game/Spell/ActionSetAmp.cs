@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Spell
@@ -40,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Spell
             if (saveMask == AmpSaveMask.None)
                 return;
 
-            var model = new CharacterActionSetAmp
+            var model = new CharacterActionSetAmpModel
             {
                 Id        = actionSet.Owner,
                 SpecIndex = actionSet.Index,

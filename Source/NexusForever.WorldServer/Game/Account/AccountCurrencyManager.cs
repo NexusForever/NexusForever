@@ -1,16 +1,14 @@
-﻿using NexusForever.WorldServer.Network;
+﻿using System;
 using System.Collections.Generic;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
-using AccountCurrencyModel = NexusForever.Shared.Database.Auth.Model.AccountCurrency;
-using NexusForever.Shared.Database.Auth.Model;
-using NexusForever.WorldServer.Network.Message.Model;
-using ServerAccountCurrency = NexusForever.WorldServer.Network.Message.Model.Shared.AccountCurrency;
 using System.Linq;
-using NLog;
-using System;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Account.Static;
+using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Account
 {
@@ -23,7 +21,7 @@ namespace NexusForever.WorldServer.Game.Account
         {
             this.session = session;
 
-            foreach (AccountCurrencyModel currencyModel in model.AccountCurrency)
+            foreach (AccountCurrencyModel currencyModel in model.Currencies)
             {
                 // Disabled Character Token for now due to causing server errors if the player tries to use it. TODO: Fix level 50 creation
                 if ((AccountCurrencyType)currencyModel.CurrencyId == AccountCurrencyType.MaxLevelToken)

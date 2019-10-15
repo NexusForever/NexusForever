@@ -1,5 +1,5 @@
 using System;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Create a new <see cref="Category"/> from an existing database model.
         /// </summary>
-        public Category(StoreCategory model)
+        public Category(StoreCategoryModel model)
         {
             Id               = model.Id;
             Name             = model.Name;

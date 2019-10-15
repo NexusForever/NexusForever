@@ -1,4 +1,5 @@
-﻿using NexusForever.Shared.Configuration;
+﻿using NexusForever.Database.Configuration;
+using NexusForever.Shared.Configuration;
 
 namespace NexusForever.AuthServer
 {

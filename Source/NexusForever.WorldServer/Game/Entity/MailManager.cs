@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Mail;
 using NexusForever.WorldServer.Game.Mail.Static;
@@ -31,12 +31,12 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly UpdateTimer mailTimer = new UpdateTimer(1000d);
 
         /// <summary>
-        /// Create a new <see cref="MailManager"/> from existing <see cref="Character"/> database model.
+        /// Create a new <see cref="MailManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public MailManager(Player owner, Character model)
+        public MailManager(Player owner, CharacterModel model)
         {
             player = owner;
-            foreach (CharacterMail mailModel in model.CharacterMail)
+            foreach (MailModel mailModel in model.Mail)
             {
                 var mail = new MailItem(mailModel);
                 if (mail.IsReadyToDeliver())
@@ -185,7 +185,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void SendMail(ClientMailSend mailSend)
         {
-            player.Session.EnqueueEvent(new TaskGenericEvent<Character>(CharacterDatabase.GetCharacterByName(mailSend.Name),
+            player.Session.EnqueueEvent(new TaskGenericEvent<CharacterModel>(DatabaseManager.CharacterDatabase.GetCharacterByName(mailSend.Name),
                 targetCharacter =>
             {
                 var items = new List<Item>();

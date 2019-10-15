@@ -2,20 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class PathManager: ISaveCharacter, IEnumerable<PathEntry>
+    public class PathManager : ISaveCharacter, IEnumerable<PathEntry>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private const uint MaxPathCount = 4u;
         private const uint MaxPathLevel = 30u;
 
@@ -25,10 +22,10 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="PathManager"/> from <see cref="Player"/> database model.
         /// </summary>
-        public PathManager(Player owner, Character model)
+        public PathManager(Player owner, CharacterModel model)
         {
             player = owner;
-            foreach (CharacterPath pathModel in model.CharacterPath)
+            foreach (CharacterPathModel pathModel in model.Paths)
                 paths[pathModel.Path] = new PathEntry(pathModel);
 
             Validate();

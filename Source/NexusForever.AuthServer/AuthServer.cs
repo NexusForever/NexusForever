@@ -30,7 +30,6 @@ namespace NexusForever.AuthServer
             log.Info("Initialising...");
 
             ConfigurationManager<AuthServerConfiguration>.Initialise("AuthServer.json");
-
             DatabaseManager.Initialise(ConfigurationManager<AuthServerConfiguration>.Config.Database);
 
             ServerManager.Initialise();

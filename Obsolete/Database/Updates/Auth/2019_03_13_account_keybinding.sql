@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS `account_keybinding` (
+    `id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `inputActionId` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
+    `deviceEnum00` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `deviceEnum01` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `deviceEnum02` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `code00` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `code01` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `code02` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `metaKeys00` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `metaKeys01` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `metaKeys02` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `eventTypeEnum00` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `eventTypeEnum01` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    `eventTypeEnum02` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`, `inputActionId`),
+    CONSTRAINT `FK__account_keybinding_id__account_id` FOREIGN KEY (`id`) REFERENCES `account` (`id`) ON DELETE CASCADE
+);

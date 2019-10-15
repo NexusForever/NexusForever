@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -33,9 +33,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly List<Item> deletedItems = new List<Item>();
 
         /// <summary>
-        /// Create a new <see cref="Inventory"/> from <see cref="Player"/> database model.
+        /// Create a new <see cref="Inventory"/> from an existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public Inventory(Player owner, Character model)
+        public Inventory(Player owner, CharacterModel model)
         {
             characterId = owner?.CharacterId ?? 0ul;
             player      = owner;
@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach ((InventoryLocation location, uint defaultCapacity) in AssetManager.InventoryLocationCapacities)
                 bags.Add(location, new Bag(location, defaultCapacity));
 
-            foreach (var itemModel in model.Item)
+            foreach (var itemModel in model.Items)
                 AddItem(new Item(itemModel));
         }
 

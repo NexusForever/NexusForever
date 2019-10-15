@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Mail.Static;
-using MailModel = NexusForever.WorldServer.Database.Character.Model.CharacterMail;
 
 namespace NexusForever.WorldServer.Game.Mail
 {
-    public class MailItem : IEnumerable<MailAttachment>
+    public class MailItem : IEnumerable<MailAttachment>, ISaveCharacter
     {
         public ulong Id { get; }
 
@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Mail
             DeliveryTime               = (DeliveryTime)model.DeliveryTime;
             CreateTime                 = model.CreateTime;
 
-            foreach (CharacterMailAttachment mailAttachment in model.CharacterMailAttachment)
+            foreach (MailAttachmentModel mailAttachment in model.Attachments)
                 mailAttachments.Add(new MailAttachment(mailAttachment));
 
             saveMask = MailSaveMask.None;

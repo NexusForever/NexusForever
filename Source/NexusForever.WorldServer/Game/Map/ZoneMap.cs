@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -49,7 +49,7 @@ namespace NexusForever.WorldServer.Game.Map
         {
             foreach ((ushort hexGroupId, bool _) in zoneMapHexGroups.Where(z => z.Value).ToList())
             {
-                var model = new CharacterZonemapHexgroup
+                var model = new CharacterZonemapHexgroupModel
                 {
                     Id       = player.CharacterId,
                     ZoneMap  = (ushort)entry.Id,
