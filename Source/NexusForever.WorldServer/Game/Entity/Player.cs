@@ -136,6 +136,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
 
+        private UnitEntity currentChair;
+        public bool IsSitting => currentChair != null;
+
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
         {
@@ -657,6 +660,52 @@ namespace NexusForever.WorldServer.Game.Entity
                 Sex         = (byte)Sex,
                 ItemVisuals = GetAppearance().ToList()
             }, true);
+        }
+
+        /// <summary>
+        /// Makes this <see cref="Player"/> sit on provided <see cref="UnitEntity"/>
+        /// </summary>
+        public void Sit(UnitEntity chair)
+        {
+            if (IsSitting)
+                Unsit();
+
+            currentChair = chair;
+            // TODO: Emit interactive state from the entity instance itself
+            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            {
+                UnitId = chair.Guid,
+                InUse = true
+            }, true);
+            EnqueueToVisible(new ServerUnitSetChair
+            {
+                UnitId = Guid,
+                UnitIdChair = chair.Guid,
+                WaitForUnit = false
+            }, true);
+        }
+
+        /// <summary>
+        /// Removed this <see cref="Player"/> if it is currently sitting on an entity
+        /// </summary>
+        public void Unsit()
+        {
+            if (IsSitting)
+            {
+                // TODO: Emit interactive state from the entity instance itself
+                currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+                {
+                    UnitId = currentChair.Guid,
+                    InUse = false
+                }, true);
+                EnqueueToVisible(new ServerUnitSetChair
+                {
+                    UnitId = Guid,
+                    UnitIdChair = 0,
+                    WaitForUnit = false
+                }, true);
+                currentChair = null;
+            }
         }
 
         /// <summary>

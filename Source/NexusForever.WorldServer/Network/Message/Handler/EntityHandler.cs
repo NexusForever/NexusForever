@@ -79,13 +79,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             switch (entityInteraction.Event)
             {
                 case 37: // Quest NPC
-                {
-                    session.EnqueueMessageEncrypted(new Server0357
                     {
-                        UnitId = entityInteraction.Guid
-                    });
-                    break;
-                }
+                        session.EnqueueMessageEncrypted(new Server0357
+                        {
+                            UnitId = entityInteraction.Guid
+                        });
+                        break;
+                    }
                 case 49: // Handle Vendor
                     VendorHandler.HandleClientVendor(session, entityInteraction);
                     break;
@@ -123,6 +123,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     log.Warn($"Received unhandled interaction event {entityInteraction.Event} from Entity {entityInteraction.Guid}");
                     break;
             }
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientEntityInteractChair)]
+        public static void HandleClientEntityInteractEmote(WorldSession session, ClientEntityInteractChair interactChair)
+        {
+            UnitEntity chair = session.Player.Map.GetEntity<UnitEntity>(interactChair.ChairUnitId);
+            // TODO: Check to make sure entity is actually a Chair
+            if (chair != null)
+                session.Player.Sit(chair);
         }
     }
 }
