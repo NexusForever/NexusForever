@@ -160,7 +160,7 @@ namespace NexusForever.Database.Character
         public ulong GetNextMailId()
         {
             using (var context = new CharacterContext(config))
-                return context.CharacterMail.DefaultIfEmpty().Max(s => s.Id);
+                return context.Mail.DefaultIfEmpty().Max(s => s.Id);
         }
     }
 }

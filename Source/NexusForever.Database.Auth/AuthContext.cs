@@ -44,21 +44,21 @@ namespace NexusForever.Database.Auth
 
                 entity.Property(e => e.Email)
                     .IsRequired()
-                    .HasColumnType("varchar(128)");
+                    .HasMaxLength(128);
 
                 entity.Property(e => e.GameToken)
-                    .HasColumnType("varchar(32)");
+                    .HasMaxLength(32);
 
                 entity.Property(e => e.S)
                     .IsRequired()
-                    .HasColumnType("varchar(32)");
+                    .HasMaxLength(32);
 
                 entity.Property(e => e.SessionKey)
-                    .HasColumnType("varchar(32)");
+                    .HasMaxLength(32);
 
                 entity.Property(e => e.V)
                     .IsRequired()
-                    .HasColumnType("varchar(512)");
+                    .HasMaxLength(512);
             });
 
             modelBuilder.Entity<AccountCostumeUnlockModel>(entity =>
@@ -133,11 +133,11 @@ namespace NexusForever.Database.Auth
 
                 entity.Property(e => e.Host)
                     .IsRequired()
-                    .HasColumnType("varchar(64)");
+                    .HasMaxLength(64);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasColumnType("varchar(64)");
+                    .HasMaxLength(64);
 
                 // default server entry
                 entity.HasData(new ServerModel
@@ -158,7 +158,7 @@ namespace NexusForever.Database.Auth
 
                 entity.Property(e => e.Message)
                     .IsRequired()
-                    .HasColumnType("varchar(256)");
+                    .HasMaxLength(256);
             });
         }
     }

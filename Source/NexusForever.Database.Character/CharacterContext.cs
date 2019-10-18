@@ -7,33 +7,10 @@ namespace NexusForever.Database.Character
     public class CharacterContext : DbContext
     {
         public DbSet<CharacterModel> Character { get; set; }
-        public DbSet<CharacterAchievementModel> CharacterAchievement { get; set; }
-        public DbSet<CharacterActionSetAmpModel> CharacterActionSetAmp { get; set; }
-        public DbSet<CharacterActionSetShortcutModel> CharacterActionSetShortcut { get; set; }
-        public DbSet<CharacterAppearanceModel> CharacterAppearance { get; set; }
-        public DbSet<CharacterBoneModel> CharacterBone { get; set; }
-        public DbSet<CharacterCostumeModel> CharacterCostume { get; set; }
-        public DbSet<CharacterCostumeItemModel> CharacterCostumeItem { get; set; }
-        public DbSet<CharacterCurrencyModel> CharacterCurrency { get; set; }
-        public DbSet<CharacterCustomisationModel> CharacterCustomisation { get; set; }
-        public DbSet<CharacterDatacubeModel> CharacterDatacube { get; set; }
-        public DbSet<CharacterEntitlementModel> CharacterEntitlement { get; set; }
-        public DbSet<CharacterKeybindingModel> CharacterKeybinding { get; set; }
-        public DbSet<MailModel> CharacterMail { get; set; }
-        public DbSet<MailAttachmentModel> CharacterMailAttachment { get; set; }
-        public DbSet<CharacterPathModel> CharacterPath { get; set; }
-        public DbSet<CharacterPetCustomisationModel> CharacterPetCustomisation { get; set; }
-        public DbSet<CharacterPetFlairModel> CharacterPetFlair { get; set; }
-        public DbSet<CharacterQuestModel> CharacterQuest { get; set; }
-        public DbSet<CharacterQuestObjectiveModel> CharacterQuestObjective { get; set; }
-        public DbSet<CharacterSpellModel> CharacterSpell { get; set; }
-        public DbSet<CharacterStatModel> CharacterStats { get; set; }
-        public DbSet<CharacterTitleModel> CharacterTitle { get; set; }
-        public DbSet<CharacterZonemapHexgroupModel> CharacterZonemapHexgroup { get; set; }
         public DbSet<ItemModel> Item { get; set; }
+        public DbSet<MailModel> Mail { get; set; }
         public DbSet<ResidenceModel> Residence { get; set; }
         public DbSet<ResidenceDecorModel> ResidenceDecor { get; set; }
-        public DbSet<ResidencePlotModel> ResidencePlot { get; set; }
 
         private readonly IDatabaseConfiguration config;
 
@@ -64,10 +41,10 @@ namespace NexusForever.Database.Character
                     .HasColumnType("datetime");
 
                 entity.Property(e => e.Name)
-                    .HasColumnType("varchar(50)");
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.OriginalName)
-                    .HasColumnType("varchar(50)");
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.PathActivatedTimestamp)
                     .HasColumnType("datetime")
@@ -236,7 +213,7 @@ namespace NexusForever.Database.Character
 
             modelBuilder.Entity<MailModel>(entity =>
             {
-                entity.ToTable("character_mail");
+                entity.ToTable("mail");
 
                 entity.HasOne(e => e.Recipient)
                     .WithMany(e => e.Mail)
@@ -248,16 +225,16 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.Message)
                     .IsRequired()
-                    .HasColumnType("varchar(2000)");
+                    .HasMaxLength(2000);
 
                 entity.Property(e => e.Subject)
                     .IsRequired()
-                    .HasColumnType("varchar(200)");
+                    .HasMaxLength(200);
             });
 
             modelBuilder.Entity<MailAttachmentModel>(entity =>
             {
-                entity.ToTable("character_mail_attachment");
+                entity.ToTable("mail_attachment");
 
                 entity.HasKey(e => new { e.Id, e.Index });
 
@@ -300,7 +277,7 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasColumnType("varchar(128)")
+                    .HasMaxLength(128)
                     .HasDefaultValue("");
             });
 
@@ -406,7 +383,7 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasColumnType("varchar(50)");
+                    .HasMaxLength(50);
 
                 entity.HasOne(d => d.Owner)
                     .WithOne(p => p.Residence)

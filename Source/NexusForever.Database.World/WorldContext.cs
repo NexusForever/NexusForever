@@ -8,18 +8,9 @@ namespace NexusForever.Database.World
     {
         public DbSet<DisableModel> Disable { get; set; }
         public DbSet<EntityModel> Entity { get; set; }
-        public DbSet<EntitySplineModel> EntitySpline { get; set; }
-        public DbSet<EntityStatModel> EntityStats { get; set; }
-        public DbSet<EntityVendorModel> EntityVendor { get; set; }
-        public DbSet<EntityVendorCategoryModel> EntityVendorCategory { get; set; }
-        public DbSet<EntityVendorItemModel> EntityVendorItem { get; set; }
         public DbSet<TutorialModel> Tutorial { get; set; }
         public DbSet<StoreCategoryModel> StoreCategory { get; set; }
         public DbSet<StoreOfferGroupModel> StoreOfferGroup { get; set; }
-        public DbSet<StoreOfferGroupCategoryModel> StoreOfferGroupCategory { get; set; }
-        public DbSet<StoreOfferItemModel> StoreOfferItem { get; set; }
-        public DbSet<StoreOfferItemDataModel> StoreOfferItemData { get; set; }
-        public DbSet<StoreOfferItemPriceModel> StoreOfferItemPrice { get; set; }
 
         private readonly IDatabaseConfiguration config;
 
@@ -44,7 +35,7 @@ namespace NexusForever.Database.World
 
                 entity.Property(e => e.Note)
                     .IsRequired()
-                    .HasColumnType("varchar(500)");
+                    .HasMaxLength(500);
             });
 
             modelBuilder.Entity<EntityModel>(entity =>
@@ -125,14 +116,14 @@ namespace NexusForever.Database.World
 
                 entity.Property(e => e.Description)
                     .IsRequired()
-                    .HasColumnType("varchar(150)");
+                    .HasMaxLength(150);
 
                 entity.Property(e => e.Index)
                     .HasDefaultValue(1);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasColumnType("varchar(50)");
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.ParentId)
                     .HasDefaultValue(26);
@@ -144,11 +135,11 @@ namespace NexusForever.Database.World
 
                 entity.Property(e => e.Description)
                     .IsRequired()
-                    .HasColumnType("varchar(500)");
+                    .HasMaxLength(500);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasColumnType("varchar(50)");
+                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<StoreOfferGroupCategoryModel>(entity =>
@@ -183,11 +174,11 @@ namespace NexusForever.Database.World
 
                 entity.Property(e => e.Description)
                     .IsRequired()
-                    .HasColumnType("varchar(500)");
+                    .HasMaxLength(500);
 
                 entity.Property(e => e.Name)
                     .IsRequired()
-                    .HasColumnType("varchar(50)");
+                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<StoreOfferItemDataModel>(entity =>
@@ -225,7 +216,7 @@ namespace NexusForever.Database.World
 
                 entity.Property(e => e.Note)
                     .IsRequired()
-                    .HasColumnType("varchar(50)");
+                    .HasMaxLength(50);
             });
         }
     }
