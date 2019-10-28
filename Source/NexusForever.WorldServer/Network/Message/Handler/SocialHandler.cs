@@ -59,6 +59,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 standState = (StandState)entry.StandState;
             }
 
+            if (emote.EmoteId == 0 && session.Player.IsSitting)
+                session.Player.Unsit();
+
             session.Player.EnqueueToVisible(new ServerEmote
             {
                 Guid       = session.Player.Guid,

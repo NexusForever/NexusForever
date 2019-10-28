@@ -111,6 +111,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint? VanityPetGuid { get; set; }
 
+        public bool IsSitting => currentChairGuid != null;
+        private uint? currentChairGuid;
+
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
@@ -657,6 +660,58 @@ namespace NexusForever.WorldServer.Game.Entity
                 Sex         = (byte)Sex,
                 ItemVisuals = GetAppearance().ToList()
             }, true);
+        }
+
+        /// <summary>
+        /// Make <see cref="Player"/> sit on provided <see cref="WorldEntity"/>.
+        /// </summary>
+        public void Sit(WorldEntity chair)
+        {
+            if (IsSitting)
+                Unsit();
+
+            currentChairGuid = chair.Guid;
+
+            // TODO: Emit interactive state from the entity instance itself
+            chair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            {
+                UnitId = chair.Guid,
+                InUse  = true
+            }, true);
+            EnqueueToVisible(new ServerUnitSetChair
+            {
+                UnitId      = Guid,
+                UnitIdChair = chair.Guid,
+                WaitForUnit = false
+            }, true);
+        }
+
+        /// <summary>
+        /// Remove <see cref="Player"/> from the <see cref="WorldEntity"/> it is sitting on.
+        /// </summary>
+        public void Unsit()
+        {
+            if (!IsSitting)
+                return;
+
+            WorldEntity currentChair = GetVisible<WorldEntity>(currentChairGuid.Value);
+            if (currentChair == null)
+                throw new InvalidOperationException();
+
+            // TODO: Emit interactive state from the entity instance itself
+            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            {
+                UnitId = currentChair.Guid,
+                InUse  = false
+            }, true);
+            EnqueueToVisible(new ServerUnitSetChair
+            {
+                UnitId      = Guid,
+                UnitIdChair = 0,
+                WaitForUnit = false
+            }, true);
+
+            currentChairGuid = null;
         }
 
         /// <summary>

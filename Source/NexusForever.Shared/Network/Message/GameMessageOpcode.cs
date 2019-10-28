@@ -54,6 +54,7 @@ namespace NexusForever.Shared.Network.Message
         ClientRapidTransport            = 0x0141,
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
+        ClientEntityInteractChair       = 0x014E,
         ClientRequestAmpReset           = 0x0151,
         ClientItemUseLootBag            = 0x015E,
         ServerCharacterSelectFail       = 0x0162,
@@ -194,6 +195,7 @@ namespace NexusForever.Shared.Network.Message
         ServerUnlockPetFlair            = 0x068D,
         ServerChangePetStance           = 0x068F,
         ServerPublicEventStart          = 0x0700,
+        ServerEntityInteractiveUpdate   = 0x0755,
         ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
@@ -237,6 +239,7 @@ namespace NexusForever.Shared.Network.Message
         Server08B3                      = 0x08B3,
         ServerSetUnitPathType           = 0x08B8,
         ServerVehiclePassengerRemove    = 0x08C7,
+        ServerUnitSetChair              = 0x08CF,
         ServerEntityVisualUpdate        = 0x0905,
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
