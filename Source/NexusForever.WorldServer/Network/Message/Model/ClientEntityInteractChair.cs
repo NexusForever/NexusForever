@@ -11,8 +11,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            ChairUnitId  = reader.ReadUInt();
-            Remove  = reader.ReadBit();
+            ChairUnitId = reader.ReadUInt();
+            Remove      = reader.ReadBit();
         }
     }
 }

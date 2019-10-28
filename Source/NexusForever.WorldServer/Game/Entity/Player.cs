@@ -111,6 +111,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint? VanityPetGuid { get; set; }
 
+        public bool IsSitting => currentChairGuid != null;
+        private uint? currentChairGuid;
+
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
@@ -135,9 +138,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
-
-        private UnitEntity currentChair;
-        public bool IsSitting => currentChair != null;
 
         public Player(WorldSession session, Character model)
             : base(EntityType.Player)
@@ -663,49 +663,55 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Makes this <see cref="Player"/> sit on provided <see cref="UnitEntity"/>
+        /// Make <see cref="Player"/> sit on provided <see cref="WorldEntity"/>.
         /// </summary>
-        public void Sit(UnitEntity chair)
+        public void Sit(WorldEntity chair)
         {
             if (IsSitting)
                 Unsit();
 
-            currentChair = chair;
+            currentChairGuid = chair.Guid;
+
             // TODO: Emit interactive state from the entity instance itself
-            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            chair.EnqueueToVisible(new ServerEntityInteractiveUpdate
             {
                 UnitId = chair.Guid,
-                InUse = true
+                InUse  = true
             }, true);
             EnqueueToVisible(new ServerUnitSetChair
             {
-                UnitId = Guid,
+                UnitId      = Guid,
                 UnitIdChair = chair.Guid,
                 WaitForUnit = false
             }, true);
         }
 
         /// <summary>
-        /// Removed this <see cref="Player"/> if it is currently sitting on an entity
+        /// Remove <see cref="Player"/> from the <see cref="WorldEntity"/> it is sitting on.
         /// </summary>
         public void Unsit()
         {
-            if (IsSitting)
+            if (!IsSitting)
+                return;
+
+            WorldEntity currentChair = GetVisible<WorldEntity>(currentChairGuid.Value);
+            if (currentChair == null)
+                throw new InvalidOperationException();
+
+            // TODO: Emit interactive state from the entity instance itself
+            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
             {
-                // TODO: Emit interactive state from the entity instance itself
-                currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
-                {
-                    UnitId = currentChair.Guid,
-                    InUse = false
-                }, true);
-                EnqueueToVisible(new ServerUnitSetChair
-                {
-                    UnitId = Guid,
-                    UnitIdChair = 0,
-                    WaitForUnit = false
-                }, true);
-                currentChair = null;
-            }
+                UnitId = currentChair.Guid,
+                InUse  = false
+            }, true);
+            EnqueueToVisible(new ServerUnitSetChair
+            {
+                UnitId      = Guid,
+                UnitIdChair = 0,
+                WaitForUnit = false
+            }, true);
+
+            currentChairGuid = null;
         }
 
         /// <summary>

@@ -6,6 +6,8 @@ using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 using System;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Quest.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -79,13 +81,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             switch (entityInteraction.Event)
             {
                 case 37: // Quest NPC
+                {
+                    session.EnqueueMessageEncrypted(new Server0357
                     {
-                        session.EnqueueMessageEncrypted(new Server0357
-                        {
-                            UnitId = entityInteraction.Guid
-                        });
-                        break;
-                    }
+                        UnitId = entityInteraction.Guid
+                    });
+                    break;
+                }
                 case 49: // Handle Vendor
                     VendorHandler.HandleClientVendor(session, entityInteraction);
                     break;
@@ -128,10 +130,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientEntityInteractChair)]
         public static void HandleClientEntityInteractEmote(WorldSession session, ClientEntityInteractChair interactChair)
         {
-            UnitEntity chair = session.Player.Map.GetEntity<UnitEntity>(interactChair.ChairUnitId);
-            // TODO: Check to make sure entity is actually a Chair
-            if (chair != null)
-                session.Player.Sit(chair);
+            WorldEntity chair = session.Player.GetVisible<WorldEntity>(interactChair.ChairUnitId);
+            if (chair == null)
+                throw new InvalidPacketValueException();
+
+            Creature2Entry creatureEntry = GameTableManager.Creature2.GetEntry(chair.CreatureId);
+            if ((creatureEntry.ActivationFlags & 0x200000) == 0)
+                throw new InvalidPacketValueException();
+
+            session.Player.Sit(chair);
         }
     }
 }

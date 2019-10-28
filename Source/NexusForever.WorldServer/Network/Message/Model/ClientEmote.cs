@@ -1,7 +1,5 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Social;
-
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -16,11 +14,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            EmoteId = reader.ReadUInt(14u);
-            Seed = reader.ReadUInt();
+            EmoteId      = reader.ReadUInt(14u);
+            Seed         = reader.ReadUInt();
             TargetUnitId = reader.ReadUInt();
-            Targeted = reader.ReadBit();
-            Silent = reader.ReadBit(); // Seems to be true when the Client is instructed by the server to do this
+            Targeted     = reader.ReadBit();
+            Silent       = reader.ReadBit(); // Seems to be true when the Client is instructed by the server to do this
         }
     }
 }
