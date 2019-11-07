@@ -1,6 +1,6 @@
 ﻿using NexusForever.Shared;
 
-namespace NexusForever.WorldServer.Game
+namespace NexusForever.Shared.Game
 {
     public class UpdateTimer : IUpdate
     {

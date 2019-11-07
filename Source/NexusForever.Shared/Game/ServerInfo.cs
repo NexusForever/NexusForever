@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using NexusForever.Shared.Database.Auth.Model;
 using NLog;
 
@@ -13,6 +14,7 @@ namespace NexusForever.Shared.Game
 
         public Server Model { get; }
         public uint Address { get; }
+        public bool IsOnline { get; private set; } = false;
 
         public ServerInfo(Server model)
         {
@@ -33,6 +35,22 @@ namespace NexusForever.Shared.Game
             {
                 log.Fatal(e, $"Failed to load server entry id: {model.Id}, host: {model.Host} from the database!");
                 throw;
+            }
+        }
+
+        public async Task PingHost(string hostIP, int port)
+        {
+            using (var client = new TcpClient())
+            {
+                await client.ConnectAsync(hostIP, port).ContinueWith(task =>
+                {
+                    if (task.IsFaulted)
+                        IsOnline = false;
+                    else
+                        IsOnline = true;
+
+                    return Task.CompletedTask;
+                });
             }
         }
     }

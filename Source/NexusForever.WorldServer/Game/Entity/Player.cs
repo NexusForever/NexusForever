@@ -7,6 +7,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Database.Auth;
 using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
