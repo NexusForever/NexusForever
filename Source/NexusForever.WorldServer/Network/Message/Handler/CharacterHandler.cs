@@ -620,19 +620,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleInspectPlayerRequest(WorldSession session, ClientInspectPlayerRequest inspectPlayer)
         {
             // TODO: Remove this since Raw- Lazy is rewriting something.
-            var inspectSession = NetworkManager<WorldSession>.GetSession(s => s.Player?.Guid == inspectPlayer.Guid);
+            WorldSession inspectSession = NetworkManager<WorldSession>.GetSession(s => s.Player?.Guid == inspectPlayer.Guid);
+            if (inspectSession == null)
+                return;
 
-            var inspectResponse = new ServerInspectPlayerResponse();
-            inspectResponse.Guid = inspectPlayer.Guid;
-
-            foreach (Item item in inspectSession.Player.Inventory
-                .Where(b => b.Location == InventoryLocation.Equipped)
-                .SelectMany(i => i))
+            session.EnqueueMessageEncrypted(new ServerInspectPlayerResponse
             {
-                inspectResponse.Items.Add(item.BuildNetworkItem());
-            }
-
-            session.EnqueueMessageEncrypted(inspectResponse);
+                Guid  = inspectPlayer.Guid,
+                Items = inspectSession.Player.Inventory
+                    .Single(b => b.Location == InventoryLocation.Equipped)
+                    .Select(i => i.BuildNetworkItem())
+                    .ToList()
+            });
         }
     }
 }
