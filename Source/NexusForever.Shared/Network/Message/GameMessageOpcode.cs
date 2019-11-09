@@ -150,6 +150,8 @@ namespace NexusForever.Shared.Network.Message
         ClientHousingVisit              = 0x0531,
         ClientHousingEditMode           = 0x053C,
         ServerSpellList                 = 0x0551,
+        ClientInspectPlayerRequest      = 0x0552,
+        ServerInspectPlayerResponse     = 0x0553,
         ServerItemSwap                  = 0x0568,
         ServerItemMove                  = 0x0569,
         BiInputKeySet                   = 0x056F,

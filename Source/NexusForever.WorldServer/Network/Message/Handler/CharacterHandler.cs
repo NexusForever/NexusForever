@@ -600,5 +600,23 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 InnateIndex = session.Player.InnateIndex
             });
         }
+
+        [MessageHandler(GameMessageOpcode.ClientInspectPlayerRequest)]
+        public static void HandleInspectPlayerRequest(WorldSession session, ClientInspectPlayerRequest inspectPlayer)
+        {
+            // TODO: Remove this since Raw- Lazy is rewriting something.
+            WorldSession inspectSession = NetworkManager<WorldSession>.GetSession(s => s.Player?.Guid == inspectPlayer.Guid);
+            if (inspectSession == null)
+                return;
+
+            session.EnqueueMessageEncrypted(new ServerInspectPlayerResponse
+            {
+                Guid  = inspectPlayer.Guid,
+                Items = inspectSession.Player.Inventory
+                    .Single(b => b.Location == InventoryLocation.Equipped)
+                    .Select(i => i.BuildNetworkItem())
+                    .ToList()
+            });
+        }
     }
 }
