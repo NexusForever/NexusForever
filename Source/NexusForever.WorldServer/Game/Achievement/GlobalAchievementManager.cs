@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
@@ -8,22 +9,26 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {
-    public static class GlobalAchievementManager
+    public sealed class GlobalAchievementManager : Singleton<GlobalAchievementManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public static readonly Dictionary<ushort, AchievementInfo> achievements
+        public readonly Dictionary<ushort, AchievementInfo> achievements
             = new Dictionary<ushort, AchievementInfo>();
-        private static readonly Dictionary<AchievementType, List<AchievementInfo>> characterAchievements
+        private readonly Dictionary<AchievementType, List<AchievementInfo>> characterAchievements
             = new Dictionary<AchievementType, List<AchievementInfo>>();
-        private static readonly Dictionary<AchievementType, List<AchievementInfo>> guildAchievements
+        private readonly Dictionary<AchievementType, List<AchievementInfo>> guildAchievements
             = new Dictionary<AchievementType, List<AchievementInfo>>();
 
-        public static void Initialise()
+        private GlobalAchievementManager()
+        {
+        }
+
+        public void Initialise()
         {
             DateTime start = DateTime.UtcNow;
 
-            foreach (AchievementEntry entry in GameTableManager.Achievement.Entries)
+            foreach (AchievementEntry entry in GameTableManager.Instance.Achievement.Entries)
             {
                 var info = new AchievementInfo(entry);
                 achievements.Add((ushort)entry.Id, info);
@@ -43,7 +48,7 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// <summary>
         /// Return <see cref="AchievementInfo"/> for supplied achievement id.
         /// </summary>
-        public static AchievementInfo GetAchievement(ushort id)
+        public AchievementInfo GetAchievement(ushort id)
         {
             return achievements.TryGetValue(id, out AchievementInfo info) ? info : null;
         }
@@ -51,7 +56,7 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// <summary>
         /// Return all <see cref="AchievementInfo"/>'s of <see cref="AchievementType"/> that can be completed by a player.
         /// </summary>
-        public static IEnumerable<AchievementInfo> GetCharacterAchievements(AchievementType type)
+        public IEnumerable<AchievementInfo> GetCharacterAchievements(AchievementType type)
         {
             if (!characterAchievements.TryGetValue(type, out List<AchievementInfo> achievements))
                 return Enumerable.Empty<AchievementInfo>();
@@ -62,7 +67,7 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// <summary>
         /// Return all <see cref="AchievementInfo"/>'s of <see cref="AchievementType"/> that can be completed by a guild.
         /// </summary>
-        public static IEnumerable<AchievementInfo> GetGuildAchievements(AchievementType type)
+        public IEnumerable<AchievementInfo> GetGuildAchievements(AchievementType type)
         {
             if (!guildAchievements.TryGetValue(type, out List<AchievementInfo> achievements))
                 return Enumerable.Empty<AchievementInfo>();

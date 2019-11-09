@@ -134,7 +134,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (chair == null)
                 throw new InvalidPacketValueException();
 
-            Creature2Entry creatureEntry = GameTableManager.Creature2.GetEntry(chair.CreatureId);
+            Creature2Entry creatureEntry = GameTableManager.Instance.Creature2.GetEntry(chair.CreatureId);
             if ((creatureEntry.ActivationFlags & 0x200000) == 0)
                 throw new InvalidPacketValueException();
 

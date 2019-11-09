@@ -9,17 +9,22 @@ using Nexus.Archive;
 using NexusForever.MapGenerator.GameTable;
 using NexusForever.MapGenerator.IO.Area;
 using NexusForever.MapGenerator.IO.Map;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.IO;
 using NLog;
 
 namespace NexusForever.MapGenerator
 {
-    public static class GenerationManager
+    public sealed class GenerationManager : Singleton<GenerationManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public static void Initialise()
+        private GenerationManager()
+        {
+        }
+
+        public void Initialise()
         {
             log.Info("Generatring base map files...");
 
@@ -29,9 +34,9 @@ namespace NexusForever.MapGenerator
         /// <summary>
         /// Generate a base map (.nfmap) file for a single world optionally specifying a single grid.
         /// </summary>
-        public static void GenerateWorld(ushort worldId, byte? gridX = null, byte? gridY = null)
+        public void GenerateWorld(ushort worldId, byte? gridX = null, byte? gridY = null)
         {
-            WorldEntry entry = GameTableManager.World.GetEntry(worldId);
+            WorldEntry entry = GameTableManager.Instance.World.GetEntry(worldId);
             if (entry != null)
                 ProcessWorld(entry, gridX, gridY);
         }
@@ -39,10 +44,10 @@ namespace NexusForever.MapGenerator
         /// <summary>
         /// Generate base map (.nfmap) files for all worlds.
         /// </summary>
-        public static void GenerateWorlds(bool singleThread)
+        public void GenerateWorlds(bool singleThread)
         {
             List<Task> taskList = new List<Task>();
-            foreach (WorldEntry entry in GameTableManager.World.Entries
+            foreach (WorldEntry entry in GameTableManager.Instance.World.Entries
                 .Where(e => e.AssetPath != string.Empty)
                 .GroupBy(e => e.AssetPath)
                 .Select(g => g.First())
@@ -64,7 +69,7 @@ namespace NexusForever.MapGenerator
         /// <summary>
         /// Generate a base map (.nfmap) file from supplied <see cref="WorldEntry"/>.
         /// </summary>
-        private static void ProcessWorld(WorldEntry entry, byte? gridX = null, byte? gridY = null)
+        private void ProcessWorld(WorldEntry entry, byte? gridX = null, byte? gridY = null)
         {
             var mapFile = new WritableMapFile(Path.GetFileName(entry.AssetPath));
 
@@ -73,14 +78,14 @@ namespace NexusForever.MapGenerator
             if (gridX.HasValue && gridY.HasValue)
             {
                 string path = Path.Combine(entry.AssetPath, $"{mapFile.Asset}.{gridX:x2}{gridY:x2}.area");
-                IArchiveFileEntry grid = ArchiveManager.MainArchive.GetFileInfoByPath(path);
+                IArchiveFileEntry grid = ArchiveManager.Instance.MainArchive.GetFileInfoByPath(path);
                 if (grid != null)
                     ProcessGrid(mapFile, grid, gridX.Value, gridY.Value);
             }
             else
             {
                 string path = Path.Combine(entry.AssetPath, "*.*.area");
-                foreach (IArchiveFileEntry grid in ArchiveManager.MainArchive.IndexFile.GetFiles(path))
+                foreach (IArchiveFileEntry grid in ArchiveManager.Instance.MainArchive.IndexFile.GetFiles(path))
                 {
                     Regex regex = new Regex(@"[\w]+\.([A-Fa-f0-9]{2})([A-Fa-f0-9]{2})\.area");
                     Match match = regex.Match(grid.FileName);
@@ -109,7 +114,7 @@ namespace NexusForever.MapGenerator
             }
         }
 
-        private static void ProcessGrid(WritableMapFile map, IArchiveFileEntry grid, byte gridX, byte gridY)
+        private void ProcessGrid(WritableMapFile map, IArchiveFileEntry grid, byte gridX, byte gridY)
         {
             // skip any low quality grids
             if (grid.FileName.Contains("_low", StringComparison.OrdinalIgnoreCase))
@@ -117,7 +122,7 @@ namespace NexusForever.MapGenerator
 
             log.Info($"Processing {map.Asset} grid {gridX},{gridY}...");
 
-            using (Stream stream = ArchiveManager.MainArchive.OpenFileStream(grid))
+            using (Stream stream = ArchiveManager.Instance.MainArchive.OpenFileStream(grid))
             {
                 try
                 {

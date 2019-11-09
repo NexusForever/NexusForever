@@ -28,7 +28,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            if (GameTableManager.Creature2DisplayInfo.GetEntry(displayInfo) == null)
+            if (GameTableManager.Instance.Creature2DisplayInfo.GetEntry(displayInfo) == null)
             {
                 await SendHelpAsync(context);
                 return;

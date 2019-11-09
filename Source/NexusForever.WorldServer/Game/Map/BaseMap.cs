@@ -49,7 +49,7 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public static MapFile LoadMapFile(string assetPath)
         {
-            string mapPath  = ConfigurationManager<WorldServerConfiguration>.Config.Map.MapPath;
+            string mapPath  = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.MapPath;
             string asset    = Path.Combine(mapPath, Path.GetFileName(assetPath));
             string filePath = Path.ChangeExtension(asset, ".nfmap");
 
@@ -217,7 +217,7 @@ namespace NexusForever.WorldServer.Game.Map
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
                 // non issue once all entities types are handled
-                WorldEntity entity = EntityManager.NewEntity((EntityType)model.Type) ?? EntityManager.NewEntity(EntityType.Simple);
+                WorldEntity entity = EntityManager.Instance.NewEntity((EntityType)model.Type) ?? EntityManager.Instance.NewEntity(EntityType.Simple);
                 entity.Initialise(model);
 
                 var vector = new Vector3(model.X, model.Y, model.Z);

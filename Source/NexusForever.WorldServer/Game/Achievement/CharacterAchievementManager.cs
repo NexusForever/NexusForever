@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Achievement
 
             foreach (CharacterAchievementModel achievementModel in model.CharacterAchievement)
             {
-                AchievementInfo info = GlobalAchievementManager.GetAchievement(achievementModel.AchievementId);
+                AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(achievementModel.AchievementId);
                 if (info == null)
                     throw new DatabaseDataException($"Character {model.Id} has invalid achievement {achievementModel.AchievementId} stored!");
 
@@ -58,7 +58,7 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// </summary>
         public override void CheckAchievements(Player target, AchievementType type, uint objectId, uint objectIdAlt = 0u, uint count = 1u)
         {
-            CheckAchievements(target, GlobalAchievementManager.GetCharacterAchievements(type), objectId, objectIdAlt, count);
+            CheckAchievements(target, GlobalAchievementManager.Instance.GetCharacterAchievements(type), objectId, objectIdAlt, count);
 
             // TODO
             /*if (inGuild)

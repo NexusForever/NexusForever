@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            IEnumerable<WorldSession> allSessions = NetworkManager<WorldSession>.GetSessions();
+            IEnumerable<WorldSession> allSessions = NetworkManager<WorldSession>.Instance.GetSessions();
             foreach (WorldSession session in allSessions)
             {
                 session.EnqueueMessageEncrypted(new ServerRealmBroadcast

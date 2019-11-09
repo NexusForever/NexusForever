@@ -52,7 +52,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            WorldLocation2Entry entry = GameTableManager.WorldLocation2.GetEntry(worldLocation2Id);
+            WorldLocation2Entry entry = GameTableManager.Instance.WorldLocation2.GetEntry(worldLocation2Id);
             if (entry == null)
             {
                 await context.SendMessageAsync($"WorldLocation2 entry not found: {worldLocation2Id}");

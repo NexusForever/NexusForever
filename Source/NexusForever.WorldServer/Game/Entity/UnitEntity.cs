@@ -39,7 +39,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (parameters == null)
                 throw new ArgumentNullException();
 
-            Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spell4Id);
+            Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spell4Id);
             if (spell4Entry == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -54,7 +54,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (parameters == null)
                 throw new ArgumentNullException();
 
-            SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4BaseId);
+            SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 

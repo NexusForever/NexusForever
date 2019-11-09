@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Game.Achievement
 
         public override void CheckAchievements(Player target, AchievementType type, uint objectId, uint objectIdAlt = 0, uint count = 1)
         {
-            CheckAchievements(target, GlobalAchievementManager.GetGuildAchievements(type), objectId, objectIdAlt, count);
+            CheckAchievements(target, GlobalAchievementManager.Instance.GetGuildAchievements(type), objectId, objectIdAlt, count);
         }
     }
 }

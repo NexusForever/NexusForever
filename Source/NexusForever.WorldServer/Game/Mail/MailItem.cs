@@ -109,7 +109,7 @@ namespace NexusForever.WorldServer.Game.Mail
         /// </summary>
         public MailItem(MailParameters parameters)
         {
-            Id          = AssetManager.NextMailId;
+            Id          = AssetManager.Instance.NextMailId;
             recipientId = parameters.RecipientCharacterId;
             SenderType  = parameters.MessageType;
 

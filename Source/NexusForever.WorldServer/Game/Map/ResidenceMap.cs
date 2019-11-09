@@ -27,12 +27,12 @@ namespace NexusForever.WorldServer.Game.Map
 
             if (info.ResidenceId != 0u)
             {
-                residence = ResidenceManager.GetCachedResidence(info.ResidenceId);
+                residence = ResidenceManager.Instance.GetCachedResidence(info.ResidenceId);
                 if (residence == null)
                     throw new InvalidOperationException();
             }
             else
-                residence = ResidenceManager.CreateResidence(player);
+                residence = ResidenceManager.Instance.CreateResidence(player);
 
             // initialise plug entities
             foreach (Plot plot in residence.GetPlots().Where(p => p.PlugEntry != null))
@@ -263,7 +263,7 @@ namespace NexusForever.WorldServer.Game.Map
 
         private void DecorCreate(Player player, ClientHousingDecorUpdate.DecorUpdate update)
         {
-            HousingDecorInfoEntry entry = GameTableManager.HousingDecorInfo.GetEntry(update.DecorInfoId);
+            HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(update.DecorInfoId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
@@ -285,7 +285,7 @@ namespace NexusForever.WorldServer.Game.Map
             {
                 if (update.ColourShiftId != 0u)
                 {
-                    ColorShiftEntry colourEntry = GameTableManager.ColorShift.GetEntry(update.ColourShiftId);
+                    ColorShiftEntry colourEntry = GameTableManager.Instance.ColorShift.GetEntry(update.ColourShiftId);
                     if (colourEntry == null)
                         throw new InvalidPacketValueException();
                 }
@@ -335,7 +335,7 @@ namespace NexusForever.WorldServer.Game.Map
             {
                 if (update.ColourShiftId != 0u)
                 {
-                    ColorShiftEntry colourEntry = GameTableManager.ColorShift.GetEntry(update.ColourShiftId);
+                    ColorShiftEntry colourEntry = GameTableManager.Instance.ColorShift.GetEntry(update.ColourShiftId);
                     if (colourEntry == null)
                         throw new InvalidPacketValueException();
                 }
@@ -423,9 +423,9 @@ namespace NexusForever.WorldServer.Game.Map
                 throw new InvalidPacketValueException();
 
             if (housingSetPrivacyLevel.PrivacyLevel == ResidencePrivacyLevel.Public)
-                ResidenceManager.RegisterResidenceVists(residence.Id, residence.OwnerName, residence.Name);
+                ResidenceManager.Instance.RegisterResidenceVists(residence.Id, residence.OwnerName, residence.Name);
             else
-                ResidenceManager.DeregisterResidenceVists(residence.Id);
+                ResidenceManager.Instance.DeregisterResidenceVists(residence.Id);
 
             residence.PrivacyLevel = housingSetPrivacyLevel.PrivacyLevel;
             SendHousingPrivacy();

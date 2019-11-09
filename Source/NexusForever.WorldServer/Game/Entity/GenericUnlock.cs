@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public GenericUnlock(AccountGenericUnlock model)
         {
-            Entry     = GameTableManager.GenericUnlockEntry.GetEntry(model.Entry);
+            Entry     = GameTableManager.Instance.GenericUnlockEntry.GetEntry(model.Entry);
             accountId = model.Id;
         }
 

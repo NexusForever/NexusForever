@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             try
             {
-                CommandManager.HandleCommand(session, cheat.Message, false);
+                CommandManager.Instance.HandleCommand(session, cheat.Message, false);
             }
             catch (Exception e)
             {

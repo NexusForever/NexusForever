@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             // 0x0988 - Store catalogue categories 
             // 0x098B - Store catalogue offer grouips + offers
             // 0x0987 - Store catalogue finalised message
-            GlobalStorefrontManager.HandleCatalogRequest(session);
+            GlobalStorefrontManager.Instance.HandleCatalogRequest(session);
         }
     }
 }

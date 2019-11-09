@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
@@ -14,47 +15,51 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.Spell
 {
-    public static class GlobalSpellManager
+    public sealed class GlobalSpellManager : Singleton<GlobalSpellManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Id to be assigned to the next spell cast.
         /// </summary>
-        public static uint NextCastingId => nextCastingId++;
+        public uint NextCastingId => nextCastingId++;
 
         /// <summary>
         /// Id to be assigned to the next spell effect.
         /// </summary>
-        public static uint NextEffectId => nextEffectId++;
+        public uint NextEffectId => nextEffectId++;
 
-        private static uint nextCastingId = 1;
-        private static uint nextEffectId = 1;
+        private uint nextCastingId = 1;
+        private uint nextEffectId = 1;
 
-        private static Dictionary<uint, SpellBaseInfo> spellBaseInfoStore = new Dictionary<uint, SpellBaseInfo>();
-        private static readonly Dictionary<SpellEffectType, SpellEffectDelegate> spellEffectDelegates =  new Dictionary<SpellEffectType, SpellEffectDelegate>();
+        private Dictionary<uint, SpellBaseInfo> spellBaseInfoStore = new Dictionary<uint, SpellBaseInfo>();
+        private readonly Dictionary<SpellEffectType, SpellEffectDelegate> spellEffectDelegates =  new Dictionary<SpellEffectType, SpellEffectDelegate>();
 
-        public static void Initialise()
+        private GlobalSpellManager()
+        {
+        }
+
+        public void Initialise()
         {
             //InitialiseSpellInfo();
             InitialiseSpellEffectHandlers();
         }
 
-        private static void InitialiseSpellInfo()
+        private void InitialiseSpellInfo()
         {
             Stopwatch sw = Stopwatch.StartNew();
             log.Info("Generating spell info...");
 
             var concurrentStore = new ConcurrentDictionary<uint, SpellBaseInfo>();
 
-            Parallel.ForEach(GameTableManager.Spell4Base.Entries,
+            Parallel.ForEach(GameTableManager.Instance.Spell4Base.Entries,
                 e => { concurrentStore.TryAdd(e.Id, new SpellBaseInfo(e)); });
             spellBaseInfoStore = concurrentStore.ToDictionary(e => e.Key, e => e.Value);
 
             log.Info($"Cached {spellBaseInfoStore.Count} spells in {sw.ElapsedMilliseconds}ms.");
         }
 
-        private static void InitialiseSpellEffectHandlers()
+        private void InitialiseSpellEffectHandlers()
         {
             foreach (MethodInfo method in Assembly.GetExecutingAssembly()
                 .GetTypes()
@@ -80,9 +85,9 @@ namespace NexusForever.WorldServer.Game.Spell
         /// <summary>
         /// Return <see cref="SpellBaseInfo"/>, if not already cached it will be generated before being returned.
         /// </summary>
-        public static SpellBaseInfo GetSpellBaseInfo(uint spell4BaseId)
+        public SpellBaseInfo GetSpellBaseInfo(uint spell4BaseId)
         {
-            Spell4BaseEntry spell4BaseEntry = GameTableManager.Spell4Base.GetEntry(spell4BaseId);
+            Spell4BaseEntry spell4BaseEntry = GameTableManager.Instance.Spell4Base.GetEntry(spell4BaseId);
             if (spell4BaseEntry == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -98,7 +103,7 @@ namespace NexusForever.WorldServer.Game.Spell
         /// <summary>
         /// Return <see cref="SpellEffectDelegate"/> for supplied <see cref="SpellEffectType"/>.
         /// </summary>
-        public static SpellEffectDelegate GetEffectHandler(SpellEffectType spellEffectType)
+        public SpellEffectDelegate GetEffectHandler(SpellEffectType spellEffectType)
         {
             return spellEffectDelegates.TryGetValue(spellEffectType, out SpellEffectDelegate handler) ? handler : null;
         }

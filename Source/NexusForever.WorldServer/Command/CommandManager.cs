@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Command.Handler;
 using NexusForever.WorldServer.Network;
@@ -9,12 +10,13 @@ using NLog;
 
 namespace NexusForever.WorldServer.Command
 {
-    public static class CommandManager
+    public sealed class CommandManager : Singleton<CommandManager>
     {
-        private static readonly List<ICommandHandler> commandHandlers = new List<ICommandHandler>();
         private static ILogger Logger { get; } = LogManager.GetCurrentClassLogger();
 
-        public static void Initialise()
+        private readonly List<ICommandHandler> commandHandlers = new List<ICommandHandler>();
+
+        public void Initialise()
         {
             Type[] types = typeof(CommandManager).Assembly.GetTypes().Where(i =>
                     typeof(ICommandHandler).IsAssignableFrom(i) &&
@@ -26,22 +28,22 @@ namespace NexusForever.WorldServer.Command
             Logger.Info("Initialised {0} command handlers.", commandHandlers.Count);
         }
 
-        public static IEnumerable<ICommandHandler> GetCommandHandlers()
+        public IEnumerable<ICommandHandler> GetCommandHandlers()
         {
             return commandHandlers.OrderBy(i => i.Order);
         }
 
-        public static bool HandleCommand(WorldSession session, string commandText, bool isFromChat)
+        public bool HandleCommand(WorldSession session, string commandText, bool isFromChat)
         {
             return HandleCommand(new WorldSessionCommandContext(session), commandText, isFromChat);
         }
 
-        public static bool HandleCommand(CommandContext context, string commandText, bool isFromChat)
+        public bool HandleCommand(CommandContext context, string commandText, bool isFromChat)
         {
             return HandleCommandAsync(context, commandText, isFromChat).GetAwaiter().GetResult();
         }
 
-        public static async Task<bool> HandleCommandAsync(CommandContext session, string commandText, bool isFromChat)
+        public async Task<bool> HandleCommandAsync(CommandContext session, string commandText, bool isFromChat)
         {
             if (isFromChat)
             {

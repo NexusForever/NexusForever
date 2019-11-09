@@ -22,11 +22,11 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             string name = parameters.Length == 0 ? context.Session.Player.Name : string.Join(" ", parameters);
 
-            Residence residence = ResidenceManager.GetResidence(name).GetAwaiter().GetResult();
+            Residence residence = ResidenceManager.Instance.GetResidence(name).GetAwaiter().GetResult();
             if (residence == null)
             {
                 if (parameters.Length == 0)
-                    residence = ResidenceManager.CreateResidence(context.Session.Player);
+                    residence = ResidenceManager.Instance.CreateResidence(context.Session.Player);
                 else
                 {
                     context.SendMessageAsync("A residence for that character doesn't exist!");
@@ -34,7 +34,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 }
             }
 
-            ResidenceEntrance entrance = ResidenceManager.GetResidenceEntrance(residence);
+            ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(residence);
             context.Session.Player.TeleportTo(entrance.Entry, entrance.Position, 0u, residence.Id);
 
             return Task.CompletedTask;
@@ -55,7 +55,7 @@ namespace NexusForever.WorldServer.Command.Handler
             uint decorInfoId = uint.Parse(parameters[0]);
             uint quantity    = parameters.Length == 2 ? uint.Parse(parameters[1]) : 1u;
 
-            HousingDecorInfoEntry entry = GameTableManager.HousingDecorInfo.GetEntry(decorInfoId);
+            HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(decorInfoId);
             if (entry == null)
             {
                 context.SendMessageAsync($"Invalid decor info id {decorInfoId}!");
@@ -75,9 +75,9 @@ namespace NexusForever.WorldServer.Command.Handler
             var sw = new StringWriter();
             sw.WriteLine("Decor Lookup Results:");
 
-            TextTable tt = GameTableManager.GetTextTable(context.Language);
+            TextTable tt = GameTableManager.Instance.GetTextTable(context.Language);
             foreach (HousingDecorInfoEntry decorEntry in
-                SearchManager.Search<HousingDecorInfoEntry>(parameters[0], context.Language, e => e.LocalizedTextIdName, true))
+                SearchManager.Instance.Search<HousingDecorInfoEntry>(parameters[0], context.Language, e => e.LocalizedTextIdName, true))
             {
                 string text = tt.GetEntry(decorEntry.LocalizedTextIdName);
                 sw.WriteLine($"({decorEntry.Id}) {text}");

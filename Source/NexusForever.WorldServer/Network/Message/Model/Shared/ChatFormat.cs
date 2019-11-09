@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             StartIndex  = reader.ReadUShort();
             StopIndex   = reader.ReadUShort();
 
-            FormatModel = SocialManager.GetChatFormatModel(Type);
+            FormatModel = SocialManager.Instance.GetChatFormatModel(Type);
             if (FormatModel == null)
                 throw new NotImplementedException();
 

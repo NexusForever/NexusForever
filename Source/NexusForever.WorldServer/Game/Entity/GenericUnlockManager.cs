@@ -40,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void Unlock(ushort genericUnlockEntryId)
         {
-            GenericUnlockEntryEntry entry = GameTableManager.GenericUnlockEntry.GetEntry(genericUnlockEntryId);
+            GenericUnlockEntryEntry entry = GameTableManager.Instance.GenericUnlockEntry.GetEntry(genericUnlockEntryId);
             if (entry == null)
             {
                 SendUnlockResult(GenericUnlockResult.Invalid);
@@ -64,7 +64,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void UnlockAll(GenericUnlockType type)
         {
-            foreach (GenericUnlockEntryEntry entry in GameTableManager.GenericUnlockEntry.Entries
+            foreach (GenericUnlockEntryEntry entry in GameTableManager.Instance.GenericUnlockEntry.Entries
                 .Where(e => e.GenericUnlockTypeEnum == (uint)type))
             {
                 if (unlocks.ContainsKey(entry.Id))

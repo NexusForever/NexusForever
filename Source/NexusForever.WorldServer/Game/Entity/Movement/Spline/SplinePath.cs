@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline
 
             SplineTypeBase splineType = new SplineTypeCatmullRomTbl();
 
-            ISplineMode splineMode = GlobalMovementManager.NewSplineMode(mode);
+            ISplineMode splineMode = GlobalMovementManager.Instance.NewSplineMode(mode);
             if (splineMode == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -67,7 +67,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline
                     throw new ArgumentOutOfRangeException();
             }
 
-            ISplineMode splineMode = GlobalMovementManager.NewSplineMode(mode);
+            ISplineMode splineMode = GlobalMovementManager.Instance.NewSplineMode(mode);
             if (splineMode == null)
                 throw new ArgumentException();
 

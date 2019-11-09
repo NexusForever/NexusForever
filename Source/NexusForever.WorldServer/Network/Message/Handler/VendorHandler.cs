@@ -72,7 +72,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (vendorItem == null)
                 return;
 
-            Item2Entry itemEntry = GameTableManager.Item.GetEntry(vendorItem.ItemId);
+            Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(vendorItem.ItemId);
             float costMultiplier = vendorInfo.BuyPriceMultiplier * vendorPurchase.VendorItemQty;
 
             // do all sanity checks before modifying currency
@@ -128,13 +128,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             // TODO Figure out why this is showing "You deleted [item]"
             Item soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
-            BuybackManager.AddItem(session.Player, soldItem, vendorSell.Quantity, currencyChange);
+            BuybackManager.Instance.AddItem(session.Player, soldItem, vendorSell.Quantity, currencyChange);
         }
 
         [MessageHandler(GameMessageOpcode.ClientBuybackItemFromVendor)]
         public static void HandleBuybackItemFromVendor(WorldSession session, ClientBuybackItemFromVendor buybackItemFromVendor)
         {
-            BuybackItem buybackItem = BuybackManager.GetItem(session.Player, buybackItemFromVendor.UniqueId);
+            BuybackItem buybackItem = BuybackManager.Instance.GetItem(session.Player, buybackItemFromVendor.UniqueId);
             if (buybackItem == null)
                 return;
 
@@ -149,7 +149,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.Player.CurrencyManager.CurrencySubtractAmount(currencyTypeId, currencyAmount);
 
             session.Player.Inventory.AddItem(buybackItem.Item, InventoryLocation.Inventory);
-            BuybackManager.RemoveItem(session.Player, buybackItem);
+            BuybackManager.Instance.RemoveItem(session.Player, buybackItem);
         }
     }
 }

@@ -94,7 +94,7 @@ namespace NexusForever.WorldServer.Game.Entity
             uint worldAreaId = Map.File.GetWorldAreaId(vector);
             if (Zone?.Id != worldAreaId)
             {
-                Zone = GameTableManager.WorldZone.GetEntry(worldAreaId);
+                Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId);
                 OnZoneUpdate();
             }
         }

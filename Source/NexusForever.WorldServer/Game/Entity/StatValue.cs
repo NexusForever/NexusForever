@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public StatValue(CharacterStats model)
         {
             Stat  = (Stat)model.Stat;
-            Type  = EntityManager.GetStatAttribute(Stat).Type;
+            Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
             Value = model.Value;
         }
 
@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public StatValue(EntityStats model)
         {
             Stat  = (Stat)model.Stat;
-            Type  = EntityManager.GetStatAttribute(Stat).Type;
+            Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
             Value = model.Value;
         }
 

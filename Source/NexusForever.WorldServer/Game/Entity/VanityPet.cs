@@ -29,8 +29,8 @@ namespace NexusForever.WorldServer.Game.Entity
             : base(EntityType.Pet)
         {
             OwnerGuid               = owner.Guid;
-            Creature                = GameTableManager.Creature2.GetEntry(creature);
-            Creature2DisplayGroup   = GameTableManager.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == Creature.Creature2DisplayGroupId);
+            Creature                = GameTableManager.Instance.Creature2.GetEntry(creature);
+            Creature2DisplayGroup   = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == Creature.Creature2DisplayGroupId);
             DisplayInfo             = Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u;
 
             SetProperty(Property.BaseHealth, 800.0f, 800.0f);

@@ -152,7 +152,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
         /// </summary>
         public void LaunchSpline(ushort splineId, SplineMode mode, float speed)
         {
-            Spline2Entry entry = GameTableManager.Spline2.GetEntry(splineId);
+            Spline2Entry entry = GameTableManager.Instance.Spline2.GetEntry(splineId);
             if (entry == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -279,7 +279,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
         /// </summary>
         private void AddCommand(IEntityCommandModel model, bool dirty = false)
         {
-            EntityCommand? command = EntityCommandManager.GetCommand(model.GetType());
+            EntityCommand? command = EntityCommandManager.Instance.GetCommand(model.GetType());
             if (command == null)
                 throw new ArgumentException();
 
@@ -323,7 +323,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
 
         private T GetCommand<T>() where T : IEntityCommandModel
         {
-            EntityCommand? command = EntityCommandManager.GetCommand(typeof(T));
+            EntityCommand? command = EntityCommandManager.Instance.GetCommand(typeof(T));
             if (command == null)
                 throw new ArgumentException();
 

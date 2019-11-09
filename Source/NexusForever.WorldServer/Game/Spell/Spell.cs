@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             this.caster     = caster;
             this.parameters = parameters;
-            CastingId       = GlobalSpellManager.NextCastingId;
+            CastingId       = GlobalSpellManager.Instance.NextCastingId;
             status          = SpellStatus.Initiating;
 
             if (parameters.RootSpellInfo == null)
@@ -206,12 +206,12 @@ namespace NexusForever.WorldServer.Game.Spell
                     .Where(t => (t.Flags & (SpellEffectTargetFlags)spell4EffectsEntry.TargetFlags) != 0)
                     .ToList();
 
-                SpellEffectDelegate handler = GlobalSpellManager.GetEffectHandler((SpellEffectType)spell4EffectsEntry.EffectType);
+                SpellEffectDelegate handler = GlobalSpellManager.Instance.GetEffectHandler((SpellEffectType)spell4EffectsEntry.EffectType);
                 if (handler == null)
                     log.Warn($"Unhandled spell effect {(SpellEffectType)spell4EffectsEntry.EffectType}");
                 else
                 {
-                    uint effectId = GlobalSpellManager.NextEffectId;
+                    uint effectId = GlobalSpellManager.Instance.NextEffectId;
                     foreach (SpellTargetInfo effectTarget in effectTargets)
                     {
                         var info = new SpellTargetInfo.SpellTargetEffectInfo(effectId, spell4EffectsEntry);

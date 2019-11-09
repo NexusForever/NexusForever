@@ -19,16 +19,16 @@ namespace NexusForever.WorldServer.Game.Quest
         public QuestInfo(Quest2Entry entry)
         {
             Entry           = entry;
-            DifficultyEntry = GameTableManager.Quest2Difficulty.GetEntry(Entry.Quest2DifficultyId);
+            DifficultyEntry = GameTableManager.Instance.Quest2Difficulty.GetEntry(Entry.Quest2DifficultyId);
 
             ImmutableList<QuestObjectiveEntry>.Builder objectiveBuilder = ImmutableList.CreateBuilder<QuestObjectiveEntry>();
             foreach (uint objectiveId in entry.Objectives.Where(o => o != 0u))
-                objectiveBuilder.Add(GameTableManager.QuestObjective.GetEntry(objectiveId));
+                objectiveBuilder.Add(GameTableManager.Instance.QuestObjective.GetEntry(objectiveId));
 
             Objectives = objectiveBuilder.ToImmutable();
 
             ImmutableDictionary<uint, Quest2RewardEntry>.Builder rewardBuilder = ImmutableDictionary.CreateBuilder<uint, Quest2RewardEntry>();
-            foreach (Quest2RewardEntry rewardEntry in GameTableManager.Quest2Reward.Entries
+            foreach (Quest2RewardEntry rewardEntry in GameTableManager.Instance.Quest2Reward.Entries
                 .Where(e => e.Quest2Id == entry.Id))
                 rewardBuilder.Add(rewardEntry.Id, rewardEntry);
 
@@ -66,7 +66,7 @@ namespace NexusForever.WorldServer.Game.Quest
             if (Entry.RewardXpOverride != 0u)
                 return Entry.RewardXpOverride;
 
-            XpPerLevelEntry entry = GameTableManager.XpPerLevel.GetEntry(Entry.ConLevel);
+            XpPerLevelEntry entry = GameTableManager.Instance.XpPerLevel.GetEntry(Entry.ConLevel);
             return (uint)(DifficultyEntry.XpMultiplier * entry.BaseQuestXpPerLevel);
         }
 
@@ -78,7 +78,7 @@ namespace NexusForever.WorldServer.Game.Quest
             if (Entry.RewardCashOverride != 0u)
                 return Entry.RewardCashOverride;
 
-            GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(530);
+            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(530);
             return (uint)(MathF.Pow(Entry.ConLevel, entry.Datafloat0) * DifficultyEntry.CashRewardMultiplier);
         }
     }

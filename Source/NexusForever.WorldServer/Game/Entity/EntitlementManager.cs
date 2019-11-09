@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (AccountEntitlementModel entitlementModel in model.AccountEntitlement)
             {
-                EntitlementEntry entry = GameTableManager.Entitlement.GetEntry(entitlementModel.EntitlementId);
+                EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry(entitlementModel.EntitlementId);
                 if (entry == null)
                     throw new DatabaseDataException($"Account {model.Id} has invalid entitlement {entitlementModel.EntitlementId} stored!");
 
@@ -85,7 +85,7 @@ namespace NexusForever.WorldServer.Game.Entity
             characterEntitlements.Clear();
             foreach (CharacterEntitlementModel entitlementModel in model.CharacterEntitlement)
             {
-                EntitlementEntry entry = GameTableManager.Entitlement.GetEntry(entitlementModel.EntitlementId);
+                EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry(entitlementModel.EntitlementId);
                 if (entry == null)
                     throw new DatabaseDataException($"Character {model.Id} has invalid entitlement {entitlementModel.EntitlementId} stored!");
 
@@ -103,7 +103,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </remarks>
         public void SetAccountEntitlement(EntitlementType type, int value)
         {
-            EntitlementEntry entry = GameTableManager.Entitlement.GetEntry((ulong)type);
+            EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type);
             if (entry == null)
                 throw new ArgumentException($"Invalid entitlement type {type}!");
 
@@ -126,7 +126,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </remarks>
         public void SetCharacterEntitlement(EntitlementType type, int value)
         {
-            EntitlementEntry entry = GameTableManager.Entitlement.GetEntry((ulong)type);
+            EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type);
             if (entry == null)
                 throw new ArgumentException($"Invalid entitlement type {type}!");
 

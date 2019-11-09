@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            AchievementInfo info = GlobalAchievementManager.GetAchievement(achievementId);
+            AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(achievementId);
             if (info == null)
             {
                 await context.SendMessageAsync($"Invalid achievement id {achievementId}!");

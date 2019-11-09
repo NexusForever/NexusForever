@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            if (GameTableManager.Entitlement.GetEntry(entitlementId) == null)
+            if (GameTableManager.Instance.Entitlement.GetEntry(entitlementId) == null)
             {
                 await context.SendMessageAsync($"{entitlementId} isn't a valid entitlement id!");
                 return;
@@ -46,7 +46,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            if (GameTableManager.Entitlement.GetEntry(entitlementId) == null)
+            if (GameTableManager.Instance.Entitlement.GetEntry(entitlementId) == null)
             {
                 await context.SendMessageAsync($"{entitlementId} isn't a valid entitlement id!");
                 return;

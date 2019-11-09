@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
         protected override async Task HandleCommandAsync(CommandContext context, string c, string[] parameters)
         {
-            IEnumerable<ICommandHandler> commandHandlers = CommandManager.GetCommandHandlers();
+            IEnumerable<ICommandHandler> commandHandlers = CommandManager.Instance.GetCommandHandlers();
             var allCommands = commandHandlers
                 .Where(i => i.GetType() != GetType())
                 .SelectMany(i => i.GetCommands()
@@ -47,7 +47,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 await context.SendMessageAsync(stringBuilder.ToString()).ConfigureAwait(false);
             }
             else
-                await CommandManager.HandleCommandAsync(context, $"{parameters[0]} help", false).ConfigureAwait(false);
+                await CommandManager.Instance.HandleCommandAsync(context, $"{parameters[0]} help", false).ConfigureAwait(false);
         }
 
         private string GetModuleName(object obj)

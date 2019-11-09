@@ -34,7 +34,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            if (GameTableManager.CurrencyType.GetEntry(currencyId) == null)
+            if (GameTableManager.Instance.CurrencyType.GetEntry(currencyId) == null)
             {
                 context.SendMessageAsync("Invalid currencyId. Please try again.");
                 return Task.CompletedTask;
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("list", "Lists currency IDs and names")]
         public Task ListSubCommand(CommandContext context, string command, string[] parameters)
         {
-            foreach (var entry in GameTableManager.CurrencyType.Entries)
+            foreach (var entry in GameTableManager.Instance.CurrencyType.Entries)
             {
                 context.SendMessageAsync($"ID {entry.Id}: {entry.Description}");
             }

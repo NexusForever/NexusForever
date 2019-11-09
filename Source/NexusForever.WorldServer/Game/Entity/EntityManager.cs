@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.IO.Map;
@@ -16,16 +17,20 @@ using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public static class EntityManager
+    public sealed class EntityManager : Singleton<EntityManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private delegate WorldEntity EntityFactoryDelegate();
-        private static ImmutableDictionary<EntityType, EntityFactoryDelegate> entityFactories;
+        private ImmutableDictionary<EntityType, EntityFactoryDelegate> entityFactories;
 
-        private static ImmutableDictionary<Stat, StatAttribute> statAttributes;
+        private ImmutableDictionary<Stat, StatAttribute> statAttributes;
 
-        public static void Initialise()
+        private EntityManager()
+        {
+        }
+
+        public void Initialise()
         {
             InitialiseEntityFactories();
             InitialiseEntityStats();
@@ -33,7 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
             CalculateEntityAreaData();
         }
 
-        private static void InitialiseEntityFactories()
+        private void InitialiseEntityFactories()
         {
             var builder = ImmutableDictionary.CreateBuilder<EntityType, EntityFactoryDelegate>();
 
@@ -52,7 +57,7 @@ namespace NexusForever.WorldServer.Game.Entity
             entityFactories = builder.ToImmutable();
         }
 
-        private static void InitialiseEntityStats()
+        private void InitialiseEntityStats()
         {
             var builder = ImmutableDictionary.CreateBuilder<Stat, StatAttribute>();
 
@@ -70,7 +75,7 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         [Conditional("DEBUG")]
-        private static void CalculateEntityAreaData()
+        private void CalculateEntityAreaData()
         {
             log.Info("Calculating area information for entities...");
 
@@ -83,7 +88,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 if (!mapFiles.TryGetValue(model.World, out MapFile mapFile))
                 {
-                    WorldEntry entry = GameTableManager.World.GetEntry(model.World);
+                    WorldEntry entry = GameTableManager.Instance.World.GetEntry(model.World);
                     mapFile = BaseMap.LoadMapFile(entry.AssetPath);
                     mapFiles.Add(model.World, mapFile);
                 }
@@ -102,7 +107,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Return a new <see cref="WorldEntity"/> of supplied <see cref="EntityType"/>.
         /// </summary>
-        public static WorldEntity NewEntity(EntityType type)
+        public WorldEntity NewEntity(EntityType type)
         {
             return entityFactories.TryGetValue(type, out EntityFactoryDelegate factory) ? factory.Invoke() : null;
         }
@@ -110,7 +115,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Return <see cref="StatAttribute"/> for supplied <see cref="Stat"/>.
         /// </summary>
-        public static StatAttribute GetStatAttribute(Stat stat)
+        public StatAttribute GetStatAttribute(Stat stat)
         {
             return statAttributes.TryGetValue(stat, out StatAttribute value) ? value : null;
         }

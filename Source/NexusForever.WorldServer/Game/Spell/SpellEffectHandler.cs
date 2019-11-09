@@ -38,11 +38,11 @@ namespace NexusForever.WorldServer.Game.Spell
             if (!(target is Player player))
                 return;
 
-            Creature2Entry creature2 = GameTableManager.Creature2.GetEntry(info.Entry.DataBits02);
+            Creature2Entry creature2 = GameTableManager.Instance.Creature2.GetEntry(info.Entry.DataBits02);
             if (creature2 == null)
                 return;
 
-            Creature2DisplayGroupEntryEntry displayGroupEntry = GameTableManager.Creature2DisplayGroupEntry.Entries.FirstOrDefault(d => d.Creature2DisplayGroupId == creature2.Creature2DisplayGroupId);
+            Creature2DisplayGroupEntryEntry displayGroupEntry = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.FirstOrDefault(d => d.Creature2DisplayGroupId == creature2.Creature2DisplayGroupId);
             if (displayGroupEntry == null)
                 return;
 
@@ -81,7 +81,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.Teleport)]
         private void HandleEffectTeleport(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            WorldLocation2Entry locationEntry = GameTableManager.WorldLocation2.GetEntry(info.Entry.DataBits00);
+            WorldLocation2Entry locationEntry = GameTableManager.Instance.WorldLocation2.GetEntry(info.Entry.DataBits00);
             if (locationEntry == null)
                 return;
 
@@ -97,11 +97,11 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.RapidTransport)]
         private void HandleEffectRapidTransport(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            TaxiNodeEntry taxiNode = GameTableManager.TaxiNode.GetEntry(parameters.TaxiNode);
+            TaxiNodeEntry taxiNode = GameTableManager.Instance.TaxiNode.GetEntry(parameters.TaxiNode);
             if (taxiNode == null)
                 return;
 
-            WorldLocation2Entry worldLocation = GameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
+            WorldLocation2Entry worldLocation = GameTableManager.Instance.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
             if (worldLocation == null)
                 return;
 
@@ -128,7 +128,7 @@ namespace NexusForever.WorldServer.Game.Spell
             if (!(target is Player player))
                 return;
 
-            Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(info.Entry.DataBits00);
+            Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(info.Entry.DataBits00);
             player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
 
             player.Session.EnqueueMessageEncrypted(new ServerUnlockMount
@@ -152,7 +152,7 @@ namespace NexusForever.WorldServer.Game.Spell
             if (!(target is Player player))
                 return;
 
-            Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(info.Entry.DataBits00);
+            Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(info.Entry.DataBits00);
             player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
 
             player.Session.EnqueueMessageEncrypted(new ServerUnlockMount

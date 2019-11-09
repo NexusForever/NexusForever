@@ -173,7 +173,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         protected float? GetStatFloat(Stat stat)
         {
-            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Float)
                 throw new ArgumentException();
 
@@ -188,7 +188,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         protected uint? GetStatInteger(Stat stat)
         {
-            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Integer)
                 throw new ArgumentException();
 
@@ -215,7 +215,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         protected void SetStat(Stat stat, float value)
         {
-            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Float)
                 throw new ArgumentException();
 
@@ -242,7 +242,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         protected void SetStat(Stat stat, uint value)
         {
-            StatAttribute attribute = EntityManager.GetStatAttribute(stat);
+            StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Integer)
                 throw new ArgumentException();
 

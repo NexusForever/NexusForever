@@ -32,20 +32,20 @@ namespace NexusForever.MapGenerator
             if (!Directory.Exists(parameters.PatchPath))
                 throw new DirectoryNotFoundException();
 
-            ArchiveManager.Initialise(parameters.PatchPath);
-            GameTableManager.Initialise();
+            ArchiveManager.Instance.Initialise(parameters.PatchPath);
+            GameTableManager.Instance.Initialise();
 
             if (parameters.Extract)
-                ExtractionManager.Initialise();
+                ExtractionManager.Instance.Initialise();
             if (parameters.Generate)
             {
-                GenerationManager.Initialise();
+                GenerationManager.Instance.Initialise();
 
                 var start = DateTime.UtcNow;
                 if (parameters.WorldId.HasValue)
-                    GenerationManager.GenerateWorld(parameters.WorldId.Value, parameters.GridX, parameters.GridY);
+                    GenerationManager.Instance.GenerateWorld(parameters.WorldId.Value, parameters.GridX, parameters.GridY);
                 else
-                    GenerationManager.GenerateWorlds(true);
+                    GenerationManager.Instance.GenerateWorlds(true);
 
                 TimeSpan span = DateTime.UtcNow - start;
                 log.Info($"Generated base maps in {span.TotalSeconds}s.");

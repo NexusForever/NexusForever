@@ -49,7 +49,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Title(CharacterTitle model)
         {
             CharacterId = model.Id;
-            Entry       = GameTableManager.CharacterTitle.GetEntry(model.Title);
+            Entry       = GameTableManager.Instance.CharacterTitle.GetEntry(model.Title);
             revoked     = Convert.ToBoolean(model.Revoked);
 
             if (Entry.LifeTimeSeconds != 0u)

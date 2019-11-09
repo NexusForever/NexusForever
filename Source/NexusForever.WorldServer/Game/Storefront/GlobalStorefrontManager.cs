@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Storefront.Static;
@@ -15,19 +16,23 @@ namespace NexusForever.WorldServer.Game.Storefront
     /// GlobalStorefrontManager provides global caching of all the store items that are sent to each player. It was made global so that reloading store items while the server is 
     /// running would be handled in a global context.
     /// </summary>
-    public static class GlobalStorefrontManager
+    public sealed class GlobalStorefrontManager : Singleton<GlobalStorefrontManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private static ImmutableDictionary<uint, Category> storeCategories;
-        private static ImmutableList<ServerStoreCategories.StoreCategory> serverStoreCategoryCache;
+        private ImmutableDictionary<uint, Category> storeCategories;
+        private ImmutableList<ServerStoreCategories.StoreCategory> serverStoreCategoryCache;
 
-        private static ImmutableDictionary<uint, OfferGroup> offerGroups;
-        private static ImmutableList<ServerStoreOffers.OfferGroup> serverStoreOfferGroupCache;
+        private ImmutableDictionary<uint, OfferGroup> offerGroups;
+        private ImmutableList<ServerStoreOffers.OfferGroup> serverStoreOfferGroupCache;
 
-        private static ImmutableDictionary</*offerId*/uint, /*offerGroupId*/uint> offerGroupLookup;
+        private ImmutableDictionary</*offerId*/uint, /*offerGroupId*/uint> offerGroupLookup;
 
-        public static void Initialise()
+        private GlobalStorefrontManager()
+        {
+        }
+
+        public void Initialise()
         {
             InitialiseStoreCategories();
             InitialiseStoreOfferGroups();
@@ -37,7 +42,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             log.Info($"Initialised {storeCategories.Count} categories with {offerGroups.Count} offers groups.");
         }
 
-        private static void InitialiseStoreCategories()
+        private void InitialiseStoreCategories()
         {
             IEnumerable<StoreCategory> storeCategoryModels = WorldDatabase.GetStoreCategories()
                 .OrderBy(i => i.Id)
@@ -51,7 +56,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             storeCategories = builder.ToImmutable();
         }
 
-        private static void InitialiseStoreOfferGroups()
+        private void InitialiseStoreOfferGroups()
         {
             IEnumerable<StoreOfferGroup> offerGroupModels = WorldDatabase.GetStoreOfferGroups()
                 .OrderBy(i => i.Id)
@@ -71,7 +76,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             offerGroupLookup = offerBuilder.ToImmutable();
         }
 
-        private static void BuildNetworkPackets()
+        private void BuildNetworkPackets()
         {
             var categoryBuilder = ImmutableList.CreateBuilder<ServerStoreCategories.StoreCategory>();
             foreach (Category category in storeCategories.Values)
@@ -87,7 +92,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Return the <see cref="OfferItem"/> that matches the supplied offer ID
         /// </summary>
-        public static OfferItem GetStoreOfferItem(uint offerId)
+        public OfferItem GetStoreOfferItem(uint offerId)
         {
             if (!offerGroupLookup.TryGetValue(offerId, out uint offerGroupId))
                 return null;
@@ -98,14 +103,14 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// This method is used to send the current Store Catalog to the <see cref="WorldSession"/>
         /// </summary>
-        public static void HandleCatalogRequest(WorldSession session)
+        public void HandleCatalogRequest(WorldSession session)
         {
             SendStoreCategories(session);
             SendStoreOffers(session);
             SendStoreFinalise(session);
         }
 
-        private static void SendStoreCategories(WorldSession session)
+        private void SendStoreCategories(WorldSession session)
         {
             session.EnqueueMessageEncrypted(new ServerStoreCategories
             {
@@ -114,7 +119,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             });
         }
 
-        private static void SendStoreOffers(WorldSession session)
+        private void SendStoreOffers(WorldSession session)
         {
             var storeOffers = new ServerStoreOffers();
             for (int i = 0; i < serverStoreOfferGroupCache.Count; i++)
@@ -131,7 +136,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             }
         }
 
-        private static void SendStoreFinalise(WorldSession session)
+        private void SendStoreFinalise(WorldSession session)
         {
             session.EnqueueMessageEncrypted(new ServerStoreFinalise());
         }

@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
@@ -10,14 +11,18 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {
-    public static partial class PrerequisiteManager
+    public sealed partial class PrerequisiteManager : Singleton<PrerequisiteManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private delegate bool PrerequisiteCheckDelegate(Player player, PrerequisiteComparison comparison, uint value, uint objectId);
-        private static ImmutableDictionary<PrerequisiteType, PrerequisiteCheckDelegate> prerequisiteCheckHandlers;
+        private ImmutableDictionary<PrerequisiteType, PrerequisiteCheckDelegate> prerequisiteCheckHandlers;
 
-        public static void Initialise()
+        private PrerequisiteManager()
+        {
+        }
+
+        public void Initialise()
         {
             var builder = ImmutableDictionary.CreateBuilder<PrerequisiteType, PrerequisiteCheckDelegate>();
             foreach (MethodInfo method in Assembly.GetExecutingAssembly().GetTypes()
@@ -39,9 +44,9 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         /// <summary>
         /// Checks if <see cref="Player"/> meets supplied prerequisite.
         /// </summary>
-        public static bool Meets(Player player, uint prerequisiteId)
+        public bool Meets(Player player, uint prerequisiteId)
         {
-            PrerequisiteEntry entry = GameTableManager.Prerequisite.GetEntry(prerequisiteId);
+            PrerequisiteEntry entry = GameTableManager.Instance.Prerequisite.GetEntry(prerequisiteId);
             if (entry == null)
                 throw new ArgumentException();
 
@@ -59,7 +64,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             return true;
         }
 
-        private static bool Meets(Player player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId)
+        private bool Meets(Player player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             if (!prerequisiteCheckHandlers.TryGetValue(type, out PrerequisiteCheckDelegate handler))
             {
