@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using NexusForever.Shared.Cryptography;
@@ -23,6 +23,7 @@ namespace NexusForever.WorldServer.Network
 
         public GenericUnlockManager GenericUnlockManager { get; set; }
         public AccountCurrencyManager AccountCurrencyManager { get; set; }
+        public EntitlementManager EntitlementManager { get; set; }
 
         public override void OnAccept(Socket newSocket)
         {
@@ -62,8 +63,9 @@ namespace NexusForever.WorldServer.Network
 
             Account = account;
 
-            GenericUnlockManager = new GenericUnlockManager(this, account);
+            GenericUnlockManager   = new GenericUnlockManager(this, account);
             AccountCurrencyManager = new AccountCurrencyManager(this, account);
+            EntitlementManager     = new EntitlementManager(this, account);
         }
 
         public void SetEncryptionKey(byte[] sessionKey)

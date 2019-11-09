@@ -6,6 +6,7 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Quest;
@@ -479,6 +480,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             activeQuests.Remove(questId);
             completedQuests.Add(questId, quest);
+
+            player.AchievementManager.CheckAchievements(player, AchievementType.QuestComplete, questId);
         }
 
         private void RewardQuest(QuestInfo info, ushort reward)

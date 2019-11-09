@@ -110,31 +110,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 session.AccountCurrencyManager.SendCharacterListPacket();
                 session.GenericUnlockManager.SendUnlockList();
+
                 session.EnqueueMessageEncrypted(new ServerAccountEntitlements
                 {
-                    Entitlements =
-                    {
-                        new ServerAccountEntitlements.AccountEntitlementInfo
+                    Entitlements = session.EntitlementManager.GetAccountEntitlements()
+                        .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
                         {
-                            Entitlement = Entitlement.BaseCharacterSlots,
-                            Count       = 12
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ExtraDecorSlots,
-                            Count       = 2000
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ChuaWarriorUnlock,
-                            Count       = 1
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.AurinEngineerUnlock,
-                            Count       = 1
-                        }
-                    }
+                            Entitlement = e.Type,
+                            Count       = e.Amount
+                        })
+                        .ToList()
                 });
 
                 var serverCharacterList = new ServerCharacterList
@@ -613,6 +598,24 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
                 InnateIndex = session.Player.InnateIndex
+            });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientInspectPlayerRequest)]
+        public static void HandleInspectPlayerRequest(WorldSession session, ClientInspectPlayerRequest inspectPlayer)
+        {
+            // TODO: Remove this since Raw- Lazy is rewriting something.
+            WorldSession inspectSession = NetworkManager<WorldSession>.GetSession(s => s.Player?.Guid == inspectPlayer.Guid);
+            if (inspectSession == null)
+                return;
+
+            session.EnqueueMessageEncrypted(new ServerInspectPlayerResponse
+            {
+                Guid  = inspectPlayer.Guid,
+                Items = inspectSession.Player.Inventory
+                    .Single(b => b.Location == InventoryLocation.Equipped)
+                    .Select(i => i.BuildNetworkItem())
+                    .ToList()
             });
         }
     }

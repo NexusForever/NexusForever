@@ -193,7 +193,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public static GameTable<EmotesEntry> Emotes { get; private set; }
 
+        [GameData]
         public static GameTable<EntitlementEntry> Entitlement { get; private set; }
+
         public static GameTable<EpisodeEntry> Episode { get; private set; }
         public static GameTable<EpisodeQuestEntry> EpisodeQuest { get; private set; }
 

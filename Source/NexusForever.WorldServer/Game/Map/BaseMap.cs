@@ -12,6 +12,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Map.Search;
 using NLog;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 using Path = System.IO.Path;
@@ -107,6 +108,7 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void EnqueueAdd(GridEntity entity, Vector3 position)
         {
+            entity.OnEnqueueAddToMap();
             pendingAdd.Enqueue(new GridAction(entity, position));
         }
 
@@ -115,6 +117,7 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void EnqueueRemove(GridEntity entity)
         {
+            entity.OnEnqueueRemoveFromMap();
             pendingRemove.Enqueue(entity);
         }
 
@@ -144,7 +147,7 @@ namespace NexusForever.WorldServer.Game.Map
                 for (float x = vector.X - radius; x < vector.X + radius + MapDefines.GridCellSize; x += MapDefines.GridCellSize)
                 {
                     var searchVector = new Vector3(x, 0f, z);
-                    // don't activate new grids during serch
+                    // don't activate new grids during search
                     GetGrid(searchVector)?.Search(searchVector, check, intersectedEntities);
                 }
             }

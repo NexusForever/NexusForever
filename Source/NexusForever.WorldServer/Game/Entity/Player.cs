@@ -15,6 +15,7 @@ using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -108,7 +109,10 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Guid of the <see cref="VanityPet"/> currently summoned by the <see cref="Player"/>.
         /// </summary>
-        public uint PetGuid { get; set; }
+        public uint? VanityPetGuid { get; set; }
+
+        public bool IsSitting => currentChairGuid != null;
+        private uint? currentChairGuid;
 
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
@@ -125,6 +129,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public MailManager MailManager { get; }
         public ZoneMapManager ZoneMapManager { get; }
         public QuestManager QuestManager { get; }
+        public CharacterAchievementManager AchievementManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -170,6 +175,9 @@ namespace NexusForever.WorldServer.Game.Entity
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
+            AchievementManager      = new CharacterAchievementManager(this, model);
+
+            Session.EntitlementManager.OnNewCharacter(model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -290,8 +298,16 @@ namespace NexusForever.WorldServer.Game.Entity
             base.OnAddToMap(map, guid, vector);
             map.OnAddToMap(this);
 
-            SendPacketsAfterAddToMap();
+            // resummon vanity pet if it existed before teleport
+            if (pendingTeleport?.VanityPetId != null)
+            {
+                var vanityPet = new VanityPet(this, pendingTeleport.VanityPetId.Value);
+                map.EnqueueAdd(vanityPet, Position);
+            }
 
+            pendingTeleport = null;
+
+            SendPacketsAfterAddToMap();
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
             IsLoading = false;
@@ -301,10 +317,6 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             base.OnRelocate(vector);
             saveMask |= PlayerSaveMask.Location;
-
-            // TODO: remove this once pathfinding is implemented
-            if (PetGuid > 0)
-                Map.EnqueueRelocate(GetVisible<VanityPet>(PetGuid), vector);
 
             ZoneMapManager.OnRelocate(vector);
         }
@@ -382,8 +394,15 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     FactionId = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
                 },
-                ActiveCostumeIndex = CostumeIndex,
-                InputKeySet = (uint)InputKeySet
+                ActiveCostumeIndex    = CostumeIndex,
+                InputKeySet           = (uint)InputKeySet,
+                CharacterEntitlements = Session.EntitlementManager.GetCharacterEntitlements()
+                    .Select(e => new ServerPlayerCreate.CharacterEntitlement
+                    {
+                        Entitlement = e.Type,
+                        Count       = e.Amount
+                    })
+                    .ToList()
             };
 
             foreach (Currency currency in CurrencyManager)
@@ -413,6 +432,8 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager.SendInitialPackets();
             Session.AccountCurrencyManager.SendInitialPackets();
             QuestManager.SendInitialPackets();
+            AchievementManager.SendInitialPackets();
+
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
                 InnateIndex = InnateIndex
@@ -429,13 +450,18 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnRemoveFromMap()
         {
+            // enqueue removal of existing vanity pet if summoned
+            if (VanityPetGuid != null)
+            {
+                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
+                pet?.RemoveFromMap();
+                VanityPetGuid = null;
+            }
+
             base.OnRemoveFromMap();
 
             if (pendingTeleport != null)
-            {
                 MapManager.AddToMap(this, pendingTeleport.Info, pendingTeleport.Vector);
-                pendingTeleport = null;
-            }
         }
 
         public override void AddVisible(GridEntity entity)
@@ -589,8 +615,16 @@ namespace NexusForever.WorldServer.Game.Entity
                 // TODO: don't remove player from map if it's the same as destination
             }
 
+            // store vanity pet summoned before teleport so it can be summoned again after being added to the new map
+            uint? vanityPetId = null;
+            if (VanityPetGuid != null)
+            {
+                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
+                vanityPetId = pet?.Creature.Id;
+            }
+
             var info = new MapInfo(entry, instanceId, residenceId);
-            pendingTeleport = new PendingTeleport(info, vector);
+            pendingTeleport = new PendingTeleport(info, vector, vanityPetId);
             RemoveFromMap();
         }
 
@@ -629,6 +663,58 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Make <see cref="Player"/> sit on provided <see cref="WorldEntity"/>.
+        /// </summary>
+        public void Sit(WorldEntity chair)
+        {
+            if (IsSitting)
+                Unsit();
+
+            currentChairGuid = chair.Guid;
+
+            // TODO: Emit interactive state from the entity instance itself
+            chair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            {
+                UnitId = chair.Guid,
+                InUse  = true
+            }, true);
+            EnqueueToVisible(new ServerUnitSetChair
+            {
+                UnitId      = Guid,
+                UnitIdChair = chair.Guid,
+                WaitForUnit = false
+            }, true);
+        }
+
+        /// <summary>
+        /// Remove <see cref="Player"/> from the <see cref="WorldEntity"/> it is sitting on.
+        /// </summary>
+        public void Unsit()
+        {
+            if (!IsSitting)
+                return;
+
+            WorldEntity currentChair = GetVisible<WorldEntity>(currentChairGuid.Value);
+            if (currentChair == null)
+                throw new InvalidOperationException();
+
+            // TODO: Emit interactive state from the entity instance itself
+            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            {
+                UnitId = currentChair.Guid,
+                InUse  = false
+            }, true);
+            EnqueueToVisible(new ServerUnitSetChair
+            {
+                UnitId      = Guid,
+                UnitIdChair = 0,
+                WaitForUnit = false
+            }, true);
+
+            currentChairGuid = null;
+        }
+
+        /// <summary>
         /// Send <see cref="GenericError"/> to <see cref="Player"/>.
         /// </summary>
         public void SendGenericError(GenericError error)
@@ -652,6 +738,8 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Session.GenericUnlockManager.Save(context);
             Session.AccountCurrencyManager.Save(context);
+            Session.EntitlementManager.Save(context);
+
             CostumeManager.Save(context);
             KeybindingManager.Save(context);
         }
@@ -732,6 +820,9 @@ namespace NexusForever.WorldServer.Game.Entity
             MailManager.Save(context);
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
+            AchievementManager.Save(context);
+
+            Session.EntitlementManager.Save(context);
         }
 
         /// <summary>
