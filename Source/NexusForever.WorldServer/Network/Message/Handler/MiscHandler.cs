@@ -1,3 +1,4 @@
+using System;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
@@ -60,6 +61,28 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleWeaponToggle(WorldSession session, ClientToggleWeapons toggleWeapons)
         {
             session.Player.Sheathed = toggleWeapons.ToggleState;
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientRandomRollRequest)]
+        public static void HandleRandomRoll(WorldSession session, ClientRandomRollRequest randomRoll)
+        {
+            if ( randomRoll.MinRandom > randomRoll.MaxRandom)
+                throw new InvalidPacketValueException();
+
+            if (randomRoll.MaxRandom > 1000000u)
+                throw new InvalidPacketValueException();
+
+            session.EnqueueMessageEncrypted(new ServerRandomRollResponse
+            {
+                TargetPlayerIdentity = new TargetPlayerIdentity
+                {
+                    RealmId = WorldServer.RealmId,
+                    CharacterId = session.Player.CharacterId
+                },
+                MinRandom = randomRoll.MinRandom,
+                MaxRandom = randomRoll.MaxRandom,
+                RandomRollResult = new Random().Next((int)randomRoll.MinRandom, (int)randomRoll.MaxRandom)
+            });
         }
     }
 }

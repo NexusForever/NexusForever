@@ -197,6 +197,8 @@ namespace NexusForever.Shared.Network.Message
         ServerUnlockPetFlair            = 0x068D,
         ServerChangePetStance           = 0x068F,
         ServerPublicEventStart          = 0x0700,
+        ClientRandomRollRequest         = 0x071B,
+        ServerRandomRollResponse        = 0x071C,
         ServerEntityInteractiveUpdate   = 0x0755,
         ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
