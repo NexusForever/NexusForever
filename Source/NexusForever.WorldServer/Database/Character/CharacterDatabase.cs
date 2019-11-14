@@ -20,6 +20,18 @@ namespace NexusForever.WorldServer.Database.Character
             }
         }
 
+        public static async Task<List<Model.Character>> GetAllCharactersAsync()
+        {
+            using (var context = new CharacterContext())
+                return await context.Character.Where(c => c.DeleteTime == null).ToListAsync();
+        }
+
+        public static List<Model.Character> GetAllCharacters()
+        {
+            using (var context = new CharacterContext())
+                return context.Character.Where(c => c.DeleteTime == null).ToList();
+        }
+
         public static ulong GetNextCharacterId()
         {
             using (var context = new CharacterContext())
