@@ -19,24 +19,24 @@ namespace NexusForever.WorldServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             app.UseStaticFiles();
-            app.UseWebSockets(new WebSocketOptions()
+            app.UseWebSockets(new WebSocketOptions
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(30),
                 ReceiveBufferSize = 16384
             });
             app.UseMiddleware<WebSocketMiddleware>();
-            app.UseMvc(routes =>
+
+            app.UseRouting();
+            app.UseEndpoints(ep =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                ep.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

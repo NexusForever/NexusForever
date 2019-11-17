@@ -196,18 +196,13 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// </summary>
         protected uint GetAchievementPoints(AchievementInfo info)
         {
-            // TODO: prettify this with the new C# 8 switch expressions
-            switch (info.Entry.AchievementPointEnum)
+            return info.Entry.AchievementPointEnum switch
             {
-                case 1u:
-                    return 10u;
-                case 2u:
-                    return 25u;
-                case 3u:
-                    return 50u;
-                default:
-                    return 0u;
-            }
+                1u => 10u,
+                2u => 25u,
+                3u => 50u,
+                _ => 0u,
+            };
         }
 
         /// <summary>
