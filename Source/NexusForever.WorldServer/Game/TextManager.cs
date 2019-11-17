@@ -45,9 +45,9 @@ namespace NexusForever.WorldServer.Game
 
         private GameTable<T> GetGameTable<T>() where T : class, new()
         {
-            return typeof(GameTableManager).GetProperties(BindingFlags.Static | BindingFlags.Public)
+            return GameTableManager.Instance.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(i => i.PropertyType == typeof(GameTable<T>))
-                .Select(property => property.GetValue(null) as GameTable<T>)
+                .Select(property => property.GetValue(GameTableManager.Instance) as GameTable<T>)
                 .FirstOrDefault();
         }
 
