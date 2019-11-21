@@ -75,7 +75,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             amount += currency.Amount;
             if (currency.Entry.CapAmount > 0)
-                amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
+                amount = Math.Min(amount, currency.Entry.CapAmount);
 
             CurrencyAmountUpdate(currency, amount, isLoot);
         }
