@@ -9,6 +9,7 @@ using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NLog;
 
@@ -38,6 +39,7 @@ namespace NexusForever.WorldServer.Game.Spell
         private ImmutableDictionary<uint, ImmutableList<Spell4Entry>> spellEntries;
         private ImmutableDictionary<uint, ImmutableList<Spell4EffectsEntry>> spellEffectEntries;
         private ImmutableDictionary<uint, ImmutableList<TelegraphDamageEntry>> spellTelegraphEntries;
+        private ImmutableDictionary<Vital, CastResult> vitalCastResults;
 
         private GlobalSpellManager()
         {
@@ -48,6 +50,7 @@ namespace NexusForever.WorldServer.Game.Spell
             CacheSpellEntries();
             InitialiseSpellInfo();
             InitialiseSpellEffectHandlers();
+            InitialiseVitalCastResults();
         }
 
         private void CacheSpellEntries()
@@ -104,6 +107,21 @@ namespace NexusForever.WorldServer.Game.Spell
 
                 spellEffectDelegates.Add(attribute.SpellEffectType, lambda.Compile());
             }
+        }
+
+        private void InitialiseVitalCastResults()
+        {
+            var builder = ImmutableDictionary.CreateBuilder<Vital, CastResult>();
+
+            foreach (FieldInfo field in typeof(CastResult).GetFields())
+            {
+                IEnumerable<CastResultVitalAttribute> attributes = field.GetCustomAttributes<CastResultVitalAttribute>();
+
+                foreach (CastResultVitalAttribute attribute in attributes)
+                    builder.Add(attribute.Vital, (CastResult)field.GetValue(null));
+            }
+
+            vitalCastResults = builder.ToImmutable();
         }
 
         /// <summary>
@@ -166,6 +184,14 @@ namespace NexusForever.WorldServer.Game.Spell
         public SpellEffectDelegate GetEffectHandler(SpellEffectType spellEffectType)
         {
             return spellEffectDelegates.TryGetValue(spellEffectType, out SpellEffectDelegate handler) ? handler : null;
+        }
+
+        /// <summary>
+        /// Return <see cref="CastResult"/> for failed cast on supplied <see cref="Vital"/>.
+        /// </summary>
+        public CastResult GetFailedCastResultForVital(Vital vital)
+        {
+            return vitalCastResults.TryGetValue(vital, out CastResult result) ? result : CastResult.SpellBad;
         }
     }
 }

@@ -53,7 +53,7 @@
         [Stat(StatType.Integer)]
         Shield              = 20,
         [Stat(StatType.Integer)]
-        InterruptArmour     = 21,
+        InterruptArmor      = 21,
         [Stat(StatType.Integer)]
         Unknown22           = 22,
         [Stat(StatType.Float)]

@@ -85,6 +85,7 @@ namespace NexusForever.WorldServer
             GlobalGuildManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
+            SpellLookupManager.Instance.Initialise();
             PrerequisiteManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
             GlobalQuestManager.Instance.Initialise();

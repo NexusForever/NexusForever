@@ -10,6 +10,8 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game;
 using NLog;
+using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Spell;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -152,6 +154,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 throw new InvalidPacketValueException();
 
             session.Player.Sit(chair);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientDash)]
+        public static void HandleClientDash(WorldSession session, ClientDash clientDash)
+        {
+            if (SpellLookupManager.Instance.TryGetDashSpell(clientDash.Direction, out uint dashSpell4Id))
+                session.Player.CastSpell(dashSpell4Id, new SpellParameters
+                {
+                    UserInitiatedSpellCast = false
+                });
         }
     }
 }
