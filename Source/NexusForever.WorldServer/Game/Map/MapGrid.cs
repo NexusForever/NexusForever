@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using NexusForever.Shared;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game.Map;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map.Search;
@@ -15,7 +16,14 @@ namespace NexusForever.WorldServer.Game.Map
 
         public (uint X, uint Z) Coord { get; }
 
+        public bool PendingUnload { get; private set; }
+
         private readonly MapCell[] cells = new MapCell[MapDefines.GridCellCount * MapDefines.GridCellCount];
+
+        private uint playerCount;
+        private readonly UpdateTimer unloadTimer = new UpdateTimer(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridUnloadTimer ?? 600d);
+        private uint unloadCellX;
+        private uint unloadCellZ;
 
         /// <summary>
         /// Return <see cref="MapGrid"/> at supplied <see cref="Vector3"/>.
@@ -49,6 +57,58 @@ namespace NexusForever.WorldServer.Game.Map
         {
             foreach (MapCell cell in cells)
                 cell.Update(lastTick);
+
+            if (ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridUnloadTimer.HasValue)
+            {
+                unloadTimer.Update(lastTick);
+                if (unloadTimer.HasElapsed)
+                    PendingUnload = true;
+            }
+        }
+
+        /// <summary>
+        /// Notify <see cref="MapGrid"/> of the addition of new <see cref="Player"/> that is in vision range.
+        /// </summary>
+        public void AddVisiblePlayer()
+        {
+            playerCount++;
+            if (unloadTimer.IsTicking)
+                unloadTimer.Reset(false);
+        }
+
+        /// <summary>
+        /// Notify <see cref="MapGrid"/> of the removal of an existing <see cref="Player"/> that is no longer in vision range.
+        /// </summary>
+        public void RemoveVisiblePlayer()
+        {
+            playerCount--;
+            if (playerCount == 0u)
+                unloadTimer.Reset();
+        }
+
+        /// <summary>
+        /// Unload <see cref="MapCell"/>'s from the <see cref="MapGrid"/>.
+        /// </summary>
+        public bool Unload()
+        {
+            uint threshold = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridActionThreshold ?? 100u;
+            for (uint z = unloadCellZ; z < MapDefines.GridCellCount; z++)
+            {
+                for (uint x = unloadCellX; x < MapDefines.GridCellCount; x++)
+                {
+                    cells[z * MapDefines.GridCellCount + x].Unload(ref threshold);
+                    if (threshold == 0u)
+                    {
+                        unloadCellX = x;
+                        unloadCellZ = z;
+                        return false;
+                    }
+                }
+
+                unloadCellX = 0u;
+            }
+            
+            return true;
         }
 
         /// <summary>

@@ -89,7 +89,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (!mapFiles.TryGetValue(model.World, out MapFile mapFile))
                 {
                     WorldEntry entry = GameTableManager.Instance.World.GetEntry(model.World);
-                    mapFile = BaseMap.LoadMapFile(entry.AssetPath);
+                    mapFile = BaseMapManager.Instance.GetBaseMap(entry.AssetPath);
                     mapFiles.Add(model.World, mapFile);
                 }
 

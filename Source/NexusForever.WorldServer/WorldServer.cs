@@ -53,10 +53,11 @@ namespace NexusForever.WorldServer
             DisableManager.Instance.Initialise();
 
             GameTableManager.Instance.Initialise();
-            MapManager.Instance.Initialise();
+            BaseMapManager.Instance.Initialise();
             SearchManager.Instance.Initialise();
             EntityManager.Instance.Initialise();
             EntityCommandManager.Instance.Initialise();
+            EntityCacheManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();

@@ -49,6 +49,21 @@ namespace NexusForever.WorldServer.Game.Map
         }
 
         /// <summary>
+        /// Unload <see cref="GridEntity"/>'s from the <see cref="MapCell"/>.
+        /// </summary>
+        public void Unload(ref uint threshHold)
+        {
+            foreach (GridEntity entity in entities.ToList())
+            {
+                entity.RemoveFromMapDirect();
+
+                threshHold--;
+                if (threshHold == 0u)
+                    return;
+            }
+        }
+
+        /// <summary>
         /// Add <see cref="GridEntity"/> to the <see cref="MapCell"/>.
         /// </summary>
         public void AddEntity(GridEntity entity)

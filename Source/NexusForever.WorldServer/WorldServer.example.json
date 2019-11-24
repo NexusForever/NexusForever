@@ -18,7 +18,19 @@
         }
     },
     "Map": {
-        "MapPath": "map"
+        "MapPath": "map",
+        "PrecacheBaseMaps": [
+            22,
+            51,
+            1061
+        ],
+        "PrecacheMapSpawns": [
+            22,
+            51,
+            1061
+        ],
+        "GridActionThreshold": 100,
+        "GridUnloadTimer": 3600
     },
     "RealmId": 1,
     "LengthOfInGameDay": 12600

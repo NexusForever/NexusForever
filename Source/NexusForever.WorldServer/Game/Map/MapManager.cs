@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
 using NexusForever.Shared;
-using NexusForever.Shared.Configuration;
-using NexusForever.Shared.IO.Map;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
 
@@ -20,30 +17,6 @@ namespace NexusForever.WorldServer.Game.Map
 
         private MapManager()
         {
-        }
-
-        public void Initialise()
-        {
-            ValidateMapFiles();
-        }
-
-        private void ValidateMapFiles()
-        {
-            log.Info("Validating map files...");
-
-            string mapPath = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.MapPath;
-            if (mapPath == null || !Directory.Exists(mapPath))
-                throw new DirectoryNotFoundException("Invalid path to base maps! Make sure you have set it in the configuration file.");
-
-            foreach (string fileName in Directory.EnumerateFiles(mapPath, "*.nfmap"))
-            {
-                using (FileStream stream = File.OpenRead(fileName))
-                using (BinaryReader reader = new BinaryReader(stream))
-                {
-                    var mapFile = new MapFile();
-                    mapFile.ReadHeader(reader);
-                }
-            }
         }
 
         public void Update(double lastTick)
