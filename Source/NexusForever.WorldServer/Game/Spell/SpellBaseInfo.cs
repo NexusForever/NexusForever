@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 
@@ -34,14 +35,16 @@ namespace NexusForever.WorldServer.Game.Spell
             PrerequisiteSpell = GameTableManager.Instance.Spell4Base.GetEntry(Entry.Spell4BaseIdPrerequisiteSpell);
             SpellType         = GameTableManager.Instance.Spell4SpellTypes.GetEntry(Entry.Spell4SpellTypesIdSpellType);
 
-            foreach (Spell4Entry spell4Entry in GameTableManager.Instance.Spell4.Entries
-                .Where(e => e.Spell4BaseIdBaseSpell == Entry.Id)
-                .OrderByDescending(e => e.TierIndex))
-            {
-                // spell don't always have sequential tiers, create from highest tier not total
-                if (spellInfoStore == null)
-                    spellInfoStore = new SpellInfo[spell4Entry.TierIndex];
+            List<Spell4Entry> spellEntries = GlobalSpellManager.Instance.GetSpell4Entries(spell4BaseEntry.Id).ToList();
+            if (spellEntries.Count < 1)
+                return;
 
+            // spell don't always have sequential tiers, create from highest tier not total
+            if (spellInfoStore == null)
+                spellInfoStore = new SpellInfo[spellEntries[0].TierIndex];
+
+            foreach (Spell4Entry spell4Entry in spellEntries)
+            {
                 var spellInfo = new SpellInfo(this, spell4Entry);
                 spellInfoStore[spell4Entry.TierIndex - 1] = spellInfo;
             }

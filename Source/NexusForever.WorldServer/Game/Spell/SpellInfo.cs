@@ -40,15 +40,8 @@ namespace NexusForever.WorldServer.Game.Spell
             CasterPersistencePrerequisites = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterPersistence);
             TargetPersistencePrerequisites = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetPersistence);
 
-            Telegraphs = GameTableManager.Instance.Spell4Telegraph.Entries
-                .Where(e => e.Spell4Id == Entry.Id)
-                .Select(e => GameTableManager.Instance.TelegraphDamage.GetEntry(e.TelegraphDamageId))
-                .ToList();
-
-            Effects = GameTableManager.Instance.Spell4Effects.Entries
-                .Where(e => e.SpellId == spell4Entry.Id)
-                .OrderBy(e => e.OrderIndex)
-                .ToList();
+            Telegraphs = GlobalSpellManager.Instance.GetTelegraphDamageEntries(spell4Entry.Id).ToList();
+            Effects = GlobalSpellManager.Instance.GetSpell4EffectEntries(spell4Entry.Id).ToList();
         }
     }
 }
