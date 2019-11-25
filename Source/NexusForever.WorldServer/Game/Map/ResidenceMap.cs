@@ -254,11 +254,6 @@ namespace NexusForever.WorldServer.Game.Map
             EnqueueToAll(residenceDecor);
         }
 
-        private Vector3 CalculateDecorPosition(ClientHousingDecorUpdate.DecorUpdate update)
-        {
-            return new Vector3(update.Position.X, update.Position.Y, update.Position.Z);
-        }
-
         private void DecorCreate(Player player, ClientHousingDecorUpdate.DecorUpdate update)
         {
             HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(update.DecorInfoId);
@@ -297,7 +292,7 @@ namespace NexusForever.WorldServer.Game.Map
                     throw new InvalidPacketValueException();
 
                 // new decor is being placed directly in the world
-                decor.Position = CalculateDecorPosition(update);
+                decor.Position = update.Position;
                 decor.Rotation = update.Rotation;
                 decor.Scale    = update.Scale;
             }
@@ -358,7 +353,6 @@ namespace NexusForever.WorldServer.Game.Map
                     decor.ColourShiftId = update.ColourShiftId;
                 }
 
-                Vector3 position = CalculateDecorPosition(update);
                 if (decor.Type == DecorType.Crate)
                 {
                     if (decor.Entry.Creature2IdActiveProp != 0u)
@@ -367,7 +361,7 @@ namespace NexusForever.WorldServer.Game.Map
                     }
 
                     // crate->world
-                    decor.Move(update.DecorType, position, update.Rotation, update.Scale);
+                    decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
                 }
                 else
                 {
@@ -376,65 +370,43 @@ namespace NexusForever.WorldServer.Game.Map
                     else
                     {
                         // world->world
-                        decor.Move(update.DecorType, position, update.Rotation, update.Scale);
+                        decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
                         decor.DecorParentId = update.ParentDecorId;
                     }
                 }
-
-                EnqueueToAll(new ServerHousingResidenceDecor
-                {
-                    Operation = 0,
-                    DecorData = new List<ServerHousingResidenceDecor.Decor>
-                    {
-                        new ServerHousingResidenceDecor.Decor
-                        {
-                            RealmId       = WorldServer.RealmId,
-                            DecorId       = decor.DecorId,
-                            ResidenceId   = residence.Id,
-                            DecorType     = decor.Type,
-                            PlotIndex     = decor.PlotIndex,
-                            Scale         = decor.Scale,
-                            Position      = decor.Position,
-                            Rotation      = decor.Rotation,
-                            DecorInfoId   = decor.Entry.Id,
-                            ParentDecorId = decor.DecorParentId,
-                            ColourShift   = decor.ColourShiftId
-                        }
-                    }
-                });
             }
             else
             {
                 player.Session.EnqueueMessageEncrypted(new ServerHousingResult
                 {
-                    RealmId = WorldServer.RealmId,
+                    RealmId     = WorldServer.RealmId,
                     ResidenceId = residence.Id,
-                    PlayerName = player.Name,
-                    Result = result
-                });
-
-                EnqueueToAll(new ServerHousingResidenceDecor
-                {
-                    Operation = 0,
-                    DecorData = new List<ServerHousingResidenceDecor.Decor>
-                    {
-                        new ServerHousingResidenceDecor.Decor
-                        {
-                            RealmId       = WorldServer.RealmId,
-                            DecorId       = decor.DecorId,
-                            ResidenceId   = residence.Id,
-                            DecorType     = decor.Type,
-                            PlotIndex     = decor.PlotIndex,
-                            Scale         = decor.Scale,
-                            Position      = decor.Position,
-                            Rotation      = decor.Rotation,
-                            DecorInfoId   = decor.Entry.Id,
-                            ParentDecorId = decor.DecorParentId,
-                            ColourShift   = decor.ColourShiftId
-                        }
-                    }
+                    PlayerName  = player.Name,
+                    Result      = result
                 });
             }
+
+            EnqueueToAll(new ServerHousingResidenceDecor
+            {
+                Operation = 0,
+                DecorData = new List<ServerHousingResidenceDecor.Decor>
+                {
+                    new ServerHousingResidenceDecor.Decor
+                    {
+                        RealmId       = WorldServer.RealmId,
+                        DecorId       = decor.DecorId,
+                        ResidenceId   = residence.Id,
+                        DecorType     = decor.Type,
+                        PlotIndex     = decor.PlotIndex,
+                        Scale         = decor.Scale,
+                        Position      = decor.Position,
+                        Rotation      = decor.Rotation,
+                        DecorInfoId   = decor.Entry.Id,
+                        ParentDecorId = decor.DecorParentId,
+                        ColourShift   = decor.ColourShiftId
+                    }
+                }
+            });
         }
 
         private void DecorDelete(ClientHousingDecorUpdate.DecorUpdate update)
