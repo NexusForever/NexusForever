@@ -1089,6 +1089,10 @@ namespace NexusForever.WorldServer.Database.Character.Model
                     .HasColumnName("decorType")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.PlotIndex)
+                    .HasColumnName("plotIndex")
+                    .HasDefaultValueSql("'2147483647'");
+
                 entity.Property(e => e.Qw)
                     .HasColumnName("qw")
                     .HasDefaultValueSql("'0'");

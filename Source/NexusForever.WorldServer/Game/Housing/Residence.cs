@@ -425,5 +425,21 @@ namespace NexusForever.WorldServer.Game.Housing
             decors.Remove(decor.DecorId);
             deletedDecors.Add(decor);
         }
+
+        /// <summary>
+        /// Return <see cref="Plot"/> at the supplied index.
+        /// </summary>
+        public Plot GetPlot(byte plotIndex)
+        {
+            return plots.FirstOrDefault(i => i.Index == plotIndex);
+        }
+
+        /// <summary>
+        /// Return <see cref="Plot"/> that matches the supploed Plot Info ID.
+        /// /// </summary>
+        public Plot GetPlot(uint plotInfoId)
+        {
+            return plots.FirstOrDefault(i => i.PlotEntry.Id == plotInfoId);
+        }
     }
 }

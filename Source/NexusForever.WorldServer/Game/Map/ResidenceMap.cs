@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
@@ -10,11 +11,14 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Housing.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
     public class ResidenceMap : BaseMap
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         public ulong Id => residence?.Id ?? 0ul;
         // housing maps have unlimited vision range.
         public override float VisionRange { get; protected set; } = -1f;
@@ -151,6 +155,7 @@ namespace NexusForever.WorldServer.Game.Map
                     DecorId       = decor.DecorId,
                     ResidenceId   = residence.Id,
                     DecorType     = decor.Type,
+                    PlotIndex     = decor.PlotIndex,
                     Scale         = decor.Scale,
                     Position      = decor.Position,
                     Rotation      = decor.Rotation,
@@ -183,6 +188,7 @@ namespace NexusForever.WorldServer.Game.Map
                     DecorId     = decor.DecorId,
                     ResidenceId = residence.Id,
                     DecorType   = decor.Type,
+                    PlotIndex   = decor.PlotIndex,
                     Scale       = decor.Scale,
                     Position    = decor.Position,
                     Rotation    = decor.Rotation,
@@ -209,7 +215,7 @@ namespace NexusForever.WorldServer.Game.Map
                         DecorCreate(player, update);
                         break;
                     case DecorUpdateOperation.Move:
-                        DecorMove(update);
+                        DecorMove(player, update);
                         break;
                     case DecorUpdateOperation.Delete:
                         DecorDelete(update);
@@ -237,6 +243,7 @@ namespace NexusForever.WorldServer.Game.Map
                     DecorId     = decor.DecorId,
                     ResidenceId = residence.Id,
                     DecorType   = decor.Type,
+                    PlotIndex   = decor.PlotIndex,
                     Scale       = decor.Scale,
                     Position    = decor.Position,
                     Rotation    = decor.Rotation,
@@ -245,20 +252,6 @@ namespace NexusForever.WorldServer.Game.Map
             }
 
             EnqueueToAll(residenceDecor);
-        }
-
-        private Vector3 CalculateDecorPosition(ClientHousingDecorUpdate.DecorUpdate update)
-        {
-            // TODO: research 0.835f
-            // in meantime workaround checks for House PlotIndex and sets hardcoded offset
-            var position = new Vector3(update.Position.X, update.Position.Y, update.Position.Z);
-            if (update.PlotIndex != 0)
-            {
-                position.Y += 0.835f;
-                position.Z += 0.01f;
-            }
-
-            return position;
         }
 
         private void DecorCreate(Player player, ClientHousingDecorUpdate.DecorUpdate update)
@@ -299,7 +292,7 @@ namespace NexusForever.WorldServer.Game.Map
                     throw new InvalidPacketValueException();
 
                 // new decor is being placed directly in the world
-                decor.Position = CalculateDecorPosition(update);
+                decor.Position = update.Position;
                 decor.Rotation = update.Rotation;
                 decor.Scale    = update.Scale;
             }
@@ -315,6 +308,7 @@ namespace NexusForever.WorldServer.Game.Map
                         DecorId     = decor.DecorId,
                         ResidenceId = residence.Id,
                         DecorType   = decor.Type,
+                        PlotIndex   = decor.PlotIndex,
                         Scale       = decor.Scale,
                         Position    = decor.Position,
                         Rotation    = decor.Rotation,
@@ -325,45 +319,71 @@ namespace NexusForever.WorldServer.Game.Map
             });
         }
 
-        private void DecorMove(ClientHousingDecorUpdate.DecorUpdate update)
+        private void DecorMove(Player player, ClientHousingDecorUpdate.DecorUpdate update)
         {
             Decor decor = residence.GetDecor(update.DecorId);
             if (decor == null)
                 throw new InvalidPacketValueException();
 
-            if (update.ColourShiftId != decor.ColourShiftId)
+            HousingResult GetResult()
             {
-                if (update.ColourShiftId != 0u)
-                {
-                    ColorShiftEntry colourEntry = GameTableManager.Instance.ColorShift.GetEntry(update.ColourShiftId);
-                    if (colourEntry == null)
-                        throw new InvalidPacketValueException();
-                }
+                if (!IsValidPlotForPosition(update))
+                    return HousingResult.Decor_InvalidPosition;
 
-                decor.ColourShiftId = update.ColourShiftId;
+                return HousingResult.Success;
             }
 
-            Vector3 position = CalculateDecorPosition(update);
-            if (decor.Type == DecorType.Crate)
+            HousingResult result = GetResult();
+            if (result == HousingResult.Success)
             {
-                if (decor.Entry.Creature2IdActiveProp != 0u)
+                if (update.PlotIndex != decor.PlotIndex)
                 {
-                    // TODO: used for decor that have an associated entity
+                    decor.PlotIndex = update.PlotIndex;
                 }
 
-                // crate->world
-                decor.Move(update.DecorType, position, update.Rotation, update.Scale);
+                if (update.ColourShiftId != decor.ColourShiftId)
+                {
+                    if (update.ColourShiftId != 0u)
+                    {
+                        ColorShiftEntry colourEntry = GameTableManager.Instance.ColorShift.GetEntry(update.ColourShiftId);
+                        if (colourEntry == null)
+                            throw new InvalidPacketValueException();
+                    }
+
+                    decor.ColourShiftId = update.ColourShiftId;
+                }
+
+                if (decor.Type == DecorType.Crate)
+                {
+                    if (decor.Entry.Creature2IdActiveProp != 0u)
+                    {
+                        // TODO: used for decor that have an associated entity
+                    }
+
+                    // crate->world
+                    decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
+                }
+                else
+                {
+                    if (update.DecorType == DecorType.Crate)
+                        decor.Crate();
+                    else
+                    {
+                        // world->world
+                        decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
+                        decor.DecorParentId = update.ParentDecorId;
+                    }
+                }
             }
             else
             {
-                if (update.DecorType == DecorType.Crate)
-                    decor.Crate();
-                else
+                player.Session.EnqueueMessageEncrypted(new ServerHousingResult
                 {
-                    // world->world
-                    decor.Move(update.DecorType, position, update.Rotation, update.Scale);
-                    decor.DecorParentId = update.ParentDecorId;
-                }
+                    RealmId     = WorldServer.RealmId,
+                    ResidenceId = residence.Id,
+                    PlayerName  = player.Name,
+                    Result      = result
+                });
             }
 
             EnqueueToAll(new ServerHousingResidenceDecor
@@ -377,6 +397,7 @@ namespace NexusForever.WorldServer.Game.Map
                         DecorId       = decor.DecorId,
                         ResidenceId   = residence.Id,
                         DecorType     = decor.Type,
+                        PlotIndex     = decor.PlotIndex,
                         Scale         = decor.Scale,
                         Position      = decor.Position,
                         Rotation      = decor.Rotation,
@@ -400,6 +421,33 @@ namespace NexusForever.WorldServer.Game.Map
             residence.DecorDelete(decor);
 
             // TODO: send packet to remove from decor list
+        }
+
+        /// <summary>
+        /// Used to confirm the position and PlotIndex are valid together when placing Decor
+        /// </summary>
+        private bool IsValidPlotForPosition(ClientHousingDecorUpdate.DecorUpdate update)
+        {
+            if (update.PlotIndex == int.MaxValue)
+                return true;
+
+            WorldSocketEntry worldSocketEntry = GameTableManager.Instance.WorldSocket.GetEntry(residence.GetPlot((byte)update.PlotIndex).PlotEntry.WorldSocketId);
+
+            // TODO: Calculate position based on individual maps on Community & Warplot residences
+            Vector3 worldPosition = new Vector3(1472f + update.Position.X, update.Position.Y, 1440f + update.Position.Z);
+
+            (uint gridX, uint gridZ) = MapGrid.GetGridCoord(worldPosition);
+            (uint localCellX, uint localCellZ) = MapCell.GetCellCoord(worldPosition);
+            (uint globalCellX, uint globalCellZ) = (gridX * MapDefines.GridCellCount + localCellX, gridZ * MapDefines.GridCellCount + localCellZ);
+
+            // TODO: Investigate need for offset.
+            // Offset added due to calculation being +/- 1 sometimes when placing very close to plots. They were valid placements in the client, though.
+            uint maxBound = worldSocketEntry.BoundIds.Max() + 1;
+            uint minBound = worldSocketEntry.BoundIds.Min() - 1;
+
+            log.Debug($"IsValidPlotForPosition - PlotIndex: {update.PlotIndex}, Range: {minBound}-{maxBound}, Coords: {globalCellX}, {globalCellZ}");
+
+            return !(globalCellX >= minBound && globalCellX <= maxBound && globalCellZ >= minBound && globalCellZ <= maxBound);
         }
 
         /// <summary>
