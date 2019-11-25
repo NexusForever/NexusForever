@@ -1,17 +1,16 @@
-﻿using NexusForever.Shared;
+﻿using System;
+using System.Collections.Generic;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using CharacterModel = NexusForever.WorldServer.Database.Character.Model.Character;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
     public sealed class CharacterManager: Singleton<CharacterManager>
     {
-        private static ILogger log { get; } = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<ulong, ICharacter> characters = new Dictionary<ulong, ICharacter>();
         private readonly Dictionary<string, ulong> characterNameToId = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
@@ -25,13 +24,13 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         /// </summary>
         public void Initialise()
         {
-            BuildCharacterInfoFromDB();
+            BuildCharacterInfoFromDb();
         }
 
         /// <summary>
         /// Asynchronously adds <see cref="CharacterModel"/> data from the database to the cache
         /// </summary>
-        private void BuildCharacterInfoFromDB()
+        private void BuildCharacterInfoFromDb()
         {
             List<CharacterModel> allCharactersInDb = CharacterDatabase.GetAllCharacters();
             foreach (CharacterModel character in allCharactersInDb)
@@ -59,7 +58,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
             else
                 AddPlayer(player.CharacterId, player);
 
-            log.Info($"{player.Name} (ID: {player.CharacterId}) logged in.");
+            log.Trace($"{player.Name} (ID: {player.CharacterId}) logged in.");
         }
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
 
             characters[player.CharacterId] = new CharacterInfo(player);
 
-            log.Info($"{player.Name} (ID: {player.CharacterId}) logged out.");
+            log.Trace($"{player.Name} (ID: {player.CharacterId}) logged out.");
         }
 
         /// <summary>
@@ -81,11 +80,11 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         public void DeleteCharacter(ulong id)
         {
             if (!characters.ContainsKey(id))
-                throw new ArgumentNullException("id");
+                throw new ArgumentNullException(nameof(id));
 
             characters.Remove(id, out ICharacter character);
             if (character == null)
-                throw new ArgumentNullException("character");
+                throw new ArgumentNullException();
 
             log.Trace($"Removed character {character.Name} (ID: {id}) from the cache due to player delete.");
         }
