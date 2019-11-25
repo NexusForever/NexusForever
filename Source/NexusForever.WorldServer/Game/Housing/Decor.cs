@@ -258,6 +258,7 @@ namespace NexusForever.WorldServer.Game.Housing
         public void Crate()
         {
             Move(DecorType.Crate, Vector3.Zero, Quaternion.Identity, 0f);
+            DecorParentId = 0u;
         }
     }
 }
