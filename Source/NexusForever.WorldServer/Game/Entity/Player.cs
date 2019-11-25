@@ -16,6 +16,7 @@ using NexusForever.WorldServer.Database;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement;
+using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -31,7 +32,7 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class Player : UnitEntity, ISaveAuth, ISaveCharacter
+    public class Player : UnitEntity, ISaveAuth, ISaveCharacter, ICharacter
     {
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
@@ -116,6 +117,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
+
+        /// <summary>
+        /// Returns a <see cref="float"/> representing decimal value, in days, since Player was last online. Used by <see cref="ICharacter"/>.
+        /// </summary>
+        public float GetOnlineStatus() => 0f;
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
@@ -215,6 +221,8 @@ namespace NexusForever.WorldServer.Game.Entity
             // sprint
             SetStat(Stat.Resource0, 500f);
             SetStat(Stat.Shield, 450u);
+
+            CharacterManager.Instance.RegisterPlayer(this);
         }
 
         public override void Update(double lastTick)
@@ -570,6 +578,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void CleanUp()
         {
+            CharacterManager.Instance.DeregisterPlayer(this);
             CleanupManager.Track(Session.Account);
 
             try

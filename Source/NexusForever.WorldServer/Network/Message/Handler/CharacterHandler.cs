@@ -15,6 +15,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game;
+using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
@@ -458,7 +459,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.CanProcessPackets = true;
 
-                // TODO: De-register from any character cache
+                CharacterManager.Instance.DeleteCharacter(characterToDelete.Id);
 
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
                 {

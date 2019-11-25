@@ -25,6 +25,7 @@ using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Game.CharacterCache;
 
 namespace NexusForever.WorldServer
 {
@@ -66,6 +67,7 @@ namespace NexusForever.WorldServer
             GlobalQuestManager.Instance.Initialise();
             ServerManager.Instance.Initialise();
 
+            CharacterManager.Instance.Initialise();
             ResidenceManager.Instance.Initialise();
             GlobalStorefrontManager.Instance.Initialise();
 
