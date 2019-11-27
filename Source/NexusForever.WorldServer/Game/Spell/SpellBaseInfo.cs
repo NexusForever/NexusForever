@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Game.Spell
 {
@@ -18,6 +20,11 @@ namespace NexusForever.WorldServer.Game.Spell
         public TargetGroupEntry AoeGroup { get; }
         public Spell4BaseEntry PrerequisiteSpell { get; }
         public Spell4SpellTypesEntry SpellType { get; }
+        public SpellClass SpellClass { get; }
+        public bool HasIcon { get; }
+        public bool IsDebuff { get; }
+        public bool IsBuff { get; }
+        public bool IsDispellable { get; }
 
         private readonly SpellInfo[] spellInfoStore;
 
@@ -34,6 +41,11 @@ namespace NexusForever.WorldServer.Game.Spell
             AoeGroup          = GameTableManager.Instance.TargetGroup.GetEntry(Entry.TargetGroupIdAoeGroup);
             PrerequisiteSpell = GameTableManager.Instance.Spell4Base.GetEntry(Entry.Spell4BaseIdPrerequisiteSpell);
             SpellType         = GameTableManager.Instance.Spell4SpellTypes.GetEntry(Entry.Spell4SpellTypesIdSpellType);
+            SpellClass        = (SpellClass)Entry.SpellClass;
+            HasIcon           = Entry.SpellClass == 14 || (Entry.SpellClass >= 36 && Entry.SpellClass <= 39);
+            IsDebuff          = SpellClass == SpellClass.DebuffDispellable || SpellClass == SpellClass.DebuffNonDispellable;
+            IsBuff            = SpellClass == SpellClass.BuffDispellable || SpellClass == SpellClass.BuffNonDispellable || SpellClass == SpellClass.BuffNonDispelRightClickOk;
+            IsDispellable     = SpellClass == SpellClass.BuffDispellable || SpellClass == SpellClass.DebuffDispellable;
 
             List<Spell4Entry> spellEntries = GlobalSpellManager.Instance.GetSpell4Entries(spell4BaseEntry.Id).ToList();
             if (spellEntries.Count < 1)
