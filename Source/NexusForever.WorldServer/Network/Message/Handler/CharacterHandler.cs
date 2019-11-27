@@ -284,10 +284,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
 
                 //TODO: handle starting locations per race
-                character.LocationX = -7683.809f;
-                character.LocationY = -942.5914f;
-                character.LocationZ = -666.6343f;
-                character.WorldId = 870;
+                WorldLocation2Entry startingLocation = null;
+                if ((Faction)character.FactionId == Faction.Exile)
+                    startingLocation = GameTableManager.Instance.WorldLocation2.GetEntry(53050);
+                else if ((Faction)character.FactionId == Faction.Dominion)
+                    startingLocation = GameTableManager.Instance.WorldLocation2.GetEntry(53051);
+
+                character.LocationX = startingLocation?.Position0 ?? -7683.809f;
+                character.LocationY = startingLocation?.Position1 ?? -942.5914f;
+                character.LocationZ = startingLocation?.Position2 ?? -666.6343f;
+                character.WorldId = (ushort)(startingLocation?.WorldId ?? 870);
 
                 character.ActiveSpec = 0;
 
