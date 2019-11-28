@@ -95,6 +95,19 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 if (GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
+
+                // Add Pet Abilities if this Spell has a Pet summoned from it
+                if(spell4Entry.Spell4IdPetSwitch > 0)
+                {
+                    Spell4Entry spell4PetEntry = GameTableManager.Instance.Spell4.GetEntry(spell4Entry.Spell4IdPetSwitch);
+                    if (spell4PetEntry == null)
+                        continue;
+
+                    if (GetSpell(spell4PetEntry.Spell4IdPetSwitch) == null)
+                        AddSpell(spell4PetEntry.Spell4BaseIdBaseSpell);
+                }
+                
+                    
             }
 
             ClassEntry classEntry = GameTableManager.Instance.Class.GetEntry((byte)player.Class);
@@ -273,6 +286,22 @@ namespace NexusForever.WorldServer.Game.Entity
         public double GetSpellCooldown(uint spellId)
         {
             return spellCooldowns.TryGetValue(spellId, out double cooldown) ? cooldown : 0d;
+        }
+
+        /// <summary>
+        /// Update all spell cooldowns that share a given cooldown ID
+        /// </summary>
+        public void SetSpellCooldownByCooldownId(uint spell4CooldownId, double newCooldown)
+        {
+            foreach (uint spell4 in spellCooldowns.Keys.ToList())
+            {
+                Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spell4);
+                if (spell4Entry == null)
+                    throw new InvalidOperationException($"Spell4 with ID ({spell4}) does not exist.");
+
+                if (spell4Entry.SpellCoolDownIds.Contains(spell4CooldownId))
+                    SetSpellCooldown(spell4, newCooldown);
+            }
         }
 
         /// <summary>
