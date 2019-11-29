@@ -8,6 +8,7 @@ using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -33,8 +34,18 @@ namespace NexusForever.WorldServer.Game.Entity
                 activeActionSet = value;
             }
         }
-
         private byte activeActionSet;
+
+        public byte InnateIndex
+        {
+            get => innateIndex;
+            private set
+            {
+                saveMask |= SpellManagerSaveMask.Innate;
+                innateIndex = value;
+            }
+        }
+        private byte innateIndex;
 
         private readonly Player player;
 
@@ -45,6 +56,16 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly ActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
 
         private SpellManagerSaveMask saveMask;
+
+        private readonly Dictionary<Class, List<uint> /* spell4Id*/> classPassives = new Dictionary<Class, List<uint>>
+        {
+            { Class.Warrior, new List<uint> { 46707 } },
+            { Class.Engineer, new List<uint> { 58450 } },
+            { Class.Esper, new List<uint> { 75261 } },
+            { Class.Medic, new List<uint> { 52081 } },
+            { Class.Stalker, new List<uint> { 70634 } },
+            { Class.Spellslinger, new List<uint> { 69704 } }
+        };
 
         /// <summary>
         /// Create a new <see cref="SpellManager"/> from existing <see cref="CharacterModel"/> database model.
@@ -76,6 +97,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             activeActionSet = model.ActiveSpec;
+            innateIndex = model.InnateIndex;
         }
 
         public void GrantSpells()
@@ -154,6 +176,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     character.ActiveSpec = ActiveActionSet;
                     entity.Property(p => p.ActiveSpec).IsModified = true;
+                }
+
+                if ((saveMask & SpellManagerSaveMask.Innate) != 0)
+                {
+                    character.InnateIndex = InnateIndex;
+                    entity.Property(p => p.InnateIndex).IsModified = true;
                 }
 
                 saveMask = SpellManagerSaveMask.None;
@@ -350,6 +378,88 @@ namespace NexusForever.WorldServer.Game.Entity
             return SpecError.Ok;
         }
 
+        /// <summary>
+        /// Update active Innate Ability with supplied index.
+        /// </summary>
+        public void SetInnate(byte index)
+        {
+            ClassEntry entry = GameTableManager.Instance.Class.GetEntry((ulong)player.Class);
+            if (entry == null)
+                throw new InvalidOperationException($"Player Class does not have an entry: {player.Class}");
+
+            if (entry.Spell4IdInnateAbilityActive[index] == 0)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            uint innateActiveBaseId = GameTableManager.Instance.Spell4.GetEntry(entry.Spell4IdInnateAbilityActive[index]).Spell4BaseIdBaseSpell;
+            if (innateActiveBaseId == 0)
+                throw new InvalidOperationException("Selected Innate ability does not have an associated Spell4 Entry.");
+
+            CharacterSpell innateActive = GetSpell(innateActiveBaseId);
+            if (innateActive == null)
+                throw new InvalidOperationException($"Player does not have spell with a Base ID of {innateActiveBaseId}");
+
+            if (entry.PrerequisiteIdInnateAbility[index] > 0)
+                if (!PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteIdInnateAbility[index]))
+                    return;
+
+            CastInnatePassive(index);
+
+            InnateIndex = index;
+        }
+
+        private void CastInnatePassive(int newInnate = -1)
+        {
+            uint innateIndexToCast = newInnate > -1 ? (uint)newInnate : InnateIndex;
+
+            ClassEntry entry = GameTableManager.Instance.Class.GetEntry((ulong)player.Class);
+            if (entry == null)
+                throw new InvalidOperationException($"Player Class does not have an entry: {player.Class}");
+
+            if (newInnate > -1)
+            {
+                // TODO: End existing Innate Spell
+                uint oldInnatePassiveSpell4Id = entry.Spell4IdInnateAbilityPassive[innateIndex];
+                if (player.HasSpell(oldInnatePassiveSpell4Id, out Spell.Spell oldInnatePassive))
+                    oldInnatePassive.Finish();
+            }
+
+            uint innatePassiveSpell4Id = entry.Spell4IdInnateAbilityPassive[innateIndexToCast];
+            if (innatePassiveSpell4Id != 0)
+            {
+                if (player.HasSpell(innatePassiveSpell4Id, out Spell.Spell currentPassiveBuff))
+                    return;
+
+                CharacterSpell passiveSpell = GetSpell(GameTableManager.Instance.Spell4.GetEntry(entry.Spell4IdInnateAbilityActive[innateIndexToCast]).Spell4BaseIdBaseSpell);
+                if (passiveSpell == null)
+                    throw new InvalidOperationException($"Selected Innate Passive does not have an associated Spell4 Entry (ID: {innatePassiveSpell4Id})");
+
+                player.CastSpell(innatePassiveSpell4Id, new SpellParameters
+                {
+                    UserInitiatedSpellCast = false
+                });
+            }
+        }
+
+        /// <summary>
+        /// This uses passive On Start abilities that were caught in sniffs. Provides a lot of Procs and hidden class functionality.
+        /// </summary>
+        private void CastClassPassives()
+        {
+            if (classPassives.TryGetValue(player.Class, out List<uint> classPassiveSpells))
+            {
+                foreach (uint spell4Id in classPassiveSpells)
+                {
+                    if (player.HasSpell(spell4Id, out Spell.Spell currentClassPassive))
+                        continue;
+
+                    player.CastSpell(spell4Id, new SpellParameters
+                    {
+                        UserInitiatedSpellCast = false
+                    });
+                }
+            }
+        }
+
         public void SendInitialPackets()
         {
             SendServerAbilities();
@@ -357,6 +467,9 @@ namespace NexusForever.WorldServer.Game.Entity
             SendServerAbilityPoints();
             SendServerActionSets();
             SendServerAmpLists();
+            SendServerPlayerInnate();
+            CastInnatePassive();
+            CastClassPassives();
 
             player.Session.EnqueueMessageEncrypted(new ServerCooldownList
             {
@@ -440,6 +553,14 @@ namespace NexusForever.WorldServer.Game.Entity
                 ActionSet actionSet = GetActionSet(i);
                 player.Session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
             }
+        }
+
+        private void SendServerPlayerInnate()
+        {
+            player.Session.EnqueueMessageEncrypted(new ServerPlayerInnate
+            {
+                InnateIndex = InnateIndex
+            });
         }
     }
 }

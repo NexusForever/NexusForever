@@ -9,6 +9,7 @@ namespace NexusForever.WorldServer.Game.Entity.Static
     public enum SpellManagerSaveMask
     {
         None            = 0x0000,
-        ActiveActionSet = 0x0001
+        ActiveActionSet = 0x0001,
+        Innate          = 0x0002,
     }
 }

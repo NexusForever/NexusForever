@@ -645,14 +645,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientInnateChange)]
         public static void HandleInnateChange(WorldSession session, ClientInnateChange innateChange)
         {
-            // TODO: Validate that index exists and which ability it is
-
-            session.Player.InnateIndex = innateChange.InnateIndex;
-
-            session.EnqueueMessageEncrypted(new ServerPlayerInnate
-            {
-                InnateIndex = session.Player.InnateIndex
-            });
+            session.Player.SpellManager.SetInnate(innateChange.InnateIndex);
         }
 
         [MessageHandler(GameMessageOpcode.ClientInspectPlayerRequest)]
