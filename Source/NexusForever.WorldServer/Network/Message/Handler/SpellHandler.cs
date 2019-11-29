@@ -148,6 +148,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
                 case ShortcutType.Spell:
                     throw new InvalidPacketValueException();
+                case ShortcutType.None:
+                    // Removing Shortcut. Intentionally leaving blank.
+                    break;
+                case ShortcutType.Macro:
+                    // Allowed. Macros seem to be stored client side only.
+                    break;
                 default:
                     throw new NotImplementedException();
             }

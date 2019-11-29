@@ -168,6 +168,9 @@ namespace NexusForever.WorldServer.Game.Entity
             TimePlayedTotal = model.TimePlayedTotal;
             TimePlayedLevel = model.TimePlayedLevel;
 
+            foreach (CharacterStatModel statModel in model.Stat)
+                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+
             // managers
             CostumeManager          = new CostumeManager(this, session.Account, model);
             Inventory               = new Inventory(this, model);
@@ -212,8 +215,6 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (CharacterBoneModel bone in model.Bone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
 
-            foreach (CharacterStatModel statModel in model.Stat)
-                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
             SetStat(Stat.Sheathed, 1u);
 

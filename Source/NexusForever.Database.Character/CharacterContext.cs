@@ -243,7 +243,8 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.SpecIndex)
                     .HasColumnName("specIndex")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.AmpId)
                     .HasColumnName("ampId")
@@ -271,12 +272,14 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.SpecIndex)
                     .HasColumnName("specIndex")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Location)
                     .HasColumnName("location")
                     .HasColumnType("smallint(5) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.ObjectId)
                     .HasColumnName("objectId")
