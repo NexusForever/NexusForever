@@ -30,7 +30,6 @@ using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
-using System.Net.Sockets;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -45,12 +44,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
                 {
-                    RealmId = server.Model.Id,
-                    RealmName = server.Model.Name,
-                    Type = (RealmType)server.Model.Type,
-                    Status = server.IsOnline ? RealmStatus.Up : RealmStatus.Down,
-                    Population = RealmPopulation.Low,
-                    Unknown8 = new byte[16],
+                    RealmId          = server.Model.Id,
+                    RealmName        = server.Model.Name,
+                    Type             = (RealmType)server.Model.Type,
+                    Status           = server.IsOnline ? RealmStatus.Up : RealmStatus.Down,
+                    Population       = RealmPopulation.Low,
+                    Unknown8         = new byte[16],
                     AccountRealmInfo = new ServerRealmList.RealmInfo.AccountRealmData
                     {
                         RealmId = server.Model.Id
@@ -59,12 +58,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }
 
             serverRealmList.Messages = ServerManager.Instance.ServerMessages
-                    .Select(m => new NetworkMessage
-                    {
-                        Index = m.Index,
-                        Messages = m.Messages
-                    })
-                    .ToList();
+                .Select(m => new NetworkMessage
+                {
+                    Index    = m.Index,
+                    Messages = m.Messages
+                })
+                .ToList();
 
             session.EnqueueMessageEncrypted(serverRealmList);
         }
@@ -93,14 +92,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.EnqueueMessageEncrypted(new ServerNewRealm
                 {
-                    SessionKey = sessionKey,
+                    SessionKey  = sessionKey,
                     GatewayData = new ServerNewRealm.Gateway
                     {
                         Address = server.Address,
-                        Port = server.Model.Port
+                        Port    = server.Model.Port
                     },
                     RealmName = server.Model.Name,
-                    Type = (RealmType)server.Model.Type
+                    Type      = (RealmType)server.Model.Type
                 });
             }));
         }

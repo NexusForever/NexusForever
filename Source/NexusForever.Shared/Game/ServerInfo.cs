@@ -14,7 +14,7 @@ namespace NexusForever.Shared.Game
 
         public Server Model { get; }
         public uint Address { get; }
-        public bool IsOnline { get; private set; } = false;
+        public bool IsOnline { get; private set; }
 
         public ServerInfo(Server model)
         {
@@ -38,20 +38,17 @@ namespace NexusForever.Shared.Game
             }
         }
 
-        public async Task PingHost(string hostIP, int port)
+        /// <summary>
+        /// Attempt to connect to the remote world server asynchronously.
+        /// </summary>
+        public async Task PingHostAsync()
         {
-            using (var client = new TcpClient())
+            using var client = new TcpClient();
+            await client.ConnectAsync(Model.Host, Model.Port).ContinueWith(task =>
             {
-                await client.ConnectAsync(hostIP, port).ContinueWith(task =>
-                {
-                    if (task.IsFaulted)
-                        IsOnline = false;
-                    else
-                        IsOnline = true;
-
-                    return Task.CompletedTask;
-                });
-            }
+                IsOnline = !task.IsFaulted;
+                return task;
+            });
         }
     }
 }
