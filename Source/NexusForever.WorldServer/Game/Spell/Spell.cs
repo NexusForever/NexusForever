@@ -7,6 +7,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Spell.Event;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Spell
@@ -283,7 +284,7 @@ namespace NexusForever.WorldServer.Game.Spell
             foreach (SpellTargetInfo targetInfo in targets
                 .Where(t => t.Effects.Count > 0))
             {
-                var networkTargetInfo = new ServerSpellGo.TargetInfo
+                var networkTargetInfo = new TargetInfo
                 {
                     UnitId        = targetInfo.Entity.Guid,
                     TargetFlags   = 1,
@@ -293,7 +294,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
                 foreach (SpellTargetInfo.SpellTargetEffectInfo targetEffectInfo in targetInfo.Effects)
                 {
-                    var networkTargetEffectInfo = new ServerSpellGo.TargetInfo.EffectInfo
+                    var networkTargetEffectInfo = new TargetInfo.EffectInfo
                     {
                         Spell4EffectId = targetEffectInfo.Entry.Id,
                         EffectUniqueId = targetEffectInfo.EffectId,
@@ -303,7 +304,7 @@ namespace NexusForever.WorldServer.Game.Spell
                     if (targetEffectInfo.Damage != null)
                     {
                         networkTargetEffectInfo.InfoType = 1;
-                        networkTargetEffectInfo.DamageDescriptionData = new ServerSpellGo.TargetInfo.EffectInfo.DamageDescription
+                        networkTargetEffectInfo.DamageDescriptionData = new TargetInfo.EffectInfo.DamageDescription
                         {
                             RawDamage          = targetEffectInfo.Damage.RawDamage,
                             RawScaledDamage    = targetEffectInfo.Damage.RawScaledDamage,
@@ -324,6 +325,18 @@ namespace NexusForever.WorldServer.Game.Spell
             }
 
             caster.EnqueueToVisible(serverSpellGo, true);
+        }
+
+        private void SendRemoveBuff(uint unitId)
+        {
+            if (!parameters.SpellInfo.BaseInfo.HasIcon)
+                throw new InvalidOperationException();
+
+            caster.EnqueueToVisible(new ServerSpellBuffRemove
+            {
+                CastingId = CastingId,
+                CasterId  = unitId
+            }, true);
         }
     }
 }
