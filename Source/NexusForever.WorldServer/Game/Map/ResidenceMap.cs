@@ -374,22 +374,11 @@ namespace NexusForever.WorldServer.Game.Map
                         decor.DecorParentId = update.ParentDecorId;
                     }
                 }
-            }
-            else
-            {
-                player.Session.EnqueueMessageEncrypted(new ServerHousingResult
-                {
-                    RealmId     = WorldServer.RealmId,
-                    ResidenceId = residence.Id,
-                    PlayerName  = player.Name,
-                    Result      = result
-                });
-            }
 
-            EnqueueToAll(new ServerHousingResidenceDecor
-            {
-                Operation = 0,
-                DecorData = new List<ServerHousingResidenceDecor.Decor>
+                EnqueueToAll(new ServerHousingResidenceDecor
+                {
+                    Operation = 0,
+                    DecorData = new List<ServerHousingResidenceDecor.Decor>
                 {
                     new ServerHousingResidenceDecor.Decor
                     {
@@ -406,7 +395,18 @@ namespace NexusForever.WorldServer.Game.Map
                         ColourShift   = decor.ColourShiftId
                     }
                 }
-            });
+                });
+            }
+            else
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerHousingResult
+                {
+                    RealmId     = WorldServer.RealmId,
+                    ResidenceId = residence.Id,
+                    PlayerName  = player.Name,
+                    Result      = result
+                });
+            }
         }
 
         private void DecorDelete(ClientHousingDecorUpdate.DecorUpdate update)
@@ -441,13 +441,13 @@ namespace NexusForever.WorldServer.Game.Map
             (uint globalCellX, uint globalCellZ) = (gridX * MapDefines.GridCellCount + localCellX, gridZ * MapDefines.GridCellCount + localCellZ);
 
             // TODO: Investigate need for offset.
-            // Offset added due to calculation being +/- 1 sometimes when placing very close to plots. They were valid placements in the client, though.
-            uint maxBound = worldSocketEntry.BoundIds.Max() + 1;
-            uint minBound = worldSocketEntry.BoundIds.Min() - 1;
+            // Offset added due to calculation being +/- 2 sometimes when placing very close to plots. They were valid placements in the client, though.
+            uint maxBound = worldSocketEntry.BoundIds.Max() + 2;
+            uint minBound = worldSocketEntry.BoundIds.Min() - 2;
 
             log.Debug($"IsValidPlotForPosition - PlotIndex: {update.PlotIndex}, Range: {minBound}-{maxBound}, Coords: {globalCellX}, {globalCellZ}");
 
-            return !(globalCellX >= minBound && globalCellX <= maxBound && globalCellZ >= minBound && globalCellZ <= maxBound);
+            return (globalCellX >= minBound && globalCellX <= maxBound && globalCellZ >= minBound && globalCellZ <= maxBound);
         }
 
         /// <summary>
