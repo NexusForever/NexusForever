@@ -330,12 +330,12 @@ namespace NexusForever.WorldServer.Game.Spell
         private void SendRemoveBuff(uint unitId)
         {
             if (!parameters.SpellInfo.BaseInfo.HasIcon)
-                throw new ArgumentOutOfRangeException("HasIcon");
+                throw new InvalidOperationException();
 
             caster.EnqueueToVisible(new ServerSpellBuffRemove
             {
                 CastingId = CastingId,
-                CasterId = unitId
+                CasterId  = unitId
             }, true);
         }
     }

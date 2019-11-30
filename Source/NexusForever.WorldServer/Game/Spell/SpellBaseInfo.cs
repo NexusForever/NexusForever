@@ -41,8 +41,9 @@ namespace NexusForever.WorldServer.Game.Spell
             AoeGroup          = GameTableManager.Instance.TargetGroup.GetEntry(Entry.TargetGroupIdAoeGroup);
             PrerequisiteSpell = GameTableManager.Instance.Spell4Base.GetEntry(Entry.Spell4BaseIdPrerequisiteSpell);
             SpellType         = GameTableManager.Instance.Spell4SpellTypes.GetEntry(Entry.Spell4SpellTypesIdSpellType);
+
             SpellClass        = (SpellClass)Entry.SpellClass;
-            HasIcon           = Entry.SpellClass == 14 || (Entry.SpellClass >= 36 && Entry.SpellClass <= 39);
+            HasIcon           = SpellClass == SpellClass.BuffNonDispelRightClickOk || (SpellClass >= SpellClass.BuffDispellable && SpellClass <= SpellClass.DebuffNonDispellable);
             IsDebuff          = SpellClass == SpellClass.DebuffDispellable || SpellClass == SpellClass.DebuffNonDispellable;
             IsBuff            = SpellClass == SpellClass.BuffDispellable || SpellClass == SpellClass.BuffNonDispellable || SpellClass == SpellClass.BuffNonDispelRightClickOk;
             IsDispellable     = SpellClass == SpellClass.BuffDispellable || SpellClass == SpellClass.DebuffDispellable;
