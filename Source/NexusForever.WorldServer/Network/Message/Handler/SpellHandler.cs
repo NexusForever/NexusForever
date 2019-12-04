@@ -14,26 +14,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class SpellHandler
     {
-        [MessageHandler(GameMessageOpcode.ClientCastSpell)]
-        public static void HandleCastSpell(WorldSession session, ClientCastSpell castSpell)
+        /// <summary>
+        /// This handler is used when the player has enabled continous casting in Settings > Controls
+        /// </summary>
+        [MessageHandler(GameMessageOpcode.ClientCastSpellContinuous)]
+        public static void HandleCastSpell(WorldSession session, ClientCastSpellContinuous castSpell)
         {
             Item item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            UnlockedSpell spell = session.Player.SpellManager.GetSpell(item.Id);
-            if (spell == null)
+            UnlockedSpell unlockedSpell = session.Player.SpellManager.GetSpell(item.Id);
+            if (unlockedSpell == null)
                 throw new InvalidPacketValueException();
 
-            // true is button pressed, false is sent on release
-            if (!castSpell.ButtonPressed)
-                return;
-
-            byte tier = session.Player.SpellManager.GetSpellTier(spell.Info.Entry.Id);
-            session.Player.CastSpell(new SpellParameters
-            {
-                SpellInfo = spell.Info.GetSpellInfo(tier)
-            });
+            unlockedSpell.Cast(castSpell.ButtonPressed);
         }
 
         [MessageHandler(GameMessageOpcode.ClientSpellStopCast)]
@@ -43,22 +38,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.Player.CancelSpellCast(spellStopCast.CastingId);
         }
 
-        [MessageHandler(GameMessageOpcode.Client009A)]
-        public static void HandleCastSpell(WorldSession session, Client009A castSpell)
+        /// <summary>
+        /// This Handler is ued when a player has disabled continuous casting in Settings > Controls
+        /// </summary>
+        [MessageHandler(GameMessageOpcode.ClientCastSpell)]
+        public static void HandleCastSpell(WorldSession session, ClientCastSpell castSpell)
         {
             Item item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            UnlockedSpell spell = session.Player.SpellManager.GetSpell(item.Id);
-            if (spell == null)
+            UnlockedSpell unlockedSpell = session.Player.SpellManager.GetSpell(item.Id);
+            if (unlockedSpell == null)
                 throw new InvalidPacketValueException();
 
-            byte tier = session.Player.SpellManager.GetSpellTier(spell.Info.Entry.Id);
-            session.Player.CastSpell(new SpellParameters
-            {
-                SpellInfo = spell.Info.GetSpellInfo(tier)
-            });
+            unlockedSpell.Cast();
         }
 
         [MessageHandler(GameMessageOpcode.ClientCancelEffect)]

@@ -57,7 +57,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spellModel.Spell4BaseId);
                 Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
-                spells.Add(spellModel.Spell4BaseId, new UnlockedSpell(spellBaseInfo, spellModel, item));
+                spells.Add(spellModel.Spell4BaseId, new UnlockedSpell(owner, spellBaseInfo, spellModel, item));
             }
 
             GrantSpells();
@@ -137,6 +137,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 else
                     spellCooldowns[spellId] = cooldown - lastTick;
             }
+
+            foreach (UnlockedSpell unlockedSpell in spells.Values)
+                unlockedSpell.Update(lastTick);
         }
 
         public void Save(CharacterContext context)
