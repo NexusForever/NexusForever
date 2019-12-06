@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using CommandLine;
+using CommandLine.Text;
 using NexusForever.MapGenerator.GameTable;
 using NLog;
 
@@ -9,6 +10,7 @@ namespace NexusForever.MapGenerator
     internal static class MapGenerator
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private static ParserResult<Parameters> parserResult;
 
         #if DEBUG
         private const string Title = "NexusForever: Map Generator (DEBUG)";
@@ -20,8 +22,8 @@ namespace NexusForever.MapGenerator
         {
             Console.Title = Title;
 
-            Parser.Default.ParseArguments<Parameters>(args)
-                .WithParsed(ParameterOk);
+            parserResult = Parser.Default.ParseArguments<Parameters>(args);
+            parserResult.WithParsed(ParameterOk);
 
             log.Info("Finished!");
             Console.ReadLine();
@@ -31,6 +33,13 @@ namespace NexusForever.MapGenerator
         {
             if (!Directory.Exists(parameters.PatchPath))
                 throw new DirectoryNotFoundException();
+
+            if (!parameters.Extract && !parameters.Generate)
+            {
+                log.Warn("Please specify the Extract or Generate parameter");
+                log.Info(GetHelp());
+                return;
+            }
 
             ArchiveManager.Instance.Initialise(parameters.PatchPath);
             GameTableManager.Instance.Initialise();
@@ -50,6 +59,11 @@ namespace NexusForever.MapGenerator
                 TimeSpan span = DateTime.UtcNow - start;
                 log.Info($"Generated base maps in {span.TotalSeconds}s.");
             }
+        }
+
+        private static string GetHelp()
+        {
+            return HelpText.AutoBuild(parserResult, h => h, e => e);
         }
     }
 }
