@@ -61,6 +61,20 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             }
         }
 
+        [PrerequisiteCheck(PrerequisiteType.Prerequisite)]
+        private static bool PrerequisiteCheckOtherPreqrequisite(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.NotEqual:
+                    return !Instance.Meets(player, objectId);
+                case PrerequisiteComparison.Equal:
+                    return Instance.Meets(player, objectId);
+                default:
+                    return false;
+            }
+        }
+
         [PrerequisiteCheck(PrerequisiteType.Path)]
         private static bool PrerequisiteCheckPath(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
@@ -70,7 +84,6 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                     return player.PathManager.IsPathActive((Path)value);
                 default:
                     log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Path}!");
-
                     return false;
             }
         }
@@ -115,6 +128,25 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                 case PrerequisiteComparison.NotEqual:
                     return player.Faction1 != (Faction)value;
                 default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.BaseFaction}!");
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.CosmicRewards)]
+        private static bool PrerequisiteCheckCosmicRewards(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.NotEqual:
+                    return player.Session.AccountCurrencyManager.GetAmount(Account.Static.AccountCurrencyType.CosmicReward) != value;
+                case PrerequisiteComparison.Equal:
+                    return player.Session.AccountCurrencyManager.GetAmount(Account.Static.AccountCurrencyType.CosmicReward) == value;
+                case PrerequisiteComparison.LessThanOrEqual: 
+                    // The conditional below is intentionally "incorrect". It's possible PrerequisiteComparison 4 is actually GreaterThanOrEqual
+                    return player.Session.AccountCurrencyManager.GetAmount(Account.Static.AccountCurrencyType.CosmicReward) >= value;
+                default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.CosmicRewards}!");
                     return false;
             }
         }

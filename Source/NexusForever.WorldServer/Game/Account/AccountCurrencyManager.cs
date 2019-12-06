@@ -76,7 +76,12 @@ namespace NexusForever.WorldServer.Game.Account
                 throw new ArgumentException($"Account Currency entry not found for currencyId {currencyType}.");
 
             if (accountCurrency.AddAmount(amount))
+            {
                 SendAccountCurrencyUpdate(accountCurrency, reason);
+                if (currencyType == AccountCurrencyType.CosmicReward)
+                    session.RewardTrackManager.HandleAddLoyaltyPoints(amount);
+            }
+                
         }
 
         /// <summary>
@@ -98,6 +103,14 @@ namespace NexusForever.WorldServer.Game.Account
             // TODO: Ensure that we're not at cap - is there a cap?
             if(accountCurrency.SubtractAmount(amount))
                 SendAccountCurrencyUpdate(accountCurrency, reason);
+        }
+
+        /// <summary>
+        /// Returns the currenct amount for the given <see cref="AccountCurrencyType"/>.
+        /// </summary>
+        public ulong GetAmount(AccountCurrencyType currencyType)
+        {
+            return currencies.TryGetValue(currencyType, out AccountCurrency accountCurrency) ? accountCurrency.Amount : 0;
         }
 
         /// <summary>

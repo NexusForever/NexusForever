@@ -205,6 +205,7 @@ namespace NexusForever.WorldServer.Game.Entity
             ReputationManager       = new ReputationManager(this, model);
 
             Session.EntitlementManager.OnNewCharacter(model);
+            Session.RewardTrackManager.OnNewCharacter(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -302,6 +303,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.GenericUnlockManager.Save(context);
             Session.AccountCurrencyManager.Save(context);
             Session.EntitlementManager.Save(context);
+            Session.RewardTrackManager.Save(context);
 
             CostumeManager.Save(context);
             KeybindingManager.Save(context);
@@ -393,6 +395,7 @@ namespace NexusForever.WorldServer.Game.Entity
             ReputationManager.Save(context);
 
             Session.EntitlementManager.Save(context);
+            Session.RewardTrackManager.Save(context);
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -567,7 +570,6 @@ namespace NexusForever.WorldServer.Game.Entity
                     Reason = ItemUpdateReason.NoReason
                 });
             }
-
             playerCreate.SpecIndex = SpellManager.ActiveActionSet;
             Session.EnqueueMessageEncrypted(playerCreate);
 
@@ -581,6 +583,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.AccountCurrencyManager.SendInitialPackets();
             QuestManager.SendInitialPackets();
             AchievementManager.SendInitialPackets();
+            Session.RewardTrackManager.SendInitialPackets();
 
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {

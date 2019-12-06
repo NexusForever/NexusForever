@@ -1,4 +1,6 @@
 using System;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.CharacterCache;
@@ -91,6 +93,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientEnteredWorld)]
         public static void HandleClientEnteredWorld(WorldSession session, ClientEnteredWorld enteredWorld)
         {
+        }
+        
+        [MessageHandler(GameMessageOpcode.ClientRewardTrackChoice)]
+        public static void HandleClickRewardTrachChoice(WorldSession session, ClientRewardTrackChoice rewardTrackChoice)
+        {
+            RewardTrackRewardsEntry rewardEntry = GameTableManager.Instance.RewardTrackRewards.GetEntry(rewardTrackChoice.RewardId);
+            if (rewardEntry == null)
+                throw new InvalidOperationException($"RewardTrackRewards entry with ID {rewardTrackChoice.RewardId} not found!");
+
+            session.RewardTrackManager.HandleChooseReward(rewardEntry, rewardTrackChoice.Index);
         }
     }
 }
