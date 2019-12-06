@@ -42,12 +42,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             foreach (ServerInfo server in ServerManager.Instance.Servers)
             {
+                RealmStatus status = RealmStatus.Up;
+                if (!server.IsOnline && server.Model.Id != WorldServer.RealmId)
+                    status = RealmStatus.Down;
+
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
                 {
                     RealmId          = server.Model.Id,
                     RealmName        = server.Model.Name,
                     Type             = (RealmType)server.Model.Type,
-                    Status           = server.IsOnline ? RealmStatus.Up : RealmStatus.Down,
+                    Status           = status,
                     Population       = RealmPopulation.Low,
                     Unknown8         = new byte[16],
                     AccountRealmInfo = new ServerRealmList.RealmInfo.AccountRealmData
