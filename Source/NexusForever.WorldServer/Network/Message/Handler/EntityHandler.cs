@@ -45,7 +45,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 Guid     = mover.Guid,
                 Time     = entityCommand.Time,
-                ServerControlled = true,
+                ServerControlled = false,
                 Commands = entityCommand.Commands
             });
         }
