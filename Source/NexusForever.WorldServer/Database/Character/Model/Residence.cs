@@ -21,6 +21,7 @@ namespace NexusForever.WorldServer.Database.Character.Model
         public ushort EntrywayDecorInfoId { get; set; }
         public ushort DoorDecorInfoId { get; set; }
         public ushort GroundWallpaperId { get; set; }
+        public ushort MusicId { get; set; }
         public ushort SkyWallpaperId { get; set; }
         public ushort Flags { get; set; }
         public byte ResourceSharing { get; set; }

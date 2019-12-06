@@ -5,6 +5,7 @@ using System.Numerics;
 using NexusForever.Shared;
 using NexusForever.Shared.Game.Map;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Map.Search;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -45,6 +46,21 @@ namespace NexusForever.WorldServer.Game.Map
         {
             foreach (GridEntity entity in entities)
                 entity.Update(lastTick);
+        }
+
+        /// <summary>
+        /// Unload <see cref="GridEntity"/>'s from the <see cref="MapCell"/>.
+        /// </summary>
+        public void Unload(ref uint threshHold)
+        {
+            foreach (GridEntity entity in entities.ToList())
+            {
+                entity.RemoveFromMapDirect();
+
+                threshHold--;
+                if (threshHold == 0u)
+                    return;
+            }
         }
 
         /// <summary>

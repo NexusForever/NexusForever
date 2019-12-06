@@ -2,11 +2,15 @@
 
 namespace NexusForever.Shared.Configuration
 {
-    public static class ConfigurationManager<T>
+    public sealed class ConfigurationManager<T> : Singleton<ConfigurationManager<T>>
     {
-        public static T Config { get; private set; }
+        public T Config { get; private set; }
 
-        public static void Initialise(string file)
+        private ConfigurationManager()
+        {
+        }
+
+        public void Initialise(string file)
         {
             SharedConfiguration.Initialise(file);
             Config = SharedConfiguration.Configuration.Get<T>();

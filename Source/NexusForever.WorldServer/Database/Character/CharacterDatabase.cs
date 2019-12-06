@@ -20,6 +20,12 @@ namespace NexusForever.WorldServer.Database.Character
             }
         }
 
+        public static List<Model.Character> GetAllCharacters()
+        {
+            using (var context = new CharacterContext())
+                return context.Character.Where(c => c.DeleteTime == null).ToList();
+        }
+
         public static ulong GetNextCharacterId()
         {
             using (var context = new CharacterContext())
@@ -85,6 +91,8 @@ namespace NexusForever.WorldServer.Database.Character
                         .Include(c => c.CharacterZonemapHexgroup)
                         .Include(c => c.CharacterQuest)
                             .ThenInclude(q => q.CharacterQuestObjective)
+                        .Include(c => c.CharacterEntitlement)
+                        .Include(c => c.CharacterAchievement)
                     .ToListAsync();
             }
         }

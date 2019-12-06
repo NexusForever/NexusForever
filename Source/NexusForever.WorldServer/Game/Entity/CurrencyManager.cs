@@ -58,7 +58,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void CurrencyAddAmount(CurrencyType currencyId, ulong amount, bool isLoot = false)
         {
-            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry((ulong)currencyId);
+            CurrencyTypeEntry currencyEntry = GameTableManager.Instance.CurrencyType.GetEntry((ulong)currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
@@ -75,7 +75,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             amount += currency.Amount;
             if (currency.Entry.CapAmount > 0)
-                amount = Math.Min(amount + currency.Amount, currency.Entry.CapAmount);
+                amount = Math.Min(amount, currency.Entry.CapAmount);
 
             CurrencyAmountUpdate(currency, amount, isLoot);
         }
@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void CurrencySubtractAmount(CurrencyType currencyId, ulong amount, bool isLoot = false)
         {
-            CurrencyTypeEntry currencyEntry = GameTableManager.CurrencyType.GetEntry((ulong)currencyId);
+            CurrencyTypeEntry currencyEntry = GameTableManager.Instance.CurrencyType.GetEntry((ulong)currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 

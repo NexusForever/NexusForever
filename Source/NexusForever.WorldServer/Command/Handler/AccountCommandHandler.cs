@@ -70,7 +70,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            AccountCurrencyTypeEntry currencyEntry = GameTableManager.AccountCurrencyType.GetEntry(currencyId);
+            AccountCurrencyTypeEntry currencyEntry = GameTableManager.Instance.AccountCurrencyType.GetEntry(currencyId);
             if (currencyEntry == null)
             {
                 context.SendMessageAsync("Invalid currencyId. Please try again.");
@@ -90,8 +90,8 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("currencylist", "List all account currencies")]
         public Task handleAccountCurrencyList(CommandContext context, string command, string[] parameters)
         {
-            var tt = GameTableManager.GetTextTable(Language.English);
-            foreach (var entry in GameTableManager.AccountCurrencyType.Entries)
+            var tt = GameTableManager.Instance.GetTextTable(Language.English);
+            foreach (var entry in GameTableManager.Instance.AccountCurrencyType.Entries)
             {
                 context.SendMessageAsync($"ID {entry.Id}: {tt.GetEntry(entry.LocalizedTextId)}");
             }

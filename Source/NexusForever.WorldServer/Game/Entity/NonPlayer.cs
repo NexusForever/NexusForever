@@ -41,24 +41,24 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void CalculateProperties()
         {
-            Creature2Entry creatureEntry = GameTableManager.Creature2.GetEntry(CreatureId);
+            Creature2Entry creatureEntry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
 
             // TODO: research this some more
             /*float[] values = new float[200];
 
-            CreatureLevelEntry levelEntry = GameTableManager.CreatureLevel.GetEntry(6);
+            CreatureLevelEntry levelEntry = GameTableManager.Instance.CreatureLevel.GetEntry(6);
             for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
                 values[i] = levelEntry.UnitPropertyValue[i];
 
-            Creature2ArcheTypeEntry archeTypeEntry = GameTableManager.Creature2ArcheType.GetEntry(creatureEntry.Creature2ArcheTypeId);
+            Creature2ArcheTypeEntry archeTypeEntry = GameTableManager.Instance.Creature2ArcheType.GetEntry(creatureEntry.Creature2ArcheTypeId);
             for (uint i = 0u; i < archeTypeEntry.UnitPropertyMultiplier.Length; i++)
                 values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
 
-            Creature2DifficultyEntry difficultyEntry = GameTableManager.Creature2Difficulty.GetEntry(creatureEntry.Creature2DifficultyId);
+            Creature2DifficultyEntry difficultyEntry = GameTableManager.Instance.Creature2Difficulty.GetEntry(creatureEntry.Creature2DifficultyId);
             for (uint i = 0u; i < difficultyEntry.UnitPropertyMultiplier.Length; i++)
                 values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
 
-            Creature2TierEntry tierEntry = GameTableManager.Creature2Tier.GetEntry(creatureEntry.Creature2TierId);
+            Creature2TierEntry tierEntry = GameTableManager.Instance.Creature2Tier.GetEntry(creatureEntry.Creature2TierId);
             for (uint i = 0u; i < tierEntry.UnitPropertyMultiplier.Length; i++)
                 values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
 

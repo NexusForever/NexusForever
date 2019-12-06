@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
@@ -10,11 +11,14 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Housing.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
     public class ResidenceMap : BaseMap
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         public ulong Id => residence?.Id ?? 0ul;
         // housing maps have unlimited vision range.
         public override float VisionRange { get; protected set; } = -1f;
@@ -27,12 +31,12 @@ namespace NexusForever.WorldServer.Game.Map
 
             if (info.ResidenceId != 0u)
             {
-                residence = ResidenceManager.GetCachedResidence(info.ResidenceId);
+                residence = ResidenceManager.Instance.GetCachedResidence(info.ResidenceId);
                 if (residence == null)
                     throw new InvalidOperationException();
             }
             else
-                residence = ResidenceManager.CreateResidence(player);
+                residence = ResidenceManager.Instance.CreateResidence(player);
 
             // initialise plug entities
             foreach (Plot plot in residence.GetPlots().Where(p => p.PlugEntry != null))
@@ -115,6 +119,7 @@ namespace NexusForever.WorldServer.Game.Map
                         Roof              = residence.Roof,
                         Door              = residence.Door,
                         Ground            = residence.Ground,
+                        Music             = residence.Music,
                         Sky               = residence.Sky,
                         Flags             = residence.Flags,
                         ResourceSharing   = residence.ResourceSharing,
@@ -146,14 +151,17 @@ namespace NexusForever.WorldServer.Game.Map
                 Decor decor = decors[i];
                 residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
                 {
-                    RealmId     = WorldServer.RealmId,
-                    DecorId     = decor.DecorId,
-                    ResidenceId = residence.Id,
-                    DecorType   = decor.Type,
-                    Scale       = decor.Scale,
-                    Position    = decor.Position,
-                    Rotation    = decor.Rotation,
-                    DecorInfoId = decor.Entry.Id
+                    RealmId       = WorldServer.RealmId,
+                    DecorId       = decor.DecorId,
+                    ResidenceId   = residence.Id,
+                    DecorType     = decor.Type,
+                    PlotIndex     = decor.PlotIndex,
+                    Scale         = decor.Scale,
+                    Position      = decor.Position,
+                    Rotation      = decor.Rotation,
+                    DecorInfoId   = decor.Entry.Id,
+                    ParentDecorId = decor.DecorParentId,
+                    ColourShift   = decor.ColourShiftId
                 });
 
                 if (i == decors.Length - 1)
@@ -180,6 +188,7 @@ namespace NexusForever.WorldServer.Game.Map
                     DecorId     = decor.DecorId,
                     ResidenceId = residence.Id,
                     DecorType   = decor.Type,
+                    PlotIndex   = decor.PlotIndex,
                     Scale       = decor.Scale,
                     Position    = decor.Position,
                     Rotation    = decor.Rotation,
@@ -206,7 +215,7 @@ namespace NexusForever.WorldServer.Game.Map
                         DecorCreate(player, update);
                         break;
                     case DecorUpdateOperation.Move:
-                        DecorMove(update);
+                        DecorMove(player, update);
                         break;
                     case DecorUpdateOperation.Delete:
                         DecorDelete(update);
@@ -234,6 +243,7 @@ namespace NexusForever.WorldServer.Game.Map
                     DecorId     = decor.DecorId,
                     ResidenceId = residence.Id,
                     DecorType   = decor.Type,
+                    PlotIndex   = decor.PlotIndex,
                     Scale       = decor.Scale,
                     Position    = decor.Position,
                     Rotation    = decor.Rotation,
@@ -246,7 +256,7 @@ namespace NexusForever.WorldServer.Game.Map
 
         private void DecorCreate(Player player, ClientHousingDecorUpdate.DecorUpdate update)
         {
-            HousingDecorInfoEntry entry = GameTableManager.HousingDecorInfo.GetEntry(update.DecorInfoId);
+            HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(update.DecorInfoId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
@@ -261,17 +271,20 @@ namespace NexusForever.WorldServer.Game.Map
                 player.CurrencyManager.CurrencySubtractAmount((byte)entry.CostCurrencyTypeId, entry.Cost);*/
             }
 
-            if (update.ColourShiftId != 0u)
-            {
-                ColorShiftEntry colourEntry = GameTableManager.ColorShift.GetEntry(update.ColourShiftId);
-                if (colourEntry == null)
-                    throw new InvalidPacketValueException();
-
-                // TODO: colour shift
-            }
-
             Decor decor = residence.DecorCreate(entry);
             decor.Type = update.DecorType;
+
+            if (update.ColourShiftId != decor.ColourShiftId)
+            {
+                if (update.ColourShiftId != 0u)
+                {
+                    ColorShiftEntry colourEntry = GameTableManager.Instance.ColorShift.GetEntry(update.ColourShiftId);
+                    if (colourEntry == null)
+                        throw new InvalidPacketValueException();
+                }
+
+                decor.ColourShiftId = update.ColourShiftId;
+            }
 
             if (update.DecorType != DecorType.Crate)
             {
@@ -295,43 +308,82 @@ namespace NexusForever.WorldServer.Game.Map
                         DecorId     = decor.DecorId,
                         ResidenceId = residence.Id,
                         DecorType   = decor.Type,
+                        PlotIndex   = decor.PlotIndex,
                         Scale       = decor.Scale,
                         Position    = decor.Position,
                         Rotation    = decor.Rotation,
-                        DecorInfoId = decor.Entry.Id
+                        DecorInfoId = decor.Entry.Id,
+                        ColourShift = decor.ColourShiftId
                     }
                 }
             });
         }
 
-        private void DecorMove(ClientHousingDecorUpdate.DecorUpdate update)
+        private void DecorMove(Player player, ClientHousingDecorUpdate.DecorUpdate update)
         {
             Decor decor = residence.GetDecor(update.DecorId);
             if (decor == null)
                 throw new InvalidPacketValueException();
 
-            // TODO: research 0.835f
-            if (decor.Type == DecorType.Crate)
+            HousingResult GetResult()
             {
-                if (decor.Entry.Creature2IdActiveProp != 0u)
+                if (!IsValidPlotForPosition(update))
+                    return HousingResult.Decor_InvalidPosition;
+
+                return HousingResult.Success;
+            }
+
+            HousingResult result = GetResult();
+            if (result == HousingResult.Success)
+            {
+                if (update.PlotIndex != decor.PlotIndex)
                 {
-                    // TODO: used for decor that have an associated entity
+                    decor.PlotIndex = update.PlotIndex;
                 }
 
-                // crate->world
-                var position = new Vector3(update.Position.X, update.Position.Y + 0.835f, update.Position.Z);
-                decor.Move(update.DecorType, position, update.Rotation, update.Scale);
+                if (update.ColourShiftId != decor.ColourShiftId)
+                {
+                    if (update.ColourShiftId != 0u)
+                    {
+                        ColorShiftEntry colourEntry = GameTableManager.Instance.ColorShift.GetEntry(update.ColourShiftId);
+                        if (colourEntry == null)
+                            throw new InvalidPacketValueException();
+                    }
+
+                    decor.ColourShiftId = update.ColourShiftId;
+                }
+
+                if (decor.Type == DecorType.Crate)
+                {
+                    if (decor.Entry.Creature2IdActiveProp != 0u)
+                    {
+                        // TODO: used for decor that have an associated entity
+                    }
+
+                    // crate->world
+                    decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
+                }
+                else
+                {
+                    if (update.DecorType == DecorType.Crate)
+                        decor.Crate();
+                    else
+                    {
+                        // world->world
+                        decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale);
+                        decor.DecorParentId = update.ParentDecorId;
+                    }
+                }
             }
             else
             {
-                if (update.DecorType == DecorType.Crate)
-                    decor.Crate();
-                else
+                player.Session.EnqueueMessageEncrypted(new ServerHousingResult
                 {
-                    // world->world
-                    var position = new Vector3(update.Position.X, update.Position.Y + 0.835f, update.Position.Z);
-                    decor.Move(update.DecorType, position, update.Rotation, update.Scale);
-                }
+                    RealmId     = WorldServer.RealmId,
+                    ResidenceId = residence.Id,
+                    PlayerName  = player.Name,
+                    Result      = result
+                });
             }
 
             EnqueueToAll(new ServerHousingResidenceDecor
@@ -341,14 +393,17 @@ namespace NexusForever.WorldServer.Game.Map
                 {
                     new ServerHousingResidenceDecor.Decor
                     {
-                        RealmId     = WorldServer.RealmId,
-                        DecorId     = decor.DecorId,
-                        ResidenceId = residence.Id,
-                        DecorType   = decor.Type,
-                        Scale       = decor.Scale,
-                        Position    = decor.Position,
-                        Rotation    = decor.Rotation,
-                        DecorInfoId = decor.Entry.Id
+                        RealmId       = WorldServer.RealmId,
+                        DecorId       = decor.DecorId,
+                        ResidenceId   = residence.Id,
+                        DecorType     = decor.Type,
+                        PlotIndex     = decor.PlotIndex,
+                        Scale         = decor.Scale,
+                        Position      = decor.Position,
+                        Rotation      = decor.Rotation,
+                        DecorInfoId   = decor.Entry.Id,
+                        ParentDecorId = decor.DecorParentId,
+                        ColourShift   = decor.ColourShiftId
                     }
                 }
             });
@@ -366,6 +421,33 @@ namespace NexusForever.WorldServer.Game.Map
             residence.DecorDelete(decor);
 
             // TODO: send packet to remove from decor list
+        }
+
+        /// <summary>
+        /// Used to confirm the position and PlotIndex are valid together when placing Decor
+        /// </summary>
+        private bool IsValidPlotForPosition(ClientHousingDecorUpdate.DecorUpdate update)
+        {
+            if (update.PlotIndex == int.MaxValue)
+                return true;
+
+            WorldSocketEntry worldSocketEntry = GameTableManager.Instance.WorldSocket.GetEntry(residence.GetPlot((byte)update.PlotIndex).PlotEntry.WorldSocketId);
+
+            // TODO: Calculate position based on individual maps on Community & Warplot residences
+            Vector3 worldPosition = new Vector3(1472f + update.Position.X, update.Position.Y, 1440f + update.Position.Z);
+
+            (uint gridX, uint gridZ) = MapGrid.GetGridCoord(worldPosition);
+            (uint localCellX, uint localCellZ) = MapCell.GetCellCoord(worldPosition);
+            (uint globalCellX, uint globalCellZ) = (gridX * MapDefines.GridCellCount + localCellX, gridZ * MapDefines.GridCellCount + localCellZ);
+
+            // TODO: Investigate need for offset.
+            // Offset added due to calculation being +/- 1 sometimes when placing very close to plots. They were valid placements in the client, though.
+            uint maxBound = worldSocketEntry.BoundIds.Max() + 1;
+            uint minBound = worldSocketEntry.BoundIds.Min() - 1;
+
+            log.Debug($"IsValidPlotForPosition - PlotIndex: {update.PlotIndex}, Range: {minBound}-{maxBound}, Coords: {globalCellX}, {globalCellZ}");
+
+            return !(globalCellX >= minBound && globalCellX <= maxBound && globalCellZ >= minBound && globalCellZ <= maxBound);
         }
 
         /// <summary>
@@ -389,9 +471,9 @@ namespace NexusForever.WorldServer.Game.Map
                 throw new InvalidPacketValueException();
 
             if (housingSetPrivacyLevel.PrivacyLevel == ResidencePrivacyLevel.Public)
-                ResidenceManager.RegisterResidenceVists(residence.Id, residence.OwnerName, residence.Name);
+                ResidenceManager.Instance.RegisterResidenceVists(residence.Id, residence.OwnerName, residence.Name);
             else
-                ResidenceManager.DeregisterResidenceVists(residence.Id);
+                ResidenceManager.Instance.DeregisterResidenceVists(residence.Id);
 
             residence.PrivacyLevel = housingSetPrivacyLevel.PrivacyLevel;
             SendHousingPrivacy();
@@ -405,7 +487,22 @@ namespace NexusForever.WorldServer.Game.Map
             if (!residence.CanModifyResidence(player.CharacterId))
                 throw new InvalidPacketValueException();
 
-            // TODO
+            if (housingRemodel.RoofDecorInfoId != 0u)
+                residence.Roof = (ushort)housingRemodel.RoofDecorInfoId;
+            if (housingRemodel.WallpaperId != 0u)
+                residence.Wallpaper = (ushort)housingRemodel.WallpaperId;
+            if (housingRemodel.EntrywayDecorInfoId != 0u)
+                residence.Entryway = (ushort)housingRemodel.EntrywayDecorInfoId;
+            if (housingRemodel.DoorDecorInfoId != 0u)
+                residence.Door = (ushort)housingRemodel.DoorDecorInfoId;
+            if (housingRemodel.SkyWallpaperId != 0u)
+                residence.Sky = (ushort)housingRemodel.SkyWallpaperId;
+            if (housingRemodel.MusicId != 0u)
+                residence.Music = (ushort)housingRemodel.MusicId;
+            if (housingRemodel.GroundWallpaperId != 0u)
+                residence.Ground = (ushort)housingRemodel.GroundWallpaperId;
+
+            SendHousingProperties();
         }
     }
 }

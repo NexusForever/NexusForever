@@ -54,7 +54,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void AddDatacube(ushort id, uint progress)
         {
-            if (GameTableManager.Datacube.GetEntry(id) == null)
+            if (GameTableManager.Instance.Datacube.GetEntry(id) == null)
                 throw new ArgumentException();
             
             var datacube = new Datacube(id, DatacubeType.Datacube, progress);
@@ -68,7 +68,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void AddDatacubeVolume(ushort id, uint progress)
         {
-            if (GameTableManager.DatacubeVolume.GetEntry(id) == null)
+            if (GameTableManager.Instance.DatacubeVolume.GetEntry(id) == null)
                 throw new ArgumentException();
 
             var datacube = new Datacube(id, DatacubeType.Journal, progress);

@@ -233,7 +233,7 @@ namespace NexusForever.WorldServer.Game.Spell
         /// </summary>
         public void AddAmp(ushort id)
         {
-            EldanAugmentationEntry entry = GameTableManager.EldanAugmentation.GetEntry(id);
+            EldanAugmentationEntry entry = GameTableManager.Instance.EldanAugmentation.GetEntry(id);
             if (entry == null)
                 throw new ArgumentException($"Invalid eldan augmentation id {id}!");
 
@@ -260,7 +260,7 @@ namespace NexusForever.WorldServer.Game.Spell
         /// </summary>
         public void AddAmp(CharacterActionSetAmp model)
         {
-            EldanAugmentationEntry entry = GameTableManager.EldanAugmentation.GetEntry(model.AmpId);
+            EldanAugmentationEntry entry = GameTableManager.Instance.EldanAugmentation.GetEntry(model.AmpId);
             if (entry == null)
                 throw new ArgumentException();
 

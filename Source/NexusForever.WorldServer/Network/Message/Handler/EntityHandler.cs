@@ -6,6 +6,8 @@ using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 using System;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Quest.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -43,7 +45,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 Guid     = mover.Guid,
                 Time     = entityCommand.Time,
-                ServerControlled = true,
+                ServerControlled = false,
                 Commands = entityCommand.Commands
             });
         }
@@ -123,6 +125,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     log.Warn($"Received unhandled interaction event {entityInteraction.Event} from Entity {entityInteraction.Guid}");
                     break;
             }
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientEntityInteractChair)]
+        public static void HandleClientEntityInteractEmote(WorldSession session, ClientEntityInteractChair interactChair)
+        {
+            WorldEntity chair = session.Player.GetVisible<WorldEntity>(interactChair.ChairUnitId);
+            if (chair == null)
+                throw new InvalidPacketValueException();
+
+            Creature2Entry creatureEntry = GameTableManager.Instance.Creature2.GetEntry(chair.CreatureId);
+            if ((creatureEntry.ActivationFlags & 0x200000) == 0)
+                throw new InvalidPacketValueException();
+
+            session.Player.Sit(chair);
         }
     }
 }

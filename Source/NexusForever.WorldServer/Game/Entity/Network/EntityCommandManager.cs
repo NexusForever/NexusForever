@@ -2,16 +2,21 @@
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
+using NexusForever.Shared;
 
 namespace NexusForever.WorldServer.Game.Entity.Network
 {
-    public static class EntityCommandManager
+    public sealed class EntityCommandManager : Singleton<EntityCommandManager>
     {
         private delegate IEntityCommandModel EntityCommandFactoryDelegate();
-        private static ImmutableDictionary<EntityCommand, EntityCommandFactoryDelegate> entityCommandFactories;
-        private static ImmutableDictionary<Type, EntityCommand> entityCommands;
+        private ImmutableDictionary<EntityCommand, EntityCommandFactoryDelegate> entityCommandFactories;
+        private ImmutableDictionary<Type, EntityCommand> entityCommands;
 
-        public static void Initialise()
+        private EntityCommandManager()
+        {
+        }
+
+        public void Initialise()
         {
             var factoryBuilder = ImmutableDictionary.CreateBuilder<EntityCommand, EntityCommandFactoryDelegate>();
             var commandBuilder = ImmutableDictionary.CreateBuilder<Type, EntityCommand>();
@@ -34,7 +39,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network
         /// <summary>
         /// Return a new <see cref="IEntityCommandModel"/> of supplied <see cref="EntityCommand"/>.
         /// </summary>
-        public static IEntityCommandModel NewEntityCommand(EntityCommand command)
+        public IEntityCommandModel NewEntityCommand(EntityCommand command)
         {
             return entityCommandFactories.TryGetValue(command, out EntityCommandFactoryDelegate factory) ? factory.Invoke() : null;
         }
@@ -42,7 +47,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network
         /// <summary>
         /// Returns the <see cref="EntityCommand"/> for supplied <see cref="Type"/>.
         /// </summary>
-        public static EntityCommand? GetCommand(Type type)
+        public EntityCommand? GetCommand(Type type)
         {
             if (entityCommands.TryGetValue(type, out EntityCommand command))
                 return command;

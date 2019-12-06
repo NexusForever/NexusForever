@@ -172,7 +172,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <returns></returns>
         private uint GetCurrentLevel(Path path)
         {
-            return GameTableManager.PathLevel.Entries
+            return GameTableManager.Instance.PathLevel.Entries
                 .Last(x => x.PathXP <= paths[(int)path].TotalXp && x.PathTypeEnum == (uint)path).PathLevel;
         }
 
@@ -183,7 +183,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <returns></returns>
         private uint GetLevelByExperience(uint xp)
         {
-            return GameTableManager.PathLevel.Entries
+            return GameTableManager.Instance.PathLevel.Entries
                 .Last(x => x.PathXP <= xp && x.PathTypeEnum == (uint)player.Path).PathLevel;
         }
 
@@ -196,7 +196,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private IEnumerable<uint> CheckForLevelUp(uint totalXp, uint xpGained)
         {
             uint currentLevel = GetLevelByExperience(totalXp - xpGained);
-            return GameTableManager.PathLevel.Entries
+            return GameTableManager.Instance.PathLevel.Entries
                 .Where(x => x.PathLevel > currentLevel && x.PathXP <= totalXp && x.PathTypeEnum == (uint)player.Path)
                 .Select(e => e.PathLevel);
         }
@@ -212,7 +212,7 @@ namespace NexusForever.WorldServer.Game.Entity
             uint baseRewardObjectId = (uint)path * MaxPathLevel + 7u; // 7 is the base offset
             uint pathRewardObjectId = baseRewardObjectId + (Math.Clamp(level - 2, 0, 29)); // level - 2 is used because the objectIDs start at level 2 and a -2 offset was needed
 
-            IEnumerable<PathRewardEntry> pathRewardEntries = GameTableManager.PathReward.Entries
+            IEnumerable<PathRewardEntry> pathRewardEntries = GameTableManager.Instance.PathReward.Entries
                 .Where(x => x.ObjectId == pathRewardObjectId);
             foreach (PathRewardEntry pathRewardEntry in pathRewardEntries)
             {
@@ -253,7 +253,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (pathRewardEntry.Spell4Id > 0)
             {
-                Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(pathRewardEntry.Spell4Id);
+                Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(pathRewardEntry.Spell4Id);
                 player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
             }
 

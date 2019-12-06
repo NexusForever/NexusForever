@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Game.Map
             height       = (ushort)(mapZone.HexLimY - mapZone.HexMinY + 1);
             ushort wh    = (ushort)(width * height);
             size         = (ushort)((wh % 8u > 0u ? 8u : 0u) + wh);
-            maxHexGroups = (ushort)GameTableManager.MapZoneHexGroup.Entries.Count(m => m.MapZoneId == entry.Id);
+            maxHexGroups = (ushort)GameTableManager.Instance.MapZoneHexGroup.Entries.Count(m => m.MapZoneId == entry.Id);
             zoneMapBits  = new NetworkBitArray(size, NetworkBitArray.BitOrder.LeastSignificantBit);
         }
 
@@ -79,7 +79,7 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void AddHexGroup(ushort hexGroupId, bool sendUpdate = true)
         {
-            foreach (MapZoneHexGroupEntryEntry mapZoneHexGroupEntry in GameTableManager.MapZoneHexGroupEntry.Entries.Where(m => m.MapZoneHexGroupId == hexGroupId))
+            foreach (MapZoneHexGroupEntryEntry mapZoneHexGroupEntry in GameTableManager.Instance.MapZoneHexGroupEntry.Entries.Where(m => m.MapZoneHexGroupId == hexGroupId))
             {
                 var bit = (ushort)
                     (((short)mapZoneHexGroupEntry.HexY - (short)entry.HexMinY) * (short)width +

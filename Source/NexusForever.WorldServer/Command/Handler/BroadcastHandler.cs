@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
         protected override Task HandleCommandAsync(CommandContext context, string command, string[] parameters)
         {
-            if (parameters.Length <= 2 || parameters[0].Length > 1)
+            if (parameters.Length < 2 || parameters[0].Length > 1)
             {
                 context.SendMessageAsync("Parameters are invalid.");
                 return Task.CompletedTask;
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return Task.CompletedTask;
             }
 
-            IEnumerable<WorldSession> allSessions = NetworkManager<WorldSession>.GetSessions();
+            IEnumerable<WorldSession> allSessions = NetworkManager<WorldSession>.Instance.GetSessions();
             foreach (WorldSession session in allSessions)
             {
                 session.EnqueueMessageEncrypted(new ServerRealmBroadcast

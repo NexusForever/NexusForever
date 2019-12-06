@@ -1,11 +1,12 @@
 ﻿using System.Collections.Immutable;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Static;
 using DisableModel = NexusForever.WorldServer.Database.World.Model.Disable;
 
 namespace NexusForever.WorldServer.Game
 {
-    public class DisableManager : Manager<DisableManager>
+    public sealed class DisableManager : Singleton<DisableManager>
     {
         private static ulong Hash(DisableType type, uint objectId)
         {
@@ -14,6 +15,10 @@ namespace NexusForever.WorldServer.Game
         }
 
         private ImmutableDictionary<ulong, Disable> disables;
+
+        private DisableManager()
+        {
+        }
 
         public void Initialise()
         {

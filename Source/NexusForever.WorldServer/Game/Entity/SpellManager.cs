@@ -55,7 +55,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (CharacterSpell spellModel in model.CharacterSpell)
             {
-                SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spellModel.Spell4BaseId);
+                SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spellModel.Spell4BaseId);
                 Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
                 spells.Add(spellModel.Spell4BaseId, new UnlockedSpell(spellBaseInfo, spellModel, item));
             }
@@ -81,7 +81,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private void GrantSpells()
         {
             // TODO: TEMPORARY, this should eventually be used on level up
-            foreach (SpellLevelEntry spellLevel in GameTableManager.SpellLevel.Entries
+            foreach (SpellLevelEntry spellLevel in GameTableManager.Instance.SpellLevel.Entries
                 .Where(s => s.ClassId == (byte)player.Class && s.CharacterLevel <= player.Level)
                 .OrderBy(s => s.CharacterLevel))
             {
@@ -89,7 +89,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (spellLevel.PrerequisiteId > 0)
                     continue;
 
-                Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spellLevel.Spell4Id);
+                Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevel.Spell4Id);
                 if (spell4Entry == null)
                     continue;
 
@@ -97,13 +97,13 @@ namespace NexusForever.WorldServer.Game.Entity
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
             }
 
-            ClassEntry classEntry = GameTableManager.Class.GetEntry((byte)player.Class);
+            ClassEntry classEntry = GameTableManager.Instance.Class.GetEntry((byte)player.Class);
             foreach (uint classSpell in classEntry.Spell4IdInnateAbilityActive
                 .Concat(classEntry.Spell4IdInnateAbilityPassive)
                 .Concat(classEntry.Spell4IdAttackPrimary)
                 .Concat(classEntry.Spell4IdAttackUnarmed))
             {
-                Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(classSpell);
+                Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(classSpell);
                 if (spell4Entry == null)
                     continue;
 
@@ -176,7 +176,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void AddSpell(uint spell4BaseId, byte tier = 1)
         {
-            SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4BaseId);
+            SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -208,7 +208,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void UpdateSpell(uint spell4BaseId, byte tier, byte? actionSetIndex)
         {
-            SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4BaseId);
+            SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -389,7 +389,7 @@ namespace NexusForever.WorldServer.Game.Entity
             var serverSpellList = new ServerSpellList();
             foreach ((uint spell4BaseId, UnlockedSpell spell) in spells)
             {
-                SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4BaseId);
+                SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
                 if (spellBaseInfo == null)
                     continue;
                 

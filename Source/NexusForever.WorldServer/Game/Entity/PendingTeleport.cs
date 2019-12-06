@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using NexusForever.WorldServer.Game.Map;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -7,11 +7,13 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public MapInfo Info { get; }
         public Vector3 Vector { get; }
+        public uint? VanityPetId { get; }
 
-        public PendingTeleport(MapInfo info, Vector3 vector)
+        public PendingTeleport(MapInfo info, Vector3 vector, uint? vanityPetId)
         {
-            Info   = info;
-            Vector = vector;
+            Info        = info;
+            Vector      = vector;
+            VanityPetId = vanityPetId;
         }
     }
 }

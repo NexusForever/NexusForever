@@ -1,7 +1,7 @@
 ﻿using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Spell;
 
-namespace NexusForever.WorldServer.Game.Map
+namespace NexusForever.WorldServer.Game.Map.Search
 {
     public class SearchCheckTelegraph : ISearchCheck
     {

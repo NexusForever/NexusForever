@@ -1,0 +1,124 @@
+﻿using System;
+using System.Collections.Generic;
+using NexusForever.Shared;
+using NexusForever.WorldServer.Database.Character;
+using NexusForever.WorldServer.Game.Entity;
+using NLog;
+using CharacterModel = NexusForever.WorldServer.Database.Character.Model.Character;
+
+namespace NexusForever.WorldServer.Game.CharacterCache
+{
+    public sealed class CharacterManager: Singleton<CharacterManager>
+    {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
+        private readonly Dictionary<ulong, ICharacter> characters = new Dictionary<ulong, ICharacter>();
+        private readonly Dictionary<string, ulong> characterNameToId = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
+
+        private CharacterManager()
+        {
+        }
+
+        /// <summary>
+        /// Called to Initialise the <see cref="CharacterManager"/> at server start
+        /// </summary>
+        public void Initialise()
+        {
+            BuildCharacterInfoFromDb();
+        }
+
+        /// <summary>
+        /// Asynchronously adds <see cref="CharacterModel"/> data from the database to the cache
+        /// </summary>
+        private void BuildCharacterInfoFromDb()
+        {
+            List<CharacterModel> allCharactersInDb = CharacterDatabase.GetAllCharacters();
+            foreach (CharacterModel character in allCharactersInDb)
+                AddPlayer(character.Id, new CharacterInfo(character));
+
+            log.Info($"Stored {characters.Count} characters in Character Cache");
+        }
+
+        /// <summary>
+        /// Add <see cref="ICharacter"/> to the cache with associated ID
+        /// </summary>
+        private void AddPlayer(ulong characterId, ICharacter character)
+        {
+            characters.TryAdd(characterId, character);
+            characterNameToId.Add(character.Name, characterId);
+        }
+
+        /// <summary>
+        /// Used to register a <see cref="Player"/> in the cache in place of an existing one or as an addition. Used to provide real time data to the client of a player. Should be used on player login.
+        /// </summary>
+        public void RegisterPlayer(Player player)
+        {
+            if (characters.ContainsKey(player.CharacterId))
+                characters[player.CharacterId] = player;
+            else
+                AddPlayer(player.CharacterId, player);
+
+            log.Trace($"{player.Name} (ID: {player.CharacterId}) logged in.");
+        }
+
+        /// <summary>
+        /// Used to deregister a <see cref="Player"/> from the cache and build a snapshot of the data. Should be used on player logout to keep the server's character data consistent.
+        /// </summary>
+        public void DeregisterPlayer(Player player)
+        {
+            if (!characters.ContainsKey(player.CharacterId))
+                throw new Exception($"{player.CharacterId} should exist in characters dictionary.");
+
+            characters[player.CharacterId] = new CharacterInfo(player);
+
+            log.Trace($"{player.Name} (ID: {player.CharacterId}) logged out.");
+        }
+
+        /// <summary>
+        /// Used to delete a <see cref="ICharacter"/> from the cache when the <see cref="CharacterModel"/> is deleted
+        /// </summary>
+        public void DeleteCharacter(ulong id)
+        {
+            if (!characters.ContainsKey(id))
+                throw new ArgumentNullException(nameof(id));
+
+            characters.Remove(id, out ICharacter character);
+            if (character == null)
+                throw new ArgumentNullException();
+
+            log.Trace($"Removed character {character.Name} (ID: {id}) from the cache due to player delete.");
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Boolean"/> whether there is an <see cref="ICharacter"/> that exists with the name passed in.
+        /// </summary>
+        public bool IsCharacter(string name)
+        {
+            return characterNameToId.TryGetValue(name, out ulong value);
+        }
+
+        /// <summary>
+        /// Returns the character ID of a player with the name passed in.
+        /// </summary>
+        public ulong GetCharacterIdByName(string name)
+        {
+            return characterNameToId.TryGetValue(name, out ulong characterId) ? characterId : 0;
+        }
+
+        /// <summary>
+        /// Returns an <see cref="ICharacter"/> instance that matches the passed character ID, should one exist.
+        /// </summary>
+        public ICharacter GetCharacterInfo(ulong characterId)
+        {
+            return characters.TryGetValue(characterId, out ICharacter characterInfo) ? characterInfo : null;
+        }
+
+        /// <summary>
+        /// Returns an <see cref="ICharacter"/> instance that matches the passed character name, should one exist.
+        /// </summary>
+        public ICharacter GetCharacterInfo(string name)
+        {
+            return characterNameToId.TryGetValue(name, out ulong characterId) ? GetCharacterInfo(characterId) : null;
+        }
+    }
+}

@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             for (uint i = 0u; i < commandCount; i++)
             {
                 EntityCommand command = reader.ReadEnum<EntityCommand>(5);
-                IEntityCommandModel entityCommand = EntityCommandManager.NewEntityCommand(command);
+                IEntityCommandModel entityCommand = EntityCommandManager.Instance.NewEntityCommand(command);
                 if (entityCommand == null)
                     return;
 

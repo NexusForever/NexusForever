@@ -2,11 +2,12 @@
 using System.IO;
 using System.Linq;
 using Nexus.Archive;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.MapGenerator
 {
-    public static class ArchiveManager
+    public sealed class ArchiveManager : Singleton<ArchiveManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -20,14 +21,14 @@ namespace NexusForever.MapGenerator
         /// <summary>
         /// Main client ClientData archive.
         /// </summary>
-        public static Archive MainArchive { get; private set; }
+        public Archive MainArchive { get; private set; }
 
         /// <summary>
         /// Collection of client localisation archives.
         /// </summary>
-        public static List<Archive> LocalisationArchives { get; } = new List<Archive>();
+        public List<Archive> LocalisationArchives { get; } = new List<Archive>();
 
-        public static void Initialise(string patchPath)
+        public void Initialise(string patchPath)
         {
             log.Info("Loading archives...");
 

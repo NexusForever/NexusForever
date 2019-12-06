@@ -29,18 +29,18 @@ namespace NexusForever.AuthServer
             Console.Title = Title;
             log.Info("Initialising...");
 
-            ConfigurationManager<AuthServerConfiguration>.Initialise("AuthServer.json");
+            ConfigurationManager<AuthServerConfiguration>.Instance.Initialise("AuthServer.json");
 
-            DatabaseManager.Initialise(ConfigurationManager<AuthServerConfiguration>.Config.Database);
+            DatabaseManager.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Database);
 
-            ServerManager.Initialise();
+            ServerManager.Instance.Initialise();
 
-            MessageManager.Initialise();
-            NetworkManager<AuthSession>.Initialise(ConfigurationManager<AuthServerConfiguration>.Config.Network);
+            MessageManager.Instance.Initialise();
+            NetworkManager<AuthSession>.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Network);
 
-            WorldManager.Initialise(lastTick =>
+            WorldManager.Instance.Initialise(lastTick =>
             {
-                NetworkManager<AuthSession>.Update(lastTick);
+                NetworkManager<AuthSession>.Instance.Update(lastTick);
             });
 
             log.Info("Ready!");

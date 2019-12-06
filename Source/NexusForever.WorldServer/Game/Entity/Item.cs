@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (entry.ItemSourceId == 0u)
                 return (ushort)entry.ItemDisplayId;
 
-            List<ItemDisplaySourceEntryEntry> entries = AssetManager.GetItemDisplaySource(entry.ItemSourceId)
+            List<ItemDisplaySourceEntryEntry> entries = AssetManager.Instance.GetItemDisplaySource(entry.ItemSourceId)
                 .Where(e => e.Item2TypeId == entry.Item2TypeId)
                 .ToList();
 
@@ -171,9 +171,9 @@ namespace NexusForever.WorldServer.Game.Entity
             durability  = model.Durability;
 
             if ((InventoryLocation)model.Location != InventoryLocation.Ability)
-                Entry       = GameTableManager.Item.GetEntry(model.ItemId);
+                Entry       = GameTableManager.Instance.Item.GetEntry(model.ItemId);
             else
-                SpellEntry  = GameTableManager.Spell4Base.GetEntry(model.ItemId);
+                SpellEntry  = GameTableManager.Instance.Spell4Base.GetEntry(model.ItemId);
             saveMask    = ItemSaveMask.None;
         }
 
@@ -182,7 +182,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Item(ulong? owner, Item2Entry entry, uint count = 1u, uint initialCharges = 0)
         {
-            Guid        = AssetManager.NextItemId;
+            Guid        = AssetManager.Instance.NextItemId;
             characterId = owner;
             location    = InventoryLocation.None;
             bagIndex    = 0u;
@@ -199,7 +199,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Item(ulong owner, Spell4BaseEntry entry, uint count = 1u)
         {
-            Guid        = AssetManager.NextItemId;
+            Guid        = AssetManager.Instance.NextItemId;
             characterId = owner;
             location    = InventoryLocation.None;
             bagIndex    = 0u;
@@ -352,7 +352,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private uint CalculateVendorSellAmount()
         {
             // TODO: Rawaho was lazy and didn't finish this
-            // GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(559);
+            // GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(559);
             // uint cost = Entry.PowerLevel * entry.Dataint01;
             return 0u;
         }

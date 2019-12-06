@@ -4,7 +4,7 @@ using NexusForever.WorldServer.Game.Prerequisite.Static;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {
-    public static partial class PrerequisiteManager
+    public sealed partial class PrerequisiteManager
     {
         [PrerequisiteCheck(PrerequisiteType.Level)]
         private static bool PrerequisiteCheckLevel(Player player, PrerequisiteComparison comparison, uint value, uint objectId)

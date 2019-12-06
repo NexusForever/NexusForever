@@ -1,15 +1,20 @@
 ﻿using System.IO;
 using Nexus.Archive;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 
 namespace NexusForever.MapGenerator.GameTable
 {
-    public static class GameTableManager
+    public sealed class GameTableManager : Singleton<GameTableManager>
     {
-        public static GameTable<WorldEntry> World { get; private set; }
+        public GameTable<WorldEntry> World { get; private set; }
 
-        public static void Initialise()
+        private GameTableManager()
+        {
+        }
+
+        public void Initialise()
         {
             World = LoadGameTable<WorldEntry>("World.tbl");
         }
@@ -17,13 +22,13 @@ namespace NexusForever.MapGenerator.GameTable
         /// <summary>
         /// Return <see cref="GameTable{T}"/> for supplied table name found in the main client archive.
         /// </summary>
-        private static GameTable<T> LoadGameTable<T>(string name) where T : class, new()
+        private GameTable<T> LoadGameTable<T>(string name) where T : class, new()
         {
             string filePath = Path.Combine("DB", name);
-            if (!(ArchiveManager.MainArchive.IndexFile.FindEntry(filePath) is IArchiveFileEntry file))
+            if (!(ArchiveManager.Instance.MainArchive.IndexFile.FindEntry(filePath) is IArchiveFileEntry file))
                 throw new FileNotFoundException();
 
-            using (Stream archiveStream = ArchiveManager.MainArchive.OpenFileStream(file))
+            using (Stream archiveStream = ArchiveManager.Instance.MainArchive.OpenFileStream(file))
             using (var memoryStream = new MemoryStream())
             {
                 archiveStream.CopyTo(memoryStream);

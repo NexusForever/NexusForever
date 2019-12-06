@@ -59,11 +59,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (uint itemId in creationEntry.ItemIds.Where(i => i != 0u))
             {
-                Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+                Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
                 if (itemEntry == null)
                     throw new ArgumentNullException();
 
-                Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(itemEntry.Item2TypeId);
+                Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(itemEntry.Item2TypeId);
                 if (typeEntry.ItemSlotId == 0)
                     ItemCreate(itemEntry, 1u);
                 else
@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (Item item in bag)
             {
-                Item2TypeEntry itemTypeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
+                Item2TypeEntry itemTypeEntry = GameTableManager.Instance.ItemType.GetEntry(item.Entry.Item2TypeId);
 
                 ItemVisual visual = GetItemVisual((ItemSlot)itemTypeEntry.ItemSlotId, costume);
                 if (visual != null)
@@ -111,7 +111,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         private ItemVisual GetItemVisual(ItemSlot itemSlot, Costume costume)
         {
-            ImmutableList<EquippedItem> indexes = AssetManager.GetEquippedBagIndexes(itemSlot);
+            ImmutableList<EquippedItem> indexes = AssetManager.Instance.GetEquippedBagIndexes(itemSlot);
             if (indexes == null || indexes.Count != 1)
                 throw new ArgumentOutOfRangeException();
 
@@ -178,7 +178,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Guid = player.Guid
             };
 
-            Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
+            Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(item.Entry.Item2TypeId);
 
             Costume costume = null;
             if (player.CostumeIndex >= 0)
@@ -205,7 +205,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void ItemCreate(uint itemId)
         {
-            Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+            Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
@@ -282,7 +282,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
-            Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(itemEntry.Item2TypeId);
+            Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(itemEntry.Item2TypeId);
             if (typeEntry.ItemSlotId == 0)
                 throw new ArgumentException($"Item {itemEntry.Id} isn't equippable!");
 
@@ -290,7 +290,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Debug.Assert(bag != null);
 
             // find first free bag index, some items can be equipped into multiple slots
-            foreach (uint bagIndex in AssetManager.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId))
+            foreach (uint bagIndex in AssetManager.Instance.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId))
             {
                 if (bag.GetItem(bagIndex) != null)
                     continue;
@@ -306,7 +306,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void ItemCreate(uint itemId, uint count, ItemUpdateReason reason = ItemUpdateReason.NoReason, uint charges = 0)
         {
-            Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+            Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
@@ -653,11 +653,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (location == InventoryLocation.Equipped)
             {
-                Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
+                Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(item.Entry.Item2TypeId);
                 if (typeEntry.ItemSlotId == 0)
                     return false;
 
-                ImmutableList<EquippedItem> bagIndexes = AssetManager.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId);
+                ImmutableList<EquippedItem> bagIndexes = AssetManager.Instance.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId);
                 if (bagIndexes.All(i => i != (EquippedItem) bagIndex))
                     return false;
 

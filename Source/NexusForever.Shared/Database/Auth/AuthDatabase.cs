@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -51,6 +52,7 @@ namespace NexusForever.Shared.Database.Auth
                     .Include(a => a.AccountCurrency)
                     .Include(a => a.AccountGenericUnlock)
                     .Include(a => a.AccountKeybinding)
+                    .Include(a => a.AccountEntitlement)
                     .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 

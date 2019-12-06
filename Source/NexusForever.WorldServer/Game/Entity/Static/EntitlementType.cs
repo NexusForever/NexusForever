@@ -1,6 +1,6 @@
-﻿namespace NexusForever.WorldServer.Game.Entity.Static
+namespace NexusForever.WorldServer.Game.Entity.Static
 {
-    public enum Entitlement
+    public enum EntitlementType
     {
         CostumeSlots                         = 3,
         TwoStepVerification                  = 9,

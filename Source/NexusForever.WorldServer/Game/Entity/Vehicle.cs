@@ -32,9 +32,9 @@ namespace NexusForever.WorldServer.Game.Entity
         protected Vehicle(EntityType type, uint creatureId, uint vehicleId, uint spell4Id)
             : base(type)
         {
-            CreatureEntry = GameTableManager.Creature2.GetEntry(creatureId);
-            VehicleEntry  = GameTableManager.UnitVehicle.GetEntry(vehicleId != 0u ? vehicleId : CreatureEntry.UnitVehicleId);
-            SpellEntry    = GameTableManager.Spell4.GetEntry(spell4Id);
+            CreatureEntry = GameTableManager.Instance.Creature2.GetEntry(creatureId);
+            VehicleEntry  = GameTableManager.Instance.UnitVehicle.GetEntry(vehicleId != 0u ? vehicleId : CreatureEntry.UnitVehicleId);
+            SpellEntry    = GameTableManager.Instance.Spell4.GetEntry(spell4Id);
 
             // temp
             SetProperty(Property.BaseHealth, 800.0f, 800.0f);

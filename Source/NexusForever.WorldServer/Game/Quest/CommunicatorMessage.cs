@@ -55,7 +55,7 @@ namespace NexusForever.WorldServer.Game.Quest
 
             // TODO: reputation
 
-            if (entry.PrerequisiteId != 0u && !PrerequisiteManager.Meets(player, entry.PrerequisiteId))
+            if (entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteId))
                 return false;
 
             return true;
