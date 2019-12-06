@@ -38,33 +38,32 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientRealmList)]
         public static void HandleRealmList(WorldSession session, ClientRealmList realmList)
         {
-            var serverRealmList = new ServerRealmList
-            {
-                Messages = ServerManager.Instance.ServerMessages
-                    .Select(m => new NetworkMessage
-                    {
-                        Index    = m.Index,
-                        Messages = m.Messages
-                    })
-                    .ToList()
-            };
+            var serverRealmList = new ServerRealmList();
 
             foreach (ServerInfo server in ServerManager.Instance.Servers)
             {
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
                 {
-                    RealmId    = server.Model.Id,
-                    RealmName  = server.Model.Name,
-                    Type       = (RealmType)server.Model.Type,
-                    Status     = RealmStatus.Up,
-                    Population = RealmPopulation.Low,
-                    Unknown8   = new byte[16],
+                    RealmId          = server.Model.Id,
+                    RealmName        = server.Model.Name,
+                    Type             = (RealmType)server.Model.Type,
+                    Status           = server.IsOnline ? RealmStatus.Up : RealmStatus.Down,
+                    Population       = RealmPopulation.Low,
+                    Unknown8         = new byte[16],
                     AccountRealmInfo = new ServerRealmList.RealmInfo.AccountRealmData
                     {
                         RealmId = server.Model.Id
                     }
                 });
             }
+
+            serverRealmList.Messages = ServerManager.Instance.ServerMessages
+                .Select(m => new NetworkMessage
+                {
+                    Index    = m.Index,
+                    Messages = m.Messages
+                })
+                .ToList();
 
             session.EnqueueMessageEncrypted(serverRealmList);
         }
@@ -80,6 +79,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (server.Model.Id == WorldServer.RealmId)
                 return;
 
+            // TODO: Return proper error packet if server is not online
+            if (!server.IsOnline)
+            {
+                session.EnqueueMessageEncrypted(new ServerForceKick());
+                return;
+            }
+
             byte[] sessionKey = RandomProvider.GetBytes(16u);
             session.EnqueueEvent(new TaskEvent(AuthDatabase.UpdateAccountSessionKey(session.Account, sessionKey),
                 () =>
@@ -92,8 +98,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Address = server.Address,
                         Port    = server.Model.Port
                     },
-                    RealmName   = server.Model.Name,
-                    Type        = (RealmType)server.Model.Type
+                    RealmName = server.Model.Name,
+                    Type      = (RealmType)server.Model.Type
                 });
             }));
         }

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using NLog;
 using NexusForever.Shared;
@@ -65,7 +64,6 @@ namespace NexusForever.WorldServer
             PrerequisiteManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
             GlobalQuestManager.Instance.Initialise();
-            ServerManager.Instance.Initialise();
 
             CharacterManager.Instance.Initialise();
             ResidenceManager.Instance.Initialise();
@@ -73,10 +71,8 @@ namespace NexusForever.WorldServer
 
             GlobalAchievementManager.Instance.Initialise();
 
-            // make sure the assigned realm id in the configuration file exists in the database
             RealmId = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
-            if (ServerManager.Instance.Servers.All(s => s.Model.Id != RealmId))
-                throw new ConfigurationException($"Realm id {RealmId} in configuration file doesn't exist in the database!");
+            ServerManager.Instance.Initialise(RealmId); 
 
             MessageManager.Instance.Initialise();
             SocialManager.Instance.Initialise();

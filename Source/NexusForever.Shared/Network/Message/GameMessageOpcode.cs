@@ -117,6 +117,7 @@ namespace NexusForever.Shared.Network.Message
         ServerQuestObjectiveUpdate      = 0x0361,
         ClientQuestSetTracked           = 0x0364,
         ClientQuestRetry                = 0x0365,
+        ServerForceKick                 = 0x036A,
         ClientEmote                     = 0x037E,
         ClientCostumeItemForget         = 0x038B,
         ClientPackedWorld               = 0x038C,

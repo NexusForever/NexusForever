@@ -14,9 +14,9 @@ namespace NexusForever.AuthServer.Network
 
             EnqueueMessage(new ServerHello
             {
-                AuthVersion = 16042,
-                AuthMessage = 0x97998A0,
-                Unknown1C   = 3
+                AuthVersion    = 16042,
+                AuthMessage    = 0x97998A0,
+                ConnectionType = 3
             });
         }
 
