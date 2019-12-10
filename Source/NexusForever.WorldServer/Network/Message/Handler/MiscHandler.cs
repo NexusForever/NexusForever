@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             ICharacter character = CharacterManager.Instance.GetCharacterInfo(request.Identity.CharacterId);
             if (character == null)
-                throw new InvalidPacketValueException();
+                return;
 
             session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
             {
