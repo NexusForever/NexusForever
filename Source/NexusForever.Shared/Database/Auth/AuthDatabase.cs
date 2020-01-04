@@ -68,7 +68,7 @@ namespace NexusForever.Shared.Database.Auth
 
                 context.Account.Add(new Account
                 {
-                    Email = email,
+                    Email = email.ToLower(),
                     S     = s.ToHexString(),
                     V     = v.ToHexString()
                 });

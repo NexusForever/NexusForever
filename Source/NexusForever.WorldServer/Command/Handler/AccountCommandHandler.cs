@@ -26,8 +26,8 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            AuthDatabase.CreateAccount(parameters[0], parameters[1]);
-            await context.SendMessageAsync($"Account {parameters[0]} created successfully")
+            AuthDatabase.CreateAccount(parameters[0].ToLower(), parameters[1]);
+            await context.SendMessageAsync($"Account {parameters[0].ToLower()} created successfully")
                 .ConfigureAwait(false);
         }
 
@@ -40,11 +40,11 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            if (AuthDatabase.DeleteAccount(parameters[0]))
-                await context.SendMessageAsync($"Account {parameters[0]} successfully removed!")
+            if (AuthDatabase.DeleteAccount(parameters[0].ToLower()))
+                await context.SendMessageAsync($"Account {parameters[0].ToLower()} successfully removed!")
                     .ConfigureAwait(false);
             else
-                await context.SendMessageAsync($"Cannot find account with Email: {parameters[0]}")
+                await context.SendMessageAsync($"Cannot find account with Email: {parameters[0].ToLower()}")
                     .ConfigureAwait(false);
         }
 
