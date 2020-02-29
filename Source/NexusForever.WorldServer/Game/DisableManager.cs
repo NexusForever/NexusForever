@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared;
-using NexusForever.WorldServer.Database.World;
+using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Game.Static;
-using DisableModel = NexusForever.WorldServer.Database.World.Model.Disable;
 
 namespace NexusForever.WorldServer.Game
 {
@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Game
         public void Initialise()
         {
             var builder = ImmutableDictionary.CreateBuilder<ulong, Disable>();
-            foreach (DisableModel model in WorldDatabase.GetDisables())
+            foreach (DisableModel model in DatabaseManager.Instance.WorldDatabase.GetDisables())
             {
                 DisableType type = (DisableType)model.Type;
                 builder.Add(Hash(type, model.ObjectId), new Disable(type, model.ObjectId, model.Note));

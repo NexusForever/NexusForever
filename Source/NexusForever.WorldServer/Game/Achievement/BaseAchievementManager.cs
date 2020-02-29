@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using NexusForever.Database.Character;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Prerequisite;
@@ -201,7 +200,7 @@ namespace NexusForever.WorldServer.Game.Achievement
                 1u => 10u,
                 2u => 25u,
                 3u => 50u,
-                _ => 0u,
+                _ => 0u
             };
         }
 

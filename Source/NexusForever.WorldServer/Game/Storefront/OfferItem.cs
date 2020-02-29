@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Game.Storefront.Static;
@@ -9,7 +10,7 @@ using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
 {
-    public class OfferItem
+    public class OfferItem : IBuildable<ServerStoreOffers.OfferGroup.Offer>
     {
         public uint Id { get; }
         public string Name { get; }
@@ -23,9 +24,9 @@ namespace NexusForever.WorldServer.Game.Storefront
         private readonly ImmutableDictionary<AccountCurrencyType, OfferItemPrice> prices;
 
         /// <summary>
-        /// Create a new <see cref="StoreOfferItem"/> from an existing database model.
+        /// Create a new <see cref="OfferItem"/> from an existing database model.
         /// </summary>
-        public OfferItem(StoreOfferItem model)
+        public OfferItem(StoreOfferItemModel model)
         {
             Id           = model.Id;
             Name         = model.Name;
@@ -36,13 +37,13 @@ namespace NexusForever.WorldServer.Game.Storefront
             Visible      = Convert.ToBoolean(model.Visible);
 
             var itemBuilder = ImmutableList.CreateBuilder<OfferItemData>();
-            foreach (StoreOfferItemData itemData in model.StoreOfferItemData)
+            foreach (StoreOfferItemDataModel itemData in model.StoreOfferItemData)
                 itemBuilder.Add(new OfferItemData(itemData));
 
             items = itemBuilder.ToImmutable();
 
             var priceBuilder = ImmutableDictionary.CreateBuilder<AccountCurrencyType, OfferItemPrice>();
-            foreach (StoreOfferItemPrice price in model.StoreOfferItemPrice)
+            foreach (StoreOfferItemPriceModel price in model.StoreOfferItemPrice)
             {
                 if (DisableManager.Instance.IsDisabled(DisableType.AccountCurrency, price.CurrencyId))
                     continue;
@@ -62,7 +63,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             return prices.TryGetValue(currencyId, out OfferItemPrice itemPrice) ? itemPrice : null;
         }
 
-        public ServerStoreOffers.OfferGroup.Offer BuildNetworkPacket()
+        public ServerStoreOffers.OfferGroup.Offer Build()
         {
             float pricePremium = 0f;
             float priceAlternative = 0;
@@ -83,10 +84,10 @@ namespace NexusForever.WorldServer.Game.Storefront
                 Unknown6         = Field6,
                 Unknown7         = Field7,
                 ItemData         = items
-                    .Select(i => i.BuildNetworkPacket())
+                    .Select(i => i.Build())
                     .ToList(),
                 CurrencyData = prices.Values
-                    .Select(p => p.BuildNetworkPacket())
+                    .Select(p => p.Build())
                     .ToList()
             };
         }

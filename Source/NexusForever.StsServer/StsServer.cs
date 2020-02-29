@@ -30,7 +30,7 @@ namespace NexusForever.StsServer
 
             ConfigurationManager<StsServerConfiguration>.Instance.Initialise("StsServer.json");
 
-            DatabaseManager.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database);
+            DatabaseManager.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database);
             MessageManager.Instance.Initialise();
             NetworkManager<StsSession>.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Network);
 

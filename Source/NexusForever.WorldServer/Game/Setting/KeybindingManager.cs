@@ -1,13 +1,12 @@
 using System.Collections.Generic;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NetworkBinding = NexusForever.WorldServer.Network.Message.Model.Shared.Binding;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Setting
 {
@@ -17,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Setting
         private readonly KeybindingSet accountKeybindings;
         private readonly KeybindingSet characterKeybindings;
 
-        public KeybindingManager(Player owner, AccountModel accountModel, Character characterModel)
+        public KeybindingManager(Player owner, AccountModel accountModel, CharacterModel characterModel)
         {
             player               = owner;
             accountKeybindings   = new KeybindingSet(accountModel);

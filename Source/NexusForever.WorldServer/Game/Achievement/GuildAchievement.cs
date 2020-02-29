@@ -1,5 +1,5 @@
 ﻿using System;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {

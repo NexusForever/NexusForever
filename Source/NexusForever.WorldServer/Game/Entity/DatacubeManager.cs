@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NetworkDatacube = NexusForever.WorldServer.Network.Message.Model.Shared.Datacube;
@@ -22,13 +22,13 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="DatacubeManager"/> from an existing database model.
         /// </summary>
-        public DatacubeManager(Player owner, Character characterModel)
+        public DatacubeManager(Player owner, CharacterModel characterModel)
         {
             player = owner;
             
-            foreach (CharacterDatacube model in characterModel.CharacterDatacube)
+            foreach (CharacterDatacubeModel model in characterModel.Datacube)
             {
-                Datacube datacube = new Datacube(model);
+                var datacube = new Datacube(model);
                 uint hash = DatacubeHash(datacube.Id, datacube.Type);
                 datacubes.Add(hash, datacube);
             }

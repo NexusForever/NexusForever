@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.World;
-using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game
@@ -47,9 +46,9 @@ namespace NexusForever.WorldServer.Game
 
         public void Initialise()
         {
-            nextCharacterId = CharacterDatabase.GetNextCharacterId() + 1ul;
-            nextItemId      = CharacterDatabase.GetNextItemId() + 1ul;
-            nextMailId      = CharacterDatabase.GetNextMailId() + 1ul;
+            nextCharacterId = DatabaseManager.Instance.CharacterDatabase.GetNextCharacterId() + 1ul;
+            nextItemId      = DatabaseManager.Instance.CharacterDatabase.GetNextItemId() + 1ul;
+            nextMailId      = DatabaseManager.Instance.CharacterDatabase.GetNextMailId() + 1ul;
 
             CacheCharacterCustomisations();
             CacheInventoryEquipSlots();
@@ -123,7 +122,7 @@ namespace NexusForever.WorldServer.Game
         private void CacheTutorials()
         {
             var zoneEntries =  ImmutableDictionary.CreateBuilder<uint, uint>();
-            foreach (Tutorial tutorial in WorldDatabase.GetTutorialTriggers())
+            foreach (TutorialModel tutorial in DatabaseManager.Instance.WorldDatabase.GetTutorialTriggers())
             {
                 if (tutorial.TriggerId == 0) // Don't add Tutorials with no trigger ID
                     continue;

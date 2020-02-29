@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Spell.Static;
 using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Game.Spell
         /// <summary>
         /// Create a new <see cref="UnlockedSpell"/> from an existing database model.
         /// </summary>
-        public UnlockedSpell(SpellBaseInfo info, CharacterSpell model, ItemEntity item)
+        public UnlockedSpell(SpellBaseInfo info, CharacterSpellModel model, ItemEntity item)
         {
             Owner = model.Id;
             Info  = info;
@@ -60,7 +60,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if ((saveMask & UnlockedSpellSaveMask.Create) != 0)
             {
-                var model = new CharacterSpell
+                var model = new CharacterSpellModel
                 {
                     Id           = Owner,
                     Spell4BaseId = Info.Entry.Id,
@@ -71,13 +71,13 @@ namespace NexusForever.WorldServer.Game.Spell
             }
             else
             {
-                var model = new CharacterSpell
+                var model = new CharacterSpellModel
                 {
                     Id           = Owner,
                     Spell4BaseId = Info.Entry.Id,
                 };
 
-                EntityEntry<CharacterSpell> entity = context.Attach(model);
+                EntityEntry<CharacterSpellModel> entity = context.Attach(model);
                 if ((saveMask & UnlockedSpellSaveMask.Tier) != 0)
                 {
                     model.Tier = tier;

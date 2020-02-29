@@ -48,7 +48,9 @@ namespace NexusForever.WorldServer
             log.Info("Initialising...");
 
             ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json");
-            DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
+
+            DatabaseManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
+            DatabaseManager.Instance.Migrate();
 
             DisableManager.Instance.Initialise();
 

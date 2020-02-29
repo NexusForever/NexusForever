@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NexusForever.Database.Configuration;
 using NexusForever.Shared.Configuration;
 
 namespace NexusForever.WorldServer

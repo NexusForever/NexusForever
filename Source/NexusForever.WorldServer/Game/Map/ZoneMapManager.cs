@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -24,13 +24,13 @@ namespace NexusForever.WorldServer.Game.Map
         private readonly Player player;
 
         /// <summary>
-        /// Create a new <see cref="ZoneMapManager"/> from existing <see cref="Character"/> database model.
+        /// Create a new <see cref="ZoneMapManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public ZoneMapManager(Player owner, Character characterModel)
+        public ZoneMapManager(Player owner, CharacterModel characterModel)
         {
             player = owner;
 
-            foreach (CharacterZonemapHexgroup hexGroupModel in characterModel.CharacterZonemapHexgroup)
+            foreach (CharacterZonemapHexgroupModel hexGroupModel in characterModel.ZonemapHexgroup)
             {
                 if (!zoneMaps.TryGetValue(hexGroupModel.ZoneMap, out ZoneMap zoneMap))
                 {

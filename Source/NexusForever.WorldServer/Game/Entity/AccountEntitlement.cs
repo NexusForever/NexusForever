@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared.GameTable.Model;
-using AccountEntitlementModel = NexusForever.Shared.Database.Auth.Model.AccountEntitlement;
 
 namespace NexusForever.WorldServer.Game.Entity
 {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
-using NexusForever.WorldServer.Database.Character;
+using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
-using CharacterModel = NexusForever.WorldServer.Database.Character.Model.Character;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         /// </summary>
         private void BuildCharacterInfoFromDb()
         {
-            List<CharacterModel> allCharactersInDb = CharacterDatabase.GetAllCharacters();
+            List<CharacterModel> allCharactersInDb = DatabaseManager.Instance.CharacterDatabase.GetAllCharacters();
             foreach (CharacterModel character in allCharactersInDb)
                 AddPlayer(character.Id, new CharacterInfo(character));
 

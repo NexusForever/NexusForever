@@ -1,11 +1,12 @@
 using System;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Storefront.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
 {
-    public class OfferItemPrice
+    public class OfferItemPrice : IBuildable<ServerStoreOffers.OfferGroup.Offer.OfferCurrencyData>
     {
         public uint OfferId { get; }
         public byte CurrencyId { get; }
@@ -18,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Create a new <see cref="OfferItemPrice"/> from an existing database model.
         /// </summary>
-        public OfferItemPrice(StoreOfferItemPrice model)
+        public OfferItemPrice(StoreOfferItemPriceModel model)
         {
             OfferId               = model.Id;
             CurrencyId            = model.CurrencyId;
@@ -37,7 +38,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             return (float)Math.Ceiling(Price / ((100f - DiscountValue) / 100)); // This gives the full price of the item
         }
 
-        public ServerStoreOffers.OfferGroup.Offer.OfferCurrencyData BuildNetworkPacket()
+        public ServerStoreOffers.OfferGroup.Offer.OfferCurrencyData Build()
         {
             return new ServerStoreOffers.OfferGroup.Offer.OfferCurrencyData
             {

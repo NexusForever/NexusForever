@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.Network;
 using NexusForever.StsServer.Network.Message;
 using NexusForever.StsServer.Network.Message.Model;
@@ -15,7 +15,7 @@ namespace NexusForever.StsServer.Network
 {
     public class StsSession : NetworkSession
     {
-        public Account Account { get; set; }
+        public AccountModel Account { get; set; }
         public SessionState State { get; set; }
 
         public Srp6Provider KeyExchange { get; set; }

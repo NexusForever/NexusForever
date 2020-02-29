@@ -5,15 +5,15 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.IO.Map;
-using NexusForever.WorldServer.Database.World;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NLog;
-using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -82,7 +82,7 @@ namespace NexusForever.WorldServer.Game.Entity
             var mapFiles = new Dictionary<ushort, MapFile>();
             var entities = new HashSet<EntityModel>();
 
-            foreach (EntityModel model in WorldDatabase.GetEntitiesWithoutArea())
+            foreach (EntityModel model in DatabaseManager.Instance.WorldDatabase.GetEntitiesWithoutArea())
             {
                 entities.Add(model);
 
@@ -99,7 +99,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 log.Info($"Calculated area {worldAreaId} for entity {model.Id}.");
             }
 
-            WorldDatabase.UpdateEntities(entities);
+            DatabaseManager.Instance.WorldDatabase.UpdateEntities(entities);
 
             log.Info($"Calculated area information for {entities.Count} {(entities.Count == 1 ? "entity" : "entities")}.");
         }

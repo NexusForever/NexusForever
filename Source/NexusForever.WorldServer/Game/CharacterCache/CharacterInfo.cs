@@ -1,6 +1,6 @@
 ﻿using System;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using CharacterModel = NexusForever.WorldServer.Database.Character.Model.Character;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
@@ -28,7 +28,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
             Level       = model.Level;
             Faction1    = (Faction)model.FactionId;
             Faction2    = (Faction)model.FactionId;
-            LastOnline  = model.LastOnline ?? DateTime.UtcNow;
+            LastOnline  = model.LastOnline;
         }
 
         public CharacterInfo(ICharacter model)

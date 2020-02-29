@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Storefront.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
 {
-    public class OfferGroup
+    public class OfferGroup : IBuildable<ServerStoreOffers.OfferGroup>
     {
         public struct Category
         {
@@ -29,7 +30,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Create a new <see cref="OfferGroup"/> from an existing database model.
         /// </summary>
-        public OfferGroup(StoreOfferGroup model)
+        public OfferGroup(StoreOfferGroupModel model)
         {
             Id           = model.Id;
             DisplayFlags = (DisplayFlag)model.DisplayFlags;
@@ -39,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             Visible      = Convert.ToBoolean(model.Visible);
 
             var builder = ImmutableList.CreateBuilder<Category>();
-            foreach (StoreOfferGroupCategory categoryModel in model.StoreOfferGroupCategory)
+            foreach (StoreOfferGroupCategoryModel categoryModel in model.StoreOfferGroupCategory)
             {
                 if (Convert.ToBoolean(categoryModel.Visible))
                 {
@@ -53,7 +54,7 @@ namespace NexusForever.WorldServer.Game.Storefront
 
             Categories = builder.ToImmutable();
 
-            foreach (StoreOfferItem offerItem in model.StoreOfferItem)
+            foreach (StoreOfferItemModel offerItem in model.StoreOfferItem)
             {
                 var offer = new OfferItem(offerItem);
                 offerItems.Add(offer.Id, offer);
@@ -68,7 +69,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             return offerItems.TryGetValue(offerId, out OfferItem offerItem) ? offerItem : null;
         }
 
-        public ServerStoreOffers.OfferGroup BuildNetworkPacket()
+        public ServerStoreOffers.OfferGroup Build()
         {
             return new ServerStoreOffers.OfferGroup
             {
@@ -85,7 +86,7 @@ namespace NexusForever.WorldServer.Game.Storefront
                     })
                     .ToList(),
                 Offers = offerItems.Values
-                    .Select(i => i.BuildNetworkPacket())
+                    .Select(i => i.Build())
                     .ToList()
             };
         }

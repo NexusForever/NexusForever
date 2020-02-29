@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
-using NexusForever.WorldServer.Database.World.Model;
-using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
+using NexusForever.Database.World.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -10,8 +9,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public uint Id { get; }
         public float SellPriceMultiplier { get; }
         public float BuyPriceMultiplier { get; }
-        public ImmutableList<EntityVendorCategory> Categories { get; }
-        public ImmutableList<EntityVendorItem> Items { get; }
+        public ImmutableList<EntityVendorCategoryModel> Categories { get; }
+        public ImmutableList<EntityVendorItemModel> Items { get; }
 
         public VendorInfo(EntityModel model)
         {
@@ -23,9 +22,9 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Return <see cref="EntityVendorItem"/> at the supplied index;
+        /// Return <see cref="EntityVendorItemModel"/> at the supplied index;
         /// </summary>
-        public EntityVendorItem GetItemAtIndex(uint index)
+        public EntityVendorItemModel GetItemAtIndex(uint index)
         {
             return Items.SingleOrDefault(i => i.Index == index);
         }

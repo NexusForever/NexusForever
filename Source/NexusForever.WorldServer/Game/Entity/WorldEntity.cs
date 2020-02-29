@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -80,7 +79,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction2     = (Faction)model.Faction2;
             ActivePropId = model.ActivePropId;
 
-            foreach (EntityStats statModel in model.EntityStats)
+            foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
         }
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database.Auth;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.Game.Events;
 using NexusForever.StsServer.Network.Message.Model;
 
@@ -14,7 +14,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
         [MessageHandler("/Auth/LoginStart", SessionState.Connected)]
         public static void HandleLoginStart(StsSession session, ClientLoginStartMessage loginStart)
         {
-            session.EnqueueEvent(new TaskGenericEvent<Account>(AuthDatabase.GetAccountAsync(loginStart.LoginName),
+            session.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountByEmailAsync(loginStart.LoginName),
                 account =>
             {
                 if (account == null)
@@ -95,7 +95,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
         public static void HandleRequestGameToken(StsSession session, RequestGameTokenMessage requestGameToken)
         {
             Guid guid = RandomProvider.GetGuid();
-            session.EnqueueEvent(new TaskEvent(AuthDatabase.UpdateAccountGameToken(session.Account, guid),
+            session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountGameToken(session.Account, guid.ToByteArray().ToHexString()),
                 () =>
             {
                 session.EnqueueMessageOk(new RequestGameTokenResponse

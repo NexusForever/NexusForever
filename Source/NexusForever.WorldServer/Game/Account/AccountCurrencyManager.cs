@@ -1,16 +1,13 @@
-﻿using NexusForever.WorldServer.Network;
+﻿using System;
 using System.Collections.Generic;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
-using AccountCurrencyModel = NexusForever.Shared.Database.Auth.Model.AccountCurrency;
-using NexusForever.Shared.Database.Auth.Model;
-using NexusForever.WorldServer.Network.Message.Model;
-using ServerAccountCurrency = NexusForever.WorldServer.Network.Message.Model.Shared.AccountCurrency;
 using System.Linq;
-using NLog;
-using System;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Account.Static;
+using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Account
 {
@@ -31,7 +28,6 @@ namespace NexusForever.WorldServer.Game.Account
 
                 currencies.Add((AccountCurrencyType)currencyModel.CurrencyId, new AccountCurrency(currencyModel));
             }
-                
         }
 
         public void Save(AuthContext context)
@@ -41,7 +37,7 @@ namespace NexusForever.WorldServer.Game.Account
         }
 
         /// <summary>
-        /// Create a new <see cref="CharacterCurrency"/>.
+        /// Create a new <see cref="AccountCurrency"/>.
         /// </summary>
         private AccountCurrency CreateAccountCurrency(AccountCurrencyType currencyType, ulong amount = 0)
         {
@@ -111,7 +107,7 @@ namespace NexusForever.WorldServer.Game.Account
         {
             session.EnqueueMessageEncrypted(new ServerAccountCurrencySet
             {
-                AccountCurrencies = currencies.Values.Select(c => c.BuildServerPacket()).ToList()
+                AccountCurrencies = currencies.Values.Select(c => c.Build()).ToList()
             });
         }
 
@@ -131,7 +127,7 @@ namespace NexusForever.WorldServer.Game.Account
         {
             session.EnqueueMessageEncrypted(new ServerAccountCurrencyGrant
             {
-                AccountCurrency = accountCurrency.BuildServerPacket(),
+                AccountCurrency = accountCurrency.Build(),
                 Unknown0 = reason
             });
         }

@@ -3,7 +3,7 @@ using NexusForever.Shared.Network.Message;
 
 namespace NexusForever.WorldServer.Network.Message.Model.Shared
 {
-    public class AccountCurrency: IWritable
+    public class AccountCurrency : IWritable
     {
         public byte AccountCurrencyType { get; set; }
         public ulong Amount { get; set; }

@@ -1,11 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using CurrencyModel = NexusForever.WorldServer.Database.Character.Model.CharacterCurrency;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -34,24 +33,24 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Currency"/> from an existing database model.
         /// </summary>
-        public Currency(CurrencyModel model)
+        public Currency(CharacterCurrencyModel model)
         {
             CharacterId = model.Id;
-            Entry = GameTableManager.Instance.CurrencyType.GetEntry(model.CurrencyId);
-            Amount = model.Amount;
+            Entry       = GameTableManager.Instance.CurrencyType.GetEntry(model.CurrencyId);
+            Amount      = model.Amount;
 
-            saveMask = CurrencySaveMask.None;
+            saveMask    = CurrencySaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="Currency"/> from an <see cref="Currency2Entry"/> template.
+        /// Create a new <see cref="Currency"/> from an <see cref="CurrencyTypeEntry"/> template.
         /// </summary>
         public Currency(ulong owner, CurrencyTypeEntry entry, ulong value = 0u)
         {
             CharacterId = owner;
-            Entry = entry;
+            Entry       = entry;
 
-            saveMask = CurrencySaveMask.Create;
+            saveMask    = CurrencySaveMask.Create;
         }
 
         public void Save(CharacterContext context)
@@ -61,25 +60,25 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if ((saveMask & CurrencySaveMask.Create) != 0)
             {
-                // Currency doesn't exist in database, all infomation must be saved
-                context.Add(new CharacterCurrency
+                // Currency doesn't exist in database, all information must be saved
+                context.Add(new CharacterCurrencyModel
                 {
-                    Id = CharacterId,
+                    Id         = CharacterId,
                     CurrencyId = (byte)Entry.Id,
-                    Amount = Amount,
+                    Amount     = Amount
                 });
             }
             else
             {
                 // Currency already exists in database, save only data that has been modified
-                var model = new CharacterCurrency
+                var model = new CharacterCurrencyModel
                 {
-                    Id = CharacterId,
+                    Id         = CharacterId,
                     CurrencyId = (byte)Entry.Id,
                 };
 
                 // could probably clean this up with reflection, works for the time being
-                EntityEntry<CharacterCurrency> entity = context.Attach(model);
+                EntityEntry<CharacterCurrencyModel> entity = context.Attach(model);
                 if ((saveMask & CurrencySaveMask.Amount) != 0)
                 {
                     model.Amount = Amount;

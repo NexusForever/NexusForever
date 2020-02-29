@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database.Auth;
+using NexusForever.Shared.Database;
 
 namespace NexusForever.Shared.Game
 {
@@ -56,14 +56,15 @@ namespace NexusForever.Shared.Game
 
         private void InitialiseServers()
         {
-            Servers = AuthDatabase.GetServers()
+            
+            Servers = DatabaseManager.Instance.AuthDatabase.GetServers()
                 .Select(s => new ServerInfo(s))
                 .ToImmutableList();
         }
 
         private void InitialiseServerMessages()
         {
-            ServerMessages = AuthDatabase.GetServerMessages()
+            ServerMessages = DatabaseManager.Instance.AuthDatabase.GetServerMessages()
                 .GroupBy(m => m.Index)
                 .Select(g => new ServerMessageInfo(g))
                 .ToImmutableList();

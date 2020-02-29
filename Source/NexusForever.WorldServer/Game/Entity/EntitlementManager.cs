@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Database;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
-using AccountEntitlementModel = NexusForever.Shared.Database.Auth.Model.AccountEntitlement;
-using CharacterEntitlementModel = NexusForever.WorldServer.Database.Character.Model.CharacterEntitlement;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -80,10 +78,10 @@ namespace NexusForever.WorldServer.Game.Entity
             return characterEntitlements.TryGetValue(type, out CharacterEntitlement entitlement) ? entitlement : null;
         }
 
-        public void OnNewCharacter(Character model)
+        public void OnNewCharacter(CharacterModel model)
         {
             characterEntitlements.Clear();
-            foreach (CharacterEntitlementModel entitlementModel in model.CharacterEntitlement)
+            foreach (CharacterEntitlementModel entitlementModel in model.Entitlement)
             {
                 EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry(entitlementModel.EntitlementId);
                 if (entry == null)

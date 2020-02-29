@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -93,7 +93,7 @@ namespace NexusForever.WorldServer.Game.Quest
         /// <summary>
         /// Create a new <see cref="Quest"/> from an existing database model.
         /// </summary>
-        public Quest(Player owner, QuestInfo info, CharacterQuest model)
+        public Quest(Player owner, QuestInfo info, CharacterQuestModel model)
         {
             player = owner;
             Info   = info;
@@ -105,7 +105,7 @@ namespace NexusForever.WorldServer.Game.Quest
             if (timer != null)
                 questTimer = new UpdateTimer(timer.Value);
 
-            foreach (CharacterQuestObjective objectiveModel in model.CharacterQuestObjective)
+            foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(info, info.Objectives[objectiveModel.Index], objectiveModel));
         }
 
@@ -141,7 +141,7 @@ namespace NexusForever.WorldServer.Game.Quest
             {
                 if ((saveMask & QuestSaveMask.Create) != 0)
                 {
-                    context.Add(new CharacterQuest
+                    context.Add(new CharacterQuestModel
                     {
                         Id      = player.CharacterId,
                         QuestId = Id,
@@ -153,7 +153,7 @@ namespace NexusForever.WorldServer.Game.Quest
                 }
                 else if ((saveMask & QuestSaveMask.Delete) != 0)
                 {
-                    var model = new CharacterQuest
+                    var model = new CharacterQuestModel
                     {
                         Id      = player.CharacterId,
                         QuestId = Id
@@ -163,13 +163,13 @@ namespace NexusForever.WorldServer.Game.Quest
                 }
                 else
                 {
-                    var model = new CharacterQuest
+                    var model = new CharacterQuestModel
                     {
                         Id      = player.CharacterId,
                         QuestId = Id
                     };
 
-                    EntityEntry<CharacterQuest> entity = context.Attach(model);
+                    EntityEntry<CharacterQuestModel> entity = context.Attach(model);
                     if ((saveMask & QuestSaveMask.State) != 0)
                     {
                         model.State = (byte)State;

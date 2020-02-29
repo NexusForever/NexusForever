@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Mail.Static;
-using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 
 namespace NexusForever.WorldServer.Game.Mail
 {
@@ -10,19 +10,19 @@ namespace NexusForever.WorldServer.Game.Mail
     {
         public ulong Id { get; }
         public uint Index { get; }
-        public ItemEntity Item { get; }
+        public Item Item { get; }
 
         private MailAttachmentSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="CharacterMailAttachment"/> model.
+        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="CharacterMailAttachmentModel"/> model.
         /// </summary>
         /// <param name="model"></param>
-        public MailAttachment(CharacterMailAttachment model)
+        public MailAttachment(CharacterMailAttachmentModel model)
         {
             Id       = model.Id;
             Index    = model.Index;
-            Item     = new ItemEntity(model.ItemGu);
+            Item     = new Item(model.Item);
 
             saveMask = MailAttachmentSaveMask.None;
         }
@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Game.Mail
         /// <summary>
         /// Create a new <see cref="MailAttachment"/>.
         /// </summary>
-        public MailAttachment(ulong mailId, uint index, ItemEntity item)
+        public MailAttachment(ulong mailId, uint index, Item item)
         {
             Id       = mailId;
             Index    = index;
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Game.Mail
             {
                 if ((saveMask & MailAttachmentSaveMask.Create) != 0)
                 {
-                    context.Add(new CharacterMailAttachment
+                    context.Add(new CharacterMailAttachmentModel
                     {
                         Id       = Id,
                         Index    = Index,
@@ -62,7 +62,7 @@ namespace NexusForever.WorldServer.Game.Mail
                 }
                 else if ((saveMask & MailAttachmentSaveMask.Delete) != 0)
                 {
-                    var model = new CharacterMailAttachment
+                    var model = new CharacterMailAttachmentModel
                     {
                         Id    = Id,
                         Index = Index

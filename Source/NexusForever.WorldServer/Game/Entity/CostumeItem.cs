@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -70,9 +70,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private CostumeItemSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="CostumeItem"/> from an existing <see cref="CharacterCostumeItem"/> database model.
+        /// Create a new <see cref="CostumeItem"/> from an existing <see cref="CharacterCostumeItemModel"/> database model.
         /// </summary>
-        public CostumeItem(Costume costume, CharacterCostumeItem model)
+        public CostumeItem(Costume costume, CharacterCostumeItemModel model)
         {
             this.costume = costume;
             Slot         = (CostumeItemSlot)model.Slot;
@@ -102,7 +102,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if ((saveMask & CostumeItemSaveMask.Create) != 0)
             {
                 // costume item doesn't exist in database, all infomation must be saved
-                context.Add(new CharacterCostumeItem
+                context.Add(new CharacterCostumeItemModel
                 {
                     Id      = costume.Owner,
                     Index   = costume.Index,
@@ -114,14 +114,14 @@ namespace NexusForever.WorldServer.Game.Entity
             else
             {
                 // costume item already exists in database, save only data that has been modified
-                var model = new CharacterCostumeItem
+                var model = new CharacterCostumeItemModel
                 {
                     Id    = costume.Owner,
                     Index = costume.Index,
                     Slot  = (byte)Slot
                 };
 
-                EntityEntry<CharacterCostumeItem> entity = context.Attach(model);
+                EntityEntry<CharacterCostumeItemModel> entity = context.Attach(model);
                 if ((saveMask & CostumeItemSaveMask.ItemId) != 0)
                 {
                     model.ItemId = itemId;

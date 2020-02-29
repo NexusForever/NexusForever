@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
@@ -154,7 +154,7 @@ namespace NexusForever.WorldServer.Game.Spell
         /// <summary>
         /// Add shortcut to <see cref="ActionSet"/> from an existing database model.
         /// </summary>
-        public void AddShortcut(CharacterActionSetShortcut model)
+        public void AddShortcut(CharacterActionSetShortcutModel model)
         {
             var shortcut = new ActionSetShortcut(this, model);
 
@@ -258,7 +258,7 @@ namespace NexusForever.WorldServer.Game.Spell
         /// <summary>
         /// Add AMP to <see cref="ActionSet"/> from an existing database model.
         /// </summary>
-        public void AddAmp(CharacterActionSetAmp model)
+        public void AddAmp(CharacterActionSetAmpModel model)
         {
             EldanAugmentationEntry entry = GameTableManager.Instance.EldanAugmentation.GetEntry(model.AmpId);
             if (entry == null)

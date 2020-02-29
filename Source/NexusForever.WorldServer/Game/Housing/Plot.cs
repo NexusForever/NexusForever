@@ -1,8 +1,7 @@
-﻿using System;
+﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Game.Housing
@@ -54,7 +53,7 @@ namespace NexusForever.WorldServer.Game.Housing
         /// <summary>
         /// Create a new <see cref="Plot"/> from an existing database model.
         /// </summary>
-        public Plot(ResidencePlot model)
+        public Plot(ResidencePlotModel model)
         {
             Id         = model.Id;
             Index      = model.Index;
@@ -91,7 +90,7 @@ namespace NexusForever.WorldServer.Game.Housing
             if ((saveMask & PlotSaveMask.Create) != 0)
             {
                 // plot doesn't exist in database, all infomation must be saved
-                context.Add(new ResidencePlot
+                context.Add(new ResidencePlotModel
                 {
                     Id         = Id,
                     Index      = Index,

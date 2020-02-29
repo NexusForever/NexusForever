@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth;
-using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.Shared.Network;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity.Network;
@@ -146,7 +144,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
 
-        public Player(WorldSession session, Character model)
+        public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
         {
             ActivationRange = BaseMap.DefaultVisionRange;
@@ -202,17 +200,17 @@ namespace NexusForever.WorldServer.Game.Entity
                 costume = CostumeManager.GetCostume((byte)CostumeIndex);
 
             SetAppearance(Inventory.GetItemVisuals(costume));
-            SetAppearance(model.CharacterAppearance
+            SetAppearance(model.Appearance
                 .Select(a => new ItemVisual
                 {
                     Slot      = (ItemSlot)a.Slot,
                     DisplayId = a.DisplayId
                 }));
 
-            foreach (CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
+            foreach (CharacterBoneModel bone in model.Bone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
 
-            foreach (CharacterStats statModel in model.CharacterStats)
+            foreach (CharacterStatModel statModel in model.Stat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
             SetStat(Stat.Sheathed, 1u);
@@ -256,14 +254,14 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Save <see cref="Account"/> and <see cref="Character"/> to the database.
+        /// Save <see cref="Account"/> and <see cref="ServerCharacterList.Character"/> to the database.
         /// </summary>
         public void Save(Action callback = null)
         {
-            Session.EnqueueEvent(new TaskEvent(AuthDatabase.Save(Save),
+            Session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.Save(Save),
             () =>
             {
-                Session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+                Session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.CharacterDatabase.Save(Save),
                 () =>
                 {
                     callback?.Invoke();
@@ -755,12 +753,12 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Save(CharacterContext context)
         {
-            var model = new Character
+            var model = new CharacterModel
             {
                 Id = CharacterId
             };
 
-            EntityEntry<Character> entity = context.Attach(model);
+            EntityEntry<CharacterModel> entity = context.Attach(model);
 
             if (saveMask != PlayerSaveMask.None)
             {

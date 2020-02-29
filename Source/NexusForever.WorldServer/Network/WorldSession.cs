@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using NexusForever.Database.Auth.Model;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.Shared.Network.Message.Model;
 using NexusForever.Shared.Network.Packet;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Account;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -16,8 +16,8 @@ namespace NexusForever.WorldServer.Network
 {
     public class WorldSession : GameSession
     {
-        public Account Account { get; private set; }
-        public List<Character> Characters { get; } = new List<Character>();
+        public AccountModel Account { get; private set; }
+        public List<CharacterModel> Characters { get; } = new List<CharacterModel>();
 
         public Player Player { get; set; }
 
@@ -54,9 +54,9 @@ namespace NexusForever.WorldServer.Network
         }
 
         /// <summary>
-        /// Initialise <see cref="WorldSession"/> from an existing <see cref="Account"/> database model.
+        /// Initialise <see cref="WorldSession"/> from an existing <see cref="AccountModel"/> database model.
         /// </summary>
-        public void Initialise(Account account)
+        public void Initialise(AccountModel account)
         {
             if (Account != null)
                 throw new InvalidOperationException();

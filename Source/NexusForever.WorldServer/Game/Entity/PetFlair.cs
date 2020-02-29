@@ -1,7 +1,7 @@
-﻿using NexusForever.Shared.GameTable;
+﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
+using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -13,9 +13,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private bool isDirty;
 
         /// <summary>
-        /// Create a new <see cref="PetFlair"/> from existing <see cref="CharacterPetFlair"/> database model.
+        /// Create a new <see cref="PetFlair"/> from existing <see cref="CharacterPetFlairModel"/> database model.
         /// </summary>
-        public PetFlair(CharacterPetFlair model)
+        public PetFlair(CharacterPetFlairModel model)
         {
             Owner = model.Id;
             Entry = GameTableManager.Instance.PetFlair.GetEntry(model.PetFlairId);
@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (!isDirty)
                 return;
 
-            var model = new CharacterPetFlair
+            var model = new CharacterPetFlairModel
             {
                 Id         = Owner,
                 PetFlairId = Entry.Id

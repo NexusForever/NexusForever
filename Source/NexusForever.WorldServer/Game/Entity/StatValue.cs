@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared.Network;
-using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -30,7 +31,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="StatValue"/> from an existing database model.
         /// </summary>
-        public StatValue(CharacterStats model)
+        public StatValue(CharacterStatModel model)
         {
             Stat  = (Stat)model.Stat;
             Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
@@ -40,7 +41,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="StatValue"/> from an existing database model.
         /// </summary>
-        public StatValue(EntityStats model)
+        public StatValue(EntityStatModel model)
         {
             Stat  = (Stat)model.Stat;
             Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
@@ -76,7 +77,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if ((saveMask & StatSaveMask.Create) != 0)
             {
-                context.Add(new CharacterStats
+                context.Add(new CharacterStatModel
                 {
                     Id    = characterId,
                     Stat  = (byte)Stat,
@@ -85,13 +86,13 @@ namespace NexusForever.WorldServer.Game.Entity
             }
             else
             {
-                var statModel = new CharacterStats
+                var statModel = new CharacterStatModel
                 {
                     Id   = characterId,
                     Stat = (byte)Stat
                 };
 
-                EntityEntry<CharacterStats> statEntity = context.Attach(statModel);
+                EntityEntry<CharacterStatModel> statEntity = context.Attach(statModel);
                 if ((saveMask & StatSaveMask.Value) != 0)
                 {
                     statModel.Value = Value;

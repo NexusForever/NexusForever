@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
@@ -47,13 +47,13 @@ namespace NexusForever.WorldServer.Game.Entity
         private SpellManagerSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="SpellManager"/> from existing <see cref="Character"/> database model.
+        /// Create a new <see cref="SpellManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public SpellManager(Player owner, Character model)
+        public SpellManager(Player owner, CharacterModel model)
         {
             player = owner;
 
-            foreach (CharacterSpell spellModel in model.CharacterSpell)
+            foreach (CharacterSpellModel spellModel in model.Spell)
             {
                 SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spellModel.Spell4BaseId);
                 Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
@@ -66,11 +66,11 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 actionSets[i] = new ActionSet(i, player);
 
-                foreach (CharacterActionSetShortcut shortcutModel in model.CharacterActionSetShortcut
+                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddShortcut(shortcutModel);
 
-                foreach (CharacterActionSetAmp ampModel in model.CharacterActionSetAmp
+                foreach (CharacterActionSetAmpModel ampModel in model.ActionSetAmp
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddAmp(ampModel);
             }
@@ -144,8 +144,8 @@ namespace NexusForever.WorldServer.Game.Entity
             if (saveMask != SpellManagerSaveMask.None)
             {
                 // character is attached in Player::Save, this will only be local lookup
-                Character character = context.Character.Find(player.CharacterId);
-                EntityEntry<Character> entity = context.Entry(character);
+                CharacterModel character = context.Character.Find(player.CharacterId);
+                EntityEntry<CharacterModel> entity = context.Entry(character);
 
                 if ((saveMask & SpellManagerSaveMask.ActiveActionSet) != 0)
                 {

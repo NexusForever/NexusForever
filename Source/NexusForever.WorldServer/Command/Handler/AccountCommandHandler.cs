@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
-using NexusForever.Shared.Database.Auth;
+using NexusForever.Shared.Cryptography;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.GameTable.Static;
@@ -26,7 +27,9 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            AuthDatabase.CreateAccount(parameters[0], parameters[1]);
+            (string salt, string verifier) = PasswordProvider.GenerateSaltAndVerifier(parameters[0], parameters[1]);
+            DatabaseManager.Instance.AuthDatabase.CreateAccount(parameters[0], salt, verifier);
+
             await context.SendMessageAsync($"Account {parameters[0]} created successfully")
                 .ConfigureAwait(false);
         }
@@ -40,7 +43,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            if (AuthDatabase.DeleteAccount(parameters[0]))
+            if (DatabaseManager.Instance.AuthDatabase.DeleteAccount(parameters[0]))
                 await context.SendMessageAsync($"Account {parameters[0]} successfully removed!")
                     .ConfigureAwait(false);
             else
@@ -88,7 +91,7 @@ namespace NexusForever.WorldServer.Command.Handler
         }
 
         [SubCommandHandler("currencylist", "List all account currencies")]
-        public Task handleAccountCurrencyList(CommandContext context, string command, string[] parameters)
+        public Task HandleAccountCurrencyList(CommandContext context, string command, string[] parameters)
         {
             var tt = GameTableManager.Instance.GetTextTable(Language.English);
             foreach (var entry in GameTableManager.Instance.AccountCurrencyType.Entries)
