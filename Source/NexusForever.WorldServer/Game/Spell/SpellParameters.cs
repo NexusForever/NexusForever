@@ -4,6 +4,7 @@ namespace NexusForever.WorldServer.Game.Spell
 {
     public class SpellParameters
     {
+        public CharacterSpell CharacterSpell { get; set; }
         public SpellInfo SpellInfo { get; set; }
         public SpellInfo ParentSpellInfo { get; set; }
         public SpellInfo RootSpellInfo { get; set; }

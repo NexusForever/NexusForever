@@ -10,7 +10,7 @@ namespace NexusForever.Shared.Network.Message
         ServerAuthEncrypted             = 0x0076,
         ServerLogoutUpdate              = 0x0092,
         ClientActivateUnitCast          = 0x0097, // not sure about the name - almost the same as 0x00B3, but also initiates 0x07FD
-        Client009A                      = 0x009A, // client spell cast request, very similiar to 0x04DB, but for non-abilities -> mount, teleport, etc.
+        ClientCastSpell                 = 0x009A,
         ServerChangeWorld               = 0x00AD,
         ServerAchievementInit           = 0x00AE,
         ServerAchievementUpdate         = 0x00AF,
@@ -131,7 +131,7 @@ namespace NexusForever.Shared.Network.Message
         ClientQuestShareResult          = 0x045E,
         ClientQuestShare                = 0x045F,
         Server0497                      = 0x0497, // guild info
-        ClientCastSpell                 = 0x04DB,
+        ClientCastSpellContinuous       = 0x04DB,
         ServerHousingResidenceDecor     = 0x04DE,
         ServerHousingProperties         = 0x04DF,
         ServerHousingPlots              = 0x04E1,
@@ -252,6 +252,7 @@ namespace NexusForever.Shared.Network.Message
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
         ClientCostumeItemUnlock         = 0x090F,
+        ServerSpellAbilityCharges       = 0x0914,
         ServerEntitlement               = 0x0918,
         ServerCombatReward              = 0x0919,
         ServerCooldownList              = 0x091B,

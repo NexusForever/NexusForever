@@ -10,14 +10,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientSummonVanityPet)]
         public static void HandleClientSummonVanityPet(WorldSession session, ClientSummonVanityPet summonVanityPet)
         {
-            UnlockedSpell spell = session.Player.SpellManager.GetSpell(summonVanityPet.Spell4BaseId);
+            CharacterSpell spell = session.Player.SpellManager.GetSpell(summonVanityPet.Spell4BaseId);
             if (spell == null)
                 throw new InvalidPacketValueException();
 
-            byte tier = session.Player.SpellManager.GetSpellTier(spell.Info.Entry.Id);
+            byte tier = session.Player.SpellManager.GetSpellTier(spell.BaseInfo.Entry.Id);
             session.Player.CastSpell(new SpellParameters
             {
-                SpellInfo = spell.Info.GetSpellInfo(tier)
+                SpellInfo = spell.BaseInfo.GetSpellInfo(tier)
             });
         }
 
