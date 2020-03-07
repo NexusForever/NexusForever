@@ -24,11 +24,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            UnlockedSpell unlockedSpell = session.Player.SpellManager.GetSpell(item.Id);
-            if (unlockedSpell == null)
+            CharacterSpell characterSpell = session.Player.SpellManager.GetSpell(item.Id);
+            if (characterSpell == null)
                 throw new InvalidPacketValueException();
 
-            unlockedSpell.Cast(castSpell.ButtonPressed);
+            characterSpell.Cast(castSpell.ButtonPressed);
         }
 
         [MessageHandler(GameMessageOpcode.ClientSpellStopCast)]
@@ -48,11 +48,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            UnlockedSpell unlockedSpell = session.Player.SpellManager.GetSpell(item.Id);
-            if (unlockedSpell == null)
+            CharacterSpell characterSpell = session.Player.SpellManager.GetSpell(item.Id);
+            if (characterSpell == null)
                 throw new InvalidPacketValueException();
 
-            unlockedSpell.Cast();
+            characterSpell.Cast();
         }
 
         [MessageHandler(GameMessageOpcode.ClientCancelEffect)]

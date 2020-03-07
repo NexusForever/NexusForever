@@ -11,57 +11,72 @@ using ItemEntity = NexusForever.WorldServer.Game.Entity.Item;
 
 namespace NexusForever.WorldServer.Game.Spell
 {
-    public class UnlockedSpell : ISaveCharacter, IUpdate
+    public class CharacterSpell : ISaveCharacter, IUpdate
     {
         public Player Owner { get; }
-        public SpellBaseInfo Info { get; }
+        public SpellBaseInfo BaseInfo { get; }
+        public SpellInfo SpellInfo { get; private set; }
         public ItemEntity Item { get; }
-        public uint MaxAbilityCharges => Info.GetSpellInfo(Tier).Entry.AbilityChargeCount;
-        public uint AbilityRechargeTime => Info.GetSpellInfo(Tier).Entry.AbilityRechargeTime;
-        public uint AbilityRechargeCount => Info.GetSpellInfo(Tier).Entry.AbilityRechargeCount;
-        public uint AbilityCharges { get; private set; }
 
         public byte Tier
         {
             get => tier;
             set
             {
+                if (tier != value)
+                    SpellInfo = BaseInfo.GetSpellInfo(tier);
+
                 tier = value;
                 saveMask |= UnlockedSpellSaveMask.Tier;
             }
         }
         private byte tier;
 
+        public uint AbilityCharges { get; private set; }
+        public uint MaxAbilityCharges => SpellInfo.Entry.AbilityChargeCount;
+
         private UnlockedSpellSaveMask saveMask;
 
         private UpdateTimer rechargeTimer;
 
         /// <summary>
-        /// Create a new <see cref="UnlockedSpell"/> from an existing database model.
+        /// Create a new <see cref="CharacterSpell"/> from an existing database model.
         /// </summary>
-        public UnlockedSpell(Player player, SpellBaseInfo info, CharacterSpellModel model, ItemEntity item)
+        public CharacterSpell(Player player, CharacterSpellModel model, SpellBaseInfo baseInfo, ItemEntity item)
         {
-            Owner = player;
-            Info  = info;
-            tier  = model.Tier;
-            Item  = item;
+            Owner     = player;
+            BaseInfo  = baseInfo;
+            SpellInfo = baseInfo.GetSpellInfo(tier);
+            Item      = item;
+            tier      = model.Tier;
 
             InitialiseAbilityCharges();
         }
 
         /// <summary>
-        /// Create a new <see cref="UnlockedSpell"/> from a <see cref="SpellBaseInfo"/>.
+        /// Create a new <see cref="CharacterSpell"/> from a <see cref="SpellBaseInfo"/>.
         /// </summary>
-        public UnlockedSpell(Player player, SpellBaseInfo info, byte tier, ItemEntity item)
+        public CharacterSpell(Player player, SpellBaseInfo baseInfo, byte tier, ItemEntity item)
         {
-            Owner = player;
-            Info  = info ?? throw new ArgumentNullException();
-            Tier  = tier;
-            Item  = item;
+            Owner     = player;
+            BaseInfo  = baseInfo ?? throw new ArgumentNullException();
+            SpellInfo = baseInfo.GetSpellInfo(tier);
+            Item      = item;
+            this.tier = tier;
 
             InitialiseAbilityCharges();
 
             saveMask = UnlockedSpellSaveMask.Create;
+        }
+
+        private void InitialiseAbilityCharges()
+        {
+            if (MaxAbilityCharges == 0u)
+                return;
+
+            rechargeTimer  = new UpdateTimer(SpellInfo.Entry.AbilityRechargeTime / 1000d);
+            AbilityCharges = MaxAbilityCharges;
+            SendChargeUpdate();
         }
 
         public void Update(double lastTick)
@@ -71,7 +86,7 @@ namespace NexusForever.WorldServer.Game.Spell
                 rechargeTimer.Update(lastTick);
                 if (rechargeTimer.HasElapsed)
                 {
-                    AbilityCharges = Math.Clamp(AbilityCharges + AbilityRechargeCount, 0u, MaxAbilityCharges);
+                    AbilityCharges = Math.Clamp(AbilityCharges + SpellInfo.Entry.AbilityRechargeCount, 0u, MaxAbilityCharges);
                     SendChargeUpdate();
                     rechargeTimer.Reset();
                 }
@@ -88,7 +103,7 @@ namespace NexusForever.WorldServer.Game.Spell
                 var model = new CharacterSpellModel
                 {
                     Id           = Owner.CharacterId,
-                    Spell4BaseId = Info.Entry.Id,
+                    Spell4BaseId = BaseInfo.Entry.Id,
                     Tier         = tier
                 };
 
@@ -99,7 +114,7 @@ namespace NexusForever.WorldServer.Game.Spell
                 var model = new CharacterSpellModel
                 {
                     Id           = Owner.CharacterId,
-                    Spell4BaseId = Info.Entry.Id,
+                    Spell4BaseId = BaseInfo.Entry.Id,
                 };
 
                 EntityEntry<CharacterSpellModel> entity = context.Attach(model);
@@ -113,17 +128,7 @@ namespace NexusForever.WorldServer.Game.Spell
             saveMask = UnlockedSpellSaveMask.None;
         }
 
-        private void InitialiseAbilityCharges()
-        {
-            if (MaxAbilityCharges > 0)
-            {
-                rechargeTimer = new UpdateTimer(AbilityRechargeTime / 1000d);
-                AbilityCharges = MaxAbilityCharges;
-                SendChargeUpdate();
-            }
-        }
-
-        // <summary>
+        /// <summary>
         /// Used for when the client does not have continuous casting enabled
         /// </summary>
         public void Cast()
@@ -149,28 +154,26 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             Owner.CastSpell(new SpellParameters
             {
-                UnlockedSpell = this,
-                SpellInfo = Info.GetSpellInfo(Tier),
+                CharacterSpell         = this,
+                SpellInfo              = SpellInfo,
                 UserInitiatedSpellCast = true
             });
         }
 
         public void UseCharge()
         {
-            if (AbilityCharges > 0)
-            {
-                AbilityCharges -= 1;
-                SendChargeUpdate();
-            }
-            else
+            if (AbilityCharges == 0)
                 throw new SpellException("No charges available.");
+
+            AbilityCharges -= 1;
+            SendChargeUpdate();
         }
 
         private void SendChargeUpdate()
         {
             Owner.Session.EnqueueMessageEncrypted(new ServerSpellAbilityCharges
             {
-                SpellId = Item.Id,
+                SpellId            = Item.Id,
                 AbilityChargeCount = AbilityCharges
             });
         }
