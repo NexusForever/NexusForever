@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Database.World
                     .Include(e => e.EntityVendor)
                     .Include(e => e.EntityVendorCategory)
                     .Include(e => e.EntityVendorItem)
-                    .Include(e => e.EntityStat)
+                    .Include(e => e.EntityStats)
                     .AsNoTracking()
                     .ToImmutableList();
         }
@@ -41,6 +41,39 @@ namespace NexusForever.WorldServer.Database.World
                
                 context.SaveChanges();
             }
+        }
+
+        public static ImmutableList<Tutorial> GetTutorialTriggers()
+        {
+            using (var context = new WorldContext())
+                return context.Tutorial.ToImmutableList();
+        }
+
+        public static ImmutableList<Model.Disable> GetDisables()
+        {
+            using (var context = new WorldContext())
+                return context.Disable.ToImmutableList();
+        }
+
+        public static ImmutableList<StoreCategory> GetStoreCategories()
+        {
+            using (var context = new WorldContext())
+                return context.StoreCategory
+                    .AsNoTracking()
+                    .ToImmutableList();
+        }
+
+        public static ImmutableList<StoreOfferGroup> GetStoreOfferGroups()
+        {
+            using (var context = new WorldContext())
+                return context.StoreOfferGroup
+                    .Include(e => e.StoreOfferGroupCategory)
+                    .Include(e => e.StoreOfferItem)
+                        .ThenInclude(e => e.StoreOfferItemData)
+                    .Include(e => e.StoreOfferItem)
+                        .ThenInclude(e => e.StoreOfferItemPrice)
+                    .AsNoTracking()
+                    .ToImmutableList();
         }
     }
 }

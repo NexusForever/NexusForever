@@ -7,6 +7,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
+using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -39,7 +40,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            ItemSpecialEntry itemSpecial = GameTableManager.ItemSpecial.GetEntry(item.Entry.ItemSpecialId00);
+            ItemSpecialEntry itemSpecial = GameTableManager.Instance.ItemSpecial.GetEntry(item.Entry.ItemSpecialId00);
             if (itemSpecial == null)
                 throw new InvalidPacketValueException();
 
@@ -63,7 +64,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            GenericUnlockEntryEntry entry = GameTableManager.GenericUnlockEntry.GetEntry(item.Entry.GenericUnlockSetId);
+            GenericUnlockEntryEntry entry = GameTableManager.Instance.GenericUnlockEntry.GetEntry(item.Entry.GenericUnlockSetId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
@@ -82,19 +83,24 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            HousingDecorInfoEntry entry = GameTableManager.HousingDecorInfo.GetEntry(item.Entry.HousingDecorInfoId);
+            HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(item.Entry.HousingDecorInfoId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
-            Task<Residence> task = ResidenceManager.GetResidence(session.Player.Name);
+            Task<Residence> task = ResidenceManager.Instance.GetResidence(session.Player.Name);
             session.EnqueueEvent(new TaskGenericEvent<Residence>(task,
                 residence =>
             {
                 if (residence == null)
-                    residence = ResidenceManager.CreateResidence(session.Player);
+                    residence = ResidenceManager.Instance.CreateResidence(session.Player);
 
                 if (session.Player.Inventory.ItemUse(item))
-                    residence.DecorCreate(entry);
+                {
+                    if (session.Player.Map is ResidenceMap residenceMap)
+                        residenceMap.DecorCreate(entry, 1);
+                    else
+                        residence.DecorCreate(entry);
+                }
             }));
         }
     }

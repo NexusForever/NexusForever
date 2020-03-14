@@ -1,11 +1,12 @@
 ﻿using System.IO;
 using System.Linq;
 using Nexus.Archive;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.MapGenerator
 {
-    public static class ExtractionManager
+    public sealed class ExtractionManager : Singleton<ExtractionManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -17,7 +18,11 @@ namespace NexusForever.MapGenerator
             "en-GB.bin"
         };
 
-        public static void Initialise()
+        private ExtractionManager()
+        {
+        }
+
+        public void Initialise()
         {
             log.Info("Extracting GameTables...");
 
@@ -30,19 +35,19 @@ namespace NexusForever.MapGenerator
         /// <summary>
         /// Extract all GameTables (*.tbl) from main client archive.
         /// </summary>
-        private static void ExtractGameTables()
+        private void ExtractGameTables()
         {
             string searchPattern = Path.Combine("DB", "*.tbl");
-            foreach (IArchiveFileEntry fileEntry in ArchiveManager.MainArchive.IndexFile.GetFiles(searchPattern))
-                ExtractFile(ArchiveManager.MainArchive, fileEntry);
+            foreach (IArchiveFileEntry fileEntry in ArchiveManager.Instance.MainArchive.IndexFile.GetFiles(searchPattern))
+                ExtractFile(ArchiveManager.Instance.MainArchive, fileEntry);
         }
 
         /// <summary>
         /// Extract all language files (*.bin) from all present localisation client archives.
         /// </summary>
-        private static void ExtractLanguageFiles()
+        private void ExtractLanguageFiles()
         {
-            foreach (Archive archive in ArchiveManager.LocalisationArchives)
+            foreach (Archive archive in ArchiveManager.Instance.LocalisationArchives)
             {
                 foreach (IArchiveFileEntry fileEntry in languageFiles
                     .Select(archive.IndexFile.FindEntry)
@@ -56,7 +61,7 @@ namespace NexusForever.MapGenerator
         /// <summary>
         /// Extract supplied <see cref="IArchiveFileEntry"/> from <see cref="Archive"/>.
         /// </summary>
-        private static void ExtractFile(Archive archive, IArchiveFileEntry fileEntry)
+        private void ExtractFile(Archive archive, IArchiveFileEntry fileEntry)
         {
             string filePath = Path.Combine("tbl", fileEntry.FileName);
 

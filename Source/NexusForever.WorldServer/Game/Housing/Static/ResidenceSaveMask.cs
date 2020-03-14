@@ -22,6 +22,7 @@ namespace NexusForever.WorldServer.Game.Housing.Static
         GardenSharing   = 0x0400,
         Decor           = 0x0800,
         Plot            = 0x1000,
-        PrivacyLevel    = 0x2000
+        PrivacyLevel    = 0x2000,
+        Music           = 0x4000
     }
 }

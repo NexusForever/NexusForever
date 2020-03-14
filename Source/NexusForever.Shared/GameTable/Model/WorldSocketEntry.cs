@@ -4,10 +4,8 @@ namespace NexusForever.Shared.GameTable.Model
     {
         public uint Id;
         public uint WorldId;
-        public uint Bounds0;
-        public uint Bounds1;
-        public uint Bounds2;
-        public uint Bounds3;
+        [GameTableFieldArray(4u)]
+        public uint[] BoundIds;
         public uint AverageHeight;
     }
 }

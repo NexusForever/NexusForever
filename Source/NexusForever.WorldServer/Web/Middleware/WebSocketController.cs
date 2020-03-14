@@ -39,7 +39,7 @@ namespace NexusForever.WorldServer.Web.Middleware
                         (WebSocketReceiveResult result, ClientMessage clientMessage) = await ReceiveObjectAsync<ClientMessage>(webSocket, context.RequestAborted);
                         if (result.CloseStatus != null)
                             continue;
-                        await CommandManager.HandleCommandAsync(new WebSocketCommandContext(webSocket), clientMessage.Message, false).ConfigureAwait(false);
+                        await CommandManager.Instance.HandleCommandAsync(new WebSocketCommandContext(webSocket), clientMessage.Message, false).ConfigureAwait(false);
                     }
                 }
                 else

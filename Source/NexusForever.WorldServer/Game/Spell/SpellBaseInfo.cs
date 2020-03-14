@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Spell.Static;
 
 namespace NexusForever.WorldServer.Game.Spell
 {
@@ -17,31 +20,44 @@ namespace NexusForever.WorldServer.Game.Spell
         public TargetGroupEntry AoeGroup { get; }
         public Spell4BaseEntry PrerequisiteSpell { get; }
         public Spell4SpellTypesEntry SpellType { get; }
+        public SpellClass SpellClass { get; }
+        public bool HasIcon { get; }
+        public bool IsDebuff { get; }
+        public bool IsBuff { get; }
+        public bool IsDispellable { get; }
 
         private readonly SpellInfo[] spellInfoStore;
 
         public SpellBaseInfo(Spell4BaseEntry spell4BaseEntry)
         {
             Entry             = spell4BaseEntry;
-            HitResult         = GameTableManager.Spell4HitResults.GetEntry(Entry.Spell4HitResultId);
-            TargetMechanics   = GameTableManager.Spell4TargetMechanics.GetEntry(Entry.Spell4TargetMechanicId);
-            TargetAngle       = GameTableManager.Spell4TargetAngle.GetEntry(Entry.Spell4TargetAngleId);
-            Prerequisites     = GameTableManager.Spell4Prerequisites.GetEntry(Entry.Spell4PrerequisiteId);
-            ValidTargets      = GameTableManager.Spell4ValidTargets.GetEntry(Entry.Spell4ValidTargetId);
-            CastGroup         = GameTableManager.TargetGroup.GetEntry(Entry.TargetGroupIdCastGroup);
-            PositionalAoe     = GameTableManager.Creature2.GetEntry(Entry.Creature2IdPositionalAoe);
-            AoeGroup          = GameTableManager.TargetGroup.GetEntry(Entry.TargetGroupIdAoeGroup);
-            PrerequisiteSpell = GameTableManager.Spell4Base.GetEntry(Entry.Spell4BaseIdPrerequisiteSpell);
-            SpellType         = GameTableManager.Spell4SpellTypes.GetEntry(Entry.Spell4SpellTypesIdSpellType);
+            HitResult         = GameTableManager.Instance.Spell4HitResults.GetEntry(Entry.Spell4HitResultId);
+            TargetMechanics   = GameTableManager.Instance.Spell4TargetMechanics.GetEntry(Entry.Spell4TargetMechanicId);
+            TargetAngle       = GameTableManager.Instance.Spell4TargetAngle.GetEntry(Entry.Spell4TargetAngleId);
+            Prerequisites     = GameTableManager.Instance.Spell4Prerequisites.GetEntry(Entry.Spell4PrerequisiteId);
+            ValidTargets      = GameTableManager.Instance.Spell4ValidTargets.GetEntry(Entry.Spell4ValidTargetId);
+            CastGroup         = GameTableManager.Instance.TargetGroup.GetEntry(Entry.TargetGroupIdCastGroup);
+            PositionalAoe     = GameTableManager.Instance.Creature2.GetEntry(Entry.Creature2IdPositionalAoe);
+            AoeGroup          = GameTableManager.Instance.TargetGroup.GetEntry(Entry.TargetGroupIdAoeGroup);
+            PrerequisiteSpell = GameTableManager.Instance.Spell4Base.GetEntry(Entry.Spell4BaseIdPrerequisiteSpell);
+            SpellType         = GameTableManager.Instance.Spell4SpellTypes.GetEntry(Entry.Spell4SpellTypesIdSpellType);
 
-            foreach (Spell4Entry spell4Entry in GameTableManager.Spell4.Entries
-                .Where(e => e.Spell4BaseIdBaseSpell == Entry.Id)
-                .OrderByDescending(e => e.TierIndex))
+            SpellClass        = (SpellClass)Entry.SpellClass;
+            HasIcon           = SpellClass == SpellClass.BuffNonDispelRightClickOk || (SpellClass >= SpellClass.BuffDispellable && SpellClass <= SpellClass.DebuffNonDispellable);
+            IsDebuff          = SpellClass == SpellClass.DebuffDispellable || SpellClass == SpellClass.DebuffNonDispellable;
+            IsBuff            = SpellClass == SpellClass.BuffDispellable || SpellClass == SpellClass.BuffNonDispellable || SpellClass == SpellClass.BuffNonDispelRightClickOk;
+            IsDispellable     = SpellClass == SpellClass.BuffDispellable || SpellClass == SpellClass.DebuffDispellable;
+
+            List<Spell4Entry> spellEntries = GlobalSpellManager.Instance.GetSpell4Entries(spell4BaseEntry.Id).ToList();
+            if (spellEntries.Count < 1)
+                return;
+
+            // spell don't always have sequential tiers, create from highest tier not total
+            if (spellInfoStore == null)
+                spellInfoStore = new SpellInfo[spellEntries[0].TierIndex];
+
+            foreach (Spell4Entry spell4Entry in spellEntries)
             {
-                // spell don't always have sequential tiers, create from highest tier not total
-                if (spellInfoStore == null)
-                    spellInfoStore = new SpellInfo[spell4Entry.TierIndex];
-
                 var spellInfo = new SpellInfo(this, spell4Entry);
                 spellInfoStore[spell4Entry.TierIndex - 1] = spellInfo;
             }

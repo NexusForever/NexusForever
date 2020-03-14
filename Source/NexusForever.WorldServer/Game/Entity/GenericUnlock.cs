@@ -3,6 +3,7 @@ using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -19,14 +20,14 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public GenericUnlock(AccountGenericUnlock model)
         {
-            Entry     = GameTableManager.GenericUnlockEntry.GetEntry(model.Entry);
+            Entry     = GameTableManager.Instance.GenericUnlockEntry.GetEntry(model.Entry);
             accountId = model.Id;
         }
 
         /// <summary>
         /// Create a new <see cref="CostumeUnlock"/> from supplied <see cref="GenericUnlockEntryEntry"/>.
         /// </summary>
-        public GenericUnlock(Account account, GenericUnlockEntryEntry entry)
+        public GenericUnlock(AccountModel account, GenericUnlockEntryEntry entry)
         {
             Entry     = entry;
             accountId = account.Id;

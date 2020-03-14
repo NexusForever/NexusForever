@@ -28,27 +28,20 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             Entry                          = spell4Entry;
             BaseInfo                       = spellBaseBaseInfo;
-            AoeTargetConstraints           = GameTableManager.Spell4AoeTargetConstraints.GetEntry(spell4Entry.Spell4AoeTargetConstraintsId);
-            CasterConditions               = GameTableManager.Spell4Conditions.GetEntry(spell4Entry.Spell4ConditionsIdCaster);
-            TargetConditions               = GameTableManager.Spell4Conditions.GetEntry(spell4Entry.Spell4ConditionsIdTarget);
-            CasterCCConditions             = GameTableManager.Spell4CCConditions.GetEntry(spell4Entry.Spell4CCConditionsIdCaster);
-            TargetCCConditions             = GameTableManager.Spell4CCConditions.GetEntry(spell4Entry.Spell4CCConditionsIdTarget);
-            GlobalCooldown                 = GameTableManager.SpellCoolDown.GetEntry(spell4Entry.SpellCoolDownIdGlobal);
-            StackGroup                     = GameTableManager.Spell4StackGroup.GetEntry(spell4Entry.Spell4StackGroupId);
-            CasterCastPrerequisites        = GameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterCast);
-            TargetCastPrerequisites        = GameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetCast);
-            CasterPersistencePrerequisites = GameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterPersistence);
-            TargetPersistencePrerequisites = GameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetPersistence);
+            AoeTargetConstraints           = GameTableManager.Instance.Spell4AoeTargetConstraints.GetEntry(spell4Entry.Spell4AoeTargetConstraintsId);
+            CasterConditions               = GameTableManager.Instance.Spell4Conditions.GetEntry(spell4Entry.Spell4ConditionsIdCaster);
+            TargetConditions               = GameTableManager.Instance.Spell4Conditions.GetEntry(spell4Entry.Spell4ConditionsIdTarget);
+            CasterCCConditions             = GameTableManager.Instance.Spell4CCConditions.GetEntry(spell4Entry.Spell4CCConditionsIdCaster);
+            TargetCCConditions             = GameTableManager.Instance.Spell4CCConditions.GetEntry(spell4Entry.Spell4CCConditionsIdTarget);
+            GlobalCooldown                 = GameTableManager.Instance.SpellCoolDown.GetEntry(spell4Entry.SpellCoolDownIdGlobal);
+            StackGroup                     = GameTableManager.Instance.Spell4StackGroup.GetEntry(spell4Entry.Spell4StackGroupId);
+            CasterCastPrerequisites        = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterCast);
+            TargetCastPrerequisites        = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetCast);
+            CasterPersistencePrerequisites = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterPersistence);
+            TargetPersistencePrerequisites = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetPersistence);
 
-            Telegraphs = GameTableManager.Spell4Telegraph.Entries
-                .Where(e => e.Spell4Id == Entry.Id)
-                .Select(e => GameTableManager.TelegraphDamage.GetEntry(e.TelegraphDamageId))
-                .ToList();
-
-            Effects = GameTableManager.Spell4Effects.Entries
-                .Where(e => e.SpellId == spell4Entry.Id)
-                .OrderBy(e => e.OrderIndex)
-                .ToList();
+            Telegraphs = GlobalSpellManager.Instance.GetTelegraphDamageEntries(spell4Entry.Id).ToList();
+            Effects = GlobalSpellManager.Instance.GetSpell4EffectEntries(spell4Entry.Id).ToList();
         }
     }
 }

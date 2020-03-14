@@ -58,7 +58,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void UnlockFlair(ushort id)
         {
-            PetFlairEntry entry = GameTableManager.PetFlair.GetEntry(id);
+            PetFlairEntry entry = GameTableManager.Instance.PetFlair.GetEntry(id);
             if (entry == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -91,7 +91,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (flairId != 0 && !petFlairs.ContainsKey(flairId))
                 throw new ArgumentException();
 
-            PetFlairEntry entry = GameTableManager.PetFlair.GetEntry(flairId);
+            PetFlairEntry entry = GameTableManager.Instance.PetFlair.GetEntry(flairId);
             if (flairId != 0 && entry == null)
                 throw new ArgumentException();
 

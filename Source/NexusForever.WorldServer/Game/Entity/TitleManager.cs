@@ -89,7 +89,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void AddTitle(ushort titleId, bool suppress = false)
         {
-            CharacterTitleEntry entry = GameTableManager.CharacterTitle.GetEntry(titleId);
+            CharacterTitleEntry entry = GameTableManager.Instance.CharacterTitle.GetEntry(titleId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
@@ -125,7 +125,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void RevokeTitle(ushort titleId, bool suppress = false)
         {
-            if (GameTableManager.CharacterTitle.GetEntry(titleId) == null)
+            if (GameTableManager.Instance.CharacterTitle.GetEntry(titleId) == null)
                 throw new InvalidPacketValueException();
 
             if (!titles.TryGetValue(titleId, out Title title))
@@ -166,7 +166,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void AddAllTitles()
         {
-            ushort[] titleIds = GameTableManager.CharacterTitle.Entries
+            ushort[] titleIds = GameTableManager.Instance.CharacterTitle.Entries
                 .Select(entry => (ushort)entry.Id)
                 .ToArray();
 

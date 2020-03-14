@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -51,7 +51,7 @@ namespace NexusForever.WorldServer.Game.Housing
             get => wallpaperId;
             set
             {
-                if (GameTableManager.HousingWallpaperInfo.GetEntry(value) == null)
+                if (GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 wallpaperId = value;
@@ -66,7 +66,7 @@ namespace NexusForever.WorldServer.Game.Housing
             get => roofDecorInfoId;
             set
             {
-                if (GameTableManager.HousingDecorInfo.GetEntry(value) == null)
+                if (GameTableManager.Instance.HousingDecorInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 roofDecorInfoId = value;
@@ -81,7 +81,7 @@ namespace NexusForever.WorldServer.Game.Housing
             get => entrywayDecorInfoId;
             set
             {
-                if (GameTableManager.HousingDecorInfo.GetEntry(value) == null)
+                if (GameTableManager.Instance.HousingDecorInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 entrywayDecorInfoId = value;
@@ -96,7 +96,7 @@ namespace NexusForever.WorldServer.Game.Housing
             get => doorDecorInfoId;
             set
             {
-                if (GameTableManager.HousingDecorInfo.GetEntry(value) == null)
+                if (GameTableManager.Instance.HousingDecorInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 doorDecorInfoId = value;
@@ -106,12 +106,31 @@ namespace NexusForever.WorldServer.Game.Housing
 
         private ushort doorDecorInfoId;
 
+        public ushort Music
+        {
+            get => musicId;
+            set
+            {
+                HousingWallpaperInfoEntry entry = GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value);
+                if (entry == null)
+                    throw new ArgumentOutOfRangeException();
+
+                if ((entry.Flags & 0x100) == 0)
+                    throw new ArgumentOutOfRangeException();
+
+                musicId = value;
+                saveMask |= ResidenceSaveMask.Music;
+            }
+        }
+
+        private ushort musicId;
+
         public ushort Ground
         {
             get => groundWallpaperId;
             set
             {
-                HousingWallpaperInfoEntry entry = GameTableManager.HousingWallpaperInfo.GetEntry(value);
+                HousingWallpaperInfoEntry entry = GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value);
                 if (entry == null)
                     throw new ArgumentOutOfRangeException();
 
@@ -130,7 +149,7 @@ namespace NexusForever.WorldServer.Game.Housing
             get => skyWallpaperId;
             set
             {
-                HousingWallpaperInfoEntry entry = GameTableManager.HousingWallpaperInfo.GetEntry(value);
+                HousingWallpaperInfoEntry entry = GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value);
                 if (entry == null)
                     throw new ArgumentOutOfRangeException();
 
@@ -138,7 +157,7 @@ namespace NexusForever.WorldServer.Game.Housing
                     throw new ArgumentOutOfRangeException();
 
                 skyWallpaperId = value;
-                saveMask |= ResidenceSaveMask.Ground;
+                saveMask |= ResidenceSaveMask.Sky;
             }
         }
 
@@ -202,6 +221,7 @@ namespace NexusForever.WorldServer.Game.Housing
             entrywayDecorInfoId = model.EntrywayDecorInfoId;
             doorDecorInfoId     = model.DoorDecorInfoId;
             groundWallpaperId   = model.GroundWallpaperId;
+            musicId             = model.MusicId;
             skyWallpaperId      = model.SkyWallpaperId;
             flags               = (ResidenceFlags)model.Flags;
             resourceSharing     = model.ResourceSharing;
@@ -227,14 +247,14 @@ namespace NexusForever.WorldServer.Game.Housing
         /// </summary>
         public Residence(Player player)
         {
-            Id             = ResidenceManager.NextResidenceId;
+            Id             = ResidenceManager.Instance.NextResidenceId;
             OwnerId        = player.CharacterId;
             OwnerName      = player.Name;
             PropertyInfoId = 35; // TODO: 35 is default for single residence, this will need to change for communities
             name           = $"{player.Name}'s House";
             privacyLevel   = ResidencePrivacyLevel.Public;
 
-            IEnumerable<HousingPlotInfoEntry> plotEntries = GameTableManager.HousingPlotInfo.Entries.Where(e => e.HousingPropertyInfoId == PropertyInfoId);
+            IEnumerable<HousingPlotInfoEntry> plotEntries = GameTableManager.Instance.HousingPlotInfo.Entries.Where(e => e.HousingPropertyInfoId == PropertyInfoId);
             foreach (HousingPlotInfoEntry entry in plotEntries)
             {
                 var plot = new Plot(Id, entry);
@@ -266,6 +286,7 @@ namespace NexusForever.WorldServer.Game.Housing
                         EntrywayDecorInfoId = entrywayDecorInfoId,
                         DoorDecorInfoId     = doorDecorInfoId,
                         GroundWallpaperId   = groundWallpaperId,
+                        MusicId             = musicId,
                         SkyWallpaperId      = skyWallpaperId,
                         Flags               = (ushort)flags,
                         ResourceSharing     = resourceSharing,
@@ -318,6 +339,11 @@ namespace NexusForever.WorldServer.Game.Housing
                     {
                         model.GroundWallpaperId = Ground;
                         entity.Property(p => p.GroundWallpaperId).IsModified = true;
+                    }
+                    if ((saveMask & ResidenceSaveMask.Music) != 0)
+                    {
+                        model.MusicId = Music;
+                        entity.Property(p => p.MusicId).IsModified = true;
                     }
                     if ((saveMask & ResidenceSaveMask.Sky) != 0)
                     {
@@ -387,7 +413,7 @@ namespace NexusForever.WorldServer.Game.Housing
 
         public Decor DecorCreate(HousingDecorInfoEntry entry)
         {
-            var decor = new Decor(Id, ResidenceManager.NextDecorId, entry);
+            var decor = new Decor(Id, ResidenceManager.Instance.NextDecorId, entry);
             decors.Add(decor.DecorId, decor);
             return decor;
         }
@@ -398,6 +424,22 @@ namespace NexusForever.WorldServer.Game.Housing
 
             decors.Remove(decor.DecorId);
             deletedDecors.Add(decor);
+        }
+
+        /// <summary>
+        /// Return <see cref="Plot"/> at the supplied index.
+        /// </summary>
+        public Plot GetPlot(byte plotIndex)
+        {
+            return plots.FirstOrDefault(i => i.Index == plotIndex);
+        }
+
+        /// <summary>
+        /// Return <see cref="Plot"/> that matches the supploed Plot Info ID.
+        /// /// </summary>
+        public Plot GetPlot(uint plotInfoId)
+        {
+            return plots.FirstOrDefault(i => i.PlotEntry.Id == plotInfoId);
         }
     }
 }

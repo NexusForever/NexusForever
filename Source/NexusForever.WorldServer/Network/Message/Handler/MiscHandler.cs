@@ -1,9 +1,7 @@
-using NexusForever.Shared.Game.Events;
+using System;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
@@ -26,33 +24,30 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientPlayerInfoRequest)]
         public static void HandlePlayerInfoRequest(WorldSession session, ClientPlayerInfoRequest request)
         {
-            session.EnqueueEvent(new TaskGenericEvent<Character>(CharacterDatabase.GetCharacterById(request.Identity.CharacterId),
-                character =>
-            {
-                if (character == null)
-                    throw new InvalidPacketValueException();
+            ICharacter character = CharacterManager.Instance.GetCharacterInfo(request.Identity.CharacterId);
+            if (character == null)
+                throw new InvalidPacketValueException();
 
-                session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
+            session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
+            {
+                BaseData = new ServerPlayerInfoFullResponse.Base
                 {
-                    BaseData = new ServerPlayerInfoFullResponse.Base
+                    ResultCode = 0,
+                    Identity = new TargetPlayerIdentity
                     {
-                        ResultCode = 0,
-                        Identity = new TargetPlayerIdentity
-                        {
-                            RealmId = WorldServer.RealmId,
-                            CharacterId = character.Id
-                        },
-                        Name = character.Name,
-                        Faction = (Faction)character.FactionId
+                        RealmId = WorldServer.RealmId,
+                        CharacterId = character.CharacterId
                     },
-                    IsClassPathSet = true,
-                    Path = (Path)character.ActivePath,
-                    Class = (Class)character.Class,
-                    Level = character.Level,
-                    IsLastLoggedOnInDaysSet = false,
-                    LastLoggedInDays = -1f
-                });
-            }));
+                    Name = character.Name,
+                    Faction = character.Faction1
+                },
+                IsClassPathSet = true,
+                Path = character.Path,
+                Class = character.Class,
+                Level = character.Level,
+                IsLastLoggedOnInDaysSet = true,
+                LastLoggedInDays = character.GetOnlineStatus()
+            });
             
         }
 
@@ -60,6 +55,28 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleWeaponToggle(WorldSession session, ClientToggleWeapons toggleWeapons)
         {
             session.Player.Sheathed = toggleWeapons.ToggleState;
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientRandomRollRequest)]
+        public static void HandleRandomRoll(WorldSession session, ClientRandomRollRequest randomRoll)
+        {
+            if ( randomRoll.MinRandom > randomRoll.MaxRandom)
+                throw new InvalidPacketValueException();
+
+            if (randomRoll.MaxRandom > 1000000u)
+                throw new InvalidPacketValueException();
+
+            session.EnqueueMessageEncrypted(new ServerRandomRollResponse
+            {
+                TargetPlayerIdentity = new TargetPlayerIdentity
+                {
+                    RealmId = WorldServer.RealmId,
+                    CharacterId = session.Player.CharacterId
+                },
+                MinRandom = randomRoll.MinRandom,
+                MaxRandom = randomRoll.MaxRandom,
+                RandomRollResult = new Random().Next((int)randomRoll.MinRandom, (int)randomRoll.MaxRandom)
+            });
         }
     }
 }

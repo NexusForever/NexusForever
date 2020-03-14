@@ -9,6 +9,6 @@ namespace NexusForever.WorldServer.Database.World.Model
         public float BuyPriceMultiplier { get; set; }
         public float SellPriceMultiplier { get; set; }
 
-        public Entity IdNavigation { get; set; }
+        public virtual Entity IdNavigation { get; set; }
     }
 }

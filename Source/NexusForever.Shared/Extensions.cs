@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.Shared.Configuration;
@@ -31,6 +33,15 @@ namespace NexusForever.Shared
                     throw new NotSupportedException($"The requested database provider: {connectionString.Provider:G} is not supported.");
             }
             return optionsBuilder;
+        }
+
+        public static IEnumerable<T> Dequeue<T>(this ConcurrentQueue<T> queue, uint count)
+        {
+            for (uint i = 0u; i < count && queue.Count > 0; i++)
+            {
+                queue.TryDequeue(out T result);
+                yield return result;
+            }
         }
     }
 }

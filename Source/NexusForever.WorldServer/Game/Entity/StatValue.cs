@@ -33,17 +33,17 @@ namespace NexusForever.WorldServer.Game.Entity
         public StatValue(CharacterStats model)
         {
             Stat  = (Stat)model.Stat;
-            Type  = EntityManager.GetStatAttribute(Stat).Type;
+            Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
             Value = model.Value;
         }
 
         /// <summary>
         /// Create a new <see cref="StatValue"/> from an existing database model.
         /// </summary>
-        public StatValue(EntityStat model)
+        public StatValue(EntityStats model)
         {
             Stat  = (Stat)model.Stat;
-            Type  = EntityManager.GetStatAttribute(Stat).Type;
+            Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
             Value = model.Value;
         }
 

@@ -7,6 +7,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NetworkBinding = NexusForever.WorldServer.Network.Message.Model.Shared.Binding;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Setting
 {
@@ -16,7 +17,7 @@ namespace NexusForever.WorldServer.Game.Setting
         private readonly KeybindingSet accountKeybindings;
         private readonly KeybindingSet characterKeybindings;
 
-        public KeybindingManager(Player owner, Account accountModel, Character characterModel)
+        public KeybindingManager(Player owner, AccountModel accountModel, Character characterModel)
         {
             player               = owner;
             accountKeybindings   = new KeybindingSet(accountModel);

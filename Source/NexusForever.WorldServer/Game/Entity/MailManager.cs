@@ -83,7 +83,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 else
                 {
                     // ReSharper disable once AccessToModifiedClosure
-                    WorldSession session = NetworkManager<WorldSession>.GetSession(c => c.Player.CharacterId == mail.RecipientId);
+                    WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(c => c.Player.CharacterId == mail.RecipientId);
                     mailManager = session?.Player.MailManager;
                 }
 
@@ -136,7 +136,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Message              = mail.Message,
                 TextEntrySubject     = mail.TextEntrySubject,
                 TextEntryMessage     = mail.TextEntryMessage,
-                CreatureId           = !isPlayer ? (uint)mail.SenderId : 0,
+                CreatureId           = !isPlayer ? mail.CreatureId : 0,
                 CurrencyGiftType     = 0,
                 CurrencyGiftAmount   = !mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,
                 CostOnDeliveryAmount = mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,
@@ -222,10 +222,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     }
 
                     uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
-                    if (!player.CurrencyManager.CanAfford(1, cost))
+                    if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, cost))
                         return GenericError.MailInsufficientFunds;
 
-                    if (!player.CurrencyManager.CanAfford(1, mailSend.CreditsSent))
+                    if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, mailSend.CreditsSent))
                         return GenericError.MailInsufficientFunds;
 
                     return GenericError.Ok;
@@ -252,10 +252,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     SendMail(parameters, items);
 
                     uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
-                    player.CurrencyManager.CurrencySubtractAmount(1, cost);
+                    player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
 
                     if (mailSend.CreditsSent > 0ul)
-                        player.CurrencyManager.CurrencySubtractAmount(1, mailSend.CreditsSent);
+                        player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, mailSend.CreditsSent);
 
                 }
 
@@ -273,13 +273,13 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void SendMail(uint creatureId, DeliveryTime time, uint subject, uint body, IEnumerable<uint> itemIds)
         {
-            if (GameTableManager.Creature2.GetEntry(creatureId) == null)
+            if (GameTableManager.Instance.Creature2.GetEntry(creatureId) == null)
                 throw new ArgumentException($"Invalid creature {creatureId} for mail sender!");
 
-            if (GameTableManager.LocalizedText.GetEntry(subject) == null)
+            if (GameTableManager.Instance.LocalizedText.GetEntry(subject) == null)
                 throw new ArgumentException($"Invalid localised text {subject} for mail subject!");
 
-            if (GameTableManager.LocalizedText.GetEntry(body) == null)
+            if (GameTableManager.Instance.LocalizedText.GetEntry(body) == null)
                 throw new ArgumentException($"Invalid localised text {body} for mail body!");
 
             var parameters = new MailParameters
@@ -295,7 +295,7 @@ namespace NexusForever.WorldServer.Game.Entity
             var items = new List<Item>();
             foreach (uint itemId in itemIds)
             {
-                Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+                Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
                 if (itemEntry == null)
                     throw new ArgumentException($"Invalid item {itemId} for mail attachment!");
 
@@ -330,16 +330,16 @@ namespace NexusForever.WorldServer.Game.Entity
             GameFormulaEntry GetMailParameters()
             {
                 if (items.Count == 0)
-                    return GameTableManager.GameFormula.GetEntry(860);
+                    return GameTableManager.Instance.GameFormula.GetEntry(860);
 
                 switch (time)
                 {
                     case DeliveryTime.Instant:
-                        return GameTableManager.GameFormula.GetEntry(861);
+                        return GameTableManager.Instance.GameFormula.GetEntry(861);
                     case DeliveryTime.Hour:
-                        return GameTableManager.GameFormula.GetEntry(862);
+                        return GameTableManager.Instance.GameFormula.GetEntry(862);
                     case DeliveryTime.Day:
-                        return GameTableManager.GameFormula.GetEntry(863);
+                        return GameTableManager.Instance.GameFormula.GetEntry(863);
                 }
 
                 return null;
@@ -414,7 +414,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (!availableMail.TryGetValue(mailId, out mail))
                     return GenericError.MailDoesNotExist;
 
-                if (!player.CurrencyManager.CanAfford(1, mail.CurrencyAmount))
+                if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, mail.CurrencyAmount))
                     return GenericError.MailInsufficientFunds;
 
                 if (mail.HasPaidOrCollectedCurrency)
@@ -426,7 +426,7 @@ namespace NexusForever.WorldServer.Game.Entity
             GenericError result = GetResult();
             if (result == GenericError.Ok)
             {
-                player.CurrencyManager.CurrencySubtractAmount(1, mail.CurrencyAmount);
+                player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, mail.CurrencyAmount);
                 mail.PayOrTakeCash();
 
                 var parameters = new MailParameters
@@ -557,7 +557,7 @@ namespace NexusForever.WorldServer.Game.Entity
             GenericError result = GetResult();
             if (result == GenericError.Ok)
             {
-                player.CurrencyManager.CurrencyAddAmount((byte)mailItem.CurrencyType, mailItem.CurrencyAmount);
+                player.CurrencyManager.CurrencyAddAmount(mailItem.CurrencyType, mailItem.CurrencyAmount);
                 mailItem.PayOrTakeCash();
             }
 
@@ -575,7 +575,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private bool IsTargetMailBoxInRange(uint unitId)
         {
             // native client function MailSystemLib.AtMailbox also uses entry 237 for distance check
-            GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(237);
+            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(237);
             if (entry == null)
                 throw new InvalidOperationException();
 

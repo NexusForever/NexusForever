@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database.Auth;
 using NexusForever.Shared.Game;
@@ -14,12 +15,14 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game;
+using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
@@ -37,7 +40,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             var serverRealmList = new ServerRealmList
             {
-                Messages = ServerManager.ServerMessages
+                Messages = ServerManager.Instance.ServerMessages
                     .Select(m => new NetworkMessage
                     {
                         Index    = m.Index,
@@ -46,7 +49,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     .ToList()
             };
 
-            foreach (ServerInfo server in ServerManager.Servers)
+            foreach (ServerInfo server in ServerManager.Instance.Servers)
             {
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
                 {
@@ -69,7 +72,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientSelectRealm)]
         public static void HandleSelectRealm(WorldSession session, ClientSelectRealm selectRealm)
         {
-            ServerInfo server = ServerManager.Servers.SingleOrDefault(s => s.Model.Id == selectRealm.RealmId);
+            ServerInfo server = ServerManager.Instance.Servers.SingleOrDefault(s => s.Model.Id == selectRealm.RealmId);
             if (server == null)
                 throw new InvalidPacketValueException();
 
@@ -106,32 +109,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.Characters.Clear();
                 session.Characters.AddRange(characters);
 
+                session.AccountCurrencyManager.SendCharacterListPacket();
                 session.GenericUnlockManager.SendUnlockList();
+
                 session.EnqueueMessageEncrypted(new ServerAccountEntitlements
                 {
-                    Entitlements =
-                    {
-                        new ServerAccountEntitlements.AccountEntitlementInfo
+                    Entitlements = session.EntitlementManager.GetAccountEntitlements()
+                        .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
                         {
-                            Entitlement = Entitlement.BaseCharacterSlots,
-                            Count       = 12
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ExtraDecorSlots,
-                            Count       = 2000
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.ChuaWarriorUnlock,
-                            Count       = 1
-                        },
-                        new ServerAccountEntitlements.AccountEntitlementInfo
-                        {
-                            Entitlement = Entitlement.AurinEngineerUnlock,
-                            Count       = 1
-                        }
-                    }
+                            Entitlement = e.Type,
+                            Count       = e.Amount
+                        })
+                        .ToList()
                 });
 
                 var serverCharacterList = new ServerCharacterList
@@ -141,6 +130,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 foreach (Character character in characters)
                 {
+                    if (character.DeleteTime != null)
+                        continue;
+
                     var listCharacter = new ServerCharacterList.Character
                     {
                         Id          = character.Id,
@@ -218,8 +210,17 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             try
             {
                 // TODO: validate name and path
+                if (CharacterDatabase.CharacterNameExists(characterCreate.Name))
+                {
+                    session.EnqueueMessageEncrypted(new ServerCharacterCreate
+                    {
+                        Result = CharacterModifyResult.CreateFailed_UniqueName
+                    });
 
-                CharacterCreationEntry creationEntry = GameTableManager.CharacterCreation.GetEntry(characterCreate.CharacterCreationId);
+                    return;
+                }
+
+                CharacterCreationEntry creationEntry = GameTableManager.Instance.CharacterCreation.GetEntry(characterCreate.CharacterCreationId);
                 if (creationEntry == null)
                     throw new InvalidPacketValueException();
 
@@ -231,7 +232,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 var character = new Character
                 {
                     AccountId  = session.Account.Id,
-                    Id         = AssetManager.NextCharacterId,
+                    Id         = AssetManager.Instance.NextCharacterId,
                     Name       = characterCreate.Name,
                     Race       = (byte)creationEntry.RaceId,
                     Sex        = (byte)creationEntry.Sex,
@@ -292,10 +293,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 // create initial LAS abilities
                 UILocation location = 0;
-                foreach (SpellLevelEntry spellLevelEntry in GameTableManager.SpellLevel.Entries
+                foreach (SpellLevelEntry spellLevelEntry in GameTableManager.Instance.SpellLevel.Entries
                     .Where(s => s.ClassId == character.Class && s.CharacterLevel == 1))
                 {
-                    Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spellLevelEntry.Spell4Id);
+                    Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevelEntry.Spell4Id);
                     if (spell4Entry == null)
                         continue;
 
@@ -366,7 +367,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     {
                         CharacterId = character.Id,
                         WorldId     = character.WorldId,
-                        Result      = 3
+                        Result      = CharacterModifyResult.CreateOk
                     });
                 }));
             }
@@ -374,7 +375,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.EnqueueMessageEncrypted(new ServerCharacterCreate
                 {
-                    Result = 0
+                    Result = CharacterModifyResult.CreateFailed
                 });
 
                 throw;
@@ -382,7 +383,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             CharacterCustomizationEntry GetCharacterCustomisation(Dictionary<uint, uint> customisations, uint race, uint sex, uint primaryLabel, uint primaryValue)
             {
-                ImmutableList<CharacterCustomizationEntry> entries = AssetManager.GetPrimaryCharacterCustomisation(race, sex, primaryLabel, primaryValue);
+                ImmutableList<CharacterCustomizationEntry> entries = AssetManager.Instance.GetPrimaryCharacterCustomisation(race, sex, primaryLabel, primaryValue);
                 if (entries == null)
                     return null;
                 if (entries.Count == 1)
@@ -398,9 +399,73 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterDelete)]
-        public static void HandleCreateDelete(WorldSession session, ClientCharacterDelete characterDelete)
+        public static void HandleCharacterDelete(WorldSession session, ClientCharacterDelete characterDelete)
         {
+            Character characterToDelete = session.Characters.FirstOrDefault(c => c.Id == characterDelete.CharacterId);
 
+            CharacterModifyResult GetResult()
+            {
+                if (characterToDelete == null)
+                    return CharacterModifyResult.DeleteFailed;
+
+                // TODO: Not sure if this is definitely the case, but put it in for good measure
+                if (characterToDelete.CharacterMail.Count > 0)
+                {
+                    foreach (CharacterMail characterMail in characterToDelete.CharacterMail)
+                    {
+                        if (characterMail.CharacterMailAttachment.Count > 0)
+                            return CharacterModifyResult.DeleteFailed;
+                    }
+                }
+
+                // TODO: Ensure character is not a guild master
+
+                return CharacterModifyResult.DeleteOk;
+            }
+
+            CharacterModifyResult result = GetResult();
+            if (result != CharacterModifyResult.DeleteOk)
+            {
+                session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
+                {
+                    Result = result
+                });
+                return;
+            }
+
+            session.CanProcessPackets = false;
+
+            void Save(CharacterContextExtended context)
+            {
+                var model = new Character
+                {
+                    Id = characterToDelete.Id
+                };
+
+                EntityEntry<Character> entity = context.Attach(model);
+
+                model.DeleteTime = DateTime.UtcNow;
+                entity.Property(e => e.DeleteTime).IsModified = true;
+                
+                model.OriginalName = characterToDelete.Name;
+                entity.Property(e => e.OriginalName).IsModified = true;
+
+                model.Name = null;
+                entity.Property(e => e.Name).IsModified = true;
+            }
+
+            session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+                () =>
+            {
+                session.CanProcessPackets = true;
+
+                CharacterManager.Instance.DeleteCharacter(characterToDelete.Id);
+
+                session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
+                {
+                    Result = result
+                });
+            }));
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterSelect)]
@@ -427,7 +492,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             session.Player = new Player(session, character);
 
-            WorldEntry entry = GameTableManager.World.GetEntry(character.WorldId);
+            WorldEntry entry = GameTableManager.Instance.World.GetEntry(character.WorldId);
             if (entry == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -437,15 +502,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 case 5:
                 {
                     // characters logging in to a housing map are returned to their own residence
-                    session.EnqueueEvent(new TaskGenericEvent<Residence>(ResidenceManager.GetResidence(session.Player.Name),
+                    session.EnqueueEvent(new TaskGenericEvent<Residence>(ResidenceManager.Instance.GetResidence(session.Player.Name),
                         residence =>
                     {
                         if (residence == null)
-                            residence = ResidenceManager.CreateResidence(session.Player);
+                            residence = ResidenceManager.Instance.CreateResidence(session.Player);
 
-                        ResidenceEntrance entrance = ResidenceManager.GetResidenceEntrance(residence);
+                        ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(residence);
                         var mapInfo = new MapInfo(entrance.Entry, 0u, residence.Id);
-                        MapManager.AddToMap(session.Player, mapInfo, entrance.Position);
+                        MapManager.Instance.AddToMap(session.Player, mapInfo, entrance.Position);
                     }));
 
                     break;
@@ -454,7 +519,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     var mapInfo = new MapInfo(entry);
                     var vector3 = new Vector3(character.LocationX, character.LocationY, character.LocationZ);
-                    MapManager.AddToMap(session.Player, mapInfo, vector3);
+                    MapManager.Instance.AddToMap(session.Player, mapInfo, vector3);
                     break;
                 }
             }
@@ -506,21 +571,52 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             //TODO: check for cooldown
             //TODO: handle payment
 
-            TaxiNodeEntry taxiNode = GameTableManager.TaxiNode.GetEntry(rapidTransport.TaxiNode);
+            TaxiNodeEntry taxiNode = GameTableManager.Instance.TaxiNode.GetEntry(rapidTransport.TaxiNode);
             if (taxiNode == null)
                 throw new InvalidPacketValueException();
 
             if (session.Player.Level < taxiNode.AutoUnlockLevel)
                 throw new InvalidPacketValueException();
 
-            WorldLocation2Entry worldLocation = GameTableManager.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
+            WorldLocation2Entry worldLocation = GameTableManager.Instance.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
             if (worldLocation == null)
                 throw new InvalidPacketValueException();
 
-            GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(1307);
+            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(1307);
             session.Player.CastSpell(entry.Dataint0, new SpellParameters
             {
                 TaxiNode = rapidTransport.TaxiNode
+            });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientInnateChange)]
+        public static void HandleInnateChange(WorldSession session, ClientInnateChange innateChange)
+        {
+            // TODO: Validate that index exists and which ability it is
+
+            session.Player.InnateIndex = innateChange.InnateIndex;
+
+            session.EnqueueMessageEncrypted(new ServerPlayerInnate
+            {
+                InnateIndex = session.Player.InnateIndex
+            });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientInspectPlayerRequest)]
+        public static void HandleInspectPlayerRequest(WorldSession session, ClientInspectPlayerRequest inspectPlayer)
+        {
+            // TODO: Remove this since Raw- Lazy is rewriting something.
+            WorldSession inspectSession = NetworkManager<WorldSession>.Instance.GetSession(s => s.Player?.Guid == inspectPlayer.Guid);
+            if (inspectSession == null)
+                return;
+
+            session.EnqueueMessageEncrypted(new ServerInspectPlayerResponse
+            {
+                Guid  = inspectPlayer.Guid,
+                Items = inspectSession.Player.Inventory
+                    .Single(b => b.Location == InventoryLocation.Equipped)
+                    .Select(i => i.BuildNetworkItem())
+                    .ToList()
             });
         }
     }

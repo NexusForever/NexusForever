@@ -87,6 +87,9 @@ namespace NexusForever.WorldServer.Game.Mail
             SenderId                   = model.SenderId;
             Subject                    = model.Subject;
             Message                    = model.Message;
+            TextEntrySubject           = model.TextEntrySubject;
+            TextEntryMessage           = model.TextEntryMessage;
+            CreatureId                 = model.CreatureId;
             CurrencyType               = (CurrencyType)model.CurrencyType;
             CurrencyAmount             = model.CurrencyAmount;
             IsCashOnDelivery           = Convert.ToBoolean(model.IsCashOnDelivery);
@@ -106,7 +109,7 @@ namespace NexusForever.WorldServer.Game.Mail
         /// </summary>
         public MailItem(MailParameters parameters)
         {
-            Id          = AssetManager.NextMailId;
+            Id          = AssetManager.Instance.NextMailId;
             recipientId = parameters.RecipientCharacterId;
             SenderType  = parameters.MessageType;
 

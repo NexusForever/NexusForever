@@ -27,11 +27,11 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline
             type = splineType;
             mode = splineMode;
 
-            Spline2Entry splineEntry = GameTableManager.Spline2.GetEntry(splineId);
+            Spline2Entry splineEntry = GameTableManager.Instance.Spline2.GetEntry(splineId);
             if (splineEntry == null)
                 throw new ArgumentException();
 
-            foreach (Spline2NodeEntry node in GameTableManager.Spline2Node.Entries
+            foreach (Spline2NodeEntry node in GameTableManager.Instance.Spline2Node.Entries
                 .Where(s => s.SplineId == splineId)
                 .OrderBy(s => s.Ordinal))
             {

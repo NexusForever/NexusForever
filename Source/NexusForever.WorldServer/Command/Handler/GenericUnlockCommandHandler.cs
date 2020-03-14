@@ -40,7 +40,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             await context.SendMessageAsync("Acquired generic unlock entries:");
 
-            TextTable tt = GameTableManager.GetTextTable(context.Language);
+            TextTable tt = GameTableManager.Instance.GetTextTable(context.Language);
             foreach (GenericUnlock unlock in context.Session.GenericUnlockManager)
             {
                 string name = tt.GetEntry(unlock.Entry.LocalizedTextIdDescription);

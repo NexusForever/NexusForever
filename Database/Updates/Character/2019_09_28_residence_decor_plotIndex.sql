@@ -1,0 +1,2 @@
+ALTER TABLE `residence_decor`
+	ADD COLUMN `plotIndex` INT(10) UNSIGNED NOT NULL DEFAULT '2147483647' AFTER `decorType`;

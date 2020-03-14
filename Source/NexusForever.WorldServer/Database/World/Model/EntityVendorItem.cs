@@ -10,6 +10,6 @@ namespace NexusForever.WorldServer.Database.World.Model
         public uint CategoryIndex { get; set; }
         public uint ItemId { get; set; }
 
-        public Entity IdNavigation { get; set; }
+        public virtual Entity IdNavigation { get; set; }
     }
 }

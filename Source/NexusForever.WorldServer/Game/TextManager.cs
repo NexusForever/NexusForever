@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Game.TextSearch;
@@ -11,21 +12,26 @@ using NLog;
 namespace NexusForever.WorldServer.Game
 {
     /// <summary>
-    ///     Responsible for looking up text and objects that the text references.
+    /// Responsible for looking up text and objects that the text references.
     /// </summary>
-    public static class SearchManager
+    public sealed class SearchManager : Singleton<SearchManager>
     {
-        private static ImmutableDictionary<Language, TextReverseIndex> reverseIndexDictionary;
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public static void Initialise()
+        private ImmutableDictionary<Language, TextReverseIndex> reverseIndexDictionary;
+
+        private SearchManager()
+        {
+        }
+
+        public void Initialise()
         {
             log.Info("Creating reverse text lookups.");
             Dictionary<Language, TextReverseIndex> index = new Dictionary<Language, TextReverseIndex>
             {
-                [Language.English] = new TextReverseIndex(GameTableManager.TextEnglish),
-                [Language.French] = new TextReverseIndex(GameTableManager.TextFrench),
-                [Language.German] = new TextReverseIndex(GameTableManager.TextGerman)
+                [Language.English] = new TextReverseIndex(GameTableManager.Instance.TextEnglish),
+                [Language.French] = new TextReverseIndex(GameTableManager.Instance.TextFrench),
+                [Language.German] = new TextReverseIndex(GameTableManager.Instance.TextGerman)
             };
             reverseIndexDictionary = index.ToImmutableDictionary();
             foreach (KeyValuePair<Language, TextReverseIndex> kvp in index)
@@ -37,12 +43,11 @@ namespace NexusForever.WorldServer.Game
             }
         }
 
-
-        private static GameTable<T> GetGameTable<T>() where T : class, new()
+        private GameTable<T> GetGameTable<T>() where T : class, new()
         {
-            return typeof(GameTableManager).GetProperties(BindingFlags.Static | BindingFlags.Public)
+            return GameTableManager.Instance.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(i => i.PropertyType == typeof(GameTable<T>))
-                .Select(property => property.GetValue(null) as GameTable<T>)
+                .Select(property => property.GetValue(GameTableManager.Instance) as GameTable<T>)
                 .FirstOrDefault();
         }
 
@@ -53,7 +58,7 @@ namespace NexusForever.WorldServer.Game
         /// <param name="language"></param>
         /// <param name="fuzzy"></param>
         /// <returns></returns>
-        public static IEnumerable<uint> Search(string text, Language language, bool fuzzy = false)
+        public IEnumerable<uint> Search(string text, Language language, bool fuzzy = false)
         {
             TextReverseIndex index = GetIndex(language);
             if (index == null)
@@ -67,7 +72,7 @@ namespace NexusForever.WorldServer.Game
             return ids;
         }
 
-        public static IEnumerable<T> Search<T>(string text, Language language,
+        public IEnumerable<T> Search<T>(string text, Language language,
             Func<T, uint> textIdAccessor,
             bool fuzzy = false) where T : class, new()
         {
@@ -82,7 +87,7 @@ namespace NexusForever.WorldServer.Game
         /// <param name="textIdAccessor">Field accessor for the localized text ID</param>
         /// <param name="fuzzy">true to search for strings containing the specified text, false for an exact match</param>
         /// <returns>Enumerable of found objects</returns>
-        public static IEnumerable<T> Search<T>(string text, Language language, Func<T, IEnumerable<uint>> textIdAccessor,
+        public IEnumerable<T> Search<T>(string text, Language language, Func<T, IEnumerable<uint>> textIdAccessor,
             bool fuzzy = false)
             where T : class, new()
         {
@@ -93,7 +98,7 @@ namespace NexusForever.WorldServer.Game
             return gameTable.Entries.Where(i => textIdAccessor(i)?.Any(x => ids.Contains(x)) ?? false);
         }
 
-        private static TextReverseIndex GetIndex(Language language)
+        private TextReverseIndex GetIndex(Language language)
         {
             reverseIndexDictionary.TryGetValue(language, out TextReverseIndex index);
             return index;

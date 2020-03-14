@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using NexusForever.Shared.Cryptography;
@@ -8,6 +8,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.Shared.Network.Message.Model;
 using NexusForever.Shared.Network.Packet;
 using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Account;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -21,6 +22,8 @@ namespace NexusForever.WorldServer.Network
         public Player Player { get; set; }
 
         public GenericUnlockManager GenericUnlockManager { get; set; }
+        public AccountCurrencyManager AccountCurrencyManager { get; set; }
+        public EntitlementManager EntitlementManager { get; set; }
 
         public override void OnAccept(Socket newSocket)
         {
@@ -60,7 +63,9 @@ namespace NexusForever.WorldServer.Network
 
             Account = account;
 
-            GenericUnlockManager = new GenericUnlockManager(this, account);
+            GenericUnlockManager   = new GenericUnlockManager(this, account);
+            AccountCurrencyManager = new AccountCurrencyManager(this, account);
+            EntitlementManager     = new EntitlementManager(this, account);
         }
 
         public void SetEncryptionKey(byte[] sessionKey)

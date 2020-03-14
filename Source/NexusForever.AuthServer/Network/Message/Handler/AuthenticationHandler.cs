@@ -40,7 +40,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 }
 
                 // TODO: might want to make this smarter in the future, eg: select a server the user has characters on
-                ServerInfo server = ServerManager.Servers.FirstOrDefault();
+                ServerInfo server = ServerManager.Instance.Servers.FirstOrDefault();
                 if (server == null)
                 {
                     SendServerAuthDenied(NpLoginResult.NoRealmsAvailableAtThisTime);
@@ -50,7 +50,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 session.EnqueueMessageEncrypted(new ServerAuthAccepted());
                 session.EnqueueMessageEncrypted(new ServerRealmMessages
                 {
-                    Messages = ServerManager.ServerMessages
+                    Messages = ServerManager.Instance.ServerMessages
                         .Select(m => new NetworkMessage
                         {
                             Index    = m.Index,

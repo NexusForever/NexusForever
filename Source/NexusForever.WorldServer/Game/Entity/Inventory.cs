@@ -59,11 +59,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (uint itemId in creationEntry.ItemIds.Where(i => i != 0u))
             {
-                Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+                Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
                 if (itemEntry == null)
                     throw new ArgumentNullException();
 
-                Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(itemEntry.Item2TypeId);
+                Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(itemEntry.Item2TypeId);
                 if (typeEntry.ItemSlotId == 0)
                     ItemCreate(itemEntry, 1u);
                 else
@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (Item item in bag)
             {
-                Item2TypeEntry itemTypeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
+                Item2TypeEntry itemTypeEntry = GameTableManager.Instance.ItemType.GetEntry(item.Entry.Item2TypeId);
 
                 ItemVisual visual = GetItemVisual((ItemSlot)itemTypeEntry.ItemSlotId, costume);
                 if (visual != null)
@@ -111,7 +111,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         private ItemVisual GetItemVisual(ItemSlot itemSlot, Costume costume)
         {
-            ImmutableList<EquippedItem> indexes = AssetManager.GetEquippedBagIndexes(itemSlot);
+            ImmutableList<EquippedItem> indexes = AssetManager.Instance.GetEquippedBagIndexes(itemSlot);
             if (indexes == null || indexes.Count != 1)
                 throw new ArgumentOutOfRangeException();
 
@@ -178,7 +178,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Guid = player.Guid
             };
 
-            Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
+            Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(item.Entry.Item2TypeId);
 
             Costume costume = null;
             if (player.CostumeIndex >= 0)
@@ -205,7 +205,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void ItemCreate(uint itemId)
         {
-            Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+            Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
@@ -215,7 +215,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> from supplied <see cref="Spell4BaseEntry"/> in the first available <see cref="InventoryLocation.Ability"/> bag slot.
         /// </summary>
-        public Item SpellCreate(Spell4BaseEntry spell4BaseEntry, byte reason)
+        public Item SpellCreate(Spell4BaseEntry spell4BaseEntry, ItemUpdateReason reason)
         {
             if (spell4BaseEntry == null)
                 throw new ArgumentNullException();
@@ -268,7 +268,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     InventoryItem = new InventoryItem
                     {
                         Item = item.BuildNetworkItem(),
-                        Reason = 49
+                        Reason = ItemUpdateReason.NoReason
                     }
                 });
             }
@@ -282,7 +282,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
-            Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(itemEntry.Item2TypeId);
+            Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(itemEntry.Item2TypeId);
             if (typeEntry.ItemSlotId == 0)
                 throw new ArgumentException($"Item {itemEntry.Id} isn't equippable!");
 
@@ -290,7 +290,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Debug.Assert(bag != null);
 
             // find first free bag index, some items can be equipped into multiple slots
-            foreach (uint bagIndex in AssetManager.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId))
+            foreach (uint bagIndex in AssetManager.Instance.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId))
             {
                 if (bag.GetItem(bagIndex) != null)
                     continue;
@@ -304,9 +304,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(uint itemId, uint count, byte reason = 49, uint charges = 0)
+        public void ItemCreate(uint itemId, uint count, ItemUpdateReason reason = ItemUpdateReason.NoReason, uint charges = 0)
         {
-            Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+            Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
@@ -316,7 +316,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Item"/> in the first available inventory bag index or stack.
         /// </summary>
-        public void ItemCreate(Item2Entry itemEntry, uint count, byte reason = 49, uint charges = 0)
+        public void ItemCreate(Item2Entry itemEntry, uint count, ItemUpdateReason reason = ItemUpdateReason.NoReason, uint charges = 0)
         {
             if (itemEntry == null)
                 throw new ArgumentNullException();
@@ -486,7 +486,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     InventoryItem = new InventoryItem
                     {
                         Item = newItem.BuildNetworkItem(),
-                        Reason = 49
+                        Reason = ItemUpdateReason.NoReason
                     }
                 });
             }
@@ -544,7 +544,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Delete <see cref="Item"/> at supplied <see cref="ItemLocation"/>, this is called directly from a packet hander.
         /// </summary>
-        public Item ItemDelete(ItemLocation from, byte reason = 15)
+        public Item ItemDelete(ItemLocation from, ItemUpdateReason reason = ItemUpdateReason.Loot)
         {
             Bag srcBag = GetBag(from.Location);
             if (srcBag == null)
@@ -554,26 +554,55 @@ namespace NexusForever.WorldServer.Game.Entity
             if (srcItem == null)
                 throw new InvalidPacketValueException();
 
-            srcBag.RemoveItem(srcItem);
-            if (!srcItem.PendingCreate)
+            return ItemDelete(srcBag, srcItem, reason);
+        }
+
+        private Item ItemDelete(Bag bag, Item item, ItemUpdateReason reason)
+        {
+            bag.RemoveItem(item);
+            if (!item.PendingCreate)
             {
-                srcItem.EnqueueDelete();
-                deletedItems.Add(srcItem);
+                item.EnqueueDelete();
+                deletedItems.Add(item);
             }
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
-                Guid = srcItem.Guid,
+                Guid   = item.Guid,
                 Reason = reason
             });
 
-            return srcItem;
+            return item;
+        }
+
+        /// <summary>
+        /// Delete a supplied amount of an <see cref="Item"/>.
+        /// </summary>
+        public void ItemDelete(uint itemId, uint count = 1u)
+        {
+            Bag bag = GetBag(InventoryLocation.Inventory);
+            foreach (Item item in bag.Where(i => i.Id == itemId))
+            {
+                if (item.StackCount > count)
+                {
+                    ItemStackCountUpdate(item, item.StackCount - count);
+                    count = 0;
+                }
+                else
+                {
+                    ItemDelete(bag, item, ItemUpdateReason.Loot);
+                    count -= item.StackCount;
+                }
+
+                if (count == 0)
+                    break;
+            }
         }
 
         /// <summary>
         /// Remove <see cref="Item"/> from this player's inventory without deleting the item from the DB
         /// </summary>
-        public void ItemRemove(Item srcItem, byte reason = 49)
+        public void ItemRemove(Item srcItem, ItemUpdateReason reason = ItemUpdateReason.NoReason)
         {
             if (srcItem == null)
                 throw new InvalidPacketValueException("Item could not be found");
@@ -605,6 +634,15 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Return the amount of free bag indexes in <see cref="InventoryLocation.Inventory"/>.
+        /// </summary>
+        public uint GetInventoryFreeBagIndexCount()
+        {
+            Bag bag = GetBag(InventoryLocation.Inventory);
+            return bag.GetFreeBagIndexCount();
+        }
+
+        /// <summary>
         /// Checks if supplied <see cref="InventoryLocation"/> and bag index valid for <see cref="Item"/>.
         /// </summary>
         private bool IsValidLocationForItem(Item item, InventoryLocation location, uint bagIndex)
@@ -615,11 +653,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (location == InventoryLocation.Equipped)
             {
-                Item2TypeEntry typeEntry = GameTableManager.ItemType.GetEntry(item.Entry.Item2TypeId);
+                Item2TypeEntry typeEntry = GameTableManager.Instance.ItemType.GetEntry(item.Entry.Item2TypeId);
                 if (typeEntry.ItemSlotId == 0)
                     return false;
 
-                ImmutableList<EquippedItem> bagIndexes = AssetManager.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId);
+                ImmutableList<EquippedItem> bagIndexes = AssetManager.Instance.GetEquippedBagIndexes((ItemSlot)typeEntry.ItemSlotId);
                 if (bagIndexes.All(i => i != (EquippedItem) bagIndex))
                     return false;
 
@@ -729,7 +767,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     Location = item.Location,
                     BagIndex = item.BagIndex
-                });
+                }, ItemUpdateReason.ConsumeCharge);
             }
 
             return true;

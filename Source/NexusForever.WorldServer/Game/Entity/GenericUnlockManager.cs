@@ -9,6 +9,7 @@ using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message;
 using NexusForever.WorldServer.Network.Message.Model;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -20,7 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="GenericUnlockManager"/> from <see cref="Account"/> database model.
         /// </summary>
-        public GenericUnlockManager(WorldSession session, Account model)
+        public GenericUnlockManager(WorldSession session, AccountModel model)
         {
             this.session = session;
 
@@ -39,7 +40,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void Unlock(ushort genericUnlockEntryId)
         {
-            GenericUnlockEntryEntry entry = GameTableManager.GenericUnlockEntry.GetEntry(genericUnlockEntryId);
+            GenericUnlockEntryEntry entry = GameTableManager.Instance.GenericUnlockEntry.GetEntry(genericUnlockEntryId);
             if (entry == null)
             {
                 SendUnlockResult(GenericUnlockResult.Invalid);
@@ -63,7 +64,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void UnlockAll(GenericUnlockType type)
         {
-            foreach (GenericUnlockEntryEntry entry in GameTableManager.GenericUnlockEntry.Entries
+            foreach (GenericUnlockEntryEntry entry in GameTableManager.Instance.GenericUnlockEntry.Entries
                 .Where(e => e.GenericUnlockTypeEnum == (uint)type))
             {
                 if (unlocks.ContainsKey(entry.Id))

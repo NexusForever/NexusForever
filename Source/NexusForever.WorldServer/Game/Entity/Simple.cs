@@ -10,7 +10,6 @@ namespace NexusForever.WorldServer.Game.Entity
     [DatabaseEntity(EntityType.Simple)]
     public class Simple : UnitEntity
     {
-        public uint CreatureId { get; private set; }
         public byte QuestChecklistIdx { get; private set; }
 
         public Simple()
@@ -21,7 +20,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void Initialise(EntityModel model)
         {
             base.Initialise(model);
-            CreatureId        = model.Creature;
             QuestChecklistIdx = model.QuestChecklistIdx;
         }
 
@@ -36,7 +34,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnActivate(Player activator)
         {
-            Creature2Entry entry = GameTableManager.Creature2.GetEntry(CreatureId);
+            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
             if (entry.DatacubeId != 0u)
                 activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, int.MaxValue);
         }
@@ -45,7 +43,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             uint progress = (uint)(1 << QuestChecklistIdx);
 
-            Creature2Entry entry = GameTableManager.Creature2.GetEntry(CreatureId);
+            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
             if (entry.DatacubeId != 0u)
             {
                 Datacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeId, DatacubeType.Datacube);

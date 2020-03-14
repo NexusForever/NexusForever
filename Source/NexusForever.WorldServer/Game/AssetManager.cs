@@ -1,42 +1,51 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Database.Character;
+using NexusForever.WorldServer.Database.World;
+using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game
 {
-    public static class AssetManager
+    public sealed class AssetManager : Singleton<AssetManager>
     {
         public static ImmutableDictionary<InventoryLocation, uint> InventoryLocationCapacities { get; private set; }
 
         /// <summary>
         /// Id to be assigned to the next created character.
         /// </summary>
-        public static ulong NextCharacterId => nextCharacterId++;
+        public ulong NextCharacterId => nextCharacterId++;
 
         /// <summary>
         /// Id to be assigned to the next created item.
         /// </summary>
-        public static ulong NextItemId => nextItemId++;
+        public ulong NextItemId => nextItemId++;
 
         /// <summary>
         /// Id to be assigned to the next created mail.
         /// </summary>
-        public static ulong NextMailId => nextMailId++;
+        public ulong NextMailId => nextMailId++;
 
-        private static ulong nextCharacterId;
-        private static ulong nextItemId;
-        private static ulong nextMailId;
+        private ulong nextCharacterId;
+        private ulong nextItemId;
+        private ulong nextMailId;
 
-        private static ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
+        private ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
-        private static ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
-        private static ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
+        private ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
+        private ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
-        public static void Initialise()
+        private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
+
+        private AssetManager()
+        {
+        }
+
+        public void Initialise()
         {
             nextCharacterId = CharacterDatabase.GetNextCharacterId() + 1ul;
             nextItemId      = CharacterDatabase.GetNextItemId() + 1ul;
@@ -46,12 +55,13 @@ namespace NexusForever.WorldServer.Game
             CacheInventoryEquipSlots();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
+            CacheTutorials();
         }
 
-        private static void CacheCharacterCustomisations()
+        private void CacheCharacterCustomisations()
         {
             var entries = new Dictionary<uint, List<CharacterCustomizationEntry>>();
-            foreach (CharacterCustomizationEntry entry in GameTableManager.CharacterCustomization.Entries)
+            foreach (CharacterCustomizationEntry entry in GameTableManager.Instance.CharacterCustomization.Entries)
             {
                 uint primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
                 if (!entries.ContainsKey(primaryKey))
@@ -63,7 +73,7 @@ namespace NexusForever.WorldServer.Game
             characterCustomisations = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
-        private static void CacheInventoryEquipSlots()
+        private void CacheInventoryEquipSlots()
         {
             var entries = new Dictionary<ItemSlot, List<EquippedItem>>();
             foreach (FieldInfo field in typeof(ItemSlot).GetFields())
@@ -81,7 +91,7 @@ namespace NexusForever.WorldServer.Game
             equippedItems = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
-        public static void CacheInventoryBagCapacities()
+        public void CacheInventoryBagCapacities()
         {
             var entries = new Dictionary<InventoryLocation, uint>();
             foreach (FieldInfo field in typeof(InventoryLocation).GetFields())
@@ -96,10 +106,10 @@ namespace NexusForever.WorldServer.Game
             InventoryLocationCapacities = entries.ToImmutableDictionary();
         }
 
-        private static void CacheItemDisplaySourceEntries()
+        private void CacheItemDisplaySourceEntries()
         {
             var entries = new Dictionary<uint, List<ItemDisplaySourceEntryEntry>>();
-            foreach (ItemDisplaySourceEntryEntry entry in GameTableManager.ItemDisplaySourceEntry.Entries)
+            foreach (ItemDisplaySourceEntryEntry entry in GameTableManager.Instance.ItemDisplaySourceEntry.Entries)
             {
                 if (!entries.ContainsKey(entry.ItemSourceId))
                     entries.Add(entry.ItemSourceId, new List<ItemDisplaySourceEntryEntry>());
@@ -110,10 +120,25 @@ namespace NexusForever.WorldServer.Game
             itemDisplaySourcesEntry = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
+        private void CacheTutorials()
+        {
+            var zoneEntries =  ImmutableDictionary.CreateBuilder<uint, uint>();
+            foreach (Tutorial tutorial in WorldDatabase.GetTutorialTriggers())
+            {
+                if (tutorial.TriggerId == 0) // Don't add Tutorials with no trigger ID
+                    continue;
+
+                if (tutorial.Type == 29 && !zoneEntries.ContainsKey(tutorial.TriggerId))
+                    zoneEntries.Add(tutorial.TriggerId, tutorial.Id);
+            }
+
+            zoneTutorials = zoneEntries.ToImmutable();
+        }
+
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
         /// </summary>
-        public static ImmutableList<CharacterCustomizationEntry> GetPrimaryCharacterCustomisation(uint race, uint sex, uint label, uint value)
+        public ImmutableList<CharacterCustomizationEntry> GetPrimaryCharacterCustomisation(uint race, uint sex, uint label, uint value)
         {
             uint key = (value << 24) | (label << 16) | (sex << 8) | race;
             return characterCustomisations.TryGetValue(key, out ImmutableList<CharacterCustomizationEntry> entries) ? entries : null;
@@ -122,7 +147,7 @@ namespace NexusForever.WorldServer.Game
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="EquippedItem"/>'s for supplied <see cref="ItemSlot"/>.
         /// </summary>
-        public static ImmutableList<EquippedItem> GetEquippedBagIndexes(ItemSlot slot)
+        public ImmutableList<EquippedItem> GetEquippedBagIndexes(ItemSlot slot)
         {
             return equippedItems.TryGetValue(slot, out ImmutableList<EquippedItem> entries) ? entries : null;
         }
@@ -130,9 +155,17 @@ namespace NexusForever.WorldServer.Game
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="ItemDisplaySourceEntryEntry"/>'s for the supplied itemSource.
         /// </summary>
-        public static ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
+        public ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
         {
             return itemDisplaySourcesEntry.TryGetValue(itemSource, out ImmutableList<ItemDisplaySourceEntryEntry> entries) ? entries : null;
+        }
+
+        /// <summary>
+        /// Returns a Tutorial ID if it's found in the Zone Tutorials cache
+        /// </summary>
+        public uint GetTutorialIdForZone(uint zoneId)
+        {
+            return zoneTutorials.TryGetValue(zoneId, out uint tutorialId) ? tutorialId : 0;
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Numerics;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Map.Search;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NLog;
 

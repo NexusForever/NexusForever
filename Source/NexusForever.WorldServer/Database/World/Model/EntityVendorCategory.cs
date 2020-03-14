@@ -9,6 +9,6 @@ namespace NexusForever.WorldServer.Database.World.Model
         public uint Index { get; set; }
         public uint LocalisedTextId { get; set; }
 
-        public Entity IdNavigation { get; set; }
+        public virtual Entity IdNavigation { get; set; }
     }
 }

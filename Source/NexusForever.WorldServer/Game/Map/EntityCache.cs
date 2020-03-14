@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
@@ -7,11 +8,16 @@ namespace NexusForever.WorldServer.Game.Map
 {
     public class EntityCache
     {
-        private readonly Dictionary<ushort /*gridHash*/, HashSet<EntityModel>> entities = new Dictionary<ushort, HashSet<EntityModel>>();
+        public uint GridCount => (uint)entities.Count;
+        public uint EntityCount { get; }
 
-        private static ushort GetGridHash(uint gridX, uint gridZ)
+        private readonly Dictionary<(uint GridX, uint GridZ), HashSet<EntityModel>> entities = new Dictionary<(uint GridX, uint GridZ), HashSet<EntityModel>>();
+
+        public EntityCache(ImmutableList<EntityModel> models)
         {
-            return (ushort)((gridZ << 8) | gridX);
+            EntityCount = (uint)models.Count;
+            foreach (EntityModel model in models)
+                AddEntity(model);
         }
 
         /// <summary>
@@ -20,13 +26,12 @@ namespace NexusForever.WorldServer.Game.Map
         public void AddEntity(EntityModel model)
         {
             var vector = new Vector3(model.X, model.Y, model.Z);
-            (uint gridX, uint gridZ) = MapGrid.GetGridCoord(vector);
+            (uint GridX, uint GridZ) coord = MapGrid.GetGridCoord(vector);
 
-            ushort hash = GetGridHash(gridX, gridZ);
-            if (!entities.ContainsKey(hash))
-                entities.Add(hash, new HashSet<EntityModel>());
+            if (!entities.ContainsKey(coord))
+                entities.Add(coord, new HashSet<EntityModel>());
 
-            entities[hash].Add(model);
+            entities[coord].Add(model);
         }
 
         /// <summary>
@@ -34,8 +39,7 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public IEnumerable<EntityModel> GetEntities(uint gridX, uint gridZ)
         {
-            ushort hash = GetGridHash(gridX, gridZ);
-            return entities.TryGetValue(hash, out HashSet<EntityModel> cellEntities) ? cellEntities : Enumerable.Empty<EntityModel>();
+            return entities.TryGetValue((gridX, gridZ), out HashSet<EntityModel> cellEntities) ? cellEntities : Enumerable.Empty<EntityModel>();
         }
     }
 }

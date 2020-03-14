@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Numerics;
 
 namespace NexusForever.Shared
 {
     public static class MathsExtensions
     {
+        public static float PI2 = MathF.PI * 2;
+
         /// <summary>
         /// Convert degrees to radians.
         /// </summary>
@@ -71,6 +73,30 @@ namespace NexusForever.Shared
             float y = MathF.Atan2(2f * (xz + yw), 1f - 2f * (xx + yy));
             float r = MathF.Atan2(2f * (xy + zw), 1f - 2f * (xx + zz));
             return new Vector3(y.ToDegrees(), p.ToDegrees(), r.ToDegrees());
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector3"/> which has been offset by a random angle and distance between 0 and supplied max range.
+        /// </summary>
+        public static Vector3 GetRandomPoint2D(this Vector3 v, float maxRange)
+        {
+            var random = new Random();
+            return GetPoint2D(v, (float)random.NextDouble() * PI2, (float)random.NextDouble() * maxRange);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector3"/> which has been offset by supplied angle and distance.
+        /// </summary>
+        public static Vector3 GetPoint2D(this Vector3 v, float angle, float distance)
+        {
+            float x = v.X + MathF.Cos(angle) * distance;
+            float z = v.Z + MathF.Sin(angle) * distance;
+            return new Vector3(x, v.Y, z);
+        }
+
+        public static float GetDistance(this Vector3 v1, Vector3 v2)
+        {
+            return MathF.Sqrt(MathF.Pow(v1.X - v2.X, 2) + MathF.Pow(v1.Z - v2.Z, 2));
         }
     }
 }

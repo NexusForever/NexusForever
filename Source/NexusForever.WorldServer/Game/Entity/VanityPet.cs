@@ -1,30 +1,37 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Network;
-using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public class VanityPet : UnitEntity
+    public class VanityPet : WorldEntity
     {
-        public uint OwnerGuid { get; }
+        private const float FollowDistance = 3f;
+        private const float FollowMinRecalculateDistance = 5f;
+
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
+        public uint OwnerGuid { get; private set; }
         public Creature2Entry Creature { get; }
         public Creature2DisplayGroupEntryEntry Creature2DisplayGroup { get; }
+
+        private readonly UpdateTimer followTimer = new UpdateTimer(1d);
 
         public VanityPet(Player owner, uint creature)
             : base(EntityType.Pet)
         {
             OwnerGuid               = owner.Guid;
-            Creature                = GameTableManager.Creature2.GetEntry(creature);
-            Creature2DisplayGroup   = GameTableManager.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == Creature.Creature2DisplayGroupId);
-            DisplayInfo             = Creature2DisplayGroup.Creature2DisplayInfoId;
+            Creature                = GameTableManager.Instance.Creature2.GetEntry(creature);
+            Creature2DisplayGroup   = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == Creature.Creature2DisplayGroupId);
+            DisplayInfo             = Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u;
 
             SetProperty(Property.BaseHealth, 800.0f, 800.0f);
 
@@ -46,8 +53,17 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
             base.OnAddToMap(map, guid, vector);
+
             Player owner = GetVisible<Player>(OwnerGuid);
-            owner.PetGuid = Guid;
+            if (owner == null)
+            {
+                // this shouldn't happen, log it anyway
+                log.Error($"VanityPet {Guid} has lost it's owner {OwnerGuid}!");
+                RemoveFromMap();
+                return;
+            }
+
+            owner.VanityPetGuid = Guid;
 
             owner.EnqueueToVisible(new Server08B3
             {
@@ -57,66 +73,41 @@ namespace NexusForever.WorldServer.Game.Entity
             }, true);
         }
 
-        public override ServerEntityCreate BuildCreatePacket()
+        public override void OnEnqueueRemoveFromMap()
         {
-            var owner = Map.GetEntity<Player>(OwnerGuid);
+            followTimer.Reset(false);
+            OwnerGuid = 0u;
+        }
 
-            var entityCreate = base.BuildCreatePacket();
-            entityCreate.Time = 904575;
-            entityCreate.Faction1 = Faction1;
-            entityCreate.Faction2 = Faction2;
+        public override void Update(double lastTick)
+        {
+            base.Update(lastTick);
+            Follow(lastTick);
+        }
 
-            /*entityCreate.Commands = new Dictionary<EntityCommand, IEntityCommand>
+        private void Follow(double lastTick)
+        {
+            followTimer.Update(lastTick);
+            if (!followTimer.HasElapsed)
+                return;
+
+            Player owner = GetVisible<Player>(OwnerGuid);
+            if (owner == null)
             {
-                {
-                    EntityCommand.SetPlatform,
-                    new SetPlatformCommand
-                    {
-                        //Platform = OwnerGuid
-                    }
-                },
-                {
-                    EntityCommand.SetPosition,
-                    new SetPositionCommand
-                    {
-                        Position = new Position(owner.Position)
-                    }
-                },
-                {
-                    EntityCommand.SetVelocity,
-                    new SetVelocityCommand
-                    {
-                    }
-                },
-                {
-                    EntityCommand.SetMove,
-                    new SetMoveCommand
-                    {
-                    }
-                },
-                {
-                    EntityCommand.SetRotation,
-                    new SetRotationCommand
-                    {
-                        Position = new Position(owner.Rotation)
-                    }
-                },
-                {
-                    EntityCommand.SetState,
-                    new SetStateCommand
-                    {
-                        State = 257
-                    }
-                },
-                {
-                    EntityCommand.SetMode,
-                    new SetModeCommand
-                    {
-                    }
-                }
-            };*/
+                // this shouldn't happen, log it anyway
+                log.Error($"VanityPet {Guid} has lost it's owner {OwnerGuid}!");
+                RemoveFromMap();
+                return;
+            }
 
-            return entityCreate;
+            // only recalculate the path to owner if distance is significant
+            float distance = owner.Position.GetDistance(Position);
+            if (distance < FollowMinRecalculateDistance)
+                return;
+
+            MovementManager.Follow(owner, FollowDistance);
+
+            followTimer.Reset();
         }
     }
 }

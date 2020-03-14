@@ -13,6 +13,7 @@ using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 using NetworkCostume = NexusForever.WorldServer.Network.Message.Model.Shared.Costume;
+using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -35,7 +36,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="CurrencyManager"/> from existing <see cref="Account"/> and <see cref="Character"/> database models.
         /// </summary>
-        public CostumeManager(Player owner, Account accountModel, Character characterModel)
+        public CostumeManager(Player owner, AccountModel accountModel, Character characterModel)
         {
             player = owner;
 
@@ -106,7 +107,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (costumeItem.ItemId == 0)
                     continue;
 
-                Item2Entry itemEntry = GameTableManager.Item.GetEntry(costumeItem.ItemId);
+                Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(costumeItem.ItemId);
                 if (itemEntry == null)
                 {
                     SendCostumeSaveResult(CostumeSaveResult.InvalidItem);
@@ -126,7 +127,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     return;
                 }
 
-                ItemDisplayEntry itemDisplayEntry = GameTableManager.ItemDisplay.GetEntry(Item.GetDisplayId(itemEntry));
+                ItemDisplayEntry itemDisplayEntry = GameTableManager.Instance.ItemDisplay.GetEntry(Item.GetDisplayId(itemEntry));
                 for (int i = 0; i < costumeItem.Dyes.Length; i++)
                 {
                     if (costumeItem.Dyes[i] == 0u)
@@ -238,7 +239,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private uint GetMaxUnlockItemCount()
         {
             // client defaults to 1000 if entry doesn't exist
-            GameFormulaEntry entry = GameTableManager.GameFormula.GetEntry(1203);
+            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(1203);
             if (entry == null)
                 return 1000u;
 
@@ -250,7 +251,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void ForgetItem(uint itemId)
         {
-            Item2Entry itemEntry = GameTableManager.Item.GetEntry(itemId);
+            Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
             if (itemEntry == null)
             {
                 SendCostumeItemUnlock(CostumeUnlockResult.InvalidItem);

@@ -102,14 +102,14 @@ namespace NexusForever.StsServer.Network
 
         private void HandlePacket(ClientStsPacket packet)
         {
-            IReadable message = MessageManager.GetMessage(packet.Uri);
+            IReadable message = MessageManager.Instance.GetMessage(packet.Uri);
             if (message == null)
             {
                 log.Info($"Received unknown packet {packet.Uri}");
                 return;
             }
 
-            MessageHandlerInfo handlerInfo = MessageManager.GetMessageHandler(packet.Uri);
+            MessageHandlerInfo handlerInfo = MessageManager.Instance.GetMessageHandler(packet.Uri);
             if (handlerInfo == null)
             {
                 log.Info($"Received unhandled packet {packet.Uri}");

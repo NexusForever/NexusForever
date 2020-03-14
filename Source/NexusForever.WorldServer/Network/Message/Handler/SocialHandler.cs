@@ -1,18 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Logging;
-using NexusForever.Shared.Configuration;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.Character.Model;
-using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
@@ -32,10 +25,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 try
                 {
-                    CommandManager.HandleCommand(session, chat.Message, true);
-                    //CommandManager.ParseCommand(chat.Message, out string command, out string[] parameters);
-                    //CommandHandlerDelegate handler = CommandManager.GetCommandHandler(command);
-                    //handler?.Invoke(session, parameters);
+                    CommandManager.Instance.HandleCommand(session, chat.Message, true);
                 }
                 catch (Exception e)
                 {
@@ -43,27 +33,30 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
             }
             else
-                SocialManager.HandleClientChat(session, chat);
+                SocialManager.Instance.HandleClientChat(session, chat);
         }
 
         [MessageHandler(GameMessageOpcode.ClientEmote)]
         public static void HandleEmote(WorldSession session, ClientEmote emote)
         {
-            uint emoteId = emote.EmoteId;
-            uint standState = 0;
-            if (emoteId != 0)
+            StandState standState = StandState.Stand;
+            if (emote.EmoteId != 0)
             {
-                EmotesEntry entry = GameTableManager.Emotes.GetEntry(emoteId);
+                EmotesEntry entry = GameTableManager.Instance.Emotes.GetEntry(emote.EmoteId);
                 if (entry == null)
                     throw (new InvalidPacketValueException("HandleEmote: Invalid EmoteId"));
 
-                standState = entry.StandState;
+                standState = (StandState)entry.StandState;
             }
+
+            if (emote.EmoteId == 0 && session.Player.IsSitting)
+                session.Player.Unsit();
+
             session.Player.EnqueueToVisible(new ServerEmote
             {
-                Guid = session.Player.Guid,
+                Guid       = session.Player.Guid,
                 StandState = standState,
-                EmoteId = emoteId
+                EmoteId    = emote.EmoteId
             });
         }
 

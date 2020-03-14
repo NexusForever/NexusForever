@@ -6,6 +6,9 @@ using NexusForever.WorldServer.Game.Entity.Network.Command;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 using System;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Quest.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -42,7 +45,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 Guid     = mover.Guid,
                 Time     = entityCommand.Time,
-                ServerControlled = true,
+                ServerControlled = false,
                 Commands = entityCommand.Commands
             });
         }
@@ -68,6 +71,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             // TODO: sanity check for range etc.
 
+            session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
             entity.OnActivateCast(session.Player);
         }
 
@@ -76,6 +80,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             switch (entityInteraction.Event)
             {
+                case 37: // Quest NPC
+                {
+                    session.EnqueueMessageEncrypted(new Server0357
+                    {
+                        UnitId = entityInteraction.Guid
+                    });
+                    break;
+                }
                 case 49: // Handle Vendor
                     VendorHandler.HandleClientVendor(session, entityInteraction);
                     break;
@@ -83,7 +95,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     var mailboxEntity = session.Player.Map.GetEntity<Mailbox>(entityInteraction.Guid);
                     break;
                 case 8: // "HousingGuildNeighborhoodBrokerOpen"
-                case 37: // Quest NPC
                 case 40:
                 case 41: // "ResourceConversionOpen"
                 case 42: // "ToggleAbilitiesWindow"
@@ -114,6 +125,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     log.Warn($"Received unhandled interaction event {entityInteraction.Event} from Entity {entityInteraction.Guid}");
                     break;
             }
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientEntityInteractChair)]
+        public static void HandleClientEntityInteractEmote(WorldSession session, ClientEntityInteractChair interactChair)
+        {
+            WorldEntity chair = session.Player.GetVisible<WorldEntity>(interactChair.ChairUnitId);
+            if (chair == null)
+                throw new InvalidPacketValueException();
+
+            Creature2Entry creatureEntry = GameTableManager.Instance.Creature2.GetEntry(chair.CreatureId);
+            if ((creatureEntry.ActivationFlags & 0x200000) == 0)
+                throw new InvalidPacketValueException();
+
+            session.Player.Sit(chair);
         }
     }
 }

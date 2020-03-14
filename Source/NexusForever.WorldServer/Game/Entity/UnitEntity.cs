@@ -6,6 +6,7 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
+using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -38,7 +39,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (parameters == null)
                 throw new ArgumentNullException();
 
-            Spell4Entry spell4Entry = GameTableManager.Spell4.GetEntry(spell4Id);
+            Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spell4Id);
             if (spell4Entry == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -53,7 +54,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (parameters == null)
                 throw new ArgumentNullException();
 
-            SpellBaseInfo spellBaseInfo = GlobalSpellManager.GetSpellBaseInfo(spell4BaseId);
+            SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -72,6 +73,20 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             if (parameters == null)
                 throw new ArgumentNullException();
+
+            if (DisableManager.Instance.IsDisabled(DisableType.BaseSpell, parameters.SpellInfo.BaseInfo.Entry.Id))
+            {
+                if (this is Player player)
+                    player.SendSystemMessage($"Unable to cast base spell {parameters.SpellInfo.BaseInfo.Entry.Id} because it is disabled.");
+                return;
+            }
+
+            if (DisableManager.Instance.IsDisabled(DisableType.Spell, parameters.SpellInfo.Entry.Id))
+            {
+                if (this is Player player)
+                    player.SendSystemMessage($"Unable to cast spell {parameters.SpellInfo.Entry.Id} because it is disabled.");
+                return;
+            }
 
             var spell = new Spell.Spell(this, parameters);
             spell.Cast();

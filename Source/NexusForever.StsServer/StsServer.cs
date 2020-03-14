@@ -28,15 +28,15 @@ namespace NexusForever.StsServer
             Console.Title = Title;
             log.Info("Initialising...");
 
-            ConfigurationManager<StsServerConfiguration>.Initialise("StsServer.json");
+            ConfigurationManager<StsServerConfiguration>.Instance.Initialise("StsServer.json");
 
-            DatabaseManager.Initialise(ConfigurationManager<StsServerConfiguration>.Config.Database);
-            MessageManager.Initialise();
-            NetworkManager<StsSession>.Initialise(ConfigurationManager<StsServerConfiguration>.Config.Network);
+            DatabaseManager.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database);
+            MessageManager.Instance.Initialise();
+            NetworkManager<StsSession>.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Network);
 
-            WorldManager.Initialise(lastTick =>
+            WorldManager.Instance.Initialise(lastTick =>
             {
-                NetworkManager<StsSession>.Update(lastTick);
+                NetworkManager<StsSession>.Instance.Update(lastTick);
             });
 
             log.Info("Ready!");

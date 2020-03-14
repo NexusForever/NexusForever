@@ -10,9 +10,9 @@ namespace NexusForever.Shared.GameTable
 
         public TextTableEntry(Language language, uint id, string text)
         {
-            Id = id;
-            Language = Language;
-            Text = text;
+            Id       = id;
+            Language = language;
+            Text     = text;
         }
     }
 }

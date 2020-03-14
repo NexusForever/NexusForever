@@ -148,7 +148,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 case ShortcutType.Item:
                 {
-                    if (GameTableManager.Item.GetEntry(requestActionSetChanges.ObjectId) == null)
+                    if (GameTableManager.Instance.Item.GetEntry(requestActionSetChanges.ObjectId) == null)
                         throw new InvalidPacketValueException();
                     break;
                 }

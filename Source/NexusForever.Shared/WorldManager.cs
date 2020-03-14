@@ -4,11 +4,15 @@ using System.Threading;
 
 namespace NexusForever.Shared
 {
-    public static class WorldManager
+    public sealed class WorldManager : Singleton<WorldManager>
     {
-        private static volatile bool shutdownRequested;
+        private volatile bool shutdownRequested;
 
-        public static void Initialise(Action<double> updateAction)
+        private WorldManager()
+        {
+        }
+
+        public void Initialise(Action<double> updateAction)
         {
             var worldThread = new Thread(() =>
             {
@@ -29,7 +33,7 @@ namespace NexusForever.Shared
             worldThread.Start();
         }
 
-        public static void Shutdown()
+        public void Shutdown()
         {
             shutdownRequested = true;
         }
