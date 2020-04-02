@@ -175,6 +175,7 @@ namespace NexusForever.Shared.Network.Message
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
         Server0639                      = 0x0639, // mount up or something
+        ClientZoneChange                = 0x063A,
         ClientPlayerMovementSpeedUpdate = 0x063B,
         ServerAuthDenied                = 0x063D,
         ServerOwnedCommodityOrders      = 0x064C,

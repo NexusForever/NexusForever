@@ -78,5 +78,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 RandomRollResult = new Random().Next((int)randomRoll.MinRandom, (int)randomRoll.MaxRandom)
             });
         }
+
+        [MessageHandler(GameMessageOpcode.ClientZoneChange)]
+        public static void HandleClientZoneChange(WorldSession session, ClientZoneChange zoneChange)
+        {
+        }
     }
 }
