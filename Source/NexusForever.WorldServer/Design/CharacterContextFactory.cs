@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Design
                 Character = new DatabaseConnectionString
                 {
                     Provider         = DatabaseProvider.MySql,
-                    ConnectionString = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database.Auth.ConnectionString
+                    ConnectionString = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database.Character.ConnectionString
                 }
             });
         }

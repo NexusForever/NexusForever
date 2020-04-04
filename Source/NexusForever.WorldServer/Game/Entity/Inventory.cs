@@ -347,7 +347,13 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 uint bagIndex = bag.GetFirstAvailableBagIndex();
                 if (bagIndex == uint.MaxValue)
+                {
+                    // If there is remaining count left, and this was created by SupplySatchelManager, then return the rest to the client.
+                    if (count > 0 && reason == ItemUpdateReason.ResourceConversion)
+                        player.SupplySatchelManager.AddAmount(new Item(characterId, itemEntry, count, charges), count);
                     return;
+                }
+                    
 
                 var item = new Item(characterId, itemEntry, Math.Min(count, itemEntry.MaxStackCount), charges);
                 AddItem(item, InventoryLocation.Inventory, bagIndex);
@@ -772,6 +778,24 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             return true;
+        }
+
+        public void ItemMoveToSupplySatchel(Item item, uint amount)
+        {
+            if (player.SupplySatchelManager.IsFull(item))
+                return;
+
+            uint amountRemaining = player.SupplySatchelManager.AddAmount(item, amount);
+            if (amountRemaining > 0)
+                ItemStackCountUpdate(item, (item.StackCount - amount) + amountRemaining);
+            else if (amount < item.StackCount)
+                ItemStackCountUpdate(item, item.StackCount - amount);
+            else
+                ItemDelete(new ItemLocation 
+                    {
+                        Location = item.Location,
+                        BagIndex = item.BagIndex
+                    }, ItemUpdateReason.ResourceConversion);
         }
 
         private Bag GetBag(InventoryLocation location)
