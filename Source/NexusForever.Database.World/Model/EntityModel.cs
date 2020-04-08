@@ -21,6 +21,7 @@ namespace NexusForever.Database.World.Model
         public ushort Faction2 { get; set; }
         public byte QuestChecklistIdx { get; set; }
         public ulong ActivePropId { get; set; }
+        public ushort WorldSocketId { get; set; }
 
         public EntitySplineModel EntitySpline { get; set; }
         public EntityVendorModel EntityVendor { get; set; }

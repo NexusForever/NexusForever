@@ -134,6 +134,11 @@ namespace NexusForever.Database.World
                     .HasColumnType("smallint(5) unsigned")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.WorldSocketId)
+                    .HasColumnName("worldSocketId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
                 entity.Property(e => e.X)
                     .HasColumnName("x")
                     .HasColumnType("float")
