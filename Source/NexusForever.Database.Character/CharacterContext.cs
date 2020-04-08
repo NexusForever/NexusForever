@@ -29,6 +29,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterSpellModel> CharacterSpell { get; set; }
         public DbSet<CharacterStatModel> CharacterStat { get; set; }
         public DbSet<CharacterTitleModel> CharacterTitle { get; set; }
+        public DbSet<CharacterTradeskillMaterialModel> CharacterTradeskillMaterial { get; set; }
         public DbSet<CharacterZonemapHexgroupModel> CharacterZonemapHexgroup { get; set; }
         public DbSet<ItemModel> Item { get; set; }
         public DbSet<ResidenceModel> Residence { get; set; }
@@ -1033,6 +1034,34 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.CharacterTitle)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_title_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterTradeskillMaterialModel>(entity =>
+            {
+                entity.ToTable("character_tradeskill_materials");
+
+                entity.HasKey(e => new { e.Id, e.MaterialId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.MaterialId)
+                    .HasColumnName("materialId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Amount)
+                    .HasColumnName("amount")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.TradeskillMaterials)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_tradeskill_material_id__character_id");
             });
 
             modelBuilder.Entity<CharacterZonemapHexgroupModel>(entity =>

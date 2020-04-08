@@ -135,6 +135,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public ZoneMapManager ZoneMapManager { get; }
         public QuestManager QuestManager { get; }
         public CharacterAchievementManager AchievementManager { get; }
+        public SupplySatchelManager SupplySatchelManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -181,6 +182,7 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
             AchievementManager      = new CharacterAchievementManager(this, model);
+            SupplySatchelManager    = new SupplySatchelManager(this, model);
 
             Session.EntitlementManager.OnNewCharacter(model);
 
@@ -388,6 +390,18 @@ namespace NexusForever.WorldServer.Game.Entity
                         Id    = RewardProperty.Trading,
                         Type  = 1,
                         Value = 1
+                    },
+                    new ServerRewardPropertySet.RewardProperty
+                    {
+                        Id    = RewardProperty.TradeskillMatStackLimit,
+                        Type  = 1,
+                        Value = 100
+                    },
+                    new ServerRewardPropertySet.RewardProperty
+                    {
+                        Id    = RewardProperty.TradeskillMatTrading,
+                        Type  = 1,
+                        Value = 1
                     }
                 }
             });
@@ -409,7 +423,8 @@ namespace NexusForever.WorldServer.Game.Entity
                         Entitlement = e.Type,
                         Count       = e.Amount
                     })
-                    .ToList()
+                    .ToList(),
+                TradeskillMaterials   = SupplySatchelManager.BuildNetworkPacket()
             };
 
             foreach (Currency currency in CurrencyManager)
@@ -828,6 +843,7 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
             AchievementManager.Save(context);
+            SupplySatchelManager.Save(context);
 
             Session.EntitlementManager.Save(context);
         }

@@ -103,5 +103,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
             }));
         }
+
+        [MessageHandler(GameMessageOpcode.ClientItemMoveToSupplySatchel)]
+        public static void HandleClientItemMoveToSupplySatchel(WorldSession session, ClientItemMoveToSupplySatchel moveToSupplySatchel)
+        {
+            Item item = session.Player.Inventory.GetItem(moveToSupplySatchel.ItemGuid);
+            if (item == null)
+                throw new InvalidPacketValueException();
+
+            session.Player.Inventory.ItemMoveToSupplySatchel(item, moveToSupplySatchel.Amount);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientItemMoveFromSupplySatchel)]
+        public static void HandleClientItemMoveFromSupplySatchel(WorldSession session, ClientItemMoveFromSupplySatchel request)
+        {
+            session.Player.SupplySatchelManager.MoveToInventory(request.MaterialId, request.Amount);
+        }
     }
 }
