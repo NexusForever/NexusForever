@@ -12,6 +12,7 @@ using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Game;
 using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.CharacterCache;
+using NexusForever.WorldServer.Game.Cinematic;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
@@ -59,6 +60,7 @@ namespace NexusForever.WorldServer
             FactionManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
 
+            GlobalCinematicManager.Instance.Initialise();
             GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
             GlobalAchievementManager.Instance.Initialise(); // must be initialised before guilds
             GlobalGuildManager.Instance.Initialise(); // must be initialised before residences
