@@ -351,7 +351,7 @@ namespace NexusForever.WorldServer.Game.Housing
                     }
                     if ((saveMask & ResidenceSaveMask.Flags) != 0)
                     {
-                        model.Flags = Sky;
+                        model.Flags = (ushort)Flags;
                         entity.Property(p => p.Flags).IsModified = true;
                     }
                 }

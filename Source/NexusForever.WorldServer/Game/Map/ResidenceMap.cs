@@ -504,5 +504,18 @@ namespace NexusForever.WorldServer.Game.Map
 
             SendHousingProperties();
         }
+
+        /// <summary>
+        /// UpdateResidenceFlags <see cref="Residence"/>, this is called directly from a packet hander.
+        /// </summary>
+        public void UpdateResidenceFlags(Player player, ClientHousingFlagsUpdate flagsUpdate)
+        {
+            if (!residence.CanModifyResidence(player.CharacterId))
+                throw new InvalidPacketValueException();
+
+            residence.Flags = flagsUpdate.Flags;
+
+            SendHousingProperties();
+        }
     }
 }
