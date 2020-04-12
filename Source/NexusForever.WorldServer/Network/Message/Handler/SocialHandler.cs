@@ -45,9 +45,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleEmote(WorldSession session, ClientEmote emote)
         {
             StandState standState = StandState.Stand;
+            EmotesEntry entry = null;
             if (emote.EmoteId != 0)
             {
-                EmotesEntry entry = GameTableManager.Instance.Emotes.GetEntry(emote.EmoteId);
+                entry = GameTableManager.Instance.Emotes.GetEntry(emote.EmoteId);
                 if (entry == null)
                     throw (new InvalidPacketValueException("HandleEmote: Invalid EmoteId"));
 
@@ -57,12 +58,29 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (emote.EmoteId == 0 && session.Player.IsSitting)
                 session.Player.Unsit();
 
-            session.Player.EnqueueToVisible(new ServerEmote
+            if (emote.EmoteId == 0)
+                return;
+
+            // TODO: Only set this when the Player has an "unlimited duration" emote active - like /sit, /sleep, /dance.
+            session.Player.IsEmoting = true;
+
+            session.Player.EnqueueToVisible(new ServerEntityEmote
             {
-                Guid       = session.Player.Guid,
-                StandState = standState,
-                EmoteId    = emote.EmoteId
+                EmotesId = (ushort)emote.EmoteId,
+                Seed = emote.Seed,
+                SourceUnitId = session.Player.Guid,
+                TargetUnitId = emote.TargetUnitId,
+                Targeted = emote.Targeted,
+                Silent = emote.Silent
             });
+
+            if (entry.NoArgAnim != 0)
+                session.Player.EnqueueToVisible(new ServerEmote
+                {
+                    Guid       = session.Player.Guid,
+                    StandState = standState,
+                    EmoteId    = emote.EmoteId
+                });
         }
 
         [MessageHandler(GameMessageOpcode.ClientWhoRequest)]
