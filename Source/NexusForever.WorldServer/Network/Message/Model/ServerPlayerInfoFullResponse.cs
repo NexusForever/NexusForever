@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public Path Path { get; set; }
         public Class Class { get; set; }
         public uint Level { get; set; }
-        public bool IsLastLoggedOnInDaysSet { get; set; } = true;
+        public bool IsLastLoggedOnInDaysSet { get; set; }
         public float LastLoggedInDays { get; set; }
 
         public void Write(GamePacketWriter writer)

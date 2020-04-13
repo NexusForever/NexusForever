@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            Level  = reader.ReadUInt();
+            Level = reader.ReadUInt();
         }
     }
 }

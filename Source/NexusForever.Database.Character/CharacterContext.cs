@@ -115,9 +115,7 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.LastOnline)
                     .HasColumnName("lastOnline")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("current_timestamp()")
-                    .ValueGeneratedOnAddOrUpdate();
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.Level)
                     .HasColumnName("level")

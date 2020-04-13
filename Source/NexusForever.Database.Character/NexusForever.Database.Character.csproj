@@ -5,11 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200330171436_CharacterXp.cs" />
-    <Compile Remove="Migrations\20200330171436_CharacterXp.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\NexusForever.Database\NexusForever.Database.csproj" />
   </ItemGroup>
 

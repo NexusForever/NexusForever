@@ -10,13 +10,10 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public class XpManager
     {
-        private Player player;
-        private PlayerSaveMask saveMask;
-
         public uint TotalXp
         {
             get => totalXp;
-            set
+            private set
             {
                 totalXp = value;
                 saveMask |= PlayerSaveMask.Xp;
@@ -27,7 +24,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public uint RestBonusXp
         {
             get => restBonusXp;
-            set
+            private set
             {
                 restBonusXp = value;
                 saveMask |= PlayerSaveMask.Xp;
@@ -35,6 +32,12 @@ namespace NexusForever.WorldServer.Game.Entity
         }
         private uint restBonusXp;
 
+        private PlayerSaveMask saveMask;
+        private readonly Player player;
+
+        /// <summary>
+        /// Create a new <see cref="XpManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// </summary>
         public XpManager(Player player, CharacterModel model)
         {
             this.player = player;
@@ -65,22 +68,25 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void CalculateRestXpAtLogin(CharacterModel model)
         {
+            // don't calculate rest xp for first login
             if (model.LastOnline == null)
                 return;
 
+            float xpForLevel     = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level).MinXpForLevel;
+            float xpForNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
+
             uint maximumBonusXp;
             if (player.Level < 50)
-                maximumBonusXp = (uint)((GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel - GameTableManager.Instance.XpPerLevel.GetEntry(player.Level).MinXpForLevel) * 1.5f);
+                maximumBonusXp = (uint)((xpForNextLevel - xpForLevel) * 1.5f);
             else
                 maximumBonusXp = 0; // TODO: Calculate Elder Gem Rest Bonus XP
 
             double xpPercentEarned;
 
             // TODO: Calculate Rest Bonus XP earned since last login, properly.
-            // We use DateTime.Now because LastOnline is stored by the DB in local time
             // Data from this video was used in initial calculations: https://www.youtube.com/watch?v=xEMMd7CGg4s
             // Video is out of date, but the assumption is the formulas are the same just modified more post-F2P.
-            double hoursSinceLogin = DateTime.Now.Subtract((DateTime)model.LastOnline).TotalHours;
+            double hoursSinceLogin = DateTime.UtcNow.Subtract((DateTime)model.LastOnline).TotalHours;
             switch (model.WorldId)
             {
                 case 1229:
@@ -95,17 +101,19 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // TODO: Apply bonuses from spells as necessary
 
-            uint bonusXpValue = Math.Clamp((uint)((GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel - GameTableManager.Instance.XpPerLevel.GetEntry(player.Level).MinXpForLevel) * xpPercentEarned), 0, maximumBonusXp);
+            uint bonusXpValue = Math.Clamp((uint)((xpForNextLevel - xpForLevel) * xpPercentEarned), 0, maximumBonusXp);
             uint totalBonusXp = Math.Clamp(model.RestBonusXp + bonusXpValue, 0u, maximumBonusXp);
             RestBonusXp = totalBonusXp;
         }
 
+        /// <summary>
         /// Grants <see cref="Player"/> the supplied experience, handling level up if necessary.
         /// </summary>
-        /// <param name="xp">Experience to grant</param>
+        /// <param name="earnedXp">Experience to grant</param>
         /// <param name="reason"><see cref="ExpReason"/> for the experience grant</param>
         public void GrantXp(uint earnedXp, ExpReason reason = ExpReason.Cheat)
         {
+            // TODO: move to configuration option
             const uint maxLevel = 50;
 
             if (earnedXp < 1)
@@ -129,46 +137,26 @@ namespace NexusForever.WorldServer.Game.Entity
             if (reason == ExpReason.KillCreature)
                 restXp = (uint)(earnedXp * 0.5f);
 
-            uint currentLevel = player.Level;
-            uint currentXp = TotalXp;
-            uint xpToNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
-            uint totalXp = earnedXp + currentXp + signatureXp + restXp;
-
             player.Session.EnqueueMessageEncrypted(new ServerExperienceGained
             {
-                TotalXpGained = earnedXp + signatureXp + restXp,
-                RestXpAmount = restXp,
+                TotalXpGained     = earnedXp + signatureXp + restXp,
+                RestXpAmount      = restXp,
                 SignatureXpAmount = signatureXp,
-                Reason = reason
+                Reason            = reason
             });
 
-            while (totalXp >= xpToNextLevel && currentLevel < maxLevel) // WorldServer.Rules.MaxLevel)
+            uint totalXp = TotalXp + earnedXp + signatureXp + restXp;
+
+            uint xpToNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
+            while (totalXp >= xpToNextLevel && player.Level < maxLevel) // WorldServer.Rules.MaxLevel)
             {
                 totalXp -= xpToNextLevel;
-
-                if (currentLevel < maxLevel)
-                    GrantLevel((byte)(player.Level + 1));
-                else
-                {
-                    if (totalXp > 0)
-                        earnedXp -= totalXp;
-                }
-
-                currentLevel = player.Level;
+                GrantLevel((byte)(player.Level + 1));
 
                 xpToNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
             }
 
-            SetXp(earnedXp + currentXp + signatureXp + restXp);
-        }
-
-        /// <summary>
-        /// Sets <see cref="Player"/> <see cref="TotalXp"/> to supplied value
-        /// </summary>
-        /// <param name="xp"></param>
-        private void SetXp(uint xp)
-        {
-            TotalXp = xp;
+            TotalXp += earnedXp + signatureXp + restXp;
         }
 
         /// <summary>
@@ -178,21 +166,19 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <param name="reason"><see cref="ExpReason"/> for the level grant</param>
         public void SetLevel(byte newLevel, ExpReason reason = ExpReason.Cheat)
         {
-            uint oldLevel = player.Level;
-
-            if (newLevel == oldLevel)
+            if (newLevel == player.Level)
                 return;
 
             uint newXp = GameTableManager.Instance.XpPerLevel.GetEntry(newLevel).MinXpForLevel;
             player.Session.EnqueueMessageEncrypted(new ServerExperienceGained
             {
-                TotalXpGained = newXp - TotalXp,
-                RestXpAmount = 0,
+                TotalXpGained     = newXp - TotalXp,
+                RestXpAmount      = 0,
                 SignatureXpAmount = 0,
-                Reason = reason
+                Reason            = reason
             });
-            SetXp(newXp);
 
+            TotalXp = newXp;
             GrantLevel(newLevel);
         }
 
@@ -203,7 +189,6 @@ namespace NexusForever.WorldServer.Game.Entity
         private void GrantLevel(byte newLevel)
         {
             uint oldLevel = player.Level;
-
             if (newLevel == oldLevel)
                 return;
 

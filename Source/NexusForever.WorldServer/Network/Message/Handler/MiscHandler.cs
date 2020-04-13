@@ -28,6 +28,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (character == null)
                 throw new InvalidPacketValueException();
 
+            float? onlineStatus = character.GetOnlineStatus();
             session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
             {
                 BaseData = new ServerPlayerInfoFullResponse.Base
@@ -45,8 +46,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 Path = character.Path,
                 Class = character.Class,
                 Level = character.Level,
-                IsLastLoggedOnInDaysSet = true,
-                LastLoggedInDays = character.GetOnlineStatus()
+                IsLastLoggedOnInDaysSet = onlineStatus.HasValue,
+                LastLoggedInDays = onlineStatus.GetValueOrDefault(0f)
             });
             
         }

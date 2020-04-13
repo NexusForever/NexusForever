@@ -122,9 +122,12 @@ namespace NexusForever.WorldServer.Game.Entity
         public bool IsLoading { get; private set; } = true;
 
         /// <summary>
-        /// Returns a <see cref="float"/> representing decimal value, in days, since Player was last online. Used by <see cref="ICharacter"/>.
+        /// Returns a <see cref="float"/> representing decimal value, in days, since the character was last online. Used by <see cref="ICharacter"/>.
         /// </summary>
-        public float GetOnlineStatus() => 0f;
+        /// <remarks>
+        /// 0 is always returned for online players.
+        /// </remarks>
+        public float? GetOnlineStatus() => 0f;
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
@@ -846,6 +849,8 @@ namespace NexusForever.WorldServer.Game.Entity
             entity.Property(p => p.TimePlayedLevel).IsModified = true;
             model.TimePlayedTotal = (uint)TimePlayedTotal;
             entity.Property(p => p.TimePlayedTotal).IsModified = true;
+            model.LastOnline = DateTime.UtcNow;
+            entity.Property(p => p.LastOnline).IsModified = true;
 
             foreach (StatValue stat in stats.Values)
                 stat.SaveCharacter(CharacterId, context);

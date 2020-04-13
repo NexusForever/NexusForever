@@ -1,14 +1,12 @@
 ﻿using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
-using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Name("Character")]
     public class CharacterCommandHandler : CommandCategory
     {
-        
         public CharacterCommandHandler()
             : base(true, "character")
         {
