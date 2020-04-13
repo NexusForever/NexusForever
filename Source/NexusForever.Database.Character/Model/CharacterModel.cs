@@ -14,7 +14,7 @@ namespace NexusForever.Database.Character.Model
         public byte Level { get; set; }
         public ushort FactionId { get; set; }
         public DateTime CreateTime { get; set; }
-        public DateTime LastOnline { get; set; }
+        public DateTime? LastOnline { get; set; }
         public float LocationX { get; set; }
         public float LocationY { get; set; }
         public float LocationZ { get; set; }
@@ -31,6 +31,8 @@ namespace NexusForever.Database.Character.Model
         public uint TimePlayedLevel { get; set; }
         public DateTime? DeleteTime { get; set; }
         public string OriginalName { get; set; }
+        public uint TotalXp { get; set; }
+        public uint RestBonusXp { get; set; }
 
         public ResidenceModel Residence { get; set; }
         public ICollection<CharacterAchievementModel> Achievement { get; set; } = new HashSet<CharacterAchievementModel>();

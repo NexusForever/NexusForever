@@ -78,7 +78,7 @@ namespace NexusForever.WorldServer.Game.Entity
             activeActionSet = model.ActiveSpec;
         }
 
-        private void GrantSpells()
+        public void GrantSpells()
         {
             // TODO: TEMPORARY, this should eventually be used on level up
             foreach (SpellLevelEntry spellLevel in GameTableManager.Instance.SpellLevel.Entries

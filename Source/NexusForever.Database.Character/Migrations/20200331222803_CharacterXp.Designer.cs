@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Character;
 
 namespace NexusForever.Database.Character.Migrations
 {
     [DbContext(typeof(CharacterContext))]
-    partial class CharacterContextModelSnapshot : ModelSnapshot
+    [Migration("20200331222803_CharacterXp")]
+    partial class CharacterXp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -634,9 +636,11 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnType("tinyint(4)")
                         .HasDefaultValue((sbyte)0);
 
-                    b.Property<DateTime?>("LastOnline")
+                    b.Property<DateTime>("LastOnline")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnName("lastOnline")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("current_timestamp()");
 
                     b.Property<byte>("Level")
                         .ValueGeneratedOnAdd()
@@ -993,31 +997,6 @@ namespace NexusForever.Database.Character.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("character_title");
-                });
-
-            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterTradeskillMaterialModel", b =>
-                {
-                    b.Property<ulong>("Id")
-                        .HasColumnName("id")
-                        .HasColumnType("bigint(20) unsigned")
-                        .HasDefaultValue(0ul);
-
-                    b.Property<ushort>("MaterialId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("materialId")
-                        .HasColumnType("smallint(5) unsigned")
-                        .HasDefaultValue((ushort)0);
-
-                    b.Property<ushort>("Amount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("amount")
-                        .HasColumnType("smallint(5) unsigned")
-                        .HasDefaultValue((ushort)0);
-
-                    b.HasKey("Id", "MaterialId")
-                        .HasName("PRIMARY");
-
-                    b.ToTable("character_tradeskill_materials");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterZonemapHexgroupModel", b =>
@@ -1572,16 +1551,6 @@ namespace NexusForever.Database.Character.Migrations
                         .WithMany("CharacterTitle")
                         .HasForeignKey("Id")
                         .HasConstraintName("FK__character_title_id__character_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterTradeskillMaterialModel", b =>
-                {
-                    b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
-                        .WithMany("TradeskillMaterials")
-                        .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_tradeskill_material_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

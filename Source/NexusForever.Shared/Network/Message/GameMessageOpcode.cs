@@ -212,6 +212,7 @@ namespace NexusForever.Shared.Network.Message
         ClientTitleSet                  = 0x078E,
         ServerNewRealm                  = 0x07A1,
         ClientRealmList                 = 0x07A4,
+        ClientReplayLevelRequest        = 0x07A5,
         ClientCharacterSelect           = 0x07DD,
         ClientCharacterList             = 0x07E0,
         ClientEntityInteract            = 0x07EA,
