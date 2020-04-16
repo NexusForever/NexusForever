@@ -513,7 +513,9 @@ namespace NexusForever.WorldServer.Game.Map
             if (!residence.CanModifyResidence(player.CharacterId))
                 throw new InvalidPacketValueException();
 
-            residence.Flags = flagsUpdate.Flags;
+            residence.Flags           = flagsUpdate.Flags;
+            residence.ResourceSharing = flagsUpdate.ResourceSharing;
+            residence.GardenSharing   = flagsUpdate.GardenSharing;
 
             SendHousingProperties();
         }

@@ -2,7 +2,6 @@
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Housing.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using System;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -11,13 +10,15 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public TargetPlayerIdentity Identity { get; } = new TargetPlayerIdentity();
         public ResidenceFlags Flags { get; private set; }
-        public uint Unknown0 { get; private set; }
+        public byte ResourceSharing { get; private set; }
+        public byte GardenSharing { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
             Identity.Read(reader);
-            Flags = reader.ReadEnum<ResidenceFlags>(3u);
-            Unknown0 = reader.ReadUInt();
+            Flags           = reader.ReadEnum<ResidenceFlags>(32u);
+            ResourceSharing = reader.ReadByte(3u);
+            GardenSharing   = reader.ReadByte(3u);
         }
     }
 }

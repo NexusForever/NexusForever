@@ -354,6 +354,16 @@ namespace NexusForever.WorldServer.Game.Housing
                         model.Flags = (ushort)Flags;
                         entity.Property(p => p.Flags).IsModified = true;
                     }
+                    if ((saveMask & ResidenceSaveMask.ResourceSharing) != 0)
+                    {
+                        model.ResourceSharing = ResourceSharing;
+                        entity.Property(p => p.ResourceSharing).IsModified = true;
+                    }
+                    if ((saveMask & ResidenceSaveMask.GardenSharing) != 0)
+                    {
+                        model.GardenSharing = GardenSharing;
+                        entity.Property(p => p.GardenSharing).IsModified = true;
+                    }
                 }
 
                 saveMask = ResidenceSaveMask.None;
