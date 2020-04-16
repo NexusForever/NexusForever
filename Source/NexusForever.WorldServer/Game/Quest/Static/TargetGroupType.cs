@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NexusForever.WorldServer.Game.Static
+﻿namespace NexusForever.WorldServer.Game.Quest.Static
 {
     public enum TargetGroupType
     {

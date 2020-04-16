@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using NexusForever.WorldServer.Command.Attributes;
 using NexusForever.WorldServer.Command.Contexts;
 using NexusForever.WorldServer.Game;
@@ -95,7 +96,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
             context.Session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature, creatureId, quantity);
             context.Session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature2, creatureId, quantity);
-            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(creatureId))
+            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(creatureId) ?? Enumerable.Empty<uint>())
             {
                 context.Session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroup, targetGroupId, quantity);
                 context.Session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroups, targetGroupId, quantity);

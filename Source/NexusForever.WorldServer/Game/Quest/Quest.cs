@@ -264,7 +264,8 @@ namespace NexusForever.WorldServer.Game.Quest
 
             // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (QuestObjective objective in objectives
-                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data).OrderByDescending(o => o.Index))
+                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data)
+                .OrderByDescending(o => o.Index))
             {
                 if (objective.IsComplete())
                     continue;
@@ -288,7 +289,7 @@ namespace NexusForever.WorldServer.Game.Quest
             if (PendingDelete)
                 return;
 
-            QuestObjective objective = objectives.FirstOrDefault(i => i.Entry.Id == id);
+            QuestObjective objective = objectives.SingleOrDefault(i => i.Entry.Id == id);
             if (objective == null)
                 return;
 

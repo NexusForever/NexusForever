@@ -7,7 +7,7 @@ using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Static;
+using NexusForever.WorldServer.Game.Quest.Static;
 
 namespace NexusForever.WorldServer.Game
 {
@@ -195,7 +195,7 @@ namespace NexusForever.WorldServer.Game
         /// </summary>
         public ImmutableList<uint> GetTargetGroupsForCreatureId(uint creatureId)
         {
-            return creatureAssociatedTargetGroups.TryGetValue(creatureId, out ImmutableList<uint> entries) ? entries : new List<uint>().ToImmutableList();
+            return creatureAssociatedTargetGroups.TryGetValue(creatureId, out ImmutableList<uint> entries) ? entries : null;
         }
     }
 }
