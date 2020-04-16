@@ -144,6 +144,7 @@ namespace NexusForever.Shared.Network.Message
         ServerHousingVendorList         = 0x0508,
         ClientHousingRemodel            = 0x050A,
         ClientHousingDecorUpdate        = 0x050B,
+        ClientHousingFlagsUpdate        = 0x050E,
         ClientHousingPlugUpdate         = 0x0510,
         ClientHousingVendorList         = 0x0525,
         ServerHousingRandomCommunityList = 0x0526,
