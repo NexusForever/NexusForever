@@ -320,6 +320,7 @@ namespace NexusForever.WorldServer.Game.Entity
                     objective.Progress = 0u;
             }
 
+            quest.Flags |= QuestFlags.Tracked;
             quest.State = QuestState.Accepted;
             activeQuests.Add((ushort)info.Entry.Id, quest);
 
@@ -429,7 +430,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void QuestComplete(ushort questId, ushort reward, bool communicator)
         {
-            if (GlobalQuestManager.Instance.GetQuestInfo(questId) == null)
+            QuestInfo questInfo = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (questInfo == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
 
             if (DisableManager.Instance.IsDisabled(DisableType.Quest, questId))
@@ -440,7 +442,14 @@ namespace NexusForever.WorldServer.Game.Entity
 
             Quest.Quest quest = GetQuest(questId, GetQuestFlags.Active);
             if (quest == null)
-                throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which they don't have!");
+            {
+                if (!questInfo.IsAutoComplete())
+                    throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which they don't have!");
+
+                QuestAdd(questId, null);
+                quest = GetQuest(questId);
+                quest.State = QuestState.Achieved;
+            }
 
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
@@ -601,6 +610,15 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             foreach (Quest.Quest quest in activeQuests.Values)
                 quest.ObjectiveUpdate(type, data, progress);
+        }
+
+        /// <summary>
+        /// Update any active <see cref="Quest"/> <see cref="QuestObjective"/>'s with supplied ID with progress.
+        /// </summary>
+        public void ObjectiveUpdate(uint id, uint progress)
+        {
+            foreach (Quest.Quest quest in activeQuests.Values)
+                quest.ObjectiveUpdate(id, progress);
         }
     }
 }
