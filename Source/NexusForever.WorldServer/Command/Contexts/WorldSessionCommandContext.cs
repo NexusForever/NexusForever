@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 

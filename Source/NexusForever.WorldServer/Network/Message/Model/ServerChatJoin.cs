@@ -1,11 +1,11 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ServerChatJoin)]
-    class ServerChatJoin : IWritable
+    public class ServerChatJoin : IWritable
     {
         public ChatChannel Channel { get; set; }
         public ulong ChannelId { get; set; }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -23,7 +22,7 @@ namespace NexusForever.Shared.Network
 
         private FragmentedBuffer onDeck;
         private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new ConcurrentQueue<ClientGamePacket>();
-        private readonly Queue<ServerGamePacket> outgoingPackets = new Queue<ServerGamePacket>();
+        private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new ConcurrentQueue<ServerGamePacket>();
 
         /// <summary>
         /// Enqueue <see cref="IWritable"/> to be sent to the client.
