@@ -24,9 +24,8 @@ using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.Setting;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Game.Static;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -369,7 +368,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
-            SocialManager.Instance.JoinChatChannels(Session);
             SendInGameTime();
             PathManager.SendInitialPackets();
             BuybackManager.Instance.SendBuybackItems(this);
@@ -611,7 +609,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 Save(() =>
                 {
                     RemoveFromMap();
-                    SocialManager.Instance.LeaveChatChannels(Session);
                     Session.Player = null;
                 });
             }

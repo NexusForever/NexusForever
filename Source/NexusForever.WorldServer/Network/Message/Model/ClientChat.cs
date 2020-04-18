@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
