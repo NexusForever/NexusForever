@@ -151,6 +151,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
+        public bool CanTeleport() => pendingTeleport == null;
 
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
@@ -635,6 +636,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void TeleportTo(WorldEntry entry, Vector3 vector, uint instanceId = 0u, ulong residenceId = 0ul)
         {
+            if (!CanTeleport())
+                throw new InvalidOperationException($"Player {CharacterId} tried to teleport when they're already teleporting.");
+
             if (DisableManager.Instance.IsDisabled(DisableType.World, entry.Id))
             {
                 SendSystemMessage($"Unable to teleport to world {entry.Id} because it is disabled.");

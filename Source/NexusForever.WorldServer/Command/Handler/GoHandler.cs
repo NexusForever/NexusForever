@@ -27,6 +27,12 @@ namespace NexusForever.WorldServer.Command.Handler
         }
         protected override async Task HandleCommandAsync(CommandContext context, string command, string[] parameters)
         {
+            if (!context.Session.Player.CanTeleport())
+            {
+                await context.SendErrorAsync("You have a pending teleport! Please wait to use this command.");
+                return;
+            }
+
             string zoneName = string.Join(" ", parameters);
 
             WorldLocation2Entry zone = SearchManager.Instance.Search<WorldLocation2Entry>(zoneName, context.Language, GetTextIds).FirstOrDefault();
