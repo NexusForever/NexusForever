@@ -421,6 +421,16 @@ namespace NexusForever.WorldServer.Game.Map
             residence.DecorDelete(decor);
 
             // TODO: send packet to remove from decor list
+            var residenceDecor = new ServerHousingResidenceDecor();
+            residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
+            {
+                RealmId = WorldServer.RealmId,
+                ResidenceId = residence.Id,
+                DecorId = decor.DecorId,
+                DecorInfoId = 0
+            });
+
+            EnqueueToAll(residenceDecor);
         }
 
         /// <summary>
