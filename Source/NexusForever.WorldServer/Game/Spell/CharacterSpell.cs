@@ -38,6 +38,8 @@ namespace NexusForever.WorldServer.Game.Spell
         private UnlockedSpellSaveMask saveMask;
 
         private UpdateTimer rechargeTimer;
+        private bool buttonPressed;
+        private bool noCooldown => SpellInfo.Entry.SpellCoolDown == 0 && SpellInfo.Entry.SpellCoolDownId00 == 0 && SpellInfo.Entry.SpellCoolDownId01 == 0 && SpellInfo.Entry.SpellCoolDownId02 == 0;
 
         /// <summary>
         /// Create a new <see cref="CharacterSpell"/> from an existing database model.
@@ -129,10 +131,23 @@ namespace NexusForever.WorldServer.Game.Spell
         }
 
         /// <summary>
+        /// Used to call this spell from the <see cref="SpellManager"/>. For use in continuous casting.
+        /// </summary>
+        public void SpellManagerCast()
+        {
+            if (!buttonPressed)
+                throw new InvalidOperationException($"Spell should not cast because button is not held down!");
+
+            CastSpell();
+        }
+
+        /// <summary>
         /// Used for when the client does not have continuous casting enabled
         /// </summary>
         public void Cast()
         {
+            Owner.SpellManager.SetAsContinuousCast(null);
+
             CastSpell();
         }
 
@@ -142,10 +157,16 @@ namespace NexusForever.WorldServer.Game.Spell
         public void Cast(bool buttonPressed)
         {
             // TODO: Handle continuous casting of spell for Player if button remains depressed
+            this.buttonPressed = buttonPressed;
 
             // If the player depresses button after the spell had exceeded its threshold, don't try and recast the spell until button is pressed down again.
-            if (!buttonPressed)
+            if (buttonPressed && noCooldown)
+                Owner.SpellManager.SetAsContinuousCast(this);
+            else if (!buttonPressed)
+            {
+                Owner.SpellManager.SetAsContinuousCast(null);
                 return;
+            }
 
             CastSpell();
         }
