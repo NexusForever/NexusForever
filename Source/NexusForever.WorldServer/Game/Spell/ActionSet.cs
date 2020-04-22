@@ -63,7 +63,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if ((saveMask & ActionSetSaveMask.ActionSetAmps) != 0)
             {
-                foreach ((ushort id, ActionSetAmp amp) in amps.ToList())
+                foreach ((ushort id, ActionSetAmp amp) in amps.OrderBy(i => i.Value.PendingDelete == true).ToList())
                 {
                     if (amp.PendingDelete)
                         amps.Remove(id);
@@ -74,7 +74,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             if ((saveMask & ActionSetSaveMask.ActionSetActions) != 0)
             {
-                foreach ((UILocation location, ActionSetShortcut shortcut) in actions.ToList())
+                foreach ((UILocation location, ActionSetShortcut shortcut) in actions.OrderBy(i => i.Value.PendingDelete == true).ToList())
                 {
                     if (shortcut.PendingDelete)
                         actions.Remove(location);
