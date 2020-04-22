@@ -28,6 +28,12 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
+            if (!context.Session.Player.CanTeleport())
+            {
+                await context.SendErrorAsync("You have a pending teleport! Please wait to use this command.");
+                return;
+            }
+
             if (parameters.Length == 4)
             {
                 // optional world parameter is supplied, make sure it is valid too
@@ -49,6 +55,12 @@ namespace NexusForever.WorldServer.Command.Handler
             if (parameters.Length != 1 || !uint.TryParse(parameters[0], out uint worldLocation2Id))
             {
                 await SendHelpAsync(context);
+                return;
+            }
+
+            if (!context.Session.Player.CanTeleport())
+            {
+                await context.SendErrorAsync("You have a pending teleport! Please wait to use this command.");
                 return;
             }
 

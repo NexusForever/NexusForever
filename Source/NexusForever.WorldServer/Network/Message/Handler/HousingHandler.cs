@@ -137,6 +137,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (!(session.Player.Map is ResidenceMap))
                 throw new InvalidPacketValueException();
 
+            if (!session.Player.CanTeleport())
+                return;
+
             Task<Residence> residenceTask;
             if (housingVisit.TargetResidenceName != "")
                 residenceTask = ResidenceManager.Instance.GetResidence(housingVisit.TargetResidenceName);

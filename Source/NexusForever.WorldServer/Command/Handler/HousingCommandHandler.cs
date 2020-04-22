@@ -20,6 +20,12 @@ namespace NexusForever.WorldServer.Command.Handler
         [SubCommandHandler("teleport", "[name] - Teleport to a residence, optionally specifying a character")]
         public Task TeleportSubCommandHandler(CommandContext context, string command, string[] parameters)
         {
+            if (!context.Session.Player.CanTeleport())
+            {
+                context.SendErrorAsync("You have a pending teleport! Please wait to use this command.");
+                return Task.CompletedTask;
+            }
+
             string name = parameters.Length == 0 ? context.Session.Player.Name : string.Join(" ", parameters);
 
             Residence residence = ResidenceManager.Instance.GetResidence(name).GetAwaiter().GetResult();
