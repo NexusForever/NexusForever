@@ -184,7 +184,7 @@ namespace NexusForever.Database.Character
             using var context = new CharacterContext(config);
             return context.Residence
                 .Include(r => r.Character)
-                .Where(r => r.PrivacyLevel == 0)
+                .Where(r => r.PrivacyLevel == 0 && r.Character.OriginalName == null)
                 .ToList();
         }
 

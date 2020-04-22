@@ -475,6 +475,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.CanProcessPackets = true;
 
+                ResidenceManager.Instance.RemoveResidence(characterToDelete.Name);
                 CharacterManager.Instance.DeleteCharacter(characterToDelete.Id);
 
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
