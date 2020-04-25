@@ -15,5 +15,6 @@ namespace NexusForever.WorldServer.Game.Mail
         public ulong MoneyToGive { get; set; }
         public ulong CodAmount { get; set; }
         public DeliveryTime DeliveryTime { get; set; }
+        public MailFlag Flags { get; set; }
     }
 }

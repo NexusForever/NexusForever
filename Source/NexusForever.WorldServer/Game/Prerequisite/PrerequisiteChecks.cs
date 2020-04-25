@@ -105,6 +105,21 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             }
         }
 
+        [PrerequisiteCheck(PrerequisiteType.AccountItemClaimed)]
+        private static bool PrerequisiteCheckAccountItemClaimed(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.NotEqual:
+                    return player.Inventory.HasItem(value) == false;
+                case PrerequisiteComparison.Equal:
+                    return player.Inventory.HasItem(value) == true;
+                default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.AccountItemClaimed}!");
+                    return false;
+            }
+        }
+
         [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
         private static bool PrerequisiteCheckBaseFaction(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
         {

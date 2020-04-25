@@ -801,6 +801,22 @@ namespace NexusForever.WorldServer.Game.Entity
                     }, ItemUpdateReason.ResourceConversion);
         }
 
+        /// <summary>
+        /// Returns whether or not this <see cref="Player"/> has an item with the supplied Item2Id
+        /// </summary>
+        public bool HasItem(uint item2Id)
+        {
+            foreach (Bag bag in bags.Values)
+            {
+                foreach (Item item in bag)
+                {
+                    if (item.Entry.Id == item2Id) return true;
+                }
+            }
+
+            return false;
+        }
+
         private Bag GetBag(InventoryLocation location)
         {
             return bags.TryGetValue(location, out Bag container) ? container : null;

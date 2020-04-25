@@ -1,6 +1,9 @@
 ﻿using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -38,6 +41,35 @@ namespace NexusForever.WorldServer.Command.Handler
                 context.SendMessage($"Account {email} successfully removed!");
             else
                 context.SendMessage($"Cannot find account with Email: {email}");
+        }
+
+        [Command(Permission.AccountInventory, "A collection of commands to manage account inventory.", "inventory")]
+        public class AccountInventoryCommandCategory : CommandCategory
+        {
+            [Command(Permission.AccountInventoryItemAdd, "Add an item to the account inventory.", "add")]
+            public void HandleAccountInventoryCommandItemAdd(ICommandContext context,
+                [Parameter("Item to add")]
+                uint itemId,
+                [Parameter("Item quantity")]
+                uint? quantity)
+            {
+                quantity ??= 1u;
+
+                if (context.GetTargetOrInvoker<Player>() == null)
+                {
+                    context.SendMessage("You need to have a target to add an Account Item to!");
+                    return;
+                }
+
+                AccountItemEntry accountItem = GameTableManager.Instance.AccountItem.GetEntry(itemId);
+                if (accountItem == null)
+                {
+                    context.SendMessage($"Could not find Account Item with ID {itemId}. Please try again with a valid ID.");
+                    return;
+                }
+
+                context.GetTargetOrInvoker<Player>().Session.AccountInventory.ItemCreate(accountItem);
+            }
         }
     }
 }

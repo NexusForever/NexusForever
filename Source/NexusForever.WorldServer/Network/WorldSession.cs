@@ -26,6 +26,7 @@ namespace NexusForever.WorldServer.Network
         public GenericUnlockManager GenericUnlockManager { get; private set; }
         public AccountCurrencyManager AccountCurrencyManager { get; private set; }
         public EntitlementManager EntitlementManager { get; private set; }
+        public AccountInventory AccountInventory { get; set; }
 
         public override void OnAccept(Socket newSocket)
         {
@@ -70,6 +71,7 @@ namespace NexusForever.WorldServer.Network
             GenericUnlockManager   = new GenericUnlockManager(this, account);
             AccountCurrencyManager = new AccountCurrencyManager(this, account);
             EntitlementManager     = new EntitlementManager(this, account);
+            AccountInventory       = new AccountInventory(this, account);
         }
 
         public void SetEncryptionKey(byte[] sessionKey)

@@ -252,6 +252,7 @@ namespace NexusForever.Shared.Network.Message
         ClientStorefrontPurchaseCharacter = 0x082A,
         ClientStorefrontRequestCatalog  = 0x082D,
         ClientSummonVanityPet           = 0x082F,
+        ClientAccountItemBind           = 0x0839,
         ServerTimeOfDay                 = 0x0845,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
@@ -285,10 +286,12 @@ namespace NexusForever.Shared.Network.Message
         ServerAccountCurrencyGrant      = 0x0967,
         ServerAccountEntitlements       = 0x0968,
         ServerAccountItems              = 0x096D,
+        ServerAccountOperationResult    = 0x0970,
         ServerAccountEntitlement        = 0x0973,
         ServerAccountItemCooldownSet    = 0x0974,
         ServerAccountItemAdd            = 0x0975,
         ServerAccountItemsPending       = 0x0979,
+        ServerAccountItemDelete         = 0x097C,
         ServerGenericUnlockList         = 0x0981,
         ServerGenericUnlock             = 0x0982,
         ServerGenericUnlockResult       = 0x0985,
