@@ -154,6 +154,9 @@ namespace NexusForever.WorldServer.Game.Achievement
             // TODO: should the server also check PrerequisiteId?
             if (entry.PrerequisiteIdServer != 0u && !PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteIdServer))
                 return false;
+            
+            if (entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteId))
+                return false;
 
             // TODO: research PrerequisiteIdObjective and PrerequisiteIdObjectiveAlt
 
@@ -179,6 +182,10 @@ namespace NexusForever.WorldServer.Game.Achievement
             if (entry.ObjectId != 0u && entry.ObjectId != objectId)
                 return false;
             if (entry.ObjectIdAlt != 0u && entry.ObjectIdAlt != objectIdAlt)
+                return false;
+
+            // TODO: Research this case where both values are 0. It's assumed the checklist is checked by ID by a script.
+            if (entry.ObjectId == 0u && entry.ObjectIdAlt == 0u)
                 return false;
 
             return true;

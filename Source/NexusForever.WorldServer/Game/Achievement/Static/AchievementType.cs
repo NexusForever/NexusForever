@@ -5,6 +5,7 @@
     {
         KillCreatureEntry = 1,
         KillCreatureGroup = 2,
-        QuestComplete     = 3
+        QuestComplete     = 3,
+        ItemConsume       = 80
     }
 }
