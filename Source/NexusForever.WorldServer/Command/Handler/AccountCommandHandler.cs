@@ -26,11 +26,11 @@ namespace NexusForever.WorldServer.Command.Handler
                 await SendHelpAsync(context).ConfigureAwait(false);
                 return;
             }
+            string mail = parameters[0].ToLower();
+            (string salt, string verifier) = PasswordProvider.GenerateSaltAndVerifier(mail, parameters[1]);
+            DatabaseManager.Instance.AuthDatabase.CreateAccount(mail, salt, verifier);
 
-            (string salt, string verifier) = PasswordProvider.GenerateSaltAndVerifier(parameters[0], parameters[1]);
-            DatabaseManager.Instance.AuthDatabase.CreateAccount(parameters[0], salt, verifier);
-
-            await context.SendMessageAsync($"Account {parameters[0]} created successfully")
+            await context.SendMessageAsync($"Account {mail} created successfully")
                 .ConfigureAwait(false);
         }
 
