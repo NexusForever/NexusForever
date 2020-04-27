@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Entity
     public class SupplySatchelManager: IEnumerable<TradeskillMaterial>, ISaveCharacter
     {
         private readonly Player player;
-        private readonly uint maximumStackAmount;
+        private readonly uint maximumStackAmount = 100;
         private readonly Dictionary</* materialId */ushort, TradeskillMaterial> tradeskillMaterials = new Dictionary<ushort, TradeskillMaterial>();
 
         public SupplySatchelManager(Player owner, CharacterModel model)
@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Game.Entity
             player = owner;
 
             // TODO: Make this configurable and powered by the same entry that would power the RewardProperty
-            maximumStackAmount = 100u;
+            maximumStackAmount = (uint)owner.Session.EntitlementManager.GetRewardProperty(Static.RewardPropertyType.TradeskillMatStackLimit, 0)?.Value;
 
             foreach (CharacterTradeskillMaterialModel tradeskillMaterial in model.TradeskillMaterials)
                 tradeskillMaterials.Add(tradeskillMaterial.MaterialId, new TradeskillMaterial(tradeskillMaterial));

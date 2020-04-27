@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using RewardPropertyEnum = NexusForever.WorldServer.Game.Entity.Static.RewardProperty;
+using RewardPropertyEnum = NexusForever.WorldServer.Game.Entity.Static.RewardPropertyType;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -10,14 +10,42 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public class RewardProperty : IWritable
         {
+            public class UnknownStruct : IWritable
+            {
+                public byte Unknown0 { get; set; } // 4
+                public uint Unknown1 { get; set; }
+                public byte Type { get; set; }
+                public float Value { get; set; }
+
+                public void Write(GamePacketWriter writer)
+                {
+                    writer.Write(Unknown0, 4u);
+                    writer.Write(Unknown1);
+                    writer.Write(Type, 2u);
+
+                    switch (Type)
+                    {
+                        case 0:
+                        case 2:
+                            writer.Write(Value);
+                            break;
+                        case 1:
+                            writer.Write((uint)Value);
+                            break;
+                    }
+                }
+            }
+
             public RewardPropertyEnum Id { get; set; }
+            public uint Data { get; set; }
             public byte Type { get; set; }
             public float Value { get; set; }
+            public List<UnknownStruct> UnknownStructs { get; set; } = new List<UnknownStruct>();
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(Id, 6u);
-                writer.Write(0u);
+                writer.Write(Data);
                 writer.Write(Type, 2u);
 
                 switch (Type)
@@ -31,7 +59,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
                         break;
                 }
 
-                writer.Write((byte)0);
+                writer.Write(UnknownStructs.Count, 8u);
+                UnknownStructs.ForEach(u => u.Write(writer));
             }
         }
 

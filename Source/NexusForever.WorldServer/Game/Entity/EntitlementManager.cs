@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
@@ -8,6 +9,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -21,6 +23,12 @@ namespace NexusForever.WorldServer.Game.Entity
             = new Dictionary<EntitlementType, AccountEntitlement>();
         private readonly Dictionary<EntitlementType, CharacterEntitlement> characterEntitlements
             = new Dictionary<EntitlementType, CharacterEntitlement>();
+
+        /// <summary>
+        /// All <see cref="RewardProperty"/> that are sent to the Player.
+        /// </summary>
+        /// <remarks>This is keyed by <see cref="RewardPropertyType"/> and Data key. This Data key is usually a "type", e.g. (RewardPropertyType.AccountCurrency, 15) would be Crimson Essence. This is used to determine bonuses that are specific to a type of RewardProperty.</remarks>
+        private readonly Dictionary<(RewardPropertyType, uint), RewardProperty> rewardProperties = new Dictionary<(RewardPropertyType, uint), RewardProperty>();
 
         /// <summary>
         /// Create a new <see cref="EntitlementManager"/> from existing database model.
@@ -90,6 +98,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 var entitlement = new CharacterEntitlement(entitlementModel, entry);
                 characterEntitlements.Add(entitlement.Type, entitlement);
             }
+
+            rewardProperties.Clear();
+            CalculateRewardProperties();
         }
 
         /// <summary>
@@ -113,6 +124,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 Entitlement = type,
                 Count       = entitlement.Amount
             });
+
+            UpdateRewardProperties(type, value);
         }
 
         /// <summary>
@@ -136,6 +149,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 Entitlement = type,
                 Count       = entitlement.Amount
             });
+
+            UpdateRewardProperties(type, value);
         }
 
         private static T SetEntitlement<T>(IDictionary<EntitlementType, T> collection, EntitlementEntry entry, int value, Func<T> creator)
@@ -164,6 +179,54 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             return entitlement;
+        }
+
+        /// <summary>
+        /// Calculate the <see cref="RewardProperty"/> Values based on <see cref="AccountTier"/>.
+        /// </summary>
+        private void CalculateRewardProperties()
+        {
+            foreach (RewardPropertyPremiumModifierEntry entry in AssetManager.Instance.GetRewardPropertiesForTier(session.AccountTier))
+            {
+                if (!rewardProperties.ContainsKey(((RewardPropertyType)entry.RewardPropertyId, entry.RewardPropertyData)))
+                    rewardProperties.TryAdd(((RewardPropertyType)entry.RewardPropertyId, entry.RewardPropertyData), new RewardProperty(entry));
+
+                if (rewardProperties.TryGetValue(((RewardPropertyType)entry.RewardPropertyId, entry.RewardPropertyData), out RewardProperty rewardProperty))
+                    rewardProperty.AddValue(entry, this);
+            }
+        }
+
+        /// <summary>
+        /// This updates the <see cref="Player"/> <see cref="RewardProperty"/> with the value change.
+        /// </summary>
+        private void UpdateRewardProperties(EntitlementType type, int value)
+        {
+            if (session.Player == null)
+                return;
+
+            foreach (RewardPropertyPremiumModifierEntry rewardPropertyEntry in GameTableManager.Instance.RewardPropertyPremiumModifier.Entries.Where(i => i.Tier <= (uint)session.AccountTier && (EntitlementType)i.EntitlementIdModifierCount == type))
+            {
+                if (!rewardProperties.TryGetValue(((RewardPropertyType)rewardPropertyEntry.RewardPropertyId, rewardPropertyEntry.RewardPropertyData), out RewardProperty rewardProperty))
+                    throw new InvalidOperationException($"Trying to modify RewardProperty from EntitlementManager but RewardProperty doesn't exist.");
+
+                rewardProperty.AddValue(value, session.Player);
+            }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="RewardProperty"/> that matches the <see cref="RewardPropertyType"/> and Data value.
+        /// </summary>
+        public RewardProperty GetRewardProperty(RewardPropertyType type, uint data)
+        {
+            return rewardProperties.TryGetValue((type, data), out RewardProperty rewardProperty) ? rewardProperty : null;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="List{T}"/> containing all the <see cref="RewardProperty"/> network messages for the Client.
+        /// </summary>
+        public List<ServerRewardPropertySet.RewardProperty> GetRewardPropertiesNetworkMessage()
+        {
+            return rewardProperties.Values.Select(e => e.Build()).ToList();
         }
     }
 }

@@ -3,7 +3,7 @@
     /// <summary>
     /// Replication of the CodeEnumRewardProperty enum from the client. Gaps for missing numbers.
     /// </summary>
-    public enum RewardProperty
+    public enum RewardPropertyType
     {
         XP                          = 1,
         CurrencyType                = 2,
