@@ -143,7 +143,7 @@ namespace NexusForever.WorldServer.Game.Entity
             return new ItemVisual
             {
                 Slot      = itemSlot,
-                DisplayId = Item.GetDisplayId(costumeItem != null ? costumeItem.Entry : item?.Entry),
+                DisplayId = Item.GetDisplayId(costumeItem?.Entry != null ? costumeItem.Entry : item?.Entry),
                 DyeData   = costumeItem?.DyeData ?? 0
             };
         }
