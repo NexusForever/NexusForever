@@ -76,9 +76,9 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             switch (comparison)
             {
                 case PrerequisiteComparison.NotEqual:
-                    return player.AchievementManager.HasCompletedAchievement((ushort)objectId) == false;
+                    return !player.AchievementManager.HasCompletedAchievement((ushort)objectId);
                 case PrerequisiteComparison.Equal:
-                    return player.AchievementManager.HasCompletedAchievement((ushort)objectId) == true;
+                    return player.AchievementManager.HasCompletedAchievement((ushort)objectId);
                 default:
                     log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Achievement}!");
                     return false;
