@@ -11,6 +11,7 @@
         Reputation  = 5,
         Quest       = 6,
         Achievement = 7,
-        Path        = 52
+        Path        = 52,
+        SpellBaseId = 214,
     }
 }

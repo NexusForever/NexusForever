@@ -8,6 +8,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -46,6 +47,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             if (itemSpecial.Spell4IdOnActivate > 0u)
             {
+                if (itemSpecial.PrerequisiteIdGeneric00 > 0 && !PrerequisiteManager.Instance.Meets(session.Player, itemSpecial.PrerequisiteIdGeneric00))
+                {
+                    session.Player.SendGenericError(Game.Static.GenericError.UnlockItemFailed); // TODO: Confirm right error message.
+                    return;
+                }
+
                 if (session.Player.Inventory.ItemUse(item))
                 {
                     session.Player.CastSpell(itemSpecial.Spell4IdOnActivate, new SpellParameters

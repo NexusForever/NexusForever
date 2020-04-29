@@ -10,6 +10,7 @@ using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
+using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -760,6 +761,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if ((item.Charges <= 0 && item.Entry.MaxCharges > 1)|| (item.StackCount <= 0 && item.Entry.MaxStackCount > 1))
                 return false;
+
+            player.AchievementManager.CheckAchievements(player, AchievementType.ItemConsume, item.Id);
 
             if(item.Charges >= 1 && item.Entry.MaxStackCount == 1)
                 item.Charges--;

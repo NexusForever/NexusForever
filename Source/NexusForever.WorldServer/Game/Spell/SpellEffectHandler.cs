@@ -184,5 +184,14 @@ namespace NexusForever.WorldServer.Game.Spell
             var vanityPet = new VanityPet(player, info.Entry.DataBits00);
             player.Map.EnqueueAdd(vanityPet, player.Position);
         }
+
+        [SpellEffectHandler(SpellEffectType.TitleGrant)]
+        private void HandleEffectTitleGrant(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            if (!(target is Player player))
+                return;
+
+            player.TitleManager.AddTitle((ushort)info.Entry.DataBits00);
+        }
     }
 }
