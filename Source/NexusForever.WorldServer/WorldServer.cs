@@ -20,6 +20,7 @@ using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Housing;
+using NexusForever.WorldServer.Game.Loot;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Quest;
@@ -83,6 +84,7 @@ namespace NexusForever.WorldServer
             GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
             GlobalAchievementManager.Instance.Initialise(); // must be initialised before guilds
             GlobalGuildManager.Instance.Initialise();
+            GlobalLootManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
             PrerequisiteManager.Instance.Initialise();
@@ -109,6 +111,7 @@ namespace NexusForever.WorldServer
                 ResidenceManager.Instance.Update(lastTick);
                 BuybackManager.Instance.Update(lastTick);
                 GlobalQuestManager.Instance.Update(lastTick);
+                GlobalLootManager.Instance.Update(lastTick);
                 GlobalGuildManager.Instance.Update(lastTick);
                 GlobalChatManager.Instance.Update(lastTick);
 

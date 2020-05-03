@@ -13,6 +13,9 @@ namespace NexusForever.Database.World
         public DbSet<EntityVendorModel> EntityVendor { get; set; }
         public DbSet<EntityVendorCategoryModel> EntityVendorCategory { get; set; }
         public DbSet<EntityVendorItemModel> EntityVendorItem { get; set; }
+        public DbSet<ItemLootModel> ItemLoot { get; set; }
+        public DbSet<LootGroupModel> LootGroup { get; set; }
+        public DbSet<LootItemModel> LootItem { get; set; }
         public DbSet<StoreCategoryModel> StoreCategory { get; set; }
         public DbSet<StoreOfferGroupModel> StoreOfferGroup { get; set; }
         public DbSet<StoreOfferGroupCategoryModel> StoreOfferGroupCategory { get; set; }
@@ -312,6 +315,123 @@ namespace NexusForever.Database.World
                     .WithMany(p => p.EntityVendorItem)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__entity_vendor_item_id__entity_id");
+            });
+
+            modelBuilder.Entity<LootGroupModel>(entity =>
+            {
+                entity.ToTable("loot_group");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ParentId)
+                    .HasColumnName("parentId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(null);
+
+                entity.Property(e => e.Probability)
+                    .HasColumnName("probability")
+                    .HasColumnType("float")
+                    .HasDefaultValue(100);
+
+                entity.Property(e => e.MinDrop)
+                    .HasColumnName("minDrop")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.MaxDrop)
+                    .HasColumnName("maxDrop")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Condition)
+                    .HasColumnName("condition")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValue("");
+
+                entity.HasOne(d => d.Parent)
+                    .WithMany(p => p.ChildGroup)
+                    .HasForeignKey(d => d.ParentId)
+                    .HasConstraintName("FK__loot_group_parentId__loot_group_id")
+                    .IsRequired(false);
+            });
+
+            modelBuilder.Entity<LootItemModel>(entity =>
+            {
+                entity.ToTable("loot_item");
+
+                entity.HasKey(e => new { e.Id, e.Type, e.StaticId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.StaticId)
+                    .HasColumnName("staticId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Probability)
+                    .HasColumnName("probability")
+                    .HasColumnType("float")
+                    .HasDefaultValue(100);
+
+                entity.Property(e => e.MinCount)
+                    .HasColumnName("minCount")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.MaxCount)
+                    .HasColumnName("maxCount")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValue("");
+
+                entity.HasOne(d => d.LootGroup)
+                    .WithMany(e => e.Item)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__loot_item_id__loot_group_id");
+            });
+
+            modelBuilder.Entity<ItemLootModel>(entity =>
+            {
+                entity.ToTable("item_loot");
+
+                entity.HasKey(e => e.Id)
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValue("");
+
+                entity.Property(e => e.LootGroupId)
+                    .HasColumnName("lootGroupId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(null);
             });
 
             modelBuilder.Entity<StoreCategoryModel>(entity =>

@@ -259,6 +259,7 @@ namespace NexusForever.Shared.Network.Message
         ClientEntityInteract            = 0x07EA,
         ClientPetCustomisation          = 0x07ED,
         ClientSelectRealm               = 0x07DF,
+        ServerLootNotify                = 0x07F2,
         ServerSpellGo                   = 0x07F4,
         Server07F5                      = 0x07F5, // spell related
         Server07F6                      = 0x07F6, // spell related
@@ -290,6 +291,7 @@ namespace NexusForever.Shared.Network.Message
         ServerVehiclePassengerAdd       = 0x086F,
         ServerUnitEnteredCombat         = 0x089A,
         Server089B                      = 0x089B, // mount related
+        ServerLootGrant                 = 0x08A5,
         Server08B3                      = 0x08B3,
         ServerSetUnitPathType           = 0x08B8,
         ServerVehiclePassengerRemove    = 0x08C7,

@@ -99,5 +99,26 @@ namespace NexusForever.Database.World
                 .AsNoTracking()
                 .ToImmutableList();
         }
+
+        public ImmutableList<ItemLootModel> GetAllItemLootTables()
+        {
+            using var context = new WorldContext(config);
+            return context.ItemLoot
+                .Include(e => e.LootGroup)
+                    .ThenInclude(e => e.Item)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<LootGroupModel> GetLootGroupChildren(ulong parentId)
+        {
+            using var context = new WorldContext(config);
+            return context.LootGroup.Where(i => i.ParentId == parentId)
+                .Include(e => e.ChildGroup)
+                    .ThenInclude(e => e.Item)
+                .Include(e => e.Item)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
     }
 }
