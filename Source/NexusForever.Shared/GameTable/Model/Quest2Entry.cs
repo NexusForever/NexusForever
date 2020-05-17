@@ -90,10 +90,10 @@ namespace NexusForever.Shared.GameTable.Model
         public uint VirtualItemPushedObjectiveFlagsEnum02;
         public uint VirtualItemPushedObjectiveFlagsEnum03;
         public uint QuestDirectionIdCompletion;
-        public uint Faction2IdRewardReputation00;
-        public uint Faction2IdRewardReputation01;
-        public float RewardReputationOverride00;
-        public float RewardReputationOverride01;
+        [GameTableFieldArray(2u)]
+        public uint[] Faction2IdRewardReputations;
+        [GameTableFieldArray(2u)]
+        public float[] RewardReputationOverrides;
         public uint QuestCategoryId;
         public uint LocalizedTextIdGiverSayDecline;
         public uint PeriodicQuestGroupId;

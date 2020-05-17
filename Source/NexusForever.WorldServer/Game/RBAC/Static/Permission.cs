@@ -131,6 +131,7 @@
         QuestAchieveObjective       = 79,
         QuestObjective              = 80,
         QuestKill                   = 81,
+        QuestActivate               = 105,
 
         // spell
         Spell                       = 83,

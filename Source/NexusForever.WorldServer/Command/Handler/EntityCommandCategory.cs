@@ -73,7 +73,7 @@ namespace NexusForever.WorldServer.Command.Handler
         private void BuildHeader(ICommandContext context, StringBuilder builder, WorldEntity target)
         {
             builder.AppendLine("=============================");
-            builder.AppendLine($"UnitId: {target.Guid} | DB ID: {target.EntityId} | Type: {target.Type} | CreatureID: {target.CreatureId} | Name: {GetName(target, context.Language)}");
+            builder.AppendLine($"UnitId: {target.Guid} | DB ID: {target.EntityId} | Type: {target.Type} | CreatureID: {target.CreatureId} | Name: {GetName(target, context.Language)} | QuestChecklistIdx: {target.QuestChecklistIdx}");
         }
 
         private string GetName(WorldEntity target, Language language)
