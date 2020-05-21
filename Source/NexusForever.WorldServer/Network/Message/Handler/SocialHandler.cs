@@ -5,6 +5,8 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
+using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -16,7 +18,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        public static readonly string CommandPrefix = "!";
+        private const string CommandPrefix = "!";
 
         [MessageHandler(GameMessageOpcode.ClientChat)]
         public static void HandleChat(WorldSession session, ClientChat chat)
@@ -25,7 +27,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 try
                 {
-                    CommandManager.Instance.HandleCommand(session, chat.Message, true);
+                    var target  = session.Player.GetVisible<WorldEntity>(session.Player.TargetGuid);
+                    var context = new WorldSessionCommandContext(session.Player, target);
+                    CommandManager.Instance.HandleCommand(context, chat.Message.Substring(CommandPrefix.Length));
                 }
                 catch (Exception e)
                 {

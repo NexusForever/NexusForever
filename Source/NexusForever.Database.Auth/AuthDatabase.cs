@@ -74,6 +74,10 @@ namespace NexusForever.Database.Auth
                 .Include(a => a.AccountGenericUnlock)
                 .Include(a => a.AccountKeybinding)
                 .Include(a => a.AccountEntitlement)
+                .Include(a => a.AccountPermission)
+                .Include(a => a.AccountRole)
+                .Include(a => a.AccountPermission)
+                .Include(a => a.AccountRole)
                 .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 
@@ -145,6 +149,23 @@ namespace NexusForever.Database.Auth
         {
             using var context = new AuthContext(config);
             return context.ServerMessage
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<PermissionModel> GetPermissions()
+        {
+            using var context = new AuthContext(config);
+            return context.Permission
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<RoleModel> GetRoles()
+        {
+            using var context = new AuthContext(config);
+            return context.Role
+                .Include(r => r.RolePermission)
                 .AsNoTracking()
                 .ToImmutableList();
         }

@@ -1,6 +1,8 @@
 using System;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
+using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
@@ -15,7 +17,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             try
             {
-                CommandManager.Instance.HandleCommand(session, cheat.Message, false);
+                var target  = session.Player.GetVisible<WorldEntity>(session.Player.TargetGuid);
+                var context = new WorldSessionCommandContext(session.Player, target);
+                CommandManager.Instance.HandleCommand(context, cheat.Message);
             }
             catch (Exception e)
             {

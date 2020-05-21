@@ -8,6 +8,7 @@ using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.Shared.Network.Message.Model;
 using NexusForever.Shared.Network.Packet;
+using NexusForever.WorldServer.Game.RBAC;
 using NexusForever.WorldServer.Game.Account;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -21,9 +22,10 @@ namespace NexusForever.WorldServer.Network
 
         public Player Player { get; set; }
 
-        public GenericUnlockManager GenericUnlockManager { get; set; }
-        public AccountCurrencyManager AccountCurrencyManager { get; set; }
-        public EntitlementManager EntitlementManager { get; set; }
+        public AccountRBACManager AccountRbacManager { get; private set; }
+        public GenericUnlockManager GenericUnlockManager { get; private set; }
+        public AccountCurrencyManager AccountCurrencyManager { get; private set; }
+        public EntitlementManager EntitlementManager { get; private set; }
 
         public override void OnAccept(Socket newSocket)
         {
@@ -63,6 +65,8 @@ namespace NexusForever.WorldServer.Network
 
             Account = account;
 
+            // managers
+            AccountRbacManager     = new AccountRBACManager(this, account);
             GenericUnlockManager   = new GenericUnlockManager(this, account);
             AccountCurrencyManager = new AccountCurrencyManager(this, account);
             EntitlementManager     = new EntitlementManager(this, account);

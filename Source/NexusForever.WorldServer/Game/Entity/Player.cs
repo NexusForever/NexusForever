@@ -784,6 +784,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Save(AuthContext context)
         {
+            Session.AccountRbacManager.Save(context);
             Session.GenericUnlockManager.Save(context);
             Session.AccountCurrencyManager.Save(context);
             Session.EntitlementManager.Save(context);
