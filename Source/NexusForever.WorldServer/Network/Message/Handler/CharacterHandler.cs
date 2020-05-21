@@ -20,6 +20,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Game.Static;
@@ -546,7 +547,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleRequestLogout(WorldSession session, ClientLogoutRequest logoutRequest)
         {
             if (logoutRequest.Initiated)
-                session.Player.LogoutStart();
+            {
+                bool instantLogout = session.AccountRbacManager.HasPermission(Permission.InstantLogout);
+                session.Player.LogoutStart(instantLogout ? 0D : 30D);
+            }
             else
                 session.Player.LogoutCancel();
         }

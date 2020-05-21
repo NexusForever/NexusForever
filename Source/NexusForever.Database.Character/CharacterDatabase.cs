@@ -104,7 +104,7 @@ namespace NexusForever.Database.Character
             // return context.ResidenceDecor.DefaultIfEmpty().Max(r => r.DecorId);
             return context.ResidenceDecor
                 .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
+                .Select(g => g.Max(s => s.DecorId))
                 .ToList()[0];
         }
 

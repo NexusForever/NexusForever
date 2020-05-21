@@ -270,6 +270,594 @@ namespace NexusForever.Database.Auth.Migrations
                     b.ToTable("account");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountPermissionModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<uint>("PermissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("permissionId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("account_permission");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountRoleModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<uint>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("roleId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("account_role");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.PermissionModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<string>("Name")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("name")
+                        .HasColumnType("varchar(64)")
+                        .HasDefaultValue("");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("permission");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1u,
+                            Name = "Category: Account"
+                        },
+                        new
+                        {
+                            Id = 2u,
+                            Name = "Command: AccountCreate"
+                        },
+                        new
+                        {
+                            Id = 3u,
+                            Name = "Command: AccountDelete"
+                        },
+                        new
+                        {
+                            Id = 15u,
+                            Name = "Category: Achievement"
+                        },
+                        new
+                        {
+                            Id = 17u,
+                            Name = "Command: AchievementUpdate"
+                        },
+                        new
+                        {
+                            Id = 16u,
+                            Name = "Command: AchievementGrant"
+                        },
+                        new
+                        {
+                            Id = 18u,
+                            Name = "Category: Broadcast"
+                        },
+                        new
+                        {
+                            Id = 19u,
+                            Name = "Command: BroadcastMessage"
+                        },
+                        new
+                        {
+                            Id = 20u,
+                            Name = "Category: Character"
+                        },
+                        new
+                        {
+                            Id = 21u,
+                            Name = "Command: CharacterXP"
+                        },
+                        new
+                        {
+                            Id = 22u,
+                            Name = "Command: CharacterLevel"
+                        },
+                        new
+                        {
+                            Id = 5u,
+                            Name = "Command: CharacterSave"
+                        },
+                        new
+                        {
+                            Id = 23u,
+                            Name = "Category: Currency"
+                        },
+                        new
+                        {
+                            Id = 24u,
+                            Name = "Category: CurrencyAccount"
+                        },
+                        new
+                        {
+                            Id = 25u,
+                            Name = "Command: CurrencyAccountAdd"
+                        },
+                        new
+                        {
+                            Id = 26u,
+                            Name = "Command: CurrencyAccountList"
+                        },
+                        new
+                        {
+                            Id = 27u,
+                            Name = "Category: CurrencyCharacter"
+                        },
+                        new
+                        {
+                            Id = 28u,
+                            Name = "Command: CurrencyCharacterAdd"
+                        },
+                        new
+                        {
+                            Id = 29u,
+                            Name = "Command: CurrencyCharacterList"
+                        },
+                        new
+                        {
+                            Id = 30u,
+                            Name = "Category: Disable"
+                        },
+                        new
+                        {
+                            Id = 31u,
+                            Name = "Command: DisableInfo"
+                        },
+                        new
+                        {
+                            Id = 32u,
+                            Name = "Command: DisableReload"
+                        },
+                        new
+                        {
+                            Id = 33u,
+                            Name = "Category: Door"
+                        },
+                        new
+                        {
+                            Id = 34u,
+                            Name = "Command: DoorOpen"
+                        },
+                        new
+                        {
+                            Id = 35u,
+                            Name = "Command: DoorClose"
+                        },
+                        new
+                        {
+                            Id = 36u,
+                            Name = "Category: Entitlement"
+                        },
+                        new
+                        {
+                            Id = 40u,
+                            Name = "Category: EntitlementAccount"
+                        },
+                        new
+                        {
+                            Id = 41u,
+                            Name = "Command: EntitlementAccountAdd"
+                        },
+                        new
+                        {
+                            Id = 42u,
+                            Name = "Command: EntitlementAccountList"
+                        },
+                        new
+                        {
+                            Id = 37u,
+                            Name = "Category: EntitlementCharacter"
+                        },
+                        new
+                        {
+                            Id = 38u,
+                            Name = "Command: EntitlementCharacterAdd"
+                        },
+                        new
+                        {
+                            Id = 39u,
+                            Name = "Command: EntitlementCharacterList"
+                        },
+                        new
+                        {
+                            Id = 43u,
+                            Name = "Category: Entity"
+                        },
+                        new
+                        {
+                            Id = 44u,
+                            Name = "Command: EntityInfo"
+                        },
+                        new
+                        {
+                            Id = 45u,
+                            Name = "Command: EntityProperties"
+                        },
+                        new
+                        {
+                            Id = 60u,
+                            Name = "Category: EntityModify"
+                        },
+                        new
+                        {
+                            Id = 61u,
+                            Name = "Command: EntityModifyDisplayInfo"
+                        },
+                        new
+                        {
+                            Id = 46u,
+                            Name = "Category: Generic"
+                        },
+                        new
+                        {
+                            Id = 47u,
+                            Name = "Command: GenericUnlock"
+                        },
+                        new
+                        {
+                            Id = 48u,
+                            Name = "Command: GenericUnlockAll"
+                        },
+                        new
+                        {
+                            Id = 49u,
+                            Name = "Command: GenericList"
+                        },
+                        new
+                        {
+                            Id = 4u,
+                            Name = "Category: Help"
+                        },
+                        new
+                        {
+                            Id = 54u,
+                            Name = "Category: House"
+                        },
+                        new
+                        {
+                            Id = 58u,
+                            Name = "Command: HouseTeleport"
+                        },
+                        new
+                        {
+                            Id = 55u,
+                            Name = "Category: HouseDecor"
+                        },
+                        new
+                        {
+                            Id = 56u,
+                            Name = "Command: HouseDecorAdd"
+                        },
+                        new
+                        {
+                            Id = 57u,
+                            Name = "Command: HouseDecorLookup"
+                        },
+                        new
+                        {
+                            Id = 59u,
+                            Name = "Category: Item"
+                        },
+                        new
+                        {
+                            Id = 6u,
+                            Name = "Command: ItemAdd"
+                        },
+                        new
+                        {
+                            Id = 62u,
+                            Name = "Category: Movement"
+                        },
+                        new
+                        {
+                            Id = 63u,
+                            Name = "Category: MovementSpline"
+                        },
+                        new
+                        {
+                            Id = 64u,
+                            Name = "Command: MovementSplineAdd"
+                        },
+                        new
+                        {
+                            Id = 65u,
+                            Name = "Command: MovementSplineClear"
+                        },
+                        new
+                        {
+                            Id = 66u,
+                            Name = "Command: MovementSplineLaunch"
+                        },
+                        new
+                        {
+                            Id = 67u,
+                            Name = "Category: MovementGenerator"
+                        },
+                        new
+                        {
+                            Id = 68u,
+                            Name = "Command: MovementGeneratorDirect"
+                        },
+                        new
+                        {
+                            Id = 69u,
+                            Name = "Command: MovementGeneratorRandom"
+                        },
+                        new
+                        {
+                            Id = 70u,
+                            Name = "Category: Path"
+                        },
+                        new
+                        {
+                            Id = 71u,
+                            Name = "Command: PathUnlock"
+                        },
+                        new
+                        {
+                            Id = 72u,
+                            Name = "Command: PathActivate"
+                        },
+                        new
+                        {
+                            Id = 73u,
+                            Name = "Command: PathXP"
+                        },
+                        new
+                        {
+                            Id = 74u,
+                            Name = "Category: Pet"
+                        },
+                        new
+                        {
+                            Id = 75u,
+                            Name = "Command: PetUnlockFlair"
+                        },
+                        new
+                        {
+                            Id = 76u,
+                            Name = "Category: Quest"
+                        },
+                        new
+                        {
+                            Id = 77u,
+                            Name = "Command: QuestAdd"
+                        },
+                        new
+                        {
+                            Id = 78u,
+                            Name = "Command: QuestAchieve"
+                        },
+                        new
+                        {
+                            Id = 79u,
+                            Name = "Command: QuestAchieveObjective"
+                        },
+                        new
+                        {
+                            Id = 80u,
+                            Name = "Command: QuestObjective"
+                        },
+                        new
+                        {
+                            Id = 81u,
+                            Name = "Command: QuestKill"
+                        },
+                        new
+                        {
+                            Id = 7u,
+                            Name = "Category: RBAC"
+                        },
+                        new
+                        {
+                            Id = 8u,
+                            Name = "Category: RBACAccount"
+                        },
+                        new
+                        {
+                            Id = 9u,
+                            Name = "Category: RBACAccountPermission"
+                        },
+                        new
+                        {
+                            Id = 10u,
+                            Name = "Command: RBACAccountPermissionGrant"
+                        },
+                        new
+                        {
+                            Id = 11u,
+                            Name = "Command: RBACAccountPermissionRevoke"
+                        },
+                        new
+                        {
+                            Id = 12u,
+                            Name = "Category: RBACAccountRole"
+                        },
+                        new
+                        {
+                            Id = 13u,
+                            Name = "Command: RBACAccountRoleGrant"
+                        },
+                        new
+                        {
+                            Id = 14u,
+                            Name = "Command: RBACAccountRoleRevoke"
+                        },
+                        new
+                        {
+                            Id = 83u,
+                            Name = "Category: Spell"
+                        },
+                        new
+                        {
+                            Id = 84u,
+                            Name = "Command: SpellAdd"
+                        },
+                        new
+                        {
+                            Id = 85u,
+                            Name = "Command: SpellCast"
+                        },
+                        new
+                        {
+                            Id = 86u,
+                            Name = "Command: SpellResetCooldown"
+                        },
+                        new
+                        {
+                            Id = 50u,
+                            Name = "Category: Teleport"
+                        },
+                        new
+                        {
+                            Id = 51u,
+                            Name = "Command: TeleportCoordinates"
+                        },
+                        new
+                        {
+                            Id = 52u,
+                            Name = "Command: TeleportLocation"
+                        },
+                        new
+                        {
+                            Id = 53u,
+                            Name = "Command: TeleportName"
+                        },
+                        new
+                        {
+                            Id = 87u,
+                            Name = "Category: Title"
+                        },
+                        new
+                        {
+                            Id = 88u,
+                            Name = "Command: TitleAdd"
+                        },
+                        new
+                        {
+                            Id = 89u,
+                            Name = "Command: TitleRevoke"
+                        },
+                        new
+                        {
+                            Id = 90u,
+                            Name = "Command: TitleAll"
+                        },
+                        new
+                        {
+                            Id = 91u,
+                            Name = "Command: TitleNone"
+                        });
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.RoleModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<uint>("Flags")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("flags")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<string>("Name")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("name")
+                        .HasColumnType("varchar(64)")
+                        .HasDefaultValue("");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("role");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1u,
+                            Flags = 1u,
+                            Name = "Player"
+                        },
+                        new
+                        {
+                            Id = 2u,
+                            Flags = 1u,
+                            Name = "GameMaster"
+                        },
+                        new
+                        {
+                            Id = 3u,
+                            Flags = 2u,
+                            Name = "Administrator"
+                        },
+                        new
+                        {
+                            Id = 4u,
+                            Flags = 2u,
+                            Name = "Console"
+                        },
+                        new
+                        {
+                            Id = 5u,
+                            Flags = 2u,
+                            Name = "WebSocket"
+                        });
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.RolePermissionModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<uint>("PermissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("permissionId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("role_permission");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Auth.Model.ServerMessageModel", b =>
                 {
                     b.Property<byte>("Index")
@@ -405,6 +993,57 @@ Besuch: https://github.com/NexusForever/NexusForever"
                         .WithMany("AccountKeybinding")
                         .HasForeignKey("Id")
                         .HasConstraintName("FK__account_keybinding_id__account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountPermissionModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Auth.Model.AccountModel", "Account")
+                        .WithMany("AccountPermission")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__account_permission_id__account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NexusForever.Database.Auth.Model.PermissionModel", "Permission")
+                        .WithMany("AccountPermission")
+                        .HasForeignKey("PermissionId")
+                        .HasConstraintName("FK__account_permission_permission_id__permission_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountRoleModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Auth.Model.AccountModel", "Account")
+                        .WithMany("AccountRole")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__account_role_id__account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NexusForever.Database.Auth.Model.RoleModel", "Role")
+                        .WithMany("AccountRole")
+                        .HasForeignKey("RoleId")
+                        .HasConstraintName("FK__account_role_role_id__role_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.RolePermissionModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Auth.Model.RoleModel", "Role")
+                        .WithMany("RolePermission")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__role_permission_id__role_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NexusForever.Database.Auth.Model.PermissionModel", "Permission")
+                        .WithMany("RolePermission")
+                        .HasForeignKey("PermissionId")
+                        .HasConstraintName("FK__role_permission_permission_id__permission_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

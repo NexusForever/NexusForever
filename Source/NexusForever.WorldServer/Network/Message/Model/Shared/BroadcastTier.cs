@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NexusForever.WorldServer.Network.Message.Model.Shared
+﻿namespace NexusForever.WorldServer.Network.Message.Model.Shared
 {
     public enum BroadcastTier
     {

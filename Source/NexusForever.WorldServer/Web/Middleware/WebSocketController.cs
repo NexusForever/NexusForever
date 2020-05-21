@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Command.Context;
 
 namespace NexusForever.WorldServer.Web.Middleware
 {
@@ -39,7 +39,8 @@ namespace NexusForever.WorldServer.Web.Middleware
                         (WebSocketReceiveResult result, ClientMessage clientMessage) = await ReceiveObjectAsync<ClientMessage>(webSocket, context.RequestAborted);
                         if (result.CloseStatus != null)
                             continue;
-                        await CommandManager.Instance.HandleCommandAsync(new WebSocketCommandContext(webSocket), clientMessage.Message, false).ConfigureAwait(false);
+
+                        CommandManager.Instance.HandleCommandDelay(new WebSocketCommandContext(webSocket), clientMessage.Message);
                     }
                 }
                 else
