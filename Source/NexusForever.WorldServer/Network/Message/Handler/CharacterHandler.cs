@@ -295,12 +295,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
                 }
 
-                //Load the character at the correct starting zone. Humans and Cassian share a raceId hence the faction check
-                //Draken = 5
-                //Mechari = 12
-                //Chau = 13
                 switch (character.Race)
                 {
+                    //Faction check is required here as Cassian and Human share race ids
                     case 1:
                         if(character.FactionId == 166)
                         {
@@ -312,10 +309,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         } else
                         {
                             //Human
-                            character.LocationX = -7683.809f;
-                            character.LocationY = -942.5914f;
-                            character.LocationZ = -666.6343f;
-                            character.WorldId = 870;
+                            character.LocationX = 4078.18f;
+                            character.LocationY = -657.0739f;
+                            character.LocationZ = -5138.2456f;
+                            character.WorldId = 426;
                         }
                         break;
                     //Granok
