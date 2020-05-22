@@ -80,10 +80,22 @@ namespace NexusForever.Database.Auth
         }
 
         /// <summary>
+        /// Returns if an account with the given username already exists.
+        /// </summary>
+        public bool AccountExists(string email)
+        {
+            using var context = new AuthContext(config);
+            return context.Account.SingleOrDefault(a => a.Email == email) != null;
+        }
+
+        /// <summary>
         /// Create a new account with the supplied email, salt and password verifier that is inserted into the database.
         /// </summary>
         public void CreateAccount(string email, string s, string v)
         {
+            if (AccountExists(email))
+                throw new InvalidOperationException($"Account with that username already exists.");
+
             using var context = new AuthContext(config);
             context.Account.Add(new AccountModel
             {
