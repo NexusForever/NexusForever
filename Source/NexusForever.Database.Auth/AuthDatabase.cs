@@ -76,8 +76,6 @@ namespace NexusForever.Database.Auth
                 .Include(a => a.AccountEntitlement)
                 .Include(a => a.AccountPermission)
                 .Include(a => a.AccountRole)
-                .Include(a => a.AccountPermission)
-                .Include(a => a.AccountRole)
                 .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 
