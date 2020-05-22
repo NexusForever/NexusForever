@@ -135,8 +135,8 @@ namespace NexusForever.Database.Character
             await query.SelectMany(c => c.Datacube).LoadAsync();
 
             await query.SelectMany(c => c.Mail)
-                .SelectMany(c => c.Attachment)
-                .Select(c => c.Item)
+                .Include(c => c.Attachment)
+                .ThenInclude(c => c.Item)
                 .LoadAsync();
 
             await query.SelectMany(c => c.ZonemapHexgroup).LoadAsync();
