@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
@@ -215,7 +216,6 @@ namespace NexusForever.WorldServer.Command
                     // generic result for NoPermission and NoCommand to prevent command scraping
                     CommandResult.NoPermission      => "No help exists for this command, it's either invalid an command or you don't have permission to access it!",
                     CommandResult.NoCommand         => "No help exists for this command, it's either invalid an command or you don't have permission to access it!",
-                    CommandResult.InvalidParameters => "Invalid parameters supplied to command, see help for more information!",
                     _                               => "Something went wrong :("
                 };
             }
@@ -228,7 +228,25 @@ namespace NexusForever.WorldServer.Command
         private CommandResult HandleHelpInternal(ICommandContext context, ParameterQueue queue)
         {
             if (queue.Count == 0)
-                return CommandResult.InvalidParameters;
+            {
+                // if no commands are supplied, show root categories
+                var builder = new StringBuilder();
+                builder.AppendLine("-----------------------------------------------");
+                builder.AppendLine($"Showing help for: {queue.BreadcrumbTrail}");
+
+                foreach ((string _, ICommandHandler rootHandler) in handlers
+                    .OrderBy(p => p.Key))
+                {
+                    if (rootHandler.CanInvoke(context) != CommandResult.Ok)
+                        continue;
+
+                    builder.Append("Category: ");
+                    rootHandler.GetHelp(builder, context, false);
+                }
+
+                context.SendMessage(builder.ToString());
+                return CommandResult.Ok;
+            }
 
             string command = queue.Dequeue();
             if (!handlers.TryGetValue(command, out ICommandHandler handler))
