@@ -102,6 +102,7 @@
         // item
         Item                        = 59,
         ItemAdd                     = 6,
+        ItemLookup                  = 92,
 
         // movement
         Movement                    = 62,
