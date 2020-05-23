@@ -144,13 +144,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 SignatureXpAmount = signatureXp,
                 Reason            = reason
             });
-
+            
             uint totalXp = TotalXp + earnedXp + signatureXp + restXp;
 
             uint xpToNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
             while (totalXp >= xpToNextLevel && player.Level < maxLevel) // WorldServer.Rules.MaxLevel)
             {
-                totalXp -= xpToNextLevel;
                 GrantLevel((byte)(player.Level + 1));
 
                 xpToNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
