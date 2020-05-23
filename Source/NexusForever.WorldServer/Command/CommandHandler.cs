@@ -135,9 +135,9 @@ namespace NexusForever.WorldServer.Command
         /// <summary>
         /// Return help text that provides a brief summery of the <see cref="ICommandHandler"/>.
         /// </summary>
-        public string GetHelp(ICommandContext context, bool detailed)
+        public void GetHelp(StringBuilder builder, ICommandContext context, bool detailed)
         {
-            return helpText;
+            builder.AppendLine(helpText);
         }
 
         /// <summary>
@@ -214,8 +214,13 @@ namespace NexusForever.WorldServer.Command
             if (result != CommandResult.Ok)
                 return result;
 
-            context.SendMessage($"Showing help for: {queue.BreadcrumbTrail}");
-            context.SendMessage(helpText);
+            var builder = new StringBuilder();
+            builder.AppendLine("-----------------------------------------------");
+            builder.AppendLine($"Showing help for: {queue.BreadcrumbTrail}");
+            builder.AppendLine(helpText);
+
+            context.SendMessage(builder.ToString());
+
             return CommandResult.Ok;
         }
     }

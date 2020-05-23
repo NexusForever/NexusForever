@@ -1,4 +1,5 @@
-﻿using NexusForever.WorldServer.Command.Context;
+﻿using System.Text;
+using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Static;
 
 namespace NexusForever.WorldServer.Command
@@ -8,7 +9,7 @@ namespace NexusForever.WorldServer.Command
         /// <summary>
         /// Return help text that provides a brief summery of the <see cref="ICommandHandler"/>.
         /// </summary>
-        string GetHelp(ICommandContext context, bool detailed);
+        void GetHelp(StringBuilder builder, ICommandContext context, bool detailed);
 
         /// <summary>
         /// Returns if the supplied <see cref="ICommandContext"/> can invoke <see cref="ICommandHandler"/>.

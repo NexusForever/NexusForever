@@ -78,9 +78,8 @@ namespace NexusForever.WorldServer.Command
         /// <summary>
         /// Return help text that provides a brief summery of the <see cref="ICommandHandler"/>.
         /// </summary>
-        public string GetHelp(ICommandContext context, bool detailed)
+        public void GetHelp(StringBuilder builder, ICommandContext context, bool detailed)
         {
-            var builder = new StringBuilder();
             builder.AppendLine(helpText);
 
             if (detailed)
@@ -91,11 +90,9 @@ namespace NexusForever.WorldServer.Command
                         continue;
 
                     builder.Append(handler is CommandCategory ? "Category: " : "Command: ");
-                    builder.AppendLine($"{handler.GetHelp(context, false)}");
+                    handler.GetHelp(builder, context, false);
                 }
             }
-
-            return builder.ToString();
         }
 
         /// <summary>
@@ -120,8 +117,11 @@ namespace NexusForever.WorldServer.Command
             if (queue.Count == 0)
             {
                 // no additional commands are present show help for category
-                context.SendMessage($"Showing help for: {queue.BreadcrumbTrail}");
-                context.SendMessage(GetHelp(context, true));
+                var builder = new StringBuilder();
+                builder.AppendLine($"Showing help for: {queue.BreadcrumbTrail}");
+                GetHelp(builder, context, true);
+
+                context.SendMessage(builder.ToString());
                 return CommandResult.Ok;
             }
 
@@ -159,8 +159,13 @@ namespace NexusForever.WorldServer.Command
                 || !handlers.TryGetValue(command, out ICommandHandler handler))
             {
                 // no additional commands are present show help for category
-                context.SendMessage($"Showing help for: {queue.BreadcrumbTrail}");
-                context.SendMessage(GetHelp(context, true));
+                var builder = new StringBuilder();
+                builder.AppendLine("-----------------------------------------------");
+                builder.AppendLine($"Showing help for: {queue.BreadcrumbTrail}");
+                GetHelp(builder, context, true);
+
+                context.SendMessage(builder.ToString());
+
                 return CommandResult.Ok;
             }
 
