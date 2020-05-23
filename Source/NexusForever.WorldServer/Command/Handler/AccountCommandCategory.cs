@@ -15,6 +15,14 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Password for the new account")]
             string password)
         {
+            email = email.ToLower();
+
+            if (DatabaseManager.Instance.AuthDatabase.AccountExists(email))
+            {
+                context.SendMessage("Account with that username already exists. Please try another.");
+                return;
+            }
+
             (string salt, string verifier) = PasswordProvider.GenerateSaltAndVerifier(email, password);
             DatabaseManager.Instance.AuthDatabase.CreateAccount(email, salt, verifier);
 
