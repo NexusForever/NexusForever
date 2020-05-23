@@ -158,9 +158,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         WorldZoneId = character.WorldZoneId,
                         RealmId     = WorldServer.RealmId,
                         Path        = (byte)character.ActivePath
-                    };
-
-                    maxCharacterLevelAchieved = (byte)Math.Max(maxCharacterLevelAchieved, character.Level);
+                    };                  
 
                     // create a temporary Inventory and CostumeManager to show equipped gear
                     var inventory      = new Inventory(null, character);
@@ -203,6 +201,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                             break;
                         }
                     }
+                    maxCharacterLevelAchieved = (byte)Math.Max(maxCharacterLevelAchieved, listCharacter.Level);
 
                     serverCharacterList.Characters.Add(listCharacter);
                 }
@@ -295,57 +294,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
                 }
 
-                switch (character.Race)
-                {
-                    //Faction check is required here as Cassian and Human share race ids
-                    case 1:
-                        if(character.FactionId == 166)
-                        {
-                            //Cassian
-                            character.LocationX = -3780.4404f;
-                            character.LocationY = -996.20935f;
-                            character.LocationZ = -6343.7275f;
-                            character.WorldId = 22;
-                        } else
-                        {
-                            //Human
-                            character.LocationX = 4078.18f;
-                            character.LocationY = -657.0739f;
-                            character.LocationZ = -5138.2456f;
-                            character.WorldId = 426;
-                        }
-                        break;
-                    //Granok
-                    case 3:                   
-                        character.LocationX = 4078.18f;
-                        character.LocationY = -657.0739f;
-                        character.LocationZ = -5138.2456f;
-                        character.WorldId = 426;
-                        break;
-                    //Aurin and Mordesh
-                    case 4:
-                    case 16:                    
-                        character.LocationX = -771.3671f;
-                        character.LocationY = -903.8274f;
-                        character.LocationZ = -2267.0972f;
-                        character.WorldId = 990;
-                        break;
-                    //Draken and Chua
-                    case 5:
-                    case 13:
-                        character.LocationX = -23083.332f;
-                        character.LocationY = -996.11224f;
-                        character.LocationZ = -27382.398f;
-                        character.WorldId = 2997;
-                        break;
-                    //Mechari
-                    case 12:
-                        character.LocationX = -3780.4404f;
-                        character.LocationY = -996.20935f;
-                        character.LocationZ = -6343.7275f;
-                        character.WorldId = 22;
-                        break;
-                }
+                //TODO: handle starting locations per race
+                character.LocationX = -7683.809f;
+                character.LocationY = -942.5914f;
+                character.LocationZ = -666.6343f;
+                character.WorldId = 870;
 
                 character.ActiveSpec = 0;
 
