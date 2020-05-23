@@ -800,6 +800,11 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 91,
                         Name = "Command: TitleNone"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10000,
+                        Name = "Other: InstantLogout"
                     });
             });
 
