@@ -2,10 +2,10 @@
 {
     public enum Role
     {
-        Player,
-        GameMaster,
-        Administrator,
-        Console,
-        WebSocket
+        Player        = 1,
+        GameMaster    = 2,
+        Administrator = 3,
+        Console       = 4,
+        WebSocket     = 5
     }
 }
