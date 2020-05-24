@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using NexusForever.Database.World.Model;
@@ -41,6 +42,7 @@ namespace NexusForever.WorldServer.Game
 
         private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
         private ImmutableDictionary</*creatureId*/uint, /*targetGroupIds*/ImmutableList<uint>> creatureAssociatedTargetGroups;
+        private ImmutableList</*minXpForLevel*/uint> xpPerLevel;
 
         private AssetManager()
         {
@@ -58,6 +60,7 @@ namespace NexusForever.WorldServer.Game
             CacheItemDisplaySourceEntries();
             CacheTutorials();
             CacheCreatureTargetGroups();
+            CacheCharacterXpPerLevel();
         }
 
         private void CacheCharacterCustomisations()
@@ -157,6 +160,15 @@ namespace NexusForever.WorldServer.Game
             creatureAssociatedTargetGroups = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
+        private void CacheCharacterXpPerLevel()
+        {
+            var entries = ImmutableList.CreateBuilder<uint>();
+            foreach (XpPerLevelEntry entry in GameTableManager.Instance.XpPerLevel.Entries)
+                entries.Add(entry.MinXpForLevel);
+
+            xpPerLevel = entries.ToImmutable();
+        }
+
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
         /// </summary>
@@ -196,6 +208,13 @@ namespace NexusForever.WorldServer.Game
         public ImmutableList<uint> GetTargetGroupsForCreatureId(uint creatureId)
         {
             return creatureAssociatedTargetGroups.TryGetValue(creatureId, out ImmutableList<uint> entries) ? entries : null;
+        }
+
+        public uint GetLevelForXpAmount(uint xpAmount)
+        {
+            //TODO: this current assumes xpAmount exists in the xpPerLevel list, should be updated to return a level for any xp value ideally
+            var level = Convert.ToUInt32(xpPerLevel.BinarySearch(xpAmount));
+            return level < 0 ? ~level : ++level;
         }
     }
 }

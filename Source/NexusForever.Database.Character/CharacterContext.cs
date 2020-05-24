@@ -137,6 +137,11 @@ namespace NexusForever.Database.Character
                     .HasColumnType("float")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.RotationX)
+                    .HasColumnName("rotationX")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
                 entity.Property(e => e.Name)
                     .HasColumnName("name")
                     .HasColumnType("varchar(50)")

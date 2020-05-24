@@ -18,6 +18,7 @@ namespace NexusForever.Database.Character.Model
         public float LocationX { get; set; }
         public float LocationY { get; set; }
         public float LocationZ { get; set; }
+        public float RotationX { get; set; }
         public ushort WorldId { get; set; }
         public ushort WorldZoneId { get; set; }
         public ushort Title { get; set; }

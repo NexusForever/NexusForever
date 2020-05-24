@@ -171,6 +171,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
             innateIndex     = model.InnateIndex;
+            Rotation        = new Vector3(model.RotationX, 0f, 0f); //Not sure this is the best way to do this
 
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
@@ -311,7 +312,8 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerChangeWorld
             {
                 WorldId  = (ushort)map.Entry.Id,
-                Position = new Position(vector)
+                Position = new Position(vector),
+                Yaw = Rotation.X
             });
 
             base.OnAddToMap(map, guid, vector);
@@ -814,6 +816,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
                     model.LocationZ = Position.Z;
                     entity.Property(p => p.LocationZ).IsModified = true;
+
+                    model.RotationX = Rotation.X;
+                    entity.Property(p => p.RotationX).IsModified = true;
 
                     model.WorldId = (ushort)Map.Entry.Id;
                     entity.Property(p => p.WorldId).IsModified = true;

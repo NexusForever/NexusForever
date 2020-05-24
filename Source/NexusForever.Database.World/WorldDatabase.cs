@@ -99,5 +99,13 @@ namespace NexusForever.Database.World
                 .AsNoTracking()
                 .ToImmutableList();
         }
+
+        public ServerConfigModel GetActiveServerConfig()
+        {
+            using var context = new WorldContext(config);
+            return context.ServerConfig
+                .Include(s => s.CharacterCreationLocations)
+                .First();
+        }
     }
 }

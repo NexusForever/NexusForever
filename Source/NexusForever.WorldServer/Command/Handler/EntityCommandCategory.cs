@@ -40,6 +40,7 @@ namespace NexusForever.WorldServer.Command.Handler
             BuildHeader(context, builder, entity);
 
             builder.AppendLine($"XYZ: {entity.Position.X}, {entity.Position.Y}, {entity.Position.Z}");
+            builder.AppendLine($"Rotation: {entity.Rotation.X}");
             builder.AppendLine($"HP: {entity.Health}/(MAX) | Shield: {entity.Shield}/(MAX)");
 
             context.SendMessage(builder.ToString());

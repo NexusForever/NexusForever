@@ -25,6 +25,7 @@ using NexusForever.WorldServer.Game.Quest;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
+using NexusForever.WorldServer.Game.ServerConfig;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer
@@ -56,7 +57,7 @@ namespace NexusForever.WorldServer
             // RBACManager must be initialised before CommandManager
             RBACManager.Instance.Initialise();
             CommandManager.Instance.Initialise();
-
+            ServerConfigManager.Instance.Initialise();
             DisableManager.Instance.Initialise();
 
             GameTableManager.Instance.Initialise();

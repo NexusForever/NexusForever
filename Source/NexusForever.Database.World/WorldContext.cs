@@ -19,6 +19,8 @@ namespace NexusForever.Database.World
         public DbSet<StoreOfferItemModel> StoreOfferItem { get; set; }
         public DbSet<StoreOfferItemDataModel> StoreOfferItemData { get; set; }
         public DbSet<StoreOfferItemPriceModel> StoreOfferItemPrice { get; set; }
+        public DbSet<ServerConfigModel> ServerConfig { get; set; }
+        public DbSet<ServerConfigCharacterCreationLocationModel> ServerConfigCharacterCreationLocation { get; set; }
         public DbSet<TutorialModel> Tutorial { get; set; }
 
         private readonly IDatabaseConfig config;
@@ -575,6 +577,84 @@ namespace NexusForever.Database.World
                     .HasPrincipalKey(p => p.Id)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__store_offer_item_price_id__store_offer_item_id");
+            });
+
+            modelBuilder.Entity<ServerConfigModel>(entity =>
+            {
+                entity.ToTable("server_config");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Active)
+                    .HasColumnName("active")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+
+            });
+            modelBuilder.Entity<ServerConfigCharacterCreationLocationModel>(entity =>
+            {
+                entity.ToTable("server_config_character_creation_location");
+
+                entity.HasKey(e => new { e.Id, e.CharacterCreationId, e.RaceId, e.FactionId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.CharacterCreationId)
+                    .HasColumnName("characterCreationId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RaceId)
+                    .HasColumnName("raceId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.FactionId)
+                    .HasColumnName("factionId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.StartingX)
+                    .HasColumnName("locationX")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.StartingY)
+                    .HasColumnName("locationY")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.StartingZ)
+                    .HasColumnName("locationZ")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RotationX)
+                    .HasColumnName("rotationX")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.WorldZoneId)
+                    .HasColumnName("worldZoneId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(e => e.ServerConfig)
+                    .WithMany(p => p.CharacterCreationLocations)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__server_config_config_id_creation_id");
             });
 
             modelBuilder.Entity<TutorialModel>(entity =>
