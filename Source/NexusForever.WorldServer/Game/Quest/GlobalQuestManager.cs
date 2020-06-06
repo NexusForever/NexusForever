@@ -102,11 +102,11 @@ namespace NexusForever.WorldServer.Game.Quest
             foreach (CommunicatorMessagesEntry entry in GameTableManager.Instance.CommunicatorMessages.Entries
                 .Where(e => e.QuestIdDelivered != 0u))
             {
-                var quest = new CommunicatorMessage(entry);
-                if (!builder.ContainsKey(quest.Id))
-                    builder.Add(quest.Id, new List<CommunicatorMessage>());
+                var communicator = new CommunicatorMessage(entry);
+                if (!builder.ContainsKey(communicator.QuestId))
+                    builder.Add(communicator.QuestId, new List<CommunicatorMessage>());
 
-                builder[quest.Id].Add(quest);
+                builder[communicator.QuestId].Add(communicator);
             }
 
             communicatorQuestStore = builder.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());

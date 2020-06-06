@@ -756,32 +756,6 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
-        /// <summary>
-        /// Send a communicator message to this client, displaying the <see cref="CommunicatorMessagesEntry"/> text at the top of the screen. This is to be used by scripts to trigger quest dialog.
-        /// </summary>
-        public void SendCommunicatorMessage(uint communicatorId)
-        {
-            // TODO: Communicator messages should be queueable, so that the client can 
-
-            CommunicatorMessagesEntry entry = GameTableManager.Instance.CommunicatorMessages.GetEntry(communicatorId);
-            if (entry == null)
-                throw new InvalidOperationException($"CommunicatorMessagesEntry with ID {communicatorId} does not exist.");
-
-            if (entry.FactionId > 0 && entry.FactionId != (uint)Faction1)
-                throw new InvalidOperationException($"Invalid faction for Communicator Message");
-
-            if (entry.RaceId > 0 && entry.RaceId != (uint)Race)
-                throw new InvalidOperationException($"Invalid Race for Communicator Message");
-
-            if (entry.ClassId > 0 && entry.ClassId != (uint)Class)
-                throw new InvalidOperationException($"Invalid Class for Communicator Message");
-
-            Session.EnqueueMessageEncrypted(new ServerCommunicatorMessage
-            {
-                CommunicatorId = (ushort)entry.Id
-            });
-        }
-
         public void Save(AuthContext context)
         {
             Session.GenericUnlockManager.Save(context);
