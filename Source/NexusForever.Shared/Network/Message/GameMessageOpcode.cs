@@ -34,6 +34,7 @@ namespace NexusForever.Shared.Network.Message
         ServerDatacubeVolumeUpdate      = 0x00E2,
         ServerCharacterDeleteResult     = 0x00E6,
         Server00F1                      = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
+        ClientEnteredWorld              = 0x00F2,
         ServerCharacterFlagsUpdated     = 0x00FE,
         Server0104                      = 0x0104, // Galactic Archive
         ServerGenericError              = 0x0106,
@@ -209,6 +210,7 @@ namespace NexusForever.Shared.Network.Message
         ClientRandomRollRequest         = 0x071B,
         ServerRandomRollResponse        = 0x071C,
         ServerEntityInteractiveUpdate   = 0x0755,
+        ServerCommunicatorMessage       = 0x0757,
         ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,

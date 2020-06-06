@@ -84,5 +84,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         public static void HandleClientZoneChange(WorldSession session, ClientZoneChange zoneChange)
         {
         }
+
+        /// <summary>
+        /// The client sends this after every teleport, when it has entered the world.
+        /// </summary>
+        [MessageHandler(GameMessageOpcode.ClientEnteredWorld)]
+        public static void HandleClientEnteredWorld(WorldSession session, ClientEnteredWorld enteredWorld)
+        {
+        }
     }
 }
