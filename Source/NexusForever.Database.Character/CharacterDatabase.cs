@@ -123,7 +123,7 @@ namespace NexusForever.Database.Character
             await query.SelectMany(c => c.Stat).LoadAsync();
 
             await query.SelectMany(c => c.Costume)
-                .SelectMany(c => c.CostumeItem)
+                .Include(c => c.CostumeItem)
                 .LoadAsync();
 
             await query.SelectMany(c => c.PetCustomisation).LoadAsync();
@@ -135,14 +135,14 @@ namespace NexusForever.Database.Character
             await query.SelectMany(c => c.Datacube).LoadAsync();
 
             await query.SelectMany(c => c.Mail)
-                .SelectMany(c => c.Attachment)
-                .Select(c => c.Item)
+                .Include(c => c.Attachment)
+                .ThenInclude(c => c.Item)
                 .LoadAsync();
 
             await query.SelectMany(c => c.ZonemapHexgroup).LoadAsync();
 
             await query.SelectMany(c => c.Quest)
-                .SelectMany(c => c.QuestObjective)
+                .Include(c => c.QuestObjective)
                 .LoadAsync();
 
             await query.SelectMany(c => c.Entitlement).LoadAsync();
