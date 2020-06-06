@@ -6,7 +6,7 @@
     /// </remarks>
     /// <remarks>
     /// IDs to reuse:
-    /// 82
+    /// 
     /// </remarks>
     public enum Permission
     {
@@ -144,6 +144,10 @@
         TitleRevoke                 = 89,
         TitleAll                    = 90,
         TitleNone                   = 91,
+
+        // realm
+        Realm                       = 82,
+        RealmMOTD                   = 94,
 
         // non command permissions
         InstantLogout               = 10000
