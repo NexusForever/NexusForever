@@ -153,8 +153,6 @@ namespace NexusForever.WorldServer.Game.Entity
         private PendingTeleport pendingTeleport;
         public bool CanTeleport() => pendingTeleport == null;
 
-        private bool loggedIn = false;
-
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
         {
@@ -316,6 +314,10 @@ namespace NexusForever.WorldServer.Game.Entity
                 Position = new Position(vector)
             });
 
+            // if the player has no existing map they have just entered the world
+            // this check needs to happen before OnAddToMap as the player will have a map afterwards
+            bool initialLogin = Map == null;
+
             base.OnAddToMap(map, guid, vector);
             map.OnAddToMap(this);
 
@@ -331,10 +333,10 @@ namespace NexusForever.WorldServer.Game.Entity
             SendPacketsAfterAddToMap();
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
-            IsLoading = false;
-
-            if (!loggedIn)
+            if (initialLogin)
                 OnLogin();
+
+            IsLoading = false;
         }
 
         public override void OnRelocate(Vector3 vector)
@@ -350,13 +352,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (Zone != null)
             {
                 TextTable tt = GameTableManager.Instance.GetTextTable(Language.English);
-
-                Session.EnqueueMessageEncrypted(new ServerChat
-                {
-                    Guid    = Session.Player.Guid,
-                    Channel = ChatChannel.System,
-                    Text    = $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}"
-                });
+                SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
 
                 uint tutorialId = AssetManager.Instance.GetTutorialIdForZone(Zone.Id);
                 if (tutorialId > 0)
@@ -627,11 +623,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void OnLogin()
         {
-            loggedIn = true;
-
-            var motd = ConfigurationManager<WorldServerConfiguration>.Instance.Config.MessageOfTheDay;
-            if (motd.Length > 0)
-                SocialManager.Instance.SendMessage(Session, "MOTD: " + motd, channel: ChatChannel.Realm);
+            string motd = WorldServer.RealmMotd;
+            if (motd?.Length > 0)
+                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannel.Realm);
         }
 
         /// <summary>

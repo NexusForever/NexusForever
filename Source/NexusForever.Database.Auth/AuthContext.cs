@@ -808,6 +808,16 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 82,
+                        Name = "Category: Realm"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 94,
+                        Name = "Command: RealmMOTD"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 10000,
                         Name = "Other: InstantLogout"
                     });

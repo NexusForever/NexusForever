@@ -39,7 +39,15 @@ namespace NexusForever.WorldServer
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Internal unique id of the realm.
+        /// </summary>
         public static ushort RealmId { get; private set; }
+
+        /// <summary>
+        /// Realm message of the day that is shown to players on login.
+        /// </summary>
+        public static string RealmMotd { get; set; }
 
         private static void Main()
         {
@@ -49,6 +57,8 @@ namespace NexusForever.WorldServer
             log.Info("Initialising...");
 
             ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json");
+            RealmId   = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
+            RealmMotd = ConfigurationManager<WorldServerConfiguration>.Instance.Config.MessageOfTheDay;
 
             DatabaseManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
             DatabaseManager.Instance.Migrate();
@@ -77,8 +87,6 @@ namespace NexusForever.WorldServer
             GlobalStorefrontManager.Instance.Initialise();
 
             GlobalAchievementManager.Instance.Initialise();
-
-            RealmId = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
             ServerManager.Instance.Initialise(RealmId); 
 
             MessageManager.Instance.Initialise();
