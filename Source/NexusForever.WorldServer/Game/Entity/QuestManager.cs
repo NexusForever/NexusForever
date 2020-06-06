@@ -247,10 +247,14 @@ namespace NexusForever.WorldServer.Game.Entity
             if (player.Level < info.Entry.PrerequisiteLevel)
                 return false;
 
+            bool prequestCheckPassed = true;
             // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
             foreach (ushort questId in info.Entry.PrerequisiteQuests.Where(q => q != 0u))
                 if (GetQuestState(questId) != QuestState.Completed)
-                    return false;
+                    prequestCheckPassed = false;
+
+            if (!prequestCheckPassed)
+                return false;
 
             if (info.Entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId))
                 return false;
