@@ -483,14 +483,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnRemoveFromMap()
         {
-            // enqueue removal of existing vanity pet if summoned
-            if (VanityPetGuid != null)
-            {
-                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
-                pet?.RemoveFromMap();
-                VanityPetGuid = null;
-            }
-            
             DestroyDependents();
 
             base.OnRemoveFromMap();
@@ -668,9 +660,6 @@ namespace NexusForever.WorldServer.Game.Entity
                 VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
                 vanityPetId = pet?.Creature.Id;
             }
-            
-            if (VehicleGuid != 0u)
-                Dismount();
 
             var info = new MapInfo(entry, instanceId, residenceId);
             pendingTeleport = new PendingTeleport(info, vector, vanityPetId);
@@ -795,6 +784,7 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
         
+        /// <summary>
         /// Returns whether this <see cref="Player"/> is allowed to summon or be added to a mount
         /// </summary>
         public bool CanMount()
@@ -819,16 +809,18 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         private void DestroyDependents()
         {
-            // TODO: Enqueue re-creation of necessary entities
+            // vehicle will be removed if player is the last passenger
             if (VehicleGuid != 0u)
+                Dismount();
+
+            if (VanityPetGuid != null)
             {
-                Vehicle vehicle = GetVisible<Vehicle>(VehicleGuid);
-                if(vehicle != null)
-                    vehicle.Destroy();
-                VehicleGuid = 0u;
+                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
+                pet?.RemoveFromMap();
+                VanityPetGuid = null;
             }
 
-            // TODO: Remove pets, scanbots, vanity pets
+            // TODO: Remove pets, scanbots
         }
 
         public void Save(AuthContext context)

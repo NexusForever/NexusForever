@@ -251,16 +251,6 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// This is used to destroy a <see cref="Vehicle"/> ignoring any rules.
-        /// </summary>
-        /// <remarks>Should be used as part of a logout or for removing from map</remarks>
-        public void Destroy()
-        {
-            passengers.Clear();
-            RemoveFromMap();
-        }
-
-        /// <summary>
         /// Invoked when <see cref="Player"/> is removed as a passenger from <see cref="VehicleSeatType"/> and seat position.
         /// </summary>
         protected virtual void OnPassengerRemove(Player player, VehicleSeatType seatType, byte seatPosition)
