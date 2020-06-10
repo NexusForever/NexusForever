@@ -483,13 +483,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnRemoveFromMap()
         {
-            // enqueue removal of existing vanity pet if summoned
-            if (VanityPetGuid != null)
-            {
-                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
-                pet?.RemoveFromMap();
-                VanityPetGuid = null;
-            }
+            DestroyDependents();
 
             base.OnRemoveFromMap();
 
@@ -788,6 +782,45 @@ namespace NexusForever.WorldServer.Game.Entity
                 Channel = ChatChannel.System,
                 Text    = text
             });
+        }
+        
+        /// <summary>
+        /// Returns whether this <see cref="Player"/> is allowed to summon or be added to a mount
+        /// </summary>
+        public bool CanMount()
+        {
+            return VehicleGuid == 0u && pendingTeleport == null && logoutManager == null;
+        }
+
+        /// <summary>
+        /// Dismounts this <see cref="Player"/> from a vehicle that it's attached to
+        /// </summary>
+        public void Dismount()
+        {
+            if (VehicleGuid != 0u)
+            {
+                Vehicle vehicle = GetVisible<Vehicle>(VehicleGuid);
+                vehicle.PassengerRemove(this);
+            }
+        }
+
+        /// <summary>
+        /// Remove all entities associated with the <see cref="Player"/>
+        /// </summary>
+        private void DestroyDependents()
+        {
+            // vehicle will be removed if player is the last passenger
+            if (VehicleGuid != 0u)
+                Dismount();
+
+            if (VanityPetGuid != null)
+            {
+                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
+                pet?.RemoveFromMap();
+                VanityPetGuid = null;
+            }
+
+            // TODO: Remove pets, scanbots
         }
 
         public void Save(AuthContext context)
