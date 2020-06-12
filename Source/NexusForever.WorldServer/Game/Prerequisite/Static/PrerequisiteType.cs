@@ -13,5 +13,6 @@
         Achievement = 7,
         Path        = 52,
         SpellBaseId = 214,
+        BaseFaction = 250
     }
 }

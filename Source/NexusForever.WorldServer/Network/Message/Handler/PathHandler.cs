@@ -1,42 +1,78 @@
-﻿using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity;
+﻿using System;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.Network.Message;
+using NexusForever.WorldServer.Game.Account.Static;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class PathHandler
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         [MessageHandler(GameMessageOpcode.ClientPathActivate)]
         public static void HandlePathActivate(WorldSession session, ClientPathActivate clientPathActivate)
         {
-            log.Debug($"ClientPathActivate: Path: {clientPathActivate.Path}, UseTokens: {clientPathActivate.UseTokens}");
-            Player player = session.Player;
+            uint activateCooldown = GameTableManager.Instance.GameFormula.GetEntry(2366).Dataint0;
+            uint bypassCost       = GameTableManager.Instance.GameFormula.GetEntry(2366).Dataint01;
+            bool needToUseTokens  = DateTime.UtcNow.Subtract(session.Player.PathActivatedTime).TotalSeconds < activateCooldown;
 
-            if (clientPathActivate.UseTokens)
+            GenericError CanActivatePath()
             {
-                // TODO: Implement block if not enough tokens
-                // TODO: Remove tokens from account and send relevant packet updates
+                if (needToUseTokens && !clientPathActivate.UseTokens)
+                    return GenericError.PathChangeOnCooldown;
+
+                bool hasEnoughTokens = session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, bypassCost); // TODO: Check user has enough tokens
+                if (needToUseTokens && clientPathActivate.UseTokens && !hasEnoughTokens)
+                    return GenericError.PathChangeInsufficientFunds;
+
+                if (!session.Player.PathManager.IsPathUnlocked(clientPathActivate.Path))
+                    return GenericError.PathChangeNotUnlocked;
+
+                if (session.Player.PathManager.IsPathActive(clientPathActivate.Path))
+                    return GenericError.PathChangeRequested;
+
+                return GenericError.Ok;
             }
-            player.PathManager.ActivatePath(clientPathActivate.Path);
+
+            GenericError result = CanActivatePath();
+            if (result != GenericError.Ok)
+            {
+                session.Player.PathManager.SendServerPathActivateResult(result);
+                return;
+            }
+
+            if (needToUseTokens && clientPathActivate.UseTokens)
+                session.AccountCurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, bypassCost);
+
+            session.Player.PathManager.ActivatePath(clientPathActivate.Path);
         }
 
         [MessageHandler(GameMessageOpcode.ClientPathUnlock)]
         public static void HandlePathUnlock(WorldSession session, ClientPathUnlock clientPathUnlock)
         {
-            log.Debug($"ClientPathUnlock: Path: {clientPathUnlock.Path}");
+            uint unlockCost = GameTableManager.Instance.GameFormula.GetEntry(2365).Dataint0;
 
-            Player player = session.Player;
-            // TODO: Handle removing service tokens
-            // TODO: Return proper error codes
+            GenericError CanUnlockPath()
+            {
+                bool hasEnoughTokens = session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, unlockCost);
+                if (!hasEnoughTokens)
+                    return GenericError.PathInsufficientFunds;
 
+                if (session.Player.PathManager.IsPathUnlocked(clientPathUnlock.Path))
+                    return GenericError.PathAlreadyUnlocked;
 
-            // TODO: HasEnoughTokens should be a request to a currency manager of somesort
-            bool HasEnoughTokens = true;
-            if (HasEnoughTokens)
-                player.PathManager.UnlockPath(clientPathUnlock.Path);
+                return GenericError.Ok;
+            }
+
+            GenericError result = CanUnlockPath();
+            if (result != GenericError.Ok)
+            {
+                session.Player.PathManager.SendServerPathUnlockResult(result);
+                return;
+            }
+
+            session.Player.PathManager.UnlockPath(clientPathUnlock.Path);
+            session.AccountCurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, unlockCost);
         }
     }
 }

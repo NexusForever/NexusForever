@@ -37,6 +37,10 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         {
             switch (comparison)
             {
+                case PrerequisiteComparison.Equal:
+                    return player.Class == (Class)value;
+                case PrerequisiteComparison.NotEqual:
+                    return player.Class != (Class)value;
                 default:
                     log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Class}!");
                     return true;
@@ -96,6 +100,20 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                     return player.SpellManager.GetSpell(objectId) != null;
                 default:
                     log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Achievement}!");
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
+        private static bool PrerequisiteCheckBaseFaction(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.Faction1 == (Faction)value;
+                case PrerequisiteComparison.NotEqual:
+                    return player.Faction1 != (Faction)value;
+                default:
                     return false;
             }
         }
