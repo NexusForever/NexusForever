@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint DurationMs { get; set; } = 10000;
         public WindowType WindowTypeId { get; set; } = 0; // 2 
         public StoryPanelType StoryPanelType { get; set; } = 0; // 2
-        public byte Unknown0 { get; set; } // 3
+        public byte Priority { get; set; } // 3
 
         public void Write(GamePacketWriter writer)
         {
@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(DurationMs);
             writer.Write(WindowTypeId, 2u);
             writer.Write(StoryPanelType, 2u);
-            writer.Write(Unknown0, 3u);
+            writer.Write(Priority, 3u);
         }
     }
 }

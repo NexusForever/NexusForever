@@ -818,6 +818,21 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 95,
+                        Name = "Category: Story"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 96,
+                        Name = "Command: StoryPanel"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 97,
+                        Name = "Command: StoryCommunicator"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 10000,
                         Name = "Other: InstantLogout"
                     });

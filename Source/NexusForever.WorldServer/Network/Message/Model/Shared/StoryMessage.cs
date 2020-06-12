@@ -1,17 +1,17 @@
+using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
-using PlayerEntity = NexusForever.WorldServer.Game.Entity.Player;
 using NexusForever.WorldServer.Game.Entity.Static;
-using System.Collections.Generic;
+using PlayerEntity = NexusForever.WorldServer.Game.Entity.Player;
 
 namespace NexusForever.WorldServer.Network.Message.Model.Shared
 {
     public class StoryMessage : IWritable
     {
-        public class Actor : IWritable
+        public abstract class Actor : IWritable
         {
-            public byte Type { get; protected set; }
+            public virtual byte Type { get; }
             public List<byte> Unknown0 { get; set; } = new List<byte>
             {
                 0
@@ -24,14 +24,10 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             }
         }
 
-        public class Creature : Actor
+        public sealed class Creature : Actor
         {
+            public override byte Type => 0;
             public uint CreatureId { get; set; } // 18
-
-            public Creature()
-            {
-                Type = 0;
-            }
 
             public override void Write(GamePacketWriter writer)
             {
@@ -40,14 +36,10 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             }
         }
 
-        public class String : Actor
+        public sealed class String : Actor
         {
+            public override byte Type => 1;
             public string Text { get; set; }
-
-            public String()
-            {
-                Type = 1;
-            }
 
             public override void Write(GamePacketWriter writer)
             {
@@ -56,14 +48,10 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             }
         }
 
-        public class TextId : Actor
+        public sealed class TextId : Actor
         {
+            public override byte Type => 2;
             public uint Id { get; set; } // 21
-
-            public TextId()
-            {
-                Type = 2;
-            }
 
             public override void Write(GamePacketWriter writer)
             {
@@ -72,8 +60,9 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             }
         }
 
-        public class Player : Actor
+        public sealed class Player : Actor
         {
+            public override byte Type => 3;
             public uint PlayerGuid { get; set; }
             public string PlayerName { get; set; }
             public uint PlayerLevel { get; set; }
@@ -83,11 +72,6 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             public Faction PlayerFaction { get; set; } // 14
             public Path PlayerPath { get; set; } // 3
             public ushort PlayerTitle { get; set; } // 14
-
-            public Player()
-            {
-                Type = 3;
-            }
 
             public override void Write(GamePacketWriter writer)
             {
@@ -104,15 +88,11 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             }
         }
 
-        public class CreatureUnit : Actor
+        public sealed class CreatureUnit : Actor
         {
+            public override byte Type => 4;
             public uint CreatureUnitId { get; set; }
             public uint CreatureId { get; set; } // 18
-
-            public CreatureUnit()
-            {
-                Type = 4;
-            }
 
             public override void Write(GamePacketWriter writer)
             {
@@ -122,14 +102,10 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             }
         }
 
-        public class PlayerUnit : Actor
+        public sealed class PlayerUnit : Actor
         {
+            public override byte Type => 5;
             public uint LocalPlayerUnitId { get; set; }
-
-            public PlayerUnit()
-            {
-                Type = 5;
-            }
 
             public override void Write(GamePacketWriter writer)
             {
@@ -138,14 +114,14 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             }
         }
 
-        public uint M_msgId { get; set; }
-        public uint M_generalVoId { get; set; }
-        public List<Actor> Actors = new List<Actor>(); // 8
+        public uint MsgId { get; set; }
+        public uint GeneralVoId { get; set; }
+        public List<Actor> Actors { get; set; } = new List<Actor>(); // 8
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(M_msgId);
-            writer.Write(M_generalVoId);
+            writer.Write(MsgId);
+            writer.Write(GeneralVoId);
             writer.Write(Actors.Count, 8u);
 
             foreach (Actor actor in Actors)
@@ -170,15 +146,15 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
 
         public void AddUnit(WorldEntity entity)
         {
-            if (entity is PlayerEntity)
+            if (entity is PlayerEntity player)
             {
-                AddPlayer(entity as PlayerEntity);
+                AddPlayer(player);
                 return;
             }
 
             Actors.Add(new CreatureUnit
             {
-                CreatureId = entity.CreatureId,
+                CreatureId     = entity.CreatureId,
                 CreatureUnitId = entity.Guid
             });
         }
@@ -187,15 +163,15 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         {
             Actors.Add(new Player
             {
-                PlayerGuid = player.Guid,
-                PlayerName = player.Name,
-                PlayerLevel = player.Level,
-                PlayerGender = player.Sex,
-                PlayerRace = player.Race,
-                PlayerClass = player.Class,
+                PlayerGuid    = player.Guid,
+                PlayerName    = player.Name,
+                PlayerLevel   = player.Level,
+                PlayerGender  = player.Sex,
+                PlayerRace    = player.Race,
+                PlayerClass   = player.Class,
                 PlayerFaction = player.Faction1,
-                PlayerPath = player.Path,
-                PlayerTitle = player.TitleManager.ActiveTitleId
+                PlayerPath    = player.Path,
+                PlayerTitle   = player.TitleManager.ActiveTitleId
             });
         }
 
@@ -214,6 +190,5 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
                 Id = textId
             });
         }
-
     }
 }

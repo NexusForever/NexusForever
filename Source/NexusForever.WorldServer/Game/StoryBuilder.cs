@@ -1,10 +1,10 @@
-﻿using NexusForever.Shared;
+﻿using System;
+using NexusForever.Shared;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using System;
 
 namespace NexusForever.WorldServer.Game
 {
@@ -18,10 +18,10 @@ namespace NexusForever.WorldServer.Game
             if (entry == null)
                 throw new ArgumentNullException(nameof(entry));
 
-            StoryMessage storyMessage = new StoryMessage
+            var storyMessage = new StoryMessage
             {
-                M_msgId       = entry.Id,
-                M_generalVoId = entry.SoundEventId
+                MsgId       = entry.Id,
+                GeneralVoId = entry.SoundEventId
             };
             storyMessage.AddPlayer(player);
 
@@ -35,26 +35,26 @@ namespace NexusForever.WorldServer.Game
         /// <summary>
         /// Sends a story communicator window to the <see cref="Player"/>.
         /// </summary>
-        public void SendStoryCommunicator(uint textId, uint creatureId, Player player, uint durationMs = 10000, StoryPanelType storyPanelType = StoryPanelType.Default, WindowType windowTypeId = WindowType.LeftAligned, uint soundEventId = 0, byte unknown = 0)
+        public void SendStoryCommunicator(uint textId, uint creatureId, Player player, uint durationMs = 10000, StoryPanelType storyPanelType = StoryPanelType.Default, WindowType windowTypeId = WindowType.LeftAligned, uint soundEventId = 0, byte priority = 0)
         {
             if (textId == 0)
                 throw new ArgumentOutOfRangeException(nameof(textId));
 
-            StoryMessage storyMessage = new StoryMessage
+            var storyMessage = new StoryMessage
             {
-                M_msgId = textId
+                MsgId = textId
             };
             storyMessage.AddCreature(creatureId);
             storyMessage.AddPlayer(player);
 
             player.Session.EnqueueMessageEncrypted(new ServerStoryCommunicatorShow
             {
-                StoryMessage = storyMessage,
-                SoundEventId = soundEventId > 0 ? soundEventId : creatureId,
-                DurationMs   = durationMs,
+                StoryMessage   = storyMessage,
+                SoundEventId   = soundEventId > 0 ? soundEventId : creatureId,
+                DurationMs     = durationMs,
                 StoryPanelType = storyPanelType,
-                WindowTypeId = windowTypeId,
-                Unknown0 = unknown
+                WindowTypeId   = windowTypeId,
+                Priority       = priority
             });
         }
     }
