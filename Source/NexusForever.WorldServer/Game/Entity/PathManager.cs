@@ -10,14 +10,11 @@ using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Network.Message.Model;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     public class PathManager: ISaveCharacter, IEnumerable<PathEntry>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private const uint MaxPathCount = 4u;
         private const uint MaxPathLevel = 30u;
 
@@ -30,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public PathManager(Player owner, CharacterModel model)
         {
             player = owner;
-            foreach (CharacterPathModel pathModel in model.Path.OrderBy(x => x.Path))
+            foreach (CharacterPathModel pathModel in model.Path)
                 paths.Add((Path)pathModel.Path, new PathEntry(pathModel));
 
             Validate();
@@ -223,11 +220,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (pathRewardEntry.Item2Id == 0 && pathRewardEntry.Spell4Id == 0 && pathRewardEntry.CharacterTitleId == 0)
                     continue;
 
-                if (pathRewardEntry.PrerequisiteId > 0)
-                {
-                    if (!PrerequisiteManager.Instance.Meets(player, pathRewardEntry.PrerequisiteId))
-                        continue;
-                }
+                if (pathRewardEntry.PrerequisiteId > 0 && !PrerequisiteManager.Instance.Meets(player, pathRewardEntry.PrerequisiteId))
+                    continue;
 
                 GrantPathReward(pathRewardEntry);
             }

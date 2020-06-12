@@ -55,6 +55,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
         private Path path;
+
         public DateTime PathActivatedTime { get; private set; }
 
         public sbyte CostumeIndex
