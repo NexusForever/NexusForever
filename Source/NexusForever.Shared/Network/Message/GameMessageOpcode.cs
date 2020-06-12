@@ -209,8 +209,11 @@ namespace NexusForever.Shared.Network.Message
         ServerPublicEventStart          = 0x0700,
         ClientRandomRollRequest         = 0x071B,
         ServerRandomRollResponse        = 0x071C,
+        ServerStoryCommunicatorShow     = 0x073A,
         ServerEntityInteractiveUpdate   = 0x0755,
         ServerCommunicatorMessage       = 0x0757,
+        ServerStoryPanelHide            = 0x0759,
+        ServerStoryPanelShow            = 0x075A,
         ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,

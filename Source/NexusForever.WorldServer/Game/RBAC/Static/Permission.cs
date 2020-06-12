@@ -149,6 +149,11 @@
         Realm                       = 82,
         RealmMOTD                   = 94,
 
+        // story board
+        Story                       = 95,
+        StoryPanel                  = 96,
+        StoryCommunicator           = 97,
+
         // non command permissions
         InstantLogout               = 10000
     }

@@ -561,6 +561,8 @@ namespace NexusForever.Shared.GameTable
         public GameTable<StoreDisplayInfoEntry> StoreDisplayInfo { get; private set; }
         public GameTable<StoreKeywordEntry> StoreKeyword { get; private set; }
         public GameTable<StoreLinkEntry> StoreLink { get; private set; }
+
+        [GameData]
         public GameTable<StoryPanelEntry> StoryPanel { get; private set; }
 
         [GameData]
