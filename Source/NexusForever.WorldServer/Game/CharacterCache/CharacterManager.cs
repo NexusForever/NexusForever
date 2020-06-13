@@ -77,7 +77,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         /// <summary>
         /// Used to delete a <see cref="ICharacter"/> from the cache when the <see cref="CharacterModel"/> is deleted
         /// </summary>
-        public void DeleteCharacter(ulong id)
+        public void DeleteCharacter(ulong id, string name)
         {
             if (!characters.ContainsKey(id))
                 throw new ArgumentNullException(nameof(id));
@@ -85,6 +85,8 @@ namespace NexusForever.WorldServer.Game.CharacterCache
             characters.Remove(id, out ICharacter character);
             if (character == null)
                 throw new ArgumentNullException();
+
+            characterNameToId.Remove(name);
 
             log.Trace($"Removed character {character.Name} (ID: {id}) from the cache due to player delete.");
         }
