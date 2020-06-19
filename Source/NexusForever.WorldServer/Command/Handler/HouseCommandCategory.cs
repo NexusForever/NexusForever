@@ -75,7 +75,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            Residence residence = ResidenceManager.Instance.GetResidence(name).GetAwaiter().GetResult();
+            Residence residence = ResidenceManager.Instance.GetResidence(name ?? target.Name).GetAwaiter().GetResult();
             if (residence == null)
             {
                 if (name == null)
