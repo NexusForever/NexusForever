@@ -26,7 +26,7 @@ namespace NexusForever.Shared.Database.Auth
         public static async Task<Account> GetAccountAsync(string email)
         {
             using (var context = new AuthContext())
-                return await context.Account.SingleOrDefaultAsync(a => a.Email == email);
+                return await context.Account.SingleOrDefaultAsync(a => a.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
@@ -57,21 +57,35 @@ namespace NexusForever.Shared.Database.Auth
         /// <summary>
         /// Create a new account with the supplied email and password, the password will have a verifier generated that is inserted into the database.
         /// </summary>
-        public static void CreateAccount(string email, string password)
+        /// <returns>
+        /// A boolean indicating if the account creation was a success
+        /// </returns>
+        public static bool CreateAccount(string email, string password)
         {
+            // email should be stored as lowercase
+            email = email.ToLower();
+
             using (var context = new AuthContext())
             {
                 byte[] s = RandomProvider.GetBytes(16u);
                 byte[] v = Srp6Provider.GenerateVerifier(s, email, password);
 
-                context.Account.Add(new Account
+                if(context.Account.Any(x => x.Email == email))
                 {
-                    Email = email,
-                    S     = s.ToHexString(),
-                    V     = v.ToHexString()
-                });
+                    return false;
+                }
+                else
+                {
+                    context.Account.Add(new Account
+                    {
+                        Email = email,
+                        S = s.ToHexString(),
+                        V = v.ToHexString()
+                    });
 
-                context.SaveChanges();
+                    context.SaveChanges();
+                    return true;
+                }
             }
         }
 
