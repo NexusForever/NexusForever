@@ -92,6 +92,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction2     = (Faction)model.Faction2;
             ActivePropId = model.ActivePropId;
             WorldSocketId = model.WorldSocketId;
+            Position = new Vector3(model.X, model.Y, model.Z);
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));

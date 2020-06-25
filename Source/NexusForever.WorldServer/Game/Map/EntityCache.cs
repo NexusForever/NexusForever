@@ -34,7 +34,11 @@ namespace NexusForever.WorldServer.Game.Map
             entities[coord].Add(model);
         }
 
-        public void DelEntity(EntityModel model)
+        /// <summary>
+        /// Removes <see cref="EntityModel"/> from <see cref="EntityCache"/> at a given <see cref="Vector3"/> World Position
+        /// </summary>
+        /// <param name="model"></param>
+        public void DeleteEntity(EntityModel model)
         {
             var vector = new Vector3(model.X, model.Y, model.Z);
             (uint GridX, uint GridZ) coord = MapGrid.GetGridCoord(vector);

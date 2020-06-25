@@ -204,6 +204,11 @@ namespace NexusForever.WorldServer.Game.Map
             return grids[gridZ * MapDefines.WorldGridCount + gridX];
         }
 
+        /// <summary>
+        /// Returns Grid X and Z Values Based On A Given <see cref="Vector3"/> World Position 
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns><see cref="MapGrid"/></returns>
         public MapGrid GetGrid(Vector3 vector)
         {
             (uint gridX, uint gridZ) = MapGrid.GetGridCoord(vector);

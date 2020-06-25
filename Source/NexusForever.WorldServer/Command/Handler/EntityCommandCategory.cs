@@ -42,8 +42,8 @@ namespace NexusForever.WorldServer.Command.Handler
             {
                 Id = DatabaseManager.Instance.WorldDatabase.GetNewEntityId(),
                 Creature = unitId,
-                Area = (ushort)context.GetTargetOrInvoker<Player>().Zone.Id,
-                DisplayInfo = creatureEntry.Id,
+                Area = (ushort)context.Invoker.Zone.Id,
+                DisplayInfo = creatureEntry.Creature2DisplayGroupId,
                 OutfitInfo = (ushort)creatureEntry.Creature2OutfitGroupId,
                 X = context.Invoker.Position.X,
                 Y = context.Invoker.Position.Y,
@@ -60,17 +60,22 @@ namespace NexusForever.WorldServer.Command.Handler
             npcModel.Id = DatabaseManager.Instance.WorldDatabase.GetNewEntityId();
             
             var entity = new NonPlayer();
+            entity.CreateFlags = EntityCreateFlag.SpawnAnimation;
             entity.Initialise(npcModel, context.Invoker.Position, context.Invoker.Rotation);
-            context.GetTargetOrInvoker<Player>().Map.EnqueueAdd(entity, context.Invoker.Position);
+            // Cannot use "context.GetTargetOrInvoker()" because if you are targeting an NPC it returns the NPC
+            context.Invoker.Map.EnqueueAdd(entity, context.Invoker.Position);
 
             // Add New Entity to the EntityCache
             var cache = EntityCacheManager.Instance.GetEntityCache((ushort)context.Invoker.Map.Entry.Id);
             cache.AddEntity(npcModel);
             var activeNPCGrid = context.Invoker.Map.GetGrid(context.Invoker.Position);
-            var l = cache.GetEntities(activeNPCGrid.Coord.X, activeNPCGrid.Coord.Z).ToList();
+            var entityList = cache.GetEntities(activeNPCGrid.Coord.X, activeNPCGrid.Coord.Z).ToList();
 
-            // Make sure we have the entity information stored
-            DatabaseManager.Instance.WorldDatabase.SaveEntities(l);
+            // This function sets all the properties like health and shield etc, also prevents from spawning dead.
+            entity.CalculateProperties();
+
+            // Save Entity to Database (Entity Table)
+            DatabaseManager.Instance.WorldDatabase.SaveEntities(entityList);
                         
         }
 
@@ -95,10 +100,12 @@ namespace NexusForever.WorldServer.Command.Handler
                 .GetEntities((ushort)context.Invoker.Map.Entry.Id)
                 .Where(x => x.Id == context.Target.EntityId)
                 .FirstOrDefault();
+
+            // Remove Entity from Entity Cache (In-Game Object)
             EntityCacheManager.Instance.GetEntityCache((ushort)context.Invoker.Map.Entry.Id).DelEntity(model);
+
+            // Remove Entity from Database (Persistence)
             DatabaseManager.Instance.WorldDatabase.RemoveEntity(model);
-
-
         }
 
         [Command(Permission.EntityModify, "A collection of commands to modify an entity.", "modify")]
