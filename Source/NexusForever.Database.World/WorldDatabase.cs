@@ -35,6 +35,23 @@ namespace NexusForever.Database.World
             }
         }
 
+        public void SaveEntities(List<EntityModel> entities)
+        {
+            using var context = new WorldContext(config);
+            foreach (EntityModel entity in entities)
+            {
+                if (context.Entity.Where(e => e.Id == entity.Id).Count() > 0)
+                {
+                    context.Entity.Update(entity);
+                }
+                else
+                {
+                    context.Entity.Add(entity);
+                }
+            }
+            context.SaveChanges();
+        }
+
         public ImmutableList<EntityModel> GetEntities(ushort world)
         {
             using var context = new WorldContext(config);
@@ -45,6 +62,13 @@ namespace NexusForever.Database.World
                 .Include(e => e.EntityStat)
                 .AsNoTracking()
                 .ToImmutableList();
+        }
+
+        public uint GetNewEntityId()
+        {
+            using var context = new WorldContext(config);
+            if (context.Entity.Count() == 0) return 1;
+            return context.Entity.Max(x => x.Id) + 1;
         }
 
         public ImmutableList<EntityModel> GetEntitiesWithoutArea()
@@ -64,6 +88,13 @@ namespace NexusForever.Database.World
                 entity.State = EntityState.Modified;
             }
 
+            context.SaveChanges();
+        }
+
+        public void RemoveEntity(EntityModel model)
+        {
+            using var context = new WorldContext(config);
+            context.Entity.Remove(model);
             context.SaveChanges();
         }
 
