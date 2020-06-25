@@ -95,6 +95,28 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+
+        }
+
+        /// <summary>
+        /// Initialise <see cref="WorldEntity"/> from an existing database model.
+        /// </summary>
+        public virtual void Initialise(EntityModel model, Vector3 position, Vector3 rotation)
+        {
+            EntityId = model.Id;
+            CreatureId = model.Creature;
+            Rotation = new Vector3(rotation.X, rotation.Y, rotation.Z);
+            DisplayInfo = model.DisplayInfo;
+            OutfitInfo = model.OutfitInfo;
+            Faction1 = (Faction)model.Faction1;
+            Faction2 = (Faction)model.Faction2;
+            ActivePropId = model.ActivePropId;
+            WorldSocketId = model.WorldSocketId;
+            Position = new Vector3(position.X, position.Y, position.Z);
+            
+            foreach (EntityStatModel statModel in model.EntityStat)
+                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+
         }
 
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)

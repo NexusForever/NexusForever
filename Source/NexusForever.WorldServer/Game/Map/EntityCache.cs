@@ -34,6 +34,14 @@ namespace NexusForever.WorldServer.Game.Map
             entities[coord].Add(model);
         }
 
+        public void DelEntity(EntityModel model)
+        {
+            var vector = new Vector3(model.X, model.Y, model.Z);
+            (uint GridX, uint GridZ) coord = MapGrid.GetGridCoord(vector);
+
+            entities.Remove(coord);
+        }
+
         /// <summary>
         /// Return all <see cref="EntityModel"/>'s to be spawned for parent <see cref="MapGrid"/>.
         /// </summary>
@@ -41,5 +49,6 @@ namespace NexusForever.WorldServer.Game.Map
         {
             return entities.TryGetValue((gridX, gridZ), out HashSet<EntityModel> cellEntities) ? cellEntities : Enumerable.Empty<EntityModel>();
         }
+
     }
 }
