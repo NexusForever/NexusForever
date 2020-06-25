@@ -110,6 +110,22 @@ namespace NexusForever.WorldServer.Game.Social
             }
         }
 
+        /// <summary>
+        /// Clears Local Chat after using a ! command in chat
+        /// </summary>
+        /// <param name="session"></param>
+        public void SendCommandChatAccept(WorldSession session)
+        {
+            session.EnqueueMessageEncrypted(new ServerChatAccept { 
+                 
+            });
+            //session.EnqueueMessageEncrypted(new ServerChatAccept
+            //{
+            //    Name = session.Player.Name,
+            //    Guid = session.Player.Guid
+            //});
+        }
+
         private void SendChatAccept(WorldSession session)
         {
             session.EnqueueMessageEncrypted(new ServerChatAccept

@@ -31,6 +31,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     var target  = session.Player.GetVisible<WorldEntity>(session.Player.TargetGuid);
                     var context = new WorldSessionCommandContext(session.Player, target);
                     CommandManager.Instance.HandleCommand(context, chat.Message.Substring(CommandPrefix.Length));
+                    // Send Accept Chat from Command Usage Okay
+                    Player player = context.Invoker as Player;
+                    SocialManager.Instance.SendCommandChatAccept(player.Session);
                 }
                 catch (Exception e)
                 {
