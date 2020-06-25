@@ -102,7 +102,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 .FirstOrDefault();
 
             // Remove Entity from Entity Cache (In-Game Object)
-            EntityCacheManager.Instance.GetEntityCache((ushort)context.Invoker.Map.Entry.Id).DelEntity(model);
+            EntityCacheManager.Instance.GetEntityCache((ushort)context.Invoker.Map.Entry.Id).DeleteEntity(model);
 
             // Remove Entity from Database (Persistence)
             DatabaseManager.Instance.WorldDatabase.RemoveEntity(model);
