@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 using NexusForever.Database.World.Model;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
@@ -26,6 +29,49 @@ namespace NexusForever.WorldServer.Command.Handler
             
         }
 
+        /// <summary>
+        /// Outputs a json File in the .exe directory which contains a grouped list of mobs
+        /// </summary>
+        [Command(Permission.Entity, "Listing Creature2 Entities - npctool | display | model", "list")]
+        public void HandleEntityList(ICommandContext context, string filter)
+        {
+            // TODO: Convert to Sub-Commands
+
+            // Create CreatureList.json for NPCSpawnTool
+            if (filter.ToLower() == "npctool")
+            {
+                var creatureData = GameTableManager.Instance.Creature2.Entries;
+                List<NPCSpawnModel> CreatureList = new List<NPCSpawnModel>();
+                var filterList = creatureData.Where(x => !x.Description.Contains('[') && !string.IsNullOrEmpty(x.Description)).ToList();
+                foreach(var c in filterList)
+                {
+                    CreatureList.Add(new NPCSpawnModel { Id = c.Id, Description = c.Description.Trim() });
+                }
+
+                File.WriteAllText("CreatureList.json", JsonConvert.SerializeObject(CreatureList));
+            }
+
+            // Create creatures_ByDisplayGroupId.json, Creatures Grouped by DisplayGroupId (file size in excess of 180mb)
+            if (filter.ToLower() == "display")
+            {
+                var creatureData = GameTableManager.Instance.Creature2.Entries
+                    .GroupBy(o => o.Creature2DisplayGroupId)
+                    .ToDictionary(g => g.Key, g=> g.ToList());
+                File.WriteAllText("creatures_ByDisplayGroupId.json", JsonConvert.SerializeObject(creatureData));
+                return;
+            }
+
+            // Create creatures_ByModelInfoId.json, Creatures Grouped by ModelInfoId (file size in excess of 180mb)
+            if (filter.ToLower() == "model")
+            {
+                var creatureData = GameTableManager.Instance.Creature2.Entries
+                    .GroupBy(o => o.Creature2ModelInfoId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+                File.WriteAllText("creatures_ByModelInfoId.json", JsonConvert.SerializeObject(creatureData));
+                return;
+            }
+        }
+
         [Command(Permission.Entity, "Add an Entity by Creature Id", "add")]
         public void HandleEntityAdd(ICommandContext context,
             uint unitId)
@@ -38,6 +84,11 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
+            SpawnObject(context, creatureEntry, unitId);
+        }
+
+        private void SpawnObject(ICommandContext context, Creature2Entry creatureEntry, uint unitId)
+        {
             var npcModel = new EntityModel()
             {
                 Id = DatabaseManager.Instance.WorldDatabase.GetNewEntityId(),
@@ -58,7 +109,7 @@ namespace NexusForever.WorldServer.Command.Handler
             };
 
             npcModel.Id = DatabaseManager.Instance.WorldDatabase.GetNewEntityId();
-            
+
             var entity = new NonPlayer();
             entity.CreateFlags = EntityCreateFlag.SpawnAnimation;
             entity.Initialise(npcModel, context.Invoker.Position, context.Invoker.Rotation);
@@ -76,7 +127,6 @@ namespace NexusForever.WorldServer.Command.Handler
 
             // Save Entity to Database (Entity Table)
             DatabaseManager.Instance.WorldDatabase.SaveEntities(entityList);
-                        
         }
 
         [Command(Permission.Entity, "Delete an Entity by Target", "del")]

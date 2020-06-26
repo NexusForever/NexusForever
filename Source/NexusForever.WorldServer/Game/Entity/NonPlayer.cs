@@ -56,6 +56,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 level = (ulong)random.Next((int)creatureEntry.MinLevel, (int)creatureEntry.MaxLevel);
 
             CreatureLevelEntry levelEntry = GameTableManager.Instance.CreatureLevel.GetEntry(level);
+            if(levelEntry != null)
             for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
                 values[i] = levelEntry.UnitPropertyValue[i];
 
@@ -73,9 +74,9 @@ namespace NexusForever.WorldServer.Game.Entity
             if (tierEntry != null)
                 for (uint i = 0u; i < tierEntry.UnitPropertyMultiplier.Length; i++)
                     values[i] *= tierEntry.UnitPropertyMultiplier[i];
-
-            for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
-                SetProperty((Property)i, values[i], values[i]);
+            if (levelEntry != null)
+                for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
+                    SetProperty((Property)i, values[i], values[i]);
 
             SetStat(Stat.Level, (uint)level);
             SetStat(Stat.Health, (uint)GetPropertyValue(Property.BaseHealth));
