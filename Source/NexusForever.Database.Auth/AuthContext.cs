@@ -290,6 +290,8 @@ namespace NexusForever.Database.Auth
             {
                 entity.ToTable("account_permission");
 
+                entity.HasKey(i => new { i.Id, i.PermissionId });
+
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
                     .HasColumnType("int(10) unsigned")
@@ -314,6 +316,8 @@ namespace NexusForever.Database.Auth
             modelBuilder.Entity<AccountRoleModel>(entity =>
             {
                 entity.ToTable("account_role");
+
+                entity.HasKey(i => new { i.Id, i.RoleId });
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -893,6 +897,8 @@ namespace NexusForever.Database.Auth
             modelBuilder.Entity<RolePermissionModel>(entity =>
             {
                 entity.ToTable("role_permission");
+
+                entity.HasKey(i => new { i.Id, i.PermissionId });
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
