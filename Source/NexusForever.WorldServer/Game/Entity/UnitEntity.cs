@@ -31,6 +31,17 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        public void DealDamage(uint amount)
+        {
+            if (this is Player player)
+            {
+                player.DealDamage(amount);
+            } else if (this is WorldEntity entity)
+            {
+                entity.DealDamage(amount);
+            }
+        }
+
         /// <summary>
         /// Cast a <see cref="Spell"/> with the supplied spell id and <see cref="SpellParameters"/>.
         /// </summary>

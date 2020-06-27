@@ -764,6 +764,12 @@ namespace NexusForever.WorldServer.Game.Entity
             XpManager.GrantXp(xp, reason);
         }
 
+        public void DealDamage(uint damage)
+        {
+            uint? newHealth = GetStatInteger(Stat.Health) - damage;
+            SetStat(Stat.Health, (uint)newHealth);
+        }
+
         /// <summary>
         /// Send <see cref="GenericError"/> to <see cref="Player"/>.
         /// </summary>

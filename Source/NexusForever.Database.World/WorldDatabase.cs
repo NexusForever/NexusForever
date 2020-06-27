@@ -52,6 +52,16 @@ namespace NexusForever.Database.World
             context.SaveChanges();
         }
 
+        /// <summary>
+        /// Retrieve Unique World IDs of Mobs In Entity Database
+        /// </summary>
+        /// <returns></returns>
+        public List<ushort> GetUniqueWorlds()
+        {
+            using var context = new WorldContext(config);
+            return context.Entity.Select(e => e.World).Distinct().ToList();
+        }
+
         public ImmutableList<EntityModel> GetEntities(ushort world)
         {
             using var context = new WorldContext(config);

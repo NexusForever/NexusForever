@@ -18,6 +18,7 @@ namespace NexusForever.WorldServer.Game.Spell
         private void HandleEffectDamage(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
             // TODO: calculate damage
+            target.DealDamage(1337);
             info.AddDamage((DamageType)info.Entry.DamageType, 1337);
         }
 

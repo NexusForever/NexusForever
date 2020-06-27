@@ -197,6 +197,34 @@ namespace NexusForever.WorldServer.Game.Entity
             // deliberately empty
         }
 
+        public void DealDamage(uint amount)
+        {
+            // Hit Shields First
+            var unitHealth = GetStatInteger(Stat.Health);
+            var unitShields = GetStatInteger(Stat.Shield);
+
+            if(unitShields == 0)
+            {
+                if (unitHealth < amount) unitHealth = 0;
+                else unitHealth -= amount;
+
+            } else
+            {
+                if (unitShields <= amount)
+                {
+                    unitHealth = unitHealth - (amount - unitShields);
+                    unitShields = 0;
+                }
+                else if (unitShields > amount)
+                {
+                    unitShields -= amount;
+                }
+            }
+
+            SetStat(Stat.Shield, (uint)unitShields);
+            SetStat(Stat.Health, (uint)unitHealth);
+        }
+
         protected void SetProperty(Property property, float value, float baseValue = 0.0f)
         {
             if (Properties.ContainsKey(property))
@@ -294,6 +322,11 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 statValue = new StatValue(stat, value);
                 stats.Add(stat, statValue);
+            }
+
+            if(stat == Stat.Health)
+            {
+                
             }
 
             if (attribute.SendUpdate)
