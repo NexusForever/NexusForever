@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NetworkPetCustomisation = NexusForever.WorldServer.Network.Message.Model.Shared.PetCustomisation;
@@ -25,19 +25,19 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly Dictionary<ulong/*hash*/, PetCustomisation> petCustomisations = new Dictionary<ulong, PetCustomisation>();
 
         /// <summary>
-        /// Create a new <see cref="PetCustomisationManager"/> from existing <see cref="Character"/> database model.
+        /// Create a new <see cref="PetCustomisationManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public PetCustomisationManager(Player owner, Character model)
+        public PetCustomisationManager(Player owner, CharacterModel model)
         {
             player = owner;
 
-            foreach (CharacterPetFlair flairModel in model.CharacterPetFlair)
+            foreach (CharacterPetFlairModel flairModel in model.PetFlair)
             {
                 var petFlair = new PetFlair(flairModel);
                 petFlairs.Add(petFlair.Entry.Id, petFlair);
             }
 
-            foreach (CharacterPetCustomisation customisationModel in model.CharacterPetCustomisation)
+            foreach (CharacterPetCustomisationModel customisationModel in model.PetCustomisation)
             {
                 var customisation = new PetCustomisation(customisationModel);
                 petCustomisations.Add(PetCustomisationHash(customisation.Type, customisation.ObjectId), customisation);

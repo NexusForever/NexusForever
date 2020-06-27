@@ -28,6 +28,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (character == null)
                 throw new InvalidPacketValueException();
 
+            float? onlineStatus = character.GetOnlineStatus();
             session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
             {
                 BaseData = new ServerPlayerInfoFullResponse.Base
@@ -45,8 +46,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 Path = character.Path,
                 Class = character.Class,
                 Level = character.Level,
-                IsLastLoggedOnInDaysSet = true,
-                LastLoggedInDays = character.GetOnlineStatus()
+                IsLastLoggedOnInDaysSet = onlineStatus.HasValue,
+                LastLoggedInDays = onlineStatus.GetValueOrDefault(0f)
             });
             
         }
@@ -77,6 +78,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 MaxRandom = randomRoll.MaxRandom,
                 RandomRollResult = new Random().Next((int)randomRoll.MinRandom, (int)randomRoll.MaxRandom)
             });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientZoneChange)]
+        public static void HandleClientZoneChange(WorldSession session, ClientZoneChange zoneChange)
+        {
+        }
+
+        /// <summary>
+        /// The client sends this after every teleport, when it has entered the world.
+        /// </summary>
+        [MessageHandler(GameMessageOpcode.ClientEnteredWorld)]
+        public static void HandleClientEnteredWorld(WorldSession session, ClientEnteredWorld enteredWorld)
+        {
         }
     }
 }

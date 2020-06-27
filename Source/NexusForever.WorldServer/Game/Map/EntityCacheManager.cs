@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.WorldServer.Database.World;
+using NexusForever.Shared.Database;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Game.Map
 
         private EntityCache LoadEntityCache(ushort worldId)
         {
-            var entityCache = new EntityCache(WorldDatabase.GetEntities(worldId));
+            var entityCache = new EntityCache(DatabaseManager.Instance.WorldDatabase.GetEntities(worldId));
             entityCaches.Add(worldId, entityCache);
 
             log.Trace($"Initialised {entityCache.EntityCount} spawns on {entityCache.GridCount} grids for world {worldId}.");

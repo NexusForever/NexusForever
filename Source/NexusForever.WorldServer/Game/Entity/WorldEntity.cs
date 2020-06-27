@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using NexusForever.Database.World.Model;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -21,6 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 Rotation { get; set; } = Vector3.Zero;
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
 
+        public uint EntityId { get; protected set; }
         public uint CreatureId { get; protected set; }
         public uint DisplayInfo { get; protected set; }
         public ushort OutfitInfo { get; protected set; }
@@ -28,10 +28,21 @@ namespace NexusForever.WorldServer.Game.Entity
         public Faction Faction2 { get; set; }
 
         public ulong ActivePropId { get; private set; }
+        public ushort WorldSocketId { get; private set; }
 
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
         public MovementManager MovementManager { get; private set; }
+
+        public uint Health
+        {
+            get => GetStatInteger(Stat.Health) ?? 0u;
+        }
+
+        public float Shield
+        {
+            get => GetStatInteger(Stat.Shield) ?? 0u;
+        }
 
         public uint Level
         {
@@ -72,6 +83,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
+            EntityId     = model.Id;
             CreatureId   = model.Creature;
             Rotation     = new Vector3(model.Rx, model.Ry, model.Rz);
             DisplayInfo  = model.DisplayInfo;
@@ -79,8 +91,9 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction1     = (Faction)model.Faction1;
             Faction2     = (Faction)model.Faction2;
             ActivePropId = model.ActivePropId;
+            WorldSocketId = model.WorldSocketId;
 
-            foreach (EntityStats statModel in model.EntityStats)
+            foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
         }
 
@@ -125,13 +138,19 @@ namespace NexusForever.WorldServer.Game.Entity
                 OutfitInfo   = OutfitInfo
             };
 
-            if (ActivePropId > 0)
+            // Plugs should not have this portion of the packet set by this Class. The Plug Class should set it itself.
+            // This is in large part due to the way Plugs are tied either to a DecorId OR Guid. Other entities do not have the same issue.
+            if (!(this is Plug))
             {
-                entityCreatePacket.WorldPlacementData = new ServerEntityCreate.WorldPlacement
+                if (ActivePropId > 0 || WorldSocketId > 0)
                 {
-                    Type = 1,
-                    ActivePropId = ActivePropId
-                };
+                    entityCreatePacket.WorldPlacementData = new ServerEntityCreate.WorldPlacement
+                    {
+                        Type = 1,
+                        ActivePropId = ActivePropId,
+                        SocketId = WorldSocketId
+                    };
+                }
             }
 
             return entityCreatePacket;

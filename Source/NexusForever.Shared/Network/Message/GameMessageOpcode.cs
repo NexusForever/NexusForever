@@ -10,7 +10,7 @@ namespace NexusForever.Shared.Network.Message
         ServerAuthEncrypted             = 0x0076,
         ServerLogoutUpdate              = 0x0092,
         ClientActivateUnitCast          = 0x0097, // not sure about the name - almost the same as 0x00B3, but also initiates 0x07FD
-        Client009A                      = 0x009A, // client spell cast request, very similiar to 0x04DB, but for non-abilities -> mount, teleport, etc.
+        ClientCastSpell                 = 0x009A,
         ServerChangeWorld               = 0x00AD,
         ServerAchievementInit           = 0x00AE,
         ServerAchievementUpdate         = 0x00AF,
@@ -34,6 +34,7 @@ namespace NexusForever.Shared.Network.Message
         ServerDatacubeVolumeUpdate      = 0x00E2,
         ServerCharacterDeleteResult     = 0x00E6,
         Server00F1                      = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
+        ClientEnteredWorld              = 0x00F2,
         ServerCharacterFlagsUpdated     = 0x00FE,
         Server0104                      = 0x0104, // Galactic Archive
         ServerGenericError              = 0x0106,
@@ -49,6 +50,7 @@ namespace NexusForever.Shared.Network.Message
         ClientMailTakeAttachment        = 0x0126,
         ClientMailTakeCash              = 0x0127,
         ServerUnlockMount               = 0x0129,
+        ClientItemMoveToSupplySatchel   = 0x012A,
         ServerPetCustomizationList      = 0x012E,
         ServerPetCustomisation          = 0x012F,
         ClientRapidTransport            = 0x0141,
@@ -72,11 +74,13 @@ namespace NexusForever.Shared.Network.Message
         ClientItemSplit                 = 0x017D,
         ServerItemStackCountUpdate      = 0x017F,
         ClientItemMove                  = 0x0182,
+        ClientItemMoveFromSupplySatchel = 0x0184,
         ClientEntitySelect              = 0x0185,
         ServerFlightPathUpdate          = 0x0188,
         ServerTitleSet                  = 0x0189,
         ServerTitleUpdate               = 0x018A,
         ServerTitles                    = 0x018B,
+        ServerSupplySatchelUpdate       = 0x0199,
         ServerPlayerChanged             = 0x019B,
         ServerActionSet                 = 0x019D,
         ServerPlayerInnateSet           = 0x019F,
@@ -91,6 +95,8 @@ namespace NexusForever.Shared.Network.Message
         ServerChatAccept                = 0x01C2,
         ClientChat                      = 0x01C3,
         ServerChat                      = 0x01C8,
+        ClientChatWhisper               = 0x01D4,
+        ServerChatZoneChange            = 0x01DA,
         Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
         ClientPing                      = 0x0241,
         ClientEncrypted                 = 0x0244,
@@ -117,6 +123,7 @@ namespace NexusForever.Shared.Network.Message
         ServerQuestObjectiveUpdate      = 0x0361,
         ClientQuestSetTracked           = 0x0364,
         ClientQuestRetry                = 0x0365,
+        ServerForceKick                 = 0x036A,
         ClientEmote                     = 0x037E,
         ClientCostumeItemForget         = 0x038B,
         ClientPackedWorld               = 0x038C,
@@ -130,7 +137,7 @@ namespace NexusForever.Shared.Network.Message
         ClientQuestShareResult          = 0x045E,
         ClientQuestShare                = 0x045F,
         Server0497                      = 0x0497, // guild info
-        ClientCastSpell                 = 0x04DB,
+        ClientCastSpellContinuous       = 0x04DB,
         ServerHousingResidenceDecor     = 0x04DE,
         ServerHousingProperties         = 0x04DF,
         ServerHousingPlots              = 0x04E1,
@@ -140,6 +147,7 @@ namespace NexusForever.Shared.Network.Message
         ServerHousingVendorList         = 0x0508,
         ClientHousingRemodel            = 0x050A,
         ClientHousingDecorUpdate        = 0x050B,
+        ClientHousingFlagsUpdate        = 0x050E,
         ClientHousingPlugUpdate         = 0x0510,
         ClientHousingVendorList         = 0x0525,
         ServerHousingRandomCommunityList = 0x0526,
@@ -174,6 +182,7 @@ namespace NexusForever.Shared.Network.Message
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
         Server0639                      = 0x0639, // mount up or something
+        ClientZoneChange                = 0x063A,
         ClientPlayerMovementSpeedUpdate = 0x063B,
         ServerAuthDenied                = 0x063D,
         ServerOwnedCommodityOrders      = 0x064C,
@@ -200,13 +209,18 @@ namespace NexusForever.Shared.Network.Message
         ServerPublicEventStart          = 0x0700,
         ClientRandomRollRequest         = 0x071B,
         ServerRandomRollResponse        = 0x071C,
+        ServerStoryCommunicatorShow     = 0x073A,
         ServerEntityInteractiveUpdate   = 0x0755,
+        ServerCommunicatorMessage       = 0x0757,
+        ServerStoryPanelHide            = 0x0759,
+        ServerStoryPanelShow            = 0x075A,
         ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
         ClientTitleSet                  = 0x078E,
         ServerNewRealm                  = 0x07A1,
         ClientRealmList                 = 0x07A4,
+        ClientReplayLevelRequest        = 0x07A5,
         ClientCharacterSelect           = 0x07DD,
         ClientCharacterList             = 0x07E0,
         ClientEntityInteract            = 0x07EA,
@@ -251,6 +265,7 @@ namespace NexusForever.Shared.Network.Message
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
         ClientCostumeItemUnlock         = 0x090F,
+        ServerSpellAbilityCharges       = 0x0914,
         ServerEntitlement               = 0x0918,
         ServerCombatReward              = 0x0919,
         ServerCooldownList              = 0x091B,

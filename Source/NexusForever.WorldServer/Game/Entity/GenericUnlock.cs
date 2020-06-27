@@ -1,9 +1,8 @@
-﻿using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth.Model;
+﻿using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -16,9 +15,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private bool isDirty;
 
         /// <summary>
-        /// Create a new <see cref="CostumeUnlock"/> from existing <see cref="AccountGenericUnlock"/> database model.
+        /// Create a new <see cref="CostumeUnlock"/> from existing <see cref="AccountGenericUnlockModel"/> database model.
         /// </summary>
-        public GenericUnlock(AccountGenericUnlock model)
+        public GenericUnlock(AccountGenericUnlockModel model)
         {
             Entry     = GameTableManager.Instance.GenericUnlockEntry.GetEntry(model.Entry);
             accountId = model.Id;
@@ -39,7 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (!isDirty)
                 return;
 
-            var model = new AccountGenericUnlock
+            var model = new AccountGenericUnlockModel
             {
                 Id    = accountId,
                 Entry = Entry.Id

@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -46,7 +46,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Title"/> from an existing database model.
         /// </summary>
-        public Title(CharacterTitle model)
+        public Title(CharacterTitleModel model)
         {
             CharacterId = model.Id;
             Entry       = GameTableManager.Instance.CharacterTitle.GetEntry(model.Title);
@@ -86,7 +86,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if ((saveMask & TitleSaveMask.Create) != 0)
             {
                 // title doesn't exist in database, all infomation must be saved
-                context.Add(new CharacterTitle
+                context.Add(new CharacterTitleModel
                 {
                     Id            = CharacterId,
                     Title         = (ushort)Entry.Id,
@@ -96,13 +96,13 @@ namespace NexusForever.WorldServer.Game.Entity
             else
             {
                 // title already exists in database, save only data that has been modified
-                var model = new CharacterTitle
+                var model = new CharacterTitleModel
                 {
                     Id    = CharacterId,
                     Title = (ushort)Entry.Id
                 };
 
-                EntityEntry<CharacterTitle> entity = context.Attach(model);
+                EntityEntry<CharacterTitleModel> entity = context.Attach(model);
                 if ((saveMask & TitleSaveMask.TimeRemaining) != 0)
                 {
                     // timeRemaining should never be null here, explicit check?

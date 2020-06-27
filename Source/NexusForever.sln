@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2016
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Shared", "NexusForever.Shared\NexusForever.Shared.csproj", "{4A47774E-518A-4243-8B0B-6B5F9808329D}"
 EndProject
@@ -17,7 +17,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.ClientConnecto
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.MapGenerator", "NexusForever.MapGenerator\NexusForever.MapGenerator.csproj", "{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.MapGenerator", "NexusForever.MapGenerator\NexusForever.MapGenerator.csproj", "{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Database.Auth", "NexusForever.Database.Auth\NexusForever.Database.Auth.csproj", "{3B1462E6-FDAC-4A1C-B709-61913F5BAE26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Database.Character", "NexusForever.Database.Character\NexusForever.Database.Character.csproj", "{9A2AB9CA-C4DC-4660-AEEF-C22D6BF09647}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Database.World", "NexusForever.Database.World\NexusForever.Database.World.csproj", "{945B9303-FBCD-483B-954D-57D93EF1D0B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Database", "NexusForever.Database\NexusForever.Database.csproj", "{75B332FF-24A2-4E48-BC23-CC391F94C3B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +57,22 @@ Global
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B1462E6-FDAC-4A1C-B709-61913F5BAE26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B1462E6-FDAC-4A1C-B709-61913F5BAE26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B1462E6-FDAC-4A1C-B709-61913F5BAE26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B1462E6-FDAC-4A1C-B709-61913F5BAE26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A2AB9CA-C4DC-4660-AEEF-C22D6BF09647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A2AB9CA-C4DC-4660-AEEF-C22D6BF09647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A2AB9CA-C4DC-4660-AEEF-C22D6BF09647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A2AB9CA-C4DC-4660-AEEF-C22D6BF09647}.Release|Any CPU.Build.0 = Release|Any CPU
+		{945B9303-FBCD-483B-954D-57D93EF1D0B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{945B9303-FBCD-483B-954D-57D93EF1D0B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{945B9303-FBCD-483B-954D-57D93EF1D0B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{945B9303-FBCD-483B-954D-57D93EF1D0B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75B332FF-24A2-4E48-BC23-CC391F94C3B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75B332FF-24A2-4E48-BC23-CC391F94C3B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75B332FF-24A2-4E48-BC23-CC391F94C3B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75B332FF-24A2-4E48-BC23-CC391F94C3B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +84,10 @@ Global
 		{775E278A-6EED-4E11-B484-8538593CE0A8} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{D6201763-C0A1-4725-88E3-DCB3C35F5F73} = {96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}
 		{4E41CCCF-95AB-4BEC-91DF-03E6A4DB9EA7} = {96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}
+		{3B1462E6-FDAC-4A1C-B709-61913F5BAE26} = {F11199C0-850A-4DA7-A71B-C597581970D6}
+		{9A2AB9CA-C4DC-4660-AEEF-C22D6BF09647} = {F11199C0-850A-4DA7-A71B-C597581970D6}
+		{945B9303-FBCD-483B-954D-57D93EF1D0B7} = {F11199C0-850A-4DA7-A71B-C597581970D6}
+		{75B332FF-24A2-4E48-BC23-CC391F94C3B2} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D83B735-7E6A-4C1A-83C4-DD80682C2859}

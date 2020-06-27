@@ -1,15 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message;
 using NexusForever.WorldServer.Network.Message.Model;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -19,13 +18,13 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly Dictionary<uint, GenericUnlock> unlocks = new Dictionary<uint, GenericUnlock>();
 
         /// <summary>
-        /// Create a new <see cref="GenericUnlockManager"/> from <see cref="Account"/> database model.
+        /// Create a new <see cref="GenericUnlockManager"/> from <see cref="AccountModel"/> database model.
         /// </summary>
         public GenericUnlockManager(WorldSession session, AccountModel model)
         {
             this.session = session;
 
-            foreach (AccountGenericUnlock unlockModel in model.AccountGenericUnlock)
+            foreach (AccountGenericUnlockModel unlockModel in model.AccountGenericUnlock)
                 unlocks.Add(unlockModel.Entry, new GenericUnlock(unlockModel));
         }
 

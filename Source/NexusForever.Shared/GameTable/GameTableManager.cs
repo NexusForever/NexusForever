@@ -296,8 +296,13 @@ namespace NexusForever.Shared.GameTable
         public GameTable<ItemStatEntry> ItemStat { get; private set; }
         public GameTable<LanguageEntry> Language { get; private set; }
         public GameTable<LevelDifferentialAttributeEntry> LevelDifferentialAttribute { get; private set; }
+        
+        [GameData]
         public GameTable<LevelUpUnlockEntry> LevelUpUnlock { get; private set; }
+        
+        [GameData]
         public GameTable<LevelUpUnlockTypeEntry> LevelUpUnlockType { get; private set; }
+        
         public GameTable<LiveEventEntry> LiveEvent { get; private set; }
         public GameTable<LiveEventDisplayItemEntry> LiveEventDisplayItem { get; private set; }
         public GameTable<LoadingScreenTipEntry> LoadingScreenTip { get; private set; }
@@ -556,6 +561,8 @@ namespace NexusForever.Shared.GameTable
         public GameTable<StoreDisplayInfoEntry> StoreDisplayInfo { get; private set; }
         public GameTable<StoreKeywordEntry> StoreKeyword { get; private set; }
         public GameTable<StoreLinkEntry> StoreLink { get; private set; }
+
+        [GameData]
         public GameTable<StoryPanelEntry> StoryPanel { get; private set; }
 
         [GameData]
@@ -581,7 +588,10 @@ namespace NexusForever.Shared.GameTable
         public GameTable<TradeskillCatalystEntry> TradeskillCatalyst { get; private set; }
         public GameTable<TradeskillCatalystOrderingEntry> TradeskillCatalystOrdering { get; private set; }
         public GameTable<TradeskillHarvestingInfoEntry> TradeskillHarvestingInfo { get; private set; }
+
+        [GameData]
         public GameTable<TradeskillMaterialEntry> TradeskillMaterial { get; private set; }
+
         public GameTable<TradeskillMaterialCategoryEntry> TradeskillMaterialCategory { get; private set; }
         public GameTable<TradeskillProficiencyEntry> TradeskillProficiency { get; private set; }
         public GameTable<TradeskillSchematic2Entry> TradeskillSchematic2 { get; private set; }

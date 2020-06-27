@@ -50,6 +50,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             residenceMap.DecorUpdate(session.Player, housingDecorUpdate);
         }
 
+        [MessageHandler(GameMessageOpcode.ClientHousingFlagsUpdate)]
+        public static void HandleHousingFlagsUpdate(WorldSession session, ClientHousingFlagsUpdate flagsUpdate)
+        {
+            if (!(session.Player.Map is ResidenceMap residenceMap))
+                throw new InvalidPacketValueException();
+
+            residenceMap.UpdateResidenceFlags(session.Player, flagsUpdate);
+        }
+
         [MessageHandler(GameMessageOpcode.ClientHousingPlugUpdate)]
         public static void HandleHousingPlugUpdate(WorldSession session, ClientHousingPlugUpdate housingPlugUpdate)
         {
@@ -127,6 +136,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             if (!(session.Player.Map is ResidenceMap))
                 throw new InvalidPacketValueException();
+
+            if (!session.Player.CanTeleport())
+                return;
 
             Task<Residence> residenceTask;
             if (housingVisit.TargetResidenceName != "")

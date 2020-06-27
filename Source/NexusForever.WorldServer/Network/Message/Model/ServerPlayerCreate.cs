@@ -82,7 +82,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint UnknownC4 { get; set; }
         public uint UnknownC8 { get; set; }
         public List<ushort> KnownDyes { get; } = new List<ushort>();
-        public byte[] TradeskillMaterials { get; } = new byte[1024];
+        public ushort[] TradeskillMaterials { get; set; } = new ushort[512];
         public float GearScore { get; set; }
         public bool IsPvpServer { get; set; }
         public uint Unknown4DC { get; set; }

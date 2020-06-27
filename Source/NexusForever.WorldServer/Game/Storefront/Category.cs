@@ -1,10 +1,11 @@
 using System;
-using NexusForever.WorldServer.Database.World.Model;
+using NexusForever.Database.World.Model;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
 {
-    public class Category
+    public class Category : IBuildable<ServerStoreCategories.StoreCategory>
     {
         public uint Id { get; }
         public string Name { get; }
@@ -16,7 +17,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         /// <summary>
         /// Create a new <see cref="Category"/> from an existing database model.
         /// </summary>
-        public Category(StoreCategory model)
+        public Category(StoreCategoryModel model)
         {
             Id               = model.Id;
             Name             = model.Name;
@@ -26,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Storefront
             Visible          = Convert.ToBoolean(model.Visible);
         }
 
-        public ServerStoreCategories.StoreCategory BuildNetworkPacket()
+        public ServerStoreCategories.StoreCategory Build()
         {
             return new ServerStoreCategories.StoreCategory
             {

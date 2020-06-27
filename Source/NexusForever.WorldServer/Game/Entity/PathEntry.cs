@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -56,17 +56,17 @@ namespace NexusForever.WorldServer.Game.Entity
         private PathSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="PathEntry"/> for a <see cref="Player"/> from <see cref="CharacterPath"/>
+        /// Create a new <see cref="PathEntry"/> for a <see cref="Player"/> from <see cref="CharacterPathModel"/>
         /// </summary>
-        public PathEntry(CharacterPath model)
+        public PathEntry(CharacterPathModel model)
         {
-            CharacterId = model.Id;
-            Path = (Path)model.Path;
-            unlocked = Convert.ToBoolean(model.Unlocked);
-            totalXp = model.TotalXp;
+            CharacterId   = model.Id;
+            Path          = (Path)model.Path;
+            unlocked      = Convert.ToBoolean(model.Unlocked);
+            totalXp       = model.TotalXp;
             levelRewarded = model.LevelRewarded;
             
-            saveMask = PathSaveMask.None;
+            saveMask      = PathSaveMask.None;
         }
 
         /// <summary>
@@ -75,14 +75,14 @@ namespace NexusForever.WorldServer.Game.Entity
         public PathEntry(ulong owner, Path path, bool isUnlocked)
         {
             CharacterId = owner;
-            Path = path;
-            unlocked = isUnlocked;
+            Path        = path;
+            unlocked    = isUnlocked;
 
-            saveMask = PathSaveMask.Create;
+            saveMask    = PathSaveMask.Create;
         }
 
         /// <summary>
-        /// Save the <see cref="CharacterPath"/> with it's current state
+        /// Save the <see cref="CharacterPathModel"/> with it's current state
         /// </summary>
         /// <param name="context">The character context to save against</param>
         public void Save(CharacterContext context)
@@ -93,25 +93,25 @@ namespace NexusForever.WorldServer.Game.Entity
             if ((saveMask & PathSaveMask.Create) != 0)
             {
                 // Path doesn't exist in database, all infomation must be saved
-                context.Add(new CharacterPath
+                context.Add(new CharacterPathModel
                 {
-                    Id = CharacterId,
-                    Path = (byte)Path,
-                    Unlocked = Convert.ToByte(Unlocked),
-                    TotalXp = TotalXp,
+                    Id            = CharacterId,
+                    Path          = (byte)Path,
+                    Unlocked      = Convert.ToByte(Unlocked),
+                    TotalXp       = TotalXp,
                     LevelRewarded = LevelRewarded
                 });
             }
             else
             {
                 // Path already exists in database, save only data that has been modified
-                var model = new CharacterPath
+                var model = new CharacterPathModel
                 {
-                    Id = CharacterId,
+                    Id   = CharacterId,
                     Path = (byte)Path
                 };
 
-                EntityEntry<CharacterPath> entity = context.Attach(model);
+                EntityEntry<CharacterPathModel> entity = context.Attach(model);
                 if ((saveMask & PathSaveMask.Unlocked) != 0)
                 {
                     model.Unlocked = Convert.ToByte(Unlocked);

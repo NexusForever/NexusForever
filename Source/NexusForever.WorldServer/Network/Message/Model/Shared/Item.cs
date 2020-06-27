@@ -52,7 +52,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         public List<uint> Microchips { get; } = new List<uint>();
         public List<uint> Glyphs { get; } = new List<uint>();
         public List<UnknownStructure2> Unknown88 { get; } = new List<UnknownStructure2>();
-        public uint Unknown8C { get; set; }
+        public uint EffectiveItemLevel { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -84,7 +84,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             writer.Write(Glyphs.Count, 6u);
             Unknown88.ForEach(u => u.Write(writer));
 
-            writer.Write(Unknown8C);
+            writer.Write(EffectiveItemLevel);
         }
     }
 }

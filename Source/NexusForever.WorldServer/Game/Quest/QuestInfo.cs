@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.GameTable.Quest2.Static;
 
 namespace NexusForever.WorldServer.Game.Quest
 {
@@ -33,6 +34,11 @@ namespace NexusForever.WorldServer.Game.Quest
                 rewardBuilder.Add(rewardEntry.Id, rewardEntry);
 
             Rewards = rewardBuilder.ToImmutable();
+        }
+
+        public bool IsAutoComplete()
+        {
+            return ((QuestFlags)Entry.Flags & QuestFlags.AutoComplete) != 0;
         }
 
         /// <summary>

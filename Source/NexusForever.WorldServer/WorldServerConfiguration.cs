@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NexusForever.Database.Configuration;
 using NexusForever.Shared.Configuration;
 
 namespace NexusForever.WorldServer
@@ -19,6 +20,8 @@ namespace NexusForever.WorldServer
         public MapConfig Map { get; set; }
         public bool UseCache { get; set; } = false;
         public ushort RealmId { get; set; }
+        public string MessageOfTheDay { get; set; }
         public uint LengthOfInGameDay { get; set; }
+        public bool CrossFactionChat { get; set; } = true;
     }
 }

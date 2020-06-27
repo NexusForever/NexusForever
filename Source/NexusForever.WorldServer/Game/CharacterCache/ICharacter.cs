@@ -14,6 +14,9 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         Faction Faction1 { get; }
         Faction Faction2 { get; }
 
-        float GetOnlineStatus();
+        /// <summary>
+        /// Returns a <see cref="float"/> representing decimal value, in days, since the character was last online.
+        /// </summary>
+        float? GetOnlineStatus();
     }
 }

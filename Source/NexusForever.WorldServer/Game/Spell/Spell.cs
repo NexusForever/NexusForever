@@ -104,6 +104,9 @@ namespace NexusForever.WorldServer.Game.Spell
                 if (parameters.SpellInfo.Entry.GlobalCooldownEnum == 0
                     && player.SpellManager.GetGlobalSpellCooldown() > 0d)
                     return CastResult.SpellGlobalCooldown;
+
+                if (parameters.CharacterSpell?.MaxAbilityCharges > 0 && parameters.CharacterSpell?.AbilityCharges == 0)
+                    return CastResult.SpellNoCharges;
             }
 
             return CastResult.Ok;
@@ -183,8 +186,15 @@ namespace NexusForever.WorldServer.Game.Spell
 
             SelectTargets();
             ExecuteEffects();
+            CostSpell();
 
             SendSpellGo();
+        }
+
+        private void CostSpell()
+        {
+            if (parameters.CharacterSpell?.MaxAbilityCharges > 0)
+                parameters.CharacterSpell.UseCharge();
         }
 
         private void SelectTargets()

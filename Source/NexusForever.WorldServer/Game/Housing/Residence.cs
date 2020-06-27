@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Housing.Static;
-using ResidenceModel = NexusForever.WorldServer.Database.Character.Model.Residence;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
@@ -212,7 +211,7 @@ namespace NexusForever.WorldServer.Game.Housing
         {
             Id                  = model.Id;
             OwnerId             = model.OwnerId;
-            OwnerName           = model.Owner.Name;
+            OwnerName           = model.Character.Name;
             PropertyInfoId      = model.PropertyInfoId;
             name                = model.Name;
             privacyLevel        = (ResidencePrivacyLevel)model.PrivacyLevel;
@@ -227,13 +226,13 @@ namespace NexusForever.WorldServer.Game.Housing
             resourceSharing     = model.ResourceSharing;
             gardenSharing       = model.GardenSharing;
 
-            foreach (ResidenceDecor decorModel in model.ResidenceDecor)
+            foreach (ResidenceDecor decorModel in model.Decor)
             {
                 var decor = new Decor(decorModel);
                 decors.Add(decor.DecorId, decor);
             }
 
-            foreach (ResidencePlot plotModel in model.ResidencePlot)
+            foreach (ResidencePlotModel plotModel in model.Plot)
             {
                 var plot = new Plot(plotModel);
                 plots[plot.Index] = plot;
@@ -352,8 +351,18 @@ namespace NexusForever.WorldServer.Game.Housing
                     }
                     if ((saveMask & ResidenceSaveMask.Flags) != 0)
                     {
-                        model.Flags = Sky;
+                        model.Flags = (ushort)Flags;
                         entity.Property(p => p.Flags).IsModified = true;
+                    }
+                    if ((saveMask & ResidenceSaveMask.ResourceSharing) != 0)
+                    {
+                        model.ResourceSharing = ResourceSharing;
+                        entity.Property(p => p.ResourceSharing).IsModified = true;
+                    }
+                    if ((saveMask & ResidenceSaveMask.GardenSharing) != 0)
+                    {
+                        model.GardenSharing = GardenSharing;
+                        entity.Property(p => p.GardenSharing).IsModified = true;
                     }
                 }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
+using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Map;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map.Search;

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using NexusForever.Shared.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
-using CharacterAchievementModel = NexusForever.WorldServer.Database.Character.Model.CharacterAchievement;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {
@@ -12,13 +11,13 @@ namespace NexusForever.WorldServer.Game.Achievement
         private readonly Player owner;
 
         /// <summary>
-        /// Create a new <see cref="CharacterAchievementManager"/> from existing <see cref="Character"/> database model.
+        /// Create a new <see cref="CharacterAchievementManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public CharacterAchievementManager(Player owner, Character model)
+        public CharacterAchievementManager(Player owner, CharacterModel model)
         {
             this.owner = owner;
 
-            foreach (CharacterAchievementModel achievementModel in model.CharacterAchievement)
+            foreach (CharacterAchievementModel achievementModel in model.Achievement)
             {
                 AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(achievementModel.AchievementId);
                 if (info == null)

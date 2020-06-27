@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth;
-using NexusForever.Shared.Database.Auth.Model;
+using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.Shared.Network;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity.Network;
@@ -25,6 +24,7 @@ using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.Setting;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -50,10 +50,13 @@ namespace NexusForever.WorldServer.Game.Entity
             set
             {
                 path = value;
+                PathActivatedTime = DateTime.UtcNow;
                 saveMask |= PlayerSaveMask.Path;
             }
         }
         private Path path;
+
+        public DateTime PathActivatedTime { get; private set; }
 
         public sbyte CostumeIndex
         {
@@ -114,14 +117,19 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public bool IsSitting => currentChairGuid != null;
         private uint? currentChairGuid;
+        
+        public bool SignatureEnabled = false; // TODO: Make configurable.
 
         public WorldSession Session { get; }
         public bool IsLoading { get; private set; } = true;
 
         /// <summary>
-        /// Returns a <see cref="float"/> representing decimal value, in days, since Player was last online. Used by <see cref="ICharacter"/>.
+        /// Returns a <see cref="float"/> representing decimal value, in days, since the character was last online. Used by <see cref="ICharacter"/>.
         /// </summary>
-        public float GetOnlineStatus() => 0f;
+        /// <remarks>
+        /// 0 is always returned for online players.
+        /// </remarks>
+        public float? GetOnlineStatus() => 0f;
 
         public Inventory Inventory { get; }
         public CurrencyManager CurrencyManager { get; }
@@ -136,6 +144,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public ZoneMapManager ZoneMapManager { get; }
         public QuestManager QuestManager { get; }
         public CharacterAchievementManager AchievementManager { get; }
+        public SupplySatchelManager SupplySatchelManager { get; }
+        public XpManager XpManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -144,8 +154,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
+        public bool CanTeleport() => pendingTeleport == null;
 
-        public Player(WorldSession session, Character model)
+        public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
         {
             ActivationRange = BaseMap.DefaultVisionRange;
@@ -157,7 +168,8 @@ namespace NexusForever.WorldServer.Game.Entity
             Sex             = (Sex)model.Sex;
             Race            = (Race)model.Race;
             Class           = (Class)model.Class;
-            Path            = (Path)model.ActivePath;
+            path            = (Path)model.ActivePath;
+            PathActivatedTime = model.PathActivatedTimestamp;
             CostumeIndex    = model.ActiveCostumeIndex;
             InputKeySet     = (InputSets)model.InputKeySet;
             Faction1        = (Faction)model.FactionId;
@@ -167,6 +179,9 @@ namespace NexusForever.WorldServer.Game.Entity
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
             TimePlayedLevel = model.TimePlayedLevel;
+
+            foreach (CharacterStatModel statModel in model.Stat)
+                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
             // managers
             CostumeManager          = new CostumeManager(this, session.Account, model);
@@ -182,6 +197,8 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
             AchievementManager      = new CharacterAchievementManager(this, model);
+            SupplySatchelManager    = new SupplySatchelManager(this, model);
+            XpManager               = new XpManager(this, model);
 
             Session.EntitlementManager.OnNewCharacter(model);
 
@@ -201,18 +218,16 @@ namespace NexusForever.WorldServer.Game.Entity
                 costume = CostumeManager.GetCostume((byte)CostumeIndex);
 
             SetAppearance(Inventory.GetItemVisuals(costume));
-            SetAppearance(model.CharacterAppearance
+            SetAppearance(model.Appearance
                 .Select(a => new ItemVisual
                 {
                     Slot      = (ItemSlot)a.Slot,
                     DisplayId = a.DisplayId
                 }));
 
-            foreach (CharacterBone bone in model.CharacterBone.OrderBy(bone => bone.BoneIndex))
+            foreach (CharacterBoneModel bone in model.Bone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
 
-            foreach (CharacterStats statModel in model.CharacterStats)
-                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
             SetStat(Stat.Sheathed, 1u);
 
@@ -255,14 +270,14 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Save <see cref="Account"/> and <see cref="Character"/> to the database.
+        /// Save <see cref="Account"/> and <see cref="ServerCharacterList.Character"/> to the database.
         /// </summary>
         public void Save(Action callback = null)
         {
-            Session.EnqueueEvent(new TaskEvent(AuthDatabase.Save(Save),
+            Session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.Save(Save),
             () =>
             {
-                Session.EnqueueEvent(new TaskEvent(CharacterDatabase.Save(Save),
+                Session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.CharacterDatabase.Save(Save),
                 () =>
                 {
                     callback?.Invoke();
@@ -303,6 +318,10 @@ namespace NexusForever.WorldServer.Game.Entity
                 Position = new Position(vector)
             });
 
+            // if the player has no existing map they have just entered the world
+            // this check needs to happen before OnAddToMap as the player will have a map afterwards
+            bool initialLogin = Map == null;
+
             base.OnAddToMap(map, guid, vector);
             map.OnAddToMap(this);
 
@@ -317,6 +336,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
             SendPacketsAfterAddToMap();
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
+
+            if (initialLogin)
+                OnLogin();
 
             IsLoading = false;
         }
@@ -334,13 +356,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (Zone != null)
             {
                 TextTable tt = GameTableManager.Instance.GetTextTable(Language.English);
-
-                Session.EnqueueMessageEncrypted(new ServerChat
-                {
-                    Guid    = Session.Player.Guid,
-                    Channel = ChatChannel.System,
-                    Text    = $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}"
-                });
+                SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
 
                 uint tutorialId = AssetManager.Instance.GetTutorialIdForZone(Zone.Id);
                 if (tutorialId > 0)
@@ -389,6 +405,18 @@ namespace NexusForever.WorldServer.Game.Entity
                         Id    = RewardProperty.Trading,
                         Type  = 1,
                         Value = 1
+                    },
+                    new ServerRewardPropertySet.RewardProperty
+                    {
+                        Id    = RewardProperty.TradeskillMatStackLimit,
+                        Type  = 1,
+                        Value = 100
+                    },
+                    new ServerRewardPropertySet.RewardProperty
+                    {
+                        Id    = RewardProperty.TradeskillMatTrading,
+                        Type  = 1,
+                        Value = 1
                     }
                 }
             });
@@ -410,7 +438,10 @@ namespace NexusForever.WorldServer.Game.Entity
                         Entitlement = e.Type,
                         Count       = e.Amount
                     })
-                    .ToList()
+                    .ToList(),
+                TradeskillMaterials   = SupplySatchelManager.BuildNetworkPacket(),
+                Xp                    = XpManager.TotalXp,
+                RestBonusXp           = XpManager.RestBonusXp
             };
 
             foreach (Currency currency in CurrencyManager)
@@ -428,7 +459,6 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             playerCreate.SpecIndex = SpellManager.ActiveActionSet;
-
             Session.EnqueueMessageEncrypted(playerCreate);
 
             TitleManager.SendTitles();
@@ -457,13 +487,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public override void OnRemoveFromMap()
         {
-            // enqueue removal of existing vanity pet if summoned
-            if (VanityPetGuid != null)
-            {
-                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
-                pet?.RemoveFromMap();
-                VanityPetGuid = null;
-            }
+            DestroyDependents();
 
             base.OnRemoveFromMap();
 
@@ -595,6 +619,13 @@ namespace NexusForever.WorldServer.Game.Entity
             }
         }
 
+        private void OnLogin()
+        {
+            string motd = WorldServer.RealmMotd;
+            if (motd?.Length > 0)
+                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannel.Realm);
+        }
+
         /// <summary>
         /// Teleport <see cref="Player"/> to supplied location.
         /// </summary>
@@ -612,6 +643,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void TeleportTo(WorldEntry entry, Vector3 vector, uint instanceId = 0u, ulong residenceId = 0ul)
         {
+            if (!CanTeleport())
+                throw new InvalidOperationException($"Player {CharacterId} tried to teleport when they're already teleporting.");
+
             if (DisableManager.Instance.IsDisabled(DisableType.World, entry.Id))
             {
                 SendSystemMessage($"Unable to teleport to world {entry.Id} because it is disabled.");
@@ -723,6 +757,14 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Shortcut method to grant XP to the player
+        /// </summary>
+        public void GrantXp(uint xp, ExpReason reason = ExpReason.Cheat)
+        {
+            XpManager.GrantXp(xp, reason);
+        }
+
+        /// <summary>
         /// Send <see cref="GenericError"/> to <see cref="Player"/>.
         /// </summary>
         public void SendGenericError(GenericError error)
@@ -733,6 +775,10 @@ namespace NexusForever.WorldServer.Game.Entity
             });
         }
 
+        /// <summary>
+        /// Send message to <see cref="Player"/> using the <see cref="ChatChannel.System"/> channel.
+        /// </summary>
+        /// <param name="text"></param>
         public void SendSystemMessage(string text)
         {
             Session.EnqueueMessageEncrypted(new ServerChat
@@ -741,9 +787,49 @@ namespace NexusForever.WorldServer.Game.Entity
                 Text    = text
             });
         }
+        
+        /// <summary>
+        /// Returns whether this <see cref="Player"/> is allowed to summon or be added to a mount
+        /// </summary>
+        public bool CanMount()
+        {
+            return VehicleGuid == 0u && pendingTeleport == null && logoutManager == null;
+        }
+
+        /// <summary>
+        /// Dismounts this <see cref="Player"/> from a vehicle that it's attached to
+        /// </summary>
+        public void Dismount()
+        {
+            if (VehicleGuid != 0u)
+            {
+                Vehicle vehicle = GetVisible<Vehicle>(VehicleGuid);
+                vehicle.PassengerRemove(this);
+            }
+        }
+
+        /// <summary>
+        /// Remove all entities associated with the <see cref="Player"/>
+        /// </summary>
+        private void DestroyDependents()
+        {
+            // vehicle will be removed if player is the last passenger
+            if (VehicleGuid != 0u)
+                Dismount();
+
+            if (VanityPetGuid != null)
+            {
+                VanityPet pet = GetVisible<VanityPet>(VanityPetGuid.Value);
+                pet?.RemoveFromMap();
+                VanityPetGuid = null;
+            }
+
+            // TODO: Remove pets, scanbots
+        }
 
         public void Save(AuthContext context)
         {
+            Session.AccountRbacManager.Save(context);
             Session.GenericUnlockManager.Save(context);
             Session.AccountCurrencyManager.Save(context);
             Session.EntitlementManager.Save(context);
@@ -754,12 +840,12 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Save(CharacterContext context)
         {
-            var model = new Character
+            var model = new CharacterModel
             {
                 Id = CharacterId
             };
 
-            EntityEntry<Character> entity = context.Attach(model);
+            EntityEntry<CharacterModel> entity = context.Attach(model);
 
             if (saveMask != PlayerSaveMask.None)
             {
@@ -785,6 +871,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 {
                     model.ActivePath = (uint)Path;
                     entity.Property(p => p.ActivePath).IsModified = true;
+                    model.PathActivatedTimestamp = PathActivatedTime;
+                    entity.Property(p => p.PathActivatedTimestamp).IsModified = true;
                 }
 
                 if ((saveMask & PlayerSaveMask.Costume) != 0)
@@ -812,6 +900,8 @@ namespace NexusForever.WorldServer.Game.Entity
             entity.Property(p => p.TimePlayedLevel).IsModified = true;
             model.TimePlayedTotal = (uint)TimePlayedTotal;
             entity.Property(p => p.TimePlayedTotal).IsModified = true;
+            model.LastOnline = DateTime.UtcNow;
+            entity.Property(p => p.LastOnline).IsModified = true;
 
             foreach (StatValue stat in stats.Values)
                 stat.SaveCharacter(CharacterId, context);
@@ -829,6 +919,8 @@ namespace NexusForever.WorldServer.Game.Entity
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
             AchievementManager.Save(context);
+            SupplySatchelManager.Save(context);
+            XpManager.Save(context);
 
             Session.EntitlementManager.Save(context);
         }

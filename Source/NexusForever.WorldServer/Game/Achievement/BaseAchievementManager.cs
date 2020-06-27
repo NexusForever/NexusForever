@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using NexusForever.Database.Character;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Prerequisite;
@@ -155,6 +154,9 @@ namespace NexusForever.WorldServer.Game.Achievement
             // TODO: should the server also check PrerequisiteId?
             if (entry.PrerequisiteIdServer != 0u && !PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteIdServer))
                 return false;
+            
+            if (entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteId))
+                return false;
 
             // TODO: research PrerequisiteIdObjective and PrerequisiteIdObjectiveAlt
 
@@ -182,6 +184,10 @@ namespace NexusForever.WorldServer.Game.Achievement
             if (entry.ObjectIdAlt != 0u && entry.ObjectIdAlt != objectIdAlt)
                 return false;
 
+            // TODO: Research this case where both values are 0. It's assumed the checklist is checked by ID by a script.
+            if (entry.ObjectId == 0u && entry.ObjectIdAlt == 0u)
+                return false;
+
             return true;
         }
 
@@ -201,7 +207,7 @@ namespace NexusForever.WorldServer.Game.Achievement
                 1u => 10u,
                 2u => 25u,
                 3u => 50u,
-                _ => 0u,
+                _ => 0u
             };
         }
 

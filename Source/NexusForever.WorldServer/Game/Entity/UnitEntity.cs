@@ -88,6 +88,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 return;
             }
 
+            if (parameters.UserInitiatedSpellCast)
+            {
+                if (this is Player player)
+                    player.Dismount();
+            }
+
             var spell = new Spell.Spell(this, parameters);
             spell.Cast();
             pendingSpells.Add(spell);

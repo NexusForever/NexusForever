@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using NLog;
 using NexusForever.Shared;
@@ -11,9 +10,11 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Command.Contexts;
+using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Game.RBAC;
 using NexusForever.WorldServer.Game;
 using NexusForever.WorldServer.Game.Achievement;
+using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
@@ -25,7 +26,6 @@ using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
 using NexusForever.WorldServer.Network;
-using NexusForever.WorldServer.Game.CharacterCache;
 
 namespace NexusForever.WorldServer
 {
@@ -39,7 +39,15 @@ namespace NexusForever.WorldServer
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Internal unique id of the realm.
+        /// </summary>
         public static ushort RealmId { get; private set; }
+
+        /// <summary>
+        /// Realm message of the day that is shown to players on login.
+        /// </summary>
+        public static string RealmMotd { get; set; }
 
         private static void Main()
         {
@@ -49,7 +57,15 @@ namespace NexusForever.WorldServer
             log.Info("Initialising...");
 
             ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json");
-            DatabaseManager.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
+            RealmId   = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
+            RealmMotd = ConfigurationManager<WorldServerConfiguration>.Instance.Config.MessageOfTheDay;
+
+            DatabaseManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
+            DatabaseManager.Instance.Migrate();
+
+            // RBACManager must be initialised before CommandManager
+            RBACManager.Instance.Initialise();
+            CommandManager.Instance.Initialise();
 
             DisableManager.Instance.Initialise();
 
@@ -65,30 +81,29 @@ namespace NexusForever.WorldServer
             PrerequisiteManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
             GlobalQuestManager.Instance.Initialise();
-            ServerManager.Instance.Initialise();
 
             CharacterManager.Instance.Initialise();
             ResidenceManager.Instance.Initialise();
             GlobalStorefrontManager.Instance.Initialise();
 
             GlobalAchievementManager.Instance.Initialise();
-
-            // make sure the assigned realm id in the configuration file exists in the database
-            RealmId = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
-            if (ServerManager.Instance.Servers.All(s => s.Model.Id != RealmId))
-                throw new ConfigurationException($"Realm id {RealmId} in configuration file doesn't exist in the database!");
+            ServerManager.Instance.Initialise(RealmId); 
 
             MessageManager.Instance.Initialise();
             SocialManager.Instance.Initialise();
-            CommandManager.Instance.Initialise();
             NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
             WorldManager.Instance.Initialise(lastTick =>
             {
+                // NetworkManager must be first and MapManager must come before everything else
                 NetworkManager<WorldSession>.Instance.Update(lastTick);
                 MapManager.Instance.Update(lastTick);
+
                 ResidenceManager.Instance.Update(lastTick);
                 BuybackManager.Instance.Update(lastTick);
                 GlobalQuestManager.Instance.Update(lastTick);
+
+                // process commands after everything else in the tick has processed
+                CommandManager.Instance.Update(lastTick);
             });
 
             using (WorldServerEmbeddedWebServer.Initialise())
@@ -99,8 +114,7 @@ namespace NexusForever.WorldServer
                 {
                     Console.Write(">> ");
                     string line = Console.ReadLine();
-                    if (!CommandManager.Instance.HandleCommand(new ConsoleCommandContext(), line, false))
-                        Console.WriteLine("Invalid command");
+                    CommandManager.Instance.HandleCommandDelay(new ConsoleCommandContext(), line);
                 }
             }
         }

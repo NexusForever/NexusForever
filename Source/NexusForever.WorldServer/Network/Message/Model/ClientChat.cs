@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
@@ -13,6 +13,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public ulong Unknown0 { get; set; }
         public string Message { get; private set; }
         public List<ChatFormat> Formats { get; } = new List<ChatFormat>();
+        public ushort Unknown0C { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
@@ -27,6 +28,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 format.Read(reader);
                 Formats.Add(format);
             }
+
+            Unknown0C = reader.ReadUShort();
         }
     }
 }

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -33,9 +33,9 @@ namespace NexusForever.WorldServer.Game.Entity
         private PetCustomisationSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="PetCustomisation"/> from existing <see cref="CharacterPetCustomisation"/> database model.
+        /// Create a new <see cref="PetCustomisation"/> from existing <see cref="CharacterPetCustomisationModel"/> database model.
         /// </summary>
-        public PetCustomisation(CharacterPetCustomisation model)
+        public PetCustomisation(CharacterPetCustomisationModel model)
         {
             Owner    = model.Id;
             Type     = (PetType)model.Type;
@@ -69,7 +69,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if ((saveMask & PetCustomisationSaveMask.Create) != 0)
             {
                 // pet customisation doesn't exist in database, all infomation must be saved
-                var model = new CharacterPetCustomisation
+                var model = new CharacterPetCustomisationModel
                 {
                     Id          = Owner,
                     Type        = (byte)Type,
@@ -83,14 +83,14 @@ namespace NexusForever.WorldServer.Game.Entity
             else
             {
                 // pet customisation already exists in database, save only data that has been modified
-                var model = new CharacterPetCustomisation
+                var model = new CharacterPetCustomisationModel
                 {
                     Id       = Owner,
                     Type     = (byte)Type,
                     ObjectId = ObjectId
                 };
 
-                EntityEntry<CharacterPetCustomisation> entity = context.Attach(model);
+                EntityEntry<CharacterPetCustomisationModel> entity = context.Attach(model);
                 if ((saveMask & PetCustomisationSaveMask.Name) != 0)
                 {
                     model.Name = Name;

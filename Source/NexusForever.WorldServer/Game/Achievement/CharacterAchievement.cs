@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Database.Character.Model;
-using CharacterAchievementModel = NexusForever.WorldServer.Database.Character.Model.CharacterAchievement;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {

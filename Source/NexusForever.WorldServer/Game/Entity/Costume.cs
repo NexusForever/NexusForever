@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -37,15 +36,15 @@ namespace NexusForever.WorldServer.Game.Entity
         private CostumeSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="Costume"/> from an existing <see cref="CharacterCostume"/> database model.
+        /// Create a new <see cref="Costume"/> from an existing <see cref="CharacterCostumeModel"/> database model.
         /// </summary>
-        public Costume(CharacterCostume model)
+        public Costume(CharacterCostumeModel model)
         {
             Owner = model.Id;
             Index = model.Index;
             mask  = model.Mask;
             
-            foreach (CharacterCostumeItem costumeItemModel in model.CharacterCostumeItem)
+            foreach (CharacterCostumeItemModel costumeItemModel in model.CostumeItem)
                 items[costumeItemModel.Slot] = new CostumeItem(this, costumeItemModel);
         }
 
@@ -70,8 +69,8 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 if ((saveMask & CostumeSaveMask.Create) != 0)
                 {
-                    // costume doesn't exist in database, all infomation must be saved
-                    var model = new CharacterCostume
+                    // costume doesn't exist in database, all information must be saved
+                    var model = new CharacterCostumeModel
                     {
                         Id    = Owner,
                         Index = Index,
@@ -83,13 +82,13 @@ namespace NexusForever.WorldServer.Game.Entity
                 else
                 {
                     // costume already exists in database, save only data that has been modified
-                    var model = new CharacterCostume
+                    var model = new CharacterCostumeModel
                     {
                         Id    = Owner,
                         Index = Index
                     };
 
-                    EntityEntry<CharacterCostume> entity = context.Attach(model);
+                    EntityEntry<CharacterCostumeModel> entity = context.Attach(model);
                     if ((saveMask & CostumeSaveMask.Mask) != 0)
                     {
                         model.Mask = mask;

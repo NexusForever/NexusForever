@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private readonly Player player;
 
-        private readonly Dictionary<uint /*spell4BaseId*/, UnlockedSpell> spells = new Dictionary<uint, UnlockedSpell>();
+        private readonly Dictionary<uint /*spell4BaseId*/, CharacterSpell> spells = new Dictionary<uint, CharacterSpell>();
         private readonly Dictionary<uint /*spell4Id*/, double /*cooldown*/> spellCooldowns = new Dictionary<uint, double>();
         private double globalSpellCooldown;
 
@@ -47,17 +47,17 @@ namespace NexusForever.WorldServer.Game.Entity
         private SpellManagerSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="SpellManager"/> from existing <see cref="Character"/> database model.
+        /// Create a new <see cref="SpellManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public SpellManager(Player owner, Character model)
+        public SpellManager(Player owner, CharacterModel model)
         {
             player = owner;
 
-            foreach (CharacterSpell spellModel in model.CharacterSpell)
+            foreach (CharacterSpellModel spellModel in model.Spell)
             {
                 SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spellModel.Spell4BaseId);
                 Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
-                spells.Add(spellModel.Spell4BaseId, new UnlockedSpell(spellBaseInfo, spellModel, item));
+                spells.Add(spellModel.Spell4BaseId, new CharacterSpell(owner, spellModel, spellBaseInfo, item));
             }
 
             GrantSpells();
@@ -66,11 +66,11 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 actionSets[i] = new ActionSet(i, player);
 
-                foreach (CharacterActionSetShortcut shortcutModel in model.CharacterActionSetShortcut
+                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddShortcut(shortcutModel);
 
-                foreach (CharacterActionSetAmp ampModel in model.CharacterActionSetAmp
+                foreach (CharacterActionSetAmpModel ampModel in model.ActionSetAmp
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddAmp(ampModel);
             }
@@ -78,7 +78,7 @@ namespace NexusForever.WorldServer.Game.Entity
             activeActionSet = model.ActiveSpec;
         }
 
-        private void GrantSpells()
+        public void GrantSpells()
         {
             // TODO: TEMPORARY, this should eventually be used on level up
             foreach (SpellLevelEntry spellLevel in GameTableManager.Instance.SpellLevel.Entries
@@ -137,6 +137,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 else
                     spellCooldowns[spellId] = cooldown - lastTick;
             }
+
+            foreach (CharacterSpell unlockedSpell in spells.Values)
+                unlockedSpell.Update(lastTick);
         }
 
         public void Save(CharacterContext context)
@@ -144,8 +147,8 @@ namespace NexusForever.WorldServer.Game.Entity
             if (saveMask != SpellManagerSaveMask.None)
             {
                 // character is attached in Player::Save, this will only be local lookup
-                Character character = context.Character.Find(player.CharacterId);
-                EntityEntry<Character> entity = context.Entry(character);
+                CharacterModel character = context.Character.Find(player.CharacterId);
+                EntityEntry<CharacterModel> entity = context.Entry(character);
 
                 if ((saveMask & SpellManagerSaveMask.ActiveActionSet) != 0)
                 {
@@ -156,7 +159,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 saveMask = SpellManagerSaveMask.None;
             }
 
-            foreach (UnlockedSpell spell in spells.Values)
+            foreach (CharacterSpell spell in spells.Values)
                 spell.Save(context);
 
             foreach (ActionSet actionSet in actionSets)
@@ -164,15 +167,15 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Returns <see cref="UnlockedSpell"/> for an existing spell.
+        /// Returns <see cref="CharacterSpell"/> for an existing spell.
         /// </summary>
-        public UnlockedSpell GetSpell(uint spell4BaseId)
+        public CharacterSpell GetSpell(uint spell4BaseId)
         {
-            return spells.TryGetValue(spell4BaseId, out UnlockedSpell spell) ? spell : null;
+            return spells.TryGetValue(spell4BaseId, out CharacterSpell spell) ? spell : null;
         }
 
         /// <summary>
-        /// Add a new <see cref="UnlockedSpell"/> created from supplied spell base id and tier.
+        /// Add a new <see cref="CharacterSpell"/> created from supplied spell base id and tier.
         /// </summary>
         public void AddSpell(uint spell4BaseId, byte tier = 1)
         {
@@ -189,7 +192,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             Item item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
 
-            var unlockedSpell = new UnlockedSpell(player, spellBaseInfo, tier, item);
+            var unlockedSpell = new CharacterSpell(player, spellBaseInfo, tier, item);
             if (!player.IsLoading)
             {
                 player.Session.EnqueueMessageEncrypted(new ServerSpellUpdate
@@ -204,7 +207,7 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Update existing <see cref="UnlockedSpell"/> with supplied tier. The base tier will be updated if no action set index is supplied.
+        /// Update existing <see cref="CharacterSpell"/> with supplied tier. The base tier will be updated if no action set index is supplied.
         /// </summary>
         public void UpdateSpell(uint spell4BaseId, byte tier, byte? actionSetIndex)
         {
@@ -216,7 +219,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (spellInfo == null)
                 throw new ArgumentOutOfRangeException();
 
-            UnlockedSpell spell = GetSpell(spell4BaseId);
+            CharacterSpell spell = GetSpell(spell4BaseId);
             if (spell == null)
                 throw new ArgumentOutOfRangeException();
 
@@ -246,7 +249,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public byte GetSpellTier(uint spell4BaseId)
         {
-            UnlockedSpell spell = GetSpell(spell4BaseId);
+            CharacterSpell spell = GetSpell(spell4BaseId);
             if (spell == null)
                 throw new ArgumentException();
 
@@ -255,12 +258,12 @@ namespace NexusForever.WorldServer.Game.Entity
             return shortcut?.Tier ?? spell.Tier;
         }
 
-        public List<UnlockedSpell> GetPets()
+        public List<CharacterSpell> GetPets()
         {
             return spells.Values
-                .Where(s => s.Info.SpellType.Id == 27 ||
-                            s.Info.SpellType.Id == 30 ||
-                            s.Info.SpellType.Id == 104)
+                .Where(s => s.BaseInfo.SpellType.Id == 27 ||
+                            s.BaseInfo.SpellType.Id == 30 ||
+                            s.BaseInfo.SpellType.Id == 104)
                 .ToList();
         }
 
@@ -387,7 +390,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private void SendServerSpellList()
         {
             var serverSpellList = new ServerSpellList();
-            foreach ((uint spell4BaseId, UnlockedSpell spell) in spells)
+            foreach ((uint spell4BaseId, CharacterSpell spell) in spells)
             {
                 SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
                 if (spellBaseInfo == null)

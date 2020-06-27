@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -92,7 +93,7 @@ namespace NexusForever.WorldServer.Game.Quest
         /// <summary>
         /// Create a new <see cref="Quest"/> from an existing database model.
         /// </summary>
-        public Quest(Player owner, QuestInfo info, CharacterQuest model)
+        public Quest(Player owner, QuestInfo info, CharacterQuestModel model)
         {
             player = owner;
             Info   = info;
@@ -104,7 +105,7 @@ namespace NexusForever.WorldServer.Game.Quest
             if (timer != null)
                 questTimer = new UpdateTimer(timer.Value);
 
-            foreach (CharacterQuestObjective objectiveModel in model.CharacterQuestObjective)
+            foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(info, info.Objectives[objectiveModel.Index], objectiveModel));
         }
 
@@ -140,7 +141,7 @@ namespace NexusForever.WorldServer.Game.Quest
             {
                 if ((saveMask & QuestSaveMask.Create) != 0)
                 {
-                    context.Add(new CharacterQuest
+                    context.Add(new CharacterQuestModel
                     {
                         Id      = player.CharacterId,
                         QuestId = Id,
@@ -152,7 +153,7 @@ namespace NexusForever.WorldServer.Game.Quest
                 }
                 else if ((saveMask & QuestSaveMask.Delete) != 0)
                 {
-                    var model = new CharacterQuest
+                    var model = new CharacterQuestModel
                     {
                         Id      = player.CharacterId,
                         QuestId = Id
@@ -162,13 +163,13 @@ namespace NexusForever.WorldServer.Game.Quest
                 }
                 else
                 {
-                    var model = new CharacterQuest
+                    var model = new CharacterQuestModel
                     {
                         Id      = player.CharacterId,
                         QuestId = Id
                     };
 
-                    EntityEntry<CharacterQuest> entity = context.Attach(model);
+                    EntityEntry<CharacterQuestModel> entity = context.Attach(model);
                     if ((saveMask & QuestSaveMask.State) != 0)
                     {
                         model.State = (byte)State;
@@ -258,15 +259,48 @@ namespace NexusForever.WorldServer.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(QuestObjectiveType type, uint data, uint progress)
         {
+            if (PendingDelete)
+                return;
+
+            // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (QuestObjective objective in objectives
-                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data))
+                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data)
+                .OrderByDescending(o => o.Index))
             {
+                if (objective.IsComplete())
+                    continue;
+
                 if (!CanUpdateObjective(objective))
                     continue;
 
                 objective.ObjectiveUpdate(progress);
                 SendQuestObjectiveUpdate(objective);
             }
+
+            if (objectives.All(o => o.IsComplete()) && State != QuestState.Achieved)
+                State = QuestState.Achieved;
+        }
+
+        /// <summary>
+        /// Update any <see cref="QuestObjective"/>'s with supplied ID with progress.
+        /// </summary>
+        public void ObjectiveUpdate(uint id, uint progress)
+        {
+            if (PendingDelete)
+                return;
+
+            QuestObjective objective = objectives.SingleOrDefault(i => i.Entry.Id == id);
+            if (objective == null)
+                return;
+
+            if (objective.IsComplete())
+                return;
+
+            if (!CanUpdateObjective(objective))
+                return;
+
+            objective.ObjectiveUpdate(progress);
+            SendQuestObjectiveUpdate(objective);
 
             if (objectives.All(o => o.IsComplete()))
                 State = QuestState.Achieved;

@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -35,7 +36,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Create a new <see cref="Inventory"/> from <see cref="Player"/> database model.
         /// </summary>
-        public Inventory(Player owner, Character model)
+        public Inventory(Player owner, CharacterModel model)
         {
             characterId = owner?.CharacterId ?? 0ul;
             player      = owner;
@@ -43,7 +44,7 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach ((InventoryLocation location, uint defaultCapacity) in AssetManager.InventoryLocationCapacities)
                 bags.Add(location, new Bag(location, defaultCapacity));
 
-            foreach (var itemModel in model.Item)
+            foreach (ItemModel itemModel in model.Item)
                 AddItem(new Item(itemModel));
         }
 
@@ -78,14 +79,15 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public void Save(CharacterContext context)
         {
+            foreach (Item item in deletedItems)
+                item.Save(context);
+            
+            deletedItems.Clear();
+
             foreach (Item item in bags.Values
                 .Where(b => b.Location != InventoryLocation.Ability)
                 .SelectMany(i => i))
                 item.Save(context);
-
-            foreach (Item item in deletedItems)
-                item.Save(context);
-            deletedItems.Clear();
         }
 
         /// <summary>
@@ -142,7 +144,7 @@ namespace NexusForever.WorldServer.Game.Entity
             return new ItemVisual
             {
                 Slot      = itemSlot,
-                DisplayId = Item.GetDisplayId(costumeItem != null ? costumeItem.Entry : item?.Entry),
+                DisplayId = Item.GetDisplayId(costumeItem?.Entry != null ? costumeItem.Entry : item?.Entry),
                 DyeData   = costumeItem?.DyeData ?? 0
             };
         }
@@ -337,7 +339,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
                     uint newStackCount = Math.Min(item.StackCount + count, itemEntry.MaxStackCount);
                     count -= newStackCount - item.StackCount;
-                    ItemStackCountUpdate(item, newStackCount);
+                    ItemStackCountUpdate(item, newStackCount, reason);
                 }
             }
 
@@ -346,7 +348,13 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 uint bagIndex = bag.GetFirstAvailableBagIndex();
                 if (bagIndex == uint.MaxValue)
+                {
+                    // If there is remaining count left, and this was created by SupplySatchelManager, then return the rest to the client.
+                    if (count > 0 && reason == ItemUpdateReason.ResourceConversion)
+                        player.SupplySatchelManager.AddAmount(new Item(characterId, itemEntry, count, charges), count);
                     return;
+                }
+                    
 
                 var item = new Item(characterId, itemEntry, Math.Min(count, itemEntry.MaxStackCount), charges);
                 AddItem(item, InventoryLocation.Inventory, bagIndex);
@@ -724,7 +732,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Update <see cref="Item"/> with supplied stack count.
         /// </summary>
-        private void ItemStackCountUpdate(Item item, uint stackCount)
+        private void ItemStackCountUpdate(Item item, uint stackCount, ItemUpdateReason reason = ItemUpdateReason.NoReason)
         {
             if (item == null)
                 throw new ArgumentNullException();
@@ -735,7 +743,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Guid       = item.Guid,
                 StackCount = stackCount,
-                Reason     = 0
+                Reason     = reason
             });
         }
 
@@ -754,6 +762,8 @@ namespace NexusForever.WorldServer.Game.Entity
             if ((item.Charges <= 0 && item.Entry.MaxCharges > 1)|| (item.StackCount <= 0 && item.Entry.MaxStackCount > 1))
                 return false;
 
+            player.AchievementManager.CheckAchievements(player, AchievementType.ItemConsume, item.Id);
+
             if(item.Charges >= 1 && item.Entry.MaxStackCount == 1)
                 item.Charges--;
 
@@ -771,6 +781,24 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             return true;
+        }
+
+        public void ItemMoveToSupplySatchel(Item item, uint amount)
+        {
+            if (player.SupplySatchelManager.IsFull(item))
+                return;
+
+            uint amountRemaining = player.SupplySatchelManager.AddAmount(item, amount);
+            if (amountRemaining > 0)
+                ItemStackCountUpdate(item, (item.StackCount - amount) + amountRemaining);
+            else if (amount < item.StackCount)
+                ItemStackCountUpdate(item, item.StackCount - amount);
+            else
+                ItemDelete(new ItemLocation 
+                    {
+                        Location = item.Location,
+                        BagIndex = item.BagIndex
+                    }, ItemUpdateReason.ResourceConversion);
         }
 
         private Bag GetBag(InventoryLocation location)

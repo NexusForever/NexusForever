@@ -1,11 +1,11 @@
 ﻿using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Database.World.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using System.Collections.Generic;
+using NexusForever.Database.World.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -35,7 +35,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 Unknown4 = false
             };
 
-            foreach (EntityVendorCategory category in vendorEntity.VendorInfo.Categories)
+            foreach (EntityVendorCategoryModel category in vendorEntity.VendorInfo.Categories)
             {
                 serverVendor.Categories.Add(new ServerVendorItemsUpdated.Category
                 {
@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     LocalisedTextId = category.LocalisedTextId
                 });
             }
-            foreach (EntityVendorItem item in vendorEntity.VendorInfo.Items)
+            foreach (EntityVendorItemModel item in vendorEntity.VendorInfo.Items)
             {
                 serverVendor.Items.Add(new ServerVendorItemsUpdated.Item
                 {
@@ -68,7 +68,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (vendorInfo == null)
                 return;
 
-            EntityVendorItem vendorItem = vendorInfo.GetItemAtIndex(vendorPurchase.VendorIndex);
+            EntityVendorItemModel vendorItem = vendorInfo.GetItemAtIndex(vendorPurchase.VendorIndex);
             if (vendorItem == null)
                 return;
 

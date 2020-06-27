@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            Path = (Path)reader.ReadByte(3);
+            Path      = reader.ReadEnum<Path>(3);
             UseTokens = reader.ReadBit();
         }
     }

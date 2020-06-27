@@ -2,7 +2,8 @@
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using NexusForever.Shared.Database.Auth.Model;
+using System.Threading.Tasks;
+using NexusForever.Database.Auth.Model;
 using NLog;
 
 namespace NexusForever.Shared.Game
@@ -11,10 +12,11 @@ namespace NexusForever.Shared.Game
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public Server Model { get; }
+        public ServerModel Model { get; }
         public uint Address { get; }
+        public bool IsOnline { get; private set; }
 
-        public ServerInfo(Server model)
+        public ServerInfo(ServerModel model)
         {
             try
             {
@@ -34,6 +36,19 @@ namespace NexusForever.Shared.Game
                 log.Fatal(e, $"Failed to load server entry id: {model.Id}, host: {model.Host} from the database!");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Attempt to connect to the remote world server asynchronously.
+        /// </summary>
+        public async Task PingHostAsync()
+        {
+            using var client = new TcpClient();
+            await client.ConnectAsync(Model.Host, Model.Port).ContinueWith(task =>
+            {
+                IsOnline = !task.IsFaulted;
+                return task;
+            });
         }
     }
 }

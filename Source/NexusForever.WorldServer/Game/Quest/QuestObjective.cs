@@ -1,8 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Quest.Static;
 
 namespace NexusForever.WorldServer.Game.Quest
@@ -45,7 +46,7 @@ namespace NexusForever.WorldServer.Game.Quest
         /// <summary>
         /// Create a new <see cref="QuestObjective"/> from an existing database model.
         /// </summary>
-        public QuestObjective(QuestInfo info, QuestObjectiveEntry entry, CharacterQuestObjective model)
+        public QuestObjective(QuestInfo info, QuestObjectiveEntry entry, CharacterQuestObjectiveModel model)
         {
             Info     = info;
             Entry    = entry;
@@ -78,7 +79,7 @@ namespace NexusForever.WorldServer.Game.Quest
 
             if ((saveMask & QuestObjectiveSaveMask.Create) != 0)
             {
-                context.Add(new CharacterQuestObjective
+                context.Add(new CharacterQuestObjectiveModel
                 {
                     Id       = characterId,
                     QuestId  = (ushort)Info.Entry.Id,
@@ -88,14 +89,14 @@ namespace NexusForever.WorldServer.Game.Quest
             }
             else
             {
-                var model = new CharacterQuestObjective
+                var model = new CharacterQuestObjectiveModel
                 {
                     Id      = characterId,
                     QuestId = (ushort)Info.Entry.Id,
                     Index   = Index
                 };
 
-                EntityEntry<CharacterQuestObjective> entity = context.Entry(model);
+                EntityEntry<CharacterQuestObjectiveModel> entity = context.Entry(model);
                 if ((saveMask & QuestObjectiveSaveMask.Progress) != 0)
                 {
                     model.Progress = Progress;
@@ -120,10 +121,10 @@ namespace NexusForever.WorldServer.Game.Quest
         {
             // dynamic objectives have their progress based on percentage rather than count
             return (Type == QuestObjectiveType.KillCreature
-                || Type == QuestObjectiveType.Unknown8
+                || Type == QuestObjectiveType.KillTargetGroups
                 || Type == QuestObjectiveType.Unknown15
-                || Type == QuestObjectiveType.Unknown16
-                || Type == QuestObjectiveType.Unknown46)
+                || Type == QuestObjectiveType.KillTargetGroup
+                || Type == QuestObjectiveType.KillCreature2)
                 && Entry.Count > 1u
                 && (Entry.Flags & 0x0200) == 0;
         }

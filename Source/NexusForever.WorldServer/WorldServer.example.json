@@ -33,5 +33,7 @@
         "GridUnloadTimer": 3600
     },
     "RealmId": 1,
-    "LengthOfInGameDay": 12600
+    "MessageOfTheDay": "Welcome to this NexusForever server!",
+    "LengthOfInGameDay": 12600,
+    "CrossFactionChat":  true
 }

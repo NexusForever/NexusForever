@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
-using NexusForever.WorldServer.Database.Character;
+using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
-using CharacterModel = NexusForever.WorldServer.Database.Character.Model.Character;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         /// </summary>
         private void BuildCharacterInfoFromDb()
         {
-            List<CharacterModel> allCharactersInDb = CharacterDatabase.GetAllCharacters();
+            List<CharacterModel> allCharactersInDb = DatabaseManager.Instance.CharacterDatabase.GetAllCharacters();
             foreach (CharacterModel character in allCharactersInDb)
                 AddPlayer(character.Id, new CharacterInfo(character));
 
@@ -77,7 +77,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         /// <summary>
         /// Used to delete a <see cref="ICharacter"/> from the cache when the <see cref="CharacterModel"/> is deleted
         /// </summary>
-        public void DeleteCharacter(ulong id)
+        public void DeleteCharacter(ulong id, string name)
         {
             if (!characters.ContainsKey(id))
                 throw new ArgumentNullException(nameof(id));
@@ -85,6 +85,8 @@ namespace NexusForever.WorldServer.Game.CharacterCache
             characters.Remove(id, out ICharacter character);
             if (character == null)
                 throw new ArgumentNullException();
+
+            characterNameToId.Remove(name);
 
             log.Trace($"Removed character {character.Name} (ID: {id}) from the cache due to player delete.");
         }

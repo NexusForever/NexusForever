@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NexusForever.WorldServer.Database.Character.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Mail.Static;
-using MailModel = NexusForever.WorldServer.Database.Character.Model.CharacterMail;
 
 namespace NexusForever.WorldServer.Game.Mail
 {
@@ -77,9 +77,9 @@ namespace NexusForever.WorldServer.Game.Mail
         private readonly HashSet<MailAttachment> deletedAttachments = new HashSet<MailAttachment>();
 
         /// <summary>
-        /// Create a new <see cref="MailItem"/> from an existing <see cref="MailModel"/>.
+        /// Create a new <see cref="MailItem"/> from an existing <see cref="CharacterMailModel"/>.
         /// </summary>
-        public MailItem(MailModel model)
+        public MailItem(CharacterMailModel model)
         {
             Id                         = model.Id;
             recipientId                = model.RecipientId;
@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Mail
             DeliveryTime               = (DeliveryTime)model.DeliveryTime;
             CreateTime                 = model.CreateTime;
 
-            foreach (CharacterMailAttachment mailAttachment in model.CharacterMailAttachment)
+            foreach (CharacterMailAttachmentModel mailAttachment in model.Attachment)
                 mailAttachments.Add(new MailAttachment(mailAttachment));
 
             saveMask = MailSaveMask.None;
@@ -158,7 +158,7 @@ namespace NexusForever.WorldServer.Game.Mail
             {
                 if ((saveMask & MailSaveMask.Create) != 0)
                 {
-                    context.Add(new MailModel
+                    context.Add(new CharacterMailModel
                     {
                         Id                         = Id,
                         RecipientId                = RecipientId,
@@ -180,7 +180,7 @@ namespace NexusForever.WorldServer.Game.Mail
                 }
                 else if ((saveMask & MailSaveMask.Delete) != 0)
                 {
-                    var model = new MailModel
+                    var model = new CharacterMailModel
                     {
                         Id = Id
                     };
@@ -189,12 +189,12 @@ namespace NexusForever.WorldServer.Game.Mail
                 }
                 else
                 {
-                    var model = new MailModel
+                    var model = new CharacterMailModel
                     {
                         Id = Id
                     };
 
-                    EntityEntry<MailModel> entity = context.Attach(model);
+                    EntityEntry<CharacterMailModel> entity = context.Attach(model);
                     if ((saveMask & MailSaveMask.Flags) != 0)
                     {
                         model.Flags = Convert.ToByte(Flags);

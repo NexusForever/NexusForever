@@ -1,4 +1,4 @@
-﻿namespace NexusForever.WorldServer.Game.Social
+﻿namespace NexusForever.WorldServer.Game.Social.Static
 {
     public enum ChatChannel
     {

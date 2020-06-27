@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
-using EntityModel = NexusForever.WorldServer.Database.World.Model.Entity;
+using NexusForever.Database.World.Model;
 
 namespace NexusForever.WorldServer.Game.Map
 {

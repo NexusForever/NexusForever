@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
     [Message(GameMessageOpcode.ServerChat)]
-    class ServerChat : IWritable
+    public class ServerChat : IWritable
     {
         public ChatChannel Channel { get; set; }
         public ulong ChatId { get; set; }
@@ -48,7 +47,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.WriteStringWide(Text);
             writer.Write(Formats.Count, 5u);
 
-            Formats.ForEach(linkedItem => linkedItem.Write(writer));
+            Formats.ForEach(f => f.Write(writer));
 
             writer.Write(CrossFaction);
             writer.Write(0, 16u);

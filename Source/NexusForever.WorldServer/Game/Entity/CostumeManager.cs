@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NexusForever.Database.Auth;
+using NexusForever.Database.Auth.Model;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Database.Auth.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 using NetworkCostume = NexusForever.WorldServer.Network.Message.Model.Shared.Costume;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -34,16 +33,16 @@ namespace NexusForever.WorldServer.Game.Entity
         private double costumeSwapCooldown;
 
         /// <summary>
-        /// Create a new <see cref="CurrencyManager"/> from existing <see cref="Account"/> and <see cref="Character"/> database models.
+        /// Create a new <see cref="CurrencyManager"/> from existing <see cref="AccountModel"/> and <see cref="CharacterModel"/> database models.
         /// </summary>
-        public CostumeManager(Player owner, AccountModel accountModel, Character characterModel)
+        public CostumeManager(Player owner, AccountModel accountModel, CharacterModel characterModel)
         {
             player = owner;
 
-            foreach (CharacterCostume costumeModel in characterModel.CharacterCostume)
+            foreach (CharacterCostumeModel costumeModel in characterModel.Costume)
                 costumes.Add(costumeModel.Index, new Costume(costumeModel));
 
-            foreach (AccountCostumeUnlock costumeUnlockModel in accountModel.AccountCostumeUnlock)
+            foreach (AccountCostumeUnlockModel costumeUnlockModel in accountModel.AccountCostumeUnlock)
                 costumeUnlocks.Add(costumeUnlockModel.ItemId, new CostumeUnlock(costumeUnlockModel));
         }
 

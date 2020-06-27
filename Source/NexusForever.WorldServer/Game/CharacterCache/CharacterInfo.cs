@@ -1,6 +1,6 @@
 ﻿using System;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
-using CharacterModel = NexusForever.WorldServer.Database.Character.Model.Character;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         public uint Level { get; }
         public Faction Faction1 { get; }
         public Faction Faction2 { get; }
-        public DateTime LastOnline { get; } = DateTime.UtcNow;
+        public DateTime? LastOnline { get; }
 
         public CharacterInfo(CharacterModel model)
         {
@@ -28,7 +28,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
             Level       = model.Level;
             Faction1    = (Faction)model.FactionId;
             Faction2    = (Faction)model.FactionId;
-            LastOnline  = model.LastOnline ?? DateTime.UtcNow;
+            LastOnline  = model.LastOnline;
         }
 
         public CharacterInfo(ICharacter model)
@@ -44,9 +44,15 @@ namespace NexusForever.WorldServer.Game.CharacterCache
             Faction2    = model.Faction1;
         }
 
-        public float GetOnlineStatus()
+        /// <summary>
+        /// Returns a <see cref="float"/> representing decimal value, in days, since the character was last online.
+        /// </summary>
+        public float? GetOnlineStatus()
         {
-            return (float)DateTime.UtcNow.Subtract(LastOnline).TotalDays * -1f;
+            if (!LastOnline.HasValue)
+                return null;
+
+            return (float)DateTime.UtcNow.Subtract(LastOnline.Value).TotalDays * -1f;
         }
     }
 }

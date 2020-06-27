@@ -161,6 +161,7 @@ namespace NexusForever.WorldServer.Game.Entity
             });
 
             // TODO: research this...
+            // Kirmmin: This is used on both mounting up and dismounting
             player.Session.EnqueueMessageEncrypted(new Server0639
             {
             });
@@ -231,7 +232,6 @@ namespace NexusForever.WorldServer.Game.Entity
             player.VehicleGuid = 0;
             player.MovementManager.SetPosition(Position);
             player.MovementManager.SetRotation(Rotation);
-            player.MovementManager.BroadcastCommands();
 
             EnqueueToVisible(new ServerVehiclePassengerRemove
             {

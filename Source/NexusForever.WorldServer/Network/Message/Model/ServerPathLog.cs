@@ -11,7 +11,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public Path ActivePath { get; set; }
         public uint[] PathProgress { get; set; } = new uint[4];
         public PathUnlockedMask PathUnlockedMask { get; set; }
-        public int ActivateTimer { get; set; } // > 0 = On. < 0 = Off.
+        public float TimeSinceLastActivateInDays { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write(PathProgress[i]);
 
             writer.Write(PathUnlockedMask, 4);
-            writer.Write(ActivateTimer);
+            writer.Write(TimeSinceLastActivateInDays);
         }
     }
 }

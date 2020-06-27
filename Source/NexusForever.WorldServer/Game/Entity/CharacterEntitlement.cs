@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database;
-using NexusForever.WorldServer.Database.Character.Model;
-using CharacterEntitlementModel = NexusForever.WorldServer.Database.Character.Model.CharacterEntitlement;
 
 namespace NexusForever.WorldServer.Game.Entity
 {

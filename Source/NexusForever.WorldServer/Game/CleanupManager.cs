@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using NexusForever.Database.Auth.Model;
 using NexusForever.Shared;
-using AccountModel = NexusForever.Shared.Database.Auth.Model.Account;
 
 namespace NexusForever.WorldServer.Game
 {

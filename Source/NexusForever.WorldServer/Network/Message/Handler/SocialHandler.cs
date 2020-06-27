@@ -5,9 +5,12 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
+using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -16,7 +19,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        public static readonly string CommandPrefix = "!";
+        private const string CommandPrefix = "!";
 
         [MessageHandler(GameMessageOpcode.ClientChat)]
         public static void HandleChat(WorldSession session, ClientChat chat)
@@ -25,11 +28,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 try
                 {
-                    CommandManager.Instance.HandleCommand(session, chat.Message, true);
+                    var target  = session.Player.GetVisible<WorldEntity>(session.Player.TargetGuid);
+                    var context = new WorldSessionCommandContext(session.Player, target);
+                    CommandManager.Instance.HandleCommand(context, chat.Message.Substring(CommandPrefix.Length));
                 }
                 catch (Exception e)
                 {
-                    log.Warn(e.Message);
+                    log.Warn($"{e.Message}: {e.StackTrace}");
                 }
             }
             else
@@ -82,6 +87,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 Players = players
             });
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatWhisper)]
+        public static void HandleWhisper(WorldSession session, ClientChatWhisper whisper)
+        {
+            SocialManager.Instance.HandleWhisperChat(session, whisper);
         }
     }
 }

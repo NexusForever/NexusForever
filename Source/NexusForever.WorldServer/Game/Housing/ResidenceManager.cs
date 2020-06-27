@@ -3,12 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
+using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Database.Character;
 using NexusForever.WorldServer.Game.Entity;
-using ResidenceModel = NexusForever.WorldServer.Database.Character.Model.Residence;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Game.Housing
         private ulong nextDecorId;
 
         private static readonly ConcurrentDictionary</*residenceId*/ ulong, Residence> residences = new ConcurrentDictionary<ulong, Residence>();
-        private ConcurrentDictionary</*owner*/ string, ulong /*residenceId*/> ownerCache = new ConcurrentDictionary<string, ulong>();
+        private readonly ConcurrentDictionary</*owner*/ string, ulong /*residenceId*/> ownerCache = new ConcurrentDictionary<string, ulong>(StringComparer.InvariantCultureIgnoreCase);
 
         private readonly Dictionary<ulong, PublicResidence> visitableResidences = new Dictionary<ulong, PublicResidence>();
 
@@ -43,11 +43,11 @@ namespace NexusForever.WorldServer.Game.Housing
 
         public void Initialise()
         {
-            nextResidenceId = CharacterDatabase.GetNextResidenceId() + 1ul;
-            nextDecorId     = CharacterDatabase.GetNextDecorId() + 1ul;
+            nextResidenceId = DatabaseManager.Instance.CharacterDatabase.GetNextResidenceId() + 1ul;
+            nextDecorId     = DatabaseManager.Instance.CharacterDatabase.GetNextDecorId() + 1ul;
 
-            foreach (ResidenceModel residence in CharacterDatabase.GetPublicResidences())
-                RegisterResidenceVists(residence.Id, residence.Owner.Name, residence.Name);
+            foreach (ResidenceModel residence in DatabaseManager.Instance.CharacterDatabase.GetPublicResidences())
+                RegisterResidenceVists(residence.Id, residence.Character.Name, residence.Name);
         }
 
         public void Update(double lastTick)
@@ -57,7 +57,7 @@ namespace NexusForever.WorldServer.Game.Housing
             {
                 var tasks = new List<Task>();
                 foreach (Residence residence in residences.Values)
-                    tasks.Add(CharacterDatabase.SaveResidence(residence));
+                    tasks.Add(DatabaseManager.Instance.CharacterDatabase.Save(residence.Save));
 
                 Task.WaitAll(tasks.ToArray());
 
@@ -85,13 +85,13 @@ namespace NexusForever.WorldServer.Game.Housing
             if (residence != null)
                 return residence;
 
-            ResidenceModel model = await CharacterDatabase.GetResidence(residenceId);
+            ResidenceModel model = await DatabaseManager.Instance.CharacterDatabase.GetResidence(residenceId);
             if (model == null)
                 return null;
 
             residence = new Residence(model);
             residences.TryAdd(residence.Id, residence);
-            ownerCache.TryAdd(model.Owner.Name, residence.Id);
+            ownerCache.TryAdd(model.Character.Name, residence.Id);
             return residence;
         }
 
@@ -103,7 +103,7 @@ namespace NexusForever.WorldServer.Game.Housing
             if (ownerCache.TryGetValue(name, out ulong residenceId))
                 return GetCachedResidence(residenceId);
 
-            ResidenceModel model = await CharacterDatabase.GetResidence(name);
+            ResidenceModel model = await DatabaseManager.Instance.CharacterDatabase.GetResidence(name);
             if (model == null)
                 return null;
 
@@ -111,6 +111,17 @@ namespace NexusForever.WorldServer.Game.Housing
             residences.TryAdd(residence.Id, residence);
             ownerCache.TryAdd(name, residence.Id);
             return residence;
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="Residence"/> from the 
+        /// </summary>
+        public void RemoveResidence(string name)
+        {
+            if (ownerCache.TryRemove(name, out ulong residenceId))
+                DeregisterResidenceVists(residenceId);
+
+            // TODO: Kick any players out of the ResidenceMap and close the Instance.
         }
 
         /// <summary>

@@ -421,6 +421,16 @@ namespace NexusForever.WorldServer.Game.Map
             residence.DecorDelete(decor);
 
             // TODO: send packet to remove from decor list
+            var residenceDecor = new ServerHousingResidenceDecor();
+            residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
+            {
+                RealmId = WorldServer.RealmId,
+                ResidenceId = residence.Id,
+                DecorId = decor.DecorId,
+                DecorInfoId = 0
+            });
+
+            EnqueueToAll(residenceDecor);
         }
 
         /// <summary>
@@ -501,6 +511,21 @@ namespace NexusForever.WorldServer.Game.Map
                 residence.Music = (ushort)housingRemodel.MusicId;
             if (housingRemodel.GroundWallpaperId != 0u)
                 residence.Ground = (ushort)housingRemodel.GroundWallpaperId;
+
+            SendHousingProperties();
+        }
+
+        /// <summary>
+        /// UpdateResidenceFlags <see cref="Residence"/>, this is called directly from a packet hander.
+        /// </summary>
+        public void UpdateResidenceFlags(Player player, ClientHousingFlagsUpdate flagsUpdate)
+        {
+            if (!residence.CanModifyResidence(player.CharacterId))
+                throw new InvalidPacketValueException();
+
+            residence.Flags           = flagsUpdate.Flags;
+            residence.ResourceSharing = flagsUpdate.ResourceSharing;
+            residence.GardenSharing   = flagsUpdate.GardenSharing;
 
             SendHousingProperties();
         }
