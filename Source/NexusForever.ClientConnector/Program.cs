@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
-using NexusForever.ClientConnector.Configuration;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json;
+using NexusForever.ClientConnector.Configuration;
+using NexusForever.ClientConnector.Native;
 
 namespace NexusForever.ClientConnector
 {
@@ -52,8 +53,11 @@ namespace NexusForever.ClientConnector
             STARTUPINFO si = new STARTUPINFO();
             PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
 
-            CreateProcess(
-                "WildStar64.exe",
+            string client = "WildStar64.exe";
+            if (!File.Exists(client))
+                client = "WildStar32.exe";
+
+            CreateProcess(client,
                 $"/auth {config.HostName} /authNc {config.HostName} /lang {config.Language} /patcher {config.HostName} /SettingsKey WildStar /realmDataCenterId 9",
                 IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, null, ref si, out pi);
         }

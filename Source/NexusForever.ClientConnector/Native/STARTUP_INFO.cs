@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NexusForever.ClientConnector
+namespace NexusForever.ClientConnector.Native
 {
     public struct STARTUPINFO
     {
