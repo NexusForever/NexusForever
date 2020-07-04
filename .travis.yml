@@ -4,6 +4,8 @@ dotnet: 3.1.100
 os: linux
 dist: xenial
 script:
+  - dotnet build ./Source/NexusForever.ClientConnector
+  - dotnet build ./Source/NexusForever.MapGenerator
   - dotnet build ./Source/NexusForever.AuthServer
   - dotnet build ./Source/NexusForever.StsServer
   - dotnet build ./Source/NexusForever.WorldServer
@@ -11,13 +13,19 @@ before_deploy:
   - export TRAVIS_TAG="Travis-"$(git log --format=%H -1)
   - git tag $TRAVIS_TAG
   - baseDir=$(pwd)
-  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.AuthServer --self-contained=false
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.ClientConnector --no-self-contained
+  - cd $baseDir/Source/NexusForever.ClientConnector/bin/Release/netcoreapp*.*/win-x64/publish/
+  - zip -9 ClientConnector *
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.MapGenerator --no-self-contained
+  - cd $baseDir/Source/NexusForever.MapGenerator/bin/Release/netcoreapp*.*/win-x64/publish/
+  - zip -9 MapGenerator *
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.AuthServer --no-self-contained
   - cd $baseDir/Source/NexusForever.AuthServer/bin/Release/netcoreapp*.*/win-x64/publish/
   - zip -9 AuthServer *
-  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.StsServer --self-contained=false
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.StsServer --no-self-contained
   - cd $baseDir/Source/NexusForever.StsServer/bin/Release/netcoreapp*.*/win-x64/publish/
   - zip -9 StsServer *
-  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.WorldServer --self-contained=false
+  - dotnet publish -c Release -r win-x64 $baseDir/Source/NexusForever.WorldServer --no-self-contained
   - cd $baseDir/Source/NexusForever.WorldServer/bin/Release/netcoreapp*.*/win-x64/publish/
   - zip -9 WorldServer *
   - cd $baseDir
