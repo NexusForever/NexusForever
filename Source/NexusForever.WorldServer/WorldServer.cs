@@ -22,6 +22,7 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Quest;
+using NexusForever.WorldServer.Game.Reputation;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
@@ -75,6 +76,7 @@ namespace NexusForever.WorldServer
             EntityManager.Instance.Initialise();
             EntityCommandManager.Instance.Initialise();
             EntityCacheManager.Instance.Initialise();
+            FactionManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();

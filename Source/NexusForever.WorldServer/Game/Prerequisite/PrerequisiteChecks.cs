@@ -1,6 +1,7 @@
 ﻿using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
+using NexusForever.WorldServer.Game.Reputation.Static;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {

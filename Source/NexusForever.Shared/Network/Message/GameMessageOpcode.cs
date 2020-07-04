@@ -86,6 +86,7 @@ namespace NexusForever.Shared.Network.Message
         ServerPlayerInnateSet           = 0x019F,
         ServerAbilities                 = 0x01A0,
         ServerAmpList                   = 0x01A3,
+        ServerReputationUpdate          = 0x01A5,
         ServerPathUpdateXP              = 0x01AA,
         ServerExperienceGained          = 0x01AC,
         ServerUnlockVanityPet           = 0x01AE,

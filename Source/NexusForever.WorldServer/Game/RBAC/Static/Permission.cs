@@ -154,6 +154,10 @@
         StoryPanel                  = 96,
         StoryCommunicator           = 97,
 
+        // reputation
+        Reputation                  = 98,
+        ReputationUpdate            = 99,
+
         // non command permissions
         InstantLogout               = 10000
     }

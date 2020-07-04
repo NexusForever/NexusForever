@@ -3,6 +3,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 

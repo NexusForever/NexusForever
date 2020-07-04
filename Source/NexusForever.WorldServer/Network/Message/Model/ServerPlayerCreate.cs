@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using FactionId = NexusForever.WorldServer.Game.Entity.Static.Faction;
+using FactionId = NexusForever.WorldServer.Game.Reputation.Static.Faction;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -25,7 +25,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
 
             public FactionId FactionId { get; set; }
-            public List<FactionReputation> FactionReputations { get; } = new List<FactionReputation>();
+            public List<FactionReputation> FactionReputations { get; set; } = new List<FactionReputation>();
 
             public void Write(GamePacketWriter writer)
             {

@@ -7,6 +7,8 @@ using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.RBAC.Static;
+using NexusForever.WorldServer.Game.Reputation;
+using NexusForever.WorldServer.Game.Reputation.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -41,6 +43,10 @@ namespace NexusForever.WorldServer.Command.Handler
 
             builder.AppendLine($"XYZ: {entity.Position.X}, {entity.Position.Y}, {entity.Position.Z}");
             builder.AppendLine($"HP: {entity.Health}/(MAX) | Shield: {entity.Shield}/(MAX)");
+
+            Disposition faction1Disposition = context.Invoker.GetDispositionTo(entity.Faction1);
+            Disposition faction2Disposition = context.Invoker.GetDispositionTo(entity.Faction1);
+            builder.AppendLine($"Disposition To Me: {entity.Faction1},{faction1Disposition}, {entity.Faction2},{faction2Disposition}");
 
             context.SendMessage(builder.ToString());
         }

@@ -8,6 +8,8 @@ using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Reputation;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
@@ -351,6 +353,45 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 player.Session.EnqueueMessageEncrypted(message);
             }
+        }
+
+        /// <summary>
+        /// Return <see cref="Disposition"/> between <see cref="WorldEntity"/> and <see cref="Faction"/>.
+        /// </summary>
+        public virtual Disposition GetDispositionTo(Faction factionId, bool primary = true)
+        {
+            FactionNode targetFaction = FactionManager.Instance.GetFaction(factionId);
+            if (targetFaction == null)
+                throw new ArgumentException($"Invalid faction {factionId}!");
+
+            // find disposition based on faction friendships
+            Disposition? dispositionFromFactionTarget = GetDispositionFromFactionFriendship(targetFaction, primary ? Faction1 : Faction2);
+            if (dispositionFromFactionTarget.HasValue)
+                return dispositionFromFactionTarget.Value;
+
+            FactionNode invokeFaction = FactionManager.Instance.GetFaction(primary ? Faction1 : Faction2);
+            Disposition? dispositionFromFactionInvoker = GetDispositionFromFactionFriendship(invokeFaction, factionId);
+            if (dispositionFromFactionInvoker.HasValue)
+                return dispositionFromFactionInvoker.Value;
+
+            // TODO: client does a few more checks, might not be 100% accurate
+
+            // default to neutral if we have no disposition from other sources
+            return Disposition.Neutral;
+        }
+
+        private Disposition? GetDispositionFromFactionFriendship(FactionNode node, Faction factionId)
+        {
+            if (node == null)
+                return null;
+
+            // check if current node has required friendship
+            FactionLevel? level = node.GetFriendshipFactionLevel(factionId);
+            if (level.HasValue)
+                return FactionNode.GetDisposition(level.Value);
+
+            // check if parent node has required friendship
+            return GetDispositionFromFactionFriendship(node.Parent, factionId);
         }
     }
 }

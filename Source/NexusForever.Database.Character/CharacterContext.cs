@@ -26,6 +26,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterPetFlairModel> CharacterPetFlair { get; set; }
         public DbSet<CharacterQuestModel> CharacterQuest { get; set; }
         public DbSet<CharacterQuestObjectiveModel> CharacterQuestObjective { get; set; }
+        public DbSet<CharacterReputation> CharacterReputation { get; set; }
         public DbSet<CharacterSpellModel> CharacterSpell { get; set; }
         public DbSet<CharacterStatModel> CharacterStat { get; set; }
         public DbSet<CharacterTitleModel> CharacterTitle { get; set; }
@@ -955,6 +956,34 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.QuestObjective)
                     .HasForeignKey(d => new { d.Id, d.QuestId })
                     .HasConstraintName("FK__character_quest_objective_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterReputation>(entity =>
+            {
+                entity.ToTable("character_reputation");
+
+                entity.HasKey(e => new { e.Id, e.FactionId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.FactionId)
+                    .HasColumnName("factionId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Amount)
+                    .HasColumnName("amount")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.Reputation)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_reputation_id__character_id");
             });
 
             modelBuilder.Entity<CharacterSpellModel>(entity =>

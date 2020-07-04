@@ -3,6 +3,7 @@ using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using PlayerEntity = NexusForever.WorldServer.Game.Entity.Player;
 
 namespace NexusForever.WorldServer.Network.Message.Model.Shared

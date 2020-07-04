@@ -1,4 +1,4 @@
-﻿namespace NexusForever.WorldServer.Game.Entity.Static
+﻿namespace NexusForever.WorldServer.Game.Reputation.Static
 {
     public enum Faction
     {
