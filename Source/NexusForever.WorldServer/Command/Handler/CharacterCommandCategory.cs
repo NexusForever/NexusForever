@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Command.Handler
             byte level)
         {
             Player target = context.GetTargetOrInvoker<Player>();
-            if (level <= target.Level || level >= 50)
+            if (level <= target.Level || level > 50)
             {
                 context.SendMessage("Level must be greater than your current level and less than max level.");
                 return;
