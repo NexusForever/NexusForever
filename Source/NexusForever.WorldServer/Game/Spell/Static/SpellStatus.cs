@@ -5,6 +5,7 @@
         Initiating,
         Casting,
         Executing,
-        Finished
+        Finished,
+        Finishing
     }
 }

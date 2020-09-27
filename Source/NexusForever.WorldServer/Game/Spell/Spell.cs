@@ -43,14 +43,15 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             events.Update(lastTick);
 
-            if (status == SpellStatus.Executing && !events.HasPendingEvent)
+            if ((status == SpellStatus.Executing && !events.HasPendingEvent && !parameters.ForceCancelOnly) ||
+                status == SpellStatus.Finishing)
             {
                 // spell effects have finished executing
                 status = SpellStatus.Finished;
                 log.Trace($"Spell {parameters.SpellInfo.Entry.Id} has finished.");
 
                 // TODO: add a timer to count down on the Effect before sending the finish - sending the finish will e.g. wear off the buff
-                //SendSpellFinish();
+                SendSpellFinish();
             }
         }
 
@@ -232,7 +233,19 @@ namespace NexusForever.WorldServer.Game.Spell
                         handler.Invoke(this, effectTarget.Entity, info);
                     }
                 }
+
+                if (spell4EffectsEntry.DurationTime == 0u && ((SpellEffectFlags)spell4EffectsEntry.Flags & SpellEffectFlags.CancelOnly) != 0)
+                    parameters.ForceCancelOnly = true;
             }
+        }
+
+        public void Finish()
+        {
+            if (status == SpellStatus.Finished)
+                return;
+
+            events.CancelEvents();
+            status = SpellStatus.Finishing;
         }
 
         public bool IsMovingInterrupted()
