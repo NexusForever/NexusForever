@@ -2,6 +2,7 @@
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
 using NexusForever.WorldServer.Game.Reputation.Static;
+using System;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {
@@ -81,9 +82,21 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             switch (comparison)
             {
                 case PrerequisiteComparison.NotEqual:
-                    return !player.AchievementManager.HasCompletedAchievement((ushort)objectId);
+                    if (value <= 1)
+                        return player.AchievementManager.HasCompletedAchievement((ushort)objectId) != Convert.ToBoolean(value);
+                    else
+                    {
+                        log.Warn($"Unhandled PrerequisiteComparison {comparison} with value {value} for {PrerequisiteType.Achievement}!");
+                        return false;
+                    }
                 case PrerequisiteComparison.Equal:
-                    return player.AchievementManager.HasCompletedAchievement((ushort)objectId);
+                    if (value <= 1)
+                        return player.AchievementManager.HasCompletedAchievement((ushort)objectId) == Convert.ToBoolean(value);
+                    else
+                    {
+                        log.Warn($"Unhandled PrerequisiteComparison {comparison} with value {value} for {PrerequisiteType.Achievement}!");
+                        return false;
+                    }
                 default:
                     log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Achievement}!");
                     return false;
