@@ -109,7 +109,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
             AddCommand(new SetPositionCommand
             {
                 Position = new Position(position)
-            }, true);
+            }, !(owner is Player));
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
             AddCommand(new SetRotationCommand
             {
                 Position = new Position(rotation)
-            }, true);
+            }, !(owner is Player));
         }
 
         /// <summary>

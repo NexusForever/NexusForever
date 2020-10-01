@@ -34,10 +34,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         // session.Player.CancelSpellsOnMove();
 
                         mover.Map.EnqueueRelocate(mover, setPosition.Position.Vector);
+                        mover.MovementManager.SetPosition(setPosition.Position.Vector);
                         break;
                     }
                     case SetRotationCommand setRotation:
                         mover.Rotation = setRotation.Position.Vector;
+                        mover.MovementManager.SetRotation(setRotation.Position.Vector);
                         break;
                 }
             }
