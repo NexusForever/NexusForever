@@ -220,5 +220,15 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove <see cref="IWorldEntity"/> as a passenger on this <see cref="IWorldEntity"/>.
         /// </summary>
         void RemovePlatformPassenger(IWorldEntity passenger);
+
+        void OnEnterRange(IWorldEntity entity);
+
+        void OnExitRange(IWorldEntity entity);
+
+        void ApplyRangeTriggers(IWorldEntity target);
+
+        void RemoveFromRange(IWorldEntity target);
+
+        bool IsInRange(IWorldEntity target);
     }
 }

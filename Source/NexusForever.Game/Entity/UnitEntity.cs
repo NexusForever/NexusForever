@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Combat;
+﻿using System.Numerics;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Spell;
@@ -138,7 +139,17 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Remove tracked <see cref="IUnitEntity"/> that is no longer in vision range.
+        /// Add tracked <see cref="IGridEntity"/> that is in vision range.
+        /// </summary>
+        public override void AddVisible(IGridEntity entity)
+        {
+            base.AddVisible(entity);
+
+            CheckEntityRange(entity);
+        }
+
+        /// <summary>
+        /// Remove tracked <see cref="IGridEntity"/> that is no longer in vision range.
         /// </summary>
         public override void RemoveVisible(IGridEntity entity)
         {
@@ -147,7 +158,34 @@ namespace NexusForever.Game.Entity
 
             ThreatManager.RemoveHostile(entity.Guid);
 
+            CheckEntityRange(entity);
+
             base.RemoveVisible(entity);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IGridEntity"/> is relocated.
+        /// </summary>
+        public override void OnRelocate(Vector3 vector)
+        {
+            base.OnRelocate(vector);
+
+            foreach (IGridEntity entity in visibleEntities.Values)
+                CheckEntityRange(entity);
+        }
+
+        private void CheckEntityRange(IGridEntity entity)
+        {
+            if (!(entity is IWorldEntity we))
+                return;
+
+            if (!(this is IPlayer))
+            {
+                ApplyRangeTriggers(we);
+                return;
+            }
+
+            we.ApplyRangeTriggers(this);
         }
 
         /// <summary>
