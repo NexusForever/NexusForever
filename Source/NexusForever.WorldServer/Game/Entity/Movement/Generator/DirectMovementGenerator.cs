@@ -26,7 +26,10 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Generator
                 points.Add(next);
             }
 
-            points.Add(Final);
+            Vector3 final = Final;
+            final.Y = Map.GetTerrainHeight(Final.X, Final.Z);
+            points.Add(final);
+
             return points;
         }
     }

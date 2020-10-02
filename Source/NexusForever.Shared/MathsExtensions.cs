@@ -98,5 +98,13 @@ namespace NexusForever.Shared
         {
             return MathF.Sqrt(MathF.Pow(v1.X - v2.X, 2) + MathF.Pow(v1.Z - v2.Z, 2));
         }
+
+        /// <summary>
+        /// Returns a <see cref="Vector3"/> representing the rotation in degrees.
+        /// </summary>
+        public static Vector3 GetRotationTo(this Vector3 start, Vector3 end)
+        {
+            return new Vector3(start.GetAngle(end), 0f, 0f);
+        }
     }
 }
