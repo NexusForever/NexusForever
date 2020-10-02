@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
@@ -292,6 +293,16 @@ namespace NexusForever.WorldServer.Game.Housing
                         GardenSharing       = gardenSharing
                     });
                 }
+                else if ((saveMask & ResidenceSaveMask.Delete) != 0)
+                {
+                    ResidenceModel model = new ResidenceModel
+                    {
+                        Id      = Id,
+                        OwnerId = OwnerId
+                    };
+
+                    context.Entry(model).State = EntityState.Deleted;
+                }
                 else
                 {
                     // residence already exists in database, save only data that has been modified
@@ -449,6 +460,20 @@ namespace NexusForever.WorldServer.Game.Housing
         public Plot GetPlot(uint plotInfoId)
         {
             return plots.FirstOrDefault(i => i.PlotEntry.Id == plotInfoId);
+        }
+
+        /// <summary>
+        /// Enqueue <see cref="Residence"/> to be deleted from the database.
+        /// </summary>
+        public void EnqueueDelete()
+        {
+            foreach (Decor decor in GetDecor())
+                DecorDelete(decor);
+
+            foreach (Plot plot in GetPlots())
+                plot.EnqueueDelete();
+
+            saveMask = ResidenceSaveMask.Delete;
         }
     }
 }

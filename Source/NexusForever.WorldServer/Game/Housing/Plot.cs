@@ -1,4 +1,5 @@
-﻿using NexusForever.Database.Character;
+﻿using Microsoft.EntityFrameworkCore;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
@@ -70,7 +71,7 @@ namespace NexusForever.WorldServer.Game.Housing
         {
             Id         = id;
             Index      = (byte)entry.HousingPropertyPlotIndex;
-            PlotEntry      = entry;
+            PlotEntry  = entry;
             plugFacing = HousingPlugFacing.East;
 
             if (entry.HousingPlugItemIdDefault != 0u)
@@ -100,6 +101,16 @@ namespace NexusForever.WorldServer.Game.Housing
                     BuildState = BuildState
                 });
             }
+            else if ((saveMask & PlotSaveMask.Delete) != 0)
+            {
+                ResidencePlotModel model = new ResidencePlotModel
+                {
+                    Id      = Id,
+                    Index   = Index
+                };
+
+                context.Entry(model).State = EntityState.Deleted;
+            }
             else
             {
                 // plot already exists in database, save only data that has been modified
@@ -114,6 +125,14 @@ namespace NexusForever.WorldServer.Game.Housing
             // TODO
             PlugEntry  = GameTableManager.Instance.HousingPlugItem.GetEntry(plugItemId);
             BuildState = 4;
+        }
+
+        /// <summary>
+        /// Enqueue the <see cref="Plot"/> to be deleted from the database.
+        /// </summary>
+        public void EnqueueDelete()
+        {
+            saveMask = PlotSaveMask.Delete;
         }
     }
 }

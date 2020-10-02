@@ -8,7 +8,9 @@ using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
@@ -116,12 +118,30 @@ namespace NexusForever.WorldServer.Game.Housing
         /// <summary>
         /// Remove an existing <see cref="Residence"/> from the 
         /// </summary>
-        public void RemoveResidence(string name)
+        public async Task RemoveResidence(string name)
         {
-            if (ownerCache.TryRemove(name, out ulong residenceId))
-                DeregisterResidenceVists(residenceId);
+            if (!ownerCache.TryRemove(name, out ulong residenceId))
+                return;
 
             // TODO: Kick any players out of the ResidenceMap and close the Instance.
+
+            Residence residence = GetCachedResidence(residenceId);
+            if (residence == null)
+            {
+                ResidenceModel model = await DatabaseManager.Instance.CharacterDatabase.GetResidence(name);
+                if (model == null)
+                    return;
+
+                residence = new Residence(model);
+            }
+
+            DeregisterResidenceVists(residenceId);
+            residence.EnqueueDelete();
+
+            // Save one last time to remove the Residence.
+            await DatabaseManager.Instance.CharacterDatabase.Save(residence.Save);
+
+            return;
         }
 
         /// <summary>
