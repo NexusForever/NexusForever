@@ -43,6 +43,8 @@ namespace NexusForever.Game.Abstract.Entity
         uint Level { get; set; }
         bool Sheathed { get; set; }
 
+        StandState StandState { get; set; }
+
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> currently targeted.
         /// </summary>

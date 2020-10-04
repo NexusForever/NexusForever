@@ -78,6 +78,11 @@
         EntityProperties            = 45,
         EntityModify                = 60,
         EntityModifyDisplayInfo     = 61,
+        EntityThreat                = 121,
+        EntityThreatAdjust          = 122,
+        EntityThreatList            = 123,
+        EntityThreatClear           = 124,
+        EntityThreatRemove          = 125,
 
         // generic unlock
         Generic                     = 46,

@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Spell;
+﻿using NexusForever.Game.Abstract.Combat;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 
@@ -15,6 +16,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// Determines whether or not this <see cref="IUnitEntity"/> is alive.
         /// </summary>
         bool IsAlive { get; }
+
+        bool InCombat { get; }
+
+        public IThreatManager ThreatManager { get; }
 
         /// <summary>
         /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="ISpellPropertyModifier"/> instance.
@@ -79,5 +84,31 @@ namespace NexusForever.Game.Abstract.Entity
         /// If the <see cref="DamageType"/> is <see cref="DamageType.Heal"/> amount is added to current health otherwise subtracted.
         /// </remarks>
         void ModifyHealth(uint amount, DamageType type, IUnitEntity source);
+
+        /// <summary>
+        /// Invoked when this <see cref="IUnitEntity"/> is asked to select a target for an attack.
+        /// </summary>
+        void SelectTarget(IEnumerable<IHostileEntity> hostiles = null);
+
+        /// <summary>
+        /// Invoked when <see cref="IThreatManager"/> adds a <see cref="IHostileEntity"/>.
+        /// </summary>
+        void OnThreatAddTarget(IHostileEntity hostile);
+
+        /// <summary>
+        /// Invoked when <see cref="IThreatManager"/> removes a <see cref="IHostileEntity"/>.
+        /// </summary>
+        void OnThreatRemoveTarget(IHostileEntity hostile);
+
+        /// <summary>
+        /// Invoked when <see cref="IThreatManager"/> updates a <see cref="IHostileEntity"/>.
+        /// </summary>
+        /// <param name="hostiles"></param>
+        void OnThreatChange(IEnumerable<IHostileEntity> hostiles);
+
+        /// <summary>
+        /// Invoked when this <see cref="IUnitEntity"/> combat state is changed.
+        /// </summary>
+        void OnCombatStateChange(bool inCombat);
     }
 }

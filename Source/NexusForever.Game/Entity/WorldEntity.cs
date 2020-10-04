@@ -19,7 +19,6 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity
 {
@@ -118,6 +117,21 @@ namespace NexusForever.Game.Entity
         {
             get => Convert.ToBoolean(GetStatInteger(Stat.Sheathed) ?? 0u);
             set => SetStat(Stat.Sheathed, Convert.ToUInt32(value));
+        }
+
+        public StandState StandState
+        {
+            get => (StandState)(GetStatInteger(Stat.StandState) ?? 0u);
+            set
+            {
+                SetStat(Stat.StandState, (uint)value);
+
+                EnqueueToVisible(new ServerEmote
+                {
+                    Guid = Guid,
+                    StandState = value
+                });
+            }
         }
 
         /// <summary>

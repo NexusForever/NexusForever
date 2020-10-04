@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Xml.Linq;
+using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Configuration.Model;
 
@@ -978,6 +979,31 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 120,
                         Name = "Command: BanAccountCharacter"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 121,
+                        Name = "Category: EntityThreat"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 122,
+                        Name = "Command: EntityThreatAdjust"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 123,
+                        Name = "Command: EntityThreatList"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 124,
+                        Name = "Command: EntityThreatClear"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 125,
+                        Name = "Command: EntityThreatRemove"
                     },
                     new PermissionModel
                     {

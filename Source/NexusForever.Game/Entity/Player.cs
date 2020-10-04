@@ -735,6 +735,15 @@ namespace NexusForever.Game.Entity
                     Unknown1 = 1
                 });
             }
+
+            if (entity is IUnitEntity unitEntity && unitEntity.InCombat)
+            {
+                Session.EnqueueMessageEncrypted(new ServerUnitEnteredCombat
+                {
+                    UnitId = unitEntity.Guid,
+                    InCombat = unitEntity.InCombat
+                });
+            }
         }
 
         public override void RemoveVisible(IGridEntity entity)

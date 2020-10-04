@@ -1,5 +1,7 @@
 ﻿using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Combat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -59,6 +61,22 @@ namespace NexusForever.Game.Entity
                 value *= tierEntry.UnitPropertyMultiplier[(uint)property];
 
             return value;
+        }
+
+        public override void SelectTarget(IEnumerable<IHostileEntity> hostiles = null)
+        {
+            base.SelectTarget(hostiles);
+
+            hostiles ??= ThreatManager.GetThreatList();
+
+            if (hostiles.Count() == 0)
+            {
+                SetTarget(0u);
+                return;
+            }
+
+            if (currentTargetUnitId != hostiles.First().HatedUnitId)
+                SetTarget(hostiles.First().HatedUnitId, hostiles.First().Threat);
         }
     }
 }

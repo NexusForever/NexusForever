@@ -1,5 +1,7 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract.Combat;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Combat;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
@@ -45,6 +47,31 @@ namespace NexusForever.Game.Entity
 
         private EntityDeathState? deathState;
 
+        public bool InCombat
+        {
+            get => inCombat;
+            private set
+            {
+                if (inCombat == value)
+                    return;
+
+                inCombat = value;
+                OnCombatStateChange(value);
+
+                EnqueueToVisible(new ServerUnitEnteredCombat
+                {
+                    UnitId = Guid,
+                    InCombat = value
+                }, true);
+            }
+        }
+
+        private bool inCombat;
+
+        public IThreatManager ThreatManager { get; private set; }
+
+        protected uint currentTargetUnitId;
+
         /// <summary>
         /// Initial stab at a timer to regenerate Health & Shield values.
         /// </summary>
@@ -57,6 +84,8 @@ namespace NexusForever.Game.Entity
         protected UnitEntity(EntityType type)
             : base(type)
         {
+            ThreatManager = new ThreatManager(this);
+
             InitialiseHitRadius();
         }
 
@@ -89,12 +118,25 @@ namespace NexusForever.Game.Entity
                     pendingSpells.Remove(spell);
             }
 
+            ThreatManager.Update(lastTick);
+
             statUpdateTimer.Update(lastTick);
             if (statUpdateTimer.HasElapsed)
             {
                 HandleStatUpdate(lastTick);
                 statUpdateTimer.Reset();
             }
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IUnitEntity"/> is removed from <see cref="IBaseMap"/>.
+        /// </summary>
+        public override void OnRemoveFromMap()
+        {
+            // TODO: Delay OnRemoveFromMap from firing immediately on DC. Allow players to die between getting disconnected and being removed from map :D
+            ThreatManager.ClearThreatList();
+
+            base.OnRemoveFromMap();
         }
 
         /// <summary>
@@ -383,6 +425,94 @@ namespace NexusForever.Game.Entity
             // TODO: Reward XP
             // TODO: Reward Loot
             // TODO: Handle Achievements
+        }
+
+        private void CheckCombatStateChange(IEnumerable<IHostileEntity> hostiles = null)
+        {
+            if (!IsValidAttackTarget())
+                return;
+
+            // TODO: Add other checks as necessary
+            hostiles ??= ThreatManager.GetThreatList();
+
+            if (hostiles.Count() > 0)
+                InCombat = true;
+            else
+                InCombat = false;
+
+            SelectTarget();
+        }
+
+        /// <summary>
+        /// Invoked when this <see cref="IUnitEntity"/> is asked to select a target for an attack.
+        /// </summary>
+        public virtual void SelectTarget(IEnumerable<IHostileEntity> hostiles = null)
+        {
+            // deliberately empty
+        }
+
+        protected void SetTarget(uint targetUnitId, uint threatLevel = 0u)
+        {
+            if (currentTargetUnitId == targetUnitId)
+                return;
+
+            currentTargetUnitId = targetUnitId;
+            EnqueueToVisible(new ServerEntityTargetUnit
+            {
+                UnitId = Guid,
+                NewTargetId = targetUnitId,
+                ThreatLevel = threatLevel
+            });
+
+            if (currentTargetUnitId != 0u)
+                EnqueueToVisible(new ServerEntityAggroSwitch
+                {
+                    UnitId = Guid,
+                    TargetId = currentTargetUnitId
+                });
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IThreatManager"/> adds a <see cref="IHostileEntity"/>.
+        /// </summary>
+        public virtual void OnThreatAddTarget(IHostileEntity hostile)
+        {
+            if (this is IPlayer)
+                return;
+
+            if (currentTargetUnitId == 0u)
+                SetTarget(hostile.HatedUnitId, hostile.Threat);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IThreatManager"/> removes a <see cref="IHostileEntity"/>.
+        /// </summary>
+        public virtual void OnThreatRemoveTarget(IHostileEntity hostile)
+        {
+            SelectTarget();
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IThreatManager"/> updates a <see cref="IHostileEntity"/>.
+        /// </summary>
+        /// <param name="hostiles"></param>
+        public virtual void OnThreatChange(IEnumerable<IHostileEntity> hostiles)
+        {
+            CheckCombatStateChange(hostiles);
+            SelectTarget();
+        }
+
+        /// <summary>
+        /// Invoked when this <see cref="IUnitEntity"/> combat state is changed.
+        /// </summary>
+        public virtual void OnCombatStateChange(bool inCombat)
+        {
+            Sheathed = !inCombat;
+
+            if (inCombat)
+                StandState = StandState.Stand;
+            else
+                StandState = StandState.State0;
         }
     }
 }
