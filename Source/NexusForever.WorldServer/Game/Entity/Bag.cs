@@ -34,7 +34,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 // Item has incorrect slot, setting the BagIndex to the current index
                 if (i != items[i].BagIndex)
+                {
+                    log.Warn($"Item with guid: 0x{items[i].Guid:X16} has incorrect slot: {items[i].BagIndex}, setting to slot: {i}");
                     items[i].BagIndex = i;
+                }
 
                 items[i].Save(context);
             }
