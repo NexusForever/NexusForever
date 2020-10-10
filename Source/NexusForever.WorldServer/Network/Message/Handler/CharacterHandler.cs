@@ -137,7 +137,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 var serverCharacterList = new ServerCharacterList
                 {
-                    RealmId = WorldServer.RealmId
+                    RealmId = WorldServer.RealmId,
+                    AdditionalCount = (uint)characters.Count,
+                    AdditionalAllowedCharCreations = (uint)(session.EntitlementManager.GetAccountEntitlement(EntitlementType.BaseCharacterSlots).Amount - characters.Count)
                 };
 
                 foreach (CharacterModel character in characters)
@@ -157,7 +159,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         WorldId     = character.WorldId,
                         WorldZoneId = character.WorldZoneId,
                         RealmId     = WorldServer.RealmId,
-                        Path        = (byte)character.ActivePath
+                        Path        = (byte)character.ActivePath,
+                        LastLoggedOutDays = (float)DateTime.UtcNow.Subtract(character.LastOnline ?? DateTime.UtcNow).TotalDays * -1f
                     };
 
                     maxCharacterLevelAchieved = (byte)Math.Max(maxCharacterLevelAchieved, character.Level);
