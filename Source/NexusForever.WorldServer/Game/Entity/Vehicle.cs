@@ -232,18 +232,20 @@ namespace NexusForever.WorldServer.Game.Entity
             player.VehicleGuid = 0;
             player.MovementManager.SetPosition(Position);
             player.MovementManager.SetRotation(Rotation);
+            player.MovementManager.BroadcastCommands();
 
-            EnqueueToVisible(new ServerVehiclePassengerRemove
-            {
-                Self      = Guid,
-                Passenger = passenger.Guid
-            }, true);
 
             if (passenger.SeatType == VehicleSeatType.Pilot)
                 player.SetControl(player);
 
             passengers.Remove(passenger);
             OnPassengerRemove(player, passenger.SeatType, passenger.SeatPosition);
+
+            EnqueueToVisible(new ServerVehiclePassengerRemove
+            {
+                Self      = Guid,
+                Passenger = passenger.Guid
+            }, true);
 
             // this probably isn't correct for all cases
             if (passengers.Count == 0)
