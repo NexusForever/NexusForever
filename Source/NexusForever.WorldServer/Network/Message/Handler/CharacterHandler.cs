@@ -137,7 +137,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 var serverCharacterList = new ServerCharacterList
                 {
-                    RealmId = WorldServer.RealmId
+                    RealmId                        = WorldServer.RealmId,
+                    // no longer used as replaced by entitlements but retail server still used to send this
+                    AdditionalCount                = (uint)characters.Count,
+                    AdditionalAllowedCharCreations = (uint)(session.EntitlementManager.GetAccountEntitlement(EntitlementType.BaseCharacterSlots).Amount - characters.Count)
                 };
 
                 foreach (CharacterModel character in characters)
@@ -147,20 +150,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                     var listCharacter = new ServerCharacterList.Character
                     {
-                        Id          = character.Id,
-                        Name        = character.Name,
-                        Sex         = (Sex)character.Sex,
-                        Race        = (Race)character.Race,
-                        Class       = (Class)character.Class,
-                        Faction     = character.FactionId,
-                        Level       = character.Level,
-                        WorldId     = character.WorldId,
-                        WorldZoneId = character.WorldZoneId,
-                        RealmId     = WorldServer.RealmId,
-                        Path        = (byte)character.ActivePath
+                        Id                = character.Id,
+                        Name              = character.Name,
+                        Sex               = (Sex)character.Sex,
+                        Race              = (Race)character.Race,
+                        Class             = (Class)character.Class,
+                        Faction           = character.FactionId,
+                        Level             = character.Level,
+                        WorldId           = character.WorldId,
+                        WorldZoneId       = character.WorldZoneId,
+                        RealmId           = WorldServer.RealmId,
+                        Path              = (byte)character.ActivePath,
+                        LastLoggedOutDays = (float)DateTime.UtcNow.Subtract(character.LastOnline ?? DateTime.UtcNow).TotalDays * -1f
                     };
 
-                    maxCharacterLevelAchieved = (byte)Math.Max(maxCharacterLevelAchieved, character.Level);
+                    maxCharacterLevelAchieved = Math.Max(maxCharacterLevelAchieved, character.Level);
 
                     // create a temporary Inventory and CostumeManager to show equipped gear
                     var inventory      = new Inventory(null, character);
