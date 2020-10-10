@@ -44,7 +44,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 }
 
                 // TODO: might want to make this smarter in the future, eg: select a server the user has characters on
-                ServerInfo server = ServerManager.Instance.Servers.FirstOrDefault();
+                ServerInfo server = ServerManager.Instance.Servers.FirstOrDefault(s => s.IsOnline);
                 if (server == null)
                 {
                     SendServerAuthDenied(NpLoginResult.NoRealmsAvailableAtThisTime);
