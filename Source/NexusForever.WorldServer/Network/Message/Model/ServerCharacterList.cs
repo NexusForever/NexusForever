@@ -3,6 +3,7 @@ using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
@@ -103,7 +104,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public uint Unknown3C { get; set; }
         public uint AdditionalAllowedCharCreations { get; set; }
         public uint AdditionalCount { get; set; }
-        public ushort Unknown48 { get; set; }
+        public Faction FactionRestriction { get; set; }
         public bool FreeLevel50 { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -131,7 +132,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             writer.Write(Unknown3C);
             writer.Write(AdditionalAllowedCharCreations);
             writer.Write(AdditionalCount);
-            writer.Write(Unknown48, 14);
+            writer.Write(FactionRestriction, 14);
             writer.Write(FreeLevel50);
         }
     }
