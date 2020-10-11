@@ -62,7 +62,7 @@ namespace NexusForever.WorldServer.Game.Reputation
             owner.Session.EnqueueMessageEncrypted(new ServerReputationUpdate
             {
                 FactionId = factionId,
-                Value     = reputation.Amount
+                Value     = value
             });
         }
 
