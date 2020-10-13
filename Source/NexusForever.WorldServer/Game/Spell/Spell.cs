@@ -4,6 +4,7 @@ using System.Linq;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Spell.Event;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -67,8 +68,6 @@ namespace NexusForever.WorldServer.Game.Spell
             CastResult result = CheckCast();
             if (result != CastResult.Ok)
             {
-                log.Trace($"Spell {parameters.SpellInfo.Entry.Id} failed to cast {result}.");
-
                 SendSpellCastResult(result);
                 return;
             }
@@ -88,8 +87,9 @@ namespace NexusForever.WorldServer.Game.Spell
 
         private CastResult CheckCast()
         {
-            if (!CheckPrerequisites())
-                return CastResult.SpellPreRequisites;
+            CastResult preReqCheck = CheckPrerequisites();
+            if (preReqCheck != CastResult.Ok)
+                return preReqCheck;
 
             CastResult ccResult = CheckCCConditions();
             if (ccResult != CastResult.Ok)
@@ -112,11 +112,16 @@ namespace NexusForever.WorldServer.Game.Spell
             return CastResult.Ok;
         }
 
-        private bool CheckPrerequisites()
+        private CastResult CheckPrerequisites()
         {
-            // TODO
-            if (parameters.SpellInfo.CasterCastPrerequisites != null)
+            // TODO: Remove below line and evaluate PreReq's for Non-Player Entities
+            if (!(caster is Player player))
+                return CastResult.Ok;
+
+            if (parameters.SpellInfo.CasterCastPrerequisite != null && !CheckRunnerOverride(player))
             {
+                if (!PrerequisiteManager.Instance.Meets(player, parameters.SpellInfo.CasterCastPrerequisite.Id))
+                    return CastResult.PrereqCasterCast;
             }
 
             // not sure if this should be for explicit and/or implicit targets
@@ -133,7 +138,16 @@ namespace NexusForever.WorldServer.Game.Spell
             {
             }
 
-            return true;
+            return CastResult.Ok;
+        }
+
+        private bool CheckRunnerOverride(Player player)
+        {
+            foreach (PrerequisiteEntry runnerPrereq in parameters.SpellInfo.PrerequisiteRunners)
+                if (PrerequisiteManager.Instance.Meets(player, runnerPrereq.Id))
+                    return true;
+
+            return false;
         }
 
         private CastResult CheckCCConditions()
@@ -245,6 +259,8 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             if (castResult == CastResult.Ok)
                 return;
+
+            log.Trace($"Spell {parameters.SpellInfo.Entry.Id} failed to cast {castResult}.");
 
             if (caster is Player player && !player.IsLoading)
             {

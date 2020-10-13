@@ -4,9 +4,9 @@
     {
         Equal    = 1,
         NotEqual = 2,
-        LessThan = 3,
-        LessThanOrEqual = 4,
-        GreaterThan = 5,
-        GreaterThanOrEqual = 6
+        GreaterThanOrEqual = 3,
+        GreaterThan = 4,
+        LessThanOrEqual = 5,
+        LessThan = 6
     }
 }

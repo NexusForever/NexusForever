@@ -45,8 +45,8 @@ namespace NexusForever.Shared.GameTable.Model
         public uint Spell4RunnerId01;
         public uint RunnerTargetTypeEnum00;
         public uint RunnerTargetTypeEnum01;
-        public uint PrerequisiteIdRunner00;
-        public uint PrerequisiteIdRunner01;
+        [GameTableFieldArray(2u)]
+        public uint[] PrerequisiteIdRunners;
         public uint AbilityChargeCount;
         public uint AbilityRechargeTime;
         public uint AbilityRechargeCount;
