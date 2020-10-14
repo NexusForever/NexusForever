@@ -27,6 +27,7 @@ using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
+using NLog;
 using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
@@ -36,6 +37,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class CharacterHandler
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         [MessageHandler(GameMessageOpcode.ClientRealmList)]
         public static void HandleRealmList(WorldSession session, ClientRealmList realmList)
         {
@@ -166,49 +169,57 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                     maxCharacterLevelAchieved = Math.Max(maxCharacterLevelAchieved, character.Level);
 
-                    // create a temporary Inventory and CostumeManager to show equipped gear
-                    var inventory      = new Inventory(null, character);
-                    var costumeManager = new CostumeManager(null, session.Account, character);
-
-                    CostumeEntity costume = null;
-                    if (character.ActiveCostumeIndex >= 0)
-                        costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
-
-                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
-
-                    foreach (ItemVisual itemVisual in inventory.GetItemVisuals(costume))
-                        listCharacter.Gear.Add(itemVisual);
-
-                    foreach (CharacterAppearanceModel appearance in character.Appearance)
+                    try
                     {
-                        listCharacter.Appearance.Add(new ItemVisual
+                        // create a temporary Inventory and CostumeManager to show equipped gear
+                        var inventory = new Inventory(null, character);
+                        var costumeManager = new CostumeManager(null, session.Account, character);
+
+                        CostumeEntity costume = null;
+                        if (character.ActiveCostumeIndex >= 0)
+                            costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
+
+                        listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+
+                        foreach (ItemVisual itemVisual in inventory.GetItemVisuals(costume))
+                            listCharacter.Gear.Add(itemVisual);
+
+                        foreach (CharacterAppearanceModel appearance in character.Appearance)
                         {
-                            Slot      = (ItemSlot)appearance.Slot,
-                            DisplayId = appearance.DisplayId
-                        });
-                    }
-
-                    /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
-                    {
-                        listCharacter.Labels.Add(customisation.Label);
-                        listCharacter.Values.Add(customisation.Value);
-                    }*/
-
-                    foreach (CharacterBoneModel bone in character.Bone.OrderBy(bone => bone.BoneIndex))
-                    {
-                        listCharacter.Bones.Add(bone.Bone);
-                    }
-
-                    foreach (CharacterStatModel stat in character.Stat)
-                    {
-                        if ((Stat)stat.Stat == Stat.Level)
-                        {
-                            listCharacter.Level = (uint)stat.Value;
-                            break;
+                            listCharacter.Appearance.Add(new ItemVisual
+                            {
+                                Slot = (ItemSlot)appearance.Slot,
+                                DisplayId = appearance.DisplayId
+                            });
                         }
-                    }
 
-                    serverCharacterList.Characters.Add(listCharacter);
+                        /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
+                        {
+                            listCharacter.Labels.Add(customisation.Label);
+                            listCharacter.Values.Add(customisation.Value);
+                        }*/
+
+                        foreach (CharacterBoneModel bone in character.Bone.OrderBy(bone => bone.BoneIndex))
+                        {
+                            listCharacter.Bones.Add(bone.Bone);
+                        }
+
+                        foreach (CharacterStatModel stat in character.Stat)
+                        {
+                            if ((Stat)stat.Stat == Stat.Level)
+                            {
+                                listCharacter.Level = (uint)stat.Value;
+                                break;
+                            }
+                        }
+
+                        serverCharacterList.Characters.Add(listCharacter);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Fatal(ex, $"An error has occured while loading character '{character.Name}'");
+                        continue;
+                    }
                 }
 
                 session.EnqueueMessageEncrypted(new ServerMaxCharacterLevelAchieved

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NexusForever.Database.Character;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NLog;
 
@@ -21,6 +22,25 @@ namespace NexusForever.WorldServer.Game.Entity
             items    = new Item[capacity];
 
             log.Trace($"Initialised new bag {Location} with {capacity} slots.");
+        }
+
+        public void Save(CharacterContext context)
+        {
+            for (uint i = 0; i < items.Length; ++i)
+            {
+                // Item does not exist in slot
+                if (items[i] == null)
+                    continue;
+
+                // Item has incorrect slot, setting the BagIndex to the current index
+                if (i != items[i].BagIndex)
+                {
+                    log.Warn($"Item with guid: 0x{items[i].Guid:X16} has incorrect slot: {items[i].BagIndex}, setting to slot: {i}");
+                    items[i].BagIndex = i;
+                }
+
+                items[i].Save(context);
+            }
         }
 
         /// <summary>
