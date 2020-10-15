@@ -11,6 +11,8 @@ namespace NexusForever.Database.Auth
         public DbSet<AccountCurrencyModel> AccountCurrency { get; set; }
         public DbSet<AccountEntitlementModel> AccountEntitlement { get; set; }
         public DbSet<AccountGenericUnlockModel> AccountGenericUnlock { get; set; }
+        public DbSet<AccountItemModel> AccountItem { get; set; }
+        public DbSet<AccountItemCooldownModel> AccountItemCooldown { get; set; }
         public DbSet<AccountKeybindingModel> AccountKeybinding { get; set; }
         public DbSet<AccountPermissionModel> AccountPermission { get; set; }
         public DbSet<AccountRoleModel> AccountRole { get; set; }
@@ -201,6 +203,67 @@ namespace NexusForever.Database.Auth
                     .WithMany(p => p.AccountGenericUnlock)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__account_generic_unlock_id__account_id");
+            });
+
+            modelBuilder.Entity<AccountItemModel>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.AccountId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_item");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("entry")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.AccountId)
+                    .HasColumnName("accountId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ItemId)
+                    .HasColumnName("itemId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.AccountItem)
+                    .HasForeignKey(d => d.AccountId)
+                    .HasConstraintName("FK__account_item_accountId__account_id");
+            });
+
+            modelBuilder.Entity<AccountItemCooldownModel>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.CooldownGroupId })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_item_cooldown");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.CooldownGroupId)
+                    .HasColumnName("cooldownGroupId")
+                    .HasColumnType("int(10) unsigned")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.Timestamp)
+                    .HasColumnName("timestamp")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("current_timestamp()");
+
+                entity.Property(e => e.Duration)
+                    .HasColumnName("duration")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.AccountItemCooldown)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_item_cooldown_id__account_id");
             });
 
             modelBuilder.Entity<AccountKeybindingModel>(entity =>

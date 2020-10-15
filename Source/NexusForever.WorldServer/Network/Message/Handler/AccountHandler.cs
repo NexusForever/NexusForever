@@ -34,5 +34,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             // 0x0987 - Store catalogue finalised message
             GlobalStorefrontManager.Instance.HandleCatalogRequest(session);
         }
+
+        [MessageHandler(GameMessageOpcode.ClientAccountItemBind)]
+        public static void HandleAccountItemBind(WorldSession session, ClientAccountItemBind accountItemBind)
+        {
+            session.AccountInventory.BindItem(accountItemBind.UserInventoryId);
+        }
     }
 }

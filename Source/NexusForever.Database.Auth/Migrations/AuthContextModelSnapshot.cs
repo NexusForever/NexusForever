@@ -117,6 +117,63 @@ namespace NexusForever.Database.Auth.Migrations
                     b.ToTable("account_generic_unlock");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountItemCooldownModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<uint>("CooldownGroupId")
+                        .HasColumnName("cooldownGroupId")
+                        .HasColumnType("int(10) unsigned");
+
+                    b.Property<uint>("Duration")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("duration")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<DateTime?>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("timestamp")
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("current_timestamp()");
+
+                    b.HasKey("Id", "CooldownGroupId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("account_item_cooldown");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountItemModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("entry")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<uint>("AccountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("accountId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<uint>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("itemId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.HasKey("Id", "AccountId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("account_item");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountKeybindingModel", b =>
                 {
                     b.Property<uint>("Id")
@@ -1028,6 +1085,26 @@ Besuch: https://github.com/NexusForever/NexusForever"
                         .WithMany("AccountGenericUnlock")
                         .HasForeignKey("Id")
                         .HasConstraintName("FK__account_generic_unlock_id__account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountItemCooldownModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Auth.Model.AccountModel", "Account")
+                        .WithMany("AccountItemCooldown")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__account_item_cooldown_id__account_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountItemModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Auth.Model.AccountModel", "Account")
+                        .WithMany("AccountItem")
+                        .HasForeignKey("AccountId")
+                        .HasConstraintName("FK__account_item_accountId__account_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

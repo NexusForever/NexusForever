@@ -71,7 +71,10 @@ namespace NexusForever.Database.Auth
             return await context.Account
                 .Include(a => a.AccountCostumeUnlock)
                 .Include(a => a.AccountCurrency)
+                .Include(a => a.AccountEntitlement)
                 .Include(a => a.AccountGenericUnlock)
+                .Include(a => a.AccountItem)
+                .Include(a => a.AccountItemCooldown)
                 .Include(a => a.AccountKeybinding)
                 .Include(a => a.AccountEntitlement)
                 .Include(a => a.AccountPermission)
@@ -178,6 +181,16 @@ namespace NexusForever.Database.Auth
                 .Include(r => r.RolePermission)
                 .AsNoTracking()
                 .ToImmutableList();
+        }
+        
+        public ulong GetNextAccountItemId()
+        {
+            using var context = new AuthContext(config);
+
+            return context.AccountItem
+                .GroupBy(i => 1)
+                .Select(g => g.Max(s => s.Id))
+                .ToList()[0];
         }
     }
 }

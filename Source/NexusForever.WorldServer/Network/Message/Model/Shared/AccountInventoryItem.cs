@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         public uint ItemId { get; set; }
         public byte Unknown0 { get; set; } // 5
         public bool Unknown1 { get; set; }
-        public TargetPlayerIdentity TargetPlayerIdentity { get; set; } = new TargetPlayerIdentity();
+        public TargetPlayerIdentity ClaimerIdentity { get; set; } = new TargetPlayerIdentity();
 
         public void Write(GamePacketWriter writer)
         {
@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             writer.Write(ItemId);
             writer.Write(Unknown0, 5u);
             writer.Write(Unknown1);
-            TargetPlayerIdentity.Write(writer);
+            ClaimerIdentity.Write(writer);
         }
     }
 }

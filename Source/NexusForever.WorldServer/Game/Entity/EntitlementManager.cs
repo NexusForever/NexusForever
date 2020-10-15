@@ -105,6 +105,8 @@ namespace NexusForever.WorldServer.Game.Entity
             if (entry == null)
                 throw new ArgumentException($"Invalid entitlement type {type}!");
 
+            // TODO: Add RewardProperties where necessary
+
             AccountEntitlement entitlement = SetEntitlement(accountEntitlements, entry, value,
                 () => new AccountEntitlement(session.Account.Id, entry, (uint)value));
 
@@ -127,6 +129,8 @@ namespace NexusForever.WorldServer.Game.Entity
             EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type);
             if (entry == null)
                 throw new ArgumentException($"Invalid entitlement type {type}!");
+
+            // TODO: Implement Entitlements going to RewardProperties where necessary
 
             CharacterEntitlement entitlement = SetEntitlement(characterEntitlements, entry, value,
                 () => new CharacterEntitlement(session.Player.CharacterId, entry, (uint)value));

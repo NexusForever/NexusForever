@@ -140,6 +140,7 @@ namespace NexusForever.WorldServer.Game.Mail
 
             DeliveryTime = parameters.DeliveryTime;
             CreateTime   = DateTime.Now;
+            Flags        = parameters.Flags;
 
             saveMask     = MailSaveMask.Create;
         }
@@ -149,13 +150,17 @@ namespace NexusForever.WorldServer.Game.Mail
         /// </summary>
         public void EnqueueDelete()
         {
-            saveMask = MailSaveMask.Delete;
+            saveMask |= MailSaveMask.Delete;
         }
 
         public void Save(CharacterContext context)
         {
             if (saveMask != MailSaveMask.None)
             {
+                // Should only occur when mail is sent by a Creature then claimed immediately.
+                if ((saveMask & MailSaveMask.Create) != 0 && PendingDelete)
+                    return;
+
                 if ((saveMask & MailSaveMask.Create) != 0)
                 {
                     context.Add(new CharacterMailModel
@@ -243,6 +248,14 @@ namespace NexusForever.WorldServer.Game.Mail
         public void MarkAsRead()
         {
             Flags |= MailFlag.IsRead;
+        }
+
+        /// <summary>
+        /// Mark this <see cref="MailItem"/> as saved to the player.
+        /// </summary>
+        public void MarkAsSaved()
+        {
+            Flags |= MailFlag.IsSaved;
         }
 
         /// <summary>

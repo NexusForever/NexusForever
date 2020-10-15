@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private readonly Dictionary<ulong, MailItem> availableMail = new Dictionary<ulong, MailItem>();
 
         // timer to check pending mail ever second
-        private readonly UpdateTimer mailTimer = new UpdateTimer(1000d);
+        private readonly UpdateTimer mailTimer = new UpdateTimer(1d);
 
         /// <summary>
         /// Create a new <see cref="MailManager"/> from existing <see cref="CharacterModel"/> database model.
@@ -53,18 +53,40 @@ namespace NexusForever.WorldServer.Game.Entity
             if (mailTimer.HasElapsed)
             {
                 bool sendAvailableMail = false;
-                foreach (MailItem mail in pendingMail)
+                foreach (MailItem mail in pendingMail.ToList())
                 {
                     if (!mail.IsReadyToDeliver())
                         continue;
 
                     availableMail.Add(mail.Id, mail);
+                    pendingMail.Remove(mail);
                     sendAvailableMail = true;
                 }
 
                 // prevent sending multiple mail packets
                 if (sendAvailableMail)
                     SendAvailableMail();
+
+                // Automatically claim any Available Mail Attachments that are marked as automaically claimed.
+                foreach (MailItem mail in availableMail.Values.Where(i => i.SenderType == SenderType.Creature && (i.Flags & MailFlag.IsSaved) == 0))
+                {
+                    if (mail.PendingDelete)
+                        continue;
+
+                    // TODO: Mark this Mail as Saved so that we don't process again. This also keep its "Read" state for the Client.
+                    mail.MarkAsSaved();
+
+                    if ((mail.Flags & MailFlag.AutomaticClaim) != 0)
+                    {
+                        foreach (MailAttachment attachment in mail.ToList())
+                        {
+                            MailTakeAttachment(mail.Id, attachment.Index, 0u);
+                        }
+
+                        if (mail.ToList().Count == 0)
+                            MailDelete(mail.Id);
+                    }
+                }       
 
                 // TODO: remove expired mail
 
@@ -175,10 +197,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void EnqueueMail(MailItem mail)
         {
-            if (mail.IsReadyToDeliver())
-                availableMail.Add(mail.Id, mail);
-            else
-                pendingMail.Add(mail);
+            pendingMail.Add(mail);
         }
 
         /// <summary>
@@ -272,7 +291,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Send mail to self from a creature.
         /// </summary>
-        public void SendMail(uint creatureId, DeliveryTime time, uint subject, uint body, IEnumerable<uint> itemIds)
+        public void SendMail(uint creatureId, DeliveryTime time, uint subject, uint body, IEnumerable<uint> itemIds, bool automaticClaim = false)
         {
             if (GameTableManager.Instance.Creature2.GetEntry(creatureId) == null)
                 throw new ArgumentException($"Invalid creature {creatureId} for mail sender!");
@@ -290,8 +309,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 CreatureId           = creatureId,
                 SubjectStringId      = subject,
                 BodyStringId         = body,
-                DeliveryTime         = time
+                DeliveryTime         = time,
+                Flags                = MailFlag.NoExpiry | MailFlag.NotReturnable
             };
+
+            if (automaticClaim)
+                parameters.Flags |= MailFlag.AutomaticClaim;
 
             var items = new List<Item>();
             foreach (uint itemId in itemIds)
@@ -300,7 +323,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (itemEntry == null)
                     throw new ArgumentException($"Invalid item {itemId} for mail attachment!");
 
-                var item = new Item(null, itemEntry);
+                var item = new Item(null, itemEntry, initialCharges: itemEntry.MaxCharges);
                 items.Add(item);
             }
 
@@ -323,7 +346,10 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // NOTE: outgoing mail is flushed on character save to prevent any issues,
             // this means that instant mail could take up to 60 seconds (by default) to actually arrive
-            outgoingMail.Enqueue(mail);
+            if (parameters.MessageType != SenderType.Creature || parameters.DeliveryTime != DeliveryTime.Instant || (parameters.Flags & MailFlag.AutomaticClaim) == 0)
+                outgoingMail.Enqueue(mail);
+            else
+                EnqueueMail(mail);
         }
 
         private uint CalculateMailCost(DeliveryTime time, List<Item> items)
@@ -503,7 +529,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (mailAttachment == null)
                     return GenericError.MailNoAttachment;
 
-                if (unitId == 0u || !IsTargetMailBoxInRange(unitId))
+                if ((mailItem.Flags & MailFlag.AutomaticClaim) == 0 && (unitId == 0u || !IsTargetMailBoxInRange(unitId)))
                     return GenericError.MailMailBoxOutOfRange;
 
                 if (player.Inventory.IsInventoryFull())
