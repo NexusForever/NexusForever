@@ -322,7 +322,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new ArgumentNullException();
 
             // auto move materials into satchel but not when moving mats to bag from satchel
-            if (reason != ItemUpdateReason.ResourceConversion) {
+            if (reason != ItemUpdateReason.ResourceConversion) 
+            {
                 if (GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == itemEntry.Id) != null)
                     count = player.SupplySatchelManager.AddAmount(new Item(characterId, itemEntry, count, charges), count);
             }
