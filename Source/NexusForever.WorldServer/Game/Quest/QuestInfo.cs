@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NexusForever.Shared.GameTable;
@@ -86,6 +87,33 @@ namespace NexusForever.WorldServer.Game.Quest
 
             GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(530);
             return (uint)(MathF.Pow(Entry.ConLevel, entry.Datafloat0) * DifficultyEntry.CashRewardMultiplier);
+        }
+
+        /// <summary>
+        /// Return reputation rewarded on completion.
+        /// </summary>
+        public Dictionary<uint, float> GetRewardReputation()
+        {
+            Dictionary<uint, float> reputationRewards = new Dictionary<uint, float>();
+
+            for (int i = 0; i < Entry.Faction2IdRewardReputations.Length - 1; i++)
+            {
+                uint faction2Id = Entry.Faction2IdRewardReputations[i];
+
+                if (faction2Id == 0u)
+                    continue;
+
+                if (Entry.RewardReputationOverrides[i] > 0f)
+                {
+                    reputationRewards.Add(faction2Id, Entry.RewardReputationOverrides[i]);
+                    continue;
+                }
+
+                XpPerLevelEntry entry = GameTableManager.Instance.XpPerLevel.GetEntry(Entry.ConLevel);
+                reputationRewards.Add(faction2Id, DifficultyEntry.RepRewardMultiplier * entry.BaseRepRewardPerLevel);
+            }
+
+            return reputationRewards;
         }
     }
 }

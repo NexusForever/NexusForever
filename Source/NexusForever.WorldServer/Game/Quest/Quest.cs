@@ -264,16 +264,20 @@ namespace NexusForever.WorldServer.Game.Quest
 
             // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (QuestObjective objective in objectives
-                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data)
+                .Where(o => o.Entry.Type == (uint)type && o.IsTarget(data))
                 .OrderByDescending(o => o.Index))
             {
                 if (objective.IsComplete())
                     continue;
 
-                if (!CanUpdateObjective(objective))
+                if (!CanUpdateObjective(objective, progress))
                     continue;
 
                 objective.ObjectiveUpdate(progress);
+
+                if (AreAllRequiredObjectivesCompleted())
+                    CompleteAllOptionalObjectives();
+
                 SendQuestObjectiveUpdate(objective);
             }
 
@@ -296,28 +300,73 @@ namespace NexusForever.WorldServer.Game.Quest
             if (objective.IsComplete())
                 return;
 
-            if (!CanUpdateObjective(objective))
+            if (!CanUpdateObjective(objective, progress))
                 return;
 
             objective.ObjectiveUpdate(progress);
+
+            if (AreAllRequiredObjectivesCompleted())
+                CompleteAllOptionalObjectives();
+
             SendQuestObjectiveUpdate(objective);
 
             if (objectives.All(o => o.IsComplete()))
                 State = QuestState.Achieved;
         }
 
-        private bool CanUpdateObjective(QuestObjective objective)
+        private bool CanUpdateObjective(QuestObjective objective, uint progress)
         {
             // sequential objectives
             if ((objective.Entry.Flags & 0x02) != 0)
             {
                 for (int i = 0; i < objective.Index; i++)
-                    if (!objectives[i].IsComplete())
-                        return false;
+                    if ((objectives[i].Entry.Flags & 0x02) != 0) // Ensure each previous step wasn't optional.
+                        if (!objectives[i].IsComplete())
+                            return false;
             }
+
+            if (objective.IsChecklist())
+                if ((objective.Progress & (1 << (int)progress)) != 0)
+                    return false;
 
             // TODO: client also checks objective flags 1 and 8 in the same function
             return true;
+        }
+
+        private bool AreAllRequiredObjectivesCompleted()
+        {
+            if (objectives.Count == 1 && !objectives[0].IsComplete())
+                return false;
+                
+            foreach (QuestObjective objective in objectives)
+            {
+                if ((objective.Entry.Flags & 0x02) != 0 || (objective.Entry.Flags & 0x04) != 0)
+                    if (!objective.IsComplete())
+                        return false;
+            }
+
+            return true;
+        }
+
+        private void CompleteAllOptionalObjectives()
+        {
+            foreach (QuestObjective objective in objectives)
+            {
+                if ((objective.Entry.Flags & 0x02) == 0 && !objective.IsComplete())
+                    CompleteObjective(objective);
+            }
+        }
+
+        /// <summary>
+        /// Complete a given <see cref="QuestObjective"/> and update the <see cref="Player"/>.
+        /// </summary>
+        public void CompleteObjective(QuestObjective objective)
+        {
+            if (!objectives.Contains(objective))
+                throw new QuestException($"Objective {objective.Entry.Id} is not part of Quest {Info.Entry.Id}.");
+
+            objective.Complete();
+            SendQuestObjectiveUpdate(objective);
         }
 
         private void SendQuestObjectiveUpdate(QuestObjective objective)

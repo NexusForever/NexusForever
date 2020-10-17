@@ -29,6 +29,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
 
+        public byte QuestChecklistIdx { get; set; }
+
         public ulong ActivePropId { get; private set; }
         public ushort WorldSocketId { get; private set; }
 
@@ -85,15 +87,16 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
-            EntityId     = model.Id;
-            CreatureId   = model.Creature;
-            Rotation     = new Vector3(model.Rx, model.Ry, model.Rz);
-            DisplayInfo  = model.DisplayInfo;
-            OutfitInfo   = model.OutfitInfo;
-            Faction1     = (Faction)model.Faction1;
-            Faction2     = (Faction)model.Faction2;
-            ActivePropId = model.ActivePropId;
-            WorldSocketId = model.WorldSocketId;
+            EntityId          = model.Id;
+            CreatureId        = model.Creature;
+            Rotation          = new Vector3(model.Rx, model.Ry, model.Rz);
+            DisplayInfo       = model.DisplayInfo;
+            OutfitInfo        = model.OutfitInfo;
+            Faction1          = (Faction)model.Faction1;
+            Faction2          = (Faction)model.Faction2;
+            QuestChecklistIdx = model.QuestChecklistIdx;
+            ActivePropId      = model.ActivePropId;
+            WorldSocketId     = model.WorldSocketId;
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));

@@ -400,8 +400,8 @@ namespace NexusForever.WorldServer.Game.Entity
             if (quest.State != QuestState.Accepted)
                 throw new QuestException($"Player {player.CharacterId} tried to achieve quest {questId} with invalid state!");
 
-            foreach (QuestObjectiveEntry entry in quest.Info.Objectives)
-                quest.ObjectiveUpdate((QuestObjectiveType)entry.Type, entry.Data, entry.Count);
+            foreach (QuestObjective objective in quest)
+                quest.CompleteObjective(objective);
         }
 
         /// <summary>
@@ -423,7 +423,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (objective == null)
                 throw new QuestException();
 
-            quest.ObjectiveUpdate((QuestObjectiveType)objective.Entry.Type, objective.Entry.Data, objective.Entry.Count);
+            quest.CompleteObjective(objective);
         }
 
         /// <summary>
@@ -515,6 +515,12 @@ namespace NexusForever.WorldServer.Game.Entity
             uint money = info.GetRewardMoney();
             if (money != 0u)
                 player.CurrencyManager.CurrencyAddAmount(CurrencyType.Credits, money);
+
+            foreach ((uint faction2Id, float rep) in info.GetRewardReputation())
+            {
+                if (faction2Id != 0u)
+                    player.ReputationManager.UpdateReputation((Faction)faction2Id, rep);
+            }
         }
 
         private void RewardQuest(Quest2RewardEntry entry)
