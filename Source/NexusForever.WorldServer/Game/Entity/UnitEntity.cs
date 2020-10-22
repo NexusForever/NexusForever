@@ -88,11 +88,32 @@ namespace NexusForever.WorldServer.Game.Entity
                 return;
             }
 
+            // Cancel certain Spells / Buffs if required, when another ability is cast.
+            // TODO: Improve this with certain rules, as there will be abilities that can be cast while stealthed, etc.
             if (parameters.UserInitiatedSpellCast)
             {
                 if (this is Player player)
                     player.Dismount();
-            }
+                    
+                // TODO: This "effect" of removing Stealth when abilities are cast is handled by a Proc effect in the original spell. It'll trigger the removal of this buff when a player uses an ability. Once Procs are implemented, this can be removed.
+                uint[] ignoredStealthBaseIds = new uint[]
+                {
+                    30075,
+                    23164,
+                    30076
+                };
+                if (Stealthed && !ignoredStealthBaseIds.Contains(parameters.SpellInfo.Entry.Spell4BaseIdBaseSpell))
+                {
+                    foreach ((uint castingId, List<EntityStatus> statuses) in StatusEffects)
+                    {
+                        if (statuses.Contains(EntityStatus.Stealth))
+                        {
+                            Spell.Spell activeSpell = GetActiveSpell(i => i.CastingId == castingId);
+                            activeSpell.Finish();
+                        }
+                    }
+                }
+            }                        
 
             var spell = new Spell.Spell(this, parameters);
             spell.Cast();
@@ -117,6 +138,14 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Spell.Spell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
             spell?.CancelCast(CastResult.SpellCancelled);
+        }
+
+        /// <summary>
+        /// Returns an active <see cref="Spell.Spell"/> that is affecting this <see cref="UnitEntity"/>
+        /// </summary>
+        public Spell.Spell GetActiveSpell(Func<Spell.Spell, bool> func)
+        {
+            return pendingSpells.SingleOrDefault(func);
         }
     }
 }

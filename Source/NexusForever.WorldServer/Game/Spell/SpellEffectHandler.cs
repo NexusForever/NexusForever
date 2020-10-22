@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
@@ -26,6 +27,7 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             target.CastSpell(info.Entry.DataBits00, new SpellParameters
             {
+                CharacterSpell         = parameters.CharacterSpell,
                 ParentSpellInfo        = parameters.SpellInfo,
                 RootSpellInfo          = parameters.RootSpellInfo,
                 UserInitiatedSpellCast = false
@@ -192,6 +194,67 @@ namespace NexusForever.WorldServer.Game.Spell
                 return;
 
             player.TitleManager.AddTitle((ushort)info.Entry.DataBits00);
+        }
+
+        [SpellEffectHandler(SpellEffectType.Stealth)]
+        private void HandleEffectStealth(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            // TODO: Make it so that Stealth cannot be broken by damage after 3s.
+            // This is referenced by EffectId 95774. It checks a Prerequisite that you have http://www.jabbithole.com/spells/assassin-59389. If you do, it'll trigger this EffectHandler with DataBits02 set to 1 (instead of 0).
+            if (info.Entry.DataBits02 == 1)
+                return;
+
+            target.AddStatus(CastingId, EntityStatus.Stealth);
+        }
+
+        [SpellEffectHandler(SpellEffectType.ModifySpellCooldown)]
+        private void HandleEffectModifySpellCooldown(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            if (!(target is Player player))
+                return;
+
+            switch ((EffectModifySpellCooldownType)info.Entry.DataBits00)
+            {
+                case EffectModifySpellCooldownType.Spell4:
+                    player.SpellManager.SetSpellCooldown(info.Entry.DataBits01, BitConverter.Int32BitsToSingle((int)info.Entry.DataBits02));
+                    break;
+                case EffectModifySpellCooldownType.SpellCooldownId:
+                    player.SpellManager.SetSpellCooldownByCooldownId(info.Entry.DataBits01, BitConverter.Int32BitsToSingle((int)info.Entry.DataBits02));
+                    break;
+                default:
+                    log.Warn($"Unhandled ModifySpellCooldown Type {(EffectModifySpellCooldownType)info.Entry.DataBits00}");
+                    break;
+            }
+        }
+
+        [SpellEffectHandler(SpellEffectType.SpellForceRemove)]
+        private void HandleEffectSpellForceRemove(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            switch ((EffectForceSpellRemoveType)info.Entry.DataBits00)
+            {
+                case EffectForceSpellRemoveType.Spell4:
+                    Spell activeSpell4 = target.GetActiveSpell(i => i.parameters.SpellInfo.Entry.Id == info.Entry.DataBits01);
+                    if (activeSpell4 != null)
+                        activeSpell4.Finish();
+                    break;
+                case EffectForceSpellRemoveType.SpellBase:
+                    Spell activeSpellBase = target.GetActiveSpell(i => i.parameters.SpellInfo.Entry.Spell4BaseIdBaseSpell == info.Entry.DataBits01);
+                    if (activeSpellBase != null)
+                        activeSpellBase.Finish();
+                    break;
+                default:
+                    log.Warn($"Unhandled EffectForceSpellRemoveType Type {(EffectForceSpellRemoveType)info.Entry.DataBits00}");
+                    break;
+            }
+        }
+
+        [SpellEffectHandler(SpellEffectType.RavelSignal)]
+        private void HandleEffectRavelSignal(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+            if (info.Entry.DataBits00 == 1 && info.Entry.DataBits01 == 13076) // TODO: Move to actual script system. This is used in Stalker's Stealth Ability to prevent it from executing the next Effect whcih was the Cancel Stealth proxy effect.
+                parameters.ParentSpellInfo.Effects.RemoveAll(i => i.Id == 91018);
+            else
+                log.Warn($"Unhandled spell effect {SpellEffectType.RavelSignal}");
         }
     }
 }
