@@ -47,6 +47,12 @@ namespace NexusForever.Database.World
                 .ToImmutableList();
         }
 
+        public EntityModel GetEntity(uint creatureId)
+        {
+            using var context = new WorldContext(config);
+            return context.Entity.FirstOrDefault(e => e.Creature == creatureId);
+        }
+
         public ImmutableList<EntityModel> GetEntitiesWithoutArea()
         {
             using var context = new WorldContext(config);

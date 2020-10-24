@@ -25,6 +25,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             ServerEntityCreate entityCreate = base.BuildCreatePacket();
             entityCreate.CreateFlags = 0;
+
             return entityCreate;
         }
     }

@@ -54,7 +54,10 @@ namespace NexusForever.Shared.GameTable
         public GameTable<ArchiveLinkEntry> ArchiveLink { get; private set; }
         public GameTable<AttributeMilestoneGroupEntry> AttributeMilestoneGroup { get; private set; }
         public GameTable<AttributeMiniMilestoneGroupEntry> AttributeMiniMilestoneGroup { get; private set; }
+
+        [GameData]
         public GameTable<BindPointEntry> BindPoint { get; private set; }
+        
         public GameTable<BinkMovieEntry> BinkMovie { get; private set; }
         public GameTable<BinkMovieSubtitleEntry> BinkMovieSubtitle { get; private set; }
         public GameTable<BugCategoryEntry> BugCategory { get; private set; }

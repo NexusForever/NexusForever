@@ -58,6 +58,9 @@ namespace NexusForever.WorldServer.Game.Entity
             if (spellBaseInfo == null)
                 throw new ArgumentOutOfRangeException();
 
+            if (parameters.ClientSideInteraction != null)
+                parameters.ClientSideInteraction.SetClientSideInteractionEntry(GameTableManager.Instance.ClientSideInteraction.GetEntry(spellBaseInfo.Entry.ClientSideInteractionId));
+
             SpellInfo spellInfo = spellBaseInfo.GetSpellInfo(tier);
             if (spellInfo == null)
                 throw new ArgumentOutOfRangeException();
@@ -117,6 +120,16 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Spell.Spell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
             spell?.CancelCast(CastResult.SpellCancelled);
+        }
+
+        /// <summary>
+        /// Returns a pending <see cref="Spell.Spell"/> based on its casting id
+        /// </summary>
+        /// <param name="castingId">Casting ID of the spell to return</param>
+        public Spell.Spell GetPendingSpell(uint castingId)
+        {
+            Spell.Spell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
+            return spell ?? null;
         }
     }
 }

@@ -1,9 +1,12 @@
 using NexusForever.Database.World.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.CSI;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game.Spell;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -32,14 +35,14 @@ namespace NexusForever.WorldServer.Game.Entity
             };
         }
 
-        public override void OnActivate(Player activator)
+        public override void OnInteract(Player activator)
         {
             Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
             if (entry.DatacubeId != 0u)
                 activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, int.MaxValue);
         }
 
-        public override void OnActivateCast(Player activator)
+        public override void OnActivateSuccess(Player activator)
         {
             uint progress = (uint)(1 << QuestChecklistIdx);
 
@@ -68,7 +71,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 }
             }
 
-            //TODO: cast "116,Generic Quest Spell - Activating - Activate - Tier 1" by 0x07FD
+            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
+            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, CreatureId, 1u);
         }
     }
 }

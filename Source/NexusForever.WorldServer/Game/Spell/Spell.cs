@@ -19,6 +19,7 @@ namespace NexusForever.WorldServer.Game.Spell
         public uint CastingId { get; }
         public bool IsCasting => status == SpellStatus.Casting;
         public bool IsFinished => status == SpellStatus.Finished;
+        public bool IsClientSideInteraction => parameters.ClientSideInteraction != null;
 
         private readonly UnitEntity caster;
         private readonly SpellParameters parameters;
@@ -49,6 +50,8 @@ namespace NexusForever.WorldServer.Game.Spell
                 status = SpellStatus.Finished;
                 log.Trace($"Spell {parameters.SpellInfo.Entry.Id} has finished.");
 
+                parameters.CompleteAction?.Invoke(parameters);
+
                 // TODO: add a timer to count down on the Effect before sending the finish - sending the finish will e.g. wear off the buff
                 //SendSpellFinish();
             }
@@ -77,10 +80,21 @@ namespace NexusForever.WorldServer.Game.Spell
                 if (parameters.SpellInfo.GlobalCooldown != null)
                     player.SpellManager.SetGlobalSpellCooldown(parameters.SpellInfo.GlobalCooldown.CooldownTime / 1000d);
 
-            SendSpellStart();
+            double castTime = parameters.CastTimeOverride > -1 ? parameters.CastTimeOverride / 1000d : parameters.SpellInfo.Entry.CastTime / 1000d;
+            if (parameters.ClientSideInteraction != null)
+            {
+                SendSpellStartClientInteraction();
 
-            // enqueue spell to be executed after cast time
-            events.EnqueueEvent(new SpellEvent(parameters.SpellInfo.Entry.CastTime / 1000d, Execute));
+                if ((CastMethod)parameters.SpellInfo.BaseInfo.Entry.CastMethod != CastMethod.ClientSideInteraction)
+                    events.EnqueueEvent(new SpellEvent(castTime, SucceedClientInteraction));
+            }
+            else
+            {
+                SendSpellStart();
+
+                events.EnqueueEvent(new SpellEvent(castTime, Execute));
+            }
+
             status = SpellStatus.Casting;
 
             log.Trace($"Spell {parameters.SpellInfo.Entry.Id} has started casting.");
@@ -200,6 +214,14 @@ namespace NexusForever.WorldServer.Game.Spell
         private void SelectTargets()
         {
             targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Caster, caster));
+
+            if (parameters.PrimaryTargetId > 0)
+            {
+                UnitEntity primaryTargetEntity = caster.GetVisible<UnitEntity>(parameters.PrimaryTargetId);
+                if (primaryTargetEntity != null)
+                    targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Target, primaryTargetEntity));
+            }
+
             foreach (TelegraphDamageEntry telegraphDamageEntry in parameters.SpellInfo.Telegraphs)
             {
                 var telegraph = new Telegraph(telegraphDamageEntry, caster, caster.Position, caster.Rotation);
@@ -241,6 +263,30 @@ namespace NexusForever.WorldServer.Game.Spell
             return parameters.SpellInfo.Entry.CastTime > 0;
         }
 
+        /// <summary>
+        /// Used when a <see cref="CSI.ClientSideInteraction"/> succeeds
+        /// </summary>
+        public void SucceedClientInteraction()
+        {
+            if (parameters.ClientSideInteraction == null)
+                throw new ArgumentException("This can only be used by a Client Interaction Event.");
+
+            Execute();
+        }
+
+        /// <summary>
+        /// Used when a <see cref="CSI.ClientSideInteraction"/> fails
+        /// </summary>
+        public void FailClientInteraction()
+        {
+            if (parameters.ClientSideInteraction == null)
+                throw new ArgumentException("This can only be used by a Client Interaction Event.");
+
+            parameters.ClientSideInteraction.TriggerFail();
+
+            CancelCast(CastResult.ClientSideInteractionFail);
+        }
+
         private void SendSpellCastResult(CastResult castResult)
         {
             if (castResult == CastResult.Ok)
@@ -269,6 +315,21 @@ namespace NexusForever.WorldServer.Game.Spell
                 FieldPosition          = new Position(caster.Position),
                 UserInitiatedSpellCast = parameters.UserInitiatedSpellCast
             }, true);
+        }
+
+        private void SendSpellStartClientInteraction()
+        {
+            // Shoule we actually emit client interaction events to everyone? - Logs suggest that we only see this packet firing when the client interacts with -something- and is likely only sent to them
+            if(caster is Player player)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerSpellStartClientInteraction
+                {
+                    ClientUniqueId = parameters.ClientSideInteraction.ClientUniqueId,
+                    CastingId = CastingId,
+                    CasterId = parameters.PrimaryTargetId
+                });
+            }
+            
         }
 
         private void SendSpellFinish()

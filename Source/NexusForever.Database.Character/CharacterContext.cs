@@ -84,6 +84,11 @@ namespace NexusForever.Database.Character
                     .HasColumnType("tinyint(3) unsigned")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.BindPoint)
+                    .HasColumnName("bindPoint")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.Class)
                     .HasColumnName("class")
                     .HasColumnType("tinyint(3) unsigned")
