@@ -143,7 +143,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     RealmId                        = WorldServer.RealmId,
                     // no longer used as replaced by entitlements but retail server still used to send this
                     AdditionalCount                = (uint)characters.Count,
-                    AdditionalAllowedCharCreations = (uint)(session.EntitlementManager.GetAccountEntitlement(EntitlementType.BaseCharacterSlots).Amount - characters.Count)
+                    AdditionalAllowedCharCreations = (uint)(session.EntitlementManager.GetAccountEntitlement(EntitlementType.BaseCharacterSlots)?.Amount ?? 0u - characters.Count)
                 };
 
                 foreach (CharacterModel character in characters)
