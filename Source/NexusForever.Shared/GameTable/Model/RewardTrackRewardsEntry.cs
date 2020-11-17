@@ -9,14 +9,11 @@ namespace NexusForever.Shared.GameTable.Model
         public uint Flags;
         public uint CurrencyTypeId;
         public uint CurrencyAmount;
-        public uint RewardTrackRewardTypeEnum00;
-        public uint RewardTrackRewardTypeEnum01;
-        public uint RewardTrackRewardTypeEnum02;
-        public uint RewardChoiceId00;
-        public uint RewardChoiceId01;
-        public uint RewardChoiceId02;
-        public uint RewardChoiceCount00;
-        public uint RewardChoiceCount01;
-        public uint RewardChoiceCount02;
+        [GameTableFieldArray(3u)]
+        public uint[] RewardTrackRewardTypeEnums;
+        [GameTableFieldArray(3u)]
+        public uint[] RewardChoiceIds;
+        [GameTableFieldArray(3u)]
+        public uint[] RewardChoiceCounts;
     }
 }

@@ -17,6 +17,7 @@ namespace NexusForever.Database.Auth
         public DbSet<PermissionModel> Permission { get; set; }
         public DbSet<RoleModel> Role { get; set; }
         public DbSet<RolePermissionModel> RolePermission { get; set; }
+        public DbSet<AccountRewardTrackModel> AccountRewardTrack { get; set; }
         public DbSet<ServerModel> Server { get; set; }
         public DbSet<ServerMessageModel> ServerMessage { get; set; }
 
@@ -851,6 +852,72 @@ namespace NexusForever.Database.Auth
                         Name = "Other: InstantLogout"
                     });
             });
+
+            modelBuilder.Entity<AccountRewardTrackModel>(entity =>
+            {
+                entity.ToTable("account_reward_track");
+
+                entity.HasKey(e => new { e.Id, e.RewardTrackId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RewardTrackId)
+                    .HasColumnName("rewardTrackId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Points)
+                    .HasColumnName("points")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.AccountRewardTrack)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_reward_track_id__account_id");
+            });
+
+            modelBuilder.Entity<AccountRewardTrackMilestoneModel>(entity =>
+            {
+                entity.ToTable("account_reward_track_milestone");
+
+                entity.HasKey(e => new { e.Id, e.RewardTrackId, e.MilestoneId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                    entity.Property(e => e.RewardTrackId)
+                    .HasColumnName("rewardTrackId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.MilestoneId)
+                    .HasColumnName("milestoneId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.PointsRequired)
+                    .HasColumnName("pointsRequired")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Choice)
+                    .HasColumnName("choice")
+                    .HasDefaultValue(-1);
+
+                entity.HasOne(d => d.RewardTrack)
+                    .WithMany(p => p.Milestone)
+                    .HasForeignKey(d => new { d.Id, d.RewardTrackId })
+                    .HasConstraintName("FK__account_reward_track_milestone_id-rewardTrackId__account_reward_track_id-rewardTrackId");
+            });
+
 
             modelBuilder.Entity<RoleModel>(entity =>
             {

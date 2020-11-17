@@ -158,6 +158,10 @@
         Reputation                  = 98,
         ReputationUpdate            = 99,
 
+        // reward tracks
+        RewardTrack                 = 100,
+        RewardTrackUpdate           = 101,
+
         // non command permissions
         InstantLogout               = 10000
     }

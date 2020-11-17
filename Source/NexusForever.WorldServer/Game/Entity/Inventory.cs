@@ -310,6 +310,9 @@ namespace NexusForever.WorldServer.Game.Entity
             if (itemEntry == null)
                 throw new ArgumentNullException();
 
+            if (charges == 0 && itemEntry.MaxCharges > 0)
+                charges = itemEntry.MaxCharges;
+
             ItemCreate(itemEntry, count, reason, charges);
         }
 

@@ -463,8 +463,13 @@ namespace NexusForever.Shared.GameTable
         public GameTable<RewardRotationEssenceEntry> RewardRotationEssence { get; private set; }
         public GameTable<RewardRotationItemEntry> RewardRotationItem { get; private set; }
         public GameTable<RewardRotationModifierEntry> RewardRotationModifier { get; private set; }
+
+        [GameData]
         public GameTable<RewardTrackEntry> RewardTrack { get; private set; }
+
+        [GameData]
         public GameTable<RewardTrackRewardsEntry> RewardTrackRewards { get; private set; }
+
         public GameTable<SalvageEntry> Salvage { get; private set; }
         public GameTable<SalvageExceptionEntry> SalvageException { get; private set; }
         public GameTable<SkyCloudSetEntry> SkyCloudSet { get; private set; }
