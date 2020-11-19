@@ -6,6 +6,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Entity
@@ -19,9 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public SupplySatchelManager(Player owner, CharacterModel model)
         {
             player = owner;
-
-            // TODO: Make this configurable and powered by the same entry that would power the RewardProperty
-            maximumStackAmount = (uint)owner.Session.EntitlementManager.GetRewardProperty(Static.RewardPropertyType.TradeskillMatStackLimit, 0)?.Value;
+            maximumStackAmount = (uint)(owner.Session.EntitlementManager.GetRewardProperty(RewardPropertyType.TradeskillMatStackLimit)?.GetValue(0u) ?? 0f);
 
             foreach (CharacterTradeskillMaterialModel tradeskillMaterial in model.TradeskillMaterials)
                 tradeskillMaterials.Add(tradeskillMaterial.MaterialId, new TradeskillMaterial(tradeskillMaterial));

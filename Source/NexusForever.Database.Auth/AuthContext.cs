@@ -849,6 +849,11 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 10000,
                         Name = "Other: InstantLogout"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10001,
+                        Name = "Other: Signature"
                     });
             });
 

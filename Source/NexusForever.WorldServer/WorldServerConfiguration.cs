@@ -23,6 +23,5 @@ namespace NexusForever.WorldServer
         public string MessageOfTheDay { get; set; }
         public uint LengthOfInGameDay { get; set; }
         public bool CrossFactionChat { get; set; } = true;
-        public byte DefaultAccountTier { get; set; }
     }
 }

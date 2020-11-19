@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
-using RewardPropertyEnum = NexusForever.WorldServer.Game.Entity.Static.RewardPropertyType;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -36,9 +36,9 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 }
             }
 
-            public RewardPropertyEnum Id { get; set; }
+            public RewardPropertyType Id { get; set; }
             public uint Data { get; set; }
-            public byte Type { get; set; }
+            public RewardPropertyModifierValueType Type { get; set; }
             public float Value { get; set; }
             public List<UnknownStruct> UnknownStructs { get; set; } = new List<UnknownStruct>();
 
@@ -50,11 +50,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
                 switch (Type)
                 {
-                    case 0:
-                    case 2:
+                    case RewardPropertyModifierValueType.AdditiveScalar:
+                    case RewardPropertyModifierValueType.MultiplicativeScalar:
                         writer.Write(Value);
                         break;
-                    case 1:
+                    case RewardPropertyModifierValueType.Discrete:
                         writer.Write((uint)Value);
                         break;
                 }
@@ -64,12 +64,12 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-        public List<RewardProperty> Variables { get; set; } = new List<RewardProperty>();
+        public List<RewardProperty> Properties { get; set; } = new List<RewardProperty>();
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write((byte)Variables.Count);
-            Variables.ForEach(u => u.Write(writer));
+            writer.Write((byte)Properties.Count);
+            Properties.ForEach(u => u.Write(writer));
         }
     }
 }

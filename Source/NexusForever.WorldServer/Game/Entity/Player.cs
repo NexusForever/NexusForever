@@ -183,7 +183,7 @@ namespace NexusForever.WorldServer.Game.Entity
             TimePlayedTotal = model.TimePlayedTotal;
             TimePlayedLevel = model.TimePlayedLevel;
 
-            Session.EntitlementManager.OnNewCharacter(model);
+            Session.EntitlementManager.Initialise(model);
 
             foreach (CharacterStatModel statModel in model.Stat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
@@ -485,12 +485,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
             Session.EnqueueMessageEncrypted(new Server00F1());
             SetControl(this);
-
-            // TODO: Move to Unlocks/Rewards Handler. A lot of these are tied to Entitlements which display in the character sheet, but don't actually unlock anything without this packet.
-            Session.EnqueueMessageEncrypted(new ServerRewardPropertySet
-            {
-                Variables = Session.EntitlementManager.GetRewardPropertiesNetworkMessage()
-            });
 
             CostumeManager.SendInitialPackets();
             

@@ -44,7 +44,7 @@ namespace NexusForever.WorldServer.Game
         private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
         private ImmutableDictionary</*creatureId*/uint, /*targetGroupIds*/ImmutableList<uint>> creatureAssociatedTargetGroups;
 
-        private ImmutableDictionary</*premiumTier*/AccountTier, /*targetGroupIds*/ImmutableList<RewardPropertyPremiumModifierEntry>> rewardPropertiesByTier;
+        private ImmutableDictionary<AccountTier, ImmutableList<RewardPropertyPremiumModifierEntry>> rewardPropertiesByTier;
 
         private AssetManager()
         {
@@ -164,21 +164,22 @@ namespace NexusForever.WorldServer.Game
 
         private void CacheRewardPropertiesByTier()
         {
-            var entries = ImmutableDictionary.CreateBuilder<AccountTier, List<RewardPropertyPremiumModifierEntry>>();
+            // VIP was intended to be used in China from what I can see, you can force the VIP premium system in the client with the China game mode parameter
+            // not supported as the system was unfinished
+            IEnumerable<RewardPropertyPremiumModifierEntry> hybridEntries = GameTableManager.Instance
+                .RewardPropertyPremiumModifier.Entries
+                .Where(e => (PremiumSystem)e.PremiumSystemEnum == PremiumSystem.Hybrid)
+                .ToList();
 
-            // Unknown how to set the PremiumSystemEnum in the Client at this time. In addition, looks like only "Hybrid" was used on Retail.
-            var rewardProps = GameTableManager.Instance.RewardPropertyPremiumModifier.Entries
-                .Where(i => (PremiumSystem)i.PremiumSystemEnum == PremiumSystem.Hybrid)
-                .GroupBy(i => i.Tier);
-            for (int i = 0; i < rewardProps.Count(); i++)
-                entries.Add((AccountTier)i, new List<RewardPropertyPremiumModifierEntry>());
-
-            foreach (var entry in rewardProps.SelectMany(e => e))
-                foreach ((AccountTier tier, List<RewardPropertyPremiumModifierEntry> list) in entries
-                    .Where(e => e.Key >= (AccountTier)entry.Tier)) // Base Reward Properties are determined by current Account Tier and lower. This is how Retail worked.
-                        list.Add(entry);
-
-            rewardPropertiesByTier = entries.ToImmutableDictionary(e => e.Key, e=> e.Value.ToImmutableList());
+            // base reward properties are determined by current account tier and lower if fall through flag is set
+            rewardPropertiesByTier = hybridEntries
+                .Select(e => e.Tier)
+                .Distinct()
+                .ToImmutableDictionary(k => (AccountTier)k, k => hybridEntries
+                    .Where(r => r.Tier == k)
+                    .Concat(hybridEntries
+                        .Where(r => r.Tier < k && ((RewardPropertyPremiumModiferFlags)r.Flags & RewardPropertyPremiumModiferFlags.FallThrough) != 0))
+                    .ToImmutableList());
         }
 
         /// <summary>

@@ -12,6 +12,7 @@ using NexusForever.Shared.Network.Packet;
 using NexusForever.WorldServer.Game.RBAC;
 using NexusForever.WorldServer.Game.Account;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -29,8 +30,7 @@ namespace NexusForever.WorldServer.Network
         public AccountCurrencyManager AccountCurrencyManager { get; private set; }
         public EntitlementManager EntitlementManager { get; private set; }
 
-        // TODO: Add Account Tiers to the Database?
-        public AccountTier AccountTier = (AccountTier)ConfigurationManager<WorldServerConfiguration>.Instance.Config.DefaultAccountTier;
+        public AccountTier AccountTier => AccountRbacManager.HasPermission(Permission.Signature) ? AccountTier.Signature : AccountTier.Basic;
 
         public override void OnAccept(Socket newSocket)
         {

@@ -457,6 +457,8 @@ namespace NexusForever.Shared.GameTable
         public GameTable<ReplaceableMaterialInfoEntry> ReplaceableMaterialInfo { get; private set; }
         public GameTable<ResourceConversionEntry> ResourceConversion { get; private set; }
         public GameTable<ResourceConversionGroupEntry> ResourceConversionGroup { get; private set; }
+
+        [GameData]
         public GameTable<RewardPropertyEntry> RewardProperty { get; private set; }
 
         [GameData]
