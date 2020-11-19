@@ -142,19 +142,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Tier = session.AccountTier
                 });
 
+                // 2 is just a fail safe for the minimum amount of character slots
+                // this is set in the tbl files so a value should always exist
+                uint characterSlots = (uint)(session.EntitlementManager.GetRewardProperty(RewardPropertyType.CharacterSlots).GetValue(0u) ?? 2u);
+                uint characterCount = (uint)characters.Count(c => c.DeleteTime == null);
+
                 var serverCharacterList = new ServerCharacterList
                 {
                     RealmId                        = WorldServer.RealmId,
                     // no longer used as replaced by entitlements but retail server still used to send this
-                    AdditionalCount                = (uint)characters.Count,
-                    AdditionalAllowedCharCreations = (uint)(session.EntitlementManager.GetAccountEntitlement(EntitlementType.BaseCharacterSlots).Amount - characters.Count)
+                    AdditionalCount                = characterCount,
+                    AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)(characterSlots - characterCount))
                 };
 
-                foreach (CharacterModel character in characters)
+                foreach (CharacterModel character in characters.Where(c => c.DeleteTime == null))
                 {
-                    if (character.DeleteTime != null)
-                        continue;
-
                     var listCharacter = new ServerCharacterList.Character
                     {
                         Id                = character.Id,
