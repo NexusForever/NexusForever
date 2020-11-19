@@ -159,6 +159,7 @@
         ReputationUpdate            = 99,
 
         // non command permissions
-        InstantLogout               = 10000
+        InstantLogout               = 10000,
+        Signature                   = 10001
     }
 }

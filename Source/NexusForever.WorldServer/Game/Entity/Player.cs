@@ -183,6 +183,8 @@ namespace NexusForever.WorldServer.Game.Entity
             TimePlayedTotal = model.TimePlayedTotal;
             TimePlayedLevel = model.TimePlayedLevel;
 
+            Session.EntitlementManager.Initialise(model);
+
             foreach (CharacterStatModel statModel in model.Stat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
@@ -203,8 +205,6 @@ namespace NexusForever.WorldServer.Game.Entity
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
-
-            Session.EntitlementManager.OnNewCharacter(model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -485,44 +485,6 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
             Session.EnqueueMessageEncrypted(new Server00F1());
             SetControl(this);
-
-            // TODO: Move to Unlocks/Rewards Handler. A lot of these are tied to Entitlements which display in the character sheet, but don't actually unlock anything without this packet.
-            Session.EnqueueMessageEncrypted(new ServerRewardPropertySet
-            {
-                Variables = new List<ServerRewardPropertySet.RewardProperty>
-                {
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.CostumeSlots,
-                        Type  = 1,
-                        Value = CostumeManager.CostumeCap
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.ExtraDecorSlots,
-                        Type  = 1,
-                        Value = 2000
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.Trading,
-                        Type  = 1,
-                        Value = 1
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.TradeskillMatStackLimit,
-                        Type  = 1,
-                        Value = 100
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.TradeskillMatTrading,
-                        Type  = 1,
-                        Value = 1
-                    }
-                }
-            });
 
             CostumeManager.SendInitialPackets();
             

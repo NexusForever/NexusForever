@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Character.Model;
+using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
@@ -11,6 +12,8 @@ using NexusForever.Shared.Network.Packet;
 using NexusForever.WorldServer.Game.RBAC;
 using NexusForever.WorldServer.Game.Account;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.RBAC.Static;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Network
@@ -26,6 +29,8 @@ namespace NexusForever.WorldServer.Network
         public GenericUnlockManager GenericUnlockManager { get; private set; }
         public AccountCurrencyManager AccountCurrencyManager { get; private set; }
         public EntitlementManager EntitlementManager { get; private set; }
+
+        public AccountTier AccountTier => AccountRbacManager.HasPermission(Permission.Signature) ? AccountTier.Signature : AccountTier.Basic;
 
         public override void OnAccept(Socket newSocket)
         {
