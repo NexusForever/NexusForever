@@ -12,6 +12,7 @@
         Quest       = 6,
         Achievement = 7,
         Path        = 52,
+        Vital       = 73,
         SpellBaseId = 214,
         BaseFaction = 250
     }
