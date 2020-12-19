@@ -609,6 +609,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.AccountCurrencyManager.SendInitialPackets();
             QuestManager.SendInitialPackets();
             AchievementManager.SendInitialPackets();
+            Session.EntitlementManager.SendInitialPackets();
 
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
