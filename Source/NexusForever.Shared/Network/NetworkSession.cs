@@ -56,6 +56,11 @@ namespace NexusForever.Shared.Network
             log.Trace("Client disconnected.");
         }
 
+        public void Disconnect()
+        {
+            OnDisconnect();
+        }
+
         /// <summary>
         /// Invoked with <see cref="IAsyncResult"/> when data from the <see cref="Socket"/> is received.
         /// </summary>

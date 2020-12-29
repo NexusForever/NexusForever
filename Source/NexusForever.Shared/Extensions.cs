@@ -27,5 +27,10 @@ namespace NexusForever.Shared
                 yield return result;
             }
         }
+
+        public static int RoundOff(this int i)
+        {
+            return (int)Math.Round(i / 10.0) * 10;
+        }
     }
 }
