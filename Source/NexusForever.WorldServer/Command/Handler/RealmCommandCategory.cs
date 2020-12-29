@@ -35,7 +35,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Second until shutdown. (300 = 5 mins)")]
             uint seconds)
         {
-            log.Info($"Realm in shutting down in {seconds} seconds.");
+            log.Info($"Realm is shutting down in {seconds} seconds.");
             shutdownDateTime = DateTime.Now.AddSeconds(seconds);
             Timer timer = new Timer(2000);
             timer.Elapsed += OnTimedEvent;
@@ -93,7 +93,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
         private static void WarnUsers(string message)
         {
-            message = $"Realm in shutting down in {message}.";
+            message = $"Realm is shutting down in {message}.";
             log.Info(message);
             foreach (WorldSession session in NetworkManager<WorldSession>.Instance.GetSessions())
             {
