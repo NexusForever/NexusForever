@@ -38,4 +38,10 @@
     <Folder Include="Web\Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\Tools\Win\WorldServer.bat" Link="WorldServer.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
