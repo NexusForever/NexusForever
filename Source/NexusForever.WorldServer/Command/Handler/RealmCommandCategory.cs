@@ -109,10 +109,10 @@ namespace NexusForever.WorldServer.Command.Handler
             // Gracefully disconnect all users.
             try
             {
-                Parallel.ForEach(NetworkManager<WorldSession>.Instance.GetSessions(), session =>
+                foreach (var session in NetworkManager<WorldSession>.Instance.GetSessions())
                 {
                     session.Disconnect();
-                });
+                }
             }
             catch (InvalidOperationException exception)
             {
@@ -124,6 +124,7 @@ namespace NexusForever.WorldServer.Command.Handler
             finally
             {
                 log.Info("All users have been disconnected.");
+                WorldManager.Instance.Shutdown();
                 Timer timer = new Timer(15000);
                 timer.Elapsed += OnShutdown;
                 timer.Start();

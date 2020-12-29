@@ -52,7 +52,7 @@ namespace NexusForever.WorldServer
 
         private static void Main()
         {
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location));
 
             Console.Title = Title;
             log.Info("Initialising...");
