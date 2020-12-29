@@ -7,7 +7,7 @@ using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network;
 using NLog;
 using System;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
@@ -24,8 +24,10 @@ namespace NexusForever.WorldServer.Command.Handler
             string message)
         {
             WorldServer.RealmMotd = message;
-            foreach (WorldSession session in NetworkManager<WorldSession>.Instance.GetSessions())
+            Parallel.ForEach(NetworkManager<WorldSession>.Instance.GetSessions(), session =>
+            {
                 SocialManager.Instance.SendMessage(session, WorldServer.RealmMotd, "MOTD", ChatChannel.Realm);
+            });
         }
 
         #region Shutdown Command
@@ -95,10 +97,10 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             message = $"Realm is shutting down in {message}.";
             log.Info(message);
-            foreach (WorldSession session in NetworkManager<WorldSession>.Instance.GetSessions())
+            Parallel.ForEach(NetworkManager<WorldSession>.Instance.GetSessions(), session =>
             {
                 SocialManager.Instance.SendMessage(session, message);
-            }
+            });
         }
 
         private static void Shutdown()
@@ -107,10 +109,10 @@ namespace NexusForever.WorldServer.Command.Handler
             // Gracefully disconnect all users.
             try
             {
-                foreach (WorldSession session in NetworkManager<WorldSession>.Instance.GetSessions())
+                Parallel.ForEach(NetworkManager<WorldSession>.Instance.GetSessions(), session =>
                 {
                     session.Disconnect();
-                }
+                });
             }
             catch (InvalidOperationException exception)
             {
