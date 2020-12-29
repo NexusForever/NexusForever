@@ -25,7 +25,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Database.World
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Database", "NexusForever.Database\NexusForever.Database.csproj", "{75B332FF-24A2-4E48-BC23-CC391F94C3B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.ClientConnector", "NexusForever.ClientConnector\NexusForever.ClientConnector.csproj", "{E3D4C486-284D-4CEB-B361-CBC9D1E804F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.ClientConnector", "NexusForever.ClientConnector\NexusForever.ClientConnector.csproj", "{E3D4C486-284D-4CEB-B361-CBC9D1E804F9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{9CD4B34A-B034-4859-8E04-BED9F9930F30}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Win", "Win", "{E468914E-2835-4C51-915C-52DB2856ECC3}"
+	ProjectSection(SolutionItems) = preProject
+		..\Tools\Win\AuthServer.bat = ..\Tools\Win\AuthServer.bat
+		..\Tools\Win\StsServer.bat = ..\Tools\Win\StsServer.bat
+		..\Tools\Win\WorldServer.bat = ..\Tools\Win\WorldServer.bat
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Linux", "Linux", "{75D8D74E-B766-4836-8FE0-1EF6DB619F99}"
+	ProjectSection(SolutionItems) = preProject
+		..\Tools\Linux\nexus.sh = ..\Tools\Linux\nexus.sh
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +102,8 @@ Global
 		{945B9303-FBCD-483B-954D-57D93EF1D0B7} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{75B332FF-24A2-4E48-BC23-CC391F94C3B2} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{E3D4C486-284D-4CEB-B361-CBC9D1E804F9} = {96FBF6E9-0E5B-47B0-BEB0-05112E4A5BB1}
+		{E468914E-2835-4C51-915C-52DB2856ECC3} = {9CD4B34A-B034-4859-8E04-BED9F9930F30}
+		{75D8D74E-B766-4836-8FE0-1EF6DB619F99} = {9CD4B34A-B034-4859-8E04-BED9F9930F30}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D83B735-7E6A-4C1A-83C4-DD80682C2859}
