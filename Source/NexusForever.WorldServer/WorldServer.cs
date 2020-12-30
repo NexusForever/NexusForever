@@ -27,6 +27,12 @@ using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
 using NexusForever.WorldServer.Network;
+using NLog;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Threading;
 
 namespace NexusForever.WorldServer
 {
@@ -44,6 +50,8 @@ namespace NexusForever.WorldServer
         /// Internal unique id of the realm.
         /// </summary>
         public static ushort RealmId { get; private set; }
+        private static volatile bool shutdownRequested;
+        private static Thread worldThread;
 
         /// <summary>
         /// Realm message of the day that is shown to players on login.
@@ -106,19 +114,40 @@ namespace NexusForever.WorldServer
 
                 // process commands after everything else in the tick has processed
                 CommandManager.Instance.Update(lastTick);
-            });
+            }, managersList);
 
-            using (WorldServerEmbeddedWebServer.Initialise())
+            WorldManager.Instance.OnShutdown += OnShutdown;
+            managersList.Add(WorldServerEmbeddedWebServer.Instance.Initialise());
+            log.Info("Ready!");
+
+            worldThread = new Thread(() => 
             {
-                log.Info("Ready!");
-
-                while (true)
+                while (!shutdownRequested)
                 {
                     Console.Write(">> ");
                     string line = Console.ReadLine();
-                    CommandManager.Instance.HandleCommandDelay(new ConsoleCommandContext(), line);
+                    if (!shutdownRequested)
+                    {
+                        CommandManager.Instance.HandleCommandDelay(new ConsoleCommandContext(), line);
+                    }
                 }
-            }
+            });
+
+            worldThread.Start();
+        }
+
+        private static void OnShutdown()
+        {
+            shutdownRequested = true;
+
+            #if DEBUG
+                Environment.Exit(0);
+            #else
+                Console.WriteLine($"World Server shutdown.");
+                Console.WriteLine($"Press any key to quit...");
+            #endif
+
+
         }
     }
 }
