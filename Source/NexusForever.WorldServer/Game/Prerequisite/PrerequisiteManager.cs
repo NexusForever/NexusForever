@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
 using NLog;
+using System;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {
-    public sealed partial class PrerequisiteManager : Singleton<PrerequisiteManager>
+    public sealed partial class PrerequisiteManager : Singleton<PrerequisiteManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         {
         }
 
-        public void Initialise()
+        public PrerequisiteManager Initialise()
         {
             var builder = ImmutableDictionary.CreateBuilder<PrerequisiteType, PrerequisiteCheckDelegate>();
             foreach (MethodInfo method in Assembly.GetExecutingAssembly().GetTypes()
@@ -39,6 +39,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             prerequisiteCheckHandlers = builder.ToImmutable();
 
             log.Info($"Initialised {prerequisiteCheckHandlers.Count} prerequisite handler(s).");
+            return Instance;
         }
 
         /// <summary>
@@ -107,6 +108,12 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             }
 
             return handler.Invoke(player, comparison, value, objectId);
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

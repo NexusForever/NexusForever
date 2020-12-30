@@ -1,17 +1,17 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NLog;
 
 namespace NexusForever.Shared.Network.Message
 {
     public delegate void MessageHandlerDelegate(NetworkSession session, IReadable message);
 
-    public sealed class MessageManager : Singleton<MessageManager>
+    public sealed class MessageManager : Singleton<MessageManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -26,10 +26,11 @@ namespace NexusForever.Shared.Network.Message
         {
         }
 
-        public void Initialise()
+        public MessageManager Initialise()
         {
             InitialiseMessages();
             InitialiseMessageHandlers();
+            return Instance;
         }
 
         private void InitialiseMessages()
@@ -137,6 +138,12 @@ namespace NexusForever.Shared.Network.Message
         {
             return clientMessageHandlers.TryGetValue(opcode, out MessageHandlerDelegate handler)
                 ? handler : null;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using System.Reflection;
-using NLog;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
@@ -11,7 +7,6 @@ using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game.RBAC;
 using NexusForever.WorldServer.Game;
 using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.CharacterCache;
@@ -22,11 +17,17 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Quest;
+using NexusForever.WorldServer.Game.RBAC;
 using NexusForever.WorldServer.Game.Reputation;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
 using NexusForever.WorldServer.Network;
+using NLog;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace NexusForever.WorldServer
 {
@@ -44,6 +45,7 @@ namespace NexusForever.WorldServer
         /// Internal unique id of the realm.
         /// </summary>
         public static ushort RealmId { get; private set; }
+        private static volatile bool shutdownRequested;
 
         /// <summary>
         /// Realm message of the day that is shown to players on login.
@@ -57,43 +59,44 @@ namespace NexusForever.WorldServer
             Console.Title = Title;
             log.Info("Initialising...");
 
-            ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json");
+            List<IShutdownAble> managersList = new List<IShutdownAble>();
+
+            managersList.Add(ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json"));
             RealmId   = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
             RealmMotd = ConfigurationManager<WorldServerConfiguration>.Instance.Config.MessageOfTheDay;
 
-            DatabaseManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
+            managersList.Add(DatabaseManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database));
             DatabaseManager.Instance.Migrate();
 
             // RBACManager must be initialised before CommandManager
-            RBACManager.Instance.Initialise();
-            CommandManager.Instance.Initialise();
+            managersList.Add(RBACManager.Instance.Initialise());
+            managersList.Add(CommandManager.Instance.Initialise());
 
-            DisableManager.Instance.Initialise();
+            managersList.Add(DisableManager.Instance.Initialise());
+            managersList.Add(GameTableManager.Instance.Initialise());
+            managersList.Add(BaseMapManager.Instance.Initialise());
+            managersList.Add(SearchManager.Instance.Initialise());
+            managersList.Add(EntityManager.Instance.Initialise());
+            managersList.Add(EntityCommandManager.Instance.Initialise());
+            managersList.Add(EntityCacheManager.Instance.Initialise());
+            managersList.Add(FactionManager.Instance.Initialise());
+            managersList.Add(GlobalMovementManager.Instance.Initialise());
 
-            GameTableManager.Instance.Initialise();
-            BaseMapManager.Instance.Initialise();
-            SearchManager.Instance.Initialise();
-            EntityManager.Instance.Initialise();
-            EntityCommandManager.Instance.Initialise();
-            EntityCacheManager.Instance.Initialise();
-            FactionManager.Instance.Initialise();
-            GlobalMovementManager.Instance.Initialise();
+            managersList.Add(AssetManager.Instance.Initialise());
+            managersList.Add(PrerequisiteManager.Instance.Initialise());
+            managersList.Add(GlobalSpellManager.Instance.Initialise());
+            managersList.Add(GlobalQuestManager.Instance.Initialise());
 
-            AssetManager.Instance.Initialise();
-            PrerequisiteManager.Instance.Initialise();
-            GlobalSpellManager.Instance.Initialise();
-            GlobalQuestManager.Instance.Initialise();
+            managersList.Add(CharacterManager.Instance.Initialise());
+            managersList.Add(ResidenceManager.Instance.Initialise());
+            managersList.Add(GlobalStorefrontManager.Instance.Initialise());
 
-            CharacterManager.Instance.Initialise();
-            ResidenceManager.Instance.Initialise();
-            GlobalStorefrontManager.Instance.Initialise();
+            managersList.Add(GlobalAchievementManager.Instance.Initialise());
+            managersList.Add(ServerManager.Instance.Initialise(RealmId));
 
-            GlobalAchievementManager.Instance.Initialise();
-            ServerManager.Instance.Initialise(RealmId); 
-
-            MessageManager.Instance.Initialise();
-            SocialManager.Instance.Initialise();
-            NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
+            managersList.Add(MessageManager.Instance.Initialise());
+            managersList.Add(SocialManager.Instance.Initialise());
+            managersList.Add(NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network));
             WorldManager.Instance.Initialise(lastTick =>
             {
                 // NetworkManager must be first and MapManager must come before everything else
@@ -106,19 +109,31 @@ namespace NexusForever.WorldServer
 
                 // process commands after everything else in the tick has processed
                 CommandManager.Instance.Update(lastTick);
-            });
+            }, managersList);
+
+            WorldManager.Instance.OnShutdown += OnShutdown;
 
             using (WorldServerEmbeddedWebServer.Initialise())
             {
                 log.Info("Ready!");
 
-                while (true)
+                while (!shutdownRequested)
                 {
                     Console.Write(">> ");
                     string line = Console.ReadLine();
-                    CommandManager.Instance.HandleCommandDelay(new ConsoleCommandContext(), line);
+                    if (!shutdownRequested)
+                    {
+                        CommandManager.Instance.HandleCommandDelay(new ConsoleCommandContext(), line);
+                    }
                 }
             }
+        }
+
+        private static void OnShutdown()
+        {
+            shutdownRequested = true;
+            Console.WriteLine($"World Server shutdown.");
+            Console.WriteLine($"Press any key to quit...");
         }
     }
 }

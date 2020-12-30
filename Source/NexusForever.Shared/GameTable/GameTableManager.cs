@@ -1,3 +1,6 @@
+using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.GameTable.Static;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,14 +9,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.GameTable.Static;
-using NLog;
 
 namespace NexusForever.Shared.GameTable
 {
     [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
-    public sealed class GameTableManager : Singleton<GameTableManager>
+    public sealed class GameTableManager : Singleton<GameTableManager>, IShutdownAble
     {
         private const int minimumThreads = 2;
         private const int maximumThreads = 16;
@@ -666,7 +666,7 @@ namespace NexusForever.Shared.GameTable
         {
         }
 
-        public void Initialise()
+        public GameTableManager Initialise()
         {
             log.Info("Loading GameTables...");
 
@@ -683,6 +683,7 @@ namespace NexusForever.Shared.GameTable
             }
 
             log.Info($"Loaded GameTables in {sw.ElapsedMilliseconds}ms.");
+            return Instance;
         }
 
         private async Task LoadGameTablesAsync()
@@ -826,6 +827,12 @@ namespace NexusForever.Shared.GameTable
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

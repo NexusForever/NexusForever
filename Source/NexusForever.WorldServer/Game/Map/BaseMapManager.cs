@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.IO.Map;
 using NLog;
+using System.Collections.Generic;
+using System.IO;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public sealed class BaseMapManager : Singleton<BaseMapManager>
+    public sealed class BaseMapManager : Singleton<BaseMapManager>, IShutdownAble
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
@@ -19,10 +19,11 @@ namespace NexusForever.WorldServer.Game.Map
         {
         }
 
-        public void Initialise()
+        public BaseMapManager Initialise()
         {
             ValidateMapFiles();
             PreCacheMapFiles();
+            return Instance;
         }
 
         private void ValidateMapFiles()
@@ -89,6 +90,12 @@ namespace NexusForever.WorldServer.Game.Map
                 log.Trace($"Initialised base map file for asset {assetPath}.");
                 return mapFile;
             }
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

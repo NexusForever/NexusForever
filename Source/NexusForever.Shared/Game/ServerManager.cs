@@ -1,14 +1,14 @@
-﻿using System.Collections.Immutable;
+﻿using NexusForever.Shared.Configuration;
+using NexusForever.Shared.Database;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
 
 namespace NexusForever.Shared.Game
 {
-    public sealed class ServerManager : Singleton<ServerManager>
+    public sealed class ServerManager : Singleton<ServerManager>, IShutdownAble
     {
         public ImmutableList<ServerInfo> Servers { get; private set; }
         public ImmutableList<ServerMessageInfo> ServerMessages { get; private set; }
@@ -24,7 +24,7 @@ namespace NexusForever.Shared.Game
         {
         }
 
-        public void Initialise(ushort? realmId = null)
+        public ServerManager Initialise(ushort? realmId = null)
         {
             serverRealmId = realmId;
 
@@ -52,6 +52,7 @@ namespace NexusForever.Shared.Game
             });
 
             serverManagerThread.Start();
+            return Instance;
         }
 
         private void InitialiseServers()

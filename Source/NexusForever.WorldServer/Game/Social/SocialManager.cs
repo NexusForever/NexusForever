@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map.Search;
 using NexusForever.WorldServer.Game.Social.Model;
@@ -17,11 +9,17 @@ using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 
 namespace NexusForever.WorldServer.Game.Social
 {
-    public sealed class SocialManager : Singleton<SocialManager>
+    public sealed class SocialManager : Singleton<SocialManager>, IShutdownAble
     {
         private const float LocalChatDistance = 155f;
 
@@ -39,10 +37,11 @@ namespace NexusForever.WorldServer.Game.Social
         {
         }
 
-        public void Initialise()
+        public SocialManager Initialise()
         {
             InitialiseChatHandlers();
             InitialiseChatFormatFactories();
+            return Instance;
         }
 
         private void InitialiseChatHandlers()
@@ -242,6 +241,12 @@ namespace NexusForever.WorldServer.Game.Social
                 Name    = name,
                 Text    = message,
             });
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

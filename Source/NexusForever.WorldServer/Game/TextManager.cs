@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Game.TextSearch;
 using NLog;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 
 namespace NexusForever.WorldServer.Game
 {
     /// <summary>
     /// Responsible for looking up text and objects that the text references.
     /// </summary>
-    public sealed class SearchManager : Singleton<SearchManager>
+    public sealed class SearchManager : Singleton<SearchManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -24,7 +24,7 @@ namespace NexusForever.WorldServer.Game
         {
         }
 
-        public void Initialise()
+        public SearchManager Initialise()
         {
             log.Info("Creating reverse text lookups.");
             Dictionary<Language, TextReverseIndex> index = new Dictionary<Language, TextReverseIndex>
@@ -41,6 +41,8 @@ namespace NexusForever.WorldServer.Game
                 else
                     log.Debug($"Language {kvp.Key} loaded.");
             }
+
+            return Instance;
         }
 
         private GameTable<T> GetGameTable<T>() where T : class, new()
@@ -102,6 +104,12 @@ namespace NexusForever.WorldServer.Game
         {
             reverseIndexDictionary.TryGetValue(language, out TextReverseIndex index);
             return index;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

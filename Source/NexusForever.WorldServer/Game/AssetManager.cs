@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
-using NexusForever.Database.World.Model;
+﻿using NexusForever.Database.World.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
@@ -10,10 +6,14 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.Static;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 
 namespace NexusForever.WorldServer.Game
 {
-    public sealed class AssetManager : Singleton<AssetManager>
+    public sealed class AssetManager : Singleton<AssetManager>, IShutdownAble
     {
         public static ImmutableDictionary<InventoryLocation, uint> InventoryLocationCapacities { get; private set; }
 
@@ -50,7 +50,7 @@ namespace NexusForever.WorldServer.Game
         {
         }
 
-        public void Initialise()
+        public AssetManager Initialise()
         {
             nextCharacterId = DatabaseManager.Instance.CharacterDatabase.GetNextCharacterId() + 1ul;
             nextItemId      = DatabaseManager.Instance.CharacterDatabase.GetNextItemId() + 1ul;
@@ -63,6 +63,7 @@ namespace NexusForever.WorldServer.Game
             CacheTutorials();
             CacheCreatureTargetGroups();
             CacheRewardPropertiesByTier();
+            return Instance;
         }
 
         private void CacheCharacterCustomisations()
@@ -229,6 +230,12 @@ namespace NexusForever.WorldServer.Game
         public ImmutableList<RewardPropertyPremiumModifierEntry> GetRewardPropertiesForTier(AccountTier tier)
         {
             return rewardPropertiesByTier.TryGetValue(tier, out ImmutableList<RewardPropertyPremiumModifierEntry> entries) ? entries : ImmutableList<RewardPropertyPremiumModifierEntry>.Empty;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using NexusForever.Database.Character.Model;
+﻿using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
-    public sealed class ResidenceManager : Singleton<ResidenceManager>, IUpdate
+    public sealed class ResidenceManager : Singleton<ResidenceManager>, IUpdate, IShutdownAble
     {
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
@@ -41,13 +41,15 @@ namespace NexusForever.WorldServer.Game.Housing
         {
         }
 
-        public void Initialise()
+        public ResidenceManager Initialise()
         {
             nextResidenceId = DatabaseManager.Instance.CharacterDatabase.GetNextResidenceId() + 1ul;
             nextDecorId     = DatabaseManager.Instance.CharacterDatabase.GetNextDecorId() + 1ul;
 
             foreach (ResidenceModel residence in DatabaseManager.Instance.CharacterDatabase.GetPublicResidences())
                 RegisterResidenceVists(residence.Id, residence.Character.Name, residence.Name);
+
+            return Instance;
         }
 
         public void Update(double lastTick)
@@ -168,6 +170,12 @@ namespace NexusForever.WorldServer.Game.Housing
                 .Values
                 .OrderBy(r => random.Next())
                 .Take(50);
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

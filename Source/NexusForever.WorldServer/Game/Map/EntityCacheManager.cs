@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
 using NLog;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public sealed class EntityCacheManager : Singleton<EntityCacheManager>
+    public sealed class EntityCacheManager : Singleton<EntityCacheManager>, IShutdownAble
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
@@ -16,16 +16,18 @@ namespace NexusForever.WorldServer.Game.Map
         {
         }
 
-        public void Initialise()
+        public EntityCacheManager Initialise()
         {
             log.Info("Caching map spawns...");
 
             List<ushort> precachedBaseMaps = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.PrecacheBaseMaps;
             if (precachedBaseMaps == null)
-                return;
+                return Instance;
 
             foreach (ushort worldId in precachedBaseMaps)
                 LoadEntityCache(worldId);
+
+            return Instance;
         }
 
         /// <summary>
@@ -46,6 +48,11 @@ namespace NexusForever.WorldServer.Game.Map
 
             log.Trace($"Initialised {entityCache.EntityCount} spawns on {entityCache.GridCount} grids for world {worldId}.");
             return entityCache;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
         }
     }
 }

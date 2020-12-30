@@ -1,12 +1,12 @@
-﻿using System;
+﻿using NexusForever.Shared;
+using System;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
-using NexusForever.Shared;
 
 namespace NexusForever.WorldServer.Game.Entity.Network
 {
-    public sealed class EntityCommandManager : Singleton<EntityCommandManager>
+    public sealed class EntityCommandManager : Singleton<EntityCommandManager>, IShutdownAble
     {
         private delegate IEntityCommandModel EntityCommandFactoryDelegate();
         private ImmutableDictionary<EntityCommand, EntityCommandFactoryDelegate> entityCommandFactories;
@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network
         {
         }
 
-        public void Initialise()
+        public EntityCommandManager Initialise()
         {
             var factoryBuilder = ImmutableDictionary.CreateBuilder<EntityCommand, EntityCommandFactoryDelegate>();
             var commandBuilder = ImmutableDictionary.CreateBuilder<Type, EntityCommand>();
@@ -34,6 +34,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network
 
             entityCommandFactories = factoryBuilder.ToImmutable();
             entityCommands = commandBuilder.ToImmutable();
+            return Instance;
         }
 
         /// <summary>
@@ -53,6 +54,12 @@ namespace NexusForever.WorldServer.Game.Entity.Network
                 return command;
 
             return null;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

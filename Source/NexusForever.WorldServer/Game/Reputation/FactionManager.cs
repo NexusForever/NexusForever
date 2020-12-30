@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Reputation.Static;
 using NLog;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace NexusForever.WorldServer.Game.Reputation
 {
-    public class FactionManager : Singleton<FactionManager>
+    public class FactionManager : Singleton<FactionManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Reputation
         {
         }
 
-        public void Initialise()
+        public FactionManager Initialise()
         {
             DateTime start = DateTime.Now;
             log.Info("Initialising factions...");
@@ -59,6 +59,7 @@ namespace NexusForever.WorldServer.Game.Reputation
 
             TimeSpan span = DateTime.Now - start;
             log.Info($"Initialised {nodes.Count} faction(s) in {span.TotalMilliseconds}ms.");
+            return Instance;
         }
 
         /// <summary>
@@ -67,6 +68,12 @@ namespace NexusForever.WorldServer.Game.Reputation
         public FactionNode GetFaction(Faction factionId)
         {
             return nodes.TryGetValue(factionId, out FactionNode node) ? node : null;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Numerics;
-using System.Reflection;
-using NexusForever.Database.World.Model;
+﻿using NexusForever.Database.World.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
@@ -14,10 +7,17 @@ using NexusForever.Shared.IO.Map;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NLog;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Linq.Expressions;
+using System.Numerics;
+using System.Reflection;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public sealed class EntityManager : Singleton<EntityManager>
+    public sealed class EntityManager : Singleton<EntityManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -30,12 +30,13 @@ namespace NexusForever.WorldServer.Game.Entity
         {
         }
 
-        public void Initialise()
+        public EntityManager Initialise()
         {
             InitialiseEntityFactories();
             InitialiseEntityStats();
 
             CalculateEntityAreaData();
+            return Instance;
         }
 
         private void InitialiseEntityFactories()
@@ -118,6 +119,12 @@ namespace NexusForever.WorldServer.Game.Entity
         public StatAttribute GetStatAttribute(Stat stat)
         {
             return statAttributes.TryGetValue(stat, out StatAttribute value) ? value : null;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

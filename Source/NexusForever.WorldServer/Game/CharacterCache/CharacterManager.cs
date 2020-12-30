@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using NexusForever.Database.Character.Model;
+﻿using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Game.Entity;
 using NLog;
+using System;
+using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
-    public sealed class CharacterManager: Singleton<CharacterManager>
+    public sealed class CharacterManager: Singleton<CharacterManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -22,9 +22,10 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         /// <summary>
         /// Called to Initialise the <see cref="CharacterManager"/> at server start
         /// </summary>
-        public void Initialise()
+        public CharacterManager Initialise()
         {
             BuildCharacterInfoFromDb();
+            return Instance;
         }
 
         /// <summary>
@@ -121,6 +122,12 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         public ICharacter GetCharacterInfo(string name)
         {
             return characterNameToId.TryGetValue(name, out ulong characterId) ? GetCharacterInfo(characterId) : null;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

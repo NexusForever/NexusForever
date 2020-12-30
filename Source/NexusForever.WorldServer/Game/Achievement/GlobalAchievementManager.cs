@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NLog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {
-    public sealed class GlobalAchievementManager : Singleton<GlobalAchievementManager>
+    public sealed class GlobalAchievementManager : Singleton<GlobalAchievementManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -24,7 +24,7 @@ namespace NexusForever.WorldServer.Game.Achievement
         {
         }
 
-        public void Initialise()
+        public GlobalAchievementManager Initialise()
         {
             DateTime start = DateTime.UtcNow;
 
@@ -43,6 +43,7 @@ namespace NexusForever.WorldServer.Game.Achievement
 
             TimeSpan span = DateTime.UtcNow - start;
             log.Info($"Initialised {achievements.Count} achievements in {span.TotalMilliseconds}ms.");
+            return Instance;
         }
 
         /// <summary>
@@ -73,6 +74,12 @@ namespace NexusForever.WorldServer.Game.Achievement
                 return Enumerable.Empty<AchievementInfo>();
 
             return achievements;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

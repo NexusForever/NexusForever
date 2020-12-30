@@ -1,16 +1,16 @@
-﻿using System;
+﻿using NexusForever.Shared;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
+using NLog;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using NexusForever.Shared;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Quest
 {
-    public sealed class GlobalQuestManager : Singleton<GlobalQuestManager>, IUpdate
+    public sealed class GlobalQuestManager : Singleton<GlobalQuestManager>, IUpdate, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Game.Quest
         {
         }
 
-        public void Initialise()
+        public GlobalQuestManager Initialise()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -43,6 +43,7 @@ namespace NexusForever.WorldServer.Game.Quest
             InitialiseCommunicator();
 
             log.Info($"Cached {questInfoStore.Count} quests in {sw.ElapsedMilliseconds}ms.");
+            return Instance;
         }
 
         private void CalculateResetTimes()
@@ -153,6 +154,12 @@ namespace NexusForever.WorldServer.Game.Quest
         {
             return communicatorQuestStore.TryGetValue(questId, out ImmutableList<CommunicatorMessage> creatureIds)
                 ? creatureIds : Enumerable.Empty<CommunicatorMessage>();
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+
         }
     }
 }

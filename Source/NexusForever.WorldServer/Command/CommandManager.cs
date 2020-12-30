@@ -1,19 +1,19 @@
-﻿using System;
+﻿using NexusForever.Shared;
+using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Command.Convert;
+using NexusForever.WorldServer.Command.Static;
+using NLog;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using NexusForever.Shared;
-using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Command.Convert;
-using NexusForever.WorldServer.Command.Static;
-using NLog;
 
 namespace NexusForever.WorldServer.Command
 {
-    public sealed class CommandManager : Singleton<CommandManager>, IUpdate
+    public sealed class CommandManager : Singleton<CommandManager>, IUpdate, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -29,10 +29,11 @@ namespace NexusForever.WorldServer.Command
         {
         }
 
-        public void Initialise()
+        public CommandManager Initialise()
         {
             BuildConverters();
             InitialiseHandlers();
+            return Instance;
         }
 
         private void BuildConverters()
@@ -253,6 +254,12 @@ namespace NexusForever.WorldServer.Command
                 return CommandResult.NoCommand;
 
             return handler.InvokeHelp(context, queue);
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

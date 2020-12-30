@@ -1,14 +1,15 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using NLog;
-using NexusForever.AuthServer.Network;
+﻿using NexusForever.AuthServer.Network;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
+using NLog;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace NexusForever.AuthServer
 {
@@ -24,24 +25,26 @@ namespace NexusForever.AuthServer
 
         private static void Main()
         {
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location));
 
             Console.Title = Title;
             log.Info("Initialising...");
 
-            ConfigurationManager<AuthServerConfiguration>.Instance.Initialise("AuthServer.json");
+            List<IShutdownAble> managersList = new List<IShutdownAble>();
 
-            DatabaseManager.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Database);
+            managersList.Add(ConfigurationManager<AuthServerConfiguration>.Instance.Initialise("AuthServer.json"));
 
-            ServerManager.Instance.Initialise();
+            managersList.Add(DatabaseManager.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Database));
 
-            MessageManager.Instance.Initialise();
-            NetworkManager<AuthSession>.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Network);
+            managersList.Add(ServerManager.Instance.Initialise());
+
+            managersList.Add(MessageManager.Instance.Initialise());
+            managersList.Add(NetworkManager<AuthSession>.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Network));
 
             WorldManager.Instance.Initialise(lastTick =>
             {
                 NetworkManager<AuthSession>.Instance.Update(lastTick);
-            });
+            }, managersList);
 
             log.Info("Ready!");
         }

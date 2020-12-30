@@ -59,7 +59,6 @@ namespace NexusForever.WorldServer.Command.Handler
                 HandleShutdownTick(timer);
             }
         }
-
         private static void HandleShutdownTick(Timer timer)
         {
             TimeSpan timeSpan = shutdownDateTime - DateTime.Now;
@@ -116,7 +115,7 @@ namespace NexusForever.WorldServer.Command.Handler
             }
             catch (InvalidOperationException exception)
             {
-                if (!exception.Message.Equals("Collection was modified after the enumerator was instantiated."))
+                if (!exception.HResult.Equals(-2146233079)) // Collection was modified after the enumerator was instantiated.
                 {
                     log.Error(exception);
                 }
@@ -136,7 +135,6 @@ namespace NexusForever.WorldServer.Command.Handler
             log.Info("Realm Shutdown.");
             Timer timer = (Timer)source;
             timer?.Stop();
-            Environment.Exit(0);
         }
 
         #endregion

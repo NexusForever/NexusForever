@@ -1,20 +1,20 @@
-﻿using System;
+﻿using NexusForever.Shared;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Spell.Static;
+using NLog;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NexusForever.Shared;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Spell.Static;
-using NLog;
 
 namespace NexusForever.WorldServer.Game.Spell
 {
-    public sealed class GlobalSpellManager : Singleton<GlobalSpellManager>
+    public sealed class GlobalSpellManager : Singleton<GlobalSpellManager>, IShutdownAble
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -43,11 +43,12 @@ namespace NexusForever.WorldServer.Game.Spell
         {
         }
 
-        public void Initialise()
+        public GlobalSpellManager Initialise()
         {
             CacheSpellEntries();
             InitialiseSpellInfo();
             InitialiseSpellEffectHandlers();
+            return Instance;
         }
 
         private void CacheSpellEntries()
@@ -166,6 +167,12 @@ namespace NexusForever.WorldServer.Game.Spell
         public SpellEffectDelegate GetEffectHandler(SpellEffectType spellEffectType)
         {
             return spellEffectDelegates.TryGetValue(spellEffectType, out SpellEffectDelegate handler) ? handler : null;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }

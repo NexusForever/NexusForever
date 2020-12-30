@@ -6,7 +6,7 @@ using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Game
 {
-    public sealed class DisableManager : Singleton<DisableManager>
+    public sealed class DisableManager : Singleton<DisableManager>, IShutdownAble
     {
         private static ulong Hash(DisableType type, uint objectId)
         {
@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game
         {
         }
 
-        public void Initialise()
+        public DisableManager Initialise()
         {
             var builder = ImmutableDictionary.CreateBuilder<ulong, Disable>();
             foreach (DisableModel model in DatabaseManager.Instance.WorldDatabase.GetDisables())
@@ -30,6 +30,7 @@ namespace NexusForever.WorldServer.Game
             }
 
             disables = builder.ToImmutable();
+            return Instance;
         }
 
         /// <summary>
@@ -48,6 +49,12 @@ namespace NexusForever.WorldServer.Game
         {
             ulong hash = Hash(type, objectId);
             return disables.TryGetValue(hash, out Disable disable) ? disable.Note : null;
+        }
+
+        /// <inheritdoc />
+        public void Shutdown()
+        {
+            
         }
     }
 }
