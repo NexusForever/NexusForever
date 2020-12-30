@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 namespace NexusForever.WorldServer
 {
@@ -46,6 +47,7 @@ namespace NexusForever.WorldServer
         /// </summary>
         public static ushort RealmId { get; private set; }
         private static volatile bool shutdownRequested;
+        private static Thread worldThread;
 
         /// <summary>
         /// Realm message of the day that is shown to players on login.
@@ -112,11 +114,11 @@ namespace NexusForever.WorldServer
             }, managersList);
 
             WorldManager.Instance.OnShutdown += OnShutdown;
+            managersList.Add(WorldServerEmbeddedWebServer.Instance.Initialise());
+            log.Info("Ready!");
 
-            using (WorldServerEmbeddedWebServer.Initialise())
+            worldThread = new Thread(() => 
             {
-                log.Info("Ready!");
-
                 while (!shutdownRequested)
                 {
                     Console.Write(">> ");
@@ -126,14 +128,23 @@ namespace NexusForever.WorldServer
                         CommandManager.Instance.HandleCommandDelay(new ConsoleCommandContext(), line);
                     }
                 }
-            }
+            });
+
+            worldThread.Start();
         }
 
         private static void OnShutdown()
         {
             shutdownRequested = true;
-            Console.WriteLine($"World Server shutdown.");
-            Console.WriteLine($"Press any key to quit...");
+
+            #if DEBUG
+                Environment.Exit(0);
+            #else
+                Console.WriteLine($"World Server shutdown.");
+                Console.WriteLine($"Press any key to quit...");
+            #endif
+
+
         }
     }
 }
