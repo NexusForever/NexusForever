@@ -59,7 +59,7 @@ namespace NexusForever.WorldServer.Command.Context
                 player.Session.EnqueueMessageEncrypted(new ServerChat
                 {
                     Guid    = player.Guid,
-                    Channel = ChatChannel.System,
+                    Channel = ChatChannelType.System,
                     Name    = name,
                     Text    = line
                 });

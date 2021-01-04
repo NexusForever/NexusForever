@@ -113,13 +113,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // TODO: load from DB? Might be useful for custom
             UpdateRewardPropertiesPremiumModifiers(true);
-
-            session.EnqueueMessageEncrypted(new ServerRewardPropertySet
-            {
-                Properties = rewardProperties.Values
-                    .SelectMany(e => e.Build())
-                    .ToList()
-            });
         }
 
         private void UpdateRewardPropertiesPremiumModifiers(bool character)
@@ -160,6 +153,16 @@ namespace NexusForever.WorldServer.Game.Entity
 
                 UpdateRewardPropertyInternal((RewardPropertyType)entry.Id, value, modifierEntry.RewardPropertyData);
             }
+        }
+
+        public void SendInitialPackets()
+        {
+            session.EnqueueMessageEncrypted(new ServerRewardPropertySet
+            {
+                Properties = rewardProperties.Values
+                    .SelectMany(e => e.Build())
+                    .ToList()
+            });
         }
 
         /// <summary>

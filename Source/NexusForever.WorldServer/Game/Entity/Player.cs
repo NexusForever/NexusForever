@@ -19,6 +19,8 @@ using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Guild;
+using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.Reputation;
@@ -44,7 +46,19 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
+        public Faction Faction { get; }
         public List<float> Bones { get; } = new List<float>();
+
+        public CharacterFlag Flags
+        {
+            get => flags;
+            set
+            {
+                flags = value;
+                saveMask |= PlayerSaveMask.Flags;
+            }
+        }
+        private CharacterFlag flags;
 
         public Path Path
         {
@@ -149,6 +163,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public SupplySatchelManager SupplySatchelManager { get; }
         public XpManager XpManager { get; }
         public ReputationManager ReputationManager { get; }
+        public GuildManager GuildManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -158,6 +173,14 @@ namespace NexusForever.WorldServer.Game.Entity
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
         public bool CanTeleport() => pendingTeleport == null;
+
+
+
+        
+
+
+
+
 
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
@@ -175,9 +198,11 @@ namespace NexusForever.WorldServer.Game.Entity
             PathActivatedTime = model.PathActivatedTimestamp;
             CostumeIndex    = model.ActiveCostumeIndex;
             InputKeySet     = (InputSets)model.InputKeySet;
+            Faction         = (Faction)model.FactionId;
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
             innateIndex     = model.InnateIndex;
+            flags           = (CharacterFlag)model.Flags;
 
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
@@ -205,6 +230,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
+            GuildManager            = new GuildManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -356,6 +382,12 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.InputKeySet).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Flags) != 0)
+                {
+                    model.Flags = (uint)Flags;
+                    entity.Property(p => p.Flags).IsModified = true;
+                }
+
                 if ((saveMask & PlayerSaveMask.Innate) != 0)
                 {
                     model.InnateIndex = InnateIndex;
@@ -391,6 +423,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SupplySatchelManager.Save(context);
             XpManager.Save(context);
             ReputationManager.Save(context);
+            GuildManager.Save(context);
 
             Session.EntitlementManager.Save(context);
         }
@@ -399,15 +432,20 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             return new PlayerEntityModel
             {
-                Id       = CharacterId,
-                RealmId  = WorldServer.RealmId,
-                Name     = Name,
-                Race     = Race,
-                Class    = Class,
-                Sex      = Sex,
-                Bones    = Bones,
-                Title    = TitleManager.ActiveTitleId,
-                PvPFlag  = PvPFlag.Disabled
+                Id        = CharacterId,
+                RealmId   = WorldServer.RealmId,
+                Name      = Name,
+                Race      = Race,
+                Class     = Class,
+                Sex       = Sex,
+                Bones     = Bones,
+                Title     = TitleManager.ActiveTitleId,
+                GuildIds  = GuildManager
+                    .Select(g => g.Id)
+                    .ToList(),
+                GuildName = GuildManager.GuildAffiliation?.Name,
+                GuildType = GuildManager.GuildAffiliation?.Type ?? GuildType.None,
+                PvPFlag   = PvPFlag.Disabled
             };
         }
 
@@ -421,9 +459,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 Position = new Position(vector)
             });
 
-            // if the player has no existing map they have just entered the world
-            // this check needs to happen before OnAddToMap as the player will have a map afterwards
-            bool initialLogin = Map == null;
+            // this must come before OnAddToMap
+            // the client UI initialises the Holomark checkboxes during OnDocumentReady
+            SendCharacterFlagsUpdated();
 
             base.OnAddToMap(map, guid, vector);
             map.OnAddToMap(this);
@@ -440,7 +478,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SendPacketsAfterAddToMap();
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
-            if (initialLogin)
+            if (PreviousMap == null)
                 OnLogin();
 
             IsLoading = false;
@@ -459,7 +497,10 @@ namespace NexusForever.WorldServer.Game.Entity
             if (Zone != null)
             {
                 TextTable tt = GameTableManager.Instance.GetTextTable(Language.English);
-                SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
+                if (tt != null)
+                {
+                    SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
+                }
 
                 uint tutorialId = AssetManager.Instance.GetTutorialIdForZone(Zone.Id);
                 if (tutorialId > 0)
@@ -543,6 +584,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.AccountCurrencyManager.SendInitialPackets();
             QuestManager.SendInitialPackets();
             AchievementManager.SendInitialPackets();
+            Session.EntitlementManager.SendInitialPackets();
 
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
@@ -681,6 +723,8 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Save(() =>
                 {
+                    OnLogout();
+
                     RemoveFromMap();
                     Session.Player = null;
                 });
@@ -695,7 +739,14 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             string motd = WorldServer.RealmMotd;
             if (motd?.Length > 0)
-                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannel.Realm);
+                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
+
+            GuildManager.OnLogin();
+        }
+
+        private void OnLogout()
+        {
+            GuildManager.OnLogout();
         }
 
         /// <summary>
@@ -855,7 +906,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Session.EnqueueMessageEncrypted(new ServerChat
             {
-                Channel = ChatChannel.System,
+                Channel = ChatChannelType.System,
                 Text    = text
             });
         }
@@ -936,6 +987,43 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // check if parent node has required reputation
             return GetDispositionFromReputation(node.Parent);
+        }
+
+        /// <summary>
+        /// Add a new <see cref="CharacterFlag"/>.
+        /// </summary>
+        public void SetFlag(CharacterFlag flag)
+        {
+            Flags |= flag;
+            SendCharacterFlagsUpdated();
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="CharacterFlag"/>.
+        /// </summary>
+        public void RemoveFlag(CharacterFlag flag)
+        {
+            Flags &= ~flag;
+            SendCharacterFlagsUpdated();
+        }
+
+        /// <summary>
+        /// Returns if supplied <see cref="CharacterFlag"/> exists.
+        /// </summary>
+        public bool HasFlag(CharacterFlag flag)
+        {
+            return (Flags & flag) != 0;
+        }
+
+        /// <summary>
+        /// Send <see cref="ServerCharacterFlagsUpdated"/> to client.
+        /// </summary>
+        public void SendCharacterFlagsUpdated()
+        {
+            Session.EnqueueMessageEncrypted(new ServerCharacterFlagsUpdated
+            {
+                Flags = flags
+            });
         }
     }
 }
