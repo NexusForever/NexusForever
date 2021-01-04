@@ -1,11 +1,10 @@
-﻿using NexusForever.Shared.Network;
+﻿using System.Collections.Generic;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-
     [Message(GameMessageOpcode.ServerGuildRoster)]
     public class ServerGuildRoster : IWritable
     {
@@ -18,7 +17,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             writer.Write(GuildRealm, 14u);
             writer.Write(GuildId);
-            writer.Write(GuildMembers.Count, 32u);
+            writer.Write(GuildMembers.Count);
             GuildMembers.ForEach(w => w.Write(writer));
             writer.Write(Done);
         }

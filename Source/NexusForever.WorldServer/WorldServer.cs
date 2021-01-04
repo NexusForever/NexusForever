@@ -27,6 +27,7 @@ using NexusForever.WorldServer.Game.Reputation;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
+using NexusForever.WorldServer.Game.TextFilter;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer
@@ -96,6 +97,9 @@ namespace NexusForever.WorldServer
             MessageManager.Instance.Initialise();
             SocialManager.Instance.Initialise();
             NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
+
+            TextFilterManager.Instance.Initialise();
+
             WorldManager.Instance.Initialise(lastTick =>
             {
                 // NetworkManager must be first and MapManager must come before everything else

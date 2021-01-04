@@ -212,11 +212,12 @@ namespace NexusForever.Database.Character
                 .ToList()[0];
         }
 
-        public List<Guild> GetGuilds()
+        public List<GuildModel> GetGuilds()
         {
             using var context = new CharacterContext(config);
 
             return context.Guild
+                .Where(g => g.DeleteTime == null)
                 .Include(g => g.GuildRank)
                 .Include(g => g.GuildMember)
                 .Include(g => g.GuildData)

@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public string PlayerName { get; set; }
         public string GuildName { get; set; }
-        public uint Taxes { get; set; }
+        public uint Flags { get; set; }
         public GuildType GuildType { get; set; }
         public ulong Unknown4 { get; set; }
 
@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
         {
             writer.WriteStringWide(PlayerName);
             writer.WriteStringWide(GuildName);
-            writer.Write(Taxes);
+            writer.Write(Flags);
             writer.Write(GuildType, 4u);
             writer.Write(Unknown4);
         }

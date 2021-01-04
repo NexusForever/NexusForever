@@ -1,11 +1,10 @@
-﻿using NexusForever.Shared.Network;
+﻿using System.Collections.Generic;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-
     [Message(GameMessageOpcode.ServerGuildInit)]
     public class ServerGuildInit : IWritable
     {

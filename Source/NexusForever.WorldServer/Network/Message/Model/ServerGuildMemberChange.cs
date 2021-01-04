@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public ushort RealmId { get; set; }
         public ulong GuildId { get; set; }
-        public GuildMember GuildMember { get; set; } = new GuildMember();
+        public GuildMember GuildMember { get; set; }
         public ushort MemberCount { get; set; }
         public ushort OnlineMemberCount { get; set; }
 

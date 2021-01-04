@@ -4,7 +4,6 @@ using NexusForever.WorldServer.Game.Guild.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-
     [Message(GameMessageOpcode.ServerGuildResult)]
     public class ServerGuildResult : IWritable
     {

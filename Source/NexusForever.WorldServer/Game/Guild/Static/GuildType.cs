@@ -2,12 +2,13 @@
 {
     public enum GuildType
     {
-        Guild = 1,
-        Circle,
-        WarParty,
-        ArenaTeam2v2,
-        ArenaTeam3v3,
-        ArenaTeam5v5,
-        Community
+        None         = 0,
+        Guild        = 1,
+        Circle       = 2,
+        WarParty     = 3,
+        ArenaTeam2v2 = 4,
+        ArenaTeam3v3 = 5,
+        ArenaTeam5v5 = 6,
+        Community    = 7
     }
 }

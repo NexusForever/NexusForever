@@ -629,6 +629,8 @@ namespace NexusForever.Shared.GameTable
         public GameTable<WindEntry> Wind { get; private set; }
 
         public GameTable<WindSpawnEntry> WindSpawn { get; private set; }
+
+        [GameData]
         public GameTable<WordFilterEntry> WordFilter { get; private set; }
 
         [GameData]

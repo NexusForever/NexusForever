@@ -1,9 +1,7 @@
-﻿using NexusForever.Shared.Network;
+﻿using System.Collections.Generic;
+using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Guild.Static;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NexusForever.WorldServer.Network.Message.Model.Shared
 {
@@ -61,7 +59,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
 
         public ulong GuildId { get; set; }
         public string GuildName { get; set; }
-        public uint Flags { get; set; }
+        public GuildFlag Flags { get; set; }
         public GuildType Type { get; set; } // 4
 
         public List<GuildRank> Ranks { get; set; } = new List<GuildRank>(new GuildRank[10]);
@@ -87,7 +85,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         {
             writer.Write(GuildId);
             writer.WriteStringWide(GuildName);
-            writer.Write(Flags);
+            writer.Write(Flags, 32u);
             writer.Write(Type, 4u);
 
             if (Ranks.Count < 10)

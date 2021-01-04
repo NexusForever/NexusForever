@@ -1,20 +1,20 @@
-﻿using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Guild.Static;
-using NexusForever.WorldServer.Network;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
-using System;
+﻿using System;
 using System.Linq;
-using GuildBaseModel = NexusForever.Database.Character.Model.Guild;
-using GuildDataModel = NexusForever.Database.Character.Model.GuildData;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
+using NexusForever.WorldServer.Game.Guild.Static;
+using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Guild
 {
-    public class Guild : GuildBase, IGuild
+    public partial class Guild : GuildBase
     {
-        public uint Flags { get; private set; }
-        public GuildStandard GuildStandard { get; private set; }
+        public override uint MaxMembers => 40u;
+
+        public GuildStandard Standard { get; }
 
         public string MessageOfTheDay
         {
@@ -22,165 +22,133 @@ namespace NexusForever.WorldServer.Game.Guild
             set
             {
                 messageOfTheDay = value;
-                guildSaveMask |= GuildSaveMask.MessageOfTheDay;
+                saveMask |= GuildSaveMask.MessageOfTheDay;
             }
         }
         private string messageOfTheDay;
+
         public string AdditionalInfo
         {
             get => additionalInfo;
             set
             {
                 additionalInfo = value;
-                guildSaveMask |= GuildSaveMask.AdditionalInfo;
+                saveMask |= GuildSaveMask.AdditionalInfo;
             }
         }
         private string additionalInfo;
 
-        private GuildSaveMask guildSaveMask;
+        private GuildSaveMask saveMask;
+
+        private ChatChannel memberChannel;
+        private ChatChannel officerChannel;
 
         /// <summary>
-        /// Create a <see cref="Guild"/> given model data
+        /// Create a new <see cref="Guild"/> from an existing database model.
         /// </summary>
-        public Guild(GuildDataModel model, GuildBaseModel baseModel) 
-            : base (GuildType.Guild, baseModel)
+        public Guild(GuildModel model) 
+            : base(model)
         {
-            Flags = model.Taxes;
-            GuildStandard = new GuildStandard
-            {
-                BackgroundIcon = new GuildStandard.GuildStandardPart
-                {
-                    GuildStandardPartId = model.BackgroundIconPartId
-                },
-                ForegroundIcon = new GuildStandard.GuildStandardPart
-                {
-                    GuildStandardPartId = model.ForegroundIconPartId
-                },
-                ScanLines = new GuildStandard.GuildStandardPart
-                {
-                    GuildStandardPartId = model.ScanLinesPartId
-                }
-            };
-            MessageOfTheDay = model.MessageOfTheDay;
-            AdditionalInfo = model.AdditionalInfo;
-
-            guildSaveMask = GuildSaveMask.None;
+            Standard        = new GuildStandard(model.GuildData);
+            messageOfTheDay = model.GuildData.MessageOfTheDay;
+            additionalInfo  = model.GuildData.AdditionalInfo;
         }
 
         /// <summary>
-        /// Create a new <see cref="Guild"/> given necessary parameters
+        /// Create a new <see cref="Guild"/> using the supplied parameters.
         /// </summary>
-        public Guild(WorldSession leaderSession, string guildName, string leaderRankName, string councilRankName, string memberRankName, GuildStandard guildStandard)
-            : base(GuildType.Guild)
+        public Guild(string name, string leaderRankName, string councilRankName, string memberRankName, GuildStandard standard)
+            : base(GuildType.Guild, name, leaderRankName, councilRankName, memberRankName)
         {
-            Name = guildName;
-            LeaderId = leaderSession.Player.CharacterId;
-            Flags = 0;
-
-            // Add Default Ranks & Assign Default Permissions for Guild
-            AddRank(new Rank(leaderRankName, Id, 0, GuildRankPermission.Leader, ulong.MaxValue, long.MaxValue, long.MaxValue));
-            AddRank(new Rank(councilRankName, Id, 1, (GuildRankPermission.OfficerChat | GuildRankPermission.MemberChat | GuildRankPermission.Kick | GuildRankPermission.Invite | GuildRankPermission.ChangeMemberRank | GuildRankPermission.Vote), ulong.MaxValue, long.MaxValue, long.MaxValue));
-            AddRank(new Rank(memberRankName, Id, 9, GuildRankPermission.MemberChat, 0, 0, 0));
-
-            GuildStandard = guildStandard;
-
-            Player player = leaderSession.Player;
-            Member Leader = new Member(Id, player.CharacterId, GetRank(0), "", this);
-            AddMember(Leader);
-            OnlineMembers.Add(Leader.CharacterId);
-
-            guildSaveMask = GuildSaveMask.Create;
-            base.saveMask = GuildBaseSaveMask.Create;
+            Standard        = standard;
+            messageOfTheDay = "";
+            additionalInfo  = "";
         }
 
-        /// <summary>
-        /// Save this <see cref="Guild"/> to a <see cref="GuildDataModel"/>. Deletion should be handled by <see cref="GuildBase"/> & Foreign Keys.
-        /// </summary>
-        public override void Save(CharacterContext context)
+        protected override void InitialiseChatChannels()
         {
-            if ((base.saveMask & GuildBaseSaveMask.Delete) != 0)
+            memberChannel  = SocialManager.Instance.RegisterChatChannel(ChatChannelType.Guild, Id);
+            officerChannel = SocialManager.Instance.RegisterChatChannel(ChatChannelType.GuildOfficer, Id);
+        }
+
+        protected override void Save(CharacterContext context, GuildBaseSaveMask baseSaveMask)
+        {
+            if ((baseSaveMask & GuildBaseSaveMask.Create) != 0)
             {
-                base.Save(context);
-                return;
+                context.Add(new GuildDataModel
+                {
+                    Id                   = Id,
+                    AdditionalInfo       = AdditionalInfo,
+                    MessageOfTheDay      = MessageOfTheDay,
+                    BackgroundIconPartId = (ushort)Standard.BackgroundIcon.GuildStandardPartEntry.Id,
+                    ForegroundIconPartId = (ushort)Standard.ForegroundIcon.GuildStandardPartEntry.Id,
+                    ScanLinesPartId      = (ushort)Standard.ScanLines.GuildStandardPartEntry.Id
+                });
             }
 
-            base.Save(context);
-
-            if (guildSaveMask != GuildSaveMask.None)
+            if (saveMask != GuildSaveMask.None)
             {
-                if ((guildSaveMask & GuildSaveMask.Create) != 0)
+                var model = new GuildDataModel
                 {
-                    context.Add(new GuildDataModel
-                    {
-                        Id = Id,
-                        Taxes = Flags,
-                        AdditionalInfo = AdditionalInfo,
-                        MessageOfTheDay = MessageOfTheDay,
-                        BackgroundIconPartId = GuildStandard.BackgroundIcon.GuildStandardPartId,
-                        ForegroundIconPartId = GuildStandard.ForegroundIcon.GuildStandardPartId,
-                        ScanLinesPartId = GuildStandard.ScanLines.GuildStandardPartId
-                    });
-                }
-                else
-                {
-                    var model = new GuildDataModel
-                    {
-                        Id = Id
-                    };
+                    Id = Id
+                };
 
-                    EntityEntry<GuildDataModel> entity = context.Attach(model);
-                    if ((guildSaveMask & GuildSaveMask.MessageOfTheDay) != 0)
-                    {
-                        model.MessageOfTheDay = MessageOfTheDay;
-                        entity.Property(p => p.MessageOfTheDay).IsModified = true;
-                    }
-                    if ((guildSaveMask & GuildSaveMask.Taxes) != 0)
-                    {
-                        model.Taxes = Flags;
-                        entity.Property(p => p.Taxes).IsModified = true;
-                    }
-                    if ((guildSaveMask & GuildSaveMask.AdditionalInfo) != 0)
-                    {
-                        model.AdditionalInfo = AdditionalInfo;
-                        entity.Property(p => p.AdditionalInfo).IsModified = true;
-                    }
+                EntityEntry<GuildDataModel> entity = context.Attach(model);
+                if ((saveMask & GuildSaveMask.MessageOfTheDay) != 0)
+                {
+                    model.MessageOfTheDay = MessageOfTheDay;
+                    entity.Property(p => p.MessageOfTheDay).IsModified = true;
                 }
 
-                guildSaveMask = GuildSaveMask.None;
+                if ((saveMask & GuildSaveMask.AdditionalInfo) != 0)
+                {
+                    model.AdditionalInfo = AdditionalInfo;
+                    entity.Property(p => p.AdditionalInfo).IsModified = true;
+                }
+
+                saveMask = GuildSaveMask.None;
             }
         }
 
-        /// <summary>
-        /// Return a <see cref="GuildData"/> packet of this <see cref="Guild"/>
-        /// </summary>
-        public override GuildData BuildGuildDataPacket()
+        public override GuildData Build()
         {
             return new GuildData
             {
-                GuildId = Id,
-                GuildName = Name,
-                Flags = Flags,
-                Type = Type,
-                Ranks = GetGuildRanksPackets().ToList(),
-                GuildStandard = GuildStandard,
-                MemberCount = (uint)members.Count,
-                OnlineMemberCount = (uint)OnlineMembers.Count,
+                GuildId           = Id,
+                GuildName         = Name,
+                Flags             = Flags,
+                Type              = Type,
+                Ranks             = GetGuildRanksPackets().ToList(),
+                GuildStandard     = Standard.Build(),
+                MemberCount       = (uint)members.Count,
+                OnlineMemberCount = (uint)onlineMembers.Count,
                 GuildInfo =
                 {
-                    MessageOfTheDay = MessageOfTheDay,
-                    GuildInfo = AdditionalInfo,
+                    MessageOfTheDay         = MessageOfTheDay,
+                    GuildInfo               = AdditionalInfo,
                     GuildCreationDateInDays = (float)DateTime.Now.Subtract(CreateTime).TotalDays * -1f
                 }
             };
         }
 
-        /// <summary>
-        /// Set the <see cref="Guild"/> <see cref="Flags"/> to indicate whether or not guild taxes are enabled
-        /// </summary>
-        public void SetTaxes(bool taxesEnabled)
+        protected override void MemberOnline(GuildMember member)
         {
-            Flags = Convert.ToUInt32(taxesEnabled);
-            guildSaveMask |= GuildSaveMask.Taxes;
+            if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
+                memberChannel.AddMember(member.CharacterId);
+            if (member.Rank.HasPermission(GuildRankPermission.OfficerChat))
+                officerChannel.AddMember(member.CharacterId);
+
+            base.MemberOnline(member);
+        }
+
+        protected override void MemberOffline(GuildMember member)
+        {
+            if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
+                memberChannel.RemoveMember(member.CharacterId);
+            if (member.Rank.HasPermission(GuildRankPermission.OfficerChat))
+                officerChannel.RemoveMember(member.CharacterId);
+
+            base.MemberOffline(member);
         }
     }
 }

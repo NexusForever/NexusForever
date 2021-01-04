@@ -13,9 +13,9 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            LeftHidden = reader.ReadBit();
-            RightHidden = reader.ReadBit();
-            BackHidden = reader.ReadBit();
+            LeftHidden   = reader.ReadBit();
+            RightHidden  = reader.ReadBit();
+            BackHidden   = reader.ReadBit();
             DistanceNear = reader.ReadBit();
         }
     }

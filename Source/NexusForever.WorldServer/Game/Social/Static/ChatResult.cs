@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NexusForever.WorldServer.Game.Social.Static
+﻿namespace NexusForever.WorldServer.Game.Social.Static
 {
     public enum ChatResult
     {
+		Ok,
         DoesntExist = 1,
 	    BadPassword = 2,
         NoPermissions = 3,

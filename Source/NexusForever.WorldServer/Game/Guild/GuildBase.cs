@@ -1,461 +1,784 @@
-﻿using NexusForever.WorldServer.Game.Guild.Static;
-using NexusForever.WorldServer.Network;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using NexusForever.Database.Character;
-using GuildBaseModel = NexusForever.Database.Character.Model.Guild;
-using GuildRankModel = NexusForever.Database.Character.Model.GuildRank;
-using GuildMemberModel = NexusForever.Database.Character.Model.GuildMember;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.WorldServer.Game.Entity;
+using NexusForever.Database;
+using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Network.Message.Model;
-using System.Threading.Tasks;
 using NexusForever.WorldServer.Game.CharacterCache;
-using Microsoft.EntityFrameworkCore;
-using NexusForever.Shared.Network;
+using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Guild.Static;
+using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NLog;
+using NetworkGuildMember = NexusForever.WorldServer.Network.Message.Model.Shared.GuildMember;
+using NetworkGuildRank = NexusForever.WorldServer.Network.Message.Model.Shared.GuildRank;
 
 namespace NexusForever.WorldServer.Game.Guild
 {
-    public abstract class GuildBase : IGuild
+    public abstract partial class GuildBase : IBuildable<GuildData>, IEnumerable<GuildMember>
     {
+        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+
         public ulong Id { get; }
         public GuildType Type { get; }
-        public string Name { get; protected set; }
-        public ulong LeaderId { get; protected set; }
-        public Member Leader { get; protected set; }
         public DateTime CreateTime { get; }
 
-        protected GuildBaseSaveMask saveMask { get; set; }
+        public string Name
+        {
+            get => name;
+            set
+            {
+                name = value;
+                saveMask |= GuildBaseSaveMask.Name;
+            }
+        }
+        private string name;
 
-        protected SortedDictionary</*index*/byte, Rank> ranks { get; set; } = new SortedDictionary<byte, Rank>();
-        private HashSet<Rank> deletedRanks { get; } = new HashSet<Rank>();
-        protected Dictionary</*characterId*/ulong, Member> members { get; set; } = new Dictionary<ulong, Member>();
-        private HashSet<Member> deletedMembers { get; } = new HashSet<Member>();
-        public List</*id*/ulong> OnlineMembers { get; private set; } = new List<ulong>();
+        public ulong? LeaderId
+        {
+            get => leaderId;
+            set
+            {
+                leaderId = value;
+                saveMask |= GuildBaseSaveMask.LeaderId;
+            }
+        }
+        private ulong? leaderId;
 
-        private bool IsPendingDelete = false;
+        public GuildFlag Flags
+        {
+            get => guildFlags;
+            set
+            {
+                guildFlags = value;
+                saveMask |= GuildBaseSaveMask.Flags;
+            }
+        }
+        private GuildFlag guildFlags;
+
+        private GuildBaseSaveMask saveMask;
+
+        public uint MemberCount => (uint)members.Count;
 
         /// <summary>
-        /// Create a new <see cref="GuildBase"/> using <see cref="GuildBaseModel"/>
+        /// Returns if <see cref="GuildBase"/> is enqueued to be saved to the database.
         /// </summary>
-        public GuildBase(GuildType guildType, GuildBaseModel model)
+        public bool PendingCreate => (saveMask & GuildBaseSaveMask.Create) != 0;
+
+        /// <summary>
+        /// Returns if <see cref="GuildBase"/> is enqueued to be deleted from the database.
+        /// </summary>
+        public bool PendingDelete => (saveMask & GuildBaseSaveMask.Delete) != 0;
+
+        /// <summary>
+        /// Maximum number of <see cref="GuildMember"/>'s allowed in the guild.
+        /// </summary>
+        public abstract uint MaxMembers { get; }
+
+        protected readonly SortedDictionary</*index*/byte, GuildRank> ranks = new SortedDictionary<byte, GuildRank>();
+        protected readonly Dictionary</*characterId*/ulong, GuildMember> members = new Dictionary<ulong, GuildMember>();
+        protected readonly List</*characterId*/ulong> onlineMembers = new List<ulong>();
+
+        /// <summary>
+        /// Create a new <see cref="GuildBase"/> from an existing database model.
+        /// </summary>
+        protected GuildBase(GuildModel model)
         {
-            Id = model.Id;
-            Type = (GuildType)model.Type;
-            Name = model.Name;
-            LeaderId = model.LeaderId;
+            Id         = model.Id;
+            Type       = (GuildType)model.Type;
+            Name       = model.Name;
+            Flags      = (GuildFlag)model.Flags;
+            LeaderId   = model.LeaderId;
             CreateTime = model.CreateTime;
 
-            foreach (GuildRankModel guildRankModel in model.GuildRank)
-                ranks.Add(guildRankModel.Index, new Rank(guildRankModel));
+            foreach (GuildRankModel rankModel in model.GuildRank)
+                ranks.Add(rankModel.Index, new GuildRank(rankModel));
 
-            foreach (GuildMemberModel guildMemberModel in model.GuildMember)
-                members.Add(guildMemberModel.CharacterId, new Member(guildMemberModel, ranks[guildMemberModel.Rank], this));
+            foreach (GuildMemberModel memberModel in model.GuildMember)
+            {
+                if (!ranks.TryGetValue(memberModel.Rank, out GuildRank rank))
+                    throw new DatabaseDataException($"Guild member {memberModel.Id} has an invalid rank {memberModel.Rank} for guild {memberModel.Guild.Id}!");
 
-            Leader = members[LeaderId];
+                var member = new GuildMember(memberModel, this, rank);
+                rank.AddMember(member);
+                members.Add(memberModel.CharacterId, member);
+            }
+
+            InitialiseChatChannels();
 
             saveMask = GuildBaseSaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="GuildBase"/> of <see cref="GuildType"/>
+        /// Create a new <see cref="GuildBase"/> using supplied parameters.
         /// </summary>
-        protected GuildBase(GuildType guildType)
+        protected GuildBase(GuildType type, string guildName, string leaderRankName, string councilRankName, string memberRankName)
         {
-            Id = GlobalGuildManager.Instance.NextGuildId;
-            Type = guildType;
+            Id         = GlobalGuildManager.Instance.NextGuildId;
+            Type       = type;
+            Name       = guildName;
+            Flags      = GuildFlag.None;
             CreateTime = DateTime.Now;
+
+            InitialiseRanks(leaderRankName, councilRankName, memberRankName);
+            InitialiseChatChannels();
 
             saveMask = GuildBaseSaveMask.Create;
         }
 
+        protected virtual void InitialiseRanks(string leaderRankName, string councilRankName, string memberRankName)
+        {
+            AddRank(0, leaderRankName, GuildRankPermission.Leader, ulong.MaxValue, ulong.MaxValue, ulong.MaxValue);
+            AddRank(1, councilRankName, GuildRankPermission.Council, ulong.MaxValue, ulong.MaxValue, ulong.MaxValue);
+            AddRank(9, memberRankName, GuildRankPermission.MemberChat, 0, 0, 0);
+        }
+
+        protected virtual void InitialiseChatChannels()
+        {
+            // deliberately empty
+        }
+
         /// <summary>
-        /// Save this <see cref="GuildBase"/> to a <see cref="GuildBaseModel"/>
+        /// Save this <see cref="GuildBase"/> to a <see cref="GuildModel"/>
         /// </summary>
-        public virtual void Save(CharacterContext context)
+        public void Save(CharacterContext context)
         {
             if (saveMask != GuildBaseSaveMask.None)
             {
                 if ((saveMask & GuildBaseSaveMask.Create) != 0)
                 {
-                    context.Add(new GuildBaseModel
+                    context.Add(new GuildModel
                     {
-                        Id = Id,
-                        Type = (byte)Type,
-                        Name = Name,
-                        LeaderId = LeaderId,
+                        Id         = Id,
+                        Type       = (byte)Type,
+                        Name       = Name,
+                        LeaderId   = LeaderId,
                         CreateTime = CreateTime
                     });
                 }
                 else if ((saveMask & GuildBaseSaveMask.Delete) != 0)
                 {
-                    var model = new GuildBaseModel
+                    var model = new GuildModel
                     {
                         Id = Id
                     };
 
-                    context.Entry(model).State = EntityState.Deleted;
+                    EntityEntry<GuildModel> entity = context.Attach(model);
+
+                    model.DeleteTime = DateTime.UtcNow;
+                    entity.Property(p => p.DeleteTime).IsModified = true;
+
+                    model.OriginalName = Name;
+                    entity.Property(p => p.OriginalName).IsModified = true;
+
+                    model.Name = null;
+                    entity.Property(p => p.Name).IsModified = true;
+
+                    model.OriginalLeaderId = LeaderId;
+                    entity.Property(p => p.OriginalLeaderId).IsModified = true;
+
+                    model.LeaderId = null;
+                    entity.Property(p => p.LeaderId).IsModified = true;
                 }
                 else
                 {
-                    // residence already exists in database, save only data that has been modified
-                    var model = new GuildBaseModel
+                    var model = new GuildModel
                     {
                         Id = Id
                     };
 
-                    // could probably clean this up with reflection, works for the time being
-                    //EntityEntry <GuildModel> entity = context.Attach(model);
-                    //if ((saveMask & GuildSaveMask.Name) != 0)
-                    //{
-                    //    model.Name = Name;
-                    //    entity.Property(p => p.Name).IsModified = true;
-                    //}
-                }
+                    EntityEntry<GuildModel> entity = context.Attach(model);
+                    if ((saveMask & GuildBaseSaveMask.Name) != 0)
+                    {
+                        model.Name = name;
+                        entity.Property(p => p.Name).IsModified = true;
+                    }
 
-                saveMask = GuildBaseSaveMask.None;
+                    if ((saveMask & GuildBaseSaveMask.LeaderId) != 0)
+                    {
+                        model.LeaderId = LeaderId;
+                        entity.Property(p => p.LeaderId).IsModified = true;
+                    }
+
+                    if ((saveMask & GuildBaseSaveMask.Flags) != 0)
+                    {
+                        model.Flags = (uint)Flags;
+                        entity.Property(p => p.Flags).IsModified = true;
+                    }
+                }
             }
 
-            // Don't save Ranks or Members if guild is being deleted, throws SQL error.
-            // FK handles deleting members & ranks from DB
-            if (IsPendingDelete)
-                return;
-            
-            // Saving of deleted ranks must occur before saving of new or existing ranks so that the primary key is available
-            foreach (Rank rank in deletedRanks)
+            Save(context, saveMask);
+            saveMask = GuildBaseSaveMask.None;
+
+            foreach (GuildRank rank in ranks.Values.ToList())
+            {
+                if (rank.PendingDelete)
+                    ranks.Remove(rank.Index);
+
                 rank.Save(context);
+            }
 
-            foreach (Rank rank in ranks.Values)
-                rank.Save(context);
+            foreach (GuildMember member in members.Values.ToList())
+            {
+                if (member.PendingDelete)
+                    members.Remove(member.CharacterId);
 
-            foreach (Member member in deletedMembers)
                 member.Save(context);
-
-            foreach (Member member in members.Values)
-                member.Save(context);
-
-            deletedRanks.Clear();
-            deletedMembers.Clear();
+            }
         }
 
-        /// <summary>
-        /// Delete this <see cref="GuildBase"/>
-        /// </summary>
-        public void Delete()
+        protected virtual void Save(CharacterContext context, GuildBaseSaveMask saveMask)
         {
-            // Entity won't exist if create flag exists, so we set to None and let GC get rid of it.
-            if ((saveMask & GuildBaseSaveMask.Create) == 0)
-                saveMask = GuildBaseSaveMask.Delete;
-            else
-                saveMask = GuildBaseSaveMask.None;
+            // deliberately empty
+        }
 
-            IsPendingDelete = true;
+        public virtual GuildData Build()
+        {
+            return new GuildData
+            {
+                GuildId           = Id,
+                GuildName         = Name,
+                Flags             = Flags,
+                Type              = Type,
+                Ranks             = GetGuildRanksPackets().ToList(),
+                MemberCount       = (uint)members.Count,
+                OnlineMemberCount = (uint)onlineMembers.Count,
+                GuildInfo =
+                {
+                    GuildCreationDateInDays = (float)DateTime.Now.Subtract(CreateTime).TotalDays * -1f
+                }
+            };
         }
 
         /// <summary>
-        /// Used to trigger login events for <see cref="Player"/> associated with this <see cref="GuildBase"/>
+        /// Add a new <see cref="GuildFlag"/>.
+        /// </summary>
+        public void SetFlag(GuildFlag flags)
+        {
+            Flags |= flags;
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="GuildFlag"/>.
+        /// </summary>
+        public void RemoveFlag(GuildFlag flags)
+        {
+            Flags &= ~flags;
+        }
+
+        /// <summary>
+        /// Returns if supplied <see cref="GuildFlag"/> exists.
+        /// </summary>
+        public bool HasFlags(GuildFlag flags)
+        {
+            return (Flags & flags) != 0;
+        }
+
+        /// <summary>
+        /// Trigger login events for <see cref="Player"/> for <see cref="GuildBase"/>.
         /// </summary>
         public void OnPlayerLogin(Player player)
         {
-            // TODO: Announce to guild?
-            AnnounceGuildMemberChange(player.CharacterId);
-            AnnounceGuildResult(GuildResult.MemberOnline, referenceText: player.Name);
+            if (!members.TryGetValue(player.CharacterId, out GuildMember member))
+                throw new ArgumentException($"Invalid member {player.CharacterId} for guild {Id}.");
 
-            OnlineMembers.Add(player.CharacterId);
+            MemberOnline(member);
+
+            AnnounceGuildMemberChange(member);
+            AnnounceGuildResult(GuildResult.MemberOnline, referenceText: player.Name);
+        }
+
+        protected virtual void MemberOnline(GuildMember member)
+        {
+            onlineMembers.Add(member.CharacterId);
         }
 
         /// <summary>
-        /// Used to trigger logout events for <see cref="Player"/> associated with this <see cref="GuildBase"/>
+        /// Trigger logout events for <see cref="Player"/> for <see cref="GuildBase"/>.
         /// </summary>
         public void OnPlayerLogout(Player player)
         {
-            OnlineMembers.Remove(player.CharacterId);
+            if (!members.TryGetValue(player.CharacterId, out GuildMember member))
+                throw new ArgumentException($"Invalid member {player.CharacterId} for guild {Id}.");
 
-            // TODO: Announce to guild?
-            AnnounceGuildMemberChange(player.CharacterId);
+            MemberOffline(member);
+
+            AnnounceGuildMemberChange(member);
             AnnounceGuildResult(GuildResult.MemberOffline, referenceText: player.Name);
         }
 
-        /// <summary>
-        /// Add a <see cref="Rank"/> to this <see cref="GuildBase"/>
-        /// </summary>
-        public void AddRank(Rank rank)
+        protected virtual void MemberOffline(GuildMember member)
         {
-            if (ranks.ContainsKey(rank.Index))
-                throw new ArgumentOutOfRangeException("There is already a rank that exists with this index.");
-            if (rank.Index > 9 || rank.Index < 0)
-                throw new ArgumentOutOfRangeException("Rank Index invalid.");
-
-            ranks.Add(rank.Index, rank);
+            onlineMembers.Remove(member.CharacterId);
         }
 
         /// <summary>
-        /// Remove a <see cref="Rank"/> from this <see cref="GuildBase"/> given its index
+        /// Returns if <see cref="Player"/> can join the <see cref="GuildBase"/>.
         /// </summary>
-        public void RemoveRank(byte rankIndex)
+        public virtual GuildResultInfo CanJoinGuild(Player player)
         {
-            if (rankIndex > 9)
-                throw new ArgumentOutOfRangeException("Rank Index cannot be higher than the maximum rank count of 10.");
-            if (!ranks.ContainsKey(rankIndex))
-                throw new ArgumentNullException("Rank does not exist by that rank index");
+            if (MemberCount >= MaxMembers)
+                return new GuildResultInfo(GuildResult.CannotInviteGuildFull);
 
-            RemoveRank(ranks[rankIndex]);
+            if (GetMember(player.CharacterId) != null)
+                return new GuildResultInfo(GuildResult.AlreadyAMember);
+
+            return new GuildResultInfo(GuildResult.Success);
         }
 
         /// <summary>
-        /// Remove the <see cref="Rank"/> from this <see cref="GuildBase"/> and enqueues deletion
+        /// Add a new <see cref="Player"/> to the <see cref="GuildBase"/>.
         /// </summary>
-        private void RemoveRank(Rank rank)
+        /// <remarks>
+        /// <see cref="CanJoinGuild(Player)"/> should be invoked before invoking this method.
+        /// If the <see cref="GuildBase"/> has no members the <see cref="Player"/> will become the leader.
+        /// </remarks>
+        public void JoinGuild(Player player)
         {
-            rank.Delete();
-            deletedRanks.Add(rank);
-            ranks.Remove(rank.Index);
-        }
-
-        /// <summary>
-        /// Returns whether or not a rank exists with the given name
-        /// </summary>
-        public bool RankExists(string name)
-        {
-            return ranks.Values.FirstOrDefault(i => i.Name == name) != null;
-        }
-
-        /// <summary>
-        /// Returns the <see cref="Rank"/> using the given index
-        /// </summary>
-        public Rank GetRank(byte index)
-        {
-            ranks.TryGetValue(index, out Rank rank);
-            return rank;
-        }
-
-        /// <summary>
-        /// Returns the <see cref="Rank"/> that is below the rank at the given index
-        /// </summary>
-        public Rank GetDemotedRank(byte index)
-        {
-            Rank newRank = null;
-            for(byte i = (byte)(index + 1); i < 10; i++)
+            GuildMember member;
+            if (MemberCount == 0u)
             {
-                if (newRank != null)
-                    break;
+                log.Trace($"Guild{Id} has no leader, new member {player.CharacterId} will be assigned to leader.");
 
-                if (ranks.ContainsKey(i))
-                    newRank = ranks[i];
+                LeaderId = player.CharacterId;
+                member   = AddMember(player.CharacterId, 0);
+                SendGuildResult(player.Session, GuildResult.YouCreated, Id, referenceText: Name);
+            }
+            else
+            {
+                member = AddMember(player.CharacterId);
+                SendGuildResult(player.Session, GuildResult.YouJoined, Id, referenceText: Name);
             }
 
-            return newRank;
+            SendGuildJoin(player.Session, member.Build(), new GuildPlayerLimits());
+            SendGuildRoster(player.Session);
+            AnnounceGuildMemberChange(member);
+        }
+
+        private void SendGuildJoin(WorldSession session, NetworkGuildMember guildMember, GuildPlayerLimits playerLimits)
+        {
+            session.EnqueueMessageEncrypted(new ServerGuildJoin
+            {
+                GuildData   = Build(),
+                Self        = guildMember,
+                SelfPrivate = playerLimits,
+                Nameplate   = session.Player.GuildManager.GuildAffiliation.Id == Id
+            });
+        }
+
+        private void SendGuildRoster(WorldSession session)
+        {
+            session.EnqueueMessageEncrypted(new ServerGuildRoster
+            {
+                GuildRealm = WorldServer.RealmId,
+                GuildId    = Id,
+                GuildMembers = members.Values
+                    .Select(m => m.Build())
+                    .ToList(),
+                Done       = true
+            });
         }
 
         /// <summary>
-        /// Returns the <see cref="Rank"/> that is above the rank at the given index
+        /// Returns if <see cref="Player"/> can leave the <see cref="GuildBase"/>.
         /// </summary>
-        public Rank GetPromotedRank(byte index)
+        public GuildResultInfo CanLeaveGuild(Player player)
         {
-            Rank newRank = null;
-            for (sbyte i = (sbyte)(index - 1); i > -1; i--)
-            {
-                if (newRank != null)
-                    break;
+            GuildMember member = GetMember(player.CharacterId);
+            if (member == null)
+                return new GuildResultInfo(GuildResult.NotInThatGuild);
 
-                if (ranks.ContainsKey((byte)i))
-                    newRank = ranks[(byte)i];
+            return CanLeaveGuild(member);
+        }
+
+        /// <summary>
+        /// Returns if <see cref="GuildMember"/> can leave the <see cref="GuildBase"/>.
+        /// </summary>
+        protected virtual GuildResultInfo CanLeaveGuild(GuildMember member)
+        {
+            if (member.Rank.Index == 0)
+                return new GuildResultInfo(GuildResult.GuildmasterCannotLeaveGuild);
+
+            return new GuildResultInfo(GuildResult.Success);
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="Player"/> from the <see cref="GuildBase"/>.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="CanLeaveGuild(Player)"/> should be invoked before invoking this method.
+        /// </remarks>
+        public void LeaveGuild(Player player, GuildResult reason)
+        {
+            if (!members.TryGetValue(player.CharacterId, out GuildMember member))
+                throw new ArgumentException($"Invalid member {player.CharacterId} for guild {Id}.");
+
+            LeaveGuild(member, reason == GuildResult.GuildDisbanded);
+            SendGuildResult(player.Session, reason, referenceText: Name);
+
+            player.Session.EnqueueMessageEncrypted(new ServerGuildRemove
+            {
+                RealmId = WorldServer.RealmId,
+                GuildId = Id
+            });
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="GuildMember"/> from the <see cref="GuildBase"/>.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="CanLeaveGuild(GuildMember)"/> should be invoked before invoking this method.
+        /// </remarks>
+        private void LeaveGuild(GuildMember member, bool disband = false)
+        {
+            RemoveMember(member.CharacterId, disband);
+
+            if (!disband)
+            {
+                SendToOnlineUsers(new ServerGuildMemberRemove
+                {
+                    RealmId        = WorldServer.RealmId,
+                    GuildId        = Id,
+                    PlayerIdentity = new TargetPlayerIdentity
+                    {
+                        RealmId     = WorldServer.RealmId,
+                        CharacterId = member.CharacterId
+                    },
+                });
             }
 
-            return newRank;
+            GlobalGuildManager.Instance.UntrackCharacterGuild(member.CharacterId, Id);
         }
 
         /// <summary>
-        /// Returns an <see cref="IEnumerable{T}"/> containing built packets for all <see cref="Rank"/> in this <see cref="GuildBase"/>
+        /// Returns if the <see cref="GuildBase"/> can be disbanded.
         /// </summary>
-        public IEnumerable<GuildRank> GetGuildRanksPackets()
+        protected virtual GuildResultInfo CanDisbandGuild()
+        {
+            // deliberately returns success
+            return new GuildResultInfo(GuildResult.Success);
+        }
+
+        /// <summary>
+        /// Disband <see cref="GuildBase"/>.
+        /// </summary>
+        public void DisbandGuild()
+        {
+            foreach (GuildMember member in members.Values.ToList())
+            {
+                // if the player is online handle through the local manager otherwise directly in the guild
+                Player player = CharacterManager.Instance.GetPlayer(member.CharacterId);
+                if (player != null)
+                    player.GuildManager.LeaveGuild(Id, GuildResult.GuildDisbanded);
+                else
+                    LeaveGuild(member, true);
+            }
+
+            saveMask |= GuildBaseSaveMask.Delete;
+            log.Trace($"Guild {Id} was disbanded.");
+        }
+
+        /// <summary>
+        /// Add a new <see cref="GuildRank"/> using the supplied parameters.
+        /// </summary>
+        private void AddRank(byte index, string name, GuildRankPermission permissions = GuildRankPermission.Disabled,
+            ulong bankPermissions = 0ul, ulong bankMoneyWithdrawlLimits = 0ul, ulong repairLimits = 0ul)
+        {
+            if (index > 9)
+                throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum rank index is 9!");
+
+            if (ranks.TryGetValue(index, out GuildRank rank))
+            {
+                if (!rank.PendingDelete)
+                    throw new InvalidOperationException($"Rank {index} for guild {Id} already exists!");
+
+                // rank is pending delete, reuse object
+                rank.EnqueueDelete(false);
+                rank.Name                     = name;
+                rank.Permissions              = permissions;
+                rank.BankPermissions          = bankPermissions;
+                rank.BankMoneyWithdrawlLimits = bankMoneyWithdrawlLimits;
+                rank.RepairLimit              = repairLimits;
+            }
+            else
+            {
+                rank = new GuildRank(Id, index, name, permissions, bankPermissions, bankMoneyWithdrawlLimits, repairLimits);
+                ranks.Add(index, rank);
+            }
+
+            log.Trace($"Added rank {name}({index}) to guild {Id}.");
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="GuildRank"/> at the supplied index.
+        /// </summary>
+        private void RemoveRank(byte index)
+        {
+            if (index > 9)
+                throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum rank index is 9!");
+
+            if (!ranks.TryGetValue(index, out GuildRank rank))
+                throw new ArgumentException($"Invalid rank {rank} for guild {Id}.");
+
+            if (rank.MemberCount > 0u)
+                throw new InvalidOperationException($"Rank {index} for guild {Id} has existing members!");
+
+            // rank is pending create, direct remove
+            if (rank.PendingCreate)
+                ranks.Remove(index);
+            else
+                rank.EnqueueDelete(true);
+
+            log.Trace($"Removed rank {rank.Name}({rank.Index}) from guild {Id}.");
+        }
+
+        /// <summary>
+        /// Returns if a <see cref="GuildRank"/> exists with the given name.
+        /// </summary>
+        private bool RankExists(string name)
+        {
+            return ranks.Values.FirstOrDefault(r =>
+                !r.PendingDelete && string.Equals(r.Name, name, StringComparison.InvariantCultureIgnoreCase)) != null;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="GuildRank"/> using the given index
+        /// </summary>
+        private GuildRank GetRank(byte index)
+        {
+            if (ranks.TryGetValue(index, out GuildRank rank) && !rank.PendingDelete)
+                return rank;
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="GuildRank"/> that is below the rank at the given index.
+        /// </summary>
+        /// <remarks>
+        /// A demoted rank has an increased index.
+        /// </remarks>
+        private GuildRank GetDemotedRank(byte index)
+        {
+            if (index > 8)
+                throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum demote rank index is 8!");
+
+            for (byte i = (byte)(index + 1); i <= 9; i++)
+                if (ranks.TryGetValue(i, out GuildRank rank))
+                    return rank;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="GuildRank"/> that is above the rank at the given index.
+        /// </summary>
+        /// <remarks>
+        /// A promoted rank has an decreased index.
+        /// </remarks>
+        private GuildRank GetPromotedRank(byte index)
+        {
+            if (index < 1)
+                throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, minimum promote rank index is 1!");
+            if (index > 9)
+                throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum demote rank index is 9!");
+
+            for (sbyte i = (sbyte)(index - 1); i >= 0; i--)
+                if (ranks.TryGetValue((byte)i, out GuildRank rank))
+                    return rank;
+
+            return null;
+        }
+
+        protected virtual void MemberChangeRank(GuildMember member, GuildRank newRank)
+        {
+            member.Rank.RemoveMember(member);
+            newRank.AddMember(member);
+            member.Rank = newRank;
+        }
+
+        /// <summary>
+        /// Return a collection of <see cref="Network.Message.Model.Shared.GuildRank"/>'s.
+        /// </summary>
+        /// <remarks>
+        /// This will always return 10 ranks, if there are less than 10 ranks in the <see cref="GuildBase"/> empty place holders will be returned.
+        /// </remarks>
+        protected IEnumerable<NetworkGuildRank> GetGuildRanksPackets()
         {
             for (byte i = 0; i < 10; i++)
             {
-                Rank rank = GetRank(i);
+                GuildRank rank = GetRank(i);
                 if (rank != null)
-                    yield return rank.BuildGuildRankPacket();
+                    yield return rank.Build();
                 else
-                    yield return new GuildRank();
+                    yield return new NetworkGuildRank();
             }
         }
 
         /// <summary>
-        /// Adds the <see cref="Member"/> to the memberlist for this <see cref="GuildBase"/>
+        /// Add a new <see cref="GuildMember"/> with supplied character id.
         /// </summary>
-        public void AddMember(Member member)
+        private GuildMember AddMember(ulong characterId, byte rank = 9)
         {
-            if (members.ContainsKey(member.CharacterId))
-                throw new ArgumentOutOfRangeException("That character already exists in the guild.");
+            if (!ranks.TryGetValue(rank, out GuildRank guildRank))
+                throw new ArgumentException($"Invalid rank {rank} for guild {Id}.");
 
-            members.Add(member.CharacterId, member);
-        }
+            if (members.TryGetValue(characterId, out GuildMember member))
+            {
+                if (!member.PendingDelete)
+                    throw new InvalidOperationException($"Member {characterId} for guild {Id} already exists!");
 
-        /// <summary>
-        /// Removes the <see cref="Member"/> from the memberlist for this <see cref="GuildBase"/> based on their character ID
-        /// </summary>
-        public void RemoveMember(ulong characterId, out WorldSession memberSession)
-        {
-            if (!members.ContainsKey(characterId))
-                throw new ArgumentNullException("That character does not exist in the guild.");
+                // rank is pending delete, reuse object
+                member.EnqueueDelete(false);
+            }
+            else
+            {
+                // new members default to the lowest rank
+                member = new GuildMember(this, characterId, guildRank);
+                members.Add(characterId, member);
+            }
 
-            // Make sure the session is returned if it exists before removing from OnlineMembers
-            memberSession = NetworkManager<WorldSession>.Instance.GetSession(i => i.Player?.CharacterId == characterId);
-            if (memberSession != null)
-                OnlineMembers.Remove(characterId);
+            MemberOnline(member);
+            guildRank.AddMember(member);
 
-            RemoveMember(members[characterId]);
-        }
-
-        /// <summary>
-        /// Removes the selected <see cref="Member"/> from this <see cref="GuildBase"/> and enqueues deletion
-        /// </summary>
-        private void RemoveMember(Member member)
-        {
-            member.Delete();
-            deletedMembers.Add(member);
-            members.Remove(member.CharacterId);
-        }
-
-        /// <summary>
-        /// Returns the number of <see cref="Member"/> in this guild
-        /// </summary>
-        public uint GetMemberCount()
-        {
-            return (uint)members.Values.Count;
-        }
-
-        /// <summary>
-        /// Returns the <see cref="Member"/> matching a character name
-        /// </summary>
-        public Member GetMember(string characterName)
-        {
-            return members.Values.FirstOrDefault(i => CharacterManager.Instance.GetCharacterInfo(i.CharacterId).Name == characterName);
-        }
-
-        /// <summary>
-        /// Returns the <see cref="Member"/> matching a character ID
-        /// </summary>
-        public Member GetMember(ulong characterId)
-        {
-            members.TryGetValue(characterId, out Member member);
+            log.Trace($"Added member {characterId} to guild {Id}.");
             return member;
         }
 
         /// <summary>
-        /// Returns all <see cref="Member"/> that are of a given <see cref="Rank"/> index
+        /// Add an existing <see cref="GuildMember"/> with supplied character id.
         /// </summary>
-        public IEnumerable<Member> GetMembersOfRank(byte index)
+        private void RemoveMember(ulong characterId, bool disband)
         {
-            return members.Values.Where(i => i.Rank.Index == index);
-        }
+            if (!members.TryGetValue(characterId, out GuildMember member))
+                throw new ArgumentException($"Invalid member {characterId} for guild {Id}.");
 
-        /// <summary>
-        /// Returns all <see cref="GuildMember"/> packets from the memberlist for this <see cref="GuildBase"/>
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<GuildMember> GetGuildMembersPackets()
-        {
-            foreach(Member member in members.Values)
-                yield return member.BuildGuildMemberPacket();
-        }
-
-        /// <summary>
-        /// Returns all <see cref="WorldSession"/> of online members who have a given <see cref="GuildRankPermission"/>
-        /// </summary>
-        public IEnumerable<WorldSession> GetOnlineMembersWithPermission(GuildRankPermission permission)
-        {
-            List<WorldSession> worldSessions = new List<WorldSession>();
-            IEnumerable<ulong> matchingMembers = members.Keys.Intersect(OnlineMembers);
-
-            foreach(ulong member in matchingMembers)
+            if (!disband)
             {
-                if ((GetMember(member).Rank.GuildPermission & permission) != 0)
-                    worldSessions.Add(NetworkManager<WorldSession>.Instance.GetSession(i => i.Player?.CharacterId == member));
+                // member is pending create, direct remove
+                if (member.PendingCreate)
+                    members.Remove(characterId);
+                else
+                    member.EnqueueDelete(true);
             }
 
-            return worldSessions.AsEnumerable();
+            MemberOffline(member);
+            member.Rank.RemoveMember(member);
+
+            log.Trace($"Removed member {member.CharacterId} from guild {Id}.");
         }
 
         /// <summary>
-        /// Emits an <see cref="IWritable"/> packet to all online members
+        /// Return <see cref="GuildMember"/> with supplied character id.
         /// </summary>
-        /// <param name="writable"></param>
-        public void SendToOnlineUsers(IWritable writable)
+        public GuildMember GetMember(ulong characterId)
         {
-            foreach (ulong characterId in OnlineMembers)
+            if (members.TryGetValue(characterId, out GuildMember member) && !member.PendingDelete)
+                return member;
+            return null;
+        }
+
+        /// <summary>
+        /// Return <see cref="GuildMember"/> with supplied character name.
+        /// </summary>
+        public GuildMember GetMember(string name)
+        {
+            return GetMember(CharacterManager.Instance.GetCharacterIdByName(name));
+        }
+
+        /// <summary>
+        /// Send <see cref="ServerGuildResult"/> to <see cref="WorldSession"/> based on supplied <see cref="GuildResultInfo"/>.
+        /// </summary>
+        public static void SendGuildResult(WorldSession session, GuildResultInfo info)
+        {
+            SendGuildResult(session, info.Result, info.GuildId, info.ReferenceId, info.ReferenceString);
+        }
+
+        /// <summary>
+        /// Send <see cref="ServerGuildResult"/> to <see cref="WorldSession"/> based on supplied parameters.
+        /// </summary>
+        public static void SendGuildResult(WorldSession session, GuildResult result, ulong guildId = 0ul, uint referenceId = 0u, string referenceText = "")
+        {
+            session.EnqueueMessageEncrypted(new ServerGuildResult
             {
-                WorldSession targetSession = NetworkManager<WorldSession>.Instance.GetSession(i => i.Player?.CharacterId == characterId);
-                if (targetSession == null)
+                Result        = result,
+                RealmId       = WorldServer.RealmId,
+                GuildId       = guildId,
+                ReferenceId   = referenceId,
+                ReferenceText = referenceText
+            });
+        }
+
+        /// <summary>
+        /// Send <see cref="IWritable"/> to all online members.
+        /// </summary>
+        protected void SendToOnlineUsers(IWritable writable)
+        {
+            foreach (ulong characterId in onlineMembers)
+            {
+                Player player = CharacterManager.Instance.GetPlayer(characterId);
+                if (player?.Session == null)
                     continue;
 
-                targetSession.EnqueueMessageEncrypted(writable);
+                player.Session.EnqueueMessageEncrypted(writable);
             }
-                
         }
 
         /// <summary>
-        /// Emits an <see cref="IWritable"/> packet to all online guild members who have a <see cref="GuildRankPermission"/>
+        /// Sends <see cref="ServerGuildResult"/> to all online members based on supplied parameters.
         /// </summary>
-        public void SendToOnlineUsers(IWritable writable, GuildRankPermission requiredPermission = GuildRankPermission.None)
+        private void AnnounceGuildResult(GuildResult result, uint referenceId = 0, string referenceText = "")
         {
-            foreach (ulong characterId in OnlineMembers)
+            SendToOnlineUsers(new ServerGuildResult
             {
-                WorldSession targetSession = NetworkManager<WorldSession>.Instance.GetSession(i => i.Player?.CharacterId == characterId);
-                if (targetSession == null)
-                    continue;
-
-                if (members.TryGetValue(targetSession.Player.CharacterId, out Member member))
-                {
-                    if ((member.Rank.GuildPermission & requiredPermission) != 0)
-                        targetSession.EnqueueMessageEncrypted(writable);
-                }
-            }
-                
+                Result        = result,
+                RealmId       = WorldServer.RealmId,
+                GuildId       = Id,
+                ReferenceId   = referenceId,
+                ReferenceText = referenceText,
+            });
         }
 
         /// <summary>
-        /// Sends a packet notifying all members of a <see cref="GuildResult"/>
+        /// Send <see cref="ServerGuildMemberChange"/> to all online members with supplied <see cref="GuildMember"/>.
         /// </summary>
-        public void AnnounceGuildResult(GuildResult guildResult, uint referenceId = 0, string referenceText = "")
+        private void AnnounceGuildMemberChange(GuildMember member)
         {
-            ServerGuildResult serverGuildResult = new ServerGuildResult
+            SendToOnlineUsers(new ServerGuildMemberChange
             {
-                Result = guildResult
-            };
-            serverGuildResult.RealmId = WorldServer.RealmId;
-            serverGuildResult.GuildId = Id;
-            serverGuildResult.ReferenceId = referenceId;
-            serverGuildResult.ReferenceText = referenceText;
-
-            SendToOnlineUsers(serverGuildResult);
+                RealmId           = WorldServer.RealmId,
+                GuildId           = Id,
+                GuildMember       = member.Build(),
+                MemberCount       = (ushort)members.Count,
+                OnlineMemberCount = (ushort)onlineMembers.Count
+            });
         }
 
         /// <summary>
-        /// Send a packet to all online member containing data for another member based on a character ID
+        /// Send <see cref="ServerGuildRankChange"/> to all online members.
         /// </summary>
-        /// <param name="characterId"></param>
-        public void AnnounceGuildMemberChange(ulong characterId)
+        private void AnnounceGuildRankChange()
         {
-            ServerGuildMemberChange serverGuildMemberChange = new ServerGuildMemberChange
+            SendToOnlineUsers(new ServerGuildRankChange
             {
                 RealmId = WorldServer.RealmId,
                 GuildId = Id,
-                GuildMember = members[characterId].BuildGuildMemberPacket(),
-                MemberCount = (ushort)members.Count,
-                OnlineMemberCount = (ushort)OnlineMembers.Count
-            };
-
-            SendToOnlineUsers(serverGuildMemberChange);
+                Ranks   = GetGuildRanksPackets().ToList()
+            });
         }
 
-        /// <summary>
-        /// Return a <see cref="GuildData"/> packet of this <see cref="GuildBase"/>
-        /// </summary>
-        public abstract GuildData BuildGuildDataPacket();
+        public IEnumerator<GuildMember> GetEnumerator()
+        {
+            return members.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

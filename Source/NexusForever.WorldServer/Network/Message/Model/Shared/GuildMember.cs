@@ -1,13 +1,10 @@
 ﻿using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity.Static;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NexusForever.WorldServer.Network.Message.Model.Shared
 {
-    public class GuildMember: IWritable
+    public class GuildMember : IWritable
     {
         public ushort Realm { get; set; }
         public ulong CharacterId { get; set; }

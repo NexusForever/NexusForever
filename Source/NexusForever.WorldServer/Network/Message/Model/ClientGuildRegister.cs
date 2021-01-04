@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Guild.Static;
@@ -16,18 +15,18 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public string CouncilTitle { get; set; }
         public string MemberTitle { get; set; }
         public GuildStandard GuildStandard { get; set; } = new GuildStandard();
-        public bool Unknown0 { get; set; }
+        public bool AlternateCost { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            UnitId = reader.ReadUInt();
-            GuildType = (GuildType)reader.ReadByte(4u);
-            GuildName = reader.ReadWideString();
-            MasterTitle = reader.ReadWideString();
-            CouncilTitle = reader.ReadWideString();
-            MemberTitle = reader.ReadWideString();
+            UnitId        = reader.ReadUInt();
+            GuildType     = reader.ReadEnum<GuildType>(4u);
+            GuildName     = reader.ReadWideString();
+            MasterTitle   = reader.ReadWideString();
+            CouncilTitle  = reader.ReadWideString();
+            MemberTitle   = reader.ReadWideString();
             GuildStandard.Read(reader);
-            Unknown0 = reader.ReadBit();
+            AlternateCost = reader.ReadBit();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerChat)]
     public class ServerChat : IWritable
     {
-        public ChatChannel Channel { get; set; }
+        public ChatChannelType Channel { get; set; }
         public ulong ChatId { get; set; }
 
         public bool GM { get; set; }

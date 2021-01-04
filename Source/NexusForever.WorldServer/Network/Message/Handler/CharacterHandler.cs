@@ -457,17 +457,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     }
                 }
 
-                (CharacterModifyResult, uint) guildRemoveResult = (CharacterModifyResult.DeleteOk, 0);
-                foreach(GuildBase guild in GlobalGuildManager.Instance.GetMatchingGuilds(characterToDelete.Id))
-                {
-                    if (guild.LeaderId == characterDelete.CharacterId)
-                    {
-                        guildRemoveResult.Item1 = CharacterModifyResult.DeleteFailed_GuildMaster;
-                        guildRemoveResult.Item2 += 1;
-                    }
-                }
-                if (guildRemoveResult.Item1 != CharacterModifyResult.DeleteOk)
-                    return guildRemoveResult;
+                uint leaderCount = (uint)GlobalGuildManager.Instance.GetCharacterGuilds(characterToDelete.Id)
+                    .Count(g => g.LeaderId == characterDelete.CharacterId);
+                if (leaderCount > 0)
+                    return (CharacterModifyResult.DeleteFailed, leaderCount);
 
                 return (CharacterModifyResult.DeleteOk, 0);
             }
@@ -509,7 +502,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.CanProcessPackets = true;
 
-                GlobalGuildManager.Instance.RemoveCharacterFromAllGuilds(characterToDelete.Id);
                 ResidenceManager.Instance.RemoveResidence(characterToDelete.Name);
                 CharacterManager.Instance.DeleteCharacter(characterToDelete.Id, characterToDelete.Name);
 

@@ -49,6 +49,17 @@ namespace NexusForever.WorldServer.Game.Entity
         public Faction Faction { get; }
         public List<float> Bones { get; } = new List<float>();
 
+        public CharacterFlag Flags
+        {
+            get => flags;
+            set
+            {
+                flags = value;
+                saveMask |= PlayerSaveMask.Flags;
+            }
+        }
+        private CharacterFlag flags;
+
         public Path Path
         {
             get => path;
@@ -152,6 +163,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public SupplySatchelManager SupplySatchelManager { get; }
         public XpManager XpManager { get; }
         public ReputationManager ReputationManager { get; }
+        public GuildManager GuildManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -162,36 +174,13 @@ namespace NexusForever.WorldServer.Game.Entity
         private PendingTeleport pendingTeleport;
         public bool CanTeleport() => pendingTeleport == null;
 
-        public ulong GuildId = 0;
-        public List<ulong> GuildMemberships = new List<ulong>();
-        public GuildInvite PendingGuildInvite;
-        public ulong GuildAffiliation
-        {
-            get => guildAffiliation;
-            set
-            {
-                if (guildAffiliation != value)
-                {
-                    guildAffiliation = value;
-                    saveMask |= PlayerSaveMask.Affiliation;
-                }
-            }
-        }
-        private ulong guildAffiliation;
 
-        public GuildHolomark GuildHolomarkMask
-        {
-            get => guildHolomarkMask;
-            set
-            {
-                if (guildHolomarkMask != value)
-                {
-                    guildHolomarkMask = value;
-                    saveMask |= PlayerSaveMask.Holomark;
-                }
-            }
-        }
-        private GuildHolomark guildHolomarkMask;
+
+        
+
+
+
+
 
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
@@ -213,8 +202,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
             innateIndex     = model.InnateIndex;
-            guildAffiliation = model.GuildAffiliation;
-            guildHolomarkMask = (GuildHolomark)model.GuildHolomarkMask;
+            flags           = (CharacterFlag)model.Flags;
 
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
@@ -242,6 +230,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
+            GuildManager            = new GuildManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -279,7 +268,6 @@ namespace NexusForever.WorldServer.Game.Entity
             SetStat(Stat.Shield, 450u);
 
             CharacterManager.Instance.RegisterPlayer(this);
-            GlobalGuildManager.Instance.OnPlayerLogin(Session, this);
         }
 
         public override void Update(double lastTick)
@@ -394,22 +382,16 @@ namespace NexusForever.WorldServer.Game.Entity
                     entity.Property(p => p.InputKeySet).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Flags) != 0)
+                {
+                    model.Flags = (uint)Flags;
+                    entity.Property(p => p.Flags).IsModified = true;
+                }
+
                 if ((saveMask & PlayerSaveMask.Innate) != 0)
                 {
                     model.InnateIndex = InnateIndex;
                     entity.Property(p => p.InnateIndex).IsModified = true;
-                }
-
-                if ((saveMask & PlayerSaveMask.Affiliation) != 0)
-                {
-                    model.GuildAffiliation = GuildAffiliation;
-                    entity.Property(p => p.GuildAffiliation).IsModified = true;
-                }
-
-                if ((saveMask & PlayerSaveMask.Holomark) != 0)
-                {
-                    model.GuildHolomarkMask = Convert.ToByte(GuildHolomarkMask);
-                    entity.Property(p => p.GuildHolomarkMask).IsModified = true;
                 }
 
                 saveMask = PlayerSaveMask.None;
@@ -441,39 +423,30 @@ namespace NexusForever.WorldServer.Game.Entity
             SupplySatchelManager.Save(context);
             XpManager.Save(context);
             ReputationManager.Save(context);
+            GuildManager.Save(context);
 
             Session.EntitlementManager.Save(context);
         }
 
         protected override IEntityModel BuildEntityModel()
         {
-            PlayerEntityModel playerEntityModel = new PlayerEntityModel
+            return new PlayerEntityModel
             {
-                Id       = CharacterId,
-                RealmId  = WorldServer.RealmId,
-                Name     = Name,
-                Race     = Race,
-                Class    = Class,
-                Sex      = Sex,
-                Bones    = Bones,
-                Title    = TitleManager.ActiveTitleId,
-                GuildIds = GuildMemberships,
-                PvPFlag  = PvPFlag.Disabled
+                Id        = CharacterId,
+                RealmId   = WorldServer.RealmId,
+                Name      = Name,
+                Race      = Race,
+                Class     = Class,
+                Sex       = Sex,
+                Bones     = Bones,
+                Title     = TitleManager.ActiveTitleId,
+                GuildIds  = GuildManager
+                    .Select(g => g.Id)
+                    .ToList(),
+                GuildName = GuildManager.GuildAffiliation?.Name,
+                GuildType = GuildManager.GuildAffiliation?.Type ?? GuildType.None,
+                PvPFlag   = PvPFlag.Disabled
             };
-
-            if(GuildAffiliation > 0)
-            {
-                GuildBase guild = GlobalGuildManager.Instance.GetGuild(GuildAffiliation);
-                if (guild.GetMember(CharacterId) != null)
-                {
-                    playerEntityModel.GuildName = guild.Name;
-                    playerEntityModel.GuildType = guild.Type;
-                }
-                else
-                    GuildAffiliation = 0;
-            }
-
-            return playerEntityModel;
         }
 
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
@@ -486,9 +459,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 Position = new Position(vector)
             });
 
-            // if the player has no existing map they have just entered the world
-            // this check needs to happen before OnAddToMap as the player will have a map afterwards
-            bool initialLogin = Map == null;
+            // this must come before OnAddToMap
+            // the client UI initialises the Holomark checkboxes during OnDocumentReady
+            SendCharacterFlagsUpdated();
 
             base.OnAddToMap(map, guid, vector);
             map.OnAddToMap(this);
@@ -505,7 +478,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SendPacketsAfterAddToMap();
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
-            if (initialLogin)
+            if (PreviousMap == null)
                 OnLogin();
 
             IsLoading = false;
@@ -545,7 +518,6 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             SendInGameTime();
             PathManager.SendInitialPackets();
-            GlobalGuildManager.Instance.SendInitialPackets(Session);
             BuybackManager.Instance.SendBuybackItems(this);
 
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
@@ -742,13 +714,14 @@ namespace NexusForever.WorldServer.Game.Entity
         public void CleanUp()
         {
             CharacterManager.Instance.DeregisterPlayer(this);
-            GlobalGuildManager.Instance.OnPlayerLogout(this);
             CleanupManager.Track(Session.Account);
 
             try
             {
                 Save(() =>
                 {
+                    OnLogout();
+
                     RemoveFromMap();
                     Session.Player = null;
                 });
@@ -763,7 +736,14 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             string motd = WorldServer.RealmMotd;
             if (motd?.Length > 0)
-                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannel.Realm);
+                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
+
+            GuildManager.OnLogin();
+        }
+
+        private void OnLogout()
+        {
+            GuildManager.OnLogout();
         }
 
         /// <summary>
@@ -923,7 +903,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Session.EnqueueMessageEncrypted(new ServerChat
             {
-                Channel = ChatChannel.System,
+                Channel = ChatChannelType.System,
                 Text    = text
             });
         }
@@ -1004,6 +984,43 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // check if parent node has required reputation
             return GetDispositionFromReputation(node.Parent);
+        }
+
+        /// <summary>
+        /// Add a new <see cref="CharacterFlag"/>.
+        /// </summary>
+        public void SetFlag(CharacterFlag flag)
+        {
+            Flags |= flag;
+            SendCharacterFlagsUpdated();
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="CharacterFlag"/>.
+        /// </summary>
+        public void RemoveFlag(CharacterFlag flag)
+        {
+            Flags &= ~flag;
+            SendCharacterFlagsUpdated();
+        }
+
+        /// <summary>
+        /// Returns if supplied <see cref="CharacterFlag"/> exists.
+        /// </summary>
+        public bool HasFlag(CharacterFlag flag)
+        {
+            return (Flags & flag) != 0;
+        }
+
+        /// <summary>
+        /// Send <see cref="ServerCharacterFlagsUpdated"/> to client.
+        /// </summary>
+        public void SendCharacterFlagsUpdated()
+        {
+            Session.EnqueueMessageEncrypted(new ServerCharacterFlagsUpdated
+            {
+                Flags = flags
+            });
         }
     }
 }

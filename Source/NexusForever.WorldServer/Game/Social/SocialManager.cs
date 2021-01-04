@@ -7,10 +7,7 @@ using System.Reflection;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Map.Search;
 using NexusForever.WorldServer.Game.Social.Model;
 using NexusForever.WorldServer.Game.Social.Static;
@@ -28,13 +25,15 @@ namespace NexusForever.WorldServer.Game.Social
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<ChatChannel, ChatChannelHandler> chatChannelHandlers
-            = new Dictionary<ChatChannel, ChatChannelHandler>();
+        private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers
+            = new Dictionary<ChatChannelType, ChatChannelHandler>();
         private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories
             = new Dictionary<ChatFormatType, ChatFormatFactoryDelegate>();
 
         private delegate IChatFormat ChatFormatFactoryDelegate();
         private delegate void ChatChannelHandler(WorldSession session, ClientChat chat);
+
+        private readonly Dictionary<(ChatChannelType, ulong), ChatChannel> chatChannels = new Dictionary<(ChatChannelType, ulong), ChatChannel>();
 
         private SocialManager()
         {
@@ -92,6 +91,26 @@ namespace NexusForever.WorldServer.Game.Social
         }
 
         /// <summary>
+        /// Create a new <see cref="ChatChannel"/> with supplied <see cref="ChatChannelType"/> and id.
+        /// </summary>
+        public ChatChannel RegisterChatChannel(ChatChannelType type, ulong id)
+        {
+            var channel = new ChatChannel(type, id);
+            chatChannels.Add((type, id), channel);
+            return channel;
+        }
+
+        /// <summary>
+        /// Returns an existing <see cref="ChatChannel"/> with supplied <see cref="ChatChannelType"/> and id.
+        /// </summary>
+        public ChatChannel GetChatChannel(ChatChannelType type, ulong id)
+        {
+            if (chatChannels.TryGetValue((type, id), out ChatChannel channel))
+                return channel;
+            return null;
+        }
+
+        /// <summary>
         /// Process and delegate a <see cref="ClientChat"/> message from <see cref="WorldSession"/>, this is called directly from a packet hander.
         /// </summary>
         public void HandleClientChat(WorldSession session, ClientChat chat)
@@ -104,7 +123,7 @@ namespace NexusForever.WorldServer.Game.Social
 
                 session.EnqueueMessageEncrypted(new ServerChat
                 {
-                    Channel = ChatChannel.Debug,
+                    Channel = ChatChannelType.Debug,
                     Name    = "SocialManager",
                     Text    = "Currently not implemented",
                 });
@@ -120,9 +139,9 @@ namespace NexusForever.WorldServer.Game.Social
             });
         }
 
-        [ChatChannelHandler(ChatChannel.Say)]
-        [ChatChannelHandler(ChatChannel.Yell)]
-        [ChatChannelHandler(ChatChannel.Emote)]
+        [ChatChannelHandler(ChatChannelType.Say)]
+        [ChatChannelHandler(ChatChannelType.Yell)]
+        [ChatChannelHandler(ChatChannelType.Emote)]
         private void HandleLocalChat(WorldSession session, ClientChat chat)
         {
             var serverChat = new ServerChat
@@ -145,72 +164,43 @@ namespace NexusForever.WorldServer.Game.Social
             SendChatAccept(session);            
         }
 
-        [ChatChannelHandler(ChatChannel.Guild)]
-        [ChatChannelHandler(ChatChannel.Society)]
-        [ChatChannelHandler(ChatChannel.WarParty)]
-        [ChatChannelHandler(ChatChannel.Community)]
+        [ChatChannelHandler(ChatChannelType.Guild)]
+        [ChatChannelHandler(ChatChannelType.Society)]
+        [ChatChannelHandler(ChatChannelType.WarParty)]
+        [ChatChannelHandler(ChatChannelType.Community)]
+        [ChatChannelHandler(ChatChannelType.GuildOfficer)]
+        [ChatChannelHandler(ChatChannelType.WarPartyOfficer)]
         private void HandleGuildChat(WorldSession session, ClientChat chat)
         {
-            ChatResult result = 0;
-            if (chat.ChatId == 0 || !session.Player.GuildMemberships.Contains(chat.ChatId))
-                result = ChatResult.NotInGuild;
-
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(chat.ChatId);
-            if (guild == null)
-                result = ChatResult.NotInGuild;
-
-            Rank memberRank = guild.GetMember(session.Player.CharacterId).Rank;
-            if ((memberRank.GuildPermission & Guild.Static.GuildRankPermission.MemberChat) == 0)
-                result = ChatResult.NoSpeaking;
-
-            if (result == 0)
+            ChatChannel channel;
+            ChatResult GetResult()
             {
-                ServerChat serverChat = new ServerChat
-                {
-                    Guid = session.Player.Guid,
-                    Channel = chat.Channel,
-                    ChatId = guild.Id,
-                    Name = session.Player.Name,
-                    Text = chat.Message,
-                    Formats = ParseChatLinks(session, chat.Formats).ToList(),
-                };
-                guild.SendToOnlineUsers(serverChat, Guild.Static.GuildRankPermission.MemberChat);
+                channel = GetChatChannel(chat.Channel, chat.ChatId);
+                if (channel == null)
+                    return ChatResult.NotInGuild;
+
+                if (!channel.IsMember(session.Player.CharacterId))
+                    return ChatResult.NoSpeaking;
+
+                return ChatResult.Ok;
             }
-            else
-                SendChatResult(session, result, chat);
-        }
 
-        [ChatChannelHandler(ChatChannel.GuildOfficer)]
-        [ChatChannelHandler(ChatChannel.WarPartyOfficer)]
-        private void HandleGuildOfficerChat(WorldSession session, ClientChat chat)
-        {
-            ChatResult result = 0;
-            if (chat.ChatId == 0 || !session.Player.GuildMemberships.Contains(chat.ChatId))
-                result = ChatResult.NotInGuild;
-
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(chat.ChatId);
-            if (guild == null)
-                result = ChatResult.NotInGuild;
-
-            Rank memberRank = guild.GetMember(session.Player.CharacterId).Rank;
-            if ((memberRank.GuildPermission & Guild.Static.GuildRankPermission.OfficerChat) == 0)
-                result = ChatResult.NoSpeaking;
-
-            if (result == 0)
+            ChatResult result = GetResult();
+            if (result != ChatResult.Ok)
             {
-                ServerChat serverChat = new ServerChat
-                {
-                    Guid = session.Player.Guid,
-                    Channel = chat.Channel,
-                    ChatId = guild.Id,
-                    Name = session.Player.Name,
-                    Text = chat.Message,
-                    Formats = ParseChatLinks(session, chat.Formats).ToList(),
-                };
-                guild.SendToOnlineUsers(serverChat, Guild.Static.GuildRankPermission.OfficerChat);
-            }
-            else
                 SendChatResult(session, result, chat);
+                return;
+            }
+
+            channel.Broadcast(new ServerChat
+            {
+                Guid    = session.Player.Guid,
+                Channel = chat.Channel,
+                ChatId  = chat.ChatId,
+                Name    = session.Player.Name,
+                Text    = chat.Message,
+                Formats = ParseChatLinks(session, chat.Formats).ToList(),
+            });
         }
 
         /// <summary>
@@ -234,14 +224,14 @@ namespace NexusForever.WorldServer.Game.Social
             bool crossFactionChat = ConfigurationManager<WorldServerConfiguration>.Instance.Config.CrossFactionChat;
             if (session.Player.Faction1 != character.Faction1 && !crossFactionChat)
             {
-                SendMessage(session, $"Player \"{whisper.PlayerName}\" not found.", "", ChatChannel.System);
+                SendMessage(session, $"Player \"{whisper.PlayerName}\" not found.", "", ChatChannelType.System);
                 return;
             }
 
             // echo message
             session.EnqueueMessageEncrypted(new ServerChat
             {
-                Channel      = ChatChannel.Whisper,
+                Channel      = ChatChannelType.Whisper,
                 Name         = whisper.PlayerName,
                 Text         = whisper.Message,
                 Self         = true,
@@ -252,7 +242,7 @@ namespace NexusForever.WorldServer.Game.Social
             // target player message
             player.Session.EnqueueMessageEncrypted(new ServerChat
             {
-                Channel      = ChatChannel.Whisper,
+                Channel      = ChatChannelType.Whisper,
                 Name         = session.Player.Name,
                 Text         = whisper.Message,
                 CrossFaction = session.Player.Faction1 != character.Faction1,
@@ -303,7 +293,7 @@ namespace NexusForever.WorldServer.Game.Social
             };
         }
 
-        public void SendMessage(WorldSession session, string message, string name = "", ChatChannel channel = ChatChannel.System)
+        public void SendMessage(WorldSession session, string message, string name = "", ChatChannelType channel = ChatChannelType.System)
         {
            session.EnqueueMessageEncrypted(new ServerChat
             {
@@ -317,8 +307,8 @@ namespace NexusForever.WorldServer.Game.Social
         {
             session.EnqueueMessageEncrypted(new ServerChatResult
             {
-                Channel = clientChat.Channel,
-                ChatId = clientChat.ChatId,
+                Channel    = clientChat.Channel,
+                ChatId     = clientChat.ChatId,
                 ChatResult = result
             });
         }

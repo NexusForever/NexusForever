@@ -1,7 +1,6 @@
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Guild.Static;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
@@ -17,10 +16,10 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            RealmId = reader.ReadUShort(14u);
-            GuildId = reader.ReadULong();
-            Rank = reader.ReadUInt();
-            Data = reader.ReadULong();
+            RealmId   = reader.ReadUShort(14u);
+            GuildId   = reader.ReadULong();
+            Rank      = reader.ReadUInt();
+            Data      = reader.ReadULong();
             TextValue = reader.ReadWideString();
             Operation = reader.ReadEnum<GuildOperation>(6u);
         }
