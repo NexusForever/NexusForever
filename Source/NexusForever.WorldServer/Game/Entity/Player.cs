@@ -497,7 +497,10 @@ namespace NexusForever.WorldServer.Game.Entity
             if (Zone != null)
             {
                 TextTable tt = GameTableManager.Instance.GetTextTable(Language.English);
-                SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
+                if (tt != null)
+                {
+                    SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
+                }
 
                 uint tutorialId = AssetManager.Instance.GetTutorialIdForZone(Zone.Id);
                 if (tutorialId > 0)
