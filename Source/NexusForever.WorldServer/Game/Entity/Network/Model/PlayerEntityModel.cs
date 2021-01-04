@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Guild.Static;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Model
 {
@@ -15,8 +16,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
         public ulong GroupId { get; set; }
         public List<uint> PetIdList { get; } = new List<uint>();
         public string GuildName { get; set; }
-        public byte GuildType { get; set; }
-        public List<ulong> GuildIds { get; } = new List<ulong>(); // Only appears in sniffs when user has a guild, assume related to guild as well. Guild members?
+        public GuildType GuildType { get; set; }
+        public List<ulong> GuildIds { get; set; } = new List<ulong>(); // Only appears in sniffs when user has a guild, assume related to guild as well. Guild members?
         public List<float> Bones { get; set; } = new List<float>();
         public PvPFlag PvPFlag { get; set; }
         public byte Unknown4C { get; set; }
@@ -36,7 +37,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Model
             PetIdList.ForEach(e => writer.Write(e));
 
             writer.WriteStringWide(GuildName);
-            writer.Write(GuildType, 4);
+            writer.Write(GuildType, 4u);
 
             writer.Write((byte)GuildIds.Count, 5);
             GuildIds.ForEach(e => writer.Write(e));

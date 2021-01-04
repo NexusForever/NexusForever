@@ -18,6 +18,7 @@ using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
+using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
@@ -26,6 +27,7 @@ using NexusForever.WorldServer.Game.Reputation;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Storefront;
+using NexusForever.WorldServer.Game.TextFilter;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer
@@ -78,6 +80,7 @@ namespace NexusForever.WorldServer
             EntityCacheManager.Instance.Initialise();
             FactionManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
+            GlobalGuildManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
             PrerequisiteManager.Instance.Initialise();
@@ -94,6 +97,9 @@ namespace NexusForever.WorldServer
             MessageManager.Instance.Initialise();
             SocialManager.Instance.Initialise();
             NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
+
+            TextFilterManager.Instance.Initialise();
+
             WorldManager.Instance.Initialise(lastTick =>
             {
                 // NetworkManager must be first and MapManager must come before everything else
@@ -103,6 +109,7 @@ namespace NexusForever.WorldServer
                 ResidenceManager.Instance.Update(lastTick);
                 BuybackManager.Instance.Update(lastTick);
                 GlobalQuestManager.Instance.Update(lastTick);
+                GlobalGuildManager.Instance.Update(lastTick);
 
                 // process commands after everything else in the tick has processed
                 CommandManager.Instance.Update(lastTick);

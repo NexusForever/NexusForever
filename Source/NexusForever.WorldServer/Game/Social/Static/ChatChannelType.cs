@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.WorldServer.Game.Social.Static
 {
-    public enum ChatChannel
+    public enum ChatChannelType
     {
         Command = 1,
         System,
@@ -40,6 +40,6 @@
         ZoneFrench,
         NexusGerman,
         NexusFrench,
-        Community
+        Community = 47
     }
 }
