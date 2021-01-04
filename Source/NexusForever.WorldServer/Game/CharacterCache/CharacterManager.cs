@@ -8,7 +8,7 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {
-    public sealed class CharacterManager: Singleton<CharacterManager>
+    public sealed class CharacterManager : Singleton<CharacterManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -28,7 +28,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         }
 
         /// <summary>
-        /// Asynchronously adds <see cref="CharacterModel"/> data from the database to the cache
+        /// Adds <see cref="CharacterModel"/> data from the database to the cache
         /// </summary>
         private void BuildCharacterInfoFromDb()
         {
@@ -92,7 +92,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         }
 
         /// <summary>
-        /// Returns a <see cref="Boolean"/> whether there is an <see cref="ICharacter"/> that exists with the name passed in.
+        /// Returns a <see cref="bool"/> whether there is an <see cref="ICharacter"/> that exists with the name passed in.
         /// </summary>
         public bool IsCharacter(string name)
         {
@@ -121,6 +121,26 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         public ICharacter GetCharacterInfo(string name)
         {
             return characterNameToId.TryGetValue(name, out ulong characterId) ? GetCharacterInfo(characterId) : null;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Player"/> for the supplied name.
+        /// </summary>
+        public Player GetPlayer(string name)
+        {
+            return characterNameToId.TryGetValue(name, out ulong characterId) ? GetPlayer(characterId) : null;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Player"/> for the character id.
+        /// </summary>
+        public Player GetPlayer(ulong characterId)
+        {
+            ICharacter character = GetCharacterInfo(characterId);
+            if (character is Player player)
+                return player;
+
+            return null;
         }
     }
 }

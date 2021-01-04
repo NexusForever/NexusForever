@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Shared.Network.Message
 {
-    public interface IBuildable<out T> where T : IWritable
+    public interface IBuildable<out T>
     {
         T Build();
     }

@@ -19,8 +19,12 @@ using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Guild;
+using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game.Reputation;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Game.Setting;
 using NexusForever.WorldServer.Game.Setting.Static;
 using NexusForever.WorldServer.Game.Social;
@@ -42,7 +46,19 @@ namespace NexusForever.WorldServer.Game.Entity
         public Sex Sex { get; }
         public Race Race { get; }
         public Class Class { get; }
+        public Faction Faction { get; }
         public List<float> Bones { get; } = new List<float>();
+
+        public CharacterFlag Flags
+        {
+            get => flags;
+            set
+            {
+                flags = value;
+                saveMask |= PlayerSaveMask.Flags;
+            }
+        }
+        private CharacterFlag flags;
 
         public Path Path
         {
@@ -146,6 +162,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public CharacterAchievementManager AchievementManager { get; }
         public SupplySatchelManager SupplySatchelManager { get; }
         public XpManager XpManager { get; }
+        public ReputationManager ReputationManager { get; }
+        public GuildManager GuildManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -155,6 +173,14 @@ namespace NexusForever.WorldServer.Game.Entity
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
         public bool CanTeleport() => pendingTeleport == null;
+
+
+
+        
+
+
+
+
 
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
@@ -172,13 +198,17 @@ namespace NexusForever.WorldServer.Game.Entity
             PathActivatedTime = model.PathActivatedTimestamp;
             CostumeIndex    = model.ActiveCostumeIndex;
             InputKeySet     = (InputSets)model.InputKeySet;
+            Faction         = (Faction)model.FactionId;
             Faction1        = (Faction)model.FactionId;
             Faction2        = (Faction)model.FactionId;
             innateIndex     = model.InnateIndex;
+            flags           = (CharacterFlag)model.Flags;
 
             CreateTime      = model.CreateTime;
             TimePlayedTotal = model.TimePlayedTotal;
             TimePlayedLevel = model.TimePlayedLevel;
+
+            Session.EntitlementManager.Initialise(model);
 
             foreach (CharacterStatModel statModel in model.Stat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
@@ -199,8 +229,8 @@ namespace NexusForever.WorldServer.Game.Entity
             AchievementManager      = new CharacterAchievementManager(this, model);
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
-
-            Session.EntitlementManager.OnNewCharacter(model);
+            ReputationManager       = new ReputationManager(this, model);
+            GuildManager            = new GuildManager(this, model);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -292,19 +322,130 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.CanProcessPackets = false;
         }
 
+        public void Save(AuthContext context)
+        {
+            Session.AccountRbacManager.Save(context);
+            Session.GenericUnlockManager.Save(context);
+            Session.AccountCurrencyManager.Save(context);
+            Session.EntitlementManager.Save(context);
+
+            CostumeManager.Save(context);
+            KeybindingManager.Save(context);
+        }
+
+        public void Save(CharacterContext context)
+        {
+            var model = new CharacterModel
+            {
+                Id = CharacterId
+            };
+
+            EntityEntry<CharacterModel> entity = context.Attach(model);
+
+            if (saveMask != PlayerSaveMask.None)
+            {
+                if ((saveMask & PlayerSaveMask.Location) != 0)
+                {
+                    model.LocationX = Position.X;
+                    entity.Property(p => p.LocationX).IsModified = true;
+
+                    model.LocationY = Position.Y;
+                    entity.Property(p => p.LocationY).IsModified = true;
+
+                    model.LocationZ = Position.Z;
+                    entity.Property(p => p.LocationZ).IsModified = true;
+
+                    model.WorldId = (ushort)Map.Entry.Id;
+                    entity.Property(p => p.WorldId).IsModified = true;
+
+                    model.WorldZoneId = (ushort)Zone.Id;
+                    entity.Property(p => p.WorldZoneId).IsModified = true;
+                }
+
+                if ((saveMask & PlayerSaveMask.Path) != 0)
+                {
+                    model.ActivePath = (uint)Path;
+                    entity.Property(p => p.ActivePath).IsModified = true;
+                    model.PathActivatedTimestamp = PathActivatedTime;
+                    entity.Property(p => p.PathActivatedTimestamp).IsModified = true;
+                }
+
+                if ((saveMask & PlayerSaveMask.Costume) != 0)
+                {
+                    model.ActiveCostumeIndex = CostumeIndex;
+                    entity.Property(p => p.ActiveCostumeIndex).IsModified = true;
+                }
+
+                if ((saveMask & PlayerSaveMask.InputKeySet) != 0)
+                {
+                    model.InputKeySet = (sbyte)InputKeySet;
+                    entity.Property(p => p.InputKeySet).IsModified = true;
+                }
+
+                if ((saveMask & PlayerSaveMask.Flags) != 0)
+                {
+                    model.Flags = (uint)Flags;
+                    entity.Property(p => p.Flags).IsModified = true;
+                }
+
+                if ((saveMask & PlayerSaveMask.Innate) != 0)
+                {
+                    model.InnateIndex = InnateIndex;
+                    entity.Property(p => p.InnateIndex).IsModified = true;
+                }
+
+                saveMask = PlayerSaveMask.None;
+            }
+
+            model.TimePlayedLevel = (uint)TimePlayedLevel;
+            entity.Property(p => p.TimePlayedLevel).IsModified = true;
+            model.TimePlayedTotal = (uint)TimePlayedTotal;
+            entity.Property(p => p.TimePlayedTotal).IsModified = true;
+            model.LastOnline = DateTime.UtcNow;
+            entity.Property(p => p.LastOnline).IsModified = true;
+
+            foreach (StatValue stat in stats.Values)
+                stat.SaveCharacter(CharacterId, context);
+
+            Inventory.Save(context);
+            CurrencyManager.Save(context);
+            PathManager.Save(context);
+            TitleManager.Save(context);
+            CostumeManager.Save(context);
+            PetCustomisationManager.Save(context);
+            KeybindingManager.Save(context);
+            SpellManager.Save(context);
+            DatacubeManager.Save(context);
+            MailManager.Save(context);
+            ZoneMapManager.Save(context);
+            QuestManager.Save(context);
+            AchievementManager.Save(context);
+            SupplySatchelManager.Save(context);
+            XpManager.Save(context);
+            ReputationManager.Save(context);
+            GuildManager.Save(context);
+
+            Session.EntitlementManager.Save(context);
+        }
+
         protected override IEntityModel BuildEntityModel()
         {
             return new PlayerEntityModel
             {
-                Id       = CharacterId,
-                RealmId  = WorldServer.RealmId,
-                Name     = Name,
-                Race     = Race,
-                Class    = Class,
-                Sex      = Sex,
-                Bones    = Bones,
-                Title    = TitleManager.ActiveTitleId,
-                PvPFlag  = PvPFlag.Disabled
+                Id        = CharacterId,
+                RealmId   = WorldServer.RealmId,
+                Name      = Name,
+                Race      = Race,
+                Class     = Class,
+                Sex       = Sex,
+                Bones     = Bones,
+                Title     = TitleManager.ActiveTitleId,
+                GuildIds  = GuildManager
+                    .Select(g => g.Id)
+                    .ToList(),
+                GuildName = GuildManager.GuildAffiliation?.Name,
+                GuildType = GuildManager.GuildAffiliation?.Type ?? GuildType.None,
+                PvPFlag   = PvPFlag.Disabled
             };
         }
 
@@ -318,9 +459,9 @@ namespace NexusForever.WorldServer.Game.Entity
                 Position = new Position(vector)
             });
 
-            // if the player has no existing map they have just entered the world
-            // this check needs to happen before OnAddToMap as the player will have a map afterwards
-            bool initialLogin = Map == null;
+            // this must come before OnAddToMap
+            // the client UI initialises the Holomark checkboxes during OnDocumentReady
+            SendCharacterFlagsUpdated();
 
             base.OnAddToMap(map, guid, vector);
             map.OnAddToMap(this);
@@ -337,7 +478,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SendPacketsAfterAddToMap();
             Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
 
-            if (initialLogin)
+            if (PreviousMap == null)
                 OnLogin();
 
             IsLoading = false;
@@ -356,7 +497,10 @@ namespace NexusForever.WorldServer.Game.Entity
             if (Zone != null)
             {
                 TextTable tt = GameTableManager.Instance.GetTextTable(Language.English);
-                SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
+                if (tt != null)
+                {
+                    SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
+                }
 
                 uint tutorialId = AssetManager.Instance.GetTutorialIdForZone(Zone.Id);
                 if (tutorialId > 0)
@@ -383,52 +527,21 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.EnqueueMessageEncrypted(new Server00F1());
             SetControl(this);
 
-            // TODO: Move to Unlocks/Rewards Handler. A lot of these are tied to Entitlements which display in the character sheet, but don't actually unlock anything without this packet.
-            Session.EnqueueMessageEncrypted(new ServerRewardPropertySet
-            {
-                Variables = new List<ServerRewardPropertySet.RewardProperty>
-                {
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.CostumeSlots,
-                        Type  = 1,
-                        Value = CostumeManager.CostumeCap
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.ExtraDecorSlots,
-                        Type  = 1,
-                        Value = 2000
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.Trading,
-                        Type  = 1,
-                        Value = 1
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.TradeskillMatStackLimit,
-                        Type  = 1,
-                        Value = 100
-                    },
-                    new ServerRewardPropertySet.RewardProperty
-                    {
-                        Id    = RewardProperty.TradeskillMatTrading,
-                        Type  = 1,
-                        Value = 1
-                    }
-                }
-            });
-
             CostumeManager.SendInitialPackets();
-
+            
             var playerCreate = new ServerPlayerCreate
             {
                 ItemProficiencies = GetItemProficiencies(),
                 FactionData       = new ServerPlayerCreate.Faction
                 {
-                    FactionId = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
+                    FactionId          = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
+                    FactionReputations = ReputationManager
+                        .Select(r => new ServerPlayerCreate.Faction.FactionReputation
+                        {
+                            FactionId = r.Id,
+                            Value     = r.Amount
+                        })
+                        .ToList()
                 },
                 ActiveCostumeIndex    = CostumeIndex,
                 InputKeySet           = (uint)InputKeySet,
@@ -471,6 +584,7 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.AccountCurrencyManager.SendInitialPackets();
             QuestManager.SendInitialPackets();
             AchievementManager.SendInitialPackets();
+            Session.EntitlementManager.SendInitialPackets();
 
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
@@ -609,6 +723,8 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 Save(() =>
                 {
+                    OnLogout();
+
                     RemoveFromMap();
                     Session.Player = null;
                 });
@@ -623,7 +739,14 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             string motd = WorldServer.RealmMotd;
             if (motd?.Length > 0)
-                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannel.Realm);
+                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
+
+            GuildManager.OnLogin();
+        }
+
+        private void OnLogout()
+        {
+            GuildManager.OnLogout();
         }
 
         /// <summary>
@@ -783,7 +906,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Session.EnqueueMessageEncrypted(new ServerChat
             {
-                Channel = ChatChannel.System,
+                Channel = ChatChannelType.System,
                 Text    = text
             });
         }
@@ -827,110 +950,80 @@ namespace NexusForever.WorldServer.Game.Entity
             // TODO: Remove pets, scanbots
         }
 
-        public void Save(AuthContext context)
-        {
-            Session.AccountRbacManager.Save(context);
-            Session.GenericUnlockManager.Save(context);
-            Session.AccountCurrencyManager.Save(context);
-            Session.EntitlementManager.Save(context);
-
-            CostumeManager.Save(context);
-            KeybindingManager.Save(context);
-        }
-
-        public void Save(CharacterContext context)
-        {
-            var model = new CharacterModel
-            {
-                Id = CharacterId
-            };
-
-            EntityEntry<CharacterModel> entity = context.Attach(model);
-
-            if (saveMask != PlayerSaveMask.None)
-            {
-                if ((saveMask & PlayerSaveMask.Location) != 0)
-                {
-                    model.LocationX = Position.X;
-                    entity.Property(p => p.LocationX).IsModified = true;
-
-                    model.LocationY = Position.Y;
-                    entity.Property(p => p.LocationY).IsModified = true;
-
-                    model.LocationZ = Position.Z;
-                    entity.Property(p => p.LocationZ).IsModified = true;
-
-                    model.WorldId = (ushort)Map.Entry.Id;
-                    entity.Property(p => p.WorldId).IsModified = true;
-
-                    model.WorldZoneId = (ushort)Zone.Id;
-                    entity.Property(p => p.WorldZoneId).IsModified = true;
-                }
-
-                if ((saveMask & PlayerSaveMask.Path) != 0)
-                {
-                    model.ActivePath = (uint)Path;
-                    entity.Property(p => p.ActivePath).IsModified = true;
-                    model.PathActivatedTimestamp = PathActivatedTime;
-                    entity.Property(p => p.PathActivatedTimestamp).IsModified = true;
-                }
-
-                if ((saveMask & PlayerSaveMask.Costume) != 0)
-                {
-                    model.ActiveCostumeIndex = CostumeIndex;
-                    entity.Property(p => p.ActiveCostumeIndex).IsModified = true;
-                }
-
-                if ((saveMask & PlayerSaveMask.InputKeySet) != 0)
-                {
-                    model.InputKeySet = (sbyte)InputKeySet;
-                    entity.Property(p => p.InputKeySet).IsModified = true;
-                }
-
-                if ((saveMask & PlayerSaveMask.Innate) != 0)
-                {
-                    model.InnateIndex = InnateIndex;
-                    entity.Property(p => p.InnateIndex).IsModified = true;
-                }
-
-                saveMask = PlayerSaveMask.None;
-            }
-
-            model.TimePlayedLevel = (uint)TimePlayedLevel;
-            entity.Property(p => p.TimePlayedLevel).IsModified = true;
-            model.TimePlayedTotal = (uint)TimePlayedTotal;
-            entity.Property(p => p.TimePlayedTotal).IsModified = true;
-            model.LastOnline = DateTime.UtcNow;
-            entity.Property(p => p.LastOnline).IsModified = true;
-
-            foreach (StatValue stat in stats.Values)
-                stat.SaveCharacter(CharacterId, context);
-
-            Inventory.Save(context);
-            CurrencyManager.Save(context);
-            PathManager.Save(context);
-            TitleManager.Save(context);
-            CostumeManager.Save(context);
-            PetCustomisationManager.Save(context);
-            KeybindingManager.Save(context);
-            SpellManager.Save(context);
-            DatacubeManager.Save(context);
-            MailManager.Save(context);
-            ZoneMapManager.Save(context);
-            QuestManager.Save(context);
-            AchievementManager.Save(context);
-            SupplySatchelManager.Save(context);
-            XpManager.Save(context);
-
-            Session.EntitlementManager.Save(context);
-        }
-
         /// <summary>
         /// Returns the time in seconds that has past since the last <see cref="Player"/> save.
         /// </summary>
         public double GetTimeSinceLastSave()
         {
             return SaveDuration - saveTimer.Time;
+        }
+
+        /// <summary>
+        /// Return <see cref="Disposition"/> between <see cref="Player"/> and <see cref="Faction"/>.
+        /// </summary>
+        public override Disposition GetDispositionTo(Faction factionId, bool primary = true)
+        {
+            FactionNode targetFaction = FactionManager.Instance.GetFaction(factionId);
+            if (targetFaction == null)
+                throw new ArgumentException($"Invalid faction {factionId}!");
+
+            // find disposition based on reputation level
+            Disposition? dispositionFromReputation = GetDispositionFromReputation(targetFaction);
+            if (dispositionFromReputation.HasValue)
+                return dispositionFromReputation.Value;
+
+            return base.GetDispositionTo(factionId, primary);
+        }
+
+        private Disposition? GetDispositionFromReputation(FactionNode node)
+        {
+            if (node == null)
+                return null;
+
+            // check if current node has required reputation
+            Reputation.Reputation reputation = ReputationManager.GetReputation(node.FactionId);
+            if (reputation != null)
+                return FactionNode.GetDisposition(FactionNode.GetFactionLevel(reputation.Amount));
+
+            // check if parent node has required reputation
+            return GetDispositionFromReputation(node.Parent);
+        }
+
+        /// <summary>
+        /// Add a new <see cref="CharacterFlag"/>.
+        /// </summary>
+        public void SetFlag(CharacterFlag flag)
+        {
+            Flags |= flag;
+            SendCharacterFlagsUpdated();
+        }
+
+        /// <summary>
+        /// Remove an existing <see cref="CharacterFlag"/>.
+        /// </summary>
+        public void RemoveFlag(CharacterFlag flag)
+        {
+            Flags &= ~flag;
+            SendCharacterFlagsUpdated();
+        }
+
+        /// <summary>
+        /// Returns if supplied <see cref="CharacterFlag"/> exists.
+        /// </summary>
+        public bool HasFlag(CharacterFlag flag)
+        {
+            return (Flags & flag) != 0;
+        }
+
+        /// <summary>
+        /// Send <see cref="ServerCharacterFlagsUpdated"/> to client.
+        /// </summary>
+        public void SendCharacterFlagsUpdated()
+        {
+            Session.EnqueueMessageEncrypted(new ServerCharacterFlagsUpdated
+            {
+                Flags = flags
+            });
         }
     }
 }

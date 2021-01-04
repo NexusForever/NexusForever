@@ -27,15 +27,19 @@ using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NexusForever.WorldServer.Network.Message.Static;
+using NLog;
 using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
+using NexusForever.WorldServer.Game.Guild;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class CharacterHandler
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         [MessageHandler(GameMessageOpcode.ClientRealmList)]
         public static void HandleRealmList(WorldSession session, ClientRealmList realmList)
         {
@@ -134,77 +138,95 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         })
                         .ToList()
                 });
+                session.EnqueueMessageEncrypted(new ServerAccountTier
+                {
+                    Tier = session.AccountTier
+                });
+
+                // 2 is just a fail safe for the minimum amount of character slots
+                // this is set in the tbl files so a value should always exist
+                uint characterSlots = (uint)(session.EntitlementManager.GetRewardProperty(RewardPropertyType.CharacterSlots).GetValue(0u) ?? 2u);
+                uint characterCount = (uint)characters.Count(c => c.DeleteTime == null);
 
                 var serverCharacterList = new ServerCharacterList
                 {
-                    RealmId = WorldServer.RealmId
+                    RealmId                        = WorldServer.RealmId,
+                    // no longer used as replaced by entitlements but retail server still used to send this
+                    AdditionalCount                = characterCount,
+                    AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)(characterSlots - characterCount))
                 };
 
-                foreach (CharacterModel character in characters)
+                foreach (CharacterModel character in characters.Where(c => c.DeleteTime == null))
                 {
-                    if (character.DeleteTime != null)
-                        continue;
-
                     var listCharacter = new ServerCharacterList.Character
                     {
-                        Id          = character.Id,
-                        Name        = character.Name,
-                        Sex         = (Sex)character.Sex,
-                        Race        = (Race)character.Race,
-                        Class       = (Class)character.Class,
-                        Faction     = character.FactionId,
-                        Level       = character.Level,
-                        WorldId     = character.WorldId,
-                        WorldZoneId = character.WorldZoneId,
-                        RealmId     = WorldServer.RealmId,
-                        Path        = (byte)character.ActivePath
+                        Id                = character.Id,
+                        Name              = character.Name,
+                        Sex               = (Sex)character.Sex,
+                        Race              = (Race)character.Race,
+                        Class             = (Class)character.Class,
+                        Faction           = character.FactionId,
+                        Level             = character.Level,
+                        WorldId           = character.WorldId,
+                        WorldZoneId       = character.WorldZoneId,
+                        RealmId           = WorldServer.RealmId,
+                        Path              = (byte)character.ActivePath,
+                        LastLoggedOutDays = (float)DateTime.UtcNow.Subtract(character.LastOnline ?? DateTime.UtcNow).TotalDays * -1f
                     };
 
-                    maxCharacterLevelAchieved = (byte)Math.Max(maxCharacterLevelAchieved, character.Level);
+                    maxCharacterLevelAchieved = Math.Max(maxCharacterLevelAchieved, character.Level);
 
-                    // create a temporary Inventory and CostumeManager to show equipped gear
-                    var inventory      = new Inventory(null, character);
-                    var costumeManager = new CostumeManager(null, session.Account, character);
-
-                    CostumeEntity costume = null;
-                    if (character.ActiveCostumeIndex >= 0)
-                        costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
-
-                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
-
-                    foreach (ItemVisual itemVisual in inventory.GetItemVisuals(costume))
-                        listCharacter.Gear.Add(itemVisual);
-
-                    foreach (CharacterAppearanceModel appearance in character.Appearance)
+                    try
                     {
-                        listCharacter.Appearance.Add(new ItemVisual
+                        // create a temporary Inventory and CostumeManager to show equipped gear
+                        var inventory = new Inventory(null, character);
+                        var costumeManager = new CostumeManager(null, session.Account, character);
+
+                        CostumeEntity costume = null;
+                        if (character.ActiveCostumeIndex >= 0)
+                            costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
+
+                        listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+
+                        foreach (ItemVisual itemVisual in inventory.GetItemVisuals(costume))
+                            listCharacter.Gear.Add(itemVisual);
+
+                        foreach (CharacterAppearanceModel appearance in character.Appearance)
                         {
-                            Slot      = (ItemSlot)appearance.Slot,
-                            DisplayId = appearance.DisplayId
-                        });
-                    }
-
-                    /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
-                    {
-                        listCharacter.Labels.Add(customisation.Label);
-                        listCharacter.Values.Add(customisation.Value);
-                    }*/
-
-                    foreach (CharacterBoneModel bone in character.Bone.OrderBy(bone => bone.BoneIndex))
-                    {
-                        listCharacter.Bones.Add(bone.Bone);
-                    }
-
-                    foreach (CharacterStatModel stat in character.Stat)
-                    {
-                        if ((Stat)stat.Stat == Stat.Level)
-                        {
-                            listCharacter.Level = (uint)stat.Value;
-                            break;
+                            listCharacter.Appearance.Add(new ItemVisual
+                            {
+                                Slot = (ItemSlot)appearance.Slot,
+                                DisplayId = appearance.DisplayId
+                            });
                         }
-                    }
 
-                    serverCharacterList.Characters.Add(listCharacter);
+                        /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
+                        {
+                            listCharacter.Labels.Add(customisation.Label);
+                            listCharacter.Values.Add(customisation.Value);
+                        }*/
+
+                        foreach (CharacterBoneModel bone in character.Bone.OrderBy(bone => bone.BoneIndex))
+                        {
+                            listCharacter.Bones.Add(bone.Bone);
+                        }
+
+                        foreach (CharacterStatModel stat in character.Stat)
+                        {
+                            if ((Stat)stat.Stat == Stat.Level)
+                            {
+                                listCharacter.Level = (uint)stat.Value;
+                                break;
+                            }
+                        }
+
+                        serverCharacterList.Characters.Add(listCharacter);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Fatal(ex, $"An error has occured while loading character '{character.Name}'");
+                        continue;
+                    }
                 }
 
                 session.EnqueueMessageEncrypted(new ServerMaxCharacterLevelAchieved
@@ -420,10 +442,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             CharacterModel characterToDelete = session.Characters.FirstOrDefault(c => c.Id == characterDelete.CharacterId);
 
-            CharacterModifyResult GetResult()
+            (CharacterModifyResult, uint) GetResult()
             {
                 if (characterToDelete == null)
-                    return CharacterModifyResult.DeleteFailed;
+                    return (CharacterModifyResult.DeleteFailed, 0);
 
                 // TODO: Not sure if this is definitely the case, but put it in for good measure
                 if (characterToDelete.Mail.Count > 0)
@@ -431,21 +453,25 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     foreach (CharacterMailModel characterMail in characterToDelete.Mail)
                     {
                         if (characterMail.Attachment.Count > 0)
-                            return CharacterModifyResult.DeleteFailed;
+                            return (CharacterModifyResult.DeleteFailed, 0);
                     }
                 }
 
-                // TODO: Ensure character is not a guild master
+                uint leaderCount = (uint)GlobalGuildManager.Instance.GetCharacterGuilds(characterToDelete.Id)
+                    .Count(g => g.LeaderId == characterDelete.CharacterId);
+                if (leaderCount > 0)
+                    return (CharacterModifyResult.DeleteFailed, leaderCount);
 
-                return CharacterModifyResult.DeleteOk;
+                return (CharacterModifyResult.DeleteOk, 0);
             }
 
-            CharacterModifyResult result = GetResult();
-            if (result != CharacterModifyResult.DeleteOk)
+            (CharacterModifyResult result, uint data) deleteCheck = GetResult();
+            if (deleteCheck.result != CharacterModifyResult.DeleteOk)
             {
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
                 {
-                    Result = result
+                    Result = deleteCheck.result,
+                    Data = deleteCheck.data
                 });
                 return;
             }
@@ -481,7 +507,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
                 {
-                    Result = result
+                    Result = deleteCheck.result
                 });
             }));
         }

@@ -154,7 +154,17 @@
         StoryPanel                  = 96,
         StoryCommunicator           = 97,
 
+        // reputation
+        Reputation                  = 98,
+        ReputationUpdate            = 99,
+
+        // guild
+        Guild                       = 100,
+        GuildRegister               = 101,
+        GuildJoin                   = 102,
+
         // non command permissions
-        InstantLogout               = 10000
+        InstantLogout               = 10000,
+        Signature                   = 10001
     }
 }

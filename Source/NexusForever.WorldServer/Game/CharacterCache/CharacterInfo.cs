@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Reputation.Static;
 
 namespace NexusForever.WorldServer.Game.CharacterCache
 {

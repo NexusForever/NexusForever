@@ -14,7 +14,7 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2")
+                .HasAnnotation("ProductVersion", "3.1.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterAchievementModel", b =>
@@ -62,7 +62,6 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue(0ul);
 
                     b.Property<byte>("SpecIndex")
-                        .ValueGeneratedOnAdd()
                         .HasColumnName("specIndex")
                         .HasColumnType("tinyint(3) unsigned")
                         .HasDefaultValue((byte)0);
@@ -87,13 +86,11 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue(0ul);
 
                     b.Property<byte>("SpecIndex")
-                        .ValueGeneratedOnAdd()
                         .HasColumnName("specIndex")
                         .HasColumnType("tinyint(3) unsigned")
                         .HasDefaultValue((byte)0);
 
                     b.Property<ushort>("Location")
-                        .ValueGeneratedOnAdd()
                         .HasColumnName("location")
                         .HasColumnType("smallint(5) unsigned")
                         .HasDefaultValue((ushort)0);
@@ -622,6 +619,16 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnType("smallint(5) unsigned")
                         .HasDefaultValue((ushort)0);
 
+                    b.Property<uint>("Flags")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("flags")
+                        .HasColumnType("int unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<ulong?>("GuildAffiliation")
+                        .HasColumnName("guildAffiliation")
+                        .HasColumnType("bigint unsigned");
+
                     b.Property<byte>("InnateIndex")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("innateIndex")
@@ -915,6 +922,31 @@ namespace NexusForever.Database.Character.Migrations
                     b.ToTable("character_quest_objective");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterReputation", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<uint>("FactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("factionId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<float>("Amount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("amount")
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f);
+
+                    b.HasKey("Id", "FactionId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_reputation");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterSpellModel", b =>
                 {
                     b.Property<ulong>("Id")
@@ -1043,6 +1075,183 @@ namespace NexusForever.Database.Character.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("character_zonemap_hexgroup");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.GuildDataModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<string>("AdditionalInfo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("additionalInfo")
+                        .HasColumnType("varchar(400)")
+                        .HasDefaultValue("");
+
+                    b.Property<ushort>("BackgroundIconPartId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("backgroundIconPartId")
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0);
+
+                    b.Property<ushort>("ForegroundIconPartId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("foregroundIconPartId")
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0);
+
+                    b.Property<string>("MessageOfTheDay")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("motd")
+                        .HasColumnType("varchar(200)")
+                        .HasDefaultValue("");
+
+                    b.Property<ushort>("ScanLinesPartId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("scanLinesPartId")
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0);
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("guild_guild_data");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.GuildMemberModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<ulong>("CharacterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("characterId")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<string>("Note")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("note")
+                        .HasColumnType("varchar(32)")
+                        .HasDefaultValue("");
+
+                    b.Property<byte>("Rank")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("rank")
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0);
+
+                    b.HasKey("Id", "CharacterId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("guild_member");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.GuildModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<DateTime>("CreateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("createTime")
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("current_timestamp()");
+
+                    b.Property<DateTime?>("DeleteTime")
+                        .HasColumnName("deleteTime")
+                        .HasColumnType("datetime");
+
+                    b.Property<uint>("Flags")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("flags")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<ulong?>("LeaderId")
+                        .HasColumnName("leaderId")
+                        .HasColumnType("bigint(20) unsigned");
+
+                    b.Property<string>("Name")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("name")
+                        .HasColumnType("varchar(30)")
+                        .HasDefaultValue("");
+
+                    b.Property<ulong?>("OriginalLeaderId")
+                        .HasColumnName("orginialLeaderId")
+                        .HasColumnType("bigint(20) unsigned");
+
+                    b.Property<string>("OriginalName")
+                        .HasColumnName("originalName")
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<byte>("Type")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("type")
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0);
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("guild");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.GuildRankModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnName("id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<byte>("Index")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("index")
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0);
+
+                    b.Property<ulong>("BankWithdrawalPermission")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("bankWithdrawPermission")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<ulong>("MoneyWithdrawalLimit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("moneyWithdrawalLimit")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.Property<string>("Name")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("name")
+                        .HasColumnType("varchar(16)")
+                        .HasDefaultValue("");
+
+                    b.Property<uint>("Permission")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("permission")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u);
+
+                    b.Property<ulong>("RepairLimit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("repairLimit")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul);
+
+                    b.HasKey("Id", "Index")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("guild_rank");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ItemModel", b =>
@@ -1546,6 +1755,16 @@ namespace NexusForever.Database.Character.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterReputation", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
+                        .WithMany("Reputation")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__character_reputation_id__character_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterSpellModel", b =>
                 {
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
@@ -1592,6 +1811,36 @@ namespace NexusForever.Database.Character.Migrations
                         .WithMany("ZonemapHexgroup")
                         .HasForeignKey("Id")
                         .HasConstraintName("FK__character_zonemap_hexgroup_id__character_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.GuildDataModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
+                        .WithOne("GuildData")
+                        .HasForeignKey("NexusForever.Database.Character.Model.GuildDataModel", "Id")
+                        .HasConstraintName("FK__guild_guild_data_id__guild_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.GuildMemberModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
+                        .WithMany("GuildMember")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__guild_member_id__guild_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.GuildRankModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
+                        .WithMany("GuildRank")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__guild_rank_id__guild_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

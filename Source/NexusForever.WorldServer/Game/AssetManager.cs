@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using NexusForever.Database.World.Model;
 using NexusForever.Shared;
@@ -8,6 +9,7 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Game
 {
@@ -42,6 +44,8 @@ namespace NexusForever.WorldServer.Game
         private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
         private ImmutableDictionary</*creatureId*/uint, /*targetGroupIds*/ImmutableList<uint>> creatureAssociatedTargetGroups;
 
+        private ImmutableDictionary<AccountTier, ImmutableList<RewardPropertyPremiumModifierEntry>> rewardPropertiesByTier;
+
         private AssetManager()
         {
         }
@@ -58,6 +62,7 @@ namespace NexusForever.WorldServer.Game
             CacheItemDisplaySourceEntries();
             CacheTutorials();
             CacheCreatureTargetGroups();
+            CacheRewardPropertiesByTier();
         }
 
         private void CacheCharacterCustomisations()
@@ -157,6 +162,26 @@ namespace NexusForever.WorldServer.Game
             creatureAssociatedTargetGroups = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
+        private void CacheRewardPropertiesByTier()
+        {
+            // VIP was intended to be used in China from what I can see, you can force the VIP premium system in the client with the China game mode parameter
+            // not supported as the system was unfinished
+            IEnumerable<RewardPropertyPremiumModifierEntry> hybridEntries = GameTableManager.Instance
+                .RewardPropertyPremiumModifier.Entries
+                .Where(e => (PremiumSystem)e.PremiumSystemEnum == PremiumSystem.Hybrid)
+                .ToList();
+
+            // base reward properties are determined by current account tier and lower if fall through flag is set
+            rewardPropertiesByTier = hybridEntries
+                .Select(e => e.Tier)
+                .Distinct()
+                .ToImmutableDictionary(k => (AccountTier)k, k => hybridEntries
+                    .Where(r => r.Tier == k)
+                    .Concat(hybridEntries
+                        .Where(r => r.Tier < k && ((RewardPropertyPremiumModiferFlags)r.Flags & RewardPropertyPremiumModiferFlags.FallThrough) != 0))
+                    .ToImmutableList());
+        }
+
         /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
         /// </summary>
@@ -196,6 +221,14 @@ namespace NexusForever.WorldServer.Game
         public ImmutableList<uint> GetTargetGroupsForCreatureId(uint creatureId)
         {
             return creatureAssociatedTargetGroups.TryGetValue(creatureId, out ImmutableList<uint> entries) ? entries : null;
+        }
+
+        /// <summary>
+        /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="RewardPropertyPremiumModifierEntry"/> for the given <see cref="AccountTier"/>.
+        /// </summary>
+        public ImmutableList<RewardPropertyPremiumModifierEntry> GetRewardPropertiesForTier(AccountTier tier)
+        {
+            return rewardPropertiesByTier.TryGetValue(tier, out ImmutableList<RewardPropertyPremiumModifierEntry> entries) ? entries : ImmutableList<RewardPropertyPremiumModifierEntry>.Empty;
         }
     }
 }

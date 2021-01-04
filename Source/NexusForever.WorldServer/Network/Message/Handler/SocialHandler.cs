@@ -10,7 +10,6 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -77,9 +76,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Race = session.Player.Race,
                     Class = session.Player.Class,
                     Path = session.Player.Path,
-                    Faction = Faction.Dominion,
+                    Faction = session.Player.Faction1,
                     Sex = session.Player.Sex,
-                    Zone = 1417
+                    Zone = session.Player.Zone.Id
                 }
             };
 

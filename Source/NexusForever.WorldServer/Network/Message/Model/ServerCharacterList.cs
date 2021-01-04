@@ -3,6 +3,7 @@ using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
@@ -13,21 +14,17 @@ namespace NexusForever.WorldServer.Network.Message.Model
         public class Character : IWritable
         {
             // probably, x, y, z, yaw, pitch
-            public class UnknownStructure2 : IWritable
+            public class WorldLocation : IWritable
             {
-                public uint Unknown0 { get; set; }
-                public uint Unknown4 { get; set; }
-                public uint Unknown8 { get; set; }
-                public uint UnknownC { get; set; }
-                public uint Unknown10 { get; set; }
+                public Position Position { get; set; } = new Position();
+                public float Yaw { get; set; }
+                public float Pitch { get; set; }
 
                 public void Write(GamePacketWriter writer)
                 {
-                    writer.Write(Unknown0);
-                    writer.Write(Unknown4);
-                    writer.Write(Unknown8);
-                    writer.Write(UnknownC);
-                    writer.Write(Unknown10);
+                    Position.Write(writer);
+                    writer.Write(Yaw);
+                    writer.Write(Pitch);
                 }
             }
 
@@ -43,15 +40,15 @@ namespace NexusForever.WorldServer.Network.Message.Model
             public ushort WorldId { get; set; }
             public ushort WorldZoneId { get; set; }
             public ushort RealmId { get; set; }
-            public UnknownStructure2 Unknown3C { get; } = new UnknownStructure2();
+            public WorldLocation Location { get; } = new WorldLocation();
             public byte Path { get; set; }
             public bool IsLocked { get; set; }
-            public bool Unknown58 { get; set; }
+            public bool RequiresRename { get; set; }
             public uint GearMask { get; set; }
             public List<uint> Labels { get; } = new List<uint>();
             public List<uint> Values { get; } = new List<uint>();
             public List<float> Bones { get; } = new List<float>();
-            public uint Unknown74 { get; set; }
+            public float LastLoggedOutDays { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -75,11 +72,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 writer.Write(WorldZoneId, 15);
                 writer.Write(RealmId, 14);
 
-                Unknown3C.Write(writer);
+                Location.Write(writer);
 
                 writer.Write(Path, 3);
                 writer.Write(IsLocked);
-                writer.Write(Unknown58);
+                writer.Write(RequiresRename);
                 writer.Write(GearMask);
 
                 writer.Write(Labels.Count, 4);
@@ -92,23 +89,23 @@ namespace NexusForever.WorldServer.Network.Message.Model
                 foreach (float value in Bones)
                     writer.Write(value);
 
-                writer.Write(Unknown74);
+                writer.Write(LastLoggedOutDays);
             }
         }
 
         public ulong Id { get; set; }
         public List<Character> Characters { get; } = new List<Character>();
-        public List<uint> Unknown14 { get; } = new List<uint>();
-        public List<uint> Unknown1C { get; } = new List<uint>();
+        public List<uint> Unknown14 { get; set; } = new List<uint>(); // Believe this to be Enabled Character Creation Ids, but could not get the client to do anything different.
+        public List<uint> DisabledCharacterCreationIds { get; set; } = new List<uint>();
         public ushort RealmId { get; set; }
         public ushort Unknown28 { get; set; }
         public ulong Unknown30 { get; set; }
         public uint Unknown38 { get; set; }
         public uint Unknown3C { get; set; }
-        public uint Unknown40 { get; set; }
-        public uint Unknown44 { get; set; }
-        public ushort Unknown48 { get; set; }
-        public bool Unknown4C { get; set; }
+        public uint AdditionalAllowedCharCreations { get; set; }
+        public uint AdditionalCount { get; set; }
+        public Faction FactionRestriction { get; set; }
+        public bool FreeLevel50 { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -122,8 +119,8 @@ namespace NexusForever.WorldServer.Network.Message.Model
             foreach (uint value in Unknown14)
                 writer.Write(value);
 
-            writer.Write(Unknown1C.Count);
-            foreach (uint value in Unknown1C)
+            writer.Write(DisabledCharacterCreationIds.Count);
+            foreach (uint value in DisabledCharacterCreationIds)
                 writer.Write(value);
 
             writer.Write(RealmId, 14);
@@ -133,10 +130,10 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
             writer.Write(Unknown38);
             writer.Write(Unknown3C);
-            writer.Write(Unknown40);
-            writer.Write(Unknown44);
-            writer.Write(Unknown48, 14);
-            writer.Write(Unknown4C);
+            writer.Write(AdditionalAllowedCharCreations);
+            writer.Write(AdditionalCount);
+            writer.Write(FactionRestriction, 14);
+            writer.Write(FreeLevel50);
         }
     }
 }

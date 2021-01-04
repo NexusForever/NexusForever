@@ -11,15 +11,15 @@ namespace NexusForever.WorldServer.Game.Social
 {
     public class ChatMessageBuilder
     {
-        private readonly ChatChannel channel;
+        private readonly ChatChannelType channel;
 
         private readonly StringBuilder builder = new StringBuilder();
         private readonly List<ChatFormat> formats = new List<ChatFormat>();
 
         /// <summary>
-        /// Create a new <see cref="ChatMessageBuilder"/> with the supplied <see cref="ChatChannel"/>.
+        /// Create a new <see cref="ChatMessageBuilder"/> with the supplied <see cref="ChatChannelType"/>.
         /// </summary>
-        public ChatMessageBuilder(ChatChannel channel)
+        public ChatMessageBuilder(ChatChannelType channel)
         {
             this.channel = channel;
         }

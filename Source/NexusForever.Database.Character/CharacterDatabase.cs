@@ -150,6 +150,8 @@ namespace NexusForever.Database.Character
 
             await query.SelectMany(c => c.TradeskillMaterials).LoadAsync();
 
+            await query.SelectMany(c => c.Reputation).LoadAsync();
+
             return await query.ToListAsync();
         }
 
@@ -198,6 +200,28 @@ namespace NexusForever.Database.Character
                 .GroupBy(i => 1)
                 .Select(g => g.Max(s => s.Id))
                 .ToList()[0];
+        }
+
+        public ulong GetNextGuildId()
+        {
+            using var context = new CharacterContext(config);
+
+            return context.Guild
+                .GroupBy(i => 1)
+                .Select(g => g.Max(s => s.Id))
+                .ToList()[0];
+        }
+
+        public List<GuildModel> GetGuilds()
+        {
+            using var context = new CharacterContext(config);
+
+            return context.Guild
+                .Where(g => g.DeleteTime == null)
+                .Include(g => g.GuildRank)
+                .Include(g => g.GuildMember)
+                .Include(g => g.GuildData)
+                .ToList();
         }
     }
 }

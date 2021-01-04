@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerChatJoin)]
     public class ServerChatJoin : IWritable
     {
-        public ChatChannel Channel { get; set; }
+        public ChatChannelType Channel { get; set; }
         public ulong ChannelId { get; set; }
         public string CustomChannelName { get; set; }
 

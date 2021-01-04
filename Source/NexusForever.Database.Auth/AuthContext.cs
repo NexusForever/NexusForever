@@ -837,8 +837,23 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 98,
+                        Name = "Category: Reputation"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 99,
+                        Name = "Command: ReputationUpdate"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 10000,
                         Name = "Other: InstantLogout"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10001,
+                        Name = "Other: Signature"
                     });
             });
 

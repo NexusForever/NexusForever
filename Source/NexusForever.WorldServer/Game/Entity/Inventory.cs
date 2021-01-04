@@ -84,10 +84,8 @@ namespace NexusForever.WorldServer.Game.Entity
             
             deletedItems.Clear();
 
-            foreach (Item item in bags.Values
-                .Where(b => b.Location != InventoryLocation.Ability)
-                .SelectMany(i => i))
-                item.Save(context);
+            foreach (Bag bag in bags.Values.Where(b => b.Location != InventoryLocation.Ability))
+                bag.Save(context);
         }
 
         /// <summary>

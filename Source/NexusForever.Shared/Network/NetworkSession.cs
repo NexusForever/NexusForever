@@ -31,7 +31,8 @@ namespace NexusForever.Shared.Network
             socket = newSocket;
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveDataCallback, null);
 
-            log.Trace("New client connected.");
+            log.Trace($"New client connected. {newSocket.RemoteEndPoint}");
+
         }
 
         public override void Update(double lastTick)
@@ -51,9 +52,10 @@ namespace NexusForever.Shared.Network
         protected virtual void OnDisconnect()
         {
             Disconnected = true;
+            var remoteEndPoint = socket.RemoteEndPoint;
             socket.Close();
 
-            log.Trace("Client disconnected.");
+            log.Trace($"Client disconnected. {remoteEndPoint}");
         }
 
         /// <summary>

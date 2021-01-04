@@ -202,7 +202,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public GameTable<Faction2Entry> Faction2 { get; private set; }
 
+        [GameData]
         public GameTable<Faction2RelationshipEntry> Faction2Relationship { get; private set; }
+        
         public GameTable<FinishingMoveDeathVisualEntry> FinishingMoveDeathVisual { get; private set; }
         public GameTable<FullScreenEffectEntry> FullScreenEffect { get; private set; }
 
@@ -221,7 +223,10 @@ namespace NexusForever.Shared.GameTable
         public GameTable<GossipSetEntry> GossipSet { get; private set; }
         public GameTable<GuildPerkEntry> GuildPerk { get; private set; }
         public GameTable<GuildPermissionEntry> GuildPermission { get; private set; }
+
+        [GameData]
         public GameTable<GuildStandardPartEntry> GuildStandardPart { get; private set; }
+        
         public GameTable<HazardEntry> Hazard { get; private set; }
         public GameTable<HookAssetEntry> HookAsset { get; private set; }
         public GameTable<HookTypeEntry> HookType { get; private set; }
@@ -455,8 +460,13 @@ namespace NexusForever.Shared.GameTable
         public GameTable<ReplaceableMaterialInfoEntry> ReplaceableMaterialInfo { get; private set; }
         public GameTable<ResourceConversionEntry> ResourceConversion { get; private set; }
         public GameTable<ResourceConversionGroupEntry> ResourceConversionGroup { get; private set; }
+
+        [GameData]
         public GameTable<RewardPropertyEntry> RewardProperty { get; private set; }
+
+        [GameData]
         public GameTable<RewardPropertyPremiumModifierEntry> RewardPropertyPremiumModifier { get; private set; }
+
         public GameTable<RewardRotationContentEntry> RewardRotationContent { get; private set; }
         public GameTable<RewardRotationEssenceEntry> RewardRotationEssence { get; private set; }
         public GameTable<RewardRotationItemEntry> RewardRotationItem { get; private set; }
@@ -619,6 +629,8 @@ namespace NexusForever.Shared.GameTable
         public GameTable<WindEntry> Wind { get; private set; }
 
         public GameTable<WindSpawnEntry> WindSpawn { get; private set; }
+
+        [GameData]
         public GameTable<WordFilterEntry> WordFilter { get; private set; }
 
         [GameData]

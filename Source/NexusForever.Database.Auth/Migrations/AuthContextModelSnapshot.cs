@@ -811,8 +811,23 @@ namespace NexusForever.Database.Auth.Migrations
                         },
                         new
                         {
+                            Id = 98u,
+                            Name = "Category: Reputation"
+                        },
+                        new
+                        {
+                            Id = 99u,
+                            Name = "Command: ReputationUpdate"
+                        },
+                        new
+                        {
                             Id = 10000u,
                             Name = "Other: InstantLogout"
+                        },
+                        new
+                        {
+                            Id = 10001u,
+                            Name = "Other: Signature"
                         });
                 });
 
