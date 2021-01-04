@@ -122,6 +122,8 @@ namespace NexusForever.WorldServer.Game.Guild
             // validation can fail if the player is removed from the guild or the guild is disbanded while offline
             if (model.GuildAffiliation != null)
                 GuildAffiliation = guilds.TryGetValue(model.GuildAffiliation.Value, out GuildBase guild) ? guild : guilds.Values.FirstOrDefault();
+            else if (model.GuildAffiliation == null && guilds.Count > 0)
+                GuildAffiliation = guilds.Values.FirstOrDefault();
         }
 
         public void Save(CharacterContext context)
@@ -235,7 +237,7 @@ namespace NexusForever.WorldServer.Game.Guild
         private bool CanStoreGuildType(GuildType type)
         {
             uint count = (uint)guilds.Count(g => g.Value.Type == type);
-            return GetMaximumGuildTypeCount(type) < count;
+            return count < GetMaximumGuildTypeCount(type);
         }
 
         /// <summary>

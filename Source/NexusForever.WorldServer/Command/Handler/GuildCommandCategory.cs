@@ -35,7 +35,7 @@ namespace NexusForever.WorldServer.Command.Handler
             // default standard from the client
             GuildStandard standard = null;
             if (type == GuildType.Guild)
-                standard = new GuildStandard(3, 4, 6);
+                standard = new GuildStandard(4, 5, 6);
 
             GuildResultInfo info = player.GuildManager.CanRegisterGuild(type, name, leaderRank, councilRank, memberRank, standard);
             if (info.Result != GuildResult.Success)
