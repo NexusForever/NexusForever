@@ -1,10 +1,8 @@
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.GameTable.Static;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -12,13 +10,10 @@ using System.Threading.Tasks;
 
 namespace NexusForever.Shared.GameTable
 {
-    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
-    public sealed class GameTableManager : Singleton<GameTableManager>, IShutdownAble
+    public sealed class GameTableManager : AbstractManager<GameTableManager>
     {
         private const int minimumThreads = 2;
         private const int maximumThreads = 16;
-
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         [GameData]
         public GameTable<AccountCurrencyTypeEntry> AccountCurrencyType { get; private set; }
@@ -671,9 +666,9 @@ namespace NexusForever.Shared.GameTable
         {
         }
 
-        public GameTableManager Initialise()
+        public override GameTableManager Initialise()
         {
-            log.Info("Loading GameTables...");
+            Log.Info("Loading GameTables...");
 
             Stopwatch sw = Stopwatch.StartNew();
             try
@@ -683,11 +678,11 @@ namespace NexusForever.Shared.GameTable
             }
             catch (Exception exception)
             {
-                log.Fatal(exception);
+                Log.Fatal(exception);
                 throw;
             }
 
-            log.Info($"Loaded GameTables in {sw.ElapsedMilliseconds}ms.");
+            Log.Info($"Loaded GameTables in {sw.ElapsedMilliseconds}ms.");
             return Instance;
         }
 
@@ -767,10 +762,10 @@ namespace NexusForever.Shared.GameTable
                         {
                             bool result = await task;
                             if (result)
-                                log.Info("Completed loading {0} in {1}ms", fileName,
+                                Log.Info("Completed loading {0} in {1}ms", fileName,
                                     (DateTime.Now - loadStarted).TotalMilliseconds);
                             else
-                                log.Error("Failed to load {0} in {1}ms", fileName,
+                                Log.Error("Failed to load {0} in {1}ms", fileName,
                                     (DateTime.Now - loadStarted).TotalMilliseconds);
                         }).Unwrap());
 
@@ -821,23 +816,13 @@ namespace NexusForever.Shared.GameTable
         /// </summary>
         public TextTable GetTextTable(Language language)
         {
-            switch (language)
+            return language switch
             {
-                case Static.Language.English:
-                    return TextEnglish;
-                case Static.Language.French:
-                    return TextFrench;
-                case Static.Language.German:
-                    return TextGerman;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
+                Static.Language.English => TextEnglish,
+                Static.Language.French => TextFrench,
+                Static.Language.German => TextGerman,
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 }

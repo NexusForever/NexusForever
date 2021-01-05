@@ -7,14 +7,13 @@ using System.Net;
 
 namespace NexusForever.Shared.Network
 {
-    public sealed class NetworkManager<T> : Singleton<NetworkManager<T>>, IShutdownAble, IUpdate where T : NetworkSession, new()
+    public sealed class NetworkManager<T> : AbstractManager<NetworkManager<T>>, IUpdate where T : NetworkSession, new()
     {
         private ConnectionListener<T> connectionListener;
 
-        private readonly ConcurrentQueue<T> pendingAdd = new ConcurrentQueue<T>();
-        private readonly ConcurrentQueue<T> pendingRemove = new ConcurrentQueue<T>();
-
-        private readonly HashSet<T> sessions = new HashSet<T>();
+        private readonly ConcurrentQueue<T> pendingAdd = new();
+        private readonly ConcurrentQueue<T> pendingRemove = new();
+        private readonly HashSet<T> sessions = new();
 
         private NetworkManager()
         {
@@ -65,7 +64,7 @@ namespace NexusForever.Shared.Network
         }
 
         /// <inheritdoc />
-        public void Shutdown()
+        public override void Shutdown()
         {
             connectionListener?.Shutdown();
         }

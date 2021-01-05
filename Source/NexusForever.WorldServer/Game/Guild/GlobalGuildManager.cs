@@ -7,7 +7,6 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,10 +18,8 @@ using System.Threading.Tasks;
 
 namespace NexusForever.WorldServer.Game.Guild
 {
-    public sealed class GlobalGuildManager : Singleton<GlobalGuildManager>, IShutdownAble
+    public sealed class GlobalGuildManager : AbstractManager<GlobalGuildManager>
     {
-        private static ILogger log { get; } = LogManager.GetCurrentClassLogger();
-
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
@@ -32,20 +29,20 @@ namespace NexusForever.WorldServer.Game.Guild
         public ulong NextGuildId => nextGuildId++;
         private ulong nextGuildId;
 
-        private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new Dictionary<ulong, GuildBase>();
-        private readonly Dictionary<string, ulong> guildNameCache = new Dictionary<string, ulong>(StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<ulong, List<ulong>> guildMemberCache = new Dictionary<ulong, List<ulong>>();
+        private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new();
+        private readonly Dictionary<string, ulong> guildNameCache = new(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<ulong, List<ulong>> guildMemberCache = new();
 
         private ImmutableDictionary<GuildOperation, (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate)> guildOperationHandlers;
         private delegate GuildResultInfo GuildOperationHandlerResultDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
         private delegate void GuildOperationHandlerDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
 
-        private readonly UpdateTimer saveTimer = new UpdateTimer(SaveDuration);
+        private readonly UpdateTimer saveTimer = new(SaveDuration);
 
         /// <summary>
         /// Initialise the <see cref="GlobalGuildManager"/>, and build cache of all existing guilds
         /// </summary>
-        public GlobalGuildManager Initialise()
+        public override GlobalGuildManager Initialise()
         {
             nextGuildId = DatabaseManager.Instance.CharacterDatabase.GetNextGuildId() + 1ul;
 
@@ -90,10 +87,10 @@ namespace NexusForever.WorldServer.Game.Guild
                 foreach (GuildMember member in members)
                     TrackCharacterGuild(member.CharacterId, guild.Id);
 
-                log.Trace($"Initialised guild {guild.Name}({guild.Id}) with {members.Count} members.");
+                Log.Trace($"Initialised guild {guild.Name}({guild.Id}) with {members.Count} members.");
             }
 
-            log.Info($"Initialized {guilds.Count} guilds from the database.");
+            Log.Info($"Initialized {guilds.Count} guilds from the database.");
         }
 
         /// <summary>
@@ -156,7 +153,7 @@ namespace NexusForever.WorldServer.Game.Guild
             }
 
             guildOperationHandlers = builder.ToImmutable();
-            log.Info($"Initilaised {guildOperationHandlers.Count} guild operation handlers.");
+            Log.Info($"Initilaised {guildOperationHandlers.Count} guild operation handlers.");
         }
 
         /// <summary>
@@ -291,7 +288,7 @@ namespace NexusForever.WorldServer.Game.Guild
         {
             if (!guildOperationHandlers.TryGetValue(operation.Operation, out (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate) handlers))
             {
-                log.Warn($"Received unhandled GuildOperation {operation.Operation}.");
+                Log.Warn($"Received unhandled GuildOperation {operation.Operation}.");
 
                 player.Session.EnqueueMessageEncrypted(new ServerChat
                 {
@@ -330,10 +327,6 @@ namespace NexusForever.WorldServer.Game.Guild
                 info.GuildId = guild.Id;
                 return info;
             }
-        }
-
-        public void Shutdown()
-        {
         }
     }
 }

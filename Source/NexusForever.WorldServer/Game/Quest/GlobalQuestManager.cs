@@ -1,7 +1,6 @@
 ﻿using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,10 +9,8 @@ using System.Linq;
 
 namespace NexusForever.WorldServer.Game.Quest
 {
-    public sealed class GlobalQuestManager : Singleton<GlobalQuestManager>, IUpdate, IShutdownAble
+    public sealed class GlobalQuestManager : AbstractManager<GlobalQuestManager>, IUpdate
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         /// <summary>
         /// <see cref="DateTime"/> representing the next daily reset.
         /// </summary>
@@ -33,7 +30,7 @@ namespace NexusForever.WorldServer.Game.Quest
         {
         }
 
-        public GlobalQuestManager Initialise()
+        public override GlobalQuestManager Initialise()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -42,7 +39,7 @@ namespace NexusForever.WorldServer.Game.Quest
             InitialiseQuestRelations();
             InitialiseCommunicator();
 
-            log.Info($"Cached {questInfoStore.Count} quests in {sw.ElapsedMilliseconds}ms.");
+            Log.Info($"Cached {questInfoStore.Count} quests in {sw.ElapsedMilliseconds}ms.");
             return Instance;
         }
 
@@ -154,12 +151,6 @@ namespace NexusForever.WorldServer.Game.Quest
         {
             return communicatorQuestStore.TryGetValue(questId, out ImmutableList<CommunicatorMessage> creatureIds)
                 ? creatureIds : Enumerable.Empty<CommunicatorMessage>();
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-
         }
     }
 }

@@ -345,7 +345,7 @@ namespace NexusForever.WorldServer.Game.Entity
             // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
             foreach (WorldEntity entity in visibleEntities.Values)
             {
-                if (!(entity is Player player))
+                if (entity is not Player player)
                     continue;
 
                 if (!includeSelf && (Guid == entity.Guid || ControllerGuid == entity.Guid))

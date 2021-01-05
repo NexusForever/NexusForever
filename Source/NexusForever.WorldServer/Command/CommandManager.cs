@@ -2,7 +2,6 @@
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -13,10 +12,8 @@ using System.Text;
 
 namespace NexusForever.WorldServer.Command
 {
-    public sealed class CommandManager : Singleton<CommandManager>, IUpdate, IShutdownAble
+    public sealed class CommandManager : AbstractManager<CommandManager>, IUpdate
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private delegate IParameterConvert ParameterConverterFactoryDelegate();
         private ImmutableDictionary<Type, ParameterConverterFactoryDelegate> converterFactories;
         private ImmutableDictionary<Type, Type> defaultConverterFactories;
@@ -29,7 +26,7 @@ namespace NexusForever.WorldServer.Command
         {
         }
 
-        public CommandManager Initialise()
+        public override CommandManager Initialise()
         {
             BuildConverters();
             InitialiseHandlers();
@@ -38,7 +35,7 @@ namespace NexusForever.WorldServer.Command
 
         private void BuildConverters()
         {
-            log.Info("Initialising command parameters converters...");
+            Log.Info("Initialising command parameters converters...");
 
             var factoryBuilder = ImmutableDictionary.CreateBuilder<Type, ParameterConverterFactoryDelegate>();
             var defaultBuilder = ImmutableDictionary.CreateBuilder<Type, Type>();
@@ -102,7 +99,7 @@ namespace NexusForever.WorldServer.Command
 
         private void InitialiseHandlers()
         {
-            log.Info("Initialising command handlers...");
+            Log.Info("Initialising command handlers...");
 
             var builder = ImmutableDictionary.CreateBuilder<string, ICommandHandler>(
                 StringComparer.InvariantCultureIgnoreCase);
@@ -120,7 +117,7 @@ namespace NexusForever.WorldServer.Command
                     continue;
 
                 CommandCategory category = (CommandCategory)Activator.CreateInstance(type);
-                category.Build(attribute);
+                category?.Build(attribute);
 
                 foreach (string command in attribute.Commands)
                     builder.Add(command, category);
@@ -254,12 +251,6 @@ namespace NexusForever.WorldServer.Command
                 return CommandResult.NoCommand;
 
             return handler.InvokeHelp(context, queue);
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

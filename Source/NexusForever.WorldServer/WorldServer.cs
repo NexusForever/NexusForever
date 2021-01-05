@@ -63,7 +63,7 @@ namespace NexusForever.WorldServer
             Console.Title = Title;
             log.Info("Initialising...");
 
-            List<IShutdownAble> managersList = new List<IShutdownAble>();
+            var managersList = new List<IShutdownAble>();
 
             managersList.Add(ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json"));
             RealmId   = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
@@ -149,8 +149,6 @@ namespace NexusForever.WorldServer
                 Console.WriteLine($"World Server shutdown.");
                 Console.WriteLine($"Press any key to quit...");
             #endif
-
-
         }
     }
 }

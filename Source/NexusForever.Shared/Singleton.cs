@@ -6,7 +6,6 @@ namespace NexusForever.Shared
     {
         public static T Instance => instance.Value;
 
-        private static readonly Lazy<T> instance = new Lazy<T>(() =>
-            Activator.CreateInstance(typeof(T), true) as T);
+        private static readonly Lazy<T> instance = new Lazy<T>(() => Activator.CreateInstance(typeof(T), true) as T);
     }
 }

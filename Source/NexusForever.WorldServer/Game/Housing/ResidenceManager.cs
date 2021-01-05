@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
-    public sealed class ResidenceManager : Singleton<ResidenceManager>, IUpdate, IShutdownAble
+    public sealed class ResidenceManager : AbstractManager<ResidenceManager>, IUpdate
     {
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
@@ -30,10 +30,10 @@ namespace NexusForever.WorldServer.Game.Housing
         private ulong nextResidenceId;
         private ulong nextDecorId;
 
-        private static readonly ConcurrentDictionary</*residenceId*/ ulong, Residence> residences = new ConcurrentDictionary<ulong, Residence>();
-        private readonly ConcurrentDictionary</*owner*/ string, ulong /*residenceId*/> ownerCache = new ConcurrentDictionary<string, ulong>(StringComparer.InvariantCultureIgnoreCase);
+        private static readonly ConcurrentDictionary</*residenceId*/ ulong, Residence> residences = new();
+        private readonly ConcurrentDictionary</*owner*/ string, ulong /*residenceId*/> ownerCache = new(StringComparer.InvariantCultureIgnoreCase);
 
-        private readonly Dictionary<ulong, PublicResidence> visitableResidences = new Dictionary<ulong, PublicResidence>();
+        private readonly Dictionary<ulong, PublicResidence> visitableResidences = new();
 
         private double timeToSave = SaveDuration;
 
@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Game.Housing
         {
         }
 
-        public ResidenceManager Initialise()
+        public override ResidenceManager Initialise()
         {
             nextResidenceId = DatabaseManager.Instance.CharacterDatabase.GetNextResidenceId() + 1ul;
             nextDecorId     = DatabaseManager.Instance.CharacterDatabase.GetNextDecorId() + 1ul;
@@ -170,12 +170,6 @@ namespace NexusForever.WorldServer.Game.Housing
                 .Values
                 .OrderBy(r => random.Next())
                 .Take(50);
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using NexusForever.Shared;
 using NexusForever.Shared.Network;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -12,10 +11,8 @@ namespace NexusForever.StsServer.Network.Message
 {
     public delegate void MessageHandlerDelegate(NetworkSession session, IReadable message);
 
-    public sealed class MessageManager : Singleton<MessageManager>, IShutdownAble
+    public sealed class MessageManager : AbstractManager<MessageManager>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private delegate IReadable MessageFactoryDelegate();
         private ImmutableDictionary<string, MessageFactoryDelegate> clientMessageFactories;
 
@@ -25,7 +22,7 @@ namespace NexusForever.StsServer.Network.Message
         {
         }
 
-        public MessageManager Initialise()
+        public override MessageManager Initialise()
         {
             InitialiseMessageFactories();
             InitialiseMessageHandlers();
@@ -47,7 +44,7 @@ namespace NexusForever.StsServer.Network.Message
             }
 
             clientMessageFactories = messageFactories.ToImmutableDictionary();
-            log.Info($"Initialised {clientMessageFactories.Count} message {(clientMessageFactories.Count == 1 ? "factory" : "factories")}.");
+            Log.Info($"Initialised {clientMessageFactories.Count} message {(clientMessageFactories.Count == 1 ? "factory" : "factories")}.");
         }
 
         private void InitialiseMessageHandlers()
@@ -85,7 +82,7 @@ namespace NexusForever.StsServer.Network.Message
             }
 
             clientMessageHandlers = messageHandlers.ToImmutableDictionary();
-            log.Info($"Initialised {clientMessageHandlers.Count} message handler(s).");
+            Log.Info($"Initialised {clientMessageHandlers.Count} message handler(s).");
         }
 
         public IReadable GetMessage(string uri)
@@ -96,12 +93,6 @@ namespace NexusForever.StsServer.Network.Message
         public MessageHandlerInfo GetMessageHandler(string uri)
         {
             return clientMessageHandlers.TryGetValue(uri, out MessageHandlerInfo handler) ? handler : null;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

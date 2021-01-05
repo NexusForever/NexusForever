@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace NexusForever.Shared.Game
 {
-    public sealed class ServerManager : Singleton<ServerManager>, IShutdownAble
+    public sealed class ServerManager : AbstractManager<ServerManager>
     {
         public ImmutableList<ServerInfo> Servers { get; private set; }
         public ImmutableList<ServerMessageInfo> ServerMessages { get; private set; }
 
         private ushort? serverRealmId;
 
-        private readonly UpdateTimer checkTimer = new UpdateTimer(60d);
-        private readonly UpdateTimer pingCheckTimer = new UpdateTimer(15d);
+        private readonly UpdateTimer checkTimer = new(60d);
+        private readonly UpdateTimer pingCheckTimer = new(15d);
 
         private volatile bool shutdownRequested;
 
@@ -96,7 +96,7 @@ namespace NexusForever.Shared.Game
         /// <summary>
         /// Requests for the <see cref="ServerManager"/> to begin shutdown.
         /// </summary>
-        public void Shutdown()
+        public override void Shutdown()
         {
             shutdownRequested = true;
         }

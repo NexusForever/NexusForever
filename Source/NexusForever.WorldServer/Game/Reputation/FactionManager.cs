@@ -2,7 +2,6 @@
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Reputation.Static;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,20 +9,18 @@ using System.Linq;
 
 namespace NexusForever.WorldServer.Game.Reputation
 {
-    public class FactionManager : Singleton<FactionManager>, IShutdownAble
+    public class FactionManager : AbstractManager<FactionManager>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private ImmutableDictionary<Faction, FactionNode> nodes;
 
         private FactionManager()
         {
         }
 
-        public FactionManager Initialise()
+        public override FactionManager Initialise()
         {
             DateTime start = DateTime.Now;
-            log.Info("Initialising factions...");
+            Log.Info("Initialising factions...");
 
             var builder = ImmutableDictionary.CreateBuilder<Faction, FactionNode>();
             foreach (Faction2Entry entry in GameTableManager.Instance.Faction2.Entries)
@@ -58,7 +55,7 @@ namespace NexusForever.WorldServer.Game.Reputation
             nodes = builder.ToImmutable();
 
             TimeSpan span = DateTime.Now - start;
-            log.Info($"Initialised {nodes.Count} faction(s) in {span.TotalMilliseconds}ms.");
+            Log.Info($"Initialised {nodes.Count} faction(s) in {span.TotalMilliseconds}ms.");
             return Instance;
         }
 
@@ -68,12 +65,6 @@ namespace NexusForever.WorldServer.Game.Reputation
         public FactionNode GetFaction(Faction factionId)
         {
             return nodes.TryGetValue(factionId, out FactionNode node) ? node : null;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

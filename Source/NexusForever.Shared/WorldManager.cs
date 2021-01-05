@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using NLog;
 
 namespace NexusForever.Shared
 {
-    public sealed class WorldManager : Singleton<WorldManager>, IShutdownAble
+    public sealed class WorldManager : AbstractManager<WorldManager>
     {
         private volatile bool shutdownRequested;
         private List<IShutdownAble> managersList;
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private WorldManager()
         {
@@ -36,7 +34,7 @@ namespace NexusForever.Shared
 
                 for (int i = managersList.Count - 1; i >= 0; i--)
                 {
-                    log.Trace($"Shutting down {managersList[i]}");
+                    Log.Trace($"Shutting down {managersList[i]}");
                     managersList[i].Shutdown();
                 }
 
@@ -46,7 +44,7 @@ namespace NexusForever.Shared
             worldThread.Start();
         }
 
-        public void Shutdown()
+        public override void Shutdown()
         {
             shutdownRequested = true;
         }
@@ -67,7 +65,7 @@ namespace NexusForever.Shared
                     }
                     catch (Exception e)
                     {
-                        log.Error(e);
+                        Log.Error(e);
                     }
                 }
             }

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace NexusForever.WorldServer.Game.Entity.Network
 {
-    public sealed class EntityCommandManager : Singleton<EntityCommandManager>, IShutdownAble
+    public sealed class EntityCommandManager : AbstractManager<EntityCommandManager>
     {
         private delegate IEntityCommandModel EntityCommandFactoryDelegate();
         private ImmutableDictionary<EntityCommand, EntityCommandFactoryDelegate> entityCommandFactories;
@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network
         {
         }
 
-        public EntityCommandManager Initialise()
+        public override EntityCommandManager Initialise()
         {
             var factoryBuilder = ImmutableDictionary.CreateBuilder<EntityCommand, EntityCommandFactoryDelegate>();
             var commandBuilder = ImmutableDictionary.CreateBuilder<Type, EntityCommand>();
@@ -54,12 +54,6 @@ namespace NexusForever.WorldServer.Game.Entity.Network
                 return command;
 
             return null;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

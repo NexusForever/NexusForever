@@ -3,16 +3,13 @@ using NexusForever.Database.Auth.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Game.RBAC.Static;
-using NLog;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace NexusForever.WorldServer.Game.RBAC
 {
-    public sealed class RBACManager : Singleton<RBACManager>, IShutdownAble
+    public sealed class RBACManager : AbstractManager<RBACManager>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private ImmutableDictionary<Permission, RBACPermission> permissions;
         private ImmutableDictionary<Role, RBACRole> roles;
 
@@ -20,9 +17,9 @@ namespace NexusForever.WorldServer.Game.RBAC
         {
         }
 
-        public RBACManager Initialise()
+        public override RBACManager Initialise()
         {
-            log.Info("Initialising RBAC permissions...");
+            Log.Info("Initialising RBAC permissions...");
 
             var permissionBuilder = ImmutableDictionary.CreateBuilder<Permission, RBACPermission>();
             foreach (PermissionModel permissionModel in DatabaseManager.Instance.AuthDatabase.GetPermissions())
@@ -68,7 +65,7 @@ namespace NexusForever.WorldServer.Game.RBAC
 
             roles = roleBuilder.ToImmutable();
 
-            log.Info($"Loaded {permissions.Count} permission(s) in {roles.Count} role(s).");
+            Log.Info($"Loaded {permissions.Count} permission(s) in {roles.Count} role(s).");
             return Instance;
         }
 
@@ -86,13 +83,6 @@ namespace NexusForever.WorldServer.Game.RBAC
         public RBACRole GetRole(Role role)
         {
             return roles.TryGetValue(role, out RBACRole rbacRole) ? rbacRole : null;
-        }
-
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

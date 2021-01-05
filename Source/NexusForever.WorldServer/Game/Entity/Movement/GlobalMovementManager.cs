@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace NexusForever.WorldServer.Game.Entity.Movement
 {
-    public sealed class GlobalMovementManager : Singleton<GlobalMovementManager>, IShutdownAble
+    public sealed class GlobalMovementManager : AbstractManager<GlobalMovementManager>
     {
         private delegate ISplineMode EntitySplineModeFactoryDelegate();
         private static ImmutableDictionary<SplineMode, EntitySplineModeFactoryDelegate> splineModeFactories;
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
         {
         }
 
-        public GlobalMovementManager Initialise()
+        public override GlobalMovementManager Initialise()
         {
             InitialiseSplineModeFactories();
             return Instance;
@@ -47,12 +47,6 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
         public ISplineMode NewSplineMode(SplineMode mode)
         {
             return splineModeFactories.TryGetValue(mode, out EntitySplineModeFactoryDelegate factory) ? factory.Invoke() : null;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

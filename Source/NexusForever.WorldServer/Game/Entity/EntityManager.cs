@@ -6,7 +6,6 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.IO.Map;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,20 +16,17 @@ using System.Reflection;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public sealed class EntityManager : Singleton<EntityManager>, IShutdownAble
+    public sealed class EntityManager : AbstractManager<EntityManager>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private delegate WorldEntity EntityFactoryDelegate();
         private ImmutableDictionary<EntityType, EntityFactoryDelegate> entityFactories;
-
         private ImmutableDictionary<Stat, StatAttribute> statAttributes;
 
         private EntityManager()
         {
         }
 
-        public EntityManager Initialise()
+        public override EntityManager Initialise()
         {
             InitialiseEntityFactories();
             InitialiseEntityStats();
@@ -78,7 +74,7 @@ namespace NexusForever.WorldServer.Game.Entity
         [Conditional("DEBUG")]
         private void CalculateEntityAreaData()
         {
-            log.Info("Calculating area information for entities...");
+            Log.Info("Calculating area information for entities...");
 
             var mapFiles = new Dictionary<ushort, MapFile>();
             var entities = new HashSet<EntityModel>();
@@ -97,12 +93,12 @@ namespace NexusForever.WorldServer.Game.Entity
                 uint worldAreaId = mapFile.GetWorldAreaId(new Vector3(model.X, model.Y, model.Z));
                 model.Area = (ushort)worldAreaId;
 
-                log.Info($"Calculated area {worldAreaId} for entity {model.Id}.");
+                Log.Info($"Calculated area {worldAreaId} for entity {model.Id}.");
             }
 
             DatabaseManager.Instance.WorldDatabase.UpdateEntities(entities);
 
-            log.Info($"Calculated area information for {entities.Count} {(entities.Count == 1 ? "entity" : "entities")}.");
+            Log.Info($"Calculated area information for {entities.Count} {(entities.Count == 1 ? "entity" : "entities")}.");
         }
 
         /// <summary>
@@ -119,12 +115,6 @@ namespace NexusForever.WorldServer.Game.Entity
         public StatAttribute GetStatAttribute(Stat stat)
         {
             return statAttributes.TryGetValue(stat, out StatAttribute value) ? value : null;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

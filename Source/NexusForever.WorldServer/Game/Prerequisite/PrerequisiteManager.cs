@@ -3,17 +3,18 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
-using NLog;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {
-    public sealed partial class PrerequisiteManager : Singleton<PrerequisiteManager>, IShutdownAble
+    public sealed partial class PrerequisiteManager : AbstractManager<PrerequisiteManager>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
+        private new static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private delegate bool PrerequisiteCheckDelegate(Player player, PrerequisiteComparison comparison, uint value, uint objectId);
         private ImmutableDictionary<PrerequisiteType, PrerequisiteCheckDelegate> prerequisiteCheckHandlers;
@@ -22,7 +23,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         {
         }
 
-        public PrerequisiteManager Initialise()
+        public override PrerequisiteManager Initialise()
         {
             var builder = ImmutableDictionary.CreateBuilder<PrerequisiteType, PrerequisiteCheckDelegate>();
             foreach (MethodInfo method in Assembly.GetExecutingAssembly().GetTypes()
@@ -108,12 +109,6 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             }
 
             return handler.Invoke(player, comparison, value, objectId);
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

@@ -2,15 +2,12 @@
 using NexusForever.Database.Character;
 using NexusForever.Database.Configuration;
 using NexusForever.Database.World;
-using NLog;
 using System;
 
 namespace NexusForever.Shared.Database
 {
-    public class DatabaseManager : Singleton<DatabaseManager>, IShutdownAble
+    public class DatabaseManager : AbstractManager<DatabaseManager>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         public AuthDatabase AuthDatabase { get; private set; }
         public CharacterDatabase CharacterDatabase { get; private set; }
         public WorldDatabase WorldDatabase { get; private set; }
@@ -35,7 +32,7 @@ namespace NexusForever.Shared.Database
 
         public void Migrate()
         {
-            log.Info("Applying database migrations...");
+            Log.Info("Applying database migrations...");
 
             try
             {
@@ -45,15 +42,9 @@ namespace NexusForever.Shared.Database
             }
             catch (Exception exception)
             {
-                log.Fatal(exception);
+                Log.Fatal(exception);
                 throw;
             }
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

@@ -1,11 +1,12 @@
-﻿using NexusForever.WorldServer.Game.Entity;
+﻿using NexusForever.Shared;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
 using NexusForever.WorldServer.Game.Reputation.Static;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {
-    public sealed partial class PrerequisiteManager
+    public sealed partial class PrerequisiteManager : AbstractManager<PrerequisiteManager>
     {
         [PrerequisiteCheck(PrerequisiteType.Level)]
         private static bool PrerequisiteCheckLevel(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
@@ -108,15 +109,12 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
         private static bool PrerequisiteCheckBaseFaction(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
-            switch (comparison)
+            return comparison switch
             {
-                case PrerequisiteComparison.Equal:
-                    return player.Faction1 == (Faction)value;
-                case PrerequisiteComparison.NotEqual:
-                    return player.Faction1 != (Faction)value;
-                default:
-                    return false;
-            }
+                PrerequisiteComparison.Equal => player.Faction1 == (Faction) value,
+                PrerequisiteComparison.NotEqual => player.Faction1 != (Faction) value,
+                _ => false
+            };
         }
 
         [PrerequisiteCheck(PrerequisiteType.Vital)]

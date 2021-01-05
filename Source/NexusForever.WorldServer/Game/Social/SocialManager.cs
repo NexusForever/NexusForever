@@ -8,7 +8,6 @@ using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,27 +18,23 @@ using Item = NexusForever.WorldServer.Game.Entity.Item;
 
 namespace NexusForever.WorldServer.Game.Social
 {
-    public sealed class SocialManager : Singleton<SocialManager>, IShutdownAble
+    public sealed class SocialManager : AbstractManager<SocialManager>
     {
         private const float LocalChatDistance = 155f;
 
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
-        private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers
-            = new Dictionary<ChatChannelType, ChatChannelHandler>();
-        private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories
-            = new Dictionary<ChatFormatType, ChatFormatFactoryDelegate>();
+        private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers = new();
+        private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories = new();
 
         private delegate IChatFormat ChatFormatFactoryDelegate();
         private delegate void ChatChannelHandler(WorldSession session, ClientChat chat);
 
-        private readonly Dictionary<(ChatChannelType, ulong), ChatChannel> chatChannels = new Dictionary<(ChatChannelType, ulong), ChatChannel>();
+        private readonly Dictionary<(ChatChannelType, ulong), ChatChannel> chatChannels = new();
 
         private SocialManager()
         {
         }
 
-        public SocialManager Initialise()
+        public override SocialManager Initialise()
         {
             InitialiseChatHandlers();
             InitialiseChatFormatFactories();
@@ -120,7 +115,7 @@ namespace NexusForever.WorldServer.Game.Social
                 chatChannelHandlers[chat.Channel](session, chat);
             else
             {
-                log.Info($"ChatChannel {chat.Channel} has no handler implemented.");
+                Log.Info($"ChatChannel {chat.Channel} has no handler implemented.");
 
                 session.EnqueueMessageEncrypted(new ServerChat
                 {
@@ -210,7 +205,7 @@ namespace NexusForever.WorldServer.Game.Social
         public void HandleWhisperChat(WorldSession session, ClientChatWhisper whisper)
         {
             ICharacter character = CharacterManager.Instance.GetCharacterInfo(whisper.PlayerName);
-            if (character == null || !(character is Player player))
+            if (character is not Player player)
             {
                 SendMessage(session, $"Player \"{whisper.PlayerName}\" not found.");
                 return;
@@ -312,12 +307,6 @@ namespace NexusForever.WorldServer.Game.Social
                 ChatId     = clientChat.ChatId,
                 ChatResult = result
             });
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

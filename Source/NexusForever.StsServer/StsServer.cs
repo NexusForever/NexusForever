@@ -20,29 +20,29 @@ namespace NexusForever.StsServer
         private const string Title = "NexusForever: STS Server (RELEASE)";
         #endif
 
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
         private static void Main()
         {
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location));
 
             Console.Title = Title;
-            log.Info("Initialising...");
+            Log.Info("Initialising...");
 
-            List<IShutdownAble> managersList = new List<IShutdownAble>();
-
-            managersList.Add(ConfigurationManager<StsServerConfiguration>.Instance.Initialise("StsServer.json"));
-
-            managersList.Add(DatabaseManager.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database));
-            managersList.Add(MessageManager.Instance.Initialise());
-            managersList.Add(NetworkManager<StsSession>.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Network));
+            List<IShutdownAble> managersList = new List<IShutdownAble>
+            {
+                ConfigurationManager<StsServerConfiguration>.Instance.Initialise("StsServer.json"),
+                DatabaseManager.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database),
+                MessageManager.Instance.Initialise(),
+                NetworkManager<StsSession>.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Network)
+            };
 
             WorldManager.Instance.Initialise(lastTick =>
             {
                 NetworkManager<StsSession>.Instance.Update(lastTick);
             }, managersList);
 
-            log.Info("Ready!");
+            Log.Info("Ready!");
         }
     }
 }

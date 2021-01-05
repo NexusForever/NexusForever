@@ -8,11 +8,11 @@ using NLog.Web;
 
 namespace NexusForever.WorldServer
 {
-    public class WorldServerEmbeddedWebServer : Singleton<WorldServerEmbeddedWebServer>, IShutdownAble
+    public class WorldServerEmbeddedWebServer : AbstractManager<WorldServerEmbeddedWebServer>
     {
         private IWebHost webHost;
 
-        public WorldServerEmbeddedWebServer Initialise()
+        public override WorldServerEmbeddedWebServer Initialise()
         {
             IWebHostBuilder builder = Initialise(SharedConfiguration.Configuration);
             webHost = builder.Build();
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer
             .UseUrls($"http://localhost:5000")
             .PreferHostingUrls(false); // Can override in XXX.json
 
-        public void Shutdown()
+        public override void Shutdown()
         {
             using (webHost)
             {

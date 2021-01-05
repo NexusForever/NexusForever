@@ -49,6 +49,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Cast a <see cref="Spell"/> with the supplied spell base id, tier and <see cref="SpellParameters"/>.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public void CastSpell(uint spell4BaseId, byte tier, SpellParameters parameters)
         {
             if (parameters == null)

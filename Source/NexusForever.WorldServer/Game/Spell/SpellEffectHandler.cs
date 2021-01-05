@@ -35,7 +35,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.Disguise)]
         private void HandleEffectDisguise(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             Creature2Entry creature2 = GameTableManager.Instance.Creature2.GetEntry(info.Entry.DataBits02);
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Game.Spell
         private void HandleEffectSummonMount(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
             // TODO: handle NPC mounting?
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             if (!player.CanMount())
@@ -108,7 +108,7 @@ namespace NexusForever.WorldServer.Game.Spell
             if (worldLocation == null)
                 return;
 
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             if (!player.CanTeleport())
@@ -122,7 +122,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.LearnDyeColor)]
         private void HandleEffectLearnDyeColor(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             player.Session.GenericUnlockManager.Unlock((ushort)info.Entry.DataBits00);
@@ -131,7 +131,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.UnlockMount)]
         private void HandleEffectUnlockMount(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(info.Entry.DataBits00);
@@ -146,7 +146,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.UnlockPetFlair)]
         private void HandleEffectUnlockPetFlair(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             player.PetCustomisationManager.UnlockFlair((ushort)info.Entry.DataBits00);
@@ -155,7 +155,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.UnlockVanityPet)]
         private void HandleEffectUnlockVanityPet(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(info.Entry.DataBits00);
@@ -170,7 +170,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.SummonVanityPet)]
         private void HandleEffectSummonVanityPet(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             // enqueue removal of existing vanity pet if summoned
@@ -188,7 +188,7 @@ namespace NexusForever.WorldServer.Game.Spell
         [SpellEffectHandler(SpellEffectType.TitleGrant)]
         private void HandleEffectTitleGrant(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not Player player)
                 return;
 
             player.TitleManager.AddTitle((ushort)info.Entry.DataBits00);

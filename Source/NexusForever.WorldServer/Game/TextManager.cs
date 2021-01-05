@@ -2,7 +2,6 @@
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Game.TextSearch;
-using NLog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,19 +13,17 @@ namespace NexusForever.WorldServer.Game
     /// <summary>
     /// Responsible for looking up text and objects that the text references.
     /// </summary>
-    public sealed class SearchManager : Singleton<SearchManager>, IShutdownAble
+    public sealed class SearchManager : AbstractManager<SearchManager>
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         private ImmutableDictionary<Language, TextReverseIndex> reverseIndexDictionary;
 
         private SearchManager()
         {
         }
 
-        public SearchManager Initialise()
+        public override SearchManager Initialise()
         {
-            log.Info("Creating reverse text lookups.");
+            Log.Info("Creating reverse text lookups.");
             Dictionary<Language, TextReverseIndex> index = new Dictionary<Language, TextReverseIndex>
             {
                 [Language.English] = new TextReverseIndex(GameTableManager.Instance.TextEnglish),
@@ -37,9 +34,9 @@ namespace NexusForever.WorldServer.Game
             foreach (KeyValuePair<Language, TextReverseIndex> kvp in index)
             {
                 if (kvp.Value.IsEmpty)
-                    log.Warn($"Language {kvp.Key} was not loaded, and will not be used for text search");
+                    Log.Warn($"Language {kvp.Key} was not loaded, and will not be used for text search");
                 else
-                    log.Debug($"Language {kvp.Key} loaded.");
+                    Log.Debug($"Language {kvp.Key} loaded.");
             }
 
             return Instance;
@@ -104,12 +101,6 @@ namespace NexusForever.WorldServer.Game
         {
             reverseIndexDictionary.TryGetValue(language, out TextReverseIndex index);
             return index;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

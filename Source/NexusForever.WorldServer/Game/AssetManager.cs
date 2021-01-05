@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace NexusForever.WorldServer.Game
 {
-    public sealed class AssetManager : Singleton<AssetManager>, IShutdownAble
+    public sealed class AssetManager : AbstractManager<AssetManager>
     {
         public static ImmutableDictionary<InventoryLocation, uint> InventoryLocationCapacities { get; private set; }
 
@@ -50,7 +50,7 @@ namespace NexusForever.WorldServer.Game
         {
         }
 
-        public AssetManager Initialise()
+        public override AssetManager Initialise()
         {
             nextCharacterId = DatabaseManager.Instance.CharacterDatabase.GetNextCharacterId() + 1ul;
             nextItemId      = DatabaseManager.Instance.CharacterDatabase.GetNextItemId() + 1ul;
@@ -230,12 +230,6 @@ namespace NexusForever.WorldServer.Game
         public ImmutableList<RewardPropertyPremiumModifierEntry> GetRewardPropertiesForTier(AccountTier tier)
         {
             return rewardPropertiesByTier.TryGetValue(tier, out ImmutableList<RewardPropertyPremiumModifierEntry> entries) ? entries : ImmutableList<RewardPropertyPremiumModifierEntry>.Empty;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }

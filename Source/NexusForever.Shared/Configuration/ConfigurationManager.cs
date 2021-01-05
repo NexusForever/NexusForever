@@ -2,7 +2,7 @@
 
 namespace NexusForever.Shared.Configuration
 {
-    public sealed class ConfigurationManager<T> : Singleton<ConfigurationManager<T>>, IShutdownAble
+    public sealed class ConfigurationManager<T> : AbstractManager<ConfigurationManager<T>>
     {
         public T Config { get; private set; }
 
@@ -15,12 +15,6 @@ namespace NexusForever.Shared.Configuration
             SharedConfiguration.Initialise(file);
             Config = SharedConfiguration.Configuration.Get<T>();
             return Instance;
-        }
-
-        /// <inheritdoc />
-        public void Shutdown()
-        {
-            
         }
     }
 }
