@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Threading.Tasks;
-using NexusForever.Database;
+﻿using NexusForever.Database;
 using NexusForever.Database.Character.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
@@ -16,10 +8,18 @@ using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace NexusForever.WorldServer.Game.Guild
 {
-    public sealed class GlobalGuildManager : Singleton<GlobalGuildManager>
+    public sealed class GlobalGuildManager : Singleton<GlobalGuildManager>, IShutdownAble
     {
         private static ILogger log { get; } = LogManager.GetCurrentClassLogger();
 
@@ -45,12 +45,13 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Initialise the <see cref="GlobalGuildManager"/>, and build cache of all existing guilds
         /// </summary>
-        public void Initialise()
+        public GlobalGuildManager Initialise()
         {
             nextGuildId = DatabaseManager.Instance.CharacterDatabase.GetNextGuildId() + 1ul;
 
             InitialiseGuilds();
             InitialiseGuildOperationHandlers();
+            return Instance;
         }
 
         private void InitialiseGuilds()
@@ -329,6 +330,10 @@ namespace NexusForever.WorldServer.Game.Guild
                 info.GuildId = guild.Id;
                 return info;
             }
+        }
+
+        public void Shutdown()
+        {
         }
     }
 }

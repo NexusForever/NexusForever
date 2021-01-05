@@ -1,17 +1,17 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Game.TextFilter.Static;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 
 namespace NexusForever.WorldServer.Game.TextFilter
 {
     /// <summary>
     /// A manager to validate client text, this is based on client class.
     /// </summary>
-    public class TextFilterManager : Singleton<TextFilterManager>
+    public class TextFilterManager : Singleton<TextFilterManager>, IShutdownAble
     {
         private ImmutableDictionary<Language, TextFilterLanguage> textFilters;
         private ImmutableDictionary<UserText, UserTextAttribute> userTextAttributes;
@@ -20,10 +20,11 @@ namespace NexusForever.WorldServer.Game.TextFilter
         {
         }
 
-        public void Initialise()
+        public TextFilterManager Initialise()
         {
             InitialiseTextFilter();
             InitialiseUserText();
+            return Instance;
         }
 
         private void InitialiseTextFilter()
@@ -81,6 +82,11 @@ namespace NexusForever.WorldServer.Game.TextFilter
                 return false;
 
             return true;
+        }
+
+        public void Shutdown()
+        {
+            
         }
     }
 }
