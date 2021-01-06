@@ -9,7 +9,8 @@
         [InventoryLocation(16u)]
         Inventory = 1,
 
-        Unknown2  = 2,
+        [InventoryLocation(32u)]
+        PlayerBank  = 2,
 
         [InventoryLocation(512u)]
         Ability   = 4,

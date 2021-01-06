@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
             WorldServer.RealmMotd = message;
             Parallel.ForEach(NetworkManager<WorldSession>.Instance.GetSessions(), session =>
             {
-                SocialManager.Instance.SendMessage(session, WorldServer.RealmMotd, "MOTD", ChatChannel.Realm);
+                SocialManager.Instance.SendMessage(session, WorldServer.RealmMotd, "MOTD", ChatChannelType.Realm);
             });
         }
 

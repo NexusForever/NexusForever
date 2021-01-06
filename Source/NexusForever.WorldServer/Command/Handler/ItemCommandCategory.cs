@@ -55,7 +55,7 @@ namespace NexusForever.WorldServer.Command.Handler
             var target = context.GetTargetOrInvoker<Player>();
             foreach (Item2Entry itemEntry in searchResults)
             {
-                var builder = new ChatMessageBuilder(ChatChannel.System);
+                var builder = new ChatMessageBuilder(ChatChannelType.System);
                 builder.AppendText($"({itemEntry.Id}) ");
                 builder.AppendItem(itemEntry.Id);
                 target.Session.EnqueueMessageEncrypted(builder.Build());

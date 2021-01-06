@@ -223,7 +223,10 @@ namespace NexusForever.Shared.GameTable
         public GameTable<GossipSetEntry> GossipSet { get; private set; }
         public GameTable<GuildPerkEntry> GuildPerk { get; private set; }
         public GameTable<GuildPermissionEntry> GuildPermission { get; private set; }
+
+        [GameData]
         public GameTable<GuildStandardPartEntry> GuildStandardPart { get; private set; }
+        
         public GameTable<HazardEntry> Hazard { get; private set; }
         public GameTable<HookAssetEntry> HookAsset { get; private set; }
         public GameTable<HookTypeEntry> HookType { get; private set; }
@@ -626,6 +629,8 @@ namespace NexusForever.Shared.GameTable
         public GameTable<WindEntry> Wind { get; private set; }
 
         public GameTable<WindSpawnEntry> WindSpawn { get; private set; }
+
+        [GameData]
         public GameTable<WordFilterEntry> WordFilter { get; private set; }
 
         [GameData]

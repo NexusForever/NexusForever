@@ -18,6 +18,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public WorldZoneEntry Zone { get; private set; }
         public Vector3 Position { get; protected set; }
 
+        public MapInfo PreviousMap { get; private set; }
+
         /// <summary>
         /// Distance between a <see cref="GridEntity"/> and a <see cref="MapGrid"/> for activation.
         /// </summary>
@@ -101,8 +103,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
             visibleGrids.Clear();
 
-            Guid = 0;
-            Map  = null;
+            Guid        = 0;
+            PreviousMap = new MapInfo(Map.Entry);
+            Map         = null;
         }
 
         /// <summary>
