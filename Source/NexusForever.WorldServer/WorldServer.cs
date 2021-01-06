@@ -63,7 +63,7 @@ namespace NexusForever.WorldServer
             Console.Title = Title;
             log.Info("Initialising...");
 
-            var managersList = new List<IShutdownAble>();
+            var managersList = new List<IShutdown>();
 
             managersList.Add(ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json"));
             RealmId   = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;

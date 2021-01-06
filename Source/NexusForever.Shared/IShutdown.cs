@@ -3,7 +3,7 @@
     /// <summary>
     /// Interface for classes that support a graceful shutdown.
     /// </summary>
-    public interface IShutdownAble
+    public interface IShutdown
     {
         /// <summary>
         /// Called when shutting down.

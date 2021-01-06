@@ -30,7 +30,7 @@ namespace NexusForever.AuthServer
             Console.Title = Title;
             log.Info("Initialising...");
 
-            List<IShutdownAble> managersList = new List<IShutdownAble>();
+            List<IShutdown> managersList = new List<IShutdown>();
 
             managersList.Add(ConfigurationManager<AuthServerConfiguration>.Instance.Initialise("AuthServer.json"));
 

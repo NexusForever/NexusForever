@@ -3,7 +3,7 @@ using System;
 
 namespace NexusForever.Shared
 {
-    public abstract class AbstractManager<T> : Singleton<T>, IShutdownAble where T : class
+    public abstract class AbstractManager<T> : Singleton<T>, IShutdown where T : class
     {
         protected readonly ILogger Log = LogManager.GetCurrentClassLogger();
 

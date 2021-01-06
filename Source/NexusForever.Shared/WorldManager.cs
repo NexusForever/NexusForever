@@ -8,13 +8,13 @@ namespace NexusForever.Shared
     public sealed class WorldManager : AbstractManager<WorldManager>
     {
         private volatile bool shutdownRequested;
-        private List<IShutdownAble> managersList;
+        private List<IShutdown> managersList;
 
         private WorldManager()
         {
         }
 
-        public void Initialise(Action<double> updateAction, List<IShutdownAble> shutdownAbles)
+        public void Initialise(Action<double> updateAction, List<IShutdown> shutdownAbles)
         {
             managersList = shutdownAbles;
             var worldThread = new Thread(() =>

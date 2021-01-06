@@ -29,7 +29,7 @@ namespace NexusForever.StsServer
             Console.Title = Title;
             Log.Info("Initialising...");
 
-            List<IShutdownAble> managersList = new List<IShutdownAble>
+            List<IShutdown> managersList = new List<IShutdown>
             {
                 ConfigurationManager<StsServerConfiguration>.Instance.Initialise("StsServer.json"),
                 DatabaseManager.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database),
