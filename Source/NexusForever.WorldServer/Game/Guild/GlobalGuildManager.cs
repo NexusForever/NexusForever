@@ -76,7 +76,7 @@ namespace NexusForever.WorldServer.Game.Guild
                         guild = new Community(model);
                         break;
                     default:
-                        throw new DatabaseDataException($"Guild type not recognised {(GuildType)model.Type} for guild {model.Id}!");
+                        throw new DatabaseDataException($"Guild type not recognized {(GuildType)model.Type} for guild {model.Id}!");
                 }
 
                 guilds.Add(guild.Id, guild);
