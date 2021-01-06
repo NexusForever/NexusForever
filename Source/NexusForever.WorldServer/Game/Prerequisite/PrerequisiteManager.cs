@@ -13,8 +13,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
 {
     public sealed partial class PrerequisiteManager : AbstractManager<PrerequisiteManager>
     {
-
-        private new static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private delegate bool PrerequisiteCheckDelegate(Player player, PrerequisiteComparison comparison, uint value, uint objectId);
         private ImmutableDictionary<PrerequisiteType, PrerequisiteCheckDelegate> prerequisiteCheckHandlers;

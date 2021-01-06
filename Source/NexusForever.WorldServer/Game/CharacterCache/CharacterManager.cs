@@ -9,8 +9,8 @@ namespace NexusForever.WorldServer.Game.CharacterCache
 {
     public sealed class CharacterManager : AbstractManager<CharacterManager>
     {
-        private readonly Dictionary<ulong, ICharacter> characters = new();
-        private readonly Dictionary<string, ulong> characterNameToId = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<ulong, ICharacter> characters = new Dictionary<ulong, ICharacter>();
+        private readonly Dictionary<string, ulong> characterNameToId = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
 
         private CharacterManager()
         {

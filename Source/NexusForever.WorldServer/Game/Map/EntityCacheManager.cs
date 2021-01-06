@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Game.Map
 {
     public sealed class EntityCacheManager : AbstractManager<EntityCacheManager>
     {
-        private readonly Dictionary<ushort, EntityCache> entityCaches = new();
+        private readonly Dictionary<ushort, EntityCache> entityCaches = new Dictionary<ushort, EntityCache>();
 
         private EntityCacheManager()
         {

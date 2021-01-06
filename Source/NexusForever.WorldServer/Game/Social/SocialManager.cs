@@ -22,13 +22,13 @@ namespace NexusForever.WorldServer.Game.Social
     {
         private const float LocalChatDistance = 155f;
 
-        private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers = new();
-        private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories = new();
+        private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers = new Dictionary<ChatChannelType, ChatChannelHandler>();
+        private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories = new Dictionary<ChatFormatType, ChatFormatFactoryDelegate>();
 
         private delegate IChatFormat ChatFormatFactoryDelegate();
         private delegate void ChatChannelHandler(WorldSession session, ClientChat chat);
 
-        private readonly Dictionary<(ChatChannelType, ulong), ChatChannel> chatChannels = new();
+        private readonly Dictionary<(ChatChannelType, ulong), ChatChannel> chatChannels = new Dictionary<(ChatChannelType, ulong), ChatChannel>();
 
         private SocialManager()
         {
@@ -205,7 +205,7 @@ namespace NexusForever.WorldServer.Game.Social
         public void HandleWhisperChat(WorldSession session, ClientChatWhisper whisper)
         {
             ICharacter character = CharacterManager.Instance.GetCharacterInfo(whisper.PlayerName);
-            if (character is not Player player)
+            if (!(character is Player player))
             {
                 SendMessage(session, $"Player \"{whisper.PlayerName}\" not found.");
                 return;
