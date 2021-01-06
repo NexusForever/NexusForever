@@ -85,7 +85,6 @@ namespace NexusForever.WorldServer
             managersList.Add(EntityCacheManager.Instance.Initialise());
             managersList.Add(FactionManager.Instance.Initialise());
             managersList.Add(GlobalMovementManager.Instance.Initialise());
-            managersList.Add(GlobalGuildManager.Instance.Initialise());
 
             managersList.Add(GlobalGuildManager.Instance.Initialise());
             managersList.Add(AssetManager.Instance.Initialise());
@@ -135,20 +134,13 @@ namespace NexusForever.WorldServer
                     }
                 }
             });
-
+            worldThread.IsBackground = true;
             worldThread.Start();
         }
 
         private static void OnShutdown()
         {
             shutdownRequested = true;
-
-            #if DEBUG
-                Environment.Exit(0);
-            #else
-                Console.WriteLine($"World Server shutdown.");
-                Console.WriteLine($"Press any key to quit...");
-            #endif
         }
     }
 }
