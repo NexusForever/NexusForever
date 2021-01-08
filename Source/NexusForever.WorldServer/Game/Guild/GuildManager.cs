@@ -277,7 +277,7 @@ namespace NexusForever.WorldServer.Game.Guild
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
-            if (CanStoreGuildType(guild.Type))
+            if (!CanStoreGuildType(guild.Type))
                 return new GuildResultInfo(GuildResult.CharacterCannotJoinMoreGuilds, referenceString: owner.Name);
 
             if (pendingInvite != null)
