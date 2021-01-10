@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <StartupObject>NexusForever.WorldServer.WorldServer</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
