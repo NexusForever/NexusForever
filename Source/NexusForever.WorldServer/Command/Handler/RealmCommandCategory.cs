@@ -9,6 +9,7 @@ using NLog;
 using System;
 using System.Threading.Tasks;
 using System.Timers;
+using NexusForever.WorldServer.Game.Entity;
 using Timer = System.Timers.Timer;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -37,7 +38,16 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Second until shutdown. (300 = 5 mins)")]
             uint seconds)
         {
-            log.Info($"Realm is shutting down in {seconds} seconds.");
+            if (context.Invoker != null)
+            {
+                var player = (Player)context.Invoker;
+                log.Info($"Realm shutdown requested in {seconds} seconds, by {player?.Name} (ID: {player?.CharacterId})");
+            }
+            else
+            {
+                log.Info($"Realm shutdown requested in {seconds} seconds, by console");
+            }
+            
             shutdownDateTime = DateTime.Now.AddSeconds(seconds);
             Timer timer = new Timer(2000);
             timer.Elapsed += OnTimedEvent;

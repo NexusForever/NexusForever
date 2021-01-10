@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -68,8 +69,9 @@ namespace NexusForever.Shared
                         Log.Error(e);
                     }
                 }
+                Log.Info("Shutdown Complete");
+                LogManager.Shutdown();
             }
         }
-
     }
 }
