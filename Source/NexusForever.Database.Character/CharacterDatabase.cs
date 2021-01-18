@@ -22,7 +22,7 @@ namespace NexusForever.Database.Character
 
         public async Task Save(Action<CharacterContext> action)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             action.Invoke(context);
             await context.SaveChangesAsync();
         }
@@ -51,61 +51,49 @@ namespace NexusForever.Database.Character
         public ulong GetNextCharacterId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.Character.DefaultIfEmpty().Max(s => s.Id);
             return context.Character
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public async Task<CharacterModel> GetCharacterById(ulong characterId)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             return await context.Character.FirstOrDefaultAsync(e => e.Id == characterId);
         }
 
         public async Task<CharacterModel> GetCharacterByName(string name)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             return await context.Character.FirstOrDefaultAsync(e => e.Name == name);
         }
 
         public ulong GetNextItemId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.Item.DefaultIfEmpty().Max(s => s.Id);
             return context.Item
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public ulong GetNextResidenceId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.Residence.DefaultIfEmpty().Max(r => r.Id);
             return context.Residence
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public ulong GetNextDecorId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.ResidenceDecor.DefaultIfEmpty().Max(r => r.DecorId);
             return context.ResidenceDecor
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.DecorId))
-                .ToList()[0];
+                .Select(r => r.DecorId)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public async Task<List<CharacterModel>> GetCharacters(uint accountId)
@@ -163,7 +151,7 @@ namespace NexusForever.Database.Character
 
         public async Task<ResidenceModel> GetResidence(ulong residenceId)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             return await context.Residence
                 .Include(r => r.Decor)
                 .Include(r => r.Plot)
@@ -173,7 +161,7 @@ namespace NexusForever.Database.Character
 
         public async Task<ResidenceModel> GetResidence(string name)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             return await context.Residence
                 .Include(r => r.Decor)
                 .Include(r => r.Plot)
@@ -193,23 +181,19 @@ namespace NexusForever.Database.Character
         public ulong GetNextMailId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.CharacterMail.DefaultIfEmpty().Max(s => s.Id);
             return context.CharacterMail
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public ulong GetNextGuildId()
         {
             using var context = new CharacterContext(config);
-
             return context.Guild
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public List<GuildModel> GetGuilds()

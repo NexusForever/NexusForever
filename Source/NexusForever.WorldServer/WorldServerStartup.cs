@@ -28,8 +28,7 @@ namespace NexusForever.WorldServer
             app.UseStaticFiles();
             app.UseWebSockets(new WebSocketOptions
             {
-                KeepAliveInterval = TimeSpan.FromSeconds(30),
-                ReceiveBufferSize = 16384
+                KeepAliveInterval = TimeSpan.FromSeconds(30)
             });
             app.UseMiddleware<WebSocketMiddleware>();
 

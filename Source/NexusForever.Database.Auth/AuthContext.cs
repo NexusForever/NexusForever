@@ -42,13 +42,13 @@ namespace NexusForever.Database.Auth
                 entity.ToTable("account");
 
                 entity.HasIndex(e => e.Email)
-                    .HasName("email");
+                    .HasDatabaseName("email");
 
                 entity.HasIndex(e => e.GameToken)
-                    .HasName("gameToken");
+                    .HasDatabaseName("gameToken");
 
                 entity.HasIndex(e => e.SessionKey)
-                    .HasName("sessionKey");
+                    .HasDatabaseName("sessionKey");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")

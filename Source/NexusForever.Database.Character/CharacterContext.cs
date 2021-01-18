@@ -61,7 +61,7 @@ namespace NexusForever.Database.Character
                 entity.ToTable("character");
 
                 entity.HasIndex(e => e.AccountId)
-                    .HasName("accountId");
+                    .HasDatabaseName("accountId");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -101,7 +101,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.DeleteTime)
                     .HasColumnName("deleteTime")
                     .HasColumnType("datetime")
-                    .HasDefaultValue();
+                    .HasDefaultValue(null);
 
                 entity.Property(e => e.FactionId)
                     .HasColumnName("factionId")
@@ -157,7 +157,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.OriginalName)
                     .HasColumnName("originalName")
                     .HasColumnType("varchar(50)")
-                    .HasDefaultValue();
+                    .HasDefaultValue(null);
 
                 entity.Property(e => e.PathActivatedTimestamp)
                     .HasColumnName("pathActivatedTimestamp")
@@ -240,7 +240,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.DateCompleted)
                     .HasColumnName("dateCompleted")
                     .HasColumnType("datetime")
-                    .HasDefaultValue();
+                    .HasDefaultValue(null);
 
                 entity.HasOne(d => d.Character)
                     .WithMany(p => p.Achievement)
@@ -660,7 +660,7 @@ namespace NexusForever.Database.Character
                 entity.ToTable("character_mail");
 
                 entity.HasIndex(e => e.RecipientId)
-                    .HasName("FK__character_mail_recipientId__character_id");
+                    .HasDatabaseName("FK__character_mail_recipientId__character_id");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -758,7 +758,7 @@ namespace NexusForever.Database.Character
                     .HasName("PRIMARY");
 
                 entity.HasIndex(e => e.ItemGuid)
-                    .HasName("itemGuid")
+                    .HasDatabaseName("itemGuid")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -913,7 +913,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Reset)
                     .HasColumnName("reset")
                     .HasColumnType("datetime")
-                    .HasDefaultValue();
+                    .HasDefaultValue(null);
 
                 entity.Property(e => e.State)
                     .HasColumnName("state")
@@ -923,7 +923,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Timer)
                     .HasColumnName("timer")
                     .HasColumnType("int(10) unsigned")
-                    .HasDefaultValue();
+                    .HasDefaultValue(null);
 
                 entity.HasOne(d => d.Character)
                     .WithMany(p => p.Quest)
@@ -961,7 +961,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Timer)
                     .HasColumnName("timer")
                     .HasColumnType("int(10) unsigned")
-                    .HasDefaultValue();
+                    .HasDefaultValue(null);
 
                 entity.HasOne(d => d.Quest)
                     .WithMany(p => p.QuestObjective)
@@ -1188,7 +1188,7 @@ namespace NexusForever.Database.Character
                     .HasColumnType("varchar(30)");
 
                 entity.Property(e => e.OriginalLeaderId)
-                    .HasColumnName("orginialLeaderId")
+                    .HasColumnName("originalLeaderId")
                     .HasColumnType("bigint(20) unsigned");
             });
 
@@ -1321,7 +1321,7 @@ namespace NexusForever.Database.Character
                 entity.ToTable("item");
 
                 entity.HasIndex(e => e.OwnerId)
-                    .HasName("FK__item_ownerId__character_id");
+                    .HasDatabaseName("FK__item_ownerId__character_id");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -1361,7 +1361,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.OwnerId)
                     .HasColumnName("ownerId")
                     .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue();
+                    .HasDefaultValue(null);
 
                 entity.Property(e => e.StackCount)
                     .HasColumnName("stackCount")
@@ -1380,7 +1380,7 @@ namespace NexusForever.Database.Character
                 entity.ToTable("residence");
 
                 entity.HasIndex(e => e.OwnerId)
-                    .HasName("ownerId")
+                    .HasDatabaseName("ownerId")
                     .IsUnique();
 
                 entity.Property(e => e.Id)

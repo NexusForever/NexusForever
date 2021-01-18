@@ -319,7 +319,7 @@ namespace NexusForever.Database.World
                 entity.ToTable("store_category");
 
                 entity.HasIndex(e => e.ParentId)
-                    .HasName("parentId");
+                    .HasDatabaseName("parentId");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -399,7 +399,7 @@ namespace NexusForever.Database.World
                     .HasName("PRIMARY");
 
                 entity.HasIndex(e => e.CategoryId)
-                    .HasName("FK__store_offer_group_category_categoryId__store_category_id");
+                    .HasDatabaseName("FK__store_offer_group_category_categoryId__store_category_id");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
@@ -440,10 +440,10 @@ namespace NexusForever.Database.World
                     .HasName("PRIMARY");
 
                 entity.HasIndex(e => e.GroupId)
-                    .HasName("FK__store_offer_item_groupId__store_offer_group_id");
+                    .HasDatabaseName("FK__store_offer_item_groupId__store_offer_group_id");
 
                 entity.HasIndex(e => e.Id)
-                    .HasName("id")
+                    .HasDatabaseName("id")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
