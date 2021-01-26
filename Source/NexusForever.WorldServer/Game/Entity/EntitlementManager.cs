@@ -18,13 +18,10 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         private readonly WorldSession session;
 
-        private readonly Dictionary<EntitlementType, AccountEntitlement> accountEntitlements
-            = new();
-        private readonly Dictionary<EntitlementType, CharacterEntitlement> characterEntitlements
-            = new();
+        private readonly Dictionary<EntitlementType, AccountEntitlement> accountEntitlements = new();
+        private readonly Dictionary<EntitlementType, CharacterEntitlement> characterEntitlements = new();
 
-        private readonly Dictionary<RewardPropertyType, RewardProperty> rewardProperties
-            = new();
+        private readonly Dictionary<RewardPropertyType, RewardProperty> rewardProperties = new();
 
         /// <summary>
         /// Create a new <see cref="EntitlementManager"/> from existing database model.

@@ -13,12 +13,10 @@ namespace NexusForever.WorldServer.Game.Achievement
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public readonly Dictionary<ushort, AchievementInfo> achievements
-            = new();
-        private readonly Dictionary<AchievementType, List<AchievementInfo>> characterAchievements
-            = new();
-        private readonly Dictionary<AchievementType, List<AchievementInfo>> guildAchievements
-            = new();
+        public readonly Dictionary<ushort, AchievementInfo> achievements = new();
+
+        private readonly Dictionary<AchievementType, List<AchievementInfo>> characterAchievements = new();
+        private readonly Dictionary<AchievementType, List<AchievementInfo>> guildAchievements = new();
 
         private GlobalAchievementManager()
         {
