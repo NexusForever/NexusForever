@@ -25,10 +25,8 @@ namespace NexusForever.WorldServer.Game.Social
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers
-            = new();
-        private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories
-            = new();
+        private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers = new();
+        private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories = new();
 
         private delegate IChatFormat ChatFormatFactoryDelegate();
         private delegate void ChatChannelHandler(WorldSession session, ClientChat chat);
@@ -161,7 +159,7 @@ namespace NexusForever.WorldServer.Game.Social
             );
 
             intersectedEntities.ForEach(e => ((Player)e).Session.EnqueueMessageEncrypted(serverChat));
-            SendChatAccept(session);            
+            SendChatAccept(session);
         }
 
         [ChatChannelHandler(ChatChannelType.Guild)]
