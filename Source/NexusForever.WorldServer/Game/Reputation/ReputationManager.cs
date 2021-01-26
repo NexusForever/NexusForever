@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Reputation
     public class ReputationManager : ISaveCharacter, IEnumerable<Reputation>
     {
         private readonly Player owner;
-        private readonly Dictionary<Faction, Reputation> reputations = new Dictionary<Faction, Reputation>();
+        private readonly Dictionary<Faction, Reputation> reputations = new();
 
         /// <summary>
         /// Create a new <see cref="ReputationManager"/> from existing <see cref="CharacterModel"/> database model.

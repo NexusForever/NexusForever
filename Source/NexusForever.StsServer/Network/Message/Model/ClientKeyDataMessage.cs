@@ -15,8 +15,8 @@ namespace NexusForever.StsServer.Network.Message.Model
             XmlNode rootNode = document["Request"];
             string keyData = rootNode["KeyData"].GetValue<string>();
 
-            using (MemoryStream stream = new MemoryStream(Convert.FromBase64String(keyData)))
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (MemoryStream stream = new(Convert.FromBase64String(keyData)))
+            using (BinaryReader reader = new(stream))
             {
                 int lengthA = reader.ReadInt32();
                 A = reader.ReadBytes(lengthA);

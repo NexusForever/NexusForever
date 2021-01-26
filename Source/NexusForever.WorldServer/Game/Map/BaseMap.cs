@@ -33,12 +33,12 @@ namespace NexusForever.WorldServer.Game.Map
         public uint InstanceId { get; private set; }
 
         private readonly MapGrid[] grids = new MapGrid[MapDefines.WorldGridCount * MapDefines.WorldGridCount];
-        private readonly HashSet<(uint GridX, uint GridZ)> activeGrids = new HashSet<(uint GridX, uint GridZ)>();
+        private readonly HashSet<(uint GridX, uint GridZ)> activeGrids = new();
 
-        private readonly ConcurrentQueue<IGridAction> pendingActions = new ConcurrentQueue<IGridAction>();
+        private readonly ConcurrentQueue<IGridAction> pendingActions = new();
 
-        private readonly QueuedCounter entityCounter = new QueuedCounter();
-        private readonly Dictionary<uint /*guid*/, GridEntity> entities = new Dictionary<uint /*guid*/, GridEntity>();
+        private readonly QueuedCounter entityCounter = new();
+        private readonly Dictionary<uint /*guid*/, GridEntity> entities = new();
         private EntityCache entityCache;
 
         public virtual void Initialise(MapInfo info, Player player)

@@ -11,10 +11,10 @@ namespace NexusForever.Shared.Network
     {
         private ConnectionListener<T> connectionListener;
 
-        private readonly ConcurrentQueue<T> pendingAdd = new ConcurrentQueue<T>();
-        private readonly ConcurrentQueue<T> pendingRemove = new ConcurrentQueue<T>();
+        private readonly ConcurrentQueue<T> pendingAdd = new();
+        private readonly ConcurrentQueue<T> pendingRemove = new();
 
-        private readonly HashSet<T> sessions = new HashSet<T>();
+        private readonly HashSet<T> sessions = new();
 
         private NetworkManager()
         {

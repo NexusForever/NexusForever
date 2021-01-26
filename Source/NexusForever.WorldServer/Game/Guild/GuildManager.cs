@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Guild
 
         private readonly Player owner;
 
-        private readonly Dictionary<ulong, GuildBase> guilds = new Dictionary<ulong, GuildBase>();
+        private readonly Dictionary<ulong, GuildBase> guilds = new();
         private GuildInvite pendingInvite;
 
         /// <summary>

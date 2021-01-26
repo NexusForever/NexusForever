@@ -21,8 +21,8 @@ namespace NexusForever.Shared.Network
         protected PacketCrypt encryption;
 
         private FragmentedBuffer onDeck;
-        private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new ConcurrentQueue<ClientGamePacket>();
-        private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new ConcurrentQueue<ServerGamePacket>();
+        private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new();
+        private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new();
 
         /// <summary>
         /// Enqueue <see cref="IWritable"/> to be sent to the client.

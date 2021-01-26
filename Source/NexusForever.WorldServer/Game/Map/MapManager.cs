@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary</*worldId*/ ushort, IMap> maps = new Dictionary<ushort, IMap>();
+        private readonly Dictionary</*worldId*/ ushort, IMap> maps = new();
 
         private MapManager()
         {

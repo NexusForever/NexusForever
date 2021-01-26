@@ -22,11 +22,11 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
 
         private readonly WorldEntity owner;
         
-        private readonly Dictionary<EntityCommand, IEntityCommandModel> commands = new Dictionary<EntityCommand, IEntityCommandModel>();
+        private readonly Dictionary<EntityCommand, IEntityCommandModel> commands = new();
 
         private EntityCommand splineCommand;
         private SplinePath splinePath;
-        private readonly UpdateTimer splineGridUpdateTimer = new UpdateTimer(SplineGridUpdateTime);
+        private readonly UpdateTimer splineGridUpdateTimer = new(SplineGridUpdateTime);
 
         private bool isDirty;
 

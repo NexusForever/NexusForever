@@ -8,8 +8,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetModeKeys)]
     public class SetModeKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new List<uint>();
-        public List<uint> Modes = new List<uint>();
+        public List<uint> Times = new();
+        public List<uint> Modes = new();
 
         public uint Offset { get; set; }
 

@@ -8,8 +8,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetPositionKeys)]
     public class SetPositionKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new List<uint>();
-        public List<Position> Positions = new List<Position>();
+        public List<uint> Times = new();
+        public List<Position> Positions = new();
 
         public byte Type { get; set; }
         public uint Offset { get; set; }
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
         public void Read(GamePacketReader reader)
         {
             uint Count = reader.ReadUShort(10u);
-            Position p = new Position();
+            Position p = new();
 
             for (int i = 0; i < Count; i++)
                 Times.Add(reader.ReadUInt());

@@ -14,8 +14,8 @@ namespace NexusForever.WorldServer.Game.RBAC
     {
         private readonly WorldSession session;
 
-        private readonly Dictionary<Permission, AccountPermission> permissions = new Dictionary<Permission, AccountPermission>();
-        private readonly Dictionary<Role, AccountRole> roles = new Dictionary<Role, AccountRole>();
+        private readonly Dictionary<Permission, AccountPermission> permissions = new();
+        private readonly Dictionary<Role, AccountRole> roles = new();
 
         /// <summary>
         /// Create a new <see cref="AccountRBACManager"/> from an existing database model.

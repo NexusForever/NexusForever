@@ -25,7 +25,7 @@ namespace NexusForever.WorldServer.Game.Map
         private readonly ushort maxHexGroups;
 
         private readonly NetworkBitArray zoneMapBits;
-        private readonly Dictionary<ushort /*ZoneMapHexGroupId*/, bool /*new*/> zoneMapHexGroups = new Dictionary<ushort, bool>();
+        private readonly Dictionary<ushort /*ZoneMapHexGroupId*/, bool /*new*/> zoneMapHexGroups = new();
 
         private readonly Player player;
 

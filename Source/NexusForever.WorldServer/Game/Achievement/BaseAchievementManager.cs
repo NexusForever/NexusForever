@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Achievement
     {
         public uint AchievementPoints { get; protected set; }
 
-        protected Dictionary<ushort, Achievement> achievements = new Dictionary<ushort, Achievement>();
+        protected Dictionary<ushort, Achievement> achievements = new();
 
         public void Save(CharacterContext context)
         {

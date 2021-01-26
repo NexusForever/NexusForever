@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Game
         public void Initialise()
         {
             log.Info("Creating reverse text lookups.");
-            Dictionary<Language, TextReverseIndex> index = new Dictionary<Language, TextReverseIndex>
+            Dictionary<Language, TextReverseIndex> index = new()
             {
                 [Language.English] = new TextReverseIndex(GameTableManager.Instance.TextEnglish),
                 [Language.French] = new TextReverseIndex(GameTableManager.Instance.TextFrench),
@@ -63,7 +63,7 @@ namespace NexusForever.WorldServer.Game
             TextReverseIndex index = GetIndex(language);
             if (index == null)
                 return Enumerable.Empty<uint>();
-            List<uint> ids = new List<uint>();
+            List<uint> ids = new();
             if (fuzzy)
                 ids.AddRange(index.FuzzySearch(text));
             else

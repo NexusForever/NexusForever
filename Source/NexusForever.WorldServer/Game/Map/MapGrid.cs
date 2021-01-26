@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Game.Map
         private readonly MapCell[] cells = new MapCell[MapDefines.GridCellCount * MapDefines.GridCellCount];
 
         private uint playerCount;
-        private readonly UpdateTimer unloadTimer = new UpdateTimer(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridUnloadTimer ?? 600d);
+        private readonly UpdateTimer unloadTimer = new(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridUnloadTimer ?? 600d);
         private uint unloadCellX;
         private uint unloadCellZ;
 

@@ -5,7 +5,7 @@ namespace NexusForever.WorldServer.Game.Map
     public class QueuedCounter
     {
         private uint counter = 1;
-        private readonly Queue<uint> queue = new Queue<uint>();
+        private readonly Queue<uint> queue = new();
 
         public uint Dequeue()
         {

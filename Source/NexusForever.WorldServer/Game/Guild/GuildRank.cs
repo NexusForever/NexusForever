@@ -83,7 +83,7 @@ namespace NexusForever.WorldServer.Game.Guild
 
         public uint MemberCount => (uint)members.Count;
 
-        private readonly Dictionary<ulong, GuildMember> members = new Dictionary<ulong, GuildMember>();
+        private readonly Dictionary<ulong, GuildMember> members = new();
 
         /// <summary>
         /// Create a new <see cref="GuildRank"/> from an existing database model.

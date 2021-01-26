@@ -26,14 +26,14 @@ namespace NexusForever.WorldServer.Game.Social
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<ChatChannelType, ChatChannelHandler> chatChannelHandlers
-            = new Dictionary<ChatChannelType, ChatChannelHandler>();
+            = new();
         private readonly Dictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories
-            = new Dictionary<ChatFormatType, ChatFormatFactoryDelegate>();
+            = new();
 
         private delegate IChatFormat ChatFormatFactoryDelegate();
         private delegate void ChatChannelHandler(WorldSession session, ClientChat chat);
 
-        private readonly Dictionary<(ChatChannelType, ulong), ChatChannel> chatChannels = new Dictionary<(ChatChannelType, ulong), ChatChannel>();
+        private readonly Dictionary<(ChatChannelType, ulong), ChatChannel> chatChannels = new();
 
         private SocialManager()
         {

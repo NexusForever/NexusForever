@@ -13,7 +13,7 @@ namespace NexusForever.Shared.IO.Map
         public uint X { get; protected set; }
         public uint Y { get; protected set; }
 
-        protected readonly Dictionary<uint /*hash*/, MapFileCell> cells = new Dictionary<uint, MapFileCell>();
+        protected readonly Dictionary<uint /*hash*/, MapFileCell> cells = new();
 
         private static (uint cellX, uint cellY) GetCellCoord(Vector3 vector)
         {

@@ -14,7 +14,7 @@ namespace NexusForever.WorldServer.Game.Account
     public class AccountCurrencyManager
     {
         private readonly WorldSession session;
-        private readonly Dictionary<AccountCurrencyType, AccountCurrency> currencies = new Dictionary<AccountCurrencyType, AccountCurrency>();
+        private readonly Dictionary<AccountCurrencyType, AccountCurrency> currencies = new();
 
         public AccountCurrencyManager(WorldSession session, AccountModel model)
         {

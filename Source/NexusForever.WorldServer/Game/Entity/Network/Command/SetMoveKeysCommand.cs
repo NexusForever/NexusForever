@@ -8,8 +8,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetMoveKeys)]
     public class SetMoveKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new List<uint>();
-        public List<Move> Moves = new List<Move>();
+        public List<uint> Times = new();
+        public List<Move> Moves = new();
 
         public byte Type { get; set; }
         public uint Offset { get; set; }
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
         public void Read(GamePacketReader reader)
         {
             uint Count = reader.ReadUShort(10u);
-            Move move = new Move();
+            Move move = new();
 
             for (int i = 0; i < Count; i++)
                 Times.Add(reader.ReadUInt());

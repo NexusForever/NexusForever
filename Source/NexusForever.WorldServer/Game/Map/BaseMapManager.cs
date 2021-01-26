@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<string, MapFile> mapFiles = new Dictionary<string, MapFile>();
+        private readonly Dictionary<string, MapFile> mapFiles = new();
 
         private BaseMapManager()
         {
@@ -36,7 +36,7 @@ namespace NexusForever.WorldServer.Game.Map
             foreach (string fileName in Directory.EnumerateFiles(mapPath, "*.nfmap"))
             {
                 using (FileStream stream = File.OpenRead(fileName))
-                using (BinaryReader reader = new BinaryReader(stream))
+                using (BinaryReader reader = new(stream))
                 {
                     var mapFile = new MapFile();
                     mapFile.ReadHeader(reader);
@@ -80,7 +80,7 @@ namespace NexusForever.WorldServer.Game.Map
             string filePath = Path.ChangeExtension(asset, ".nfmap");
 
             using (FileStream stream = File.OpenRead(filePath))
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (BinaryReader reader = new(stream))
             {
                 var mapFile = new MapFile();
                 mapFiles.Add(assetPath, mapFile);

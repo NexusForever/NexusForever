@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
             uint count = reader.ReadUShort(10u);
             for (int i = 0; i < count; i++)
             {
-                Position position = new Position();
+                Position position = new();
                 position.Read(reader);
                 Positions.Add(position);
             }

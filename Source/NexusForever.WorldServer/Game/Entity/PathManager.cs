@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private const uint MaxPathLevel = 30u;
 
         private readonly Player player;
-        private readonly Dictionary<Path, PathEntry> paths = new Dictionary<Path, PathEntry>();
+        private readonly Dictionary<Path, PathEntry> paths = new();
 
         /// <summary>
         /// Create a new <see cref="PathManager"/> from <see cref="Player"/> database model.

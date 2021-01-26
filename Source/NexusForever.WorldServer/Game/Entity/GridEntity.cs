@@ -25,9 +25,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public float ActivationRange { get; protected set; }
 
-        protected readonly Dictionary<uint, GridEntity> visibleEntities = new Dictionary<uint, GridEntity>();
+        protected readonly Dictionary<uint, GridEntity> visibleEntities = new();
 
-        private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = new HashSet<(uint GridX, uint GridZ)>();
+        private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = new();
 
         /// <summary>
         /// Enqueue  <see cref="GridEntity"/> for removal from the <see cref="BaseMap"/>.

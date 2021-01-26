@@ -38,8 +38,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private readonly Player player;
 
-        private readonly Dictionary<uint /*spell4BaseId*/, CharacterSpell> spells = new Dictionary<uint, CharacterSpell>();
-        private readonly Dictionary<uint /*spell4Id*/, double /*cooldown*/> spellCooldowns = new Dictionary<uint, double>();
+        private readonly Dictionary<uint /*spell4BaseId*/, CharacterSpell> spells = new();
+        private readonly Dictionary<uint /*spell4Id*/, double /*cooldown*/> spellCooldowns = new();
         private double globalSpellCooldown;
 
         private readonly ActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];

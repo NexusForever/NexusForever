@@ -21,8 +21,8 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         private readonly Player player;
-        private readonly Dictionary<uint/*petFlairId*/, PetFlair> petFlairs = new Dictionary<uint, PetFlair>(); 
-        private readonly Dictionary<ulong/*hash*/, PetCustomisation> petCustomisations = new Dictionary<ulong, PetCustomisation>();
+        private readonly Dictionary<uint/*petFlairId*/, PetFlair> petFlairs = new(); 
+        private readonly Dictionary<ulong/*hash*/, PetCustomisation> petCustomisations = new();
 
         /// <summary>
         /// Create a new <see cref="PetCustomisationManager"/> from existing <see cref="CharacterModel"/> database model.

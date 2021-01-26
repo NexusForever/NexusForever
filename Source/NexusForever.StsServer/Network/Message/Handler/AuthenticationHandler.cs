@@ -30,8 +30,8 @@ namespace NexusForever.StsServer.Network.Message.Handler
                 session.KeyExchange = new Srp6Provider(account.Email, s, v);
 
                 byte[] B = session.KeyExchange.GenerateServerCredentials();
-                using (MemoryStream stream = new MemoryStream())
-                using (BinaryWriter writer = new BinaryWriter(stream))
+                using (MemoryStream stream = new())
+                using (BinaryWriter writer = new(stream))
                 {
                     writer.Write(s.Length);
                     writer.Write(s, 0, s.Length);
@@ -62,8 +62,8 @@ namespace NexusForever.StsServer.Network.Message.Handler
 
             byte[] M2 = session.KeyExchange.CalculateServerEvidenceMessage();
 
-            using (MemoryStream stream = new MemoryStream())
-            using (BinaryWriter writer = new BinaryWriter(stream))
+            using (MemoryStream stream = new())
+            using (BinaryWriter writer = new(stream))
             {
                 writer.Write(M2.Length);
                 writer.Write(M2, 0, M2.Length);

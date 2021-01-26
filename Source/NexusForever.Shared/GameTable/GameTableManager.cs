@@ -692,14 +692,14 @@ namespace NexusForever.Shared.GameTable
 
         private async Task LoadGameTablesAsync()
         {
-            List<Exception> exceptions = new List<Exception>();
+            List<Exception> exceptions = new();
             int loadCount = Environment.ProcessorCount * 2;
             if (loadCount < minimumThreads)
                 loadCount = minimumThreads;
             if (loadCount > maximumThreads)
                 loadCount = maximumThreads;
 
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
             async Task WaitForNextTaskToFinish()
             {
                 Task next = await Task.WhenAny(tasks);
@@ -739,7 +739,7 @@ namespace NexusForever.Shared.GameTable
                 return fileName;
             }
 
-            List<PropertyInfo> properties = new List<PropertyInfo>();
+            List<PropertyInfo> properties = new();
             // It's done this way so we load the text first, because it's huge.
             foreach (PropertyInfo property in typeof(GameTableManager).GetProperties())
             {

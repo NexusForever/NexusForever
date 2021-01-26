@@ -8,8 +8,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetVelocityKeys)]
     public class SetVelocityKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new List<uint>();
-        public List<Velocity> Velocities = new List<Velocity>();
+        public List<uint> Times = new();
+        public List<Velocity> Velocities = new();
 
         public byte Type { get; set; }
         public uint Offset { get; set; }
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
         public void Read(GamePacketReader reader)
         {
             uint Count = reader.ReadUShort(10u);
-            Velocity velocity = new Velocity();
+            Velocity velocity = new();
 
             for (int i = 0; i < Count; i++)
                 Times.Add(reader.ReadUInt());

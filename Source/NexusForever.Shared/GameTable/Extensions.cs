@@ -15,7 +15,7 @@ namespace NexusForever.Shared.GameTable
             // the underlying stream and BinaryReader doesn't actually care about position.
             using (var wrappedReader = new BinaryReader(reader.BaseStream, Encoding.Unicode, true))
             {
-                List<char> characters = new List<char>();
+                List<char> characters = new();
 
                 while (true)
                 {

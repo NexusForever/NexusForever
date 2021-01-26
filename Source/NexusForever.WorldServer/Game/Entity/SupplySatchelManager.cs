@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         private readonly Player player;
         private readonly uint maximumStackAmount = 100;
-        private readonly Dictionary</* materialId */ushort, TradeskillMaterial> tradeskillMaterials = new Dictionary<ushort, TradeskillMaterial>();
+        private readonly Dictionary</* materialId */ushort, TradeskillMaterial> tradeskillMaterials = new();
 
         public SupplySatchelManager(Player owner, CharacterModel model)
         {
