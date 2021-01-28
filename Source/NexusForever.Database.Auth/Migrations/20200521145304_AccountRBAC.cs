@@ -40,7 +40,7 @@ namespace NexusForever.Database.Auth.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_account_permission", x => x.id);
+                    table.PrimaryKey("PK_account_permission", x => new { x.id, x.permissionId });
                     table.ForeignKey(
                         name: "FK__account_permission_id__account_id",
                         column: x => x.id,
@@ -64,7 +64,7 @@ namespace NexusForever.Database.Auth.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_account_role", x => x.id);
+                    table.PrimaryKey("PK_account_role", x => new { x.id, x.roleId });
                     table.ForeignKey(
                         name: "FK__account_role_id__account_id",
                         column: x => x.id,
@@ -88,7 +88,7 @@ namespace NexusForever.Database.Auth.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_role_permission", x => x.id);
+                    table.PrimaryKey("PK_role_permission", x => new { x.id, x.permissionId });
                     table.ForeignKey(
                         name: "FK__role_permission_id__role_id",
                         column: x => x.id,
