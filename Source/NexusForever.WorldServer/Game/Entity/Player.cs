@@ -47,7 +47,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Race Race { get; }
         public Class Class { get; }
         public Faction Faction { get; }
-        public List<float> Bones { get; } = new List<float>();
+        public List<float> Bones { get; } = new();
 
         public CharacterFlag Flags
         {
@@ -133,7 +133,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public bool IsSitting => currentChairGuid != null;
         private uint? currentChairGuid;
-        
+
         public bool SignatureEnabled = false; // TODO: Make configurable.
 
         public WorldSession Session { get; }
@@ -167,20 +167,12 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
-        private UpdateTimer saveTimer = new UpdateTimer(SaveDuration);
+        private UpdateTimer saveTimer = new(SaveDuration);
         private PlayerSaveMask saveMask;
 
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
         public bool CanTeleport() => pendingTeleport == null;
-
-
-
-        
-
-
-
-
 
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
@@ -528,7 +520,7 @@ namespace NexusForever.WorldServer.Game.Entity
             SetControl(this);
 
             CostumeManager.SendInitialPackets();
-            
+
             var playerCreate = new ServerPlayerCreate
             {
                 ItemProficiencies = GetItemProficiencies(),
@@ -910,7 +902,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Text    = text
             });
         }
-        
+
         /// <summary>
         /// Returns whether this <see cref="Player"/> is allowed to summon or be added to a mount
         /// </summary>

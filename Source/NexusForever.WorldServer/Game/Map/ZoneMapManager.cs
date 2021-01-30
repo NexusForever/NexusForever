@@ -16,10 +16,10 @@ namespace NexusForever.WorldServer.Game.Map
         private const byte RateLimit = 10;
 
         private ushort currentZoneMap;
-        private ZoneMapCoordinate currentZoneMapCoordinate = new ZoneMapCoordinate();
+        private ZoneMapCoordinate currentZoneMapCoordinate = new();
         private Vector3 lastPosition;
 
-        private readonly Dictionary<ushort /*ZoneMapId*/, ZoneMap> zoneMaps = new Dictionary<ushort, ZoneMap>();
+        private readonly Dictionary<ushort /*ZoneMapId*/, ZoneMap> zoneMaps = new();
 
         private readonly Player player;
 

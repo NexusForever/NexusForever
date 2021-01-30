@@ -86,7 +86,7 @@ namespace NexusForever.WorldServer.Game.Quest
         private QuestSaveMask saveMask;
 
         private readonly Player player;
-        private readonly List<QuestObjective> objectives = new List<QuestObjective>();
+        private readonly List<QuestObjective> objectives = new();
 
         private UpdateTimer questTimer;
 

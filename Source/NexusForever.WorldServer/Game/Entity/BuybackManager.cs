@@ -11,7 +11,7 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public sealed class BuybackManager : Singleton<BuybackManager>, IUpdate
     {
-        private readonly Dictionary<ulong /*CharacterId*/, BuybackInfo> buybackInfo = new Dictionary<ulong, BuybackInfo>();
+        private readonly Dictionary<ulong /*CharacterId*/, BuybackInfo> buybackInfo = new();
 
         private BuybackManager()
         {

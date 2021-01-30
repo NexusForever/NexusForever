@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<string, MapFile> mapFiles = new Dictionary<string, MapFile>();
+        private readonly Dictionary<string, MapFile> mapFiles = new();
 
         private BaseMapManager()
         {
@@ -35,12 +35,10 @@ namespace NexusForever.WorldServer.Game.Map
 
             foreach (string fileName in Directory.EnumerateFiles(mapPath, "*.nfmap"))
             {
-                using (FileStream stream = File.OpenRead(fileName))
-                using (BinaryReader reader = new BinaryReader(stream))
-                {
-                    var mapFile = new MapFile();
-                    mapFile.ReadHeader(reader);
-                }
+                using FileStream stream = File.OpenRead(fileName);
+                using var reader = new BinaryReader(stream);
+                var mapFile = new MapFile();
+                mapFile.ReadHeader(reader);
             }
         }
 
@@ -79,16 +77,14 @@ namespace NexusForever.WorldServer.Game.Map
             string asset    = Path.Combine(mapPath, Path.GetFileName(assetPath));
             string filePath = Path.ChangeExtension(asset, ".nfmap");
 
-            using (FileStream stream = File.OpenRead(filePath))
-            using (BinaryReader reader = new BinaryReader(stream))
-            {
-                var mapFile = new MapFile();
-                mapFiles.Add(assetPath, mapFile);
-                mapFile.Read(reader);
+            using FileStream stream = File.OpenRead(filePath);
+            using var reader = new BinaryReader(stream);
+            var mapFile = new MapFile();
+            mapFiles.Add(assetPath, mapFile);
+            mapFile.Read(reader);
 
-                log.Trace($"Initialised base map file for asset {assetPath}.");
-                return mapFile;
-            }
+            log.Trace($"Initialised base map file for asset {assetPath}.");
+            return mapFile;
         }
     }
 }

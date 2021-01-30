@@ -9,9 +9,9 @@ namespace NexusForever.WorldServer.Game.Map
     public sealed class InstancedMap<T> : IInstancedMap where T : IMap, new()
     {
         private WorldEntry entry;
-        private readonly Dictionary</*instanceId*/ uint, T> instances = new Dictionary<uint, T>();
-        private readonly Queue<T> pendingInstances = new Queue<T>();
-        private readonly QueuedCounter instanceCounter = new QueuedCounter();
+        private readonly Dictionary</*instanceId*/ uint, T> instances = new();
+        private readonly Queue<T> pendingInstances = new();
+        private readonly QueuedCounter instanceCounter = new();
         
         public void Initialise(MapInfo info, Player player)
         {
@@ -47,7 +47,7 @@ namespace NexusForever.WorldServer.Game.Map
                     return instance;
             }
 
-            T newInstance = new T();
+            var newInstance = new T();
             newInstance.Initialise(info, player);
             pendingInstances.Enqueue(newInstance);
             return newInstance;

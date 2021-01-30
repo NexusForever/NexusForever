@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Command
 
         private ImmutableDictionary<string, ICommandHandler> handlers;
 
-        private readonly ConcurrentQueue<PendingCommand> pendingCommands = new ConcurrentQueue<PendingCommand>();
+        private readonly ConcurrentQueue<PendingCommand> pendingCommands = new();
 
         private CommandManager()
         {

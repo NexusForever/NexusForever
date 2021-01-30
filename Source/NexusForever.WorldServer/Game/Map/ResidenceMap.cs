@@ -444,7 +444,7 @@ namespace NexusForever.WorldServer.Game.Map
             WorldSocketEntry worldSocketEntry = GameTableManager.Instance.WorldSocket.GetEntry(residence.GetPlot((byte)update.PlotIndex).PlotEntry.WorldSocketId);
 
             // TODO: Calculate position based on individual maps on Community & Warplot residences
-            Vector3 worldPosition = new Vector3(1472f + update.Position.X, update.Position.Y, 1440f + update.Position.Z);
+            var worldPosition = new Vector3(1472f + update.Position.X, update.Position.Y, 1440f + update.Position.Z);
 
             (uint gridX, uint gridZ) = MapGrid.GetGridCoord(worldPosition);
             (uint localCellX, uint localCellZ) = MapCell.GetCellCoord(worldPosition);

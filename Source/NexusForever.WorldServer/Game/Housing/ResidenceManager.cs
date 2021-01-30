@@ -30,10 +30,10 @@ namespace NexusForever.WorldServer.Game.Housing
         private ulong nextResidenceId;
         private ulong nextDecorId;
 
-        private static readonly ConcurrentDictionary</*residenceId*/ ulong, Residence> residences = new ConcurrentDictionary<ulong, Residence>();
-        private readonly ConcurrentDictionary</*owner*/ string, ulong /*residenceId*/> ownerCache = new ConcurrentDictionary<string, ulong>(StringComparer.InvariantCultureIgnoreCase);
+        private static readonly ConcurrentDictionary</*residenceId*/ ulong, Residence> residences = new();
+        private readonly ConcurrentDictionary</*owner*/ string, ulong /*residenceId*/> ownerCache = new(StringComparer.InvariantCultureIgnoreCase);
 
-        private readonly Dictionary<ulong, PublicResidence> visitableResidences = new Dictionary<ulong, PublicResidence>();
+        private readonly Dictionary<ulong, PublicResidence> visitableResidences = new();
 
         private double timeToSave = SaveDuration;
 

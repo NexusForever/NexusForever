@@ -24,7 +24,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public Creature2Entry Creature { get; }
         public Creature2DisplayGroupEntryEntry Creature2DisplayGroup { get; }
 
-        private readonly UpdateTimer followTimer = new UpdateTimer(1d);
+        private readonly UpdateTimer followTimer = new(1d);
 
         public VanityPet(Player owner, uint creature)
             : base(EntityType.Pet)

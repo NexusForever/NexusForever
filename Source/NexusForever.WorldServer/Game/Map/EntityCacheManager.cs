@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<ushort, EntityCache> entityCaches = new Dictionary<ushort, EntityCache>();
+        private readonly Dictionary<ushort, EntityCache> entityCaches = new();
 
         private EntityCacheManager()
         {

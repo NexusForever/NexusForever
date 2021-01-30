@@ -15,14 +15,12 @@ namespace NexusForever.StsServer.Network.Message.Model
             XmlNode rootNode = document["Request"];
             string keyData = rootNode["KeyData"].GetValue<string>();
 
-            using (MemoryStream stream = new MemoryStream(Convert.FromBase64String(keyData)))
-            using (BinaryReader reader = new BinaryReader(stream))
-            {
-                int lengthA = reader.ReadInt32();
-                A = reader.ReadBytes(lengthA);
-                int lengthM = reader.ReadInt32();
-                M1 = reader.ReadBytes(lengthM);
-            }
+            using var stream = new MemoryStream(Convert.FromBase64String(keyData));
+            using var reader = new BinaryReader(stream);
+            int lengthA = reader.ReadInt32();
+            A = reader.ReadBytes(lengthA);
+            int lengthM = reader.ReadInt32();
+            M1 = reader.ReadBytes(lengthM);
         }
     }
 }

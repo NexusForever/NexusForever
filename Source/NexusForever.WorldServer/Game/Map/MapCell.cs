@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Map
 
         public (uint X, uint Z) Coord { get; }
 
-        private readonly HashSet<GridEntity> entities = new HashSet<GridEntity>();
+        private readonly HashSet<GridEntity> entities = new();
 
         /// <summary>
         /// Return <see cref="MapCell"/> at supplied <see cref="Vector3"/>.

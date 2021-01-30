@@ -24,12 +24,12 @@ namespace NexusForever.WorldServer.Game.Entity
     public class MailManager : IUpdate, ISaveCharacter
     {
         private readonly Player player;
-        private readonly Queue<MailItem> outgoingMail = new Queue<MailItem>();
-        private readonly List<MailItem> pendingMail = new List<MailItem>();
-        private readonly Dictionary<ulong, MailItem> availableMail = new Dictionary<ulong, MailItem>();
+        private readonly Queue<MailItem> outgoingMail = new();
+        private readonly List<MailItem> pendingMail = new();
+        private readonly Dictionary<ulong, MailItem> availableMail = new();
 
         // timer to check pending mail ever second
-        private readonly UpdateTimer mailTimer = new UpdateTimer(1000d);
+        private readonly UpdateTimer mailTimer = new(1000d);
 
         /// <summary>
         /// Create a new <see cref="MailManager"/> from existing <see cref="CharacterModel"/> database model.

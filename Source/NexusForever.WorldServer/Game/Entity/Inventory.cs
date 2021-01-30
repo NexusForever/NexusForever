@@ -30,8 +30,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private readonly ulong characterId;
         private readonly Player player;
-        private readonly Dictionary<InventoryLocation, Bag> bags = new Dictionary<InventoryLocation, Bag>();
-        private readonly List<Item> deletedItems = new List<Item>();
+        private readonly Dictionary<InventoryLocation, Bag> bags = new();
+        private readonly List<Item> deletedItems = new();
 
         /// <summary>
         /// Create a new <see cref="Inventory"/> from <see cref="Player"/> database model.
@@ -295,7 +295,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (bag.GetItem(bagIndex) != null)
                     continue;
 
-                Item item = new Item(characterId, itemEntry);
+                var item = new Item(characterId, itemEntry);
                 AddItem(item, InventoryLocation.Equipped, bagIndex);
                 break;
             }

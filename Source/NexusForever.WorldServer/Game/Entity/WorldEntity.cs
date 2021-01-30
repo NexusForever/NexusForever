@@ -68,9 +68,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint ControllerGuid { get; set; }
 
-        protected readonly Dictionary<Stat, StatValue> stats = new Dictionary<Stat, StatValue>();
+        protected readonly Dictionary<Stat, StatValue> stats = new();
 
-        private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
+        private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new();
 
         /// <summary>
         /// Create a new <see cref="WorldEntity"/> with supplied <see cref="EntityType"/>.
@@ -124,7 +124,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
+            var entityCreatePacket = new ServerEntityCreate
             {
                 Guid         = Guid,
                 Type         = Type,

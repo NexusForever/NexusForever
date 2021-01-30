@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Setting
 
         private bool isDirty;
 
-        private readonly Dictionary<ushort, Keybinding> bindings = new Dictionary<ushort, Keybinding>();
+        private readonly Dictionary<ushort, Keybinding> bindings = new();
 
         /// <summary>
         /// Create a new <see cref="KeybindingSet"/> from an existing database model.

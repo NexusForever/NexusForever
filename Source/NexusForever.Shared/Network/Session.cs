@@ -14,7 +14,7 @@ namespace NexusForever.Shared.Network
         /// </summary>
         public bool PendingEvent => events.Count != 0;
 
-        private readonly Queue<IEvent> events = new Queue<IEvent>();
+        private readonly Queue<IEvent> events = new();
 
         /// <summary>
         /// Enqueue <see cref="IEvent"/> to be delay executed.

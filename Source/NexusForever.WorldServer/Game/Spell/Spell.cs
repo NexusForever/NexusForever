@@ -25,9 +25,9 @@ namespace NexusForever.WorldServer.Game.Spell
         private readonly SpellParameters parameters;
         private SpellStatus status;
 
-        private readonly List<SpellTargetInfo> targets = new List<SpellTargetInfo>();
+        private readonly List<SpellTargetInfo> targets = new();
 
-        private readonly SpellEventManager events = new SpellEventManager();
+        private readonly SpellEventManager events = new();
 
         public Spell(UnitEntity caster, SpellParameters parameters)
         {

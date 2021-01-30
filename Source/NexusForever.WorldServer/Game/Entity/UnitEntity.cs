@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Game.Entity
 {
     public abstract class UnitEntity : WorldEntity
     {
-        private readonly List<Spell.Spell> pendingSpells = new List<Spell.Spell>();
+        private readonly List<Spell.Spell> pendingSpells = new();
 
         protected UnitEntity(EntityType type)
             : base(type)

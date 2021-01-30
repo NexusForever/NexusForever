@@ -6,7 +6,7 @@ namespace NexusForever.WorldServer.Game
 {
     public sealed class CleanupManager : Singleton<CleanupManager>
     {
-        private static readonly HashSet<uint> pendingCleanup = new HashSet<uint>();
+        private static readonly HashSet<uint> pendingCleanup = new();
 
         private CleanupManager()
         {

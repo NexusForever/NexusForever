@@ -11,7 +11,7 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public RewardPropertyEntry Entry { get; }
 
-        private readonly Dictionary<uint, float> values = new Dictionary<uint, float>();
+        private readonly Dictionary<uint, float> values = new();
 
         /// <summary>
         /// Create a new <see cref="RewardProperty"/> with the supplied <see cref="RewardPropertyEntry"/>.

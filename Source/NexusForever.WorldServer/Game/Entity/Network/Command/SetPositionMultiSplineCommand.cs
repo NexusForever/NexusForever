@@ -8,7 +8,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetPositionMultiSpline)]
     public class SetPositionMultiSplineCommand : IEntityCommandModel
     {
-        public List<uint> SplineIds = new List<uint>();
+        public List<uint> SplineIds = new();
         public ushort Speed { get; set; }
         public float Position { get; set; }
         public float TakeoffLocationHeight { get; set; }

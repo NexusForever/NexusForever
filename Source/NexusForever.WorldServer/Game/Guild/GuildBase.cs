@@ -79,9 +79,9 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         public abstract uint MaxMembers { get; }
 
-        protected readonly SortedDictionary</*index*/byte, GuildRank> ranks = new SortedDictionary<byte, GuildRank>();
-        protected readonly Dictionary</*characterId*/ulong, GuildMember> members = new Dictionary<ulong, GuildMember>();
-        protected readonly List</*characterId*/ulong> onlineMembers = new List<ulong>();
+        protected readonly SortedDictionary</*index*/byte, GuildRank> ranks = new();
+        protected readonly Dictionary</*characterId*/ulong, GuildMember> members = new();
+        protected readonly List</*characterId*/ulong> onlineMembers = new();
 
         /// <summary>
         /// Create a new <see cref="GuildBase"/> from an existing database model.

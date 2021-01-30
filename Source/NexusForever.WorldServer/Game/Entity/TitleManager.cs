@@ -37,7 +37,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private bool activeSaved = true;
 
         private readonly Player player;
-        private readonly Dictionary<ushort, Title> titles = new Dictionary<ushort, Title>();
+        private readonly Dictionary<ushort, Title> titles = new();
 
         /// <summary>
         /// Create a new <see cref="TitleManager"/> from existing <see cref="CharacterModel"/> database model.

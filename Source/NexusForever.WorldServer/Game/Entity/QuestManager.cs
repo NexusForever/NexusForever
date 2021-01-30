@@ -33,9 +33,9 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private readonly Player player;
 
-        private readonly Dictionary<ushort, Quest.Quest> completedQuests = new Dictionary<ushort, Quest.Quest>();
-        private readonly Dictionary<ushort, Quest.Quest> inactiveQuests = new Dictionary<ushort, Quest.Quest>();
-        private readonly Dictionary<ushort, Quest.Quest> activeQuests = new Dictionary<ushort, Quest.Quest>();
+        private readonly Dictionary<ushort, Quest.Quest> completedQuests = new();
+        private readonly Dictionary<ushort, Quest.Quest> inactiveQuests = new();
+        private readonly Dictionary<ushort, Quest.Quest> activeQuests = new();
 
         /// <summary>
         /// Create a new <see cref="QuestManager"/> from existing <see cref="CharacterModel"/> database model.

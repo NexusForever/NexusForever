@@ -25,8 +25,8 @@ namespace NexusForever.StsServer.Network
         private Arc4Provider serverNewEncryption;
 
         private FragmentedStsPacket onDeck;
-        private readonly ConcurrentQueue<ClientStsPacket> incomingPackets = new ConcurrentQueue<ClientStsPacket>();
-        private readonly Queue<ServerStsPacket> outgoingPackets = new Queue<ServerStsPacket>();
+        private readonly ConcurrentQueue<ClientStsPacket> incomingPackets = new();
+        private readonly Queue<ServerStsPacket> outgoingPackets = new();
 
         private uint sequence;
 

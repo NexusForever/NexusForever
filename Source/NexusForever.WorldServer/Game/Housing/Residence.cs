@@ -200,8 +200,8 @@ namespace NexusForever.WorldServer.Game.Housing
 
         private ResidenceSaveMask saveMask;
 
-        private readonly Dictionary<ulong, Decor> decors = new Dictionary<ulong, Decor>();
-        private readonly HashSet<Decor> deletedDecors = new HashSet<Decor>();
+        private readonly Dictionary<ulong, Decor> decors = new();
+        private readonly HashSet<Decor> deletedDecors = new();
         private readonly Plot[] plots = new Plot[7];
 
         /// <summary>

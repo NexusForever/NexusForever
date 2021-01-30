@@ -12,8 +12,8 @@ namespace NexusForever.Shared.GameTable
 {
     public static class FileCache
     {
-        private static Lazy<string> lazyModuleVersion = new Lazy<string>(CreateModuleVersionString, LazyThreadSafetyMode.ExecutionAndPublication);
-        private static Lazy<DirectoryInfo> lazyCacheDirectory => new Lazy<DirectoryInfo>(CreateCacheDirectory, LazyThreadSafetyMode.ExecutionAndPublication);
+        private static Lazy<string> lazyModuleVersion = new(CreateModuleVersionString, LazyThreadSafetyMode.ExecutionAndPublication);
+        private static Lazy<DirectoryInfo> lazyCacheDirectory => new(CreateCacheDirectory, LazyThreadSafetyMode.ExecutionAndPublication);
         private static ILogger log = LogManager.GetCurrentClassLogger();
         private static DirectoryInfo CreateCacheDirectory()
         {

@@ -15,7 +15,7 @@ namespace NexusForever.Shared.IO.Map
 
         public string Asset { get; protected set; }
 
-        protected readonly Dictionary<uint /*hash*/, MapFileGrid> grids = new Dictionary<uint, MapFileGrid>();
+        protected readonly Dictionary<uint /*hash*/, MapFileGrid> grids = new();
 
         private static (uint gridX, uint gridY) GetGridCoord(Vector3 vector)
         {

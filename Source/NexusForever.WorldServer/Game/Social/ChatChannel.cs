@@ -11,7 +11,7 @@ namespace NexusForever.WorldServer.Game.Social
         public ChatChannelType Type { get; set; }
         public ulong Id { get; set; }
 
-        private readonly HashSet<ulong> members = new HashSet<ulong>();
+        private readonly HashSet<ulong> members = new();
 
         /// <summary>
         /// Create a new <see cref="ChatChannel"/> with supplied <see cref="ChatChannelType"/> and id.

@@ -12,8 +12,8 @@ namespace NexusForever.WorldServer.Game.CharacterCache
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<ulong, ICharacter> characters = new Dictionary<ulong, ICharacter>();
-        private readonly Dictionary<string, ulong> characterNameToId = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<ulong, ICharacter> characters = new();
+        private readonly Dictionary<string, ulong> characterNameToId = new(StringComparer.OrdinalIgnoreCase);
 
         private CharacterManager()
         {

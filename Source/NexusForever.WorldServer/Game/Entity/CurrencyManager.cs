@@ -13,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Entity
     public class CurrencyManager : ISaveCharacter, IEnumerable<Currency>
     {
         private readonly Player player;
-        private readonly Dictionary<CurrencyType, Currency> currencies = new Dictionary<CurrencyType, Currency>();
+        private readonly Dictionary<CurrencyType, Currency> currencies = new();
 
         /// <summary>
         /// Create a new <see cref="CurrencyManager"/> from <see cref="CharacterModel"/> database model.
