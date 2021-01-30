@@ -27,19 +27,19 @@ namespace NexusForever.WorldServer.Game
         public void Initialise()
         {
             log.Info("Creating reverse text lookups.");
-            Dictionary<Language, TextReverseIndex> index = new()
+            var index = new Dictionary<Language, TextReverseIndex>
             {
-                [Language.English] = new TextReverseIndex(GameTableManager.Instance.TextEnglish),
-                [Language.French] = new TextReverseIndex(GameTableManager.Instance.TextFrench),
-                [Language.German] = new TextReverseIndex(GameTableManager.Instance.TextGerman)
+                [Language.English] = new(GameTableManager.Instance.TextEnglish),
+                [Language.French]  = new(GameTableManager.Instance.TextFrench),
+                [Language.German]  = new(GameTableManager.Instance.TextGerman)
             };
             reverseIndexDictionary = index.ToImmutableDictionary();
-            foreach (KeyValuePair<Language, TextReverseIndex> kvp in index)
+            foreach ((Language language, TextReverseIndex value) in index)
             {
-                if (kvp.Value.IsEmpty)
-                    log.Warn($"Language {kvp.Key} was not loaded, and will not be used for text search");
+                if (value.IsEmpty)
+                    log.Warn($"Language {language} was not loaded, and will not be used for text search");
                 else
-                    log.Debug($"Language {kvp.Key} loaded.");
+                    log.Debug($"Language {language} loaded.");
             }
         }
 

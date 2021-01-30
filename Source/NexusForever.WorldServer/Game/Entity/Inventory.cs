@@ -295,7 +295,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (bag.GetItem(bagIndex) != null)
                     continue;
 
-                Item item = new(characterId, itemEntry);
+                var item = new Item(characterId, itemEntry);
                 AddItem(item, InventoryLocation.Equipped, bagIndex);
                 break;
             }

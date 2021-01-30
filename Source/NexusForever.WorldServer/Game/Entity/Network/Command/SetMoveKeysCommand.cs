@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using NexusForever.Shared.Network;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
@@ -17,28 +15,27 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
 
         public void Read(GamePacketReader reader)
         {
-            uint Count = reader.ReadUShort(10u);
-            Move move = new();
-
-            for (int i = 0; i < Count; i++)
+            uint count = reader.ReadUShort(10u);
+            for (int i = 0; i < count; i++)
                 Times.Add(reader.ReadUInt());
 
-            for (int i = 0; i < Count; i++)
+            var move = new Move();
+            for (int i = 0; i < count; i++)
             {
                 move.Read(reader);
                 Moves.Add(move);
             }
 
-            Type    = reader.ReadByte(2u);
-            Offset  = reader.ReadUInt();
-            Blend   = reader.ReadBit();
+            Type   = reader.ReadByte(2u);
+            Offset = reader.ReadUInt();
+            Blend  = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Times.Count, 10u);
 
-            foreach (var time in Times)
+            foreach (uint time in Times)
                 writer.Write(time);
 
             Moves.ForEach(m => m.Write(writer));

@@ -67,9 +67,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientWhoRequest)]
         public static void HandleWhoRequest(WorldSession session, ClientWhoRequest request)
         {
-            List<ServerWhoResponse.WhoPlayer> players = new()
+            var players = new List<ServerWhoResponse.WhoPlayer>
             {
-                new ServerWhoResponse.WhoPlayer
+                new()
                 {
                     Name = session.Player.Name,
                     Level = session.Player.Level,

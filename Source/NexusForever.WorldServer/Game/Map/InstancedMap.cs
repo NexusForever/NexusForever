@@ -47,7 +47,7 @@ namespace NexusForever.WorldServer.Game.Map
                     return instance;
             }
 
-            T newInstance = new();
+            var newInstance = new T();
             newInstance.Initialise(info, player);
             pendingInstances.Enqueue(newInstance);
             return newInstance;
