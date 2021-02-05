@@ -108,10 +108,21 @@ namespace NexusForever.WorldServer.Game.Spell
             if (worldLocation == null)
                 return;
 
+            const uint spellIdRapidTransportCredits = 82922;
+            const uint spellIdRapidTransportServiceToken = 82956;
+
+
             if (!(target is Player player))
                 return;
 
             if (!player.CanTeleport())
+                return;
+
+            if (info.Entry.SpellId == spellIdRapidTransportCredits && player.Session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, parameters.SpellCost))
+                player.Session.Player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, parameters.SpellCost);
+            else if (info.Entry.SpellId == spellIdRapidTransportServiceToken && player.Session.AccountCurrencyManager.CanAfford(Account.Static.AccountCurrencyType.ServiceToken, parameters.SpellCost))
+                player.Session.AccountCurrencyManager.CurrencySubtractAmount(Account.Static.AccountCurrencyType.ServiceToken, parameters.SpellCost);
+            else //ToDo : Implement right error, Spell4CastResult
                 return;
 
             var rotation = new Quaternion(worldLocation.Facing0, worldLocation.Facing0, worldLocation.Facing2, worldLocation.Facing3);

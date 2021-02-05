@@ -6,6 +6,7 @@ using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Shared;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.Game;
@@ -15,6 +16,7 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game;
+using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -621,25 +623,82 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientRapidTransport)]
         public static void HandleClientTarget(WorldSession session, ClientRapidTransport rapidTransport)
         {
-            //TODO: check for cooldown
-            //TODO: handle payment
+            //TODO: Check if player is in combat
 
             TaxiNodeEntry taxiNode = GameTableManager.Instance.TaxiNode.GetEntry(rapidTransport.TaxiNode);
             if (taxiNode == null)
-                throw new InvalidPacketValueException();
-
-            if (session.Player.Level < taxiNode.AutoUnlockLevel)
                 throw new InvalidPacketValueException();
 
             WorldLocation2Entry worldLocation = GameTableManager.Instance.WorldLocation2.GetEntry(taxiNode.WorldLocation2Id);
             if (worldLocation == null)
                 throw new InvalidPacketValueException();
 
-            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(1307);
-            session.Player.CastSpell(entry.Dataint0, new SpellParameters
+            const ulong creditBasePriceEntry = 7;
+            const ulong spellIdEntry = 1307;
+            const ulong creditModifierEntry = 1310;
+
+            TaxiRouteEntry taxiRoute = GameTableManager.Instance.TaxiRoute.GetEntry(creditBasePriceEntry);
+            GameFormulaEntry spellEntry = GameTableManager.Instance.GameFormula.GetEntry(spellIdEntry);
+            GameFormulaEntry costEntry = GameTableManager.Instance.GameFormula.GetEntry(creditModifierEntry);
+
+            Vector3 destinationPosition = new Vector3(worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
+
+            ulong creditBasePrice = taxiRoute.Price;
+            ulong creditPrice;
+            ulong serviceTokenPrice = taxiNode.ContentTier + 1;
+
+            double cooldown = session.Player.SpellManager.GetSpellCooldown(spellEntry.Dataint0);
+
+
+            //Implement right error, Spell4CastResult
+            if (session.Player.Level < taxiNode.AutoUnlockLevel)
+                throw new InvalidPacketValueException();
+
+
+            if (session.Player.Map.Entry.Id == worldLocation.WorldId) 
+                creditPrice = (ulong)(creditBasePrice * costEntry.Dataint01 * taxiNode.ContentTier + Vector3.Distance(session.Player.Position, destinationPosition));
+            else
+                creditPrice = (ulong)(costEntry.Datafloat01 * taxiNode.ContentTier + creditBasePrice * costEntry.Dataint01 * taxiNode.ContentTier);
+
+
+            //Check if Node is too Near
+            if (Vector3.Distance(session.Player.Position, destinationPosition) < 200f)
+                //ToDo : Implement right error, Spell4CastResult
+                return;
+          
+            //Todo send to client Player has insufficient funds (Credits)
+            if (!session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, creditPrice) & cooldown == 0)
+                //ToDo : Implement right error, Spell4CastResult
+                return;
+
+            //Todo send to client Player has insufficient funds (ServiceToken)
+            if (!session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, serviceTokenPrice) & cooldown > 0)
+                //ToDo : Implement right error, Spell4CastResult
+                return;
+
+            //Check requirement for RapidTransport(Credits)
+            if (cooldown == 0 && session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, creditPrice))
+            {                
+                session.Player.CastSpell(spellEntry.Dataint0, new SpellParameters
+                {
+                    TaxiNode = rapidTransport.TaxiNode,
+                    SpellCost = creditPrice
+
+                }) ;
+                return;
+            }
+                       
+
+            //Check requirement for RapidTransport(ServiceToken)
+            if (cooldown > 0 && session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, serviceTokenPrice))
             {
-                TaxiNode = rapidTransport.TaxiNode
-            });
+                session.Player.CastSpell(spellEntry.Dataint01, new SpellParameters
+                {
+                    TaxiNode = rapidTransport.TaxiNode,
+                    SpellCost = serviceTokenPrice
+                });
+                return;
+            }
         }
 
         [MessageHandler(GameMessageOpcode.ClientInnateChange)]

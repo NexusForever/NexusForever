@@ -12,5 +12,6 @@ namespace NexusForever.WorldServer.Game.Spell
         public uint PrimaryTargetId { get; set; }
         public Position Position { get; set; }
         public ushort TaxiNode { get; set; }
+        public ulong SpellCost { get; set; }
     }
 }
