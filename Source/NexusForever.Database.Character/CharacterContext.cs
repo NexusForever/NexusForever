@@ -32,6 +32,8 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterTitleModel> CharacterTitle { get; set; }
         public DbSet<CharacterTradeskillMaterialModel> CharacterTradeskillMaterial { get; set; }
         public DbSet<CharacterZonemapHexgroupModel> CharacterZonemapHexgroup { get; set; }
+        public DbSet<ChatChannelModel> ChatChannel { get; set; }
+        public DbSet<ChatChannelMemberModel> ChatChannelMember { get; set; }
         public DbSet<GuildModel> Guild { get; set; }
         public DbSet<GuildRankModel> GuildRank { get; set; }
         public DbSet<GuildMemberModel> GuildMember { get; set; }
@@ -1141,6 +1143,62 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.ZonemapHexgroup)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_zonemap_hexgroup_id__character_id");
+            });
+
+            modelBuilder.Entity<ChatChannelModel>(entity =>
+            {
+                entity.ToTable("chat_channel");
+
+                entity.HasKey(e => e.Id)
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(20)")
+                    .HasDefaultValue("");
+
+                entity.Property(e => e.Password)
+                    .HasColumnName("password")
+                    .HasColumnType("varchar(20)")
+                    .HasDefaultValue("");
+            });
+
+            modelBuilder.Entity<ChatChannelMemberModel>(entity =>
+            {
+                entity.ToTable("chat_channel_member");
+
+                entity.HasKey(e => new { e.Id, e.CharacterId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.CharacterId)
+                    .HasColumnName("characterId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Flags)
+                    .HasColumnName("flags")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(e => e.Channel)
+                    .WithMany(e => e.Members)
+                    .HasForeignKey(e => e.Id)
+                    .HasConstraintName("FK__chat_channel_member_id__chat_channel_id");
             });
 
             modelBuilder.Entity<GuildModel>(entity =>

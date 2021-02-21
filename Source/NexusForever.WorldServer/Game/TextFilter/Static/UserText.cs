@@ -13,12 +13,15 @@
         GuildRankName                = 4,
         GuildBankTabName             = 5,
         HousingResidenceName         = 6,
+        [UserText(UserTextFlags.None, 500u, 1u)]
         Chat                         = 7,
         MailSubject                  = 8,
         MailBody                     = 9,
+        [UserText(UserTextFlags.NoSpace | UserTextFlags.Unknown20, 20u, 1u)]
         ChatCustomChannelName        = 10,
         ReadyCheck                   = 11,
         FriendshipNote               = 12,
+        [UserText(UserTextFlags.Unknown80, 20u, 0u)]
         ChatCustomChannelPassword    = 13,
         [UserText(UserTextFlags.AllowMultiline | UserTextFlags.Unknown80, 200u, 0u)]
         GuildMessageOfTheDay         = 14,

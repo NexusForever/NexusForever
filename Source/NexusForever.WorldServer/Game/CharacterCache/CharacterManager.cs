@@ -102,7 +102,7 @@ namespace NexusForever.WorldServer.Game.CharacterCache
         /// <summary>
         /// Returns the character ID of a player with the name passed in.
         /// </summary>
-        public ulong GetCharacterIdByName(string name)
+        public ulong? GetCharacterIdByName(string name)
         {
             return characterNameToId.TryGetValue(name, out ulong characterId) ? characterId : 0;
         }

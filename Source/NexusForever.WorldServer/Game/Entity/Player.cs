@@ -137,7 +137,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public bool SignatureEnabled = false; // TODO: Make configurable.
 
         public WorldSession Session { get; }
-        public bool IsLoading { get; private set; } = true;
+        public bool IsLoading { get; set; } = true;
 
         /// <summary>
         /// Returns a <see cref="float"/> representing decimal value, in days, since the character was last online. Used by <see cref="ICharacter"/>.
@@ -164,6 +164,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public XpManager XpManager { get; }
         public ReputationManager ReputationManager { get; }
         public GuildManager GuildManager { get; }
+        public ChatManager ChatManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -223,6 +224,7 @@ namespace NexusForever.WorldServer.Game.Entity
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
             GuildManager            = new GuildManager(this, model);
+            ChatManager             = new ChatManager(this);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -468,12 +470,8 @@ namespace NexusForever.WorldServer.Game.Entity
             pendingTeleport = null;
 
             SendPacketsAfterAddToMap();
-            Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
-
             if (PreviousMap == null)
                 OnLogin();
-
-            IsLoading = false;
         }
 
         public override void OnRelocate(Vector3 vector)
@@ -491,7 +489,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 TextTable tt = GameTableManager.Instance.GetTextTable(Language.English);
                 if (tt != null)
                 {
-                    SocialManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
+                    GlobalChatManager.Instance.SendMessage(Session, $"New Zone: ({Zone.Id}){tt.GetEntry(Zone.LocalizedTextIdName)}");
                 }
 
                 uint tutorialId = AssetManager.Instance.GetTutorialIdForZone(Zone.Id);
@@ -516,7 +514,7 @@ namespace NexusForever.WorldServer.Game.Entity
             BuybackManager.Instance.SendBuybackItems(this);
 
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
-            Session.EnqueueMessageEncrypted(new Server00F1());
+            Session.EnqueueMessageEncrypted(new ServerInstanceSettings());
             SetControl(this);
 
             CostumeManager.SendInitialPackets();
@@ -731,14 +729,16 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             string motd = WorldServer.RealmMotd;
             if (motd?.Length > 0)
-                SocialManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
+                GlobalChatManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
 
             GuildManager.OnLogin();
+            ChatManager.OnLogin();
         }
 
         private void OnLogout()
         {
             GuildManager.OnLogout();
+            ChatManager.OnLogout();
         }
 
         /// <summary>
@@ -898,7 +898,10 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Session.EnqueueMessageEncrypted(new ServerChat
             {
-                Channel = ChatChannelType.System,
+                Channel = new Channel
+                {
+                    Type = ChatChannelType.System
+                },
                 Text    = text
             });
         }

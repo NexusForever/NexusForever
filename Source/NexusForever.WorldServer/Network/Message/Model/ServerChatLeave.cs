@@ -5,18 +5,16 @@ using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Model
 {
-    [Message(GameMessageOpcode.ServerChatResult)]
-    public class ServerChatResult : IWritable
+    [Message(GameMessageOpcode.ServerChatLeave)]
+    public class ServerChatLeave : IWritable
     {
         public Channel Channel { get; set; }
-        public ChatResult ChatResult { get; set; }
-        public ushort Unknown0 { get; set; }
+        public ChatChannelLeaveReason Leave { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             Channel.Write(writer);
-            writer.Write(ChatResult, 5u);
-            writer.Write(Unknown0);
+            writer.Write(Leave, 2u);
         }
     }
 }

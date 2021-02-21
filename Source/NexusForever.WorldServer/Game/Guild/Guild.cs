@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Social.Static;
@@ -67,8 +68,8 @@ namespace NexusForever.WorldServer.Game.Guild
 
         protected override void InitialiseChatChannels()
         {
-            memberChannel  = SocialManager.Instance.RegisterChatChannel(ChatChannelType.Guild, Id);
-            officerChannel = SocialManager.Instance.RegisterChatChannel(ChatChannelType.GuildOfficer, Id);
+            memberChannel  = GlobalChatManager.Instance.CreateChatChannel(ChatChannelType.Guild, Name);
+            officerChannel = GlobalChatManager.Instance.CreateChatChannel(ChatChannelType.GuildOfficer, Name);
         }
 
         protected override void Save(CharacterContext context, GuildBaseSaveMask baseSaveMask)
@@ -134,9 +135,9 @@ namespace NexusForever.WorldServer.Game.Guild
         protected override void MemberOnline(GuildMember member)
         {
             if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
-                memberChannel.AddMember(member.CharacterId);
+                memberChannel.Join(member.CharacterId);
             if (member.Rank.HasPermission(GuildRankPermission.OfficerChat))
-                officerChannel.AddMember(member.CharacterId);
+                officerChannel.Join(member.CharacterId);
 
             base.MemberOnline(member);
         }
@@ -144,9 +145,9 @@ namespace NexusForever.WorldServer.Game.Guild
         protected override void MemberOffline(GuildMember member)
         {
             if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
-                memberChannel.RemoveMember(member.CharacterId);
+                memberChannel.Leave(member.CharacterId);
             if (member.Rank.HasPermission(GuildRankPermission.OfficerChat))
-                officerChannel.RemoveMember(member.CharacterId);
+                officerChannel.Leave(member.CharacterId);
 
             base.MemberOffline(member);
         }

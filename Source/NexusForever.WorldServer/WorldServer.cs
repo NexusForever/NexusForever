@@ -80,6 +80,7 @@ namespace NexusForever.WorldServer
             EntityCacheManager.Instance.Initialise();
             FactionManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
+            GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
             GlobalGuildManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
@@ -95,7 +96,6 @@ namespace NexusForever.WorldServer
             ServerManager.Instance.Initialise(RealmId); 
 
             MessageManager.Instance.Initialise();
-            SocialManager.Instance.Initialise();
             NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
 
             TextFilterManager.Instance.Initialise();
@@ -110,6 +110,7 @@ namespace NexusForever.WorldServer
                 BuybackManager.Instance.Update(lastTick);
                 GlobalQuestManager.Instance.Update(lastTick);
                 GlobalGuildManager.Instance.Update(lastTick);
+                GlobalChatManager.Instance.Update(lastTick);
 
                 // process commands after everything else in the tick has processed
                 CommandManager.Instance.Update(lastTick);

@@ -27,6 +27,21 @@ namespace NexusForever.Database.Character
             await context.SaveChangesAsync();
         }
 
+        public async Task Save(ISaveCharacter entity)
+        {
+            await using var context = new CharacterContext(config);
+            entity.Save(context);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Save(IEnumerable<ISaveCharacter> entities)
+        {
+            await using var context = new CharacterContext(config);
+            foreach (ISaveCharacter entity in entities)
+                entity.Save(context);
+            await context.SaveChangesAsync();
+        }
+
         public void Migrate()
         {
             using var context = new CharacterContext(config);
@@ -98,7 +113,7 @@ namespace NexusForever.Database.Character
 
         public async Task<List<CharacterModel>> GetCharacters(uint accountId)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
 
             IQueryable<CharacterModel> query = context.Character.Where(c => c.AccountId == accountId);
             await query.SelectMany(c => c.Appearance).LoadAsync();
@@ -199,12 +214,19 @@ namespace NexusForever.Database.Character
         public List<GuildModel> GetGuilds()
         {
             using var context = new CharacterContext(config);
-
             return context.Guild
                 .Where(g => g.DeleteTime == null)
                 .Include(g => g.GuildRank)
                 .Include(g => g.GuildMember)
                 .Include(g => g.GuildData)
+                .ToList();
+        }
+
+        public List<ChatChannelModel> GetChatChannels()
+        {
+            using var context = new CharacterContext(config);
+            return context.ChatChannel
+                .Include(c => c.Members)
                 .ToList();
         }
     }

@@ -15,6 +15,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Guild
@@ -294,9 +295,12 @@ namespace NexusForever.WorldServer.Game.Guild
 
                 player.Session.EnqueueMessageEncrypted(new ServerChat
                 {
-                    Channel = ChatChannelType.Debug,
-                    Name    = "GuildManager",
-                    Text    = $"{operation.Operation} not implemented!",
+                    Channel  = new Channel
+                    {
+                        Type = ChatChannelType.Debug
+                    },
+                    FromName = "GlobalGuildManager",
+                    Text     = $"{operation.Operation} not implemented!",
                 });
 
                 return;

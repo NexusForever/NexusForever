@@ -9,51 +9,44 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ServerChat)]
     public class ServerChat : IWritable
     {
-        public ChatChannelType Channel { get; set; }
-        public ulong ChatId { get; set; }
-
+        public Channel Channel { get; set; }
         public bool GM { get; set; }
         public bool Self { get; set; }
         public bool AutoResponse { get; set; }
-        public bool CrossFaction { get; set; }        
+        public TargetPlayerIdentity From { get; set; }
+        public string FromName { get; set; }
+        public string FromRealm { get; set; }
         public ChatPresenceState PresenceState { get; set; }
 
-        public uint RealmId { get; set; }
-        public ulong CharacterId { get; set; }
-
-        public string Name { get; set; }
-        public string Realm { get; set; }
-        public ulong Guid { get; set; }
         public string Text { get; set; }
+        public List<ChatFormat> Formats { get; set; } = new();
+        public bool CrossFaction { get; set; }
 
-        public List<ChatFormat> Formats { get; set; } = new List<ChatFormat>();
+        public ulong Guid { get; set; }
+        public byte PremiumTier { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Channel, 14u);
-            writer.Write(ChatId);
+            Channel.Write(writer);
 
             writer.Write(GM);
             writer.Write(Self);
             writer.Write(AutoResponse);
 
-            writer.Write(RealmId, 14u);
-            writer.Write(Guid);
+            From.Write(writer);
+            writer.WriteStringWide(FromName);
+            writer.WriteStringWide(FromRealm);
 
-            writer.WriteStringWide(Name);
-            writer.WriteStringWide(Realm);
-            writer.Write(PresenceState, 3);
+            writer.Write(PresenceState, 3u);
 
             writer.WriteStringWide(Text);
             writer.Write(Formats.Count, 5u);
-
             Formats.ForEach(f => f.Write(writer));
-
             writer.Write(CrossFaction);
             writer.Write(0, 16u);
 
-            writer.Write(Guid, 32u); // UnitId?
-            writer.Write(0, 8u); // Premium
+            writer.Write(Guid, 32u);
+            writer.Write(PremiumTier);
         }
     }
 }
