@@ -27,7 +27,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
 
                 byte[] s = account.S.ToByteArray();
                 byte[] v = account.V.ToByteArray();
-                session.KeyExchange = new Srp6Provider(account.Email, s, v);
+                session.KeyExchange = new Srp6Provider(loginStart.LoginName, s, v);
 
                 byte[] B = session.KeyExchange.GenerateServerCredentials();
                 using (var stream = new MemoryStream())

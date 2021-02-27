@@ -60,7 +60,7 @@ namespace NexusForever.WorldServer.Command
                 factoryBuilder.Add(type, Expression.Lambda<ParameterConverterFactoryDelegate>(@new).Compile());
 
                 // ConvertAttribute will specify the default type the converter is for
-                ConvertAttribute attribute = type.GetCustomAttribute<ConvertAttribute>();
+                ConvertAttribute attribute = type.GetCustomAttribute<ConvertAttribute>(false);
                 if (attribute != null)
                     defaultBuilder.Add(attribute.Type, type);
             }
