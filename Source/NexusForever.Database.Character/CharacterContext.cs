@@ -37,6 +37,7 @@ namespace NexusForever.Database.Character
         public DbSet<GuildModel> Guild { get; set; }
         public DbSet<GuildRankModel> GuildRank { get; set; }
         public DbSet<GuildMemberModel> GuildMember { get; set; }
+        public DbSet<GuildAchievementModel> GuildAchievement { get; set; }
         public DbSet<GuildDataModel> GuildData { get; set; }
         public DbSet<ItemModel> Item { get; set; }
         public DbSet<ResidenceModel> Residence { get; set; }
@@ -1248,6 +1249,44 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.OriginalLeaderId)
                     .HasColumnName("originalLeaderId")
                     .HasColumnType("bigint(20) unsigned");
+            });
+
+            modelBuilder.Entity<GuildAchievementModel>(entity =>
+            {
+                entity.ToTable("guild_achievement");
+
+                entity.HasKey(e => new { e.Id, e.AchievementId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.AchievementId)
+                    .HasColumnName("achievementId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Data0)
+                    .HasColumnName("data0")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Data1)
+                    .HasColumnName("data1")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.DateCompleted)
+                    .HasColumnName("dateCompleted")
+                    .HasColumnType("datetime")
+                    .HasDefaultValue(null);
+
+                entity.HasOne(d => d.Guild)
+                    .WithMany(p => p.Achievement)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__guild_achievement_id__guild_id");
             });
 
             modelBuilder.Entity<GuildDataModel>(entity =>

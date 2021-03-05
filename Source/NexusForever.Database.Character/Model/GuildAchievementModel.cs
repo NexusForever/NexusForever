@@ -2,7 +2,7 @@
 
 namespace NexusForever.Database.Character.Model
 {
-    public class CharacterAchievementModel : IAchievementModel
+    public class GuildAchievementModel : IAchievementModel
     {
         public ulong Id { get; set; }
         public ushort AchievementId { get; set; }
@@ -10,6 +10,6 @@ namespace NexusForever.Database.Character.Model
         public uint Data1 { get; set; }
         public DateTime? DateCompleted { get; set; }
 
-        public CharacterModel Character { get; set; }
+        public GuildModel Guild { get; set; }
     }
 }

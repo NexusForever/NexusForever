@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using NexusForever.Database;
 using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
@@ -12,15 +14,41 @@ using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {
-    public abstract class BaseAchievementManager : ISaveCharacter
+    public abstract class BaseAchievementManager<T> : ISaveCharacter
+        where T : class, IAchievementModel, new()
     {
         public uint AchievementPoints { get; protected set; }
 
-        protected Dictionary<ushort, Achievement> achievements = new();
+        protected abstract ulong OwnerId { get; }
+        protected Dictionary<ushort, Achievement<T>> achievements = new();
+
+        /// <summary>
+        /// Initialise a collection of existing achievement database models.
+        /// </summary>
+        public void Initialise(IEnumerable<T> models, bool isPlayer)
+        {
+            foreach (T model in models)
+            {
+                AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(model.AchievementId);
+                if (info == null)
+                    throw new DatabaseDataException($"{(isPlayer ? "Player" : "Guild")} {model.Id} has invalid achievement {model.AchievementId} stored!");
+
+                if (isPlayer && !info.IsPlayerAchievement)
+                    throw new DatabaseDataException($"Player {model.Id} has guild achievement {model.AchievementId} stored!");
+                if (!isPlayer && info.IsPlayerAchievement)
+                    throw new DatabaseDataException($"Guild {model.Id} has player achievement {model.AchievementId} stored!");
+
+                var achievement = new Achievement<T>(info, model);
+                if (achievement.IsComplete())
+                    AchievementPoints += GetAchievementPoints(achievement.Info);
+
+                achievements.Add(achievement.Id, achievement);
+            }
+        }
 
         public void Save(CharacterContext context)
         {
-            foreach (Achievement achievement in achievements.Values)
+            foreach (Achievement<T> achievement in achievements.Values)
                 achievement.Save(context);
         }
 
@@ -29,12 +57,13 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// </summary>
         public bool HasCompletedAchievement(ushort id)
         {
-            return achievements.TryGetValue(id, out Achievement achievement) && achievement.IsComplete();
+            return achievements.TryGetValue(id, out Achievement<T> achievement) && achievement.IsComplete();
         }
 
-        protected abstract Achievement CreateAchievement(AchievementInfo info);
-
-        protected void SendInitialPackets(Player target)
+        /// <summary>
+        /// Send initial <see cref="Achievement{T}"/> information to owner on login.
+        /// </summary>
+        public virtual void SendInitialPackets(Player target)
         {
             target.Session.EnqueueMessageEncrypted(new ServerAchievementInit
             {
@@ -44,22 +73,22 @@ namespace NexusForever.WorldServer.Game.Achievement
             });
         }
 
-        protected void SendAchievementUpdate(Player target, IEnumerable<Achievement> updates)
+        protected ServerAchievementUpdate BuildAchievementUpdate(IEnumerable<Achievement<T>> updates)
         {
-            target.Session.EnqueueMessageEncrypted(new ServerAchievementUpdate
+            return new()
             {
                 Achievements = updates
                     .Select(a => a.Build())
                     .ToList()
-            });
+            };
         }
 
-        protected void SendAchievementUpdate(params Achievement[] updates)
+        protected void SendAchievementUpdate(params Achievement<T>[] updates)
         {
             SendAchievementUpdate(updates.AsEnumerable());
         }
 
-        protected abstract void SendAchievementUpdate(IEnumerable<Achievement> updates);
+        protected abstract void SendAchievementUpdate(IEnumerable<Achievement<T>> updates);
 
         /// <summary>
         /// Grant achievement by supplied achievement id.
@@ -73,7 +102,7 @@ namespace NexusForever.WorldServer.Game.Achievement
             if (HasCompletedAchievement(info.Id))
                 throw new ArgumentException();
 
-            Achievement achievement = GetAchievement(id);
+            Achievement<T> achievement = GetAchievement(id);
             if (info.ChecklistEntries.Count == 0)
                 achievement.Data0 = info.Entry.Value;
             else
@@ -95,7 +124,7 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// </summary>
         protected void CheckAchievements(Player target, IEnumerable<AchievementInfo> achievements, uint objectId, uint objectIdAlt, uint count)
         {
-            var updates = new List<Achievement>();
+            var updates = new List<Achievement<T>>();
             foreach (AchievementInfo info in achievements)
                 if (CheckAchievement(target, info, objectId, objectIdAlt, count))
                     updates.Add(GetAchievement(info.Id));
@@ -117,7 +146,7 @@ namespace NexusForever.WorldServer.Game.Achievement
 
             bool sendUpdate = false;
 
-            Achievement achievement = null;
+            Achievement<T> achievement = null;
             if (info.ChecklistEntries.Count == 0)
             {
                 if (CanUpdateAchievement(target, info.Entry, objectId, objectIdAlt))
@@ -191,7 +220,7 @@ namespace NexusForever.WorldServer.Game.Achievement
             return true;
         }
 
-        protected virtual void CompleteAchievement(Achievement achievement)
+        protected virtual void CompleteAchievement(Achievement<T> achievement)
         {
             achievement.DateCompleted = DateTime.UtcNow;
             AchievementPoints += GetAchievementPoints(achievement.Info);
@@ -214,16 +243,16 @@ namespace NexusForever.WorldServer.Game.Achievement
         /// <summary>
         /// Return <see cref="Achievement"/> with supplied id, if it doesn't exist it will be created.
         /// </summary>
-        private Achievement GetAchievement(ushort id)
+        private Achievement<T> GetAchievement(ushort id)
         {
-            if (achievements.TryGetValue(id, out Achievement achievement))
+            if (achievements.TryGetValue(id, out Achievement<T> achievement))
                 return achievement;
 
             AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(id);
             if (info == null)
                 throw new ArgumentException();
 
-            achievement = CreateAchievement(info);
+            achievement = new Achievement<T>(OwnerId, info);
             achievements.Add(achievement.Id, achievement);
             return achievement;
         }

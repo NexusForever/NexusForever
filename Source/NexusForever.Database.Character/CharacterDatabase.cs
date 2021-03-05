@@ -219,6 +219,7 @@ namespace NexusForever.Database.Character
                 .Include(g => g.GuildRank)
                 .Include(g => g.GuildMember)
                 .Include(g => g.GuildData)
+                .Include(g => g.Achievement)
                 .ToList();
         }
 

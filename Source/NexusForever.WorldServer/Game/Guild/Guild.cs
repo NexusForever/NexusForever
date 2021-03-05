@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Social.Static;
@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Game.Guild
         public override uint MaxMembers => 40u;
 
         public GuildStandard Standard { get; }
+        public GuildAchievementManager AchievementManager { get; }
 
         public string MessageOfTheDay
         {
@@ -50,9 +51,10 @@ namespace NexusForever.WorldServer.Game.Guild
         public Guild(GuildModel model) 
             : base(model)
         {
-            Standard        = new GuildStandard(model.GuildData);
-            messageOfTheDay = model.GuildData.MessageOfTheDay;
-            additionalInfo  = model.GuildData.AdditionalInfo;
+            Standard           = new GuildStandard(model.GuildData);
+            AchievementManager = new GuildAchievementManager(this, model);
+            messageOfTheDay    = model.GuildData.MessageOfTheDay;
+            additionalInfo     = model.GuildData.AdditionalInfo;
         }
 
         /// <summary>
@@ -61,9 +63,10 @@ namespace NexusForever.WorldServer.Game.Guild
         public Guild(string name, string leaderRankName, string councilRankName, string memberRankName, GuildStandard standard)
             : base(GuildType.Guild, name, leaderRankName, councilRankName, memberRankName)
         {
-            Standard        = standard;
-            messageOfTheDay = "";
-            additionalInfo  = "";
+            Standard           = standard;
+            AchievementManager = new GuildAchievementManager(this);
+            messageOfTheDay    = "";
+            additionalInfo     = "";
         }
 
         protected override void InitialiseChatChannels()
@@ -109,6 +112,8 @@ namespace NexusForever.WorldServer.Game.Guild
 
                 saveMask = GuildSaveMask.None;
             }
+
+            AchievementManager.Save(context);
         }
 
         public override GuildData Build()

@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Game.Guild
             {
                 AdditionalInfo = operation.TextValue;
 
-                SendToOnlineUsers(new ServerGuildInfoMessageUpdate
+                Broadcast(new ServerGuildInfoMessageUpdate
                 {
                     RealmId        = WorldServer.RealmId,
                     GuildId        = Id,
@@ -60,7 +60,7 @@ namespace NexusForever.WorldServer.Game.Guild
             {
                 MessageOfTheDay = operation.TextValue;
 
-                SendToOnlineUsers(new ServerGuildMotdUpdate
+                Broadcast(new ServerGuildMotdUpdate
                 {
                     RealmId         = WorldServer.RealmId,
                     GuildId         = Id,
@@ -90,7 +90,7 @@ namespace NexusForever.WorldServer.Game.Guild
                 else
                     RemoveFlag(GuildFlag.Taxes);
 
-                SendToOnlineUsers(new ServerGuildFlagUpdate
+                Broadcast(new ServerGuildFlagUpdate
                 {
                     RealmId = WorldServer.RealmId,
                     GuildId = Id,

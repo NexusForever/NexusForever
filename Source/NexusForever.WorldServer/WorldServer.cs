@@ -81,6 +81,7 @@ namespace NexusForever.WorldServer
             FactionManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
             GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
+            GlobalAchievementManager.Instance.Initialise(); // must be initialised before guilds
             GlobalGuildManager.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
@@ -92,7 +93,6 @@ namespace NexusForever.WorldServer
             ResidenceManager.Instance.Initialise();
             GlobalStorefrontManager.Instance.Initialise();
 
-            GlobalAchievementManager.Instance.Initialise();
             ServerManager.Instance.Initialise(RealmId); 
 
             MessageManager.Instance.Initialise();

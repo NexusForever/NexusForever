@@ -440,7 +440,7 @@ namespace NexusForever.WorldServer.Game.Guild
 
             if (!disband)
             {
-                SendToOnlineUsers(new ServerGuildMemberRemove
+                Broadcast(new ServerGuildMemberRemove
                 {
                     RealmId        = WorldServer.RealmId,
                     GuildId        = Id,
@@ -720,15 +720,12 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Send <see cref="IWritable"/> to all online members.
         /// </summary>
-        protected void SendToOnlineUsers(IWritable writable)
+        public void Broadcast(IWritable writable)
         {
             foreach (ulong characterId in onlineMembers)
             {
                 Player player = CharacterManager.Instance.GetPlayer(characterId);
-                if (player?.Session == null)
-                    continue;
-
-                player.Session.EnqueueMessageEncrypted(writable);
+                player?.Session?.EnqueueMessageEncrypted(writable);
             }
         }
 
@@ -737,7 +734,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         private void AnnounceGuildResult(GuildResult result, uint referenceId = 0, string referenceText = "")
         {
-            SendToOnlineUsers(new ServerGuildResult
+            Broadcast(new ServerGuildResult
             {
                 Result        = result,
                 RealmId       = WorldServer.RealmId,
@@ -752,7 +749,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         private void AnnounceGuildMemberChange(GuildMember member)
         {
-            SendToOnlineUsers(new ServerGuildMemberChange
+            Broadcast(new ServerGuildMemberChange
             {
                 RealmId           = WorldServer.RealmId,
                 GuildId           = Id,
@@ -767,7 +764,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         private void AnnounceGuildRankChange()
         {
-            SendToOnlineUsers(new ServerGuildRankChange
+            Broadcast(new ServerGuildRankChange
             {
                 RealmId = WorldServer.RealmId,
                 GuildId = Id,
