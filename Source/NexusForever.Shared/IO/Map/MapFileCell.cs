@@ -2,6 +2,7 @@
 using System.IO;
 using System.Numerics;
 using NexusForever.Shared.Game.Map;
+using NexusForever.Shared.IO.Map.Static;
 
 namespace NexusForever.Shared.IO.Map
 {
@@ -10,11 +11,12 @@ namespace NexusForever.Shared.IO.Map
         [Flags]
         public enum Flags
         {
-            None   = 0x00,
-            Area   = 0x01,
-            Height = 0x02,
-            Aura   = 0x04,
-            Liquid = 0x08
+            None      = 0x00,
+            Zone      = 0x01,
+            Height    = 0x02,
+            Aura      = 0x04,
+            Liquid    = 0x08,
+            ZoneBound = 0x10
         }
 
         public uint X { get; protected set; }
@@ -22,7 +24,8 @@ namespace NexusForever.Shared.IO.Map
 
         protected Flags flags;
 
-        protected readonly uint[] worldAreaIds = new uint[4];
+        protected readonly uint[] worldZoneIds = new uint[4];
+        protected readonly byte[,] worldZoneBounds = new byte[64, 64];
         protected readonly float[,] heightMap = new float[17, 17];
 
         public void Read(BinaryReader reader)
@@ -39,10 +42,10 @@ namespace NexusForever.Shared.IO.Map
 
                 switch (flag)
                 {
-                    case Flags.Area:
+                    case Flags.Zone:
                     {
-                        for (int j = 0; j < worldAreaIds.Length; j++)
-                            worldAreaIds[j] = reader.ReadUInt32();
+                        for (int j = 0; j < worldZoneIds.Length; j++)
+                            worldZoneIds[j] = reader.ReadUInt32();
                         break;
                     }
                     case Flags.Height:
@@ -52,17 +55,64 @@ namespace NexusForever.Shared.IO.Map
                                 heightMap[x, y] = reader.ReadSingle();
                         break;
                     }
+                    case Flags.ZoneBound:
+                    {
+                        for (int y = 0; y < 64; y++)
+                            for (int x = 0; x < 64; x++)
+                                worldZoneBounds[x, y] = reader.ReadByte();
+                        break;
+                    }
+
                     default:
                         throw new NotImplementedException();
                 }
             }
         }
 
-        public uint[] GetWorldAreaIds()
+        /// <summary>
+        /// Return world zone id at supplied position.
+        /// </summary>
+        public uint? GetWorldZoneId(Vector3 vector)
         {
-            return (flags & Flags.Area) != 0 ? worldAreaIds : null;
+            if ((flags & Flags.Zone) != 0)
+            {
+                if ((flags & Flags.ZoneBound) != 0)
+                {
+                    ZoneBoundFlags zoneFlags = GetZoneBoundFlags(vector);
+                    if ((zoneFlags & ZoneBoundFlags.WorldZone2) != 0)
+                        return worldZoneIds[2];
+                    if ((zoneFlags & ZoneBoundFlags.WorldZone1) != 0)
+                        return worldZoneIds[1];
+                    if ((zoneFlags & ZoneBoundFlags.WorldZone0) != 0)
+                        return worldZoneIds[0];
+                }
+
+                return worldZoneIds[0];
+            }
+
+            return null;
         }
 
+        /// <summary>
+        /// Return if Road March aura is active at supplied position.
+        /// </summary>
+        public bool HasRoadMarch(Vector3 vector)
+        {
+            return (GetZoneBoundFlags(vector) & ZoneBoundFlags.RoadMarch) != 0;
+        }
+
+        private ZoneBoundFlags GetZoneBoundFlags(Vector3 vector)
+        {
+            float x = vector.X + MapDefines.WorldGridOrigin * MapDefines.GridSize;
+            float z = vector.Z + MapDefines.WorldGridOrigin * MapDefines.GridSize;
+            uint localX = ((uint)Math.Floor(x) & 31) * 2;
+            uint localZ = ((uint)Math.Floor(z) & 31) * 2;
+            return (ZoneBoundFlags)worldZoneBounds[localX, localZ];
+        }
+
+        /// <summary>
+        /// Return terrain height at supplied position.
+        /// </summary>
         public float GetTerrainHeight(Vector3 vector)
         {
             float trueX = vector.X + MapDefines.WorldGridOrigin * MapDefines.GridSize;

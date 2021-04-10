@@ -117,10 +117,10 @@ namespace NexusForever.WorldServer.Game.Entity
             UpdateVision();
             UpdateGridVision();
 
-            uint worldAreaId = Map.File.GetWorldAreaId(vector);
-            if (Zone?.Id != worldAreaId)
+            uint? worldAreaId = Map.File.GetWorldAreaId(vector);
+            if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
             {
-                Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId);
+                Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId.Value);
                 OnZoneUpdate();
             }
         }

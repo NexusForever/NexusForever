@@ -6,6 +6,7 @@ namespace NexusForever.MapGenerator.IO.Area
     public enum ChnkCellFlags
     {
         HeightMap = 0x00000001,
-        Area      = 0x10000000
+        ZoneBound = 0x00010000,
+        Zone      = 0x10000000
     }
 }

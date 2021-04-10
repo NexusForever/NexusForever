@@ -13,10 +13,10 @@ namespace NexusForever.MapGenerator.IO.Map
             X = cell.X;
             Y = cell.Y;
 
-            if ((cell.Flags & ChnkCellFlags.Area) != 0)
+            if ((cell.Flags & ChnkCellFlags.Zone) != 0)
             {
-                Array.Copy(cell.WorldAreaIds, worldAreaIds, 4);
-                flags |= Flags.Area;
+                Array.Copy(cell.WorldZoneIds, worldZoneIds, 4);
+                flags |= Flags.Zone;
             }
 
             if ((cell.Flags & ChnkCellFlags.HeightMap) != 0)
@@ -26,6 +26,15 @@ namespace NexusForever.MapGenerator.IO.Map
                         heightMap[x, y] = (cell.Heightmap[x + 1, y + 1] / 8.0f) - 2048f;
 
                 flags |= Flags.Height;
+            }
+
+            if ((cell.Flags & ChnkCellFlags.ZoneBound) != 0)
+            {
+                for (int y = 0; y < 64; y++)
+                    for (int x = 0; x < 64; x++)
+                        worldZoneBounds[x, y] = cell.WorldZoneBounds[x, y];
+
+                flags |= Flags.ZoneBound;
             }
         }
 
@@ -43,10 +52,10 @@ namespace NexusForever.MapGenerator.IO.Map
 
                 switch (flag)
                 {
-                    case Flags.Area:
+                    case Flags.Zone:
                     {
-                        foreach (uint worldAreaId in worldAreaIds)
-                            writer.Write(worldAreaId);
+                        foreach (uint worldZoneId in worldZoneIds)
+                            writer.Write(worldZoneId);
                         break;
                     }
                     case Flags.Height:
@@ -54,6 +63,13 @@ namespace NexusForever.MapGenerator.IO.Map
                         for (int y = 0; y < 17; y++)
                             for (int x = 0; x < 17; x++)
                                 writer.Write(heightMap[x, y]);
+                        break;
+                    }
+                    case Flags.ZoneBound:
+                    {
+                        for (int y = 0; y < 64; y++)
+                            for (int x = 0; x < 64; x++)
+                                writer.Write(worldZoneBounds[x, y]);
                         break;
                     }
                 }
