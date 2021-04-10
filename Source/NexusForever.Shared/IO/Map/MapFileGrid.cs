@@ -43,12 +43,12 @@ namespace NexusForever.Shared.IO.Map
         }
 
         /// <summary>
-        /// Return world area id at supplied position.
+        /// Return world zone id at supplied position.
         /// </summary>
-        public uint GetWorldAreaId(Vector3 vector)
+        public uint? GetWorldZoneId(Vector3 vector)
         {
             MapFileCell cell = GetCell(vector);
-            return cell?.GetWorldAreaIds()?.FirstOrDefault(worldAreaId => worldAreaId != 0u) ?? 0u;
+            return cell?.GetWorldZoneId(vector);
         }
 
         /// <summary>

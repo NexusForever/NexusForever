@@ -93,7 +93,10 @@ namespace NexusForever.WorldServer.Game.Entity
                     mapFiles.Add(model.World, mapFile);
                 }
 
-                uint worldAreaId = mapFile.GetWorldAreaId(new Vector3(model.X, model.Y, model.Z));
+                uint? worldAreaId = mapFile.GetWorldAreaId(new Vector3(model.X, model.Y, model.Z));
+                if (!worldAreaId.HasValue)
+                    continue;
+
                 model.Area = (ushort)worldAreaId;
 
                 log.Info($"Calculated area {worldAreaId} for entity {model.Id}.");

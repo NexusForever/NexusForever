@@ -47,10 +47,11 @@ namespace NexusForever.MapGenerator.IO.Area
         public uint Y { get; }
         public ChnkCellFlags Flags { get; private set; }
 
-        public uint[] WorldAreaIds { get; } = new uint[4];
+        public uint[] WorldZoneIds { get; } = new uint[4];
+        public byte[,] WorldZoneBounds { get; } = new byte[64, 64];
         public ushort[,] Heightmap { get; } = new ushort[19, 19];
 
-        public HashSet<IReadable> Chunks { get; } = new HashSet<IReadable>();
+        public HashSet<IReadable> Chunks { get; } = new();
 
         public ChnkCell(uint x, uint y)
         {
@@ -70,10 +71,10 @@ namespace NexusForever.MapGenerator.IO.Area
 
                 switch (flag)
                 {
-                    case ChnkCellFlags.Area:
+                    case ChnkCellFlags.Zone:
                     {
                         for (int j = 0; j < 4; j++)
-                            WorldAreaIds[j] = reader.ReadUInt32();
+                            WorldZoneIds[j] = reader.ReadUInt32();
                         break;
                     }
                     case ChnkCellFlags.HeightMap:
@@ -81,6 +82,13 @@ namespace NexusForever.MapGenerator.IO.Area
                         for (int y = 0; y < 19; y++)
                             for (int x = 0; x < 19; x++)
                                 Heightmap[x, y] = reader.ReadUInt16();
+                        break;
+                    }
+                    case ChnkCellFlags.ZoneBound:
+                    {
+                        for (int y = 0; y < 64; y++)
+                            for (int x = 0; x < 64; x++)
+                                WorldZoneBounds[x, y] = reader.ReadByte();
                         break;
                     }
                     // unhandled flag, skip data
