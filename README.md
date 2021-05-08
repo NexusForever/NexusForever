@@ -13,6 +13,17 @@ A server emulator for WildStar written in C# that supports build 16042.
  * MySQL Server (or equivalent, eg: MariaDB)
  * WildStar 16042 client
 
+### Branches
+NexusForever has multiple branches:
+* **Master**  
+Latest stable release, develop is merged into master once enough content has accumulated in develop.  
+Compiled binary releases are based on this branch.
+* **Develop**  
+Active development branch with the latest features but may be unstable.  
+Any new pull requests must be targed towards this branch.
+* **Communities**  
+Active development branch of the communities housing feature.
+
 ### Links
  * [Website](https://emulator.ws)
  * [Discord](https://discord.gg/8wT3GEQ)
