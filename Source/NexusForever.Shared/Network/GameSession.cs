@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Net.Sockets;
 using NexusForever.Shared.Cryptography;
@@ -20,7 +21,9 @@ namespace NexusForever.Shared.Network
 
         protected PacketCrypt encryption;
 
-        private FragmentedBuffer onDeck;
+        private Pipe onDeck = new Pipe();
+        private uint? nextSize = null;
+        private uint remaining = 0;
         private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new();
         private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new();
 
@@ -103,26 +106,29 @@ namespace NexusForever.Shared.Network
 
         protected override void OnData(byte[] data)
         {
-            using (var stream = new MemoryStream(data))
-            using (var reader = new GamePacketReader(stream))
+            onDeck.Writer.WriteAsync(data);
+            remaining += (uint)data.Length; // Pipe has no way of checking how much it has remaining, so I'm tracking it manually.
+            Stream stream = onDeck.Reader.AsStream();
+            GamePacketReader reader = new GamePacketReader(stream);
+
+            bool repeat = true;
+            while (repeat)
             {
-                while (stream.Remaining() != 0)
+                repeat = false;
+                if (nextSize == null && remaining >= sizeof(uint))
                 {
-                    // no packet on deck waiting for additional information, new data will be part of a new packet
-                    if (onDeck == null)
-                    {
-                        uint size = reader.ReadUInt();
-                        onDeck = new FragmentedBuffer(size - sizeof(uint));
-                    }
+                    nextSize = reader.ReadUInt() - sizeof(uint);
+                    remaining -= sizeof(uint);
+                    repeat = true;
+                }
+                if (remaining >= nextSize)
+                {
+                    remaining -= (uint)nextSize;
+                    var packet = new ClientGamePacket(reader.ReadBytes((uint)nextSize));
 
-                    onDeck.Populate(reader);
-                    if (onDeck.IsComplete)
-                    {
-                        var packet = new ClientGamePacket(onDeck.Data);
-
-                        incomingPackets.Enqueue(packet);
-                        onDeck = null;
-                    }
+                    incomingPackets.Enqueue(packet);
+                    nextSize = null;
+                    repeat = true;
                 }
             }
         }
