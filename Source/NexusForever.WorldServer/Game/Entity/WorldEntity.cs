@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
+        public Dictionary<Property, PropertyValue> Properties { get; } = new();
 
         public uint EntityId { get; protected set; }
         public uint CreatureId { get; protected set; }
@@ -113,7 +113,7 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Invoked each world tick with the delta since the previous tick occured.
+        /// Invoked each world tick with the delta since the previous tick occurred.
         /// </summary>
         public override void Update(double lastTick)
         {

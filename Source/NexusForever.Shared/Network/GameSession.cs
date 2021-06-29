@@ -8,6 +8,7 @@ using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Network.Message;
 using NexusForever.Shared.Network.Message.Model;
 using NexusForever.Shared.Network.Packet;
+using NexusForever.Shared.Network.Static;
 
 namespace NexusForever.Shared.Network
 {
@@ -197,7 +198,7 @@ namespace NexusForever.Shared.Network
                 catch (InvalidPacketValueException exception)
                 {
                     log.Error(exception);
-                    RequestedDisconnect = true;
+                    disconnectState = DisconnectState.Pending;
                 }
                 catch (Exception exception)
                 {

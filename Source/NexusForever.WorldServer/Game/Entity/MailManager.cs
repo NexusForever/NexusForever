@@ -186,7 +186,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void SendMail(ClientMailSend mailSend)
         {
-            player.Session.EnqueueEvent(new TaskGenericEvent<CharacterModel>(DatabaseManager.Instance.CharacterDatabase.GetCharacterByName(mailSend.Name),
+            player.Session.Events.EnqueueEvent(new TaskGenericEvent<CharacterModel>(DatabaseManager.Instance.CharacterDatabase.GetCharacterByName(mailSend.Name),
                 targetCharacter =>
             {
                 var items = new List<Item>();

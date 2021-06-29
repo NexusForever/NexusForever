@@ -12,7 +12,7 @@ namespace NexusForever.Shared.Network
         private ConnectionListener<T> connectionListener;
 
         private readonly ConcurrentQueue<T> pendingAdd = new();
-        private readonly ConcurrentQueue<T> pendingRemove = new();
+        private readonly Queue<T> pendingRemove = new();
 
         private readonly HashSet<T> sessions = new();
 
@@ -29,21 +29,21 @@ namespace NexusForever.Shared.Network
             };
         }
 
+        /// <summary>
+        /// Invoked each world tick with the delta since the previous tick occurred.
+        /// </summary>
         public void Update(double lastTick)
         {
-            //
             while (pendingAdd.TryDequeue(out T session))
                 sessions.Add(session);
 
-            //
             foreach (T session in sessions)
             {
                 session.Update(lastTick);
-                if (session.Disconnected && !session.PendingEvent)
+                if (session.CanDispose())
                     pendingRemove.Enqueue(session);
             }
 
-            //
             while (pendingRemove.TryDequeue(out T session))
                 sessions.Remove(session);
         }

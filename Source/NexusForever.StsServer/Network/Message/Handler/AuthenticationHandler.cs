@@ -14,7 +14,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
         [MessageHandler("/Auth/LoginStart", SessionState.Connected)]
         public static void HandleLoginStart(StsSession session, ClientLoginStartMessage loginStart)
         {
-            session.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountByEmailAsync(loginStart.LoginName),
+            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountByEmailAsync(loginStart.LoginName),
                 account =>
             {
                 if (account == null)
@@ -95,7 +95,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
         public static void HandleRequestGameToken(StsSession session, RequestGameTokenMessage requestGameToken)
         {
             Guid guid = RandomProvider.GetGuid();
-            session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountGameToken(session.Account, guid.ToByteArray().ToHexString()),
+            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountGameToken(session.Account, guid.ToByteArray().ToHexString()),
                 () =>
             {
                 session.EnqueueMessageOk(new RequestGameTokenResponse

@@ -1,25 +1,34 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
+using NexusForever.Shared.Game.Events;
+using NexusForever.Shared.Network.Static;
+using NLog;
 
 namespace NexusForever.Shared.Network
 {
-    public abstract class NetworkSession : Session
+    public abstract class NetworkSession : IUpdate
     {
-        /// <summary>
-        /// Returns whether the remote client has disconencted, if true <see cref="Socket"/> resources have been released.
-        /// </summary>
-        public bool Disconnected { get; private set; }
+        protected static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
-        /// Returns whether disconnection of the remote client has been requested.
+        /// <see cref="IEvent"/> queue that will be processed during <see cref="NetworkSession"/> update.
         /// </summary>
-        public bool RequestedDisconnect { get; protected set; }
+        public EventQueue Events { get; } = new();
 
-        public SocketHeartbeat Heartbeat { get; } = new SocketHeartbeat();
+        /// <summary>
+        /// Heartbeat to check if <see cref="NetworkSession"/> is still alive.
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="SocketHeartbeat"/> flatlines the <see cref="NetworkSession"/> will be disconnected.
+        /// </remarks>
+        public SocketHeartbeat Heartbeat { get; } = new();
 
         private Socket socket;
         private readonly byte[] buffer = new byte[4096];
         private int bufferOffset;
+
+        protected DisconnectState? disconnectState;
 
         /// <summary>
         /// Initialise <see cref="NetworkSession"/> with new <see cref="Socket"/> and begin listening for data.
@@ -33,30 +42,38 @@ namespace NexusForever.Shared.Network
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveDataCallback, null);
 
             log.Trace($"New client connected. {newSocket.RemoteEndPoint}");
-
         }
 
-        public override void Update(double lastTick)
+        /// <summary>
+        /// Invoked each world tick with the delta since the previous tick occurred.
+        /// </summary>
+        public virtual void Update(double lastTick)
         {
-            base.Update(lastTick);
+            Events.Update(lastTick);
 
-            if (!RequestedDisconnect)
-            {
+            if (!disconnectState.HasValue)
                 Heartbeat.Update(lastTick);
-                if (Heartbeat.Flatline)
-                    RequestedDisconnect = true;
-            }
-            else if (!Disconnected)
+
+            if (Heartbeat.Flatline || disconnectState == DisconnectState.Pending)
                 OnDisconnect();
         }
 
         protected virtual void OnDisconnect()
         {
-            Disconnected = true;
-            var remoteEndPoint = socket.RemoteEndPoint;
+            EndPoint remoteEndPoint = socket.RemoteEndPoint;
             socket.Close();
 
             log.Trace($"Client disconnected. {remoteEndPoint}");
+
+            disconnectState = DisconnectState.Complete;
+        }
+
+        /// <summary>
+        /// Returns if <see cref="NetworkSession"/> can be disposed.
+        /// </summary>
+        public virtual bool CanDispose()
+        {
+            return disconnectState == DisconnectState.Complete && !Events.PendingEvents;
         }
 
         /// <summary>
@@ -69,7 +86,7 @@ namespace NexusForever.Shared.Network
                 int length = socket.EndReceive(ar);
                 if (length == 0)
                 {
-                    RequestedDisconnect = true;
+                    disconnectState = DisconnectState.Pending;
                     return;
                 }
 
@@ -86,7 +103,7 @@ namespace NexusForever.Shared.Network
             }
             catch
             {
-                RequestedDisconnect = true;
+                disconnectState = DisconnectState.Pending;
             }
         }
 
@@ -103,7 +120,7 @@ namespace NexusForever.Shared.Network
             }
             catch
             {
-                RequestedDisconnect = true;
+                disconnectState = DisconnectState.Pending;
             }
         }
     }

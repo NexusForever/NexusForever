@@ -298,10 +298,10 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void Save(Action callback = null)
         {
-            Session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.Save(Save),
+            Session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.Save(Save),
             () =>
             {
-                Session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.CharacterDatabase.Save(Save),
+                Session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.CharacterDatabase.Save(Save),
                 () =>
                 {
                     callback?.Invoke();
@@ -707,22 +707,30 @@ namespace NexusForever.WorldServer.Game.Entity
         public void CleanUp()
         {
             CharacterManager.Instance.DeregisterPlayer(this);
-            CleanupManager.Track(Session.Account);
+            PlayerCleanupManager.Track(Session.Account);
 
-            try
+            Session.Events.EnqueueEvent(new TimeoutPredicateEvent(TimeSpan.FromSeconds(15), CanCleanup, () =>
             {
-                Save(() =>
+                try
                 {
                     OnLogout();
 
-                    RemoveFromMap();
-                    Session.Player = null;
-                });
-            }
-            finally
-            {
-                CleanupManager.Untrack(Session.Account);
-            }
+                    Save(() =>
+                    {
+                        RemoveFromMap();
+                        Session.Player = null;
+                    });
+                }
+                finally
+                {
+                    PlayerCleanupManager.Untrack(Session.Account);
+                }
+            }));
+        }
+
+        private bool CanCleanup()
+        {
+            return pendingTeleport == null;
         }
 
         private void OnLogin()

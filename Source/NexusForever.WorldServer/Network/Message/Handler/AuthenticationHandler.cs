@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.CanProcessPackets = false;
 
             string sessionKey = helloRealm.SessionKey.ToHexString();
-            session.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountBySessionKeyAsync(helloRealm.Email, sessionKey),
+            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountBySessionKeyAsync(helloRealm.Email, sessionKey),
                 account =>
             {
                 if (account == null)
