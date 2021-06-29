@@ -148,7 +148,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             else
                 throw new NotImplementedException();
 
-            session.EnqueueEvent(new TaskGenericEvent<Residence>(residenceTask,
+            session.Events.EnqueueEvent(new TaskGenericEvent<Residence>(residenceTask,
                 residence =>
             {
                 if (residence == null)

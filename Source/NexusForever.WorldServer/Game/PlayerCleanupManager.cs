@@ -4,11 +4,11 @@ using NexusForever.Shared;
 
 namespace NexusForever.WorldServer.Game
 {
-    public sealed class CleanupManager : Singleton<CleanupManager>
+    public sealed class PlayerCleanupManager : Singleton<PlayerCleanupManager>
     {
         private static readonly HashSet<uint> pendingCleanup = new();
 
-        private CleanupManager()
+        private PlayerCleanupManager()
         {
         }
 

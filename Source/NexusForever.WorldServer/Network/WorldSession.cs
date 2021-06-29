@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Character.Model;
-using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
@@ -21,7 +20,7 @@ namespace NexusForever.WorldServer.Network
     public class WorldSession : GameSession
     {
         public AccountModel Account { get; private set; }
-        public List<CharacterModel> Characters { get; } = new List<CharacterModel>();
+        public List<CharacterModel> Characters { get; } = new();
 
         public Player Player { get; set; }
 
