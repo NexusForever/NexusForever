@@ -23,6 +23,7 @@ using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Reputation;
 using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Game.Setting;
@@ -134,7 +135,10 @@ namespace NexusForever.WorldServer.Game.Entity
         public bool IsSitting => currentChairGuid != null;
         private uint? currentChairGuid;
 
-        public bool SignatureEnabled = false; // TODO: Make configurable.
+        /// <summary>
+        /// Returns if <see cref="Player"/> has premium signature subscription.
+        /// </summary>
+        public bool SignatureEnabled => Session.AccountRbacManager.HasPermission(Permission.Signature);
 
         public WorldSession Session { get; }
         public bool IsLoading { get; set; } = true;
