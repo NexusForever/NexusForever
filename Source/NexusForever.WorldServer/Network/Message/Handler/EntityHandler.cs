@@ -24,6 +24,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (session.Player.ControlGuid != session.Player.Guid)
                 mover = session.Player.GetVisible<WorldEntity>(session.Player.ControlGuid);
 
+            if (mover == null)
+                return;
+
             foreach ((EntityCommand id, IEntityCommandModel command) in entityCommand.Commands)
             {
                 switch (command)
@@ -32,8 +35,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     {
                         // this is causing issues after moving to soon after mounting:
                         // session.Player.CancelSpellsOnMove();
-
-                        mover.Map.EnqueueRelocate(mover, setPosition.Position.Vector);
+                        mover.Relocate(setPosition.Position.Vector);
                         break;
                     }
                     case SetRotationCommand setRotation:

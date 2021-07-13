@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Command.Handler
             {
                 quantity ??= 1u;
 
-                if (!(context.GetTargetOrInvoker<Player>().Map is ResidenceMap residenceMap))
+                if (!(context.GetTargetOrInvoker<Player>().Map is ResidenceMapInstance residenceMap))
                 {
                     context.SendMessage("You need to be on a housing map to use this command!");
                     return;
@@ -88,7 +88,7 @@ namespace NexusForever.WorldServer.Command.Handler
             }
 
             ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(residence);
-            target.TeleportTo(entrance.Entry, entrance.Position, 0u, residence.Id);
+            target.TeleportTo(entrance.Entry, entrance.Position, residence.Id);
         }
     }
 }

@@ -29,8 +29,11 @@
             51,
             1061
         ],
+        "SynchronousUpdate": false,
         "GridActionThreshold": 100,
-        "GridUnloadTimer": 3600
+        "GridActionMaxRetry": 5, 
+        "GridUnloadTimer": 3600,
+        "MaxInstances": 10
     },
     "RealmId": 1,
     "MessageOfTheDay": "Welcome to this NexusForever server!",

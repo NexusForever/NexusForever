@@ -71,7 +71,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
                 if (splineGridUpdateTimer.HasElapsed)
                 {
                     // update grid position with the interpolated position on the spline
-                    owner.Map.EnqueueRelocate(owner, splinePath.GetPosition());
+                    owner.Relocate(splinePath.GetPosition());
                     splineGridUpdateTimer.Reset();
                 }
             }
@@ -233,7 +233,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
                 return;
 
             Vector3 position = splinePath.GetPosition();
-            owner.Map.EnqueueRelocate(owner, position);
+            owner.Relocate(position);
 
             AddCommand(new SetStateCommand
             {

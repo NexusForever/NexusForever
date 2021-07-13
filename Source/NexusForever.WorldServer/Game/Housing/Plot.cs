@@ -61,6 +61,8 @@ namespace NexusForever.WorldServer.Game.Housing
             PlugEntry  = GameTableManager.Instance.HousingPlugItem.GetEntry(model.PlugItemId);
             plugFacing = (HousingPlugFacing)model.PlugFacing;
             buildState = model.BuildState;
+
+            saveMask = PlotSaveMask.None;
         }
 
         /// <summary>

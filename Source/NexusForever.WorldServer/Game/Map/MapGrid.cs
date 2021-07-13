@@ -7,6 +7,7 @@ using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Map;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map.Search;
+using NexusForever.WorldServer.Game.Map.Static;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -15,16 +16,24 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Coordinates of grid within the map.
+        /// </summary>
         public (uint X, uint Z) Coord { get; }
 
-        public bool PendingUnload { get; private set; }
+        /// <summary>
+        /// Current unload status for map grid.
+        /// </summary>
+        /// <remarks>
+        /// Status will only be set if the grid is in an unloading state.
+        /// </remarks>
+        public MapUnloadStatus? UnloadStatus { get; private set; }
 
         private readonly MapCell[] cells = new MapCell[MapDefines.GridCellCount * MapDefines.GridCellCount];
 
-        private uint playerCount;
-        private readonly UpdateTimer unloadTimer = new(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridUnloadTimer ?? 600d);
-        private uint unloadCellX;
-        private uint unloadCellZ;
+        private uint visibilityCount;
+        private uint entityCount;
+        private readonly UpdateTimer unloadTimer;
 
         /// <summary>
         /// Return <see cref="MapGrid"/> at supplied <see cref="Vector3"/>.
@@ -45,26 +54,71 @@ namespace NexusForever.WorldServer.Game.Map
         /// <summary>
         /// Initialise new <see cref="MapGrid"/> at the supplied position.
         /// </summary>
-        public MapGrid(uint gridX, uint gridZ)
+        public MapGrid(uint gridX, uint gridZ, bool allowUnload)
         {
             Coord = (gridX, gridZ);
 
             for (uint z = 0u; z < MapDefines.GridCellCount; z++)
                 for (uint x = 0u; x < MapDefines.GridCellCount; x++)
                     cells[z * MapDefines.GridCellCount + x] = new MapCell(x, z);
+
+            if (allowUnload)
+                unloadTimer = new UpdateTimer(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridUnloadTimer ?? 600d);
         }
 
         public void Update(double lastTick)
         {
-            foreach (MapCell cell in cells)
-                cell.Update(lastTick);
+            if (!UnloadStatus.HasValue)
+                foreach (MapCell cell in cells)
+                    cell.Update(lastTick);
 
-            if (ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridUnloadTimer.HasValue)
+            ProcessUnload(lastTick);
+        }
+
+        private void ProcessUnload(double lastTick)
+        {
+            switch (UnloadStatus)
             {
-                unloadTimer.Update(lastTick);
-                if (unloadTimer.HasElapsed)
-                    PendingUnload = true;
+                case MapUnloadStatus.AwaitingUnloadEntities:
+                {
+                    foreach (MapCell cell in cells)
+                        cell.Unload();
+
+                    UnloadStatus = MapUnloadStatus.UnloadingEntities;
+                    break;
+                }
+                case MapUnloadStatus.UnloadingEntities:
+                {
+                    if (entityCount == 0)
+                        UnloadStatus = MapUnloadStatus.Complete;
+                    break;
+                }
+                case null when unloadTimer != null:
+                {
+                    unloadTimer.Update(lastTick);
+                    if (unloadTimer.HasElapsed)
+                    {
+                        unloadTimer.Reset(false);
+                        Unload();
+                    }
+
+                    break;
+                }
             }
+        }
+
+        /// <summary>
+        /// Unload <see cref="MapCell"/>'s from the <see cref="MapGrid"/>.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="MapCell"/>'s are delay unloaded.
+        /// </remarks>
+        public void Unload()
+        {
+            if (visibilityCount > 0u)
+                throw new InvalidOperationException("Failed to start grid unload, players in visibility range!");
+
+            UnloadStatus = entityCount == 0 ? MapUnloadStatus.Complete : MapUnloadStatus.AwaitingUnloadEntities;
         }
 
         /// <summary>
@@ -72,8 +126,13 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void AddVisiblePlayer()
         {
-            playerCount++;
-            if (unloadTimer.IsTicking)
+            if (UnloadStatus.HasValue)
+                return;
+
+            visibilityCount++;
+
+            // cancel grid unload timer when a new player comes into range
+            if (unloadTimer != null && unloadTimer.IsTicking)
                 unloadTimer.Reset(false);
         }
 
@@ -82,34 +141,11 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void RemoveVisiblePlayer()
         {
-            playerCount--;
-            if (playerCount == 0u)
+            visibilityCount--;
+
+            // start map grid timer when the last player leaves range
+            if (unloadTimer != null && visibilityCount <= 0u)
                 unloadTimer.Reset();
-        }
-
-        /// <summary>
-        /// Unload <see cref="MapCell"/>'s from the <see cref="MapGrid"/>.
-        /// </summary>
-        public bool Unload()
-        {
-            uint threshold = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridActionThreshold ?? 100u;
-            for (uint z = unloadCellZ; z < MapDefines.GridCellCount; z++)
-            {
-                for (uint x = unloadCellX; x < MapDefines.GridCellCount; x++)
-                {
-                    cells[z * MapDefines.GridCellCount + x].Unload(ref threshold);
-                    if (threshold == 0u)
-                    {
-                        unloadCellX = x;
-                        unloadCellZ = z;
-                        return false;
-                    }
-                }
-
-                unloadCellX = 0u;
-            }
-            
-            return true;
         }
 
         /// <summary>
@@ -117,7 +153,12 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void AddEntity(GridEntity entity, Vector3 vector)
         {
+            if (UnloadStatus.HasValue)
+                return;
+
             GetCell(vector).AddEntity(entity);
+            entityCount++;
+
             log.Trace($"Added entity {entity.Guid} to grid at X:{Coord.X}, Z:{Coord.Z}.");
         }
 
@@ -127,6 +168,8 @@ namespace NexusForever.WorldServer.Game.Map
         public void RemoveEntity(GridEntity entity)
         {
             GetCell(entity.Position).RemoveEntity(entity);
+            entityCount--;
+
             log.Trace($"Removed entity {entity.Guid} to grid at X:{Coord.X}, Z:{Coord.Z}.");
         }
 
@@ -135,6 +178,9 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void RelocateEntity(GridEntity entity, Vector3 vector)
         {
+            if (UnloadStatus.HasValue)
+                return;
+
             MapCell oldCell = GetCell(entity.Position);
             MapCell newCell = GetCell(vector);
 
