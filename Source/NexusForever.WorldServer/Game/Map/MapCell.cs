@@ -14,6 +14,9 @@ namespace NexusForever.WorldServer.Game.Map
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Coordinates of cell within the grid.
+        /// </summary>
         public (uint X, uint Z) Coord { get; }
 
         private readonly HashSet<GridEntity> entities = new();
@@ -51,16 +54,13 @@ namespace NexusForever.WorldServer.Game.Map
         /// <summary>
         /// Unload <see cref="GridEntity"/>'s from the <see cref="MapCell"/>.
         /// </summary>
-        public void Unload(ref uint threshHold)
+        /// <remarks>
+        /// <see cref="GridEntity"/>'s are delay unloaded.
+        /// </remarks>
+        public void Unload()
         {
-            foreach (GridEntity entity in entities.ToList())
-            {
-                entity.RemoveFromMapDirect();
-
-                threshHold--;
-                if (threshHold == 0u)
-                    return;
-            }
+            foreach (GridEntity entity in entities)
+                entity.RemoveFromMap();
         }
 
         /// <summary>

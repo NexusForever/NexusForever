@@ -28,7 +28,7 @@ namespace NexusForever.Shared.Network
         private readonly byte[] buffer = new byte[4096];
         private int bufferOffset;
 
-        protected DisconnectState? disconnectState;
+        private DisconnectState? disconnectState;
 
         /// <summary>
         /// Initialise <see cref="NetworkSession"/> with new <see cref="Socket"/> and begin listening for data.
@@ -86,7 +86,7 @@ namespace NexusForever.Shared.Network
                 int length = socket.EndReceive(ar);
                 if (length == 0)
                 {
-                    disconnectState = DisconnectState.Pending;
+                    ForceDisconnect();
                     return;
                 }
 
@@ -103,7 +103,7 @@ namespace NexusForever.Shared.Network
             }
             catch
             {
-                disconnectState = DisconnectState.Pending;
+                ForceDisconnect();
             }
         }
 
@@ -120,8 +120,19 @@ namespace NexusForever.Shared.Network
             }
             catch
             {
-                disconnectState = DisconnectState.Pending;
+                ForceDisconnect();
             }
+        }
+
+        /// <summary>
+        /// Forece disconnect of <see cref="NetworkSession"/>.
+        /// </summary>
+        public void ForceDisconnect()
+        {
+            if (disconnectState.HasValue)
+                throw new InvalidOperationException();
+
+            disconnectState = DisconnectState.Pending;
         }
     }
 }

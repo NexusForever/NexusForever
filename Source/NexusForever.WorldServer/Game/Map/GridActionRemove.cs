@@ -4,11 +4,6 @@ namespace NexusForever.WorldServer.Game.Map
 {
     public class GridActionRemove : IGridAction
     {
-        public GridEntity Entity { get; }
-
-        public GridActionRemove(GridEntity entity)
-        {
-            Entity = entity;
-        }
+        public GridEntity Entity { get; init; }
     }
 }

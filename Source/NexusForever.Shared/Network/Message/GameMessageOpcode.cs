@@ -220,6 +220,8 @@ namespace NexusForever.Shared.Network.Message
         ServerAuthDenied                = 0x063D,
         ServerOwnedCommodityOrders      = 0x064C,
         ServerOwnedItemAuctions         = 0x064D,
+        ServerPendingWorldRemovalCancel = 0x0688,
+        ServerPendingWorldRemoval       = 0x0689,
         ClientRequestPlayed             = 0x0693,
         ServerPlayerPlayed              = 0x0694,
         ClientPathActivate              = 0x06B2,

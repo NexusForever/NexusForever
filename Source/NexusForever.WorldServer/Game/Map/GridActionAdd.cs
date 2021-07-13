@@ -5,15 +5,8 @@ namespace NexusForever.WorldServer.Game.Map
 {
     public class GridActionAdd : IGridAction
     {
+        public GridEntity Entity { get; init; }
+        public Vector3 Vector { get; init; }
         public uint RequeueCount { get; set; }
-
-        public GridEntity Entity { get; }
-        public Vector3 Vector { get; }
-
-        public GridActionAdd(GridEntity entity, Vector3 vector)
-        {
-            Entity = entity;
-            Vector = vector;
-        }
     }
 }

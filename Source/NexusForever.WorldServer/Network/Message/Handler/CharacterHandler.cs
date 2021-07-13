@@ -553,17 +553,29 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                             residence = ResidenceManager.Instance.CreateResidence(session.Player);
 
                         ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(residence);
-                        var mapInfo = new MapInfo(entrance.Entry, 0u, residence.Id);
-                        MapManager.Instance.AddToMap(session.Player, mapInfo, entrance.Position);
+                        MapManager.Instance.AddToMap(session.Player, new MapPosition
+                        {
+                            Info     = new MapInfo
+                            {
+                                Entry      = entrance.Entry,
+                                InstanceId = residence.Id
+                            },
+                            Position = entrance.Position
+                        });
                     }));
 
                     break;
                 }
                 default:
                 {
-                    var mapInfo = new MapInfo(entry);
-                    var vector3 = new Vector3(character.LocationX, character.LocationY, character.LocationZ);
-                    MapManager.Instance.AddToMap(session.Player, mapInfo, vector3);
+                    MapManager.Instance.AddToMap(session.Player, new MapPosition
+                    {
+                        Info     = new MapInfo
+                        {
+                            Entry = entry
+                        },
+                        Position = new Vector3(character.LocationX, character.LocationY, character.LocationZ)
+                    });
                     break;
                 }
             }

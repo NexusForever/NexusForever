@@ -15,39 +15,60 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public class ResidenceMap : BaseMap
+    public class ResidenceMapInstance : MapInstance
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public ulong Id => residence?.Id ?? 0ul;
         // housing maps have unlimited vision range.
         public override float VisionRange { get; protected set; } = -1f;
 
         private Residence residence;
 
-        public override void Initialise(MapInfo info, Player player)
+        /// <summary>
+        /// Initialise <see cref="ResidenceMapInstance"/> with <see cref="Residence"/>
+        /// </summary>
+        public void Initialise(Residence residence)
         {
-            base.Initialise(info, player);
+            if (this.residence != null)
+                throw new InvalidOperationException();
 
-            if (info.ResidenceId != 0u)
-            {
-                residence = ResidenceManager.Instance.GetCachedResidence(info.ResidenceId);
-                if (residence == null)
-                    throw new InvalidOperationException();
-            }
-            else
-                residence = ResidenceManager.Instance.CreateResidence(player);
+            this.residence = residence;
 
             // initialise plug entities
             foreach (Plot plot in residence.GetPlots().Where(p => p.PlugEntry != null))
             {
                 var plug = new Plug(plot.PlotEntry, plot.PlugEntry);
-                EnqueueAdd(plug, Vector3.Zero);
+                EnqueueAdd(plug, new MapPosition
+                {
+                    Position = Vector3.Zero
+                });
             }
         }
 
-        public override void OnAddToMap(Player player)
+        protected override MapPosition GetPlayerReturnLocation(Player player)
         {
+            // if the residence is unloaded return player to their own residence
+            Residence returnResidence = ResidenceManager.Instance.GetResidence(player.Name).GetAwaiter().GetResult();
+            returnResidence ??= ResidenceManager.Instance.CreateResidence(player);
+            ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(returnResidence);
+
+            return new MapPosition
+            {
+                Info   = new MapInfo
+                {
+                    Entry      = entrance.Entry,
+                    InstanceId = returnResidence.Id
+                },
+                Position = entrance.Position
+            };
+        }
+
+        protected override void AddEntity(GridEntity entity, Vector3 vector)
+        {
+            base.AddEntity(entity, vector);
+            if (entity is not Player player)
+                return;
+
             if (residence == null)
                 throw new InvalidOperationException();
 

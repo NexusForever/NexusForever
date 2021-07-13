@@ -103,7 +103,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 if (session.Player.Inventory.ItemUse(item))
                 {
-                    if (session.Player.Map is ResidenceMap residenceMap)
+                    if (session.Player.Map is ResidenceMapInstance residenceMap)
                         residenceMap.DecorCreate(entry, 1);
                     else
                         residence.DecorCreate(entry);

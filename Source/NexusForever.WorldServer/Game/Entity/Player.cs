@@ -34,11 +34,14 @@ using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NLog;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
     public class Player : UnitEntity, ISaveAuth, ISaveCharacter, ICharacter
     {
+        private readonly static ILogger log = LogManager.GetCurrentClassLogger();
+
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
@@ -141,6 +144,10 @@ namespace NexusForever.WorldServer.Game.Entity
         public bool SignatureEnabled => Session.AccountRbacManager.HasPermission(Permission.Signature);
 
         public WorldSession Session { get; }
+
+        /// <summary>
+        /// Returns if <see cref="Player"/>'s client is currently in a loading screen.
+        /// </summary>
         public bool IsLoading { get; set; } = true;
 
         /// <summary>
@@ -176,9 +183,16 @@ namespace NexusForever.WorldServer.Game.Entity
         private PlayerSaveMask saveMask;
 
         private LogoutManager logoutManager;
-        private PendingTeleport pendingTeleport;
-        public bool CanTeleport() => pendingTeleport == null;
 
+        /// <summary>
+        /// Returns if <see cref="Player"/> can teleport.
+        /// </summary>
+        public bool CanTeleport() => pendingTeleport == null;
+        private PendingTeleport pendingTeleport;
+
+        /// <summary>
+        /// Create a new <see cref="Player"/> from supplied <see cref="WorldSession"/> and <see cref="CharacterModel"/>.
+        /// </summary>
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
         {
@@ -255,7 +269,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
             foreach (CharacterBoneModel bone in model.Bone.OrderBy(bone => bone.BoneIndex))
                 Bones.Add(bone.Bone);
-
 
             SetStat(Stat.Sheathed, 1u);
 
@@ -462,13 +475,19 @@ namespace NexusForever.WorldServer.Game.Entity
             SendCharacterFlagsUpdated();
 
             base.OnAddToMap(map, guid, vector);
-            map.OnAddToMap(this);
 
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
             {
                 var vanityPet = new VanityPet(this, pendingTeleport.VanityPetId.Value);
-                map.EnqueueAdd(vanityPet, Position);
+
+                var position = new MapPosition
+                {
+                    Position = Position
+                };
+
+                if (map.CanEnter(vanityPet, position))
+                    map.EnqueueAdd(vanityPet, position);
             }
 
             pendingTeleport = null;
@@ -596,11 +615,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void OnRemoveFromMap()
         {
             DestroyDependents();
-
             base.OnRemoveFromMap();
-
-            if (pendingTeleport != null)
-                MapManager.Instance.AddToMap(this, pendingTeleport.Info, pendingTeleport.Vector);
         }
 
         public override void AddVisible(GridEntity entity)
@@ -713,21 +728,29 @@ namespace NexusForever.WorldServer.Game.Entity
             CharacterManager.Instance.DeregisterPlayer(this);
             PlayerCleanupManager.Track(Session.Account);
 
-            Session.Events.EnqueueEvent(new TimeoutPredicateEvent(TimeSpan.FromSeconds(15), CanCleanup, () =>
+            log.Trace($"Attempting to start cleanup for character {Name}({CharacterId})...");
+
+            Session.Events.EnqueueEvent(new TimeoutPredicateEvent(TimeSpan.FromSeconds(15), CanCleanup,
+                () =>
             {
                 try
                 {
+                    log.Trace($"Cleanup for character {Name}({CharacterId}) has started...");
+
                     OnLogout();
 
                     Save(() =>
                     {
-                        RemoveFromMap();
+                        if (Map != null)
+                            RemoveFromMap();
+
                         Session.Player = null;
                     });
                 }
                 finally
                 {
                     PlayerCleanupManager.Untrack(Session.Account);
+                    log.Trace($"Cleanup for character {Name}({CharacterId}) has completed.");
                 }
             }));
         }
@@ -756,32 +779,46 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Teleport <see cref="Player"/> to supplied location.
         /// </summary>
-        public void TeleportTo(ushort worldId, float x, float y, float z, uint instanceId = 0u, ulong residenceId = 0ul)
+        public void TeleportTo(ushort worldId, float x, float y, float z, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate)
         {
             WorldEntry entry = GameTableManager.Instance.World.GetEntry(worldId);
             if (entry == null)
-                throw new ArgumentException();
+                throw new ArgumentException($"Invalid world id {worldId}!");
 
-            TeleportTo(entry, new Vector3(x, y, z), instanceId, residenceId);
+            TeleportTo(entry, new Vector3(x, y, z), instanceId, reason);
         }
 
         /// <summary>
         /// Teleport <see cref="Player"/> to supplied location.
         /// </summary>
-        public void TeleportTo(WorldEntry entry, Vector3 vector, uint instanceId = 0u, ulong residenceId = 0ul)
+        public void TeleportTo(WorldEntry entry, Vector3 position, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate)
+        {
+            TeleportTo(new MapPosition
+            {
+                Info     = new MapInfo
+                {
+                    Entry      = entry,
+                    InstanceId = instanceId
+                },
+                Position = position
+            }, reason);
+        }
+
+        /// <summary>
+        /// Teleport <see cref="Player"/> to supplied location.
+        /// </summary>
+        public void TeleportTo(MapPosition mapPosition, TeleportReason reason = TeleportReason.Relocate)
         {
             if (!CanTeleport())
-                throw new InvalidOperationException($"Player {CharacterId} tried to teleport when they're already teleporting.");
-
-            if (DisableManager.Instance.IsDisabled(DisableType.World, entry.Id))
             {
-                SendSystemMessage($"Unable to teleport to world {entry.Id} because it is disabled.");
+                SendGenericError(GenericError.InstanceTransferPending);
                 return;
             }
 
-            if (Map?.Entry.Id == entry.Id)
+            if (DisableManager.Instance.IsDisabled(DisableType.World, mapPosition.Info.Entry.Id))
             {
-                // TODO: don't remove player from map if it's the same as destination
+                SendSystemMessage($"Unable to teleport to world {mapPosition.Info.Entry.Id} because it is disabled.");
+                return;
             }
 
             // store vanity pet summoned before teleport so it can be summoned again after being added to the new map
@@ -792,9 +829,40 @@ namespace NexusForever.WorldServer.Game.Entity
                 vanityPetId = pet?.Creature.Id;
             }
 
-            var info = new MapInfo(entry, instanceId, residenceId);
-            pendingTeleport = new PendingTeleport(info, vector, vanityPetId);
-            RemoveFromMap();
+            pendingTeleport = new PendingTeleport
+            {
+                Reason      = reason,
+                MapPosition = mapPosition,
+                VanityPetId = vanityPetId
+            };
+
+            MapManager.Instance.AddToMap(this, mapPosition);
+            log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.InstanceId ?? 0ul}.");
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="Player"/> teleport fails.
+        /// </summary>
+        public void OnTeleportToFailed(GenericError error)
+        {
+            if (Map != null)
+            {
+                SendGenericError(error);
+                pendingTeleport = null;
+
+                log.Trace($"Error {error} occured during teleport for {Name}({CharacterId})!");
+            }
+            else
+            {
+                // player failed prerequisites to enter map on login
+                // can not proceed, disconnect the client with a message
+                Session.EnqueueMessageEncrypted(new ServerForceKick
+                {
+                    Reason = ForceKickReason.WorldDisconnect
+                });
+
+                log.Trace($"Error {error} occured during teleport for {Name}({CharacterId}), client will be disconnected!");
+            }
         }
 
         /// <summary>

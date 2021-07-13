@@ -847,6 +847,26 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 103,
+                        Name = "Category: Map"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 104,
+                        Name = "Command: MapUnload"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 105,
+                        Name = "Command: MapPlayerRemove"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 106,
+                        Name = "Command: MapPlayerRemoveCancel"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 10000,
                         Name = "Other: InstantLogout"
                     },
@@ -854,6 +874,11 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 10001,
                         Name = "Other: Signature"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10002,
+                        Name = "Other: BypassInstanceLimits"
                     });
             });
 
