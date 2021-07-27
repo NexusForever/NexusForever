@@ -4,12 +4,16 @@ using System.Linq;
 using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Shared.Network.Message;
+using NexusForever.Shared.GameTable;
+using NexusForever.WorldServer.Game.Combat;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Reputation;
 using NexusForever.WorldServer.Game.Reputation.Static;
+using NexusForever.WorldServer.Game.Spell;
+using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
@@ -45,6 +49,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             get => GetStatInteger(Stat.Shield) ?? 0u;
         }
+        public bool IsAlive => GetStatInteger(Stat.Health) > 0u;
 
         public uint Level
         {
@@ -184,7 +189,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 Properties.Add(property, new PropertyValue(property, baseValue, value));
         }
 
-        protected float? GetPropertyValue(Property property)
+        public float? GetPropertyValue(Property property)
         {
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
         }
@@ -207,7 +212,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/>.
         /// </summary>
-        protected uint? GetStatInteger(Stat stat)
+        public uint? GetStatInteger(Stat stat)
         {
             StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Integer)

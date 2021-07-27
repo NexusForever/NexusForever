@@ -2,6 +2,7 @@
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Spell.Static;
+using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Spell
 {
@@ -19,11 +20,14 @@ namespace NexusForever.WorldServer.Game.Spell
                 public uint AdjustedDamage { get; set; }
                 public uint OverkillAmount { get; set; }
                 public bool KilledTarget { get; set; }
+                public CombatResult CombatResult { get; set; }
             }
 
             public uint EffectId { get; }
+            public bool DropEffect { get; set; } = false;
             public Spell4EffectsEntry Entry { get; }
-            public DamageDescription Damage { get; private set; }
+            public DamageDescription Damage { get; private set; } = new DamageDescription();
+            public List<ServerCombatLog> CombatLogs { get; private set; } = new List<ServerCombatLog>();
 
             public SpellTargetEffectInfo(uint effectId, Spell4EffectsEntry entry)
             {
@@ -41,6 +45,16 @@ namespace NexusForever.WorldServer.Game.Spell
                     RawScaledDamage = damage,
                     AdjustedDamage  = damage
                 };
+            }
+
+            public void AddDamage(DamageDescription damage)
+            {
+                Damage = damage;
+            }
+
+            public void AddCombatLog(ServerCombatLog combatLog)
+            {
+                CombatLogs.Add(combatLog);
             }
         }
 
