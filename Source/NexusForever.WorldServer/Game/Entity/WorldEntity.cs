@@ -19,7 +19,18 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
-        public Vector3 Rotation { get; set; } = Vector3.Zero;
+        public Vector3 Rotation
+        {
+            get => (this is Player || MovementManager == null) ? rotation : MovementManager.GetRotation();
+            set
+            {
+                if (this is Player || MovementManager == null)
+                    rotation = value; // TODO: Emit rotations nearby if Player and no client command emitted?
+                
+                MovementManager?.SetRotation(value);
+            } 
+        }
+        private Vector3 rotation = Vector3.Zero;
         public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
 
         public uint EntityId { get; protected set; }
@@ -87,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             EntityId     = model.Id;
             CreatureId   = model.Creature;
-            Rotation     = new Vector3(model.Rx, model.Ry, model.Rz);
+            rotation     = new Vector3(model.Rx, model.Ry, model.Rz);
             DisplayInfo  = model.DisplayInfo;
             OutfitInfo   = model.OutfitInfo;
             Faction1     = (Faction)model.Faction1;

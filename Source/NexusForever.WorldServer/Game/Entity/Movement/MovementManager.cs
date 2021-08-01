@@ -109,7 +109,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
             AddCommand(new SetPositionCommand
             {
                 Position = new Position(position)
-            }, true);
+            }, !(owner is Player));
         }
 
         /// <summary>
@@ -118,13 +118,46 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
         /// <remarks>
         /// Be aware that this rotation doesn't always match the entity rotation (eg: when on a vehicle)
         /// </remarks>
-        public void SetRotation(Vector3 rotation)
+        public void SetRotation(Vector3 rotation, bool blend = false)
         {
             StopSpline();
             AddCommand(new SetRotationCommand
             {
-                Position = new Position(rotation)
+                Position = new Position(rotation),
+                Blend    = blend
+            }, !(owner is Player));
+        }
+
+        /// <summary>
+        /// Get the rotation <see cref="Vector3"/> from <see cref="SetRotationCommand"/>.
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 GetRotation()
+        {
+            SetRotationCommand command = GetCommand<SetRotationCommand>();
+            return command?.Position.Vector ?? Vector3.Zero;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="SetRotationFaceUnitCommand"/> with the supplied unit id.
+        /// </summary>
+        public void SetFaceUnit(uint unitId, bool blend = false)
+        {
+            StopSpline();
+            AddCommand(new SetRotationFaceUnitCommand
+            {
+                UnitId = unitId,
+                Blend  = blend
             }, true);
+        }
+
+        /// <summary>
+        /// Get the unit id from <see cref="SetRotationFaceUnitCommand"/>.
+        /// </summary>
+        public uint? GetFaceUnit()
+        {
+            SetRotationFaceUnitCommand command = GetCommand<SetRotationFaceUnitCommand>();
+            return command?.UnitId > 0 ? command?.UnitId : null;
         }
 
         /// <summary>
@@ -162,6 +195,12 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
 
             StopSpline();
             splinePath = new SplinePath(splineId, mode, speed);
+
+            // TODO: This forces the entity to face the direction of travel. Need a way to handle walking backwards.
+            AddCommand(new SetRotationDefaultsCommand
+            {
+                Blend = true
+            });
 
             splineCommand = EntityCommand.SetPositionSpline;
             AddCommand(new SetPositionSplineCommand
@@ -208,6 +247,12 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
             StopSpline();
             splinePath = new SplinePath(nodes, type, mode, speed);
 
+            // TODO: This forces the entity to face the direction of travel. Need a way to handle walking backwards.
+            AddCommand(new SetRotationDefaultsCommand
+            {
+                Blend = true
+            });
+
             splineCommand = EntityCommand.SetPositionPath;
             AddCommand(new SetPositionPathCommand
             {
@@ -240,6 +285,16 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
                 State = 0
             });
 
+            AddCommand(new SetRotationDefaultsCommand
+            {
+                Blend = false
+            });
+
+            AddCommand(new SetRotationCommand
+            {
+                Position = new Position(splinePath.GetPreviousPosition().GetRotationTo(position))
+            });
+
             AddCommand(new SetPositionCommand
             {
                 Position = new Position(position)
@@ -248,6 +303,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement
             // TODO: calculate spline gradient to set rotation on end
 
             commands.Remove(splineCommand);
+            commands.Remove(EntityCommand.SetRotationDefaults);
             splinePath = null;
         }
 

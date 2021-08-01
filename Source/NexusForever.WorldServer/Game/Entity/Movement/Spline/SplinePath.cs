@@ -118,6 +118,18 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline
         }
 
         /// <summary>
+        /// Get previous <see cref="Vector3"/> position on spline.
+        /// </summary>
+        public Vector3 GetPreviousPosition()
+        {
+            if (IsFinialised)
+                return spline.GetPosition(direction, spline.Length - 1);
+
+            float p = Position % spline.Length;
+            return spline.GetPosition(direction, p - 1);
+        }
+
+        /// <summary>
         /// Gets the next spline point, if false is returned the spline has finished.
         /// </summary>
         private bool GetNextPoint()
