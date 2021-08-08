@@ -26,6 +26,7 @@ namespace NexusForever.WorldServer.Game.Spell
         private SpellStatus status;
 
         private readonly List<SpellTargetInfo> targets = new();
+        private readonly List<Telegraph> telegraphs = new();
 
         private readonly SpellEventManager events = new();
 
@@ -75,6 +76,11 @@ namespace NexusForever.WorldServer.Game.Spell
             if (caster is Player player)
                 if (parameters.SpellInfo.GlobalCooldown != null)
                     player.SpellManager.SetGlobalSpellCooldown(parameters.SpellInfo.GlobalCooldown.CooldownTime / 1000d);
+
+            // It's assumed that non-player entities will be stood still to cast (most do). 
+            // TODO: There are a handful of telegraphs that are attached to moving units (specifically rotating units) which this needs to be updated to account for.
+            if (!(caster is Player))
+                InitialiseTelegraphs();
 
             SendSpellStart();
 
@@ -165,6 +171,13 @@ namespace NexusForever.WorldServer.Game.Spell
             return CastResult.Ok;
         }
 
+        private void InitialiseTelegraphs()
+        {
+            telegraphs.Clear();
+            foreach (TelegraphDamageEntry telegraphDamageEntry in parameters.SpellInfo.Telegraphs)
+                telegraphs.Add(new Telegraph(telegraphDamageEntry, caster, caster.Position, caster.Rotation));
+        }
+
         /// <summary>
         /// Cancel cast with supplied <see cref="CastResult"/>.
         /// </summary>
@@ -214,9 +227,12 @@ namespace NexusForever.WorldServer.Game.Spell
         private void SelectTargets()
         {
             targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Caster, caster));
-            foreach (TelegraphDamageEntry telegraphDamageEntry in parameters.SpellInfo.Telegraphs)
+
+            if (caster is Player)
+                InitialiseTelegraphs();
+
+            foreach (Telegraph telegraph in telegraphs)
             {
-                var telegraph = new Telegraph(telegraphDamageEntry, caster, caster.Position, caster.Rotation);
                 foreach (UnitEntity entity in telegraph.GetTargets())
                     targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Telegraph, entity));
             }
@@ -274,17 +290,49 @@ namespace NexusForever.WorldServer.Game.Spell
 
         private void SendSpellStart()
         {
-            caster.EnqueueToVisible(new ServerSpellStart
+            ServerSpellStart spellStart = new ServerSpellStart
             {
-                CastingId              = CastingId,
-                CasterId               = caster.Guid,
-                PrimaryTargetId        = caster.Guid,
-                Spell4Id               = parameters.SpellInfo.Entry.Id,
-                RootSpell4Id           = parameters.RootSpellInfo?.Entry.Id ?? 0,
-                ParentSpell4Id         = parameters.ParentSpellInfo?.Entry.Id ?? 0,
-                FieldPosition          = new Position(caster.Position),
-                UserInitiatedSpellCast = parameters.UserInitiatedSpellCast
-            }, true);
+                CastingId            = CastingId,
+                CasterId             = caster.Guid,
+                PrimaryTargetId      = caster.Guid,
+                Spell4Id             = parameters.SpellInfo.Entry.Id,
+                RootSpell4Id         = parameters.RootSpellInfo?.Entry.Id ?? 0,
+                ParentSpell4Id       = parameters.ParentSpellInfo?.Entry.Id ?? 0,
+                FieldPosition        = new Position(caster.Position),
+                Yaw                  = caster.Rotation.X,
+                UserInitiatedSpellCast = parameters.UserInitiatedSpellCast,
+                InitialPositionData  = new List<ServerSpellStart.InitialPosition>(),
+                TelegraphPositionData = new List<ServerSpellStart.TelegraphPosition>()
+            };
+
+            List<UnitEntity> unitsCasting = new List<UnitEntity>();
+            if (parameters.PrimaryTargetId > 0)
+                unitsCasting.Add(caster.GetVisible<UnitEntity>(parameters.PrimaryTargetId));
+            else
+                unitsCasting.Add(caster);
+
+            foreach (UnitEntity unit in unitsCasting)
+                spellStart.InitialPositionData.Add(new ServerSpellStart.InitialPosition
+                {
+                    UnitId = unit.Guid,
+                    Position = new Position(unit.Position),
+                    TargetFlags = 3,
+                    Yaw = unit.Rotation.X
+                });
+
+            foreach (UnitEntity unit in unitsCasting)
+                foreach (Telegraph telegraph in telegraphs)
+                    spellStart.TelegraphPositionData.Add(new ServerSpellStart.TelegraphPosition
+                    {
+                        TelegraphId = (ushort)telegraph.TelegraphDamage.Id,
+                        AttachedUnitId = unit.Guid,
+                        TargetFlags = 3,
+                        Position = new Position(telegraph.Position),
+                        Yaw = telegraph.Rotation.X
+                    });
+
+
+            caster.EnqueueToVisible(spellStart, true);
         }
 
         private void SendSpellFinish()
@@ -349,6 +397,31 @@ namespace NexusForever.WorldServer.Game.Spell
 
                 serverSpellGo.TargetInfoData.Add(networkTargetInfo);
             }
+
+            List<UnitEntity> unitsCasting = new List<UnitEntity>
+                {
+                    caster
+                };
+
+            foreach (UnitEntity unit in unitsCasting)
+                serverSpellGo.InitialPositionData.Add(new Network.Message.Model.Shared.InitialPosition
+                {
+                    UnitId = unit.Guid,
+                    Position = new Position(unit.Position),
+                    TargetFlags = 3,
+                    Yaw = unit.Rotation.X
+                });
+
+            foreach (UnitEntity unit in unitsCasting)
+                foreach (Telegraph telegraph in telegraphs)
+                    serverSpellGo.TelegraphPositionData.Add(new TelegraphPosition
+                    {
+                        TelegraphId = (ushort)telegraph.TelegraphDamage.Id,
+                        AttachedUnitId = unit.Guid,
+                        TargetFlags = 3,
+                        Position = new Position(telegraph.Position),
+                        Yaw = telegraph.Rotation.X
+                    });
 
             caster.EnqueueToVisible(serverSpellGo, true);
         }

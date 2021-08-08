@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using NexusForever.Database.World.Model;
+using NexusForever.Shared.Game;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -14,9 +17,19 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         private readonly List<Spell.Spell> pendingSpells = new();
 
+        public float HitRadius { get; protected set; } = 1f;
+
         protected UnitEntity(EntityType type)
             : base(type)
         {
+            InitialiseHitRadius();
+        }
+
+        public override void Initialise(EntityModel model)
+        {
+            base.Initialise(model);
+
+            InitialiseHitRadius();
         }
 
         public override void Update(double lastTick)
@@ -117,6 +130,20 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Spell.Spell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
             spell?.CancelCast(CastResult.SpellCancelled);
+        }
+
+        private void InitialiseHitRadius()
+        {
+            if (CreatureId == 0u)
+                return;
+
+            Creature2Entry creatureEntry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
+            if (creatureEntry == null)
+                return;
+                    
+            Creature2ModelInfoEntry modelInfoEntry = GameTableManager.Instance.Creature2ModelInfo.GetEntry(creatureEntry.Creature2ModelInfoId);
+            if (modelInfoEntry != null)
+                HitRadius = modelInfoEntry.HitRadius * creatureEntry.ModelScale;
         }
     }
 }

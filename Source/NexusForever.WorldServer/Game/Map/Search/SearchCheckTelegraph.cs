@@ -16,7 +16,7 @@ namespace NexusForever.WorldServer.Game.Map.Search
 
         public bool CheckEntity(GridEntity entity)
         {
-            return entity is UnitEntity && caster != entity && telegraph.InsideTelegraph(entity.Position);
+            return entity is UnitEntity && caster != entity && telegraph.InsideTelegraph(entity.Position, (entity as UnitEntity).HitRadius);
         }
     }
 }
