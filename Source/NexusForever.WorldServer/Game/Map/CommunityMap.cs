@@ -2,6 +2,8 @@
 {
     public class CommunityMap : BaseMap
     {
-        
+        public CommunityMap(MapInfo info) : base(info)
+        {
+        }
     }
 }

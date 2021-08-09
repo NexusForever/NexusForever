@@ -4,9 +4,8 @@ using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public interface IMap : IUpdate
+    public interface IMapInstance : IMap
     {
-        void Initialise();
-        void EnqueueAdd(GridEntity entity, Vector3 position);
+        void CreateInstance(MapInfo info, Player player);
     }
 }

@@ -62,17 +62,17 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Invoked when <see cref="GridEntity"/> is enqueued to be added to <see cref="BaseMap"/>.
         /// </summary>
-        public virtual void OnEnqueueAddToMap()
+        public virtual void OnEnqueueAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
+            Guid = guid;
             // deliberately empty
         }
 
         /// <summary>
         /// Invoked when <see cref="GridEntity"/> is added to <see cref="BaseMap"/>.
         /// </summary>
-        public virtual void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
+        public virtual void OnAddToMap(BaseMap map, Vector3 vector)
         {
-            Guid     = guid;
             Map      = map;
             Position = vector;
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,29 +29,57 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public virtual float VisionRange { get; protected set; } = DefaultVisionRange;
 
-        public WorldEntry Entry { get; private set; }
+        public WorldEntry Entry { get; protected set; }
         public MapFile File { get; private set; }
-        public uint InstanceId { get; private set; }
+        public uint InstanceId { get; protected set; }
 
         private readonly MapGrid[] grids = new MapGrid[MapDefines.WorldGridCount * MapDefines.WorldGridCount];
         private readonly HashSet<(uint GridX, uint GridZ)> activeGrids = new();
 
         private readonly ConcurrentQueue<IGridAction> pendingActions = new();
 
-        private readonly QueuedCounter entityCounter = new();
         private readonly Dictionary<uint /*guid*/, GridEntity> entities = new();
         private EntityCache entityCache;
 
-        public virtual void Initialise(MapInfo info, Player player)
+        protected MapInfo Info { get; set; } = null;
+        private bool hasInitialised = false;
+
+        public BaseMap()
         {
-            Entry       = info.Entry;
+        }
+
+        public BaseMap(MapInfo info)
+        {
+            Info = info;
+            Entry = info.Entry;
+            InstanceId = info.InstanceId;
+        }
+
+        public virtual void Initialise()
+        {
+            if (Info == null)
+                throw new ArgumentNullException(nameof(Info));
+
             File        = BaseMapManager.Instance.GetBaseMap(Entry.AssetPath);
-            InstanceId  = info.InstanceId;
             entityCache = EntityCacheManager.Instance.GetEntityCache((ushort)Entry.Id);
+
+            hasInitialised = true;
         }
         
         public virtual void Update(double lastTick)
         {
+            if (!hasInitialised)
+            {
+                var sw = Stopwatch.StartNew();
+
+                Initialise();
+
+                sw.Stop();
+                if (sw.ElapsedMilliseconds > 10)
+                    log.Warn($"Map {Entry.Id} took {sw.ElapsedMilliseconds}ms to initialise!");
+                return;
+            }
+
             uint actionThreshold = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridActionThreshold ?? 100u;
             foreach (IGridAction action in pendingActions.Dequeue(actionThreshold))
             {
@@ -74,7 +103,7 @@ namespace NexusForever.WorldServer.Game.Map
                         RelocateEntity(actionRelocate.Entity, actionRelocate.Vector);
                         break;
                     case GridActionRemove actionRemove:
-                        RemoveEntity(actionRemove.Entity);
+                        RemoveEntity(actionRemove.Entity, actionRemove.DropUnitId);
                         break;
                 }
             }
@@ -103,7 +132,8 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void EnqueueAdd(GridEntity entity, Vector3 position)
         {
-            entity.OnEnqueueAddToMap();
+            uint guid = MapManager.Instance.ObtainUnitId();
+            entity.OnEnqueueAddToMap(this, guid, position);
             pendingActions.Enqueue(new GridActionAdd(entity, position));
         }
 
@@ -279,15 +309,14 @@ namespace NexusForever.WorldServer.Game.Map
 
             grid.AddEntity(entity, vector);
 
-            uint guid = entityCounter.Dequeue();
-            entities.Add(guid, entity);
-            entity.OnAddToMap(this, guid, vector);
+            entities.Add(entity.Guid, entity);
+            entity.OnAddToMap(this, vector);
 
             log.Trace($"Added entity {entity.Guid} to map {Entry.Id}.");
             return true;
         }
 
-        private void RemoveEntity(GridEntity entity)
+        private void RemoveEntity(GridEntity entity, bool dropUnitId = true)
         {
             Debug.Assert(entity.Map != null);
 
@@ -295,7 +324,9 @@ namespace NexusForever.WorldServer.Game.Map
 
             log.Trace($"Removed entity {entity.Guid} from map {Entry.Id}.");
 
-            entityCounter.Enqueue(entity.Guid);
+            if (dropUnitId)
+                MapManager.Instance.ReleaseUnitId(entity.Guid);
+
             entities.Remove(entity.Guid);
             entity.OnRemoveFromMap();
         }

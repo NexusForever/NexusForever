@@ -63,9 +63,9 @@ namespace NexusForever.WorldServer.Game.Entity
             return entityCreate;
         }
 
-        public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
+        public override void OnAddToMap(BaseMap map, Vector3 vector)
         {
-            base.OnAddToMap(map, guid, vector);
+            base.OnAddToMap(map, vector);
 
             CreateFlags &= ~EntityCreateFlag.SpawnAnimation;
             CreateFlags |= EntityCreateFlag.NoSpawnAnimation;

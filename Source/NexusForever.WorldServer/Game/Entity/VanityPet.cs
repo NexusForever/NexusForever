@@ -51,9 +51,9 @@ namespace NexusForever.WorldServer.Game.Entity
             };
         }
 
-        public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
+        public override void OnAddToMap(BaseMap map, Vector3 vector)
         {
-            base.OnAddToMap(map, guid, vector);
+            base.OnAddToMap(map, vector);
 
             Player owner = GetVisible<Player>(OwnerGuid);
             if (owner == null)

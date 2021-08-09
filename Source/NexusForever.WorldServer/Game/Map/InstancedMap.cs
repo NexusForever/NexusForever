@@ -6,16 +6,20 @@ using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public sealed class InstancedMap<T> : IInstancedMap where T : IMap, new()
+    public sealed class InstancedMap<T> : IInstancedMap where T : IMapInstance, new()
     {
         private WorldEntry entry;
         private readonly Dictionary</*instanceId*/ uint, T> instances = new();
         private readonly Queue<T> pendingInstances = new();
         private readonly QueuedCounter instanceCounter = new();
-        
-        public void Initialise(MapInfo info, Player player)
+
+        public InstancedMap(MapInfo info)
         {
             entry = info.Entry;
+        }
+        
+        public void Initialise()
+        {
         }
 
         public void EnqueueAdd(GridEntity entity, Vector3 position)
@@ -48,7 +52,7 @@ namespace NexusForever.WorldServer.Game.Map
             }
 
             var newInstance = new T();
-            newInstance.Initialise(info, player);
+            newInstance.CreateInstance(info, player);
             pendingInstances.Enqueue(newInstance);
             return newInstance;
         }

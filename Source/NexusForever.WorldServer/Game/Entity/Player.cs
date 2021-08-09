@@ -174,6 +174,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private LogoutManager logoutManager;
         private PendingTeleport pendingTeleport;
         public bool CanTeleport() => pendingTeleport == null;
+        public bool IsTeleporting() => pendingTeleport != null;
 
         public Player(WorldSession session, CharacterModel model)
             : base(EntityType.Player)
@@ -443,33 +444,101 @@ namespace NexusForever.WorldServer.Game.Entity
             };
         }
 
-        public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
+        public override void OnEnqueueAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
+            base.OnEnqueueAddToMap(map, guid, vector);
+
             IsLoading = true;
 
             Session.EnqueueMessageEncrypted(new ServerChangeWorld
             {
-                WorldId  = (ushort)map.Entry.Id,
+                WorldId = (ushort)map.Entry.Id,
                 Position = new Position(vector)
             });
+
+            Session.EnqueueMessageEncrypted(new ServerEntityDestroy
+            {
+                Guid = Guid,
+                Unknown0 = false
+            });
+            MovementManager = new Movement.MovementManager(this, vector, Rotation);
+            Session.EnqueueMessageEncrypted(BuildCreatePacket());
+            PathManager.SendSetUnitPathTypePacket();
+            Session.EnqueueMessageEncrypted(new ServerPlayerChanged
+            {
+                Guid = Guid,
+                Unknown1 = 1
+            });
+
+            var playerCreate = new ServerPlayerCreate
+            {
+                ItemProficiencies = GetItemProficiencies(),
+                FactionData = new ServerPlayerCreate.Faction
+                {
+                    FactionId = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
+                    FactionReputations = ReputationManager
+                        .Select(r => new ServerPlayerCreate.Faction.FactionReputation
+                        {
+                            FactionId = r.Id,
+                            Value = r.Amount
+                        })
+                        .ToList()
+                },
+                ActiveCostumeIndex = CostumeIndex,
+                InputKeySet = (uint)InputKeySet,
+                CharacterEntitlements = Session.EntitlementManager.GetCharacterEntitlements()
+                    .Select(e => new ServerPlayerCreate.CharacterEntitlement
+                    {
+                        Entitlement = e.Type,
+                        Count = e.Amount
+                    })
+                    .ToList(),
+                TradeskillMaterials = SupplySatchelManager.BuildNetworkPacket(),
+                Xp = XpManager.TotalXp,
+                RestBonusXp = XpManager.RestBonusXp
+            };
+
+            foreach (Currency currency in CurrencyManager)
+                playerCreate.Money[(byte)currency.Id - 1] = currency.Amount;
+
+            foreach (Item item in Inventory
+                .Where(b => b.Location != InventoryLocation.Ability)
+                .SelectMany(i => i))
+            {
+                playerCreate.Inventory.Add(new InventoryItem
+                {
+                    Item = item.BuildNetworkItem(),
+                    Reason = ItemUpdateReason.NoReason
+                });
+            }
+
+            playerCreate.SpecIndex = SpellManager.ActiveActionSet;
+            Session.EnqueueMessageEncrypted(playerCreate);
+            SetControl(this);
 
             // this must come before OnAddToMap
             // the client UI initialises the Holomark checkboxes during OnDocumentReady
             SendCharacterFlagsUpdated();
 
-            base.OnAddToMap(map, guid, vector);
-            map.OnAddToMap(this);
-
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
             {
                 var vanityPet = new VanityPet(this, pendingTeleport.VanityPetId.Value);
-                map.EnqueueAdd(vanityPet, Position);
+                Map.EnqueueAdd(vanityPet, Position);
             }
 
             pendingTeleport = null;
 
             SendPacketsAfterAddToMap();
+        }
+
+        public override void OnAddToMap(BaseMap map, Vector3 vector)
+        {
+            base.OnAddToMap(map, vector);
+            Map.OnAddToMap(this);
+
+            Session.EnqueueMessageEncrypted(new ServerInstanceSettings());
+
             if (PreviousMap == null)
                 OnLogin();
         }
@@ -514,56 +583,8 @@ namespace NexusForever.WorldServer.Game.Entity
             BuybackManager.Instance.SendBuybackItems(this);
 
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
-            Session.EnqueueMessageEncrypted(new ServerInstanceSettings());
-            SetControl(this);
 
             CostumeManager.SendInitialPackets();
-
-            var playerCreate = new ServerPlayerCreate
-            {
-                ItemProficiencies = GetItemProficiencies(),
-                FactionData       = new ServerPlayerCreate.Faction
-                {
-                    FactionId          = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
-                    FactionReputations = ReputationManager
-                        .Select(r => new ServerPlayerCreate.Faction.FactionReputation
-                        {
-                            FactionId = r.Id,
-                            Value     = r.Amount
-                        })
-                        .ToList()
-                },
-                ActiveCostumeIndex    = CostumeIndex,
-                InputKeySet           = (uint)InputKeySet,
-                CharacterEntitlements = Session.EntitlementManager.GetCharacterEntitlements()
-                    .Select(e => new ServerPlayerCreate.CharacterEntitlement
-                    {
-                        Entitlement = e.Type,
-                        Count       = e.Amount
-                    })
-                    .ToList(),
-                TradeskillMaterials   = SupplySatchelManager.BuildNetworkPacket(),
-                Xp                    = XpManager.TotalXp,
-                RestBonusXp           = XpManager.RestBonusXp
-            };
-
-            foreach (Currency currency in CurrencyManager)
-                playerCreate.Money[(byte)currency.Id - 1] = currency.Amount;
-
-            foreach (Item item in Inventory
-                .Where(b => b.Location != InventoryLocation.Ability)
-                .SelectMany(i => i))
-            {
-                playerCreate.Inventory.Add(new InventoryItem
-                {
-                    Item   = item.BuildNetworkItem(),
-                    Reason = ItemUpdateReason.NoReason
-                });
-            }
-
-            playerCreate.SpecIndex = SpellManager.ActiveActionSet;
-            Session.EnqueueMessageEncrypted(playerCreate);
-
             TitleManager.SendTitles();
             SpellManager.SendInitialPackets();
             PetCustomisationManager.SendInitialPackets();
@@ -602,19 +623,14 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void AddVisible(GridEntity entity)
         {
             base.AddVisible(entity);
+
+            if (entity == this)
+                return;
+
             Session.EnqueueMessageEncrypted(((WorldEntity)entity).BuildCreatePacket());
 
             if (entity is Player player)
                 player.PathManager.SendSetUnitPathTypePacket();
-
-            if (entity == this)
-            {
-                Session.EnqueueMessageEncrypted(new ServerPlayerChanged
-                {
-                    Guid     = entity.Guid,
-                    Unknown1 = 1
-                });
-            }
         }
 
         public override void RemoveVisible(GridEntity entity)

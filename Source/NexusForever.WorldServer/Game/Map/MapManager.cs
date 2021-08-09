@@ -14,6 +14,7 @@ namespace NexusForever.WorldServer.Game.Map
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary</*worldId*/ ushort, IMap> maps = new();
+        private readonly QueuedCounter entityCounter = new();
 
         private MapManager()
         {
@@ -40,7 +41,7 @@ namespace NexusForever.WorldServer.Game.Map
 
             sw.Stop();
             if (sw.ElapsedMilliseconds > 10)
-                log.Warn($"{maps.Count} map(s) took {sw.ElapsedMilliseconds}ms to update!");
+                log.Trace($"{maps.Count} map(s) took {sw.ElapsedMilliseconds}ms to update!");
         }
 
         /// <summary>
@@ -78,16 +79,26 @@ namespace NexusForever.WorldServer.Game.Map
             switch (info.Entry.Type)
             {
                 case 5:
-                    map = new InstancedMap<ResidenceMap>();
+                    map = new InstancedMap<ResidenceMap>(info);
                     break;
                 default:
-                    map = new BaseMap();
+                    map = new BaseMap(info);
                     break;
             }
             
-            map.Initialise(info, null);
+            //map.Initialise(info, null);
             maps.Add((ushort)info.Entry.Id, map);
             return map;
+        }
+
+        public uint ObtainUnitId()
+        {
+            return entityCounter.Dequeue();
+        }
+
+        public void ReleaseUnitId(uint unitId)
+        {
+            entityCounter.Enqueue(unitId);
         }
     }
 }

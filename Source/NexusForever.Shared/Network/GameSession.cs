@@ -153,7 +153,7 @@ namespace NexusForever.Shared.Network
             IReadable message = MessageManager.Instance.GetMessage(packet.Opcode);
             if (message == null)
             {
-                log.Warn($"Received unknown packet {packet.Opcode:X}");
+                //log.Warn($"Received unknown packet {packet.Opcode:X}");
                 return;
             }
 

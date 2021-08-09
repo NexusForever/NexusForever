@@ -15,7 +15,7 @@ using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
 {
-    public class ResidenceMap : BaseMap
+    public class ResidenceMap : BaseMap, IMapInstance
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -25,18 +25,25 @@ namespace NexusForever.WorldServer.Game.Map
 
         private Residence residence;
 
-        public override void Initialise(MapInfo info, Player player)
+        public void CreateInstance(MapInfo info, Player player)
         {
-            base.Initialise(info, player);
+            Info = info;
+            Entry = info.Entry;
+            InstanceId = info.InstanceId;
 
-            if (info.ResidenceId != 0u)
+            if (Info.ResidenceId != 0u)
             {
-                residence = ResidenceManager.Instance.GetCachedResidence(info.ResidenceId);
+                residence = ResidenceManager.Instance.GetCachedResidence(Info.ResidenceId);
                 if (residence == null)
                     throw new InvalidOperationException();
             }
             else
                 residence = ResidenceManager.Instance.CreateResidence(player);
+        }
+
+        public override void Initialise()
+        {
+            base.Initialise();
 
             // initialise plug entities
             foreach (Plot plot in residence.GetPlots().Where(p => p.PlugEntry != null))
