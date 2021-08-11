@@ -5,7 +5,8 @@ namespace NexusForever.Database.Character.Model
     public class ResidenceModel
     {
         public ulong Id { get; set; }
-        public ulong OwnerId { get; set; }
+        public ulong? OwnerId { get; set; }
+        public ulong? GuildOwnerId { get; set; }
         public byte PropertyInfoId { get; set; }
         public string Name { get; set; }
         public byte PrivacyLevel { get; set; }
@@ -21,6 +22,7 @@ namespace NexusForever.Database.Character.Model
         public byte GardenSharing { get; set; }
 
         public CharacterModel Character { get; set; }
+        public GuildModel Guild { get; set; }
         public ICollection<ResidenceDecor> Decor { get; set; } = new HashSet<ResidenceDecor>();
         public ICollection<ResidencePlotModel> Plot { get; set; } = new HashSet<ResidencePlotModel>();
     }

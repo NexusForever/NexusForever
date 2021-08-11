@@ -21,6 +21,7 @@ using NexusForever.WorldServer.Game.Entity.Network.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Guild.Static;
+using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.RBAC.Static;
@@ -176,6 +177,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public ReputationManager ReputationManager { get; }
         public GuildManager GuildManager { get; }
         public ChatManager ChatManager { get; }
+        public ResidenceManager ResidenceManager { get; }
 
         public VendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -243,6 +245,7 @@ namespace NexusForever.WorldServer.Game.Entity
             ReputationManager       = new ReputationManager(this, model);
             GuildManager            = new GuildManager(this, model);
             ChatManager             = new ChatManager(this);
+            ResidenceManager        = new ResidenceManager(this);
 
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
@@ -532,12 +535,16 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void SendPacketsAfterAddToMap()
         {
+            DateTime start = DateTime.UtcNow;
+
             SendInGameTime();
             PathManager.SendInitialPackets();
             BuybackManager.Instance.SendBuybackItems(this);
 
+            ResidenceManager.SendHousingBasics();
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
             Session.EnqueueMessageEncrypted(new ServerInstanceSettings());
+
             SetControl(this);
 
             CostumeManager.SendInitialPackets();
@@ -603,6 +610,8 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 InnateIndex = InnateIndex
             });
+
+            log.Trace($"Player {Name} took {(DateTime.UtcNow - start).TotalMilliseconds}ms to send packets after add to map.");
         }
 
         public ItemProficiency GetItemProficiencies()
@@ -783,7 +792,7 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             WorldEntry entry = GameTableManager.Instance.World.GetEntry(worldId);
             if (entry == null)
-                throw new ArgumentException($"Invalid world id {worldId}!");
+                throw new ArgumentException($"{worldId} is not a valid world id!");
 
             TeleportTo(entry, new Vector3(x, y, z), instanceId, reason);
         }

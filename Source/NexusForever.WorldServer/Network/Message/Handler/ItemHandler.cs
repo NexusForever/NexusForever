@@ -1,13 +1,9 @@
-﻿using System.Threading.Tasks;
-using NexusForever.Shared.Game.Events;
-using NexusForever.Shared.GameTable;
+﻿using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -94,21 +90,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (entry == null)
                 throw new InvalidPacketValueException();
 
-            Task<Residence> task = ResidenceManager.Instance.GetResidence(session.Player.Name);
-            session.Events.EnqueueEvent(new TaskGenericEvent<Residence>(task,
-                residence =>
-            {
-                if (residence == null)
-                    residence = ResidenceManager.Instance.CreateResidence(session.Player);
-
-                if (session.Player.Inventory.ItemUse(item))
-                {
-                    if (session.Player.Map is ResidenceMapInstance residenceMap)
-                        residenceMap.DecorCreate(entry, 1);
-                    else
-                        residence.DecorCreate(entry);
-                }
-            }));
+            if (session.Player.Inventory.ItemUse(item))
+                session.Player.ResidenceManager.DecorCreate(entry);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemMoveToSupplySatchel)]

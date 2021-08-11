@@ -12,6 +12,7 @@
         [UserText(UserTextFlags.NoStartEndSpace, 16u, 1u)]
         GuildRankName                = 4,
         GuildBankTabName             = 5,
+        [UserText(UserTextFlags.NoConsecutiveSpace | UserTextFlags.NoStartEndSpace | UserTextFlags.Unknown4 | UserTextFlags.Unknown20, 24u, 3u)]
         HousingResidenceName         = 6,
         [UserText(UserTextFlags.None, 500u, 1u)]
         Chat                         = 7,

@@ -31,9 +31,9 @@ namespace NexusForever.WorldServer.Network.Message.Model
         }
 
         public ulong Unknown0 { get; private set; }
-        public Residence TargetResidence { get; } = new Residence();
+        public Residence TargetResidence { get; } = new();
         public string TargetResidenceName { get; private set; }
-        public Community TargetCommunity { get; } = new Community();
+        public Community TargetCommunity { get; } = new();
         public string TargetCommunityName { get; private set; }
 
         public void Read(GamePacketReader reader)

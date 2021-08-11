@@ -1,7 +1,9 @@
-﻿using NexusForever.Database.Character;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Housing.Static;
 
 namespace NexusForever.WorldServer.Game.Housing
@@ -10,19 +12,30 @@ namespace NexusForever.WorldServer.Game.Housing
     {
         public ulong Id { get; }
         public byte Index { get; }
-        public HousingPlotInfoEntry PlotEntry { get; }
 
-        public HousingPlugItemEntry PlugEntry
+        public HousingPlotInfoEntry PlotInfoEntry
         {
-            get => plugEntry;
+            get => plotInfoEntry;
             set
             {
-                plugEntry = value;
+                plotInfoEntry = value;
+                saveMask |= PlotSaveMask.PlotInfoId;
+            }
+        }
+
+        private HousingPlotInfoEntry plotInfoEntry;
+
+        public HousingPlugItemEntry PlugItemEntry
+        {
+            get => plugItemEntry;
+            set
+            {
+                plugItemEntry = value;
                 saveMask |= PlotSaveMask.PlugItemId;
             }
         }
 
-        private HousingPlugItemEntry plugEntry;
+        private HousingPlugItemEntry plugItemEntry;
 
         public HousingPlugFacing PlugFacing
         {
@@ -50,17 +63,19 @@ namespace NexusForever.WorldServer.Game.Housing
 
         private PlotSaveMask saveMask;
 
+        public Plug PlugEntity { get; set; }
+
         /// <summary>
         /// Create a new <see cref="Plot"/> from an existing database model.
         /// </summary>
         public Plot(ResidencePlotModel model)
         {
-            Id         = model.Id;
-            Index      = model.Index;
-            PlotEntry  = GameTableManager.Instance.HousingPlotInfo.GetEntry(model.PlotInfoId);
-            PlugEntry  = GameTableManager.Instance.HousingPlugItem.GetEntry(model.PlugItemId);
-            plugFacing = (HousingPlugFacing)model.PlugFacing;
-            buildState = model.BuildState;
+            Id            = model.Id;
+            Index         = model.Index;
+            plotInfoEntry = GameTableManager.Instance.HousingPlotInfo.GetEntry(model.PlotInfoId);
+            plugItemEntry = GameTableManager.Instance.HousingPlugItem.GetEntry(model.PlugItemId);
+            plugFacing    = (HousingPlugFacing)model.PlugFacing;
+            buildState    = model.BuildState;
 
             saveMask = PlotSaveMask.None;
         }
@@ -70,10 +85,10 @@ namespace NexusForever.WorldServer.Game.Housing
         /// </summary>
         public Plot(ulong id, HousingPlotInfoEntry entry)
         {
-            Id         = id;
-            Index      = (byte)entry.HousingPropertyPlotIndex;
-            PlotEntry      = entry;
-            plugFacing = HousingPlugFacing.East;
+            Id            = id;
+            Index         = (byte)entry.HousingPropertyPlotIndex;
+            plotInfoEntry = entry;
+            plugFacing    = HousingPlugFacing.East;
 
             if (entry.HousingPlugItemIdDefault != 0u)
             {
@@ -96,8 +111,8 @@ namespace NexusForever.WorldServer.Game.Housing
                 {
                     Id         = Id,
                     Index      = Index,
-                    PlotInfoId = (ushort)PlotEntry.Id,
-                    PlugItemId = (ushort)(PlugEntry?.Id ?? 0u),
+                    PlotInfoId = (ushort)PlotInfoEntry.Id,
+                    PlugItemId = (ushort)(PlugItemEntry?.Id ?? 0u),
                     PlugFacing = (byte)PlugFacing,
                     BuildState = BuildState
                 });
@@ -105,7 +120,36 @@ namespace NexusForever.WorldServer.Game.Housing
             else
             {
                 // plot already exists in database, save only data that has been modified
-                // TODO
+                var model = new ResidencePlotModel
+                {
+                    Id    = Id,
+                    Index = Index,
+                };
+
+                EntityEntry<ResidencePlotModel> entity = context.Attach(model);
+                if ((saveMask & PlotSaveMask.PlotInfoId) != 0)
+                {
+                    model.PlotInfoId = (ushort)PlotInfoEntry.Id;
+                    entity.Property(p => p.PlotInfoId).IsModified = true;
+                }
+
+                if ((saveMask & PlotSaveMask.PlugItemId) != 0)
+                {
+                    model.PlugItemId = (ushort)PlugItemEntry.Id;
+                    entity.Property(p => p.PlugItemId).IsModified = true;
+                }
+
+                if ((saveMask & PlotSaveMask.PlugFacing) != 0)
+                {
+                    model.PlugFacing = (byte)PlugFacing;
+                    entity.Property(p => p.PlugFacing).IsModified = true;
+                }
+
+                if ((saveMask & PlotSaveMask.BuildState) != 0)
+                {
+                    model.BuildState = BuildState;
+                    entity.Property(p => p.BuildState).IsModified = true;
+                }
             }
 
             saveMask = PlotSaveMask.None;
@@ -114,7 +158,7 @@ namespace NexusForever.WorldServer.Game.Housing
         public void SetPlug(ushort plugItemId)
         {
             // TODO
-            PlugEntry  = GameTableManager.Instance.HousingPlugItem.GetEntry(plugItemId);
+            PlugItemEntry  = GameTableManager.Instance.HousingPlugItem.GetEntry(plugItemId);
             BuildState = 4;
         }
     }

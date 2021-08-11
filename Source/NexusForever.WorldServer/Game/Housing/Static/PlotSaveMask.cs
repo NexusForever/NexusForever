@@ -12,6 +12,7 @@ namespace NexusForever.WorldServer.Game.Housing.Static
         Create     = 0x0001,
         PlugItemId = 0x0002,
         PlugFacing = 0x0004,
-        BuildState = 0x0008
+        BuildState = 0x0008,
+        PlotInfoId = 0x0010
     }
 }
