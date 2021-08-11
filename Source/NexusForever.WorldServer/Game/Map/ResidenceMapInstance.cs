@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
@@ -11,6 +10,7 @@ using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Housing.Static;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -22,35 +22,55 @@ namespace NexusForever.WorldServer.Game.Map
         // housing maps have unlimited vision range.
         public override float VisionRange { get; protected set; } = -1f;
 
-        private Residence residence;
+        private readonly Dictionary<ulong, Residence> residences = new();
 
         /// <summary>
-        /// Initialise <see cref="ResidenceMapInstance"/> with <see cref="Residence"/>
+        /// Initialise <see cref="ResidenceMapInstance"/> with <see cref="Residence"/>.
         /// </summary>
         public void Initialise(Residence residence)
         {
-            if (this.residence != null)
-                throw new InvalidOperationException();
+            AddResidence(residence);
+            foreach (ResidenceChild childResidence in residence.GetChildren())
+                AddResidence(childResidence.Residence);
+        }
 
-            this.residence = residence;
+        private void AddResidence(Residence residence)
+        {
+            residences.Add(residence.Id, residence);
+            residence.Map = this;
 
-            // initialise plug entities
-            foreach (Plot plot in residence.GetPlots().Where(p => p.PlugEntry != null))
+            foreach (Plot plot in residence.GetPlots()
+                .Where(p => p.PlugItemEntry != null))
+                AddPlugEntity(plot);
+        }
+
+        private void AddPlugEntity(Plot plot)
+        {
+            var plug = new Plug(plot.PlotInfoEntry, plot.PlugItemEntry);
+            plot.PlugEntity = plug;
+
+            EnqueueAdd(plug, new MapPosition
             {
-                var plug = new Plug(plot.PlotEntry, plot.PlugEntry);
-                EnqueueAdd(plug, new MapPosition
-                {
-                    Position = Vector3.Zero
-                });
-            }
+                Position = Vector3.Zero
+            });
+        }
+
+        private void RemoveResidence(Residence residence)
+        {
+            residences.Remove(residence.Id);
+            residence.Map = null;
+
+            foreach (Plot plot in residence.GetPlots()
+                .Where(p => p.PlugItemEntry != null))
+                plot?.PlugEntity.RemoveFromMap();
         }
 
         protected override MapPosition GetPlayerReturnLocation(Player player)
         {
             // if the residence is unloaded return player to their own residence
-            Residence returnResidence = ResidenceManager.Instance.GetResidence(player.Name).GetAwaiter().GetResult();
-            returnResidence ??= ResidenceManager.Instance.CreateResidence(player);
-            ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(returnResidence);
+            Residence returnResidence = GlobalResidenceManager.Instance.GetResidenceByOwner(player.Name);
+            returnResidence ??= GlobalResidenceManager.Instance.CreateResidence(player);
+            ResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(returnResidence.PropertyInfoId);
 
             return new MapPosition
             {
@@ -69,31 +89,9 @@ namespace NexusForever.WorldServer.Game.Map
             if (entity is not Player player)
                 return;
 
-            if (residence == null)
-                throw new InvalidOperationException();
-
-            SendHousingPrivacy(player);
-            SendHousingProperties(player);
-
-            var housingPlots = new ServerHousingPlots
-            {
-                RealmId     = WorldServer.RealmId,
-                ResidenceId = residence.Id,
-            };
-
-            foreach (Plot plot in residence.GetPlots())
-            {
-                housingPlots.Plots.Add(new ServerHousingPlots.Plot
-                {
-                    PlotPropertyIndex = plot.Index,
-                    PlotInfoId        = plot.PlotEntry.Id,
-                    PlugFacing        = plot.PlugFacing,
-                    PlugItemId        = plot.PlugEntry?.Id ?? 0u,
-                    BuildState        = plot.BuildState
-                });
-            } 
-
-            player.Session.EnqueueMessageEncrypted(housingPlots);
+            SendResidences(player);
+            SendResidencePlots(player);
+            SendResidenceDecor(player);
 
             // this shows the housing toolbar, might need to move this to a more generic place in the future
             player.Session.EnqueueMessageEncrypted(new ServerShowActionBar
@@ -102,52 +100,19 @@ namespace NexusForever.WorldServer.Game.Map
                 ActionBarShortcutSetId = 1553,
                 Guid                   = player.Guid
             });
-
-            SendResidenceDecor(player);
         }
 
-        private void SendHousingPrivacy(Player player = null)
+        protected override void OnUnload()
         {
-            var housingPrivacy = new ServerHousingPrivacy
-            {
-                ResidenceId     = residence.Id,
-                NeighbourhoodId = 0x190000000000000A, // magic numbers are bad
-                PrivacyLevel    = ResidencePrivacyLevel.Public
-            };
-
-            if (player != null)
-                player.Session.EnqueueMessageEncrypted(housingPrivacy);
-            else
-                EnqueueToAll(housingPrivacy);
+            foreach (Residence residence in residences.Values.ToList())
+                RemoveResidence(residence);
         }
 
-        private void SendHousingProperties(Player player = null)
+        private void SendResidences(Player player = null)
         {
-            var housingProperties = new ServerHousingProperties
-            {
-                Residences =
-                {
-                    new ServerHousingProperties.Residence
-                    {
-                        RealmId           = WorldServer.RealmId,
-                        ResidenceId       = residence.Id,
-                        NeighbourhoodId   = 0x190000000000000A,
-                        CharacterIdOwner  = residence.OwnerId,
-                        Name              = residence.Name,
-                        PropertyInfoId    = residence.PropertyInfoId,
-                        WallpaperExterior = residence.Wallpaper,
-                        Entryway          = residence.Entryway,
-                        Roof              = residence.Roof,
-                        Door              = residence.Door,
-                        Ground            = residence.Ground,
-                        Music             = residence.Music,
-                        Sky               = residence.Sky,
-                        Flags             = residence.Flags,
-                        ResourceSharing   = residence.ResourceSharing,
-                        GardenSharing     = residence.GardenSharing
-                    }
-                }
-            };
+            var housingProperties = new ServerHousingProperties();
+            foreach (Residence residence in residences.Values)
+                housingProperties.Residences.Add(residence.Build());
 
             if (player != null)
                 player.Session.EnqueueMessageEncrypted(housingProperties);
@@ -155,91 +120,170 @@ namespace NexusForever.WorldServer.Game.Map
                 EnqueueToAll(housingProperties);
         }
 
-        private void SendResidenceDecor(Player player)
+        private void SendResidence(Residence residence, Player player = null)
         {
-            var residenceDecor = new ServerHousingResidenceDecor();
+            var housingProperties = new ServerHousingProperties();
+            housingProperties.Residences.Add(residence.Build());
+
+            if (player != null)
+                player.Session.EnqueueMessageEncrypted(housingProperties);
+            else
+                EnqueueToAll(housingProperties);
+        }
+
+        private void SendResidenceRemoved(Residence residence, Player player = null)
+        {
+            var housingProperties = new ServerHousingProperties();
+
+            ServerHousingProperties.Residence residenceInfo = residence.Build();
+            residenceInfo.ResidenceDeleted = true;
+            housingProperties.Residences.Add(residenceInfo);
+
+            if (player != null)
+                player.Session.EnqueueMessageEncrypted(housingProperties);
+            else
+                EnqueueToAll(housingProperties);
+        }
+
+        private void SendResidencePlots(Player player = null)
+        {
+            foreach (Residence residence in residences.Values)
+                SendResidencePlots(residence, player);
+        }
+
+        private void SendResidencePlots(Residence residence, Player player = null)
+        {
+            var housingPlots = new ServerHousingPlots
+            {
+                RealmId     = WorldServer.RealmId,
+                ResidenceId = residence.Id
+            };
+
+            foreach (Plot plot in residence.GetPlots())
+            {
+                housingPlots.Plots.Add(new ServerHousingPlots.Plot
+                {
+                    PlotPropertyIndex = plot.Index,
+                    PlotInfoId        = plot.PlotInfoEntry.Id,
+                    PlugFacing        = plot.PlugFacing,
+                    PlugItemId        = plot.PlugItemEntry?.Id ?? 0u,
+                    BuildState        = plot.BuildState
+                });
+            }
+
+            if (player != null)
+                player.Session.EnqueueMessageEncrypted(housingPlots);
+            else
+                EnqueueToAll(housingPlots);
+        }
+
+        private void SendResidenceDecor(Player player = null)
+        {
+            // a separate ServerHousingResidenceDecor has to be used for each residence
+            // the client uses the residence id from the first decor it receives as the storage for the rest as well
+            // no idea why it was implemented like this...
+            foreach (Residence residence in residences.Values)
+                SendResidenceDecor(residence, player);
+        }
+
+        private void SendResidenceDecor(Residence residence, Player player = null)
+        {
+            var residenceDecor = new ServerHousingResidenceDecor
+            {
+                Operation = 0
+            };
 
             Decor[] decors = residence.GetDecor().ToArray();
             for (uint i = 0u; i < decors.Length; i++)
             {
-                // client freaks out if too much decor is sent in a single message, limit to 100
-                if (i != 0u && i % 100u == 0u)
-                {
-                    player.Session.EnqueueMessageEncrypted(residenceDecor);
-                    residenceDecor = new ServerHousingResidenceDecor();
-                }
-
                 Decor decor = decors[i];
-                residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
-                {
-                    RealmId       = WorldServer.RealmId,
-                    DecorId       = decor.DecorId,
-                    ResidenceId   = residence.Id,
-                    DecorType     = decor.Type,
-                    PlotIndex     = decor.PlotIndex,
-                    Scale         = decor.Scale,
-                    Position      = decor.Position,
-                    Rotation      = decor.Rotation,
-                    DecorInfoId   = decor.Entry.Id,
-                    ParentDecorId = decor.DecorParentId,
-                    ColourShift   = decor.ColourShiftId
-                });
+                residenceDecor.DecorData.Add(decor.Build());
 
-                if (i == decors.Length - 1)
-                    player.Session.EnqueueMessageEncrypted(residenceDecor);
+                // client freaks out if too much decor is sent in a single message, limit to 100
+                if (i == decors.Length - 1 || i != 0u && i % 100u == 0u)
+                {
+                    if (player != null)
+                        player.Session.EnqueueMessageEncrypted(residenceDecor);
+                    else
+                        EnqueueToAll(residenceDecor);
+
+                    residenceDecor.DecorData.Clear();
+                }
             }
         }
 
         /// <summary>
-        /// Crate all placed <see cref="Decor"/>, this is called directly from a packet hander.
+        /// Add child <see cref="Residence"/> to parent <see cref="Residence"/>.
         /// </summary>
-        public void CrateAllDecor(Player player)
+        public void AddChild(Residence residence, bool temporary)
         {
-            if (!residence.CanModifyResidence(player.CharacterId))
+            Residence community = residences.Values.SingleOrDefault(r => r.IsCommunityResidence);
+            if (community == null)
+                throw new InvalidOperationException("Can't add child residence to a map that isn't a community!");
+
+            community.AddChild(residence, temporary);
+            AddResidence(residence);
+
+            SendResidence(residence);
+            SendResidencePlots(residence);
+            SendResidenceDecor(residence);
+        }
+
+        /// <summary>
+        /// Remove child <see cref="Residence"/> to parent <see cref="Residence"/>.
+        /// </summary>
+        public void RemoveChild(Residence residence)
+        {
+            Residence community = residences.Values.SingleOrDefault(r => r.IsCommunityResidence);
+            if (community == null)
+                throw new InvalidOperationException("Can't remove child residence from a map that isn't a community!");
+
+            community.RemoveChild(residence);
+            RemoveResidence(residence);
+
+            SendResidenceRemoved(residence);
+        }
+
+        /// <summary>
+        /// Crate all placed <see cref="Decor"/>, this is called directly from a packet handler.
+        /// </summary>
+        public void CrateAllDecor(TargetResidence targetResidence, Player player)
+        {
+            if (!residences.TryGetValue(targetResidence.ResidenceId, out Residence residence)
+                || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
             var housingResidenceDecor = new ServerHousingResidenceDecor();
             foreach (Decor decor in residence.GetPlacedDecor())
             {
                 decor.Crate();
-
-                housingResidenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
-                {
-                    RealmId     = WorldServer.RealmId,
-                    DecorId     = decor.DecorId,
-                    ResidenceId = residence.Id,
-                    DecorType   = decor.Type,
-                    PlotIndex   = decor.PlotIndex,
-                    Scale       = decor.Scale,
-                    Position    = decor.Position,
-                    Rotation    = decor.Rotation,
-                    DecorInfoId = decor.Entry.Id
-                });
+                housingResidenceDecor.DecorData.Add(decor.Build());
             }
 
             EnqueueToAll(housingResidenceDecor);
         }
 
         /// <summary>
-        /// Update <see cref="Decor"/> (create, move or delete), this is called directly from a packet hander.
+        /// Update <see cref="Decor"/> (create, move or delete), this is called directly from a packet handler.
         /// </summary>
         public void DecorUpdate(Player player, ClientHousingDecorUpdate housingDecorUpdate)
         {
-            if (!residence.CanModifyResidence(player.CharacterId))
-                throw new InvalidPacketValueException();
-
-            foreach (ClientHousingDecorUpdate.DecorUpdate update in housingDecorUpdate.DecorUpdates)
+            foreach (DecorInfo update in housingDecorUpdate.DecorUpdates)
             {
+                if (!residences.TryGetValue(update.TargetResidence.ResidenceId, out Residence residence)
+                    || !residence.CanModifyResidence(player))
+                    throw new InvalidPacketValueException();
+
                 switch (housingDecorUpdate.Operation)
                 {
                     case DecorUpdateOperation.Create:
-                        DecorCreate(player, update);
+                        DecorCreate(residence, player, update);
                         break;
                     case DecorUpdateOperation.Move:
-                        DecorMove(player, update);
+                        DecorMove(residence, player, update);
                         break;
                     case DecorUpdateOperation.Delete:
-                        DecorDelete(update);
+                        DecorDelete(residence, update);
                         break;
                     default:
                         throw new InvalidPacketValueException();
@@ -250,32 +294,19 @@ namespace NexusForever.WorldServer.Game.Map
         /// <summary>
         /// Create and add <see cref="Decor"/> from supplied <see cref="HousingDecorInfoEntry"/> to your crate.
         /// </summary>
-        public void DecorCreate(HousingDecorInfoEntry entry, uint quantity)
+        public void DecorCreate(Residence residence, HousingDecorInfoEntry entry, uint quantity)
         {
             var residenceDecor = new ServerHousingResidenceDecor();
             for (uint i = 0u; i < quantity; i++)
             {
                 Decor decor = residence.DecorCreate(entry);
-                decor.Type = DecorType.Crate;
-
-                residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
-                {
-                    RealmId     = WorldServer.RealmId,
-                    DecorId     = decor.DecorId,
-                    ResidenceId = residence.Id,
-                    DecorType   = decor.Type,
-                    PlotIndex   = decor.PlotIndex,
-                    Scale       = decor.Scale,
-                    Position    = decor.Position,
-                    Rotation    = decor.Rotation,
-                    DecorInfoId = decor.Entry.Id
-                });
+                residenceDecor.DecorData.Add(decor.Build());
             }
 
             EnqueueToAll(residenceDecor);
         }
 
-        private void DecorCreate(Player player, ClientHousingDecorUpdate.DecorUpdate update)
+        private void DecorCreate(Residence residence, Player player, DecorInfo update)
         {
             HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(update.DecorInfoId);
             if (entry == null)
@@ -323,24 +354,12 @@ namespace NexusForever.WorldServer.Game.Map
                 Operation = 0,
                 DecorData = new List<ServerHousingResidenceDecor.Decor>
                 {
-                    new ServerHousingResidenceDecor.Decor
-                    {
-                        RealmId     = WorldServer.RealmId,
-                        DecorId     = decor.DecorId,
-                        ResidenceId = residence.Id,
-                        DecorType   = decor.Type,
-                        PlotIndex   = decor.PlotIndex,
-                        Scale       = decor.Scale,
-                        Position    = decor.Position,
-                        Rotation    = decor.Rotation,
-                        DecorInfoId = decor.Entry.Id,
-                        ColourShift = decor.ColourShiftId
-                    }
+                     decor.Build()
                 }
             });
         }
 
-        private void DecorMove(Player player, ClientHousingDecorUpdate.DecorUpdate update)
+        private void DecorMove(Residence residence, Player player, DecorInfo update)
         {
             Decor decor = residence.GetDecor(update.DecorId);
             if (decor == null)
@@ -412,25 +431,12 @@ namespace NexusForever.WorldServer.Game.Map
                 Operation = 0,
                 DecorData = new List<ServerHousingResidenceDecor.Decor>
                 {
-                    new ServerHousingResidenceDecor.Decor
-                    {
-                        RealmId       = WorldServer.RealmId,
-                        DecorId       = decor.DecorId,
-                        ResidenceId   = residence.Id,
-                        DecorType     = decor.Type,
-                        PlotIndex     = decor.PlotIndex,
-                        Scale         = decor.Scale,
-                        Position      = decor.Position,
-                        Rotation      = decor.Rotation,
-                        DecorInfoId   = decor.Entry.Id,
-                        ParentDecorId = decor.DecorParentId,
-                        ColourShift   = decor.ColourShiftId
-                    }
+                    decor.Build()
                 }
             });
         }
 
-        private void DecorDelete(ClientHousingDecorUpdate.DecorUpdate update)
+        private void DecorDelete(Residence residence, DecorInfo update)
         {
             Decor decor = residence.GetDecor(update.DecorId);
             if (decor == null)
@@ -445,9 +451,9 @@ namespace NexusForever.WorldServer.Game.Map
             var residenceDecor = new ServerHousingResidenceDecor();
             residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
             {
-                RealmId = WorldServer.RealmId,
+                RealmId     = WorldServer.RealmId,
                 ResidenceId = residence.Id,
-                DecorId = decor.DecorId,
+                DecorId     = decor.DecorId,
                 DecorInfoId = 0
             });
 
@@ -457,12 +463,14 @@ namespace NexusForever.WorldServer.Game.Map
         /// <summary>
         /// Used to confirm the position and PlotIndex are valid together when placing Decor
         /// </summary>
-        private bool IsValidPlotForPosition(ClientHousingDecorUpdate.DecorUpdate update)
+        private bool IsValidPlotForPosition(DecorInfo update)
         {
-            if (update.PlotIndex == int.MaxValue)
+            return true;
+
+            /*if (update.PlotIndex == int.MaxValue)
                 return true;
 
-            WorldSocketEntry worldSocketEntry = GameTableManager.Instance.WorldSocket.GetEntry(residence.GetPlot((byte)update.PlotIndex).PlotEntry.WorldSocketId);
+            WorldSocketEntry worldSocketEntry = GameTableManager.Instance.WorldSocket.GetEntry(residenceOld.GetPlot((byte)update.PlotIndex).PlotEntry.WorldSocketId);
 
             // TODO: Calculate position based on individual maps on Community & Warplot residences
             var worldPosition = new Vector3(1472f + update.Position.X, update.Position.Y, 1440f + update.Position.Z);
@@ -478,44 +486,37 @@ namespace NexusForever.WorldServer.Game.Map
 
             log.Debug($"IsValidPlotForPosition - PlotIndex: {update.PlotIndex}, Range: {minBound}-{maxBound}, Coords: {globalCellX}, {globalCellZ}");
 
-            return !(globalCellX >= minBound && globalCellX <= maxBound && globalCellZ >= minBound && globalCellZ <= maxBound);
+            return !(globalCellX >= minBound && globalCellX <= maxBound && globalCellZ >= minBound && globalCellZ <= maxBound);*/
         }
 
         /// <summary>
-        /// Rename <see cref="Residence"/>, this is called directly from a packet hander.
+        /// Rename <see cref="Residence"/> with supplied name.
         /// </summary>
-        public void Rename(Player player, ClientHousingRenameProperty housingRenameProperty)
+        public void RenameResidence(Player player, TargetResidence targetResidence, string name)
         {
-            if (!residence.CanModifyResidence(player.CharacterId))
+            if (!residences.TryGetValue(targetResidence.ResidenceId, out Residence residence)
+                || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
-            residence.Name = housingRenameProperty.Name;
-            SendHousingProperties();
+            RenameResidence(residence, name);
         }
 
         /// <summary>
-        /// Set <see cref="ResidencePrivacyLevel"/>, this is called directly from a packet hander.
+        /// Rename <see cref="Residence"/> with supplied name.
         /// </summary>
-        public void SetPrivacyLevel(Player player, ClientHousingSetPrivacyLevel housingSetPrivacyLevel)
+        public void RenameResidence(Residence residence, string name)
         {
-            if (!residence.CanModifyResidence(player.CharacterId))
-                throw new InvalidPacketValueException();
-
-            if (housingSetPrivacyLevel.PrivacyLevel == ResidencePrivacyLevel.Public)
-                ResidenceManager.Instance.RegisterResidenceVists(residence.Id, residence.OwnerName, residence.Name);
-            else
-                ResidenceManager.Instance.DeregisterResidenceVists(residence.Id);
-
-            residence.PrivacyLevel = housingSetPrivacyLevel.PrivacyLevel;
-            SendHousingPrivacy();
+            residence.Name = name;
+            SendResidence(residence);
         }
 
         /// <summary>
-        /// Remodel <see cref="Residence"/>, this is called directly from a packet hander.
+        /// Remodel <see cref="Residence"/>, this is called directly from a packet handler.
         /// </summary>
-        public void Remodel(Player player, ClientHousingRemodel housingRemodel)
+        public void Remodel(TargetResidence targetResidence, Player player, ClientHousingRemodel housingRemodel)
         {
-            if (!residence.CanModifyResidence(player.CharacterId))
+            if (!residences.TryGetValue(targetResidence.ResidenceId, out Residence residence)
+                || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
             if (housingRemodel.RoofDecorInfoId != 0u)
@@ -533,22 +534,23 @@ namespace NexusForever.WorldServer.Game.Map
             if (housingRemodel.GroundWallpaperId != 0u)
                 residence.Ground = (ushort)housingRemodel.GroundWallpaperId;
 
-            SendHousingProperties();
+            SendResidences();
         }
 
         /// <summary>
-        /// UpdateResidenceFlags <see cref="Residence"/>, this is called directly from a packet hander.
+        /// UpdateResidenceFlags <see cref="Residence"/>, this is called directly from a packet handler.
         /// </summary>
-        public void UpdateResidenceFlags(Player player, ClientHousingFlagsUpdate flagsUpdate)
+        public void UpdateResidenceFlags(TargetResidence targetResidence, Player player, ClientHousingFlagsUpdate flagsUpdate)
         {
-            if (!residence.CanModifyResidence(player.CharacterId))
+            if (!residences.TryGetValue(targetResidence.ResidenceId, out Residence residence)
+                || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
             residence.Flags           = flagsUpdate.Flags;
             residence.ResourceSharing = flagsUpdate.ResourceSharing;
             residence.GardenSharing   = flagsUpdate.GardenSharing;
 
-            SendHousingProperties();
+            SendResidences();
         }
     }
 }

@@ -84,19 +84,7 @@ namespace NexusForever.WorldServer.Game.Guild
 
             GuildResultInfo result = GetResult();
             if (result.Result == GuildResult.Success)
-            {
-                if (Convert.ToBoolean(operation.Data))
-                    SetFlag(GuildFlag.Taxes);
-                else
-                    RemoveFlag(GuildFlag.Taxes);
-
-                Broadcast(new ServerGuildFlagUpdate
-                {
-                    RealmId = WorldServer.RealmId,
-                    GuildId = Id,
-                    Value   = (uint)Flags
-                });
-            }
+                SetTaxes(Convert.ToBoolean(operation.Data));
 
             return result;
         }

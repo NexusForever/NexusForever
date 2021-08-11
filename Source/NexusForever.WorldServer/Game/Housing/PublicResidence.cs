@@ -2,15 +2,8 @@
 {
     public class PublicResidence
     {
-        public ulong ResidenceId { get; }
-        public string Owner { get; }
-        public string Name { get; }
-
-        public PublicResidence(ulong residenceId, string owner, string name)
-        {
-            ResidenceId = residenceId;
-            Owner       = owner;
-            Name        = name;
-        }
+        public ulong ResidenceId { get; init; }
+        public string Owner { get; init; }
+        public string Name { get; init; }
     }
 }

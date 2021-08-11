@@ -13,6 +13,7 @@ using NexusForever.Shared.Database;
 using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Guild.Static;
+using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -189,12 +190,41 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
+        /// Validate all <see cref="Community"/> to make sure they have a corrosponding residence.
+        /// </summary>
+        /// <remarks>
+        /// This function is mainly here for migrating communities created before the implementation of community plots.
+        /// If this happens normally there could be a bigger issue.
+        /// </remarks>
+        public void ValidateCommunityResidences()
+        {
+            foreach (GuildBase guild in guilds.Values)
+            {
+                if (guild is not Community community)
+                    continue;
+
+                if (community.Residence != null)
+                    continue;
+
+                community.Residence = GlobalResidenceManager.Instance.CreateCommunity(community);
+                log.Warn($"Created new residence {community.Residence.Id} for Community {community.Id} which was missing a residence!");
+            }
+        }
+
+        /// <summary>
         /// Returns <see cref="GuildBase"/> with supplied id.
         /// </summary>
         public GuildBase GetGuild(ulong guildId)
         {
-            guilds.TryGetValue(guildId, out GuildBase guild);
-            return guild;
+            return guilds.TryGetValue(guildId, out GuildBase guild) ? guild : null;
+        }
+
+        /// <summary>
+        /// Returns <see cref="GuildBase"/> with supplied id.
+        /// </summary>
+        public T GetGuild<T>(ulong guildId) where T : GuildBase
+        {
+            return guilds.TryGetValue(guildId, out GuildBase guild) ? (T)guild : null;
         }
 
         /// <summary>
@@ -203,6 +233,14 @@ namespace NexusForever.WorldServer.Game.Guild
         public GuildBase GetGuild(string name)
         {
             return guildNameCache.TryGetValue(name, out ulong guildId) ? GetGuild(guildId) : null;
+        }
+
+        /// <summary>
+        /// Returns <see cref="GuildBase"/> with supplied name.
+        /// </summary>
+        public T GetGuild<T>(string name) where T : GuildBase
+        {
+            return guildNameCache.TryGetValue(name, out ulong guildId) ? (T)GetGuild(guildId) : null;
         }
 
         /// <summary>
@@ -273,8 +311,12 @@ namespace NexusForever.WorldServer.Game.Guild
                     guild = new ArenaTeam(type, name, leaderRankName, councilRankName, memberRankName);
                     break;
                 case GuildType.Community:
-                    guild = new Community(name, leaderRankName, councilRankName, memberRankName);
+                {
+                    var community = new Community(name, leaderRankName, councilRankName, memberRankName);
+                    community.Residence = GlobalResidenceManager.Instance.CreateCommunity(community);
+                    guild = community;
                     break;
+                }
                 default:
                     throw new ArgumentException();
             }

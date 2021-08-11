@@ -24,15 +24,15 @@ namespace NexusForever.WorldServer.Game.Social
         [Flags]
         public enum ChatChannelSaveMask
         {
-            None     = 0x00,
-            Create   = 0x01,
-            Delete   = 0x02,
+            None = 0x00,
+            Create = 0x01,
+            Delete = 0x02,
             Password = 0x04
         }
 
         public ChatChannelType Type { get; }
         public ulong Id { get; }
-        public string Name { get; }
+        public string Name { get; set; }
 
         public string Password
         {
@@ -68,6 +68,13 @@ namespace NexusForever.WorldServer.Game.Social
                 saveMask |= ChatChannelSaveMask.Delete;
             else
                 saveMask &= ~ChatChannelSaveMask.Delete;
+        }
+
+        public bool IsGuildChannel()
+        {
+            return Type == ChatChannelType.Guild
+                || Type == ChatChannelType.GuildOfficer
+                || Type == ChatChannelType.Community;
         }
 
         /// <summary>
@@ -288,7 +295,8 @@ namespace NexusForever.WorldServer.Game.Social
 
             // reassign owner
             // try and assign to a moderator first, otherwise a member
-            if (member.HasFlag(ChatChannelMemberFlags.Owner))
+            if (member.HasFlag(ChatChannelMemberFlags.Owner)
+                && !IsGuildChannel())
             {
                 ChatChannelMember newOwner = members
                     .FirstOrDefault(m => m.Value.HasFlag(ChatChannelMemberFlags.Moderator))

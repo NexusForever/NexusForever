@@ -8,10 +8,11 @@ namespace NexusForever.WorldServer.Game.Guild.Static
     [Flags]
     public enum GuildMemberSaveMask
     {
-        None   = 0x0000,
-        Create = 0x0001,
-        Delete = 0x0002,
-        Rank   = 0x0004,
-        Note   = 0x0008
+        None                     = 0x0000,
+        Create                   = 0x0001,
+        Delete                   = 0x0002,
+        Rank                     = 0x0004,
+        Note                     = 0x0008,
+        CommunityPlotReservation = 0x0010
     }
 }

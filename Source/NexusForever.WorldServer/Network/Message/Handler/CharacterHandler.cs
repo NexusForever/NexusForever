@@ -33,6 +33,8 @@ using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
 using NexusForever.WorldServer.Game.Guild;
+using NexusForever.WorldServer.Game.Map.Static;
+using NexusForever.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -502,7 +504,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 session.CanProcessPackets = true;
 
-                ResidenceManager.Instance.RemoveResidence(characterToDelete.Name);
+                GlobalResidenceManager.Instance.RemoveResidence(characterToDelete.Name);
                 CharacterManager.Instance.DeleteCharacter(characterToDelete.Id, characterToDelete.Name);
 
                 session.EnqueueMessageEncrypted(new ServerCharacterDeleteResult
@@ -540,29 +542,26 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (entry == null)
                 throw new ArgumentOutOfRangeException();
 
-            switch (entry.Type)
+            switch ((MapType)entry.Type)
             {
-                // housing map
-                case 5:
+                case MapType.Residence:
+                case MapType.Community:
                 {
                     // characters logging in to a housing map are returned to their own residence
-                    session.Events.EnqueueEvent(new TaskGenericEvent<Residence>(ResidenceManager.Instance.GetResidence(session.Player.Name),
-                        residence =>
-                    {
-                        if (residence == null)
-                            residence = ResidenceManager.Instance.CreateResidence(session.Player);
+                    Residence residence = session.Player.ResidenceManager.Residence;
+                    residence ??= GlobalResidenceManager.Instance.CreateResidence(session.Player);
 
-                        ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(residence);
-                        MapManager.Instance.AddToMap(session.Player, new MapPosition
+                    ResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(residence.PropertyInfoId);
+                    session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
+                    MapManager.Instance.AddToMap(session.Player, new MapPosition
+                    {
+                        Info     = new MapInfo
                         {
-                            Info     = new MapInfo
-                            {
-                                Entry      = entrance.Entry,
-                                InstanceId = residence.Id
-                            },
-                            Position = entrance.Position
-                        });
-                    }));
+                            Entry = entrance.Entry,
+                            InstanceId = residence.Parent?.Id ?? residence.Id
+                        },
+                        Position = entrance.Position
+                    });
 
                     break;
                 }

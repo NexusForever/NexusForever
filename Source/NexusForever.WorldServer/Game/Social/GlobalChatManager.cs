@@ -159,7 +159,7 @@ namespace NexusForever.WorldServer.Game.Social
         }
 
         /// <summary>
-        /// Create a new <see cref="ChatChannel"/> with supplied <see cref="ChatChannelType"/> and id.
+        /// Create a new <see cref="ChatChannel"/> with supplied <see cref="ChatChannelType"/>.
         /// </summary>
         public ChatChannel CreateChatChannel(ChatChannelType type, string name, string password = null)
         {
@@ -180,6 +180,29 @@ namespace NexusForever.WorldServer.Game.Social
                 chatChannelNames[type].Add(name, id);
                 return channel;
             }
+        }
+
+        /// <summary>
+        /// Create a new <see cref="ChatChannel"/> with supplied <see cref="ChatChannelType"/> and id.
+        /// </summary>
+        public ChatChannel CreateChatChannel(ChatChannelType type, ulong chatId, string name, string password = null)
+        {
+            if (chatChannels[type].TryGetValue(chatId, out ChatChannel channel))
+            {
+                if (!channel.PendingDelete)
+                    throw new InvalidOperationException($"Chat channel {type},{name} already exists!");
+
+                channel.EnqueueDelete(false);
+                channel.Password = password;   
+            }
+            else
+            {
+                channel = new ChatChannel(type, chatId, name, password);
+                chatChannels[type].Add(chatId, channel);
+                chatChannelNames[type].Add(name, chatId);
+            }
+
+            return channel;
         }
 
         /// <summary>

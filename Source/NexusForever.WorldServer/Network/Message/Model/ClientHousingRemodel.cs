@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ClientHousingRemodel)]
     public class ClientHousingRemodel : IReadable
     {
-        public TargetPlayerIdentity PlayerIdentity { get; } = new TargetPlayerIdentity();
+        public TargetResidence TargetResidence { get; } = new();
         public uint WallpaperId { get; private set; }
         public uint RoofDecorInfoId { get; private set; }
         public uint EntrywayDecorInfoId { get; private set; }
@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            PlayerIdentity.Read(reader);
+            TargetResidence.Read(reader);
             WallpaperId         = reader.ReadUInt();
             RoofDecorInfoId     = reader.ReadUInt();
             EntrywayDecorInfoId = reader.ReadUInt();

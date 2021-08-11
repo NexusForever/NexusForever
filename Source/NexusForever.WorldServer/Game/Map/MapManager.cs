@@ -53,6 +53,11 @@ namespace NexusForever.WorldServer.Game.Map
 
         private void ProcessPending()
         {
+            if (pendingAdds.Count == 0)
+                return;
+
+            var sw = Stopwatch.StartNew();
+
             while (pendingAdds.TryDequeue(out PendingAdd pending))
             {
                 IMap map = CreateMap(pending.MapPosition.Info.Entry);
@@ -69,6 +74,10 @@ namespace NexusForever.WorldServer.Game.Map
                 else
                     map.EnqueueAdd(pending.Player, pending.MapPosition);
             }
+
+            sw.Stop();
+            if (sw.ElapsedMilliseconds > 10)
+                log.Warn($"{pendingAdds.Count} pending add(s) took {sw.ElapsedMilliseconds}ms to process!");
         }
 
         private void UpdateMaps(double lastTick)
@@ -127,6 +136,7 @@ namespace NexusForever.WorldServer.Game.Map
             switch ((MapType)entry.Type)
             {
                 case MapType.Residence:
+                case MapType.Community:
                     map = new ResidenceInstancedMap();
                     break;
                 default:

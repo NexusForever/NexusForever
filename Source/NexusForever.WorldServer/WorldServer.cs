@@ -80,19 +80,20 @@ namespace NexusForever.WorldServer
             EntityCacheManager.Instance.Initialise();
             FactionManager.Instance.Initialise();
             GlobalMovementManager.Instance.Initialise();
+
             GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
             GlobalAchievementManager.Instance.Initialise(); // must be initialised before guilds
-            GlobalGuildManager.Instance.Initialise();
+            GlobalGuildManager.Instance.Initialise(); // must be initialised before residences
+            CharacterManager.Instance.Initialise(); // must be initialised before residences
+            GlobalResidenceManager.Instance.Initialise();
+            GlobalGuildManager.Instance.ValidateCommunityResidences();
 
             AssetManager.Instance.Initialise();
             PrerequisiteManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
             GlobalQuestManager.Instance.Initialise();
 
-            CharacterManager.Instance.Initialise();
-            ResidenceManager.Instance.Initialise();
             GlobalStorefrontManager.Instance.Initialise();
-
             ServerManager.Instance.Initialise(RealmId); 
 
             MessageManager.Instance.Initialise();
@@ -106,10 +107,10 @@ namespace NexusForever.WorldServer
                 NetworkManager<WorldSession>.Instance.Update(lastTick);
                 MapManager.Instance.Update(lastTick);
 
-                ResidenceManager.Instance.Update(lastTick);
                 BuybackManager.Instance.Update(lastTick);
                 GlobalQuestManager.Instance.Update(lastTick);
                 GlobalGuildManager.Instance.Update(lastTick);
+                GlobalResidenceManager.Instance.Update(lastTick); // must be after guild update
                 GlobalChatManager.Instance.Update(lastTick);
 
                 // process commands after everything else in the tick has processed

@@ -145,6 +145,17 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
+        /// Return guild of supplied <see cref="GuildType"/>.
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="Player"/> is part of multiple guilds of <see cref="GuildType"/>, the first one is returned.
+        /// </remarks>
+        public T GetGuild<T>(GuildType type) where T : GuildBase
+        {
+            return (T)guilds.FirstOrDefault(g => g.Value.Type == type).Value;
+        }
+
+        /// <summary>
         /// Send initial packets and trigger login events for any <see cref="GuildBase"/>'s for <see cref="Player"/>.
         /// </summary>
         public void OnLogin()

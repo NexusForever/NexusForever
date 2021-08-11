@@ -102,13 +102,11 @@ namespace NexusForever.WorldServer.Game.Guild
             {
                 if (!ranks.TryGetValue(memberModel.Rank, out GuildRank rank))
                     throw new DatabaseDataException($"Guild member {memberModel.Id} has an invalid rank {memberModel.Rank} for guild {memberModel.Guild.Id}!");
-
+                
                 var member = new GuildMember(memberModel, this, rank);
                 rank.AddMember(member);
                 members.Add(memberModel.CharacterId, member);
             }
-
-            InitialiseChatChannels();
 
             saveMask = GuildBaseSaveMask.None;
         }
@@ -125,7 +123,6 @@ namespace NexusForever.WorldServer.Game.Guild
             CreateTime = DateTime.Now;
 
             InitialiseRanks(leaderRankName, councilRankName, memberRankName);
-            InitialiseChatChannels();
 
             saveMask = GuildBaseSaveMask.Create;
         }
@@ -135,11 +132,6 @@ namespace NexusForever.WorldServer.Game.Guild
             AddRank(0, leaderRankName, GuildRankPermission.Leader, ulong.MaxValue, ulong.MaxValue, ulong.MaxValue);
             AddRank(1, councilRankName, GuildRankPermission.Council, ulong.MaxValue, ulong.MaxValue, ulong.MaxValue);
             AddRank(9, memberRankName, GuildRankPermission.MemberChat, 0, 0, 0);
-        }
-
-        protected virtual void InitialiseChatChannels()
-        {
-            // deliberately empty
         }
 
         /// <summary>
@@ -293,6 +285,9 @@ namespace NexusForever.WorldServer.Game.Guild
             AnnounceGuildResult(GuildResult.MemberOnline, referenceText: player.Name);
         }
 
+        /// <summary>
+        /// Invoked when a <see cref="GuildMember"/> comes online.
+        /// </summary>
         protected virtual void MemberOnline(GuildMember member)
         {
             onlineMembers.Add(member.CharacterId);
@@ -312,6 +307,9 @@ namespace NexusForever.WorldServer.Game.Guild
             AnnounceGuildResult(GuildResult.MemberOffline, referenceText: player.Name);
         }
 
+        /// <summary>
+        /// Invoked when a <see cref="GuildMember"/> goes offline.
+        /// </summary>
         protected virtual void MemberOffline(GuildMember member)
         {
             onlineMembers.Remove(member.CharacterId);
@@ -747,7 +745,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Send <see cref="ServerGuildMemberChange"/> to all online members with supplied <see cref="GuildMember"/>.
         /// </summary>
-        private void AnnounceGuildMemberChange(GuildMember member)
+        protected void AnnounceGuildMemberChange(GuildMember member)
         {
             Broadcast(new ServerGuildMemberChange
             {
@@ -769,6 +767,34 @@ namespace NexusForever.WorldServer.Game.Guild
                 RealmId = WorldServer.RealmId,
                 GuildId = Id,
                 Ranks   = GetGuildRanksPackets().ToList()
+            });
+        }
+
+        protected void SendGuildFlagUpdate()
+        {
+            Broadcast(new ServerGuildFlagUpdate
+            {
+                RealmId = WorldServer.RealmId,
+                GuildId = Id,
+                Value   = (uint)Flags
+            });
+        }
+
+        /// <summary>
+        /// Rename <see cref="GuildBase"/> with supplied name.
+        /// </summary>
+        public virtual void RenameGuild(string name)
+        {
+            Name = name;
+
+            Broadcast(new ServerGuildRename
+            {
+                TargetGuild = new TargetGuild
+                {
+                    RealmId = WorldServer.RealmId,
+                    GuildId = Id
+                },
+                Name = name
             });
         }
 
