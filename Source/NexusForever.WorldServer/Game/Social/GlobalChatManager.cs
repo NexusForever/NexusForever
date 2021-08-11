@@ -262,9 +262,19 @@ namespace NexusForever.WorldServer.Game.Social
 
         private void SendChatAccept(WorldSession session)
         {
+
             session.EnqueueMessageEncrypted(new ServerChatAccept
             {
                 Name = session.Player.Name,
+                Guid = session.Player.Guid
+            });
+        }
+
+        private void SendChatAccept(WorldSession session, string targetName)
+        {
+            session.EnqueueMessageEncrypted(new ServerChatAccept
+            {
+                Name = targetName,
                 Guid = session.Player.Guid
             });
         }
@@ -340,40 +350,45 @@ namespace NexusForever.WorldServer.Game.Social
         public void HandleWhisperChat(WorldSession session, ClientChatWhisper whisper)
         {
             Player target = CharacterManager.Instance.GetPlayer(whisper.PlayerName);
-            if (target == null)
+
+            bool CanWhisper()
             {
-                SendMessage(session, $"Player \"{whisper.PlayerName}\" not found.");
+                if (target == null)
+                    return false;
+
+                if (session.Player.Name == target.Name)
+                    return false;
+
+                bool crossFactionChat = ConfigurationManager<WorldServerConfiguration>.Instance.Config.CrossFactionChat;
+                if (session.Player.Faction1 != target.Faction1 && !crossFactionChat)
+                    return false;
+
+                return true;
+            }
+
+            if (!CanWhisper())
+            {
+                session.EnqueueMessageEncrypted(new ServerChatWhisperFail
+                {
+                    CharacterTo = whisper.PlayerName,
+                    IsAccountWhisper = false,
+                    Unknown1 = 1
+                });
                 return;
             }
 
-            if (session.Player.Name == target.Name)
-            {
-                SendMessage(session, "You cannot send a message to yourself.");
-                return;
-            }
-
-            bool crossFactionChat = ConfigurationManager<WorldServerConfiguration>.Instance.Config.CrossFactionChat;
-            if (session.Player.Faction1 != target.Faction1 && !crossFactionChat)
-            {
-                SendMessage(session, $"Player \"{whisper.PlayerName}\" not found.");
-                return;
-            }
-
-            // echo message
             var builder = new ChatMessageBuilder
             {
                 Type         = ChatChannelType.Whisper,
-                Self         = true,
-                FromName     = whisper.PlayerName,
+                Self         = false,
+                FromName     = session.Player.Name,
                 Text         = whisper.Message,
                 Formats      = ParseChatLinks(session, whisper.Formats).ToList(),
                 CrossFaction = session.Player.Faction1 != target.Faction1
             };
-            session.EnqueueMessageEncrypted(builder.Build());
-
-            // target player message
-            builder.Self = false;
             target.Session.EnqueueMessageEncrypted(builder.Build());
+
+            SendChatAccept(session, target.Name);
         }
 
         /// <summary>
