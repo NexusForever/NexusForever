@@ -124,7 +124,7 @@ namespace NexusForever.Shared.Network
         public void ForceDisconnect()
         {
             if (disconnectState.HasValue)
-                throw new InvalidOperationException();
+                return;
 
             disconnectState = DisconnectState.Pending;
         }
