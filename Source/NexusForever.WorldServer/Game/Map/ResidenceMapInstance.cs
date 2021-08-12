@@ -445,9 +445,16 @@ namespace NexusForever.WorldServer.Game.Map
             if (decor.Position != Vector3.Zero)
                 throw new InvalidOperationException();
 
-            residence.DecorDelete(decor);
+            DecorDelete(residence, decor);
+        }
 
-            // TODO: send packet to remove from decor list
+        /// <summary>
+        /// Remove an existing <see cref="Decor"/> from <see cref="Residence"/>.
+        /// </summary>
+        public void DecorDelete(Residence residence, Decor decor)
+        {
+            decor.EnqueueDelete();
+
             var residenceDecor = new ServerHousingResidenceDecor();
             residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
             {
@@ -457,6 +464,21 @@ namespace NexusForever.WorldServer.Game.Map
                 DecorInfoId = 0
             });
 
+            EnqueueToAll(residenceDecor);
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Decor"/> from an existing <see cref="Decor"/> for <see cref="Residence"/>.
+        /// </summary>
+        /// <remarks>
+        /// Copies all data from the source <see cref="Decor"/> with a new id.
+        /// </remarks>
+        public void DecorCopy(Residence residence, Decor decor)
+        {
+            Decor newDecor = residence.DecorCopy(decor);
+
+            var residenceDecor = new ServerHousingResidenceDecor();
+            residenceDecor.DecorData.Add(newDecor.Build());
             EnqueueToAll(residenceDecor);
         }
 
