@@ -355,13 +355,34 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (session.Player.Map is not ResidenceMapInstance)
                 throw new InvalidPacketValueException();
 
+            Residence residence = session.Player.ResidenceManager.Residence;
+            if (residence == null)
+                throw new InvalidPacketValueException();
+
             Community community = session.Player.GuildManager.GetGuild<Community>(GuildType.Community);
             if (community?.Residence == null)
                 throw new InvalidPacketValueException();
 
-            // TODO
-            foreach (DecorInfo decor in housingCommunityDonate.Decor)
+            foreach (DecorInfo decorInfo in housingCommunityDonate.Decor)
             {
+                Decor decor = residence.GetDecor(decorInfo.DecorId);
+                if (decor == null)
+                    throw new InvalidPacketValueException();
+
+                if (decor.Type != DecorType.Crate)
+                    throw new InvalidPacketValueException();
+
+                // copy decor to recipient residence
+                if (community.Residence.Map != null)
+                    community.Residence.Map.DecorCopy(community.Residence, decor);
+                else
+                    community.Residence.DecorCopy(decor);
+
+                // remove decor from donor residence
+                if (residence.Map != null)
+                    residence.Map.DecorDelete(residence, decor);
+                else
+                    decor.EnqueueDelete();
             }
         }
 

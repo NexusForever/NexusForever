@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Game.Housing
 {
     public class Decor : ISaveCharacter, IBuildable<ServerHousingResidenceDecor.Decor>
     {
-        public ulong Id { get; }
+        public ulong Id => Residence.Id;
         public ulong DecorId { get; }
         public HousingDecorInfoEntry Entry { get; }
 
@@ -100,16 +100,28 @@ namespace NexusForever.WorldServer.Game.Housing
 
         private ushort colourShiftId;
 
-        public Residence Residence { get; set; }
+        public Residence Residence { get; }
 
         private DecorSaveMask saveMask;
+
+        /// <summary>
+        /// Returns if <see cref="Decor"/> is enqueued to be deleted from the database.
+        /// </summary>
+        public bool PendingDelete => (saveMask & DecorSaveMask.Delete) != 0;
+
+        /// <summary>
+        /// Enqueue <see cref="Decor"/> to be deleted from the database.
+        /// </summary>
+        public void EnqueueDelete()
+        {
+            saveMask = DecorSaveMask.Delete;
+        }
 
         /// <summary>
         /// Create a new <see cref="Decor"/> from an existing database model.
         /// </summary>
         public Decor(Residence residence, ResidenceDecor model, HousingDecorInfoEntry entry)
         {
-            Id            = model.Id;
             DecorId       = model.DecorId;
             Entry         = entry;
             type          = (DecorType)model.DecorType;
@@ -127,9 +139,8 @@ namespace NexusForever.WorldServer.Game.Housing
         /// <summary>
         /// Create a new <see cref="Decor"/> from a <see cref="HousingDecorInfoEntry"/> template.
         /// </summary>
-        public Decor(Residence residence, ulong id, ulong decorId, HousingDecorInfoEntry entry)
+        public Decor(Residence residence, ulong decorId, HousingDecorInfoEntry entry)
         {
-            Id        = id;
             DecorId   = decorId;
             Entry     = entry;
             type      = DecorType.Crate;
@@ -141,11 +152,25 @@ namespace NexusForever.WorldServer.Game.Housing
         }
 
         /// <summary>
-        /// Enqueue <see cref="Decor"/> to be deleted from the database.
+        /// Create a new <see cref="Decor"/> from an existing <see cref="Decor"/>.
         /// </summary>
-        public void EnqueueDelete()
+        /// <remarks>
+        /// Copies all data from the source <see cref="Decor"/> with a new id.
+        /// </remarks>
+        public Decor(Residence residence, Decor decor, ulong decorId)
         {
-            saveMask = DecorSaveMask.Delete;
+            DecorId       = decorId;
+            Entry         = decor.Entry;
+            type          = decor.Type;
+            plotIndex     = decor.PlotIndex;
+            position      = decor.Position;
+            rotation      = decor.Rotation;
+            scale         = decor.Scale;
+            decorParentId = decor.DecorParentId;
+            colourShiftId = decor.ColourShiftId;
+            Residence     = residence;
+
+            saveMask = DecorSaveMask.Create;
         }
 
         public void Save(CharacterContext context)
