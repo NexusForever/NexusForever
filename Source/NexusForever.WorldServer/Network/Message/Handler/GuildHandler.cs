@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(1159);
                         if (guildRegister.AlternateCost && !session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, entry.Dataint01))
                             return new GuildResultInfo(GuildResult.NotEnoughCredits); // this right guild result for account credits?
-                        if (!session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, entry.Dataint0))
+                        if (!guildRegister.AlternateCost && !session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, entry.Dataint0))
                             return new GuildResultInfo(GuildResult.NotEnoughCredits);
                         break;
                     }
