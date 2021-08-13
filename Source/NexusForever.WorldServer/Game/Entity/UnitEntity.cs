@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -117,6 +118,42 @@ namespace NexusForever.WorldServer.Game.Entity
         {
             Spell.Spell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
             spell?.CancelCast(CastResult.SpellCancelled);
+        }
+
+        public override void AddVisible(GridEntity entity)
+        {
+            base.AddVisible(entity);
+
+            CheckEntityRange(entity);
+        }
+
+        public override void RemoveVisible(GridEntity entity)
+        {
+            CheckEntityRange(entity);
+
+            base.RemoveVisible(entity);
+        }
+
+        public override void OnRelocate(Vector3 vector)
+        {
+            base.OnRelocate(vector);
+
+            foreach (GridEntity entity in visibleEntities.Values)
+                CheckEntityRange(entity);
+        }
+
+        private void CheckEntityRange(GridEntity entity)
+        {
+            if (!(entity is WorldEntity we))
+                return;
+
+            if (!(this is Player))
+            {
+                ApplyRangeTriggers(we);
+                return;
+            }
+
+            we.ApplyRangeTriggers(this);
         }
     }
 }

@@ -94,9 +94,20 @@ namespace NexusForever.Shared
             return new Vector3(x, v.Y, z);
         }
 
+        /// <summary>
+        /// Returns the distance between this <see cref="Vector3"/> and a target <see cref="Vector3"/>.
+        /// </summary>
         public static float GetDistance(this Vector3 v1, Vector3 v2)
         {
             return MathF.Sqrt(MathF.Pow(v1.X - v2.X, 2) + MathF.Pow(v1.Z - v2.Z, 2));
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Vector3"/> representing Euler degrees rotation towards a target <see cref="Vector3"/>, given a <see cref="Vector3"/> representing position.
+        /// </summary>
+        public static Vector3 GetRotationTo(this Vector3 v, Vector3 targetVector)
+        {
+            return new Vector3(v.GetAngle(targetVector), 0f, 0f);
         }
     }
 }

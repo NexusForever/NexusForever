@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Database.World.Model;
+using NexusForever.Shared;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity.Movement;
 using NexusForever.WorldServer.Game.Entity.Network;
@@ -35,6 +36,9 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
         public MovementManager MovementManager { get; private set; }
+
+        public float RangeCheck { get; private set; } = 15f;
+        protected readonly Dictionary<uint, WorldEntity> inRangeEntities = new Dictionary<uint, WorldEntity>();
 
         public uint Health
         {
@@ -109,6 +113,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void OnRemoveFromMap()
         {
             base.OnRemoveFromMap();
+            inRangeEntities.Clear();
             MovementManager = null;
         }
 
@@ -392,6 +397,64 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // check if parent node has required friendship
             return GetDispositionFromFactionFriendship(node.Parent, factionId);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="WorldEntity"/> enters the range of this <see cref="WorldEntity"/>.
+        /// </summary>
+        public virtual void OnEnterRange(WorldEntity entity)
+        {
+            // deliberately empty
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="WorldEntity"/> leaves the range of this <see cref="WorldEntity"/>.
+        /// </summary>
+        public virtual void OnExitRange(WorldEntity entity)
+        {
+            // deliberately empty
+        }
+
+        /// <summary>
+        /// Checks if the provided <see cref="WorldEntity"/> is at a range to trigger an event on this <see cref="WorldEntity"/>.
+        /// </summary>
+        public virtual void ApplyRangeTriggers(WorldEntity target)
+        {
+            if (!HasEnteredRange(target) && IsInRange(target))
+            {
+                inRangeEntities.TryAdd(target.Guid, target);
+                OnEnterRange(target);
+            }
+            else if (!IsInRange(target))
+                RemoveFromRange(target);
+        }
+
+        /// <summary>
+        /// Removes the provided <see cref="WorldEntity"/> from range and notifies this <see cref="WorldEntity"/>.
+        /// </summary>
+        public void RemoveFromRange(WorldEntity target)
+        {
+            if (!HasEnteredRange(target))
+                return;
+
+            inRangeEntities.Remove(target.Guid);
+            OnExitRange(target);
+        }
+
+        /// <summary>
+        /// Returns whether the provided <see cref="WorldEntity"/> is within this <see cref="WorldEntity"/>'s range.
+        /// </summary>
+        public bool IsInRange(WorldEntity target)
+        {
+            return Position.GetDistance(target.Position) < RangeCheck;
+        }
+
+        /// <summary>
+        /// Returns whether the provided <see cref="WorldEntity"/> has entered this <see cref="WorldEntity"/>'s range.
+        /// </summary>
+        protected bool HasEnteredRange(WorldEntity target)
+        {
+            return inRangeEntities.Keys.Contains(target.Guid);
         }
     }
 }
