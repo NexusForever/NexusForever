@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NexusForever.Shared.Game;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
@@ -10,9 +11,11 @@ using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
-    public abstract class UnitEntity : WorldEntity
+    public abstract partial class UnitEntity : WorldEntity
     {
         private readonly List<Spell.Spell> pendingSpells = new();
+
+        private UpdateTimer regenTimer = new UpdateTimer(0.5d);
 
         protected UnitEntity(EntityType type)
             : base(type)
@@ -28,6 +31,14 @@ namespace NexusForever.WorldServer.Game.Entity
                 spell.Update(lastTick);
                 if (spell.IsFinished)
                     pendingSpells.Remove(spell);
+            }
+
+            regenTimer.Update(lastTick);
+            if (regenTimer.HasElapsed)
+            {
+                OnTickRegeneration();
+
+                regenTimer.Reset();
             }
         }
 

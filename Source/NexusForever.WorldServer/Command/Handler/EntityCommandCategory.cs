@@ -70,6 +70,20 @@ namespace NexusForever.WorldServer.Command.Handler
             context.SendMessage(builder.ToString());
         }
 
+        [Command(Permission.EntityProperties, "Get information about the vitals for the target entity.", "v", "vitals")]
+        public void HandleEntityVitals(ICommandContext context)
+        {
+            WorldEntity entity = context.GetTargetOrInvoker<WorldEntity>();
+
+            var builder = new StringBuilder();
+            BuildHeader(context, builder, entity);
+
+            foreach (VitalEntry vital in GameTableManager.Instance.Vital.Entries)
+                builder.AppendLine($"{(Vital)vital.Id} - {entity.GetVitalValue((Vital)vital.Id)}");
+
+            context.SendMessage(builder.ToString());
+        }
+
         private void BuildHeader(ICommandContext context, StringBuilder builder, WorldEntity target)
         {
             builder.AppendLine("=============================");

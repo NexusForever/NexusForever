@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using NexusForever.WorldServer.Game.Entity.Static;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NexusForever.WorldServer.Game.Spell.Static
 {
@@ -49,6 +50,7 @@ namespace NexusForever.WorldServer.Game.Spell.Static
         CCPolymorph                           = 0x0029,
         CCFear                                = 0x002A,
         CCHold                                = 0x002B,
+        [CastResultVital(Vital.Health)]
         CasterVitalCostHealth                 = 0x002C,
         CasterVitalCostXp                     = 0x002D,
         CasterVitalCostMoney                  = 0x002E,
@@ -56,11 +58,23 @@ namespace NexusForever.WorldServer.Game.Spell.Static
         CasterVitalCostCurrency2              = 0x0030,
         CasterVitalCostCurrency3              = 0x0031,
         CasterVitalCostResource0              = 0x0032,
+        [CastResultVital(Vital.Resource1)]
+        [CastResultVital(Vital.Volatility)]
+        [CastResultVital(Vital.Actuator)]
+        [CastResultVital(Vital.Actuator2)]
+        [CastResultVital(Vital.KineticEnergy)]
         CasterVitalCostResource1              = 0x0033,
+        [CastResultVital(Vital.Resource2)]
         CasterVitalCostResource2              = 0x0034,
+        [CastResultVital(Vital.Resource3)]
+        [CastResultVital(Vital.SuitPower)]
         CasterVitalCostResource3              = 0x0035,
+        [CastResultVital(Vital.Resource4)]
+        [CastResultVital(Vital.SpellSurge)]
         CasterVitalCostResource4              = 0x0036,
+        [CastResultVital(Vital.Resource5)]
         CasterVitalCostResource5              = 0x0037,
+        [CastResultVital(Vital.Resource6)]
         CasterVitalCostResource6              = 0x0038,
         CasterCannotBeDead                    = 0x0039,
         CasterMustBeDead                      = 0x003A,
