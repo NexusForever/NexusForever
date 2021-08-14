@@ -4,7 +4,7 @@
     {
         Circle        = 0,
         Ring          = 1,
-        Square = 2,
+        Square        = 2,
         // 3 - Seems like a Cross shape
         Cone          = 4,
         /// <summary>
