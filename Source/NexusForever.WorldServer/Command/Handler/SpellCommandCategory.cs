@@ -5,7 +5,7 @@ using NexusForever.WorldServer.Game.Spell;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
-    [Command(Permission.Spell, "A collection of commands to manage spells.")]
+    [Command(Permission.Spell, "A collection of commands to manage spells.", "spell")]
     public class SpellCommandCategory : CommandCategory
     {
         [Command(Permission.SpellAdd, "Add a base spell to character, optionally supplying the tier.", "add")]

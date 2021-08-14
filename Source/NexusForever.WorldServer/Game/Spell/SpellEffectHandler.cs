@@ -193,5 +193,10 @@ namespace NexusForever.WorldServer.Game.Spell
 
             player.TitleManager.AddTitle((ushort)info.Entry.DataBits00);
         }
+
+        [SpellEffectHandler(SpellEffectType.Fluff)]
+        private void HandleEffectFluff(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
+        }
     }
 }
