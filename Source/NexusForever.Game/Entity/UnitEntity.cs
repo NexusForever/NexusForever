@@ -3,6 +3,8 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Quest;
+using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
@@ -172,6 +174,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CastSpell(ISpellParameters parameters)
         {
+            if (!IsAlive)
+                return;
+
             if (parameters == null)
                 throw new ArgumentNullException();
 
@@ -226,6 +231,102 @@ namespace NexusForever.Game.Entity
         public ISpell GetActiveSpell(Func<ISpell, bool> func)
         {
             return pendingSpells.FirstOrDefault(func);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool CanAttack(IUnitEntity target)
+        {
+            if (!IsAlive)
+                return false;
+
+            if (!target.IsValidAttackTarget() || !IsValidAttackTarget())
+                return false;
+
+            // TODO: Disable when PvP is available.
+            if (target is IPlayer && this is IPlayer)
+                return false;
+
+            return GetDispositionTo(target.Faction1) < Disposition.Friendly;
+        }
+
+        /// <summary>
+        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target.
+        /// </summary>
+        public bool IsValidAttackTarget()
+        {
+            // TODO: Expand on this. There's bound to be flags or states that should prevent an entity from being attacked.
+            return (this is IPlayer or INonPlayer);
+        }
+
+        /// <summary>
+        /// Deal damage to this <see cref="IUnitEntity"/>.
+        /// </summary>
+        public void TakeDamage(IUnitEntity attacker, IDamageDescription damageDescription)
+        {
+            if (!IsAlive || !attacker.IsAlive)
+                return;
+
+            // TODO: Add Threat
+
+            Shield -= damageDescription.ShieldAbsorbAmount;
+            ModifyHealth(-damageDescription.AdjustedDamage);
+
+            if (Health == 0u && attacker != null)
+                Kill(attacker);
+        }
+
+        private void Kill(IUnitEntity attacker)
+        {
+            if (Health > 0)
+                throw new InvalidOperationException("Trying to kill entity that has more than 0hp");
+
+            if (DeathState is DeathState.JustSpawned or DeathState.Alive)
+                throw new InvalidOperationException($"DeathState is incorrect! Current DeathState is {DeathState}");
+
+            // Fire Events (OnKill, OnDeath)
+            OnDeath(attacker);
+
+            // Reward XP
+            // Reward Loot
+            // Handle Achievements
+            // Schedule Respawn
+        }
+
+        protected override void OnDeathStateChange(DeathState newState)
+        {
+            switch (newState)
+            {
+                case DeathState.JustDied:
+                {
+                    // Clear Threat
+
+                    foreach (ISpell spell in pendingSpells)
+                    {
+                        if (spell.IsCasting)
+                            spell.CancelCast(CastResult.CasterCannotBeDead);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            base.OnDeathStateChange(newState);
+        }
+
+        protected override void OnDeath(IUnitEntity killer)
+        {
+            if (killer is IPlayer player && this is not IPlayer)
+            {
+                player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature, CreatureId, 1u);
+                player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature2, CreatureId, 1u);
+                player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroup, CreatureId, 1u);
+                player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroups, CreatureId, 1u);
+            }
+
+            base.OnDeath(killer);
         }
     }
 }

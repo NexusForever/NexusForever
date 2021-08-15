@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
@@ -157,6 +158,24 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 throw new InvalidPacketValueException();
 
             session.Player.Sit(chair);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientResurrectRequest)]
+        public static void HandleClientResurrectRequest(WorldSession session, ClientResurrectRequest clientResurrectRequest)
+        {
+            IWorldEntity entity = session.Player.Map.GetEntity<IWorldEntity>(clientResurrectRequest.UnitId);
+            if (entity != null)
+            {
+                if (entity is IPlayer player && session.Player.Guid == entity.Guid)
+                {
+                    player.DoResurrect(clientResurrectRequest.RezType);
+                    return;
+                }
+                else
+                    throw new InvalidOperationException($"Player requested resurrection of an entity that they do not own!");
+            }
+
+            throw new NotImplementedException($"Targeted Entity not found. Can players choose what type of resurrection other players get?");
         }
     }
 }

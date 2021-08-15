@@ -51,6 +51,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         uint? VanityPetGuid { get; set; }
 
+        /// <summary>
+        /// Guid of the <see cref="IGhost"/> currently summoned by the <see cref="IPlayer"/>.
+        /// </summary>
+        uint? GhostGuid { get; set; }
+
         bool IsSitting { get; }
 
         /// <summary>
@@ -195,5 +200,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove a <see cref="Property"/> modifier by a item that is currently affecting this <see cref="IPlayer"/>.
         /// </summary>
         void RemoveItemProperty(Property property, ItemSlot itemSlot);
+
+        /// <summary>
+        /// Applies resurrection mechanics based on client selection.
+        /// </summary>
+        void DoResurrect(RezType rezType);
     }
 }

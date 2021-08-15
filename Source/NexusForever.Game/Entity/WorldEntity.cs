@@ -120,6 +120,20 @@ namespace NexusForever.Game.Entity
             set => SetStat(Stat.Sheathed, Convert.ToUInt32(value));
         }
 
+        public bool IsAlive => Health > 0u && DeathState is not DeathState.JustDied or DeathState.Corpse or DeathState.Dead;
+
+        protected DeathState DeathState
+        {
+            get => deathState;
+            private set
+            {
+                deathState = value;
+                OnDeathStateChange(value);
+            }
+        }
+
+        private DeathState deathState = DeathState.JustSpawned;
+
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> currently targeted.
         /// </summary>
@@ -802,6 +816,101 @@ namespace NexusForever.Game.Entity
             IWritable message = builder.Build();
             foreach (IPlayer player in intersectedEntities.Cast<IPlayer>())
                 player.Session.EnqueueMessageEncrypted(message);
+        }
+
+        /// <summary>
+        /// Modify this Entity's Health by the given value (Negative for Damage, Positive for Healing).
+        /// </summary>
+        public void ModifyHealth(long health)
+        {
+            int currentHealth = (int)Health;
+            int newHealth = (int)(Health + health);
+
+            if (newHealth <= 0)
+                Health = 0;
+            else if (newHealth > MaxHealth)
+                Health = MaxHealth;
+            else
+                Health = (uint)newHealth;
+
+            UpdateHealthMask mask = (UpdateHealthMask)4;
+            if (Health <= 0 && health < 0)
+                mask = (UpdateHealthMask)128;
+
+            EnqueueToVisible(new ServerEntityHealthUpdate
+            {
+                UnitId = Guid,
+                Health = Health
+            });
+
+            if (this is IPlayer)
+                EnqueueToVisible(new ServerPlayerHealthUpdate
+                {
+                    UnitId = Guid,
+                    Health = Health,
+                    Mask = mask
+                }, true);
+
+            if (currentHealth == 0u && newHealth > 0) // Resurrecting
+            {
+                SendDeathPacket(false, 2);
+                SetDeathState(DeathState.JustSpawned);
+            }
+            else if (currentHealth > 0u && newHealth <= 0u) // Dying
+            {
+                SendDeathPacket(true, 7);
+                SetDeathState(DeathState.JustDied);
+            }
+        }
+
+        private void SendDeathPacket(bool isDead, byte deathReason)
+        {
+            EnqueueToVisible(new ServerEntityDeath
+            {
+                UnitId = Guid,
+                Dead = isDead,
+                Reason = deathReason,
+                RezHealth = isDead ? 0u : Health
+            }, true);
+        }
+
+        protected void SetDeathState(DeathState newState)
+        {
+            DeathState = newState;
+
+            switch (newState)
+            {
+                case DeathState.JustSpawned:
+                    // Do stuff on spawn
+                    SetDeathState(DeathState.Alive);
+                    break;
+                case DeathState.Alive:
+                    // Do stuff on alive
+                    break;
+                case DeathState.JustDied:
+                    SetDeathState(DeathState.Corpse);
+                    break;
+                case DeathState.Corpse:
+                    // Do stuff on corpse
+                    break;
+                case DeathState.Dead:
+                    // Do stuff when entering dead state
+                    if (this is IPlayer)
+                        throw new InvalidOperationException("Invalid Death State for a Player!");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        protected virtual void OnDeathStateChange(DeathState newState)
+        {
+            // Deliberately empty
+        }
+
+        protected virtual void OnDeath(IUnitEntity killer)
+        {
+            // Deliberately empty
         }
     }
 }

@@ -50,5 +50,20 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="castingId">Casting ID of the spell to cancel</param>
         void CancelSpellCast(uint castingId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        bool CanAttack(IUnitEntity target);
+
+        /// <summary>
+        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target.
+        /// </summary>
+        bool IsValidAttackTarget();
+
+        /// <summary>
+        /// Deal damage to this <see cref="IUnitEntity"/>.
+        /// </summary>
+        void TakeDamage(IUnitEntity attacker, IDamageDescription damageDescription);
     }
 }

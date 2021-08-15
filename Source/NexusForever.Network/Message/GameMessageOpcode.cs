@@ -61,6 +61,7 @@ namespace NexusForever.Network.Message
         ClientItemDelete                = 0x0149,
         ClientEntityInteractChair       = 0x014E,
         ClientRequestAmpReset           = 0x0151,
+        ClientResurrectRequest          = 0x015A,
         ClientItemUseLootBag            = 0x015E,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
@@ -91,9 +92,11 @@ namespace NexusForever.Network.Message
         ServerAmpList                   = 0x01A3,
         ServerReputationUpdate          = 0x01A5,
         ServerPathUpdateXP              = 0x01AA,
+        ServerResurrectionUpdate        = 0x01AB,
         ServerExperienceGained          = 0x01AC,
         ServerUnlockVanityPet           = 0x01AE,
         ClientVehicleDisembark          = 0x01AF,
+        ServerResurrectionShow          = 0x01B3,
         ServerZoneMap                   = 0x01B4,
         ServerChatAction                = 0x01B5,
         ServerChatFlag                  = 0x01B7,
@@ -328,6 +331,7 @@ namespace NexusForever.Network.Message
         Server0856                      = 0x0856, // tradeskills
         ServerVehiclePassengerAdd       = 0x086F,
         ServerEntityCCStateSet          = 0x087F,
+        ServerEntityDeath               = 0x088C,
         ServerUnitEnteredCombat         = 0x089A,
         Server089B                      = 0x089B, // mount related
         Server08B3                      = 0x08B3,

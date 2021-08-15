@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database;
@@ -204,6 +203,11 @@ namespace NexusForever.Game.Entity
         /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         public uint? VanityPetGuid { get; set; }
+
+        /// <summary>
+        /// Guid of the <see cref="IGhost"/> currently summoned by the <see cref="IPlayer"/>.
+        /// </summary>
+        public uint? GhostGuid { get; set; }
 
         public bool IsSitting => currentChairGuid != null;
         private uint? currentChairGuid;
@@ -591,6 +595,12 @@ namespace NexusForever.Game.Entity
             pendingTeleport = null;
 
             SendPacketsAfterAddToMap();
+
+            if (Health == 0u)
+                SetDeathState(DeathState.JustDied);
+            else
+                SetDeathState(DeathState.JustSpawned);
+
             if (PreviousMap == null)
                 OnLogin();
         }
@@ -1085,6 +1095,13 @@ namespace NexusForever.Game.Entity
                 VanityPetGuid = null;
             }
 
+            if (GhostGuid != null)
+            {
+                IGhost ghost = GetVisible<IGhost>(GhostGuid.Value);
+                ghost?.RemoveFromMap();
+                GhostGuid = null;
+            }
+
             // TODO: Remove pets, scanbots
         }
 
@@ -1236,6 +1253,70 @@ namespace NexusForever.Game.Entity
             if (itemProperties.TryGetValue(propertyValue.Property, out Dictionary<ItemSlot, float> properties))
                 foreach (float values in properties.Values)
                     propertyValue.Value += values;
+        }
+
+        /// <summary>
+        /// Used to create a <see cref="Ghost"/> for this <see cref="Player"/> to control.
+        /// </summary>
+        private void CreateGhost()
+        {
+            IGhost ghost = new Ghost(this);
+
+            // TODO: Replace with DelayEvent (of 2 seconds) with map updates.
+            Map.EnqueueAdd(ghost, new MapPosition
+            {
+                Info = new MapInfo {
+                    Entry = Map.Entry,
+                    InstanceId = Map is MapInstance instance ? instance.InstanceId : 0u
+                },
+                Position = Position
+            });
+        }
+
+        /// <summary>
+        /// Applies resurrection mechanics based on client selection.
+        /// </summary>
+        public void DoResurrect(RezType rezType)
+        {
+            IWorldEntity controlEntity = GetVisible<IWorldEntity>(ControlGuid);
+            if (controlEntity is not IGhost ghost)
+                throw new InvalidOperationException($"Control Entity is not of type Ghost");
+
+            switch (rezType)
+            {
+                case RezType.WakeHere:
+                    uint cost = ghost.GetCostForRez();
+                    CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
+                    break;
+                default:
+                    break;
+            }
+
+            ModifyHealth((uint)(MaxHealth * 0.5f));
+            Shield = 0;
+            SetControl(this);
+            Map.EnqueueRemove(ghost);
+
+            SetDeathState(DeathState.JustSpawned);
+        }
+
+        protected override void OnDeathStateChange(DeathState newState)
+        {
+            switch (newState)
+            {
+                case DeathState.JustDied:
+                    CreateGhost();
+                    break;
+                default:
+                    break;
+            }
+
+            base.OnDeathStateChange(newState);
+        }
+
+        protected override void OnDeath(IUnitEntity killer)
+        {
+            base.OnDeath(killer);
         }
     }
 }

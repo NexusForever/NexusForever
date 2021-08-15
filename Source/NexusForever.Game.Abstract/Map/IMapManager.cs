@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Map
@@ -19,5 +20,10 @@ namespace NexusForever.Game.Abstract.Map
         /// Increase instance count for <see cref="IPlayer"/>.
         /// </summary>
         void IncreaseInstanceCount(IPlayer player);
+
+        /// <summary>
+        /// Returns the <see cref="RezType"/> mask allowed for the <see cref="IPlayer"/>'s Map.
+        /// </summary>
+        RezType GetRezTypeForMap(IPlayer player);
     }
 }
