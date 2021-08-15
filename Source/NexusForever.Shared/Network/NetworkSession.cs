@@ -19,6 +19,7 @@ namespace NexusForever.Shared.Network
 
         private Socket socket;
         private readonly byte[] buffer = new byte[4096];
+        private int bufferOffset;
 
         /// <summary>
         /// Initialise <see cref="NetworkSession"/> with new <see cref="Socket"/> and begin listening for data.
@@ -72,11 +73,16 @@ namespace NexusForever.Shared.Network
                     return;
                 }
 
-                byte[] data = new byte[length];
+                byte[] data = new byte[length + bufferOffset];
                 Buffer.BlockCopy(buffer, 0, data, 0, data.Length);
-                OnData(data);
+                bufferOffset = (int)OnData(data);
 
-                socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveDataCallback, null);
+                // if we have data that wasn't processed move it to the start of the buffer
+                // any new data will be amended to it
+                if (bufferOffset != 0)
+                    Buffer.BlockCopy(buffer, data.Length - bufferOffset, buffer, 0, bufferOffset);
+
+                socket.BeginReceive(buffer, bufferOffset, buffer.Length - bufferOffset, SocketFlags.None, ReceiveDataCallback, null);
             }
             catch
             {
@@ -84,7 +90,7 @@ namespace NexusForever.Shared.Network
             }
         }
 
-        protected abstract void OnData(byte[] data);
+        protected abstract uint OnData(byte[] data);
 
         /// <summary>
         /// Send supplied data to remote client on <see cref="Socket"/>.

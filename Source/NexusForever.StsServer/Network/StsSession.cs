@@ -64,7 +64,7 @@ namespace NexusForever.StsServer.Network
             }
         }
 
-        protected override void OnData(byte[] data)
+        protected override uint OnData(byte[] data)
         {
             clientEncryption?.Decrypt(data);
 
@@ -85,6 +85,8 @@ namespace NexusForever.StsServer.Network
                     }
                 }
             }
+
+            return 0u;
         }
 
         public override void Update(double lastTick)

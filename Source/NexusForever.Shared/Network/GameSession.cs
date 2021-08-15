@@ -101,7 +101,7 @@ namespace NexusForever.Shared.Network
             encryption = new PacketCrypt(key);
         }
 
-        protected override void OnData(byte[] data)
+        protected override uint OnData(byte[] data)
         {
             using (var stream = new MemoryStream(data))
             using (var reader = new GamePacketReader(stream))
@@ -111,6 +111,13 @@ namespace NexusForever.Shared.Network
                     // no packet on deck waiting for additional information, new data will be part of a new packet
                     if (onDeck == null)
                     {
+                        if (stream.Remaining() < sizeof(uint))
+                        {
+                            // we don't have enough data to know the length of the next packet
+                            // return the remaining buffer so new data can be appended
+                            return stream.Remaining();
+                        }
+
                         uint size = reader.ReadUInt();
                         onDeck = new FragmentedBuffer(size - sizeof(uint));
                     }
@@ -125,6 +132,8 @@ namespace NexusForever.Shared.Network
                     }
                 }
             }
+
+            return 0u;
         }
 
         protected override void OnDisconnect()
