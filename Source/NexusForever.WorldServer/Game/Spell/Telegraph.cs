@@ -67,10 +67,38 @@ namespace NexusForever.WorldServer.Game.Spell
         /// <summary>
         /// Returns any <see cref="UnitEntity"/> inside the <see cref="Telegraph"/>.
         /// </summary>
-        public IEnumerable<UnitEntity> GetTargets()
+        public IEnumerable<UnitEntity> GetTargets(Spell spell)
         {
             Caster.Map.Search(Position, GridSearchSize(), new SearchCheckTelegraph(this, Caster), out List<GridEntity> targets);
+
+            foreach (GridEntity target in targets.ToList())
+                if (!(EvaluateDamageFlagsForTarget(target, spell)))
+                    targets.Remove(target);
+
             return targets.Select(t => t as UnitEntity);
+        }
+
+        private bool EvaluateDamageFlagsForTarget(GridEntity target, Spell spell)
+        {
+            TelegraphDamageFlag damageFlag = (TelegraphDamageFlag)TelegraphDamage.TelegraphDamageFlags;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.SpellMustBeMultiPhase))
+                if (spell.CastMethod != CastMethod.Multiphase)
+                    return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBeNPC))
+                if (Caster is Player)
+                    return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBePlayer))
+                if (Caster is not Player)
+                    return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.TargetMustBeUnit))
+                if (target is not UnitEntity)
+                    return false;
+
+            return true;
         }
 
         /// <summary>

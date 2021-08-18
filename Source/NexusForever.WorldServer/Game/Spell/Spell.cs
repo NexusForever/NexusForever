@@ -4,6 +4,7 @@ using System.Linq;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Spell.Event;
 using NexusForever.WorldServer.Game.Spell.Static;
@@ -20,6 +21,7 @@ namespace NexusForever.WorldServer.Game.Spell
         public uint CastingId { get; }
         public bool IsCasting => status == SpellStatus.Casting;
         public bool IsFinished => status == SpellStatus.Finished;
+        public CastMethod CastMethod { get; }
 
         private readonly UnitEntity caster;
         private readonly SpellParameters parameters;
@@ -36,6 +38,8 @@ namespace NexusForever.WorldServer.Game.Spell
             this.parameters = parameters;
             CastingId       = GlobalSpellManager.Instance.NextCastingId;
             status          = SpellStatus.Initiating;
+            CastMethod      = (CastMethod)parameters.SpellInfo.BaseInfo.Entry.CastMethod;
+
 
             if (parameters.RootSpellInfo == null)
                 parameters.RootSpellInfo = parameters.SpellInfo;
@@ -69,6 +73,10 @@ namespace NexusForever.WorldServer.Game.Spell
             CastResult result = CheckCast();
             if (result != CastResult.Ok)
             {
+                // TODO: Add back in with Continous Cast deployment
+                //if (caster is Player)
+                //    (caster as Player).SpellManager.SetAsContinuousCast(null);
+
                 SendSpellCastResult(result);
                 return;
             }
@@ -174,6 +182,7 @@ namespace NexusForever.WorldServer.Game.Spell
         private void InitialiseTelegraphs()
         {
             telegraphs.Clear();
+
             foreach (TelegraphDamageEntry telegraphDamageEntry in parameters.SpellInfo.Telegraphs)
                 telegraphs.Add(new Telegraph(telegraphDamageEntry, caster, caster.Position, caster.Rotation));
         }
@@ -194,6 +203,13 @@ namespace NexusForever.WorldServer.Game.Spell
                     CastResult     = result,
                     CancelCast     = true
                 });
+
+                if (result == CastResult.CasterMovement)
+                    player.SpellManager.SetGlobalSpellCooldown(0d);
+
+                //player?.SpellManager.SetAsContinuousCast(null);
+
+                SendSpellCastResult(result);
             }
 
             events.CancelEvents();
@@ -215,6 +231,10 @@ namespace NexusForever.WorldServer.Game.Spell
             ExecuteEffects();
             CostSpell();
 
+            // TODO: Add back in with Vitals
+            //if (caster is Player player && HasEsperCost())
+            //    caster.ModifyVital(Vital.Resource1, -caster.GetVitalValue(Vital.Resource1));
+
             SendSpellGo();
         }
 
@@ -233,7 +253,7 @@ namespace NexusForever.WorldServer.Game.Spell
 
             foreach (Telegraph telegraph in telegraphs)
             {
-                foreach (UnitEntity entity in telegraph.GetTargets())
+                foreach (UnitEntity entity in telegraph.GetTargets(this))
                     targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Telegraph, entity));
             }
         }
@@ -242,6 +262,15 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             foreach (Spell4EffectsEntry spell4EffectsEntry in parameters.SpellInfo.Effects)
             {
+                // Check if Spell uses Psi Points, Confirm Effect is the right damage spell for the remaining Psi Points
+                if (HasEsperCost())
+                {
+                    uint remainingPsiPoints = (uint)(caster.GetStatFloat(Stat.Resource1) ?? 0u);
+                    if ((SpellEffectType)spell4EffectsEntry.EffectType == SpellEffectType.Damage &&
+                        !CanUseEsperEffect(spell4EffectsEntry, remainingPsiPoints))
+                        continue;
+                }
+
                 // select targets for effect
                 List<SpellTargetInfo> effectTargets = targets
                     .Where(t => (t.Flags & (SpellEffectTargetFlags)spell4EffectsEntry.TargetFlags) != 0)
@@ -269,6 +298,42 @@ namespace NexusForever.WorldServer.Game.Spell
         {
             // TODO: implement correctly
             return parameters.SpellInfo.Entry.CastTime > 0;
+        }
+
+        private bool HasEsperCost()
+        {
+            if (caster is not Player player)
+                return false;
+
+            if (player.Class != Class.Esper)
+                return false;
+
+            // TODO: Use Vital instead of if statement below this
+            //if (!parameters.SpellInfo.Entry.InnateCostTypes.Contains((uint)Vital.Resource1))
+            //    return false;
+
+            if (!(parameters.SpellInfo.Entry.InnateCostType0 == 6 || parameters.SpellInfo.Entry.InnateCostType1 == 6))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns if the Caster is able to use this Spell Effect with their current Psi Points.
+        /// </summary>
+        /// <returns>True if Esper Caster can use Effect</returns>
+        /// <remarks>It is assumed that this will not be called unless this Spell is a Psi Point spender.</remarks>
+        private bool CanUseEsperEffect(Spell4EffectsEntry entry, uint currentEmm)
+        {
+            switch (entry.EmmComparison)
+            {
+                case 0:
+                    return currentEmm == entry.EmmValue;
+                case 1:
+                    return currentEmm >= entry.EmmValue;
+                default:
+                    return true;
+            }
         }
 
         private void SendSpellCastResult(CastResult castResult)
@@ -313,6 +378,12 @@ namespace NexusForever.WorldServer.Game.Spell
 
             foreach (UnitEntity unit in unitsCasting)
             {
+                if (unit == null)
+                    continue;
+
+                if (unit is Player)
+                    continue;
+
                 spellStart.InitialPositionData.Add(new ServerSpellStart.InitialPosition
                 {
                     UnitId      = unit.Guid,
