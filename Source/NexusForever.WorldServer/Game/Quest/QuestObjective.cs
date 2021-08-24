@@ -130,7 +130,30 @@ namespace NexusForever.WorldServer.Game.Quest
         }
 
         /// <summary>
-        /// Return if the objective has been completed.
+        /// Return if this <see cref="QuestObjective"/> is a checklist type.
+        /// </summary>
+        public bool IsChecklist()
+        {
+            // TODO: Determine other Types that are also Checklists
+            return Type == QuestObjectiveType.ActivateTargetGroupChecklist;
+        }
+
+        /// <summary>
+        /// Return if this <see cref="QuestObjective"/> uses target group data to complete.
+        /// </summary>
+        public bool UsesTargetGroups()
+        {
+            // TODO: Determine other Types that are also using Target Groups
+            return (Type == QuestObjectiveType.ActivateTargetGroup ||
+               Type == QuestObjectiveType.ActivateTargetGroupChecklist ||
+               Type == QuestObjectiveType.KillTargetGroup ||
+               Type == QuestObjectiveType.KillTargetGroups ||
+               Type == QuestObjectiveType.TalkToTargetGroup ||
+               Type == QuestObjectiveType.ActivateEntity && Entry.TargetGroupIdRewardPane != 0u);
+        }
+
+        /// <summary>
+        /// Return if the <see cref="QuestObjective"/> has been completed.
         /// </summary>
         public bool IsComplete()
         {

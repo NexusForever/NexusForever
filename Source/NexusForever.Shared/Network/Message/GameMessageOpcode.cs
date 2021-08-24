@@ -58,6 +58,7 @@ namespace NexusForever.Shared.Network.Message
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ClientEntityInteractChair       = 0x014E,
+        ClientLootItem                  = 0x014F,
         ClientRequestAmpReset           = 0x0151,
         ClientItemUseLootBag            = 0x015E,
         ServerCharacterSelectFail       = 0x0162,
@@ -90,6 +91,7 @@ namespace NexusForever.Shared.Network.Message
         ServerReputationUpdate          = 0x01A5,
         ServerPathUpdateXP              = 0x01AA,
         ServerExperienceGained          = 0x01AC,
+        ClientLootVacuum                = 0x01AD,
         ServerUnlockVanityPet           = 0x01AE,
         ClientVehicleDisembark          = 0x01AF,
         ServerZoneMap                   = 0x01B4,
@@ -259,6 +261,7 @@ namespace NexusForever.Shared.Network.Message
         ClientEntityInteract            = 0x07EA,
         ClientPetCustomisation          = 0x07ED,
         ClientSelectRealm               = 0x07DF,
+        ServerLootNotify                = 0x07F2,
         ServerSpellGo                   = 0x07F4,
         Server07F5                      = 0x07F5, // spell related
         Server07F6                      = 0x07F6, // spell related
@@ -290,6 +293,7 @@ namespace NexusForever.Shared.Network.Message
         ServerVehiclePassengerAdd       = 0x086F,
         ServerUnitEnteredCombat         = 0x089A,
         Server089B                      = 0x089B, // mount related
+        ServerLootGrant                 = 0x08A5,
         Server08B3                      = 0x08B3,
         ServerSetUnitPathType           = 0x08B8,
         ServerVehiclePassengerRemove    = 0x08C7,
