@@ -262,6 +262,9 @@ namespace NexusForever.WorldServer.Game.Quest
             if (PendingDelete)
                 return;
 
+            if (State == QuestState.Achieved)
+                return;
+
             // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (QuestObjective objective in objectives
                 .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data)
@@ -277,7 +280,7 @@ namespace NexusForever.WorldServer.Game.Quest
                 SendQuestObjectiveUpdate(objective);
             }
 
-            if (objectives.All(o => o.IsComplete()) && State != QuestState.Achieved)
+            if (objectives.All(o => o.IsComplete()))
                 State = QuestState.Achieved;
         }
 
@@ -287,6 +290,9 @@ namespace NexusForever.WorldServer.Game.Quest
         public void ObjectiveUpdate(uint id, uint progress)
         {
             if (PendingDelete)
+                return;
+
+            if (State == QuestState.Achieved)
                 return;
 
             QuestObjective objective = objectives.SingleOrDefault(i => i.Entry.Id == id);
