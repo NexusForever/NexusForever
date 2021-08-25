@@ -6,6 +6,7 @@ using System.Linq;
 using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Quest.Static;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Quest
@@ -26,6 +27,7 @@ namespace NexusForever.WorldServer.Game.Quest
 
         private ImmutableDictionary<ushort, QuestInfo> questInfoStore;
         private ImmutableDictionary<ushort, ImmutableList<CommunicatorMessage>> communicatorQuestStore;
+        private ImmutableDictionary<(ushort /*questId*/, QuestState), ImmutableList<ushort> /*deliveryQuestId*/> communicatorQuestDeliveryStore;
         private ImmutableDictionary<ushort, ImmutableList<uint>> questGiverStore;
         private ImmutableDictionary<ushort, ImmutableList<uint>> questReceiverStore;
 
@@ -41,6 +43,7 @@ namespace NexusForever.WorldServer.Game.Quest
             InitialiseQuestInfo();
             InitialiseQuestRelations();
             InitialiseCommunicator();
+            InitialiseCommunicatorDeliveries();
 
             log.Info($"Cached {questInfoStore.Count} quests in {sw.ElapsedMilliseconds}ms.");
         }
@@ -112,6 +115,32 @@ namespace NexusForever.WorldServer.Game.Quest
             communicatorQuestStore = builder.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
+        private void InitialiseCommunicatorDeliveries()
+        {
+            var builder = new Dictionary<(ushort, QuestState), List<ushort>>();
+            foreach (CommunicatorMessagesEntry entry in GameTableManager.Instance.CommunicatorMessages.Entries
+                .Where(e => e.QuestIdDelivered != 0u))
+            {
+                for (int i = 0; i < entry.Quests.Length; i++)
+                {
+                    if (entry.Quests[i] == 0u)
+                        break;
+
+                    if (entry.Quests[i] == entry.QuestIdDelivered)
+                        continue;
+
+                    var key = ((ushort)entry.Quests[i], (QuestState)entry.States[i]);
+
+                    if (!builder.ContainsKey(key))
+                        builder.Add(key, new List<ushort>());
+
+                    builder[key].Add((ushort)entry.QuestIdDelivered);
+                }
+            }
+
+            communicatorQuestDeliveryStore = builder.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
+        }
+
         public void Update(double lastTick)
         {
             DateTime now = DateTime.UtcNow;
@@ -153,6 +182,14 @@ namespace NexusForever.WorldServer.Game.Quest
         {
             return communicatorQuestStore.TryGetValue(questId, out ImmutableList<CommunicatorMessage> creatureIds)
                 ? creatureIds : Enumerable.Empty<CommunicatorMessage>();
+        }
+
+        /// <summary>
+        /// Return a collection of quest IDs that are delivered when a quest hits a certain state.
+        /// </summary>
+        public IEnumerable<ushort> GetQuestIdsForDelivery(ushort questId, QuestState state)
+        {
+            return communicatorQuestDeliveryStore.TryGetValue((questId, state), out ImmutableList<ushort> quests) ? quests : Enumerable.Empty<ushort>();
         }
     }
 }

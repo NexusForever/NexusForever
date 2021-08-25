@@ -61,6 +61,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         break;
                     case QuestState.Botched:
                     case QuestState.Ignored:
+                    case QuestState.Mentioned:
                         inactiveQuests.Add(quest.Id, quest);
                         break;
                     case QuestState.Accepted:
@@ -171,6 +172,67 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
+        /// Mention a <see cref="Quest"/> from supplied quest ID, skipping any prerequisites checks.
+        /// </summary>
+        public void QuestMention(ushort questId)
+        {
+            QuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (info == null)
+                throw new ArgumentException($"Invalid quest {questId}!");
+
+            if (DisableManager.Instance.IsDisabled(DisableType.Quest, questId))
+            {
+                player.SendSystemMessage($"Unable to add quest {questId} because it is disabled.");
+                return;
+            }
+
+            if (GetQuest(questId) != null)
+                return;
+
+            QuestMention(info);
+        }
+
+        /// <summary>
+        /// Mention a <see cref="Quest"/> from supplied <see cref="QuestInfo"/>, skipping any prerequisites checks.
+        /// </summary>
+        public void QuestMention(QuestInfo info)
+        {
+            Quest.Quest quest = GetQuest((ushort)info.Entry.Id);
+            if (quest == null)
+                quest = new Quest.Quest(player, info);
+            else
+            {
+                // remove existing quest from its current home before
+                switch (quest.State)
+                {
+                    case QuestState.Abandoned:
+                        activeQuests.Remove(quest.Id);
+                        break;
+                    case QuestState.Completed:
+                        completedQuests.Remove(quest.Id);
+                        break;
+                    case QuestState.Botched:
+                    case QuestState.Ignored:
+                    case QuestState.Mentioned:
+                        inactiveQuests.Remove(quest.Id);
+                        break;
+                }
+
+                if (quest.PendingDelete)
+                    quest.EnqueueDelete(false);
+
+                // reset previous objective progress
+                foreach (QuestObjective objective in quest)
+                    objective.Progress = 0u;
+            }
+
+            quest.State = QuestState.Mentioned;
+            inactiveQuests.Add((ushort)info.Entry.Id, quest);
+
+            log.Trace($"Mentioned new quest {info.Entry.Id}.");
+        }
+
+        /// <summary>
         /// Add a <see cref="Quest"/> from supplied id, optionally supplying <see cref="Item"/> which was used to start the quest.
         /// </summary>
         public void QuestAdd(ushort questId, Item item)
@@ -215,7 +277,8 @@ namespace NexusForever.WorldServer.Game.Entity
             else
             {
                 // make sure the player is in range of a quest giver or they are eligible for a communicator message that starts the quest
-                if (!GlobalQuestManager.Instance.GetQuestGivers((ushort)info.Entry.Id)
+                if (!info.CanBeCalledBack() &&
+                    !GlobalQuestManager.Instance.GetQuestGivers((ushort)info.Entry.Id)
                     .Any(c => player.GetVisibleCreature<WorldEntity>(c).Any()))
                 {
                     if (!info.IsCommunicatorReceived())
@@ -316,6 +379,7 @@ namespace NexusForever.WorldServer.Game.Entity
                         break;
                     case QuestState.Botched:
                     case QuestState.Ignored:
+                    case QuestState.Mentioned:
                         inactiveQuests.Remove(quest.Id);
                         break;
                 }
@@ -387,7 +451,16 @@ namespace NexusForever.WorldServer.Game.Entity
                 }
             }
 
+            foreach (QuestObjective objective in quest)
+                objective.Progress = 0u;
+            
             quest.State = QuestState.Abandoned;
+
+            if (quest.Info.IsQuestMentioned)
+            {
+                quest.State = QuestState.Mentioned;
+                inactiveQuests.Add(quest.Id, quest);
+            }
 
             log.Trace($"Abandoned quest {questId}.");
         }
