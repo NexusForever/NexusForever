@@ -191,7 +191,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void QuestAdd(QuestInfo info, Quest.Quest quest, Item item)
         {
-            if (quest?.State == QuestState.Accepted || quest?.State == QuestState.Achieved)
+            if (quest?.State is QuestState.Accepted or QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which is already in progress!");
 
             // if quest has already been completed make sure it's repeatable and the reset period has elapsed
@@ -248,15 +248,17 @@ namespace NexusForever.WorldServer.Game.Entity
             if (player.Level < info.Entry.PrerequisiteLevel)
                 return false;
 
-            IEnumerable<uint> quests = info.Entry.PrerequisiteQuests.Where(q => q != 0);
-            bool preReqQuestsCompleted = quests.Count() == 0;
-            if ((info.Entry.PrerequisiteFlags & 1) != 0u)
-                preReqQuestsCompleted = quests.Any(q => GetQuestState((ushort)q) == QuestState.Completed);
-            else
-                preReqQuestsCompleted = quests.All(q => GetQuestState((ushort)q) == QuestState.Completed);
+            if (!info.PrerequisiteQuests.IsEmpty)
+            {
+                bool preReqQuestsCompleted;
+                if ((info.Entry.PrerequisiteFlags & 1) != 0u)
+                    preReqQuestsCompleted = info.PrerequisiteQuests.Any(q => GetQuestState((ushort)q.Id) == QuestState.Completed);
+                else
+                    preReqQuestsCompleted = info.PrerequisiteQuests.All(q => GetQuestState((ushort)q.Id) == QuestState.Completed);
 
-            if (!preReqQuestsCompleted)
-                return false;
+                if (!preReqQuestsCompleted)
+                    return false;
+            }
 
             if (info.Entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId))
                 return false;
