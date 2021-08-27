@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Game.Spell
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public uint CastingId { get; }
-        public bool IsCasting => status == SpellStatus.Casting;
+        public bool IsCasting => status == SpellStatus.Casting && parameters.UserInitiatedSpellCast;
         public bool IsFinished => status == SpellStatus.Finished;
 
         private readonly UnitEntity caster;
@@ -194,6 +194,11 @@ namespace NexusForever.WorldServer.Game.Spell
                     CastResult     = result,
                     CancelCast     = true
                 });
+
+                if (result == CastResult.CasterMovement)
+                    player?.SpellManager.SetGlobalSpellCooldown(0d);
+
+                SendSpellCastResult(result);
             }
 
             events.CancelEvents();
@@ -268,7 +273,7 @@ namespace NexusForever.WorldServer.Game.Spell
         public bool IsMovingInterrupted()
         {
             // TODO: implement correctly
-            return parameters.SpellInfo.Entry.CastTime > 0;
+            return parameters.UserInitiatedSpellCast && parameters.SpellInfo.BaseInfo.SpellType.Id != 5 && parameters.SpellInfo.Entry.CastTime > 0;
         }
 
         private void SendSpellCastResult(CastResult castResult)

@@ -250,6 +250,8 @@ namespace NexusForever.WorldServer.Game.Entity
             // this probably isn't correct for all cases
             if (passengers.Count == 0)
                 RemoveFromMap();
+
+            player.MovementManager.BroadcastCommands();
         }
 
         /// <summary>
