@@ -11,9 +11,12 @@ namespace NexusForever.WorldServer.Game.Quest
     {
         public Quest2Entry Entry { get; }
         public Quest2DifficultyEntry DifficultyEntry { get; }
+
         public ImmutableList<Quest2Entry> PrerequisiteQuests { get; private set; }
-        public ImmutableList<QuestObjectiveEntry> Objectives { get; private set; }
+        public ImmutableList<QuestObjectiveInfo> Objectives { get; private set; }
         public ImmutableDictionary<uint, Quest2RewardEntry> Rewards { get; private set; }
+
+        public bool IsQuestMentioned => GlobalQuestManager.Instance.GetQuestCommunicatorMessages((ushort)Entry.Id).ToList().Count > 0u;
 
         /// <summary>
         /// Create a new <see cref="QuestInfo"/> using supplied <see cref="Quest2Entry"/>.
@@ -39,9 +42,9 @@ namespace NexusForever.WorldServer.Game.Quest
 
         private void InitialiseObjectives()
         {
-            ImmutableList<QuestObjectiveEntry>.Builder builder = ImmutableList.CreateBuilder<QuestObjectiveEntry>();
+            ImmutableList<QuestObjectiveInfo>.Builder builder = ImmutableList.CreateBuilder<QuestObjectiveInfo>();
             foreach (uint objectiveId in Entry.Objectives.Where(o => o != 0u))
-                builder.Add(GameTableManager.Instance.QuestObjective.GetEntry(objectiveId));
+                builder.Add(new QuestObjectiveInfo(GameTableManager.Instance.QuestObjective.GetEntry(objectiveId)));
 
             Objectives = builder.ToImmutable();
         }
@@ -66,7 +69,12 @@ namespace NexusForever.WorldServer.Game.Quest
         /// </summary>
         public bool IsCommunicatorReceived()
         {
-            return (Entry.Flags & 0x08) != 0;
+            return (Entry.Flags & 0x08) != 0 ;
+        }
+
+        public bool CanBeCalledBack()
+        {
+            return (Entry.Flags & 0x04) != 0;
         }
 
         public bool CannotAbandon()

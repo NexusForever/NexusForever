@@ -10,10 +10,8 @@ namespace NexusForever.WorldServer.Game.Quest
 {
     public class QuestObjective : IUpdate
     {
-        public QuestInfo Info { get; }
-
-        public QuestObjectiveType Type => (QuestObjectiveType)Entry.Type;
-        public QuestObjectiveEntry Entry { get; }
+        public QuestInfo QuestInfo { get; }
+        public QuestObjectiveInfo ObjectiveInfo { get; }
 
         public byte Index { get; }
 
@@ -46,25 +44,25 @@ namespace NexusForever.WorldServer.Game.Quest
         /// <summary>
         /// Create a new <see cref="QuestObjective"/> from an existing database model.
         /// </summary>
-        public QuestObjective(QuestInfo info, QuestObjectiveEntry entry, CharacterQuestObjectiveModel model)
+        public QuestObjective(QuestInfo questInfo, QuestObjectiveInfo objectiveInfo, CharacterQuestObjectiveModel model)
         {
-            Info     = info;
-            Entry    = entry;
-            Index    = model.Index;
-            progress = model.Progress;
-            timer    = model.Timer;
+            QuestInfo     = questInfo;
+            ObjectiveInfo = objectiveInfo;
+            Index         = model.Index;
+            progress      = model.Progress;
+            timer         = model.Timer;
         }
 
         /// <summary>
         /// Create a new <see cref="QuestObjective"/> from supplied <see cref="QuestObjectiveEntry"/>.
         /// </summary>
-        public QuestObjective(QuestInfo info, QuestObjectiveEntry entry, byte index)
+        public QuestObjective(QuestInfo questInfo, QuestObjectiveInfo objectiveInfo, byte index)
         {
-            Info  = info;
-            Entry = entry;
-            Index = index;
+            QuestInfo     = questInfo;
+            ObjectiveInfo = objectiveInfo;
+            Index         = index;
 
-            if (Entry.MaxTimeAllowedMS != 0u)
+            if (objectiveInfo.Entry.MaxTimeAllowedMS != 0u)
             {
                 // TODO
             }
@@ -82,7 +80,7 @@ namespace NexusForever.WorldServer.Game.Quest
                 context.Add(new CharacterQuestObjectiveModel
                 {
                     Id       = characterId,
-                    QuestId  = (ushort)Info.Entry.Id,
+                    QuestId  = (ushort)QuestInfo.Entry.Id,
                     Index    = Index,
                     Progress = Progress
                 });
@@ -92,7 +90,7 @@ namespace NexusForever.WorldServer.Game.Quest
                 var model = new CharacterQuestObjectiveModel
                 {
                     Id      = characterId,
-                    QuestId = (ushort)Info.Entry.Id,
+                    QuestId = (ushort)QuestInfo.Entry.Id,
                     Index   = Index
                 };
 
@@ -120,13 +118,13 @@ namespace NexusForever.WorldServer.Game.Quest
         private bool IsDynamic()
         {
             // dynamic objectives have their progress based on percentage rather than count
-            return (Type == QuestObjectiveType.KillCreature
-                || Type == QuestObjectiveType.KillTargetGroups
-                || Type == QuestObjectiveType.Unknown15
-                || Type == QuestObjectiveType.KillTargetGroup
-                || Type == QuestObjectiveType.KillCreature2)
-                && Entry.Count > 1u
-                && (Entry.Flags & 0x0200) == 0;
+            return ObjectiveInfo.Type is QuestObjectiveType.KillCreature
+                    or QuestObjectiveType.KillTargetGroups
+                    or QuestObjectiveType.Unknown15
+                    or QuestObjectiveType.KillTargetGroup
+                    or QuestObjectiveType.KillCreature2
+                && ObjectiveInfo.Entry.Count > 1u
+                && !ObjectiveInfo.HasUnknown0200();
         }
 
         /// <summary>
@@ -139,7 +137,7 @@ namespace NexusForever.WorldServer.Game.Quest
 
         private uint GetMaxValue()
         {
-            return IsDynamic() ? 1000u : Entry.Count;
+            return IsDynamic() ? 1000u : ObjectiveInfo.Entry.Count;
         }
 
         /// <summary>
@@ -148,9 +146,17 @@ namespace NexusForever.WorldServer.Game.Quest
         public void ObjectiveUpdate(uint update)
         {
             if (IsDynamic())
-                update = (uint)(((float)update / Entry.Count) * 1000f);
+                update = (uint)(((float)update / ObjectiveInfo.Entry.Count) * 1000f);
 
             Progress = Math.Min(progress + update, GetMaxValue());
+        }
+
+        /// <summary>
+        /// Complete this <see cref="QuestObjective"/>.
+        /// </summary>
+        public void Complete()
+        {
+            Progress = GetMaxValue();
         }
     }
 }

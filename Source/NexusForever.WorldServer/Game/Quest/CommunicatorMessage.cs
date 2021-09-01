@@ -11,6 +11,7 @@ namespace NexusForever.WorldServer.Game.Quest
 {
     public class CommunicatorMessage
     {
+        public uint Id => entry.Id;
         public ushort QuestId => (ushort)entry.QuestIdDelivered;
 
         private readonly CommunicatorMessagesEntry entry;
