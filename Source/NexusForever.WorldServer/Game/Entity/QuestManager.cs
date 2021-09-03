@@ -678,5 +678,18 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (Quest.Quest quest in activeQuests.Values)
                 quest.ObjectiveUpdate(id, progress);
         }
+
+        /// <summary>
+        /// Returns when the given objective id is an active objective for the <see cref="Player"/>.
+        /// </summary>
+        public bool IsActiveObjectiveId(uint objectiveId)
+        {
+            foreach (Quest.Quest quest in activeQuests.Values)
+                if (quest.FirstOrDefault(i => i.Entry.Id == objectiveId
+                        && !i.IsComplete()) != null)
+                    return true;
+
+            return false;
+        }
     }
 }

@@ -12,6 +12,7 @@ using NexusForever.WorldServer.Game.Reputation;
 using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NexusForever.WorldServer.Game.Loot;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -35,6 +36,8 @@ namespace NexusForever.WorldServer.Game.Entity
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
         public MovementManager MovementManager { get; private set; }
+
+        public List<LootInstance> Loot { get; protected set; } = new();
 
         public uint Health
         {
@@ -392,6 +395,18 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // check if parent node has required friendship
             return GetDispositionFromFactionFriendship(node.Parent, factionId);
+        }
+
+        public void RemoveLoot(LootInstance lootInstance)
+        {
+            if (lootInstance == null)
+                throw new ArgumentNullException(nameof(lootInstance));
+
+            Loot.Remove(lootInstance);
+
+            // TODO: Set Death State when Loot is all collected
+            // if (Loot.Count == 0u)
+            //     SetDeathState(DeathState.CorpseLooted);
         }
     }
 }

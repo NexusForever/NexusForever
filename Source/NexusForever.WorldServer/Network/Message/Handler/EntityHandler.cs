@@ -10,6 +10,8 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game;
 using NLog;
+using System;
+using NexusForever.WorldServer.Game.Loot;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -152,6 +154,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 throw new InvalidPacketValueException();
 
             session.Player.Sit(chair);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientLootVacuum)]
+        public static void HandleClientLootVacuum(WorldSession session, ClientLootVacuum clientLootVacuum)
+        {
+            GlobalLootManager.Instance.GiveAllLootInRange(session);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientLootItem)]
+        public static void HandleClientLootItem(WorldSession session, ClientLootItem clientLootItem)
+        {
+            GlobalLootManager.Instance.GiveLoot(session, (int)clientLootItem.LootId);
         }
     }
 }
