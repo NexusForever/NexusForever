@@ -847,6 +847,21 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 100,
+                        Name = "Category: Guild"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 101,
+                        Name = "Command: GuildRegister"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 102,
+                        Name = "Command: GuildJoin"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 103,
                         Name = "Category: Map"
                     },
