@@ -14,6 +14,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterBoneModel> CharacterBone { get; set; }
         public DbSet<CharacterCostumeModel> CharacterCostume { get; set; }
         public DbSet<CharacterCostumeItemModel> CharacterCostumeItem { get; set; }
+        public DbSet<CharacterCreateModel> CharacterCreate { get; set; }
         public DbSet<CharacterCurrencyModel> CharacterCurrency { get; set; }
         public DbSet<CharacterCustomisationModel> CharacterCustomisation { get; set; }
         public DbSet<CharacterDatacubeModel> CharacterDatacube { get; set; }
@@ -453,6 +454,407 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.CostumeItem)
                     .HasForeignKey(d => new { d.Id, d.Index })
                     .HasConstraintName("FK__character_costume_item_id-index__character_costume_id-index");
+            });
+
+            modelBuilder.Entity<CharacterCreateModel>(entity =>
+            {
+                entity.ToTable("character_create");
+
+                entity.HasKey(e => new { e.Race, e.Faction, e.CreationStart })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Race)
+                    .HasColumnName("race")
+                    .HasColumnType("tinyint(4) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Faction)
+                    .HasColumnName("faction")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.CreationStart)
+                    .HasColumnName("creationStart")
+                    .HasColumnType("tinyint(4) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.X)
+                    .HasColumnName("x")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Y)
+                    .HasColumnName("y")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Z)
+                    .HasColumnName("z")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Rx)
+                    .HasColumnName("rx")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Ry)
+                    .HasColumnName("ry")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Rz)
+                    .HasColumnName("rz")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValue("");
+
+                entity.HasData(
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Human - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 426,
+                        X             = 4110.71f,
+                        Y             = -658.6249f,
+                        Z             = -5145.48f,
+                        Rx            = 0.317613f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Human - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Human - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 3,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Granok - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 3,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 426,
+                        X             = 4110.71f,
+                        Y             = -658.6249f,
+                        Z             = -5145.48f,
+                        Rx            = 0.317613f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment = "Exile Granok- Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 3,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Granok - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 4,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Aurin - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 4,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 990,
+                        X             = -771.823f,
+                        Y             = -904.2852f,
+                        Z             = -2269.56f,
+                        Rx            = -1.1214035f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Aurin - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 4,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Aurin - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 16,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Mordesh - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 16,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 990,
+                        X             = -771.823f,
+                        Y             = -904.2852f,
+                        Z             = -2269.56f,
+                        Rx            = -1.1214035f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Mordesh - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 16,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Mordesh - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 13,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Chua - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 13,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 870,
+                        X             = -8261.3984f,
+                        Y             = -995.471f,
+                        Z             = -242.3648f,
+                        Rx            = -2.215535f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Chua - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 13,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Chua - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 5,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Draken - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 5,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 870,
+                        X             = -8261.3984f,
+                        Y             = -995.471f,
+                        Z             = -242.3648f,
+                        Rx            = -2.215535f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Draken - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 5,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Draken - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Cassian - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 1387,
+                        X             = -3835.341f,
+                        Y             = -980.2174f,
+                        Z             = -6050.524f,
+                        Rx            = -0.456820f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Cassian - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Cassian - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 12,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Mechari - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 12,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 1387,
+                        X             = -3835.341f,
+                        Y             = -980.2174f,
+                        Z             = -6050.524f,
+                        Rx            = -0.456820f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Mechari - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 12,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Mechari - Level 50"
+                    });
             });
 
             modelBuilder.Entity<CharacterCurrencyModel>(entity =>

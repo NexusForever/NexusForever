@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NexusForever.Shared;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Cryptography;
@@ -20,6 +21,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
@@ -155,7 +157,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     RealmId                        = WorldServer.RealmId,
                     // no longer used as replaced by entitlements but retail server still used to send this
                     AdditionalCount                = characterCount,
-                    AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)(characterSlots - characterCount))
+                    AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)(characterSlots - characterCount)),
+                    // Free Level 50 needs(?) support. It appears to have just been a custom flag on the account that was consume when used up.
+                    // FreeLevel50 = true
                 };
 
                 foreach (CharacterModel character in characters.Where(c => c.DeleteTime == null))
@@ -274,8 +278,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     Sex        = (byte)creationEntry.Sex,
                     Class      = (byte)creationEntry.ClassId,
                     FactionId  = (ushort)creationEntry.FactionId,
-                    ActivePath = characterCreate.Path
+                    ActivePath = characterCreate.Path,
+                    TotalXp    = creationEntry.Xp
                 };
+
+                uint startingLevel = GameTableManager.Instance.XpPerLevel.Entries.First(l => l.MinXpForLevel >= creationEntry.Xp).Id;
 
                 for (Path path = Path.Soldier; path <= Path.Explorer; path++)
                 {
@@ -319,11 +326,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
                 }
 
-                //TODO: handle starting locations per race
-                character.LocationX = -7683.809f;
-                character.LocationY = -942.5914f;
-                character.LocationZ = -666.6343f;
-                character.WorldId = 870;
+                Location startingLocation = AssetManager.Instance.GetStartingLocation((Race)creationEntry.RaceId, (Faction)creationEntry.FactionId, (CharacterCreationStart)creationEntry.CharacterCreationStartEnum);
+                if (startingLocation == null)
+                    throw new ArgumentNullException(nameof(startingLocation));
+
+                character.LocationX = startingLocation.Position.X;
+                character.LocationY = startingLocation.Position.Y;
+                character.LocationZ = startingLocation.Position.Z;
+                character.WorldId = (ushort)startingLocation.World.Id;
 
                 character.ActiveSpec = 0;
 
@@ -372,12 +382,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 character.Stat.Add(new CharacterStatModel
                 {
                     Id    = character.Id,
-                    Stat  = (byte)Stat.Shield,
-                    Value = 450
-                });
-                character.Stat.Add(new CharacterStatModel
-                {
-                    Id    = character.Id,
                     Stat  = (byte)Stat.Dash,
                     Value = 200
                 });
@@ -385,13 +389,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.Level,
-                    Value = 1
+                    Value = startingLevel
                 });
                 character.Stat.Add(new CharacterStatModel
                 {
                     Id    = character.Id,
                     Stat  = (byte)Stat.StandState,
                     Value = 3
+                });
+                character.Stat.Add(new CharacterStatModel
+                {
+                    Id = character.Id,
+                    Stat = (byte)Stat.Sheathed,
+                    Value = 1
                 });
 
                 // TODO: actually error check this
@@ -404,6 +414,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                    () =>
                {
                    session.Characters.Add(character);
+
+                   if ((CharacterCreationStart)creationEntry.CharacterCreationStartEnum == CharacterCreationStart.Level50)
+                       session.AccountCurrencyManager.CurrencySubtractAmount(Game.Account.Static.AccountCurrencyType.MaxLevelToken, 1u);
+
                    session.EnqueueMessageEncrypted(new ServerCharacterCreate
                    {
                        CharacterId = character.Id,
