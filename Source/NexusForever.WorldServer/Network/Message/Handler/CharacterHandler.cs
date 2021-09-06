@@ -567,6 +567,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
                 default:
                 {
+                    session.Player.Rotation = new Vector3(character.RotationX, character.RotationY, character.RotationZ);
                     MapManager.Instance.AddToMap(session.Player, new MapPosition
                     {
                         Info     = new MapInfo

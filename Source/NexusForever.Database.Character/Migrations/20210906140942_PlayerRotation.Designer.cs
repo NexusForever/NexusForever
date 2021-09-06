@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Character;
 
 namespace NexusForever.Database.Character.Migrations
 {
     [DbContext(typeof(CharacterContext))]
-    partial class CharacterContextModelSnapshot : ModelSnapshot
+    [Migration("20210906140942_PlayerRotation")]
+    partial class PlayerRotation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,6 +169,67 @@ namespace NexusForever.Database.Character.Migrations
                     b.ToTable("character_bone");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterContactModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<ulong>("OwnerId")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("ownerId");
+
+                    b.Property<ulong>("ContactId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("contactId");
+
+                    b.Property<byte>("Accepted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(8) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("accepted");
+
+                    b.Property<string>("InviteMessage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("inviteMessage")
+                        .HasDefaultValueSql("''");
+
+                    b.Property<string>("PrivateNote")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("privateNote")
+                        .HasDefaultValueSql("''");
+
+                    b.Property<DateTime>("RequestTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("requestTime")
+                        .HasDefaultValueSql("current_timestamp()");
+
+                    b.Property<uint>("Type")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(3) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("type");
+
+                    b.HasKey("Id", "OwnerId", "ContactId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("Id")
+                        .IsUnique()
+                        .HasDatabaseName("contactGuid");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("character_contact");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCostumeItemModel", b =>
                 {
                     b.Property<ulong>("Id")
@@ -230,6 +293,418 @@ namespace NexusForever.Database.Character.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("character_costume");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCreateModel", b =>
+                {
+                    b.Property<byte>("Race")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(4) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("race");
+
+                    b.Property<ushort>("Faction")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0)
+                        .HasColumnName("faction");
+
+                    b.Property<byte>("CreationStart")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(4) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("creationStart");
+
+                    b.Property<string>("Comment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(200)")
+                        .HasDefaultValue("")
+                        .HasColumnName("comment");
+
+                    b.Property<float>("Rx")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("rx");
+
+                    b.Property<float>("Ry")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("ry");
+
+                    b.Property<float>("Rz")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("rz");
+
+                    b.Property<uint>("WorldId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("worldId");
+
+                    b.Property<float>("X")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("x");
+
+                    b.Property<float>("Y")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("y");
+
+                    b.Property<float>("Z")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("z");
+
+                    b.HasKey("Race", "Faction", "CreationStart")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_create");
+
+                    b.HasData(
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Human - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Human - Veteran",
+                            Rx = 0.317613f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 426u,
+                            X = 4110.71f,
+                            Y = -658.6249f,
+                            Z = -5145.48f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Human - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)3,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Granok - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)3,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Granok- Veteran",
+                            Rx = 0.317613f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 426u,
+                            X = 4110.71f,
+                            Y = -658.6249f,
+                            Z = -5145.48f
+                        },
+                        new
+                        {
+                            Race = (byte)3,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Granok - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)4,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Aurin - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)4,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Aurin - Veteran",
+                            Rx = -1.1214035f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 990u,
+                            X = -771.823f,
+                            Y = -904.2852f,
+                            Z = -2269.56f
+                        },
+                        new
+                        {
+                            Race = (byte)4,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Aurin - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)16,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Mordesh - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)16,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Mordesh - Veteran",
+                            Rx = -1.1214035f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 990u,
+                            X = -771.823f,
+                            Y = -904.2852f,
+                            Z = -2269.56f
+                        },
+                        new
+                        {
+                            Race = (byte)16,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Mordesh - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)13,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Chua - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)13,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Chua - Veteran",
+                            Rx = -2.215535f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 870u,
+                            X = -8261.398f,
+                            Y = -995.471f,
+                            Z = -242.3648f
+                        },
+                        new
+                        {
+                            Race = (byte)13,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Chua - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        },
+                        new
+                        {
+                            Race = (byte)5,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Draken - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)5,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Draken - Veteran",
+                            Rx = -2.215535f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 870u,
+                            X = -8261.398f,
+                            Y = -995.471f,
+                            Z = -242.3648f
+                        },
+                        new
+                        {
+                            Race = (byte)5,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Draken - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Cassian - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Cassian - Veteran",
+                            Rx = -0.45682f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 1387u,
+                            X = -3835.341f,
+                            Y = -980.2174f,
+                            Z = -6050.524f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Cassian - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        },
+                        new
+                        {
+                            Race = (byte)12,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Mechari - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)12,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Mechari - Veteran",
+                            Rx = -0.45682f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 1387u,
+                            X = -3835.341f,
+                            Y = -980.2174f,
+                            Z = -6050.524f
+                        },
+                        new
+                        {
+                            Race = (byte)12,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Mechari - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        });
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCurrencyModel", b =>
@@ -593,6 +1068,12 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((byte)0)
                         .HasColumnName("activeSpec");
 
+                    b.Property<ushort>("BindPoint")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasColumnName("bindPoint")
+                        .HasDefaultValueSql("'0'");
+
                     b.Property<byte>("Class")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(3) unsigned")
@@ -951,6 +1432,67 @@ namespace NexusForever.Database.Character.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("character_reputation");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterRewardTrackMilestoneModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<uint>("RewardTrackId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("rewardTrackId");
+
+                    b.Property<uint>("MilestoneId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("milestoneId");
+
+                    b.Property<int>("Choice")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(-1)
+                        .HasColumnName("choice");
+
+                    b.Property<uint>("PointsRequired")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("pointsRequired");
+
+                    b.HasKey("Id", "RewardTrackId", "MilestoneId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_reward_track_milestone");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterRewardTrackModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<uint>("RewardTrackId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("rewardTrackId");
+
+                    b.Property<uint>("Points")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("points");
+
+                    b.HasKey("Id", "RewardTrackId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_reward_track");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterSpellModel", b =>
@@ -1420,6 +1962,788 @@ namespace NexusForever.Database.Character.Migrations
                     b.ToTable("item");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.PropertyBaseModel", b =>
+                {
+                    b.Property<uint>("Type")
+                        .HasColumnType("int unsigned")
+                        .HasColumnName("type")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<uint>("Subtype")
+                        .HasColumnType("int unsigned")
+                        .HasColumnName("subtype")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<uint>("Property")
+                        .HasColumnType("int unsigned")
+                        .HasColumnName("property")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<ushort>("ModType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint unsigned")
+                        .HasColumnName("modType")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("note")
+                        .HasDefaultValueSql("''");
+
+                    b.Property<float>("Value")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasColumnName("value")
+                        .HasDefaultValueSql("'0'");
+
+                    b.HasKey("Type", "Subtype", "Property")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("property_base");
+
+                    b.HasData(
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 0u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Strength",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 1u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Dexterity",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 2u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Technology",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 3u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Magic",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 4u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Wisdom",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 7u,
+                            ModType = (ushort)1,
+                            Note = "Player - Base HP per Level",
+                            Value = 200f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 9u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Endurance",
+                            Value = 500f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 16u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Endurance Regen",
+                            Value = 0.0225f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Player - Base Assault Rating per Level",
+                            Value = 18f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Player - Base Support Rating per Level",
+                            Value = 18f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 38u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Dash Energy",
+                            Value = 200f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 39u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Dash Energy Regen",
+                            Value = 0.045f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 41u,
+                            ModType = (ushort)0,
+                            Note = "Player - Shield Capacity Base",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 100u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Movement Speed",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 101u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Avoid Chance",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 102u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Crit Chance",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 107u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Focus Recovery In Combat",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 108u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Focus Recovery Out of Combat",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 112u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Multi-Hit Amount",
+                            Value = 0.3f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 130u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Gravity Multiplier",
+                            Value = 0.8f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 150u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Taken Offset - Physical",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 151u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Taken Offset - Tech",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 152u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Taken Offset - Magic",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 154u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Mutli-Hit Chance",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 155u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Reflect Amount",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 191u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Mount Movement Speed",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 195u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Glance Amount",
+                            Value = 0.3f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 1u,
+                            Property = 10u,
+                            ModType = (ushort)2,
+                            Note = "Class - Warrior - Base Kinetic Energy Cap",
+                            Value = 1000f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 17u,
+                            ModType = (ushort)2,
+                            Note = "Class - Warrior - Base Kinetic Energy Regen",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 2u,
+                            Property = 10u,
+                            ModType = (ushort)2,
+                            Note = "Class - Engineer - Base Volatile Energy Cap",
+                            Value = 100f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 3u,
+                            Property = 10u,
+                            ModType = (ushort)2,
+                            Note = "Class - Esper - Base Psi Point Cap",
+                            Value = 5f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 4u,
+                            Property = 10u,
+                            ModType = (ushort)2,
+                            Note = "Class - Medic - Base Medic Core Cap",
+                            Value = 4f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 5u,
+                            Property = 12u,
+                            ModType = (ushort)2,
+                            Note = "Class - Stalker - Base Suit Power Cap",
+                            Value = 100f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 5u,
+                            Property = 19u,
+                            ModType = (ushort)2,
+                            Note = "Class - Stalker - Base Suit Power Regeneration Rate",
+                            Value = 0.035f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 7u,
+                            Property = 13u,
+                            ModType = (ushort)2,
+                            Note = "Class - Spellslinger - Base Spell Power Cap",
+                            Value = 100f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 4u,
+                            Property = 5u,
+                            ModType = (ushort)2,
+                            Note = "Class - Medic - Base Focus Pool",
+                            Value = 1000f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 7u,
+                            Property = 5u,
+                            ModType = (ushort)2,
+                            Note = "Class - Spellslinger - Base Focus Pool",
+                            Value = 1000f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 3u,
+                            Property = 5u,
+                            ModType = (ushort)2,
+                            Note = "Class - Esper - Base Focus Pool",
+                            Value = 1000f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 4u,
+                            Property = 107u,
+                            ModType = (ushort)2,
+                            Note = "Class - Medic - Base Focus Recovery Rate In Combat",
+                            Value = 0.005f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 7u,
+                            Property = 107u,
+                            ModType = (ushort)2,
+                            Note = "Class - Spellslinger - Focus Recovery Rate In Combat",
+                            Value = 0.005f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 3u,
+                            Property = 107u,
+                            ModType = (ushort)2,
+                            Note = "Class - Esper - Focus Recovery Rate In Combat",
+                            Value = 0.005f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 4u,
+                            Property = 108u,
+                            ModType = (ushort)2,
+                            Note = "Class - Medic - Base Focus Recovery Rate Out of Combat",
+                            Value = 0.02f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 7u,
+                            Property = 108u,
+                            ModType = (ushort)2,
+                            Note = "Class - Spellslinger - Focus Recovery Rate Out of Combat",
+                            Value = 0.02f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 3u,
+                            Property = 108u,
+                            ModType = (ushort)2,
+                            Note = "Class - Esper - Focus Recovery Rate Out of Combat",
+                            Value = 0.02f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 1u,
+                            Property = 7u,
+                            ModType = (ushort)1,
+                            Note = "Item - Chest - HP per Eff. Level",
+                            Value = 75f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 2u,
+                            Property = 7u,
+                            ModType = (ushort)1,
+                            Note = "Item - Legs - HP per Eff. Level",
+                            Value = 75f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 3u,
+                            Property = 7u,
+                            ModType = (ushort)1,
+                            Note = "Item - Head - HP per Eff. Level",
+                            Value = 45f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 4u,
+                            Property = 7u,
+                            ModType = (ushort)1,
+                            Note = "Item - Shoulder - HP per Eff. Level",
+                            Value = 60f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 5u,
+                            Property = 7u,
+                            ModType = (ushort)1,
+                            Note = "Item - Feet - HP per Eff. Level",
+                            Value = 45f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 6u,
+                            Property = 7u,
+                            ModType = (ushort)1,
+                            Note = "Item - Hands - HP per Eff. Level",
+                            Value = 45f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 1u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Chest - Attack Power per Eff. Level",
+                            Value = 4.5f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 2u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Legs - Attack Power per Eff. Level",
+                            Value = 4.5f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 3u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Head - Attack Power per Eff. Level",
+                            Value = 2.7f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 4u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Shoulder - Attack Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 5u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Feet - Attack Power per Eff. Level",
+                            Value = 2.7f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 6u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Hands - Attack Power per Eff. Level",
+                            Value = 2.7f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 7u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Tool - Attack Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 20u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Weapon - Attack Power per Eff. Level",
+                            Value = 83.53f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 58u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Support System - Attack Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 59u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Augment - Attack Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 60u,
+                            Property = 35u,
+                            ModType = (ushort)1,
+                            Note = "Item - Implant - Attack Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 1u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Chest - Support Power per Eff. Level",
+                            Value = 4.5f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 2u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Legs - Support Power per Eff. Level",
+                            Value = 4.5f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 3u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Head - Support Power per Eff. Level",
+                            Value = 2.7f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 4u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Shoulder - Support Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 5u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Feet - Support Power per Eff. Level",
+                            Value = 2.7f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 6u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Hands - Support Power per Eff. Level",
+                            Value = 2.7f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 7u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Tool - Support Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 20u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Weapon - Support Power per Eff. Level",
+                            Value = 83.53f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 58u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Support System - Support Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 59u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Augment - Support Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 60u,
+                            Property = 36u,
+                            ModType = (ushort)1,
+                            Note = "Item - Implant - Support Power per Eff. Level",
+                            Value = 3.6f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 43u,
+                            Property = 41u,
+                            ModType = (ushort)1,
+                            Note = "Item - Shield - Shield Capacity per Eff. Level",
+                            Value = 225f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 1u,
+                            Property = 42u,
+                            ModType = (ushort)1,
+                            Note = "Item - Chest - Armor per Eff. Level",
+                            Value = 25f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 2u,
+                            Property = 42u,
+                            ModType = (ushort)1,
+                            Note = "Item - Legs - Armor per Eff. Level",
+                            Value = 25f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 3u,
+                            Property = 42u,
+                            ModType = (ushort)1,
+                            Note = "Item - Head - Armor per Eff. Level",
+                            Value = 15f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 4u,
+                            Property = 42u,
+                            ModType = (ushort)1,
+                            Note = "Item - Shoulder - Armor per Eff. Level",
+                            Value = 20f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 5u,
+                            Property = 42u,
+                            ModType = (ushort)1,
+                            Note = "Item - Feet - Armor per Eff. Level",
+                            Value = 15f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 6u,
+                            Property = 42u,
+                            ModType = (ushort)1,
+                            Note = "Item - Hands - Armor per Eff. Level",
+                            Value = 15f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 43u,
+                            Property = 175u,
+                            ModType = (ushort)0,
+                            Note = "Item - Shield - Base Shield Mitigation Percent",
+                            Value = 0.625f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 43u,
+                            Property = 176u,
+                            ModType = (ushort)0,
+                            Note = "Item - Shield - Base Shield Regen Percent",
+                            Value = 0.15f
+                        },
+                        new
+                        {
+                            Type = 2u,
+                            Subtype = 43u,
+                            Property = 178u,
+                            ModType = (ushort)0,
+                            Note = "Item - Shield - Base Shield Reboot Rate (ms)",
+                            Value = 5130f
+                        });
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.ResidenceDecor", b =>
                 {
                     b.Property<ulong>("Id")
@@ -1725,6 +3049,18 @@ namespace NexusForever.Database.Character.Migrations
                     b.Navigation("Character");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterContactModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
+                        .WithMany("Contact")
+                        .HasForeignKey("OwnerId")
+                        .HasConstraintName("FK__character_contact_id__character_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCostumeItemModel", b =>
                 {
                     b.HasOne("NexusForever.Database.Character.Model.CharacterCostumeModel", "Costume")
@@ -1908,6 +3244,30 @@ namespace NexusForever.Database.Character.Migrations
                         .WithMany("Reputation")
                         .HasForeignKey("Id")
                         .HasConstraintName("FK__character_reputation_id__character_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterRewardTrackMilestoneModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.CharacterRewardTrackModel", "RewardTrack")
+                        .WithMany("Milestone")
+                        .HasForeignKey("Id", "RewardTrackId")
+                        .HasConstraintName("FK__character_reward_track_milestone_id-rewardTrackId__character_reward_track_id-rewardTrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RewardTrack");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterRewardTrackModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
+                        .WithMany("RewardTrack")
+                        .HasForeignKey("Id")
+                        .HasConstraintName("FK__character_reward_track_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2110,6 +3470,8 @@ namespace NexusForever.Database.Character.Migrations
 
                     b.Navigation("CharacterTitle");
 
+                    b.Navigation("Contact");
+
                     b.Navigation("Costume");
 
                     b.Navigation("Currency");
@@ -2138,6 +3500,8 @@ namespace NexusForever.Database.Character.Migrations
 
                     b.Navigation("Residence");
 
+                    b.Navigation("RewardTrack");
+
                     b.Navigation("Spell");
 
                     b.Navigation("Stat");
@@ -2150,6 +3514,11 @@ namespace NexusForever.Database.Character.Migrations
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterQuestModel", b =>
                 {
                     b.Navigation("QuestObjective");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterRewardTrackModel", b =>
+                {
+                    b.Navigation("Milestone");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ChatChannelModel", b =>
