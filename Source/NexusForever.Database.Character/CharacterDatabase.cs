@@ -214,5 +214,12 @@ namespace NexusForever.Database.Character
                 .Include(c => c.Members)
                 .ToList();
         }
+
+        public List<CharacterCreateModel> GetCharacterCreationData()
+        {
+            using var context = new CharacterContext(config);
+
+            return context.CharacterCreate.ToList();
+        }
     }
 }
