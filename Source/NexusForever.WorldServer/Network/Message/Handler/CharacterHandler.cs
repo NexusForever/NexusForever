@@ -16,11 +16,14 @@ using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game;
+using NexusForever.WorldServer.Game.Account.Static;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Map;
+using NexusForever.WorldServer.Game.Map.Static;
 using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Spell;
@@ -34,9 +37,6 @@ using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
 using Item = NexusForever.WorldServer.Game.Entity.Item;
 using Residence = NexusForever.WorldServer.Game.Housing.Residence;
 using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
-using NexusForever.WorldServer.Game.Guild;
-using NexusForever.WorldServer.Game.Map.Static;
-using NexusForever.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -247,14 +247,31 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientCharacterCreate)]
         public static void HandleCharacterCreate(WorldSession session, ClientCharacterCreate characterCreate)
         {
-            try
+            CharacterModifyResult? GetResult()
             {
                 // TODO: validate name and path
                 if (DatabaseManager.Instance.CharacterDatabase.CharacterNameExists(characterCreate.Name))
+                    return CharacterModifyResult.CreateFailed_UniqueName;
+
+                CharacterCreationEntry creationEntry = GameTableManager.Instance.CharacterCreation.GetEntry(characterCreate.CharacterCreationId);
+                if (creationEntry == null)
+                    return CharacterModifyResult.CreateFailed_Internal;
+
+                if ((CharacterCreationStart)creationEntry.CharacterCreationStartEnum == CharacterCreationStart.Level50
+                    && !session.AccountCurrencyManager.CanAfford(AccountCurrencyType.MaxLevelToken, 1ul))
+                    return CharacterModifyResult.CreateFailed_InsufficientFunds;
+
+                return null;
+            }
+
+            try
+            {
+                CharacterModifyResult? result = GetResult();
+                if (result.HasValue)
                 {
                     session.EnqueueMessageEncrypted(new ServerCharacterCreate
                     {
-                        Result = CharacterModifyResult.CreateFailed_UniqueName
+                        Result = result.Value
                     });
 
                     return;
@@ -399,8 +416,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 });
                 character.Stat.Add(new CharacterStatModel
                 {
-                    Id = character.Id,
-                    Stat = (byte)Stat.Sheathed,
+                    Id    = character.Id,
+                    Stat  = (byte)Stat.Sheathed,
                     Value = 1
                 });
 
@@ -416,7 +433,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                    session.Characters.Add(character);
 
                    if ((CharacterCreationStart)creationEntry.CharacterCreationStartEnum == CharacterCreationStart.Level50)
-                       session.AccountCurrencyManager.CurrencySubtractAmount(Game.Account.Static.AccountCurrencyType.MaxLevelToken, 1u);
+                       session.AccountCurrencyManager.CurrencySubtractAmount(AccountCurrencyType.MaxLevelToken, 1u);
 
                    session.EnqueueMessageEncrypted(new ServerCharacterCreate
                    {
