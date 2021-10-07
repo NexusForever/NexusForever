@@ -453,7 +453,10 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void DecorDelete(Residence residence, Decor decor)
         {
-            decor.EnqueueDelete();
+            if (decor.PendingCreate)
+                residence.DecorRemove(decor);
+            else
+                decor.EnqueueDelete();
 
             var residenceDecor = new ServerHousingResidenceDecor();
             residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor

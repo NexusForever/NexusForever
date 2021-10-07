@@ -681,6 +681,18 @@ namespace NexusForever.WorldServer.Game.Housing
         }
 
         /// <summary>
+        /// Remove existing <see cref="Decor"/> from the <see cref="Residence"/>.
+        /// </summary>
+        /// <remarks>
+        /// This does not queue the <see cref="Decor"/> for deletion from the database.
+        /// This is intended to be used for <see cref="Decor"/> that has yet to be saved to the database.
+        /// </remarks>
+        public void DecorRemove(Decor decor)
+        {
+            decors.Remove(decor.DecorId);
+        }
+
+        /// <summary>
         /// Return <see cref="Plot"/> at the supplied index.
         /// </summary>
         public Plot GetPlot(byte plotIndex)
