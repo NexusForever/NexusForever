@@ -13,16 +13,16 @@ namespace NexusForever.WorldServer.Game.Entity
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public InventoryLocation Location { get; }
+        public uint Slots => (uint)items.Length;
+        public uint SlotsRemaining { get; private set; }
 
         private Item[] items;
-        public uint SlotsRemaining { get; private set; }
 
         public Bag(InventoryLocation location, uint capacity)
         {
-            Location = location;
-            items    = new Item[capacity];
-
+            Location       = location;
             SlotsRemaining = capacity;
+            items          = new Item[capacity];
 
             log.Trace($"Initialised new bag {Location} with {capacity} slots.");
         }
@@ -66,58 +66,59 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Returns the first empty bag index, if the bag is full <see cref="uint.MaxValue"/> is returned.
+        /// Returns the first empty bag index.
         /// </summary>
-        public uint GetFirstAvailableBagIndex()
+        public uint? GetFirstAvailableBagIndex()
         {
-            for (int i = 0; i < items.Length; i++)
-                if (items[i] == null)
-                    return (uint)i;
+            for (uint bagIndex = 0u; bagIndex < items.Length; bagIndex++)
+                if (items[bagIndex] == null)
+                    return bagIndex;
 
-            return uint.MaxValue;
+            return null;
         }
 
         /// <summary>
-        /// Returns the first empty bag index, if the bag is full <see cref="uint.MaxValue"/> is returned.
+        /// Return the first empty bag index for <see cref="ItemSlot"/>.
         /// </summary>
-        public uint GetFirstAvailableBagIndexAfterIndex(int index)
+        public uint? GetFirstAvailableBagIndex(ItemSlot slot)
         {
-            for (int i = index + 1; i < items.Length; i++)
-                if (items[i] == null)
-                    return (uint)i;
+            if (Location != InventoryLocation.Equipped)
+                return null;
 
-            return uint.MaxValue;
-        }
+            // find first free bag index, some items can be equipped into multiple slots
+            foreach (uint bagIndex in ItemManager.Instance.GetEquippedBagIndexes(slot))
+                if (items[bagIndex] == null)
+                    return bagIndex;
 
-        /// <summary>
-        /// Return the amount of empty bag indexes.
-        /// </summary>
-        public uint GetFreeBagIndexCount()
-        {
-            return (uint)items.Count(i => i == null);
+            return null;
         }
 
         /// <summary>
         /// Add <see cref="Item"/> to the bag at the supplied bag index.
         /// </summary>
-        public void AddItem(Item item)
+        public void AddItem(Item item, uint bagIndex)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
-            if (item.Location != Location)
+            if (item.Location != InventoryLocation.None)
                 throw new ArgumentException();
-            if (items[item.BagIndex] != null)
+            if (items[bagIndex] != null)
                 throw new ArgumentException();
 
+            item.Location = Location;
+            item.BagIndex = bagIndex;
             items[item.BagIndex] = item;
 
-            log.Trace($"Added item 0x{item.Guid:X16} to bag {Location} at index {item.BagIndex}.");
+            checked
+            {
+                SlotsRemaining--;
+            }
 
-            SlotsRemaining = Math.Clamp(SlotsRemaining - 1, 0, (uint)items.Length);
+            log.Trace($"Added item 0x{item.Guid:X16} to bag {Location} at index {item.BagIndex}.");
         }
 
         /// <summary>
-        /// Remove <see cref="Item"/> from the bag at the supplied bag index.
+        /// Remove existing <see cref="Item"/> from the bag at the supplied bag index.
         /// </summary>
         public void RemoveItem(Item item)
         {
@@ -127,24 +128,80 @@ namespace NexusForever.WorldServer.Game.Entity
                 throw new ArgumentException();
             if (items[item.BagIndex] == null)
                 throw new ArgumentException();
-
+            
             items[item.BagIndex] = null;
 
             log.Trace($"Removed item 0x{item.Guid:X16} from bag {Location} at index {item.BagIndex}.");
 
-            item.Location = InventoryLocation.None;
-            item.BagIndex = 0u;
+            item.PreviousLocation = item.Location;
+            item.PreviousBagIndex = item.BagIndex;
+            item.Location         = InventoryLocation.None;
+            item.BagIndex         = 0u;
 
-            SlotsRemaining = Math.Clamp(SlotsRemaining + 1, 0, (uint)items.Length);
+            checked
+            {
+                SlotsRemaining++;
+            }
+
+            if (SlotsRemaining > Slots)
+                throw new InvalidOperationException();
         }
 
         /// <summary>
-        /// Returns bag's current size
+        /// Move existing <see cref="Item"/> in <see cref="Bag"/> to supplied empty bag index.
         /// </summary>
-        /// <returns></returns>
-        public int GetSize()
+        public void MoveItem(Item item, uint bagIndex)
         {
-            return items.Length;
+            if (item == null)
+                throw new ArgumentNullException(nameof(item));
+            if (item.Location != Location)
+                throw new ArgumentException();
+            if (items[item.BagIndex] == null)
+                throw new ArgumentException();
+            if (items[bagIndex] != null)
+                throw new ArgumentException();
+
+            item.PreviousLocation = item.Location;
+            item.PreviousBagIndex = item.BagIndex;
+
+            items[item.BagIndex] = null;
+
+            item.BagIndex = bagIndex;
+            items[bagIndex] = item;
+
+            log.Trace($"Moved item 0x{item.Guid:X16} from bag {Location} at index {item.PreviousBagIndex} to index {item.BagIndex}.");
+        }
+
+        /// <summary>
+        /// Swap 2 existing <see cref="Item"/> bag indexes in <see cref="Bag"/> with each other.
+        /// </summary>
+        public void SwapItem(Item item, Item item2)
+        {
+            if (item == null)
+                throw new ArgumentNullException(nameof(item));
+            if (item2 == null)
+                throw new ArgumentNullException(nameof(item2));
+            if (item.Location != Location)
+                throw new ArgumentException();
+            if (item2.Location != Location)
+                throw new ArgumentException();
+            if (items[item.BagIndex] == null)
+                throw new ArgumentException();
+            if (items[item2.BagIndex] == null)
+                throw new ArgumentException();
+
+            item.PreviousLocation  = item.Location;
+            item2.PreviousLocation = item2.Location;
+            item.PreviousBagIndex  = item.BagIndex;
+            item2.PreviousBagIndex = item2.BagIndex;
+
+            items[item.BagIndex] = item2;
+            item2.BagIndex = item.BagIndex;
+
+            items[item2.PreviousBagIndex] = item;
+            item.BagIndex = item2.PreviousBagIndex;
+
+            log.Trace($"Swapped items 0x{item.Guid:X16} and 0x{item2.Guid:X16} from bag {Location} between index {item.BagIndex} and {item2.BagIndex}.");
         }
 
         /// <summary>

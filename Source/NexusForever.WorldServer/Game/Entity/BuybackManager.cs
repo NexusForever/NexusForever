@@ -60,7 +60,7 @@ namespace NexusForever.WorldServer.Game.Entity
             var networkBuybackItem = new NetworkBuybackItem
             {
                 UniqueId = uniqueId,
-                ItemId   = item.Entry.Id,
+                ItemId   = item.Info.Id,
                 Quantity = quantity
             };
 
@@ -111,7 +111,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 var networkBuybackItem = new NetworkBuybackItem
                 {
                     UniqueId = buybackItem.UniqueId,
-                    ItemId   = buybackItem.Item.Entry.Id,
+                    ItemId   = buybackItem.Item.Info.Id,
                     Quantity = buybackItem.Quantity,
                 };
 

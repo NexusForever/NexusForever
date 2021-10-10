@@ -299,11 +299,11 @@ namespace NexusForever.WorldServer.Game.Entity
             var items = new List<Item>();
             foreach (uint itemId in itemIds)
             {
-                Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
-                if (itemEntry == null)
+                ItemInfo info = ItemManager.Instance.GetItemInfo(itemId);
+                if (info == null)
                     throw new ArgumentException($"Invalid item {itemId} for mail attachment!");
 
-                var item = new Item(null, itemEntry);
+                var item = new Item(null, info);
                 items.Add(item);
             }
 
@@ -509,7 +509,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (unitId == 0u || !IsTargetMailBoxInRange(unitId))
                     return GenericError.MailMailBoxOutOfRange;
 
-                if (player.Inventory.IsInventoryFull())
+                if (player.Inventory.IsInventoryFull(InventoryLocation.Inventory))
                     return GenericError.ItemInventoryFull;
 
                 return GenericError.Ok;

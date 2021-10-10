@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Database.World.Model;
 using NexusForever.Shared;
@@ -28,23 +27,16 @@ namespace NexusForever.WorldServer.Game
         public ulong NextCharacterId => nextCharacterId++;
 
         /// <summary>
-        /// Id to be assigned to the next created item.
-        /// </summary>
-        public ulong NextItemId => nextItemId++;
-
-        /// <summary>
         /// Id to be assigned to the next created mail.
         /// </summary>
         public ulong NextMailId => nextMailId++;
 
         private ulong nextCharacterId;
-        private ulong nextItemId;
         private ulong nextMailId;
 
         private ImmutableDictionary<(Race, Faction, CharacterCreationStart), Location> characterCreationData;
         private ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
-        private ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
         private ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
         private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
@@ -59,12 +51,10 @@ namespace NexusForever.WorldServer.Game
         public void Initialise()
         {
             nextCharacterId = DatabaseManager.Instance.CharacterDatabase.GetNextCharacterId() + 1ul;
-            nextItemId      = DatabaseManager.Instance.CharacterDatabase.GetNextItemId() + 1ul;
             nextMailId      = DatabaseManager.Instance.CharacterDatabase.GetNextMailId() + 1ul;
 
             CacheCharacterCreate();
             CacheCharacterCustomisations();
-            CacheInventoryEquipSlots();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
             CacheTutorials();
@@ -111,24 +101,6 @@ namespace NexusForever.WorldServer.Game
             }
 
             characterCustomisations = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
-        }
-
-        private void CacheInventoryEquipSlots()
-        {
-            var entries = new Dictionary<ItemSlot, List<EquippedItem>>();
-            foreach (FieldInfo field in typeof(ItemSlot).GetFields())
-            {
-                foreach (EquippedItemAttribute attribute in field.GetCustomAttributes<EquippedItemAttribute>())
-                {
-                    ItemSlot slot = (ItemSlot)field.GetValue(null);
-                    if (!entries.ContainsKey(slot))
-                        entries.Add(slot, new List<EquippedItem>());
-
-                    entries[slot].Add(attribute.Slot);
-                }
-            }
-
-            equippedItems = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
         public void CacheInventoryBagCapacities()
@@ -222,14 +194,6 @@ namespace NexusForever.WorldServer.Game
         {
             uint key = (value << 24) | (label << 16) | (sex << 8) | race;
             return characterCustomisations.TryGetValue(key, out ImmutableList<CharacterCustomizationEntry> entries) ? entries : null;
-        }
-
-        /// <summary>
-        /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="EquippedItem"/>'s for supplied <see cref="ItemSlot"/>.
-        /// </summary>
-        public ImmutableList<EquippedItem> GetEquippedBagIndexes(ItemSlot slot)
-        {
-            return equippedItems.TryGetValue(slot, out ImmutableList<EquippedItem> entries) ? entries : null;
         }
 
         /// <summary>

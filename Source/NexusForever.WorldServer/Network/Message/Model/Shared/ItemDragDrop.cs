@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
 
         public void Read(GamePacketReader reader)
         {
-            Guid         = reader.ReadULong();
+            Guid     = reader.ReadULong();
             DragDrop = reader.ReadULong();
         }
 

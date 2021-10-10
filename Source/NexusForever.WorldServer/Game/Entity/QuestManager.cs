@@ -246,8 +246,8 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (item != null)
             {
-                if (info.Entry.Id != item.Entry.Quest2IdActivation)
-                    throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} from invalid item {item.Entry.Id}!");
+                if (info.Entry.Id != item.Info.Entry.Quest2IdActivation)
+                    throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} from invalid item {item.Info.Entry.Id}!");
 
                 // TODO: consume charge
             }
@@ -318,7 +318,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public void QuestAdd(QuestInfo info)
         {
             // make sure player has room for all pushed items
-            if (player.Inventory.GetInventoryFreeBagIndexCount()
+            if (player.Inventory.GetInventorySlotsRemaining(InventoryLocation.Inventory)
                 < info.Entry.PushedItemIds.Count(i => i != 0u))
             {
                 player.SendGenericError(GenericError.ItemInventoryFull);
@@ -329,7 +329,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 uint itemId = info.Entry.PushedItemIds[i];
                 if (itemId != 0u)
-                    player.Inventory.ItemCreate(itemId, info.Entry.PushedItemCounts[i]);
+                    player.Inventory.ItemCreate(InventoryLocation.Inventory, itemId, info.Entry.PushedItemCounts[i]);
             }
 
             // TODO: virtual items
@@ -579,7 +579,7 @@ namespace NexusForever.WorldServer.Game.Entity
             switch ((QuestRewardType)entry.Quest2RewardTypeId)
             {
                 case QuestRewardType.Item:
-                    player.Inventory.ItemCreate(entry.ObjectId, entry.ObjectAmount);
+                    player.Inventory.ItemCreate(InventoryLocation.Inventory, entry.ObjectId, entry.ObjectAmount);
                     break;
                 case QuestRewardType.Money:
                     player.CurrencyManager.CurrencyAddAmount((CurrencyType)entry.ObjectId, entry.ObjectAmount);

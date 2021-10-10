@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             quantity ??= 1u;
             charges ??= 1u;
-            context.GetTargetOrInvoker<Player>().Inventory.ItemCreate(itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
+            context.GetTargetOrInvoker<Player>().Inventory.ItemCreate(InventoryLocation.Inventory, itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
         }
 
         [Command(Permission.ItemLookup, "Lookup an item by partial name.", "lookup")]

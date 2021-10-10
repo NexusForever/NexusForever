@@ -46,8 +46,8 @@ namespace NexusForever.WorldServer.Game.Entity
             throw new NotImplementedException();
         }
 
-        public uint Id => Entry?.Id ?? SpellEntry.Id;
-        public Item2Entry Entry { get; }
+        public uint Id => Info?.Id ?? SpellEntry.Id;
+        public ItemInfo Info { get; }
         public Spell4BaseEntry SpellEntry { get; }
         public ulong Guid { get; }
 
@@ -68,9 +68,6 @@ namespace NexusForever.WorldServer.Game.Entity
             get => location;
             set
             {
-                if (location != value)
-                    PreviousLocation = location;
-
                 location = value;
                 saveMask |= ItemSaveMask.Location;
             }
@@ -78,16 +75,13 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private InventoryLocation location;
 
-        public InventoryLocation PreviousLocation { get; private set; }
+        public InventoryLocation PreviousLocation { get; set; }
 
         public uint BagIndex
         {
             get => bagIndex;
             set
             {
-                if (bagIndex != value)
-                    PreviousBagIndex = bagIndex;
-
                 bagIndex = value;
                 saveMask |= ItemSaveMask.BagIndex;
             }
@@ -95,14 +89,14 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private uint bagIndex;
 
-        public uint PreviousBagIndex { get; private set; }
+        public uint PreviousBagIndex { get; set; }
 
         public uint StackCount
         {
             get => stackCount;
             set
             {
-                if (value > Entry.MaxStackCount)
+                if (value > Info.Entry.MaxStackCount)
                     throw new ArgumentOutOfRangeException();
 
                 stackCount = value;
@@ -117,7 +111,7 @@ namespace NexusForever.WorldServer.Game.Entity
             get => charges;
             set
             {
-                if (value > Entry.MaxCharges)
+                if (value > Info.Entry.MaxCharges)
                     throw new ArgumentOutOfRangeException();
 
                 charges = value;
@@ -166,36 +160,40 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Item(ItemModel model)
         {
-            Guid        = model.Id;
-            characterId = model.OwnerId;
-            location    = (InventoryLocation)model.Location;
-            bagIndex    = model.BagIndex;
-            stackCount  = model.StackCount;
-            charges     = model.Charges;
-            durability  = model.Durability;
+            Guid             = model.Id;
+            characterId      = model.OwnerId;
+            location         = InventoryLocation.None;
+            PreviousLocation = InventoryLocation.None;
+            bagIndex         = 0u;
+            PreviousBagIndex = 0u;
+            stackCount       = model.StackCount;
+            charges          = model.Charges;
+            durability       = model.Durability;
 
             if ((InventoryLocation)model.Location != InventoryLocation.Ability)
-                Entry       = GameTableManager.Instance.Item.GetEntry(model.ItemId);
+                Info = ItemManager.Instance.GetItemInfo(model.ItemId);
             else
-                SpellEntry  = GameTableManager.Instance.Spell4Base.GetEntry(model.ItemId);
-            saveMask    = ItemSaveMask.None;
+                SpellEntry = GameTableManager.Instance.Spell4Base.GetEntry(model.ItemId);
+            
+            saveMask = ItemSaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="Item"/> from an <see cref="Item2Entry"/> template.
+        /// Create a new <see cref="Item"/> from an <see cref="ItemInfo"/> template.
         /// </summary>
-        public Item(ulong? owner, Item2Entry entry, uint count = 1u, uint initialCharges = 0)
+        public Item(ulong? owner, ItemInfo info, uint count = 1u, uint initialCharges = 0)
         {
-            Guid        = AssetManager.Instance.NextItemId;
-            characterId = owner;
-            location    = InventoryLocation.None;
-            bagIndex    = 0u;
-            stackCount  = count;
-            charges     = initialCharges;
-            durability  = 1.0f;
+            Guid             = ItemManager.Instance.NextItemId;
+            characterId      = owner;
+            location         = InventoryLocation.None;
+            PreviousLocation = InventoryLocation.None;
+            bagIndex         = 0u;
+            stackCount       = count;
+            charges          = initialCharges;
+            durability       = 1.0f;
+            Info             = info;
 
-            Entry       = entry;
-            saveMask    = ItemSaveMask.Create;
+            saveMask         = ItemSaveMask.Create;
         }
 
         /// <summary>
@@ -203,16 +201,18 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public Item(ulong owner, Spell4BaseEntry entry, uint count = 1u)
         {
-            Guid        = AssetManager.Instance.NextItemId;
-            characterId = owner;
-            location    = InventoryLocation.None;
-            bagIndex    = 0u;
-            stackCount  = count;
-            charges     = 0u;
-            durability  = 0.0f;
+            Guid             = ItemManager.Instance.NextItemId;
+            characterId      = owner;
+            location         = InventoryLocation.None;
+            PreviousLocation = InventoryLocation.None;
+            bagIndex         = 0u;
+            PreviousBagIndex = 0u;
+            stackCount       = count;
+            charges          = 0u;
+            durability       = 0.0f;
+            SpellEntry       = entry;
 
-            SpellEntry  = entry;
-            saveMask    = ItemSaveMask.Create;
+            saveMask         = ItemSaveMask.Create;
         }
 
         /// <summary>
@@ -335,8 +335,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public CurrencyType GetVendorSellCurrency(byte index)
         {
-            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
-                return (CurrencyType)Entry.CurrencyTypeIdSellToVendor[index];
+            if (Info.Entry.CurrencyTypeIdSellToVendor[index] != 0u)
+                return (CurrencyType)Info.Entry.CurrencyTypeIdSellToVendor[index];
 
             return CurrencyType.None;
         }
@@ -346,8 +346,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint GetVendorSellAmount(byte index)
         {
-            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
-                return Entry.CurrencyAmountSellToVendor[index];
+            if (Info.Entry.CurrencyTypeIdSellToVendor[index] != 0u)
+                return Info.Entry.CurrencyAmountSellToVendor[index];
 
             // most items that sell for credits have their sell amount calculated and not stored in the tbl
             return CalculateVendorSellAmount();
@@ -359,13 +359,6 @@ namespace NexusForever.WorldServer.Game.Entity
             // GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(559);
             // uint cost = Entry.PowerLevel * entry.Dataint01;
             return 0u;
-        }
-        
-        /// Returns whether this item is an equippable bag for expanding inventory slots
-        /// </summary>
-        public bool IsEquippableBag()
-        {
-            return Entry.Item2FamilyId == 5 && Entry.Item2CategoryId == 88 && Entry.Item2TypeId == 134;
         }
     }
 }
