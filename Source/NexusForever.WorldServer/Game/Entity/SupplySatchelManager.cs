@@ -54,7 +54,7 @@ namespace NexusForever.WorldServer.Game.Entity
             if (amount == 0)
                 throw new ArgumentException("amount must be more than 0.");
 
-            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Entry.Id);
+            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Info.Entry.Id);
             if (entry == null)
                 throw new InvalidOperationException("TradeskillMaterialEntry does not exist.");
 
@@ -119,7 +119,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void RemoveAmount(Item item, uint amount)
         {
-            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Entry.Id);
+            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Info.Entry.Id);
             if (entry == null)
                 throw new InvalidOperationException("TradeskillMaterialEntry does not exist.");
 
@@ -158,9 +158,8 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 // Remove the amount first. The Inventory will replace what it couldn't create items for.
                 RemoveAmount(materialId, amount);
-                player.Inventory.ItemCreate(material.Entry.Item2IdStatRevolution, amount, Static.ItemUpdateReason.ResourceConversion);
+                player.Inventory.ItemCreate(InventoryLocation.Inventory, material.Entry.Item2IdStatRevolution, amount, Static.ItemUpdateReason.ResourceConversion);
             }
-                
         }
 
         /// <summary>
@@ -168,7 +167,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public bool IsFull(Item item)
         {
-            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Entry.Id);
+            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Info.Entry.Id);
             if (entry == null)
                 throw new InvalidOperationException("TradeskillMaterialEntry does not exist.");
 

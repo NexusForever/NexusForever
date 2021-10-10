@@ -89,6 +89,7 @@ namespace NexusForever.WorldServer
             GlobalGuildManager.Instance.ValidateCommunityResidences();
 
             AssetManager.Instance.Initialise();
+            ItemManager.Instance.Initialise();
             PrerequisiteManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
             GlobalQuestManager.Instance.Initialise();

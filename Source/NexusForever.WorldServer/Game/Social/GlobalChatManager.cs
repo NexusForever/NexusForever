@@ -452,7 +452,7 @@ namespace NexusForever.WorldServer.Game.Social
                 StopIndex   = chatFormat.StopIndex,
                 FormatModel = new ChatFormatItemId
                 {
-                    ItemId  = item.Entry.Id
+                    ItemId  = item.Info.Entry.Id
                 }
             };
         }
