@@ -316,26 +316,26 @@ namespace NexusForever.WorldServer.Game.Social
         }
 
         /// <summary>
-        /// Add the <see cref="WorldSession"/> to the chat channels sessions list for appropriate chat channels.
+        /// Add the <see cref="Player"/> to the chat channels sessions list for appropriate chat channels.
         /// </summary>
         /// <param name="session"></param>
-        public void JoinChatChannels(WorldSession session)
+        public void JoinChatChannels(Player player)
         {
             foreach (var channelType in defaultChannelTypes)
             {
-                GetChatChannel(channelType, 1).Join(session.Player, null);
+                GetChatChannel(channelType, 1).Join(player, null);
             }
         }
 
         /// <summary>
-        /// Remove the <see cref="WorldSession"/> from the chat channels sessions list for appropriate chat channels.
+        /// Remove the <see cref="Player"/> from the chat channels sessions list for appropriate chat channels.
         /// </summary>
         /// <param name="session"></param>
-        public void LeaveChatChannels(WorldSession session)
+        public void LeaveChatChannels(Player player)
         {
             foreach (var channelType in defaultChannelTypes)
             {
-                GetChatChannel(channelType, 1).Leave(session.Player.CharacterId);
+                GetChatChannel(channelType, 1).Leave(player.CharacterId);
             }
         }
 
