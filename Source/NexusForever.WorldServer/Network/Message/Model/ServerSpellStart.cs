@@ -10,39 +10,39 @@ namespace NexusForever.WorldServer.Network.Message.Model
     {
         public class InitialPosition : IWritable
         {   
-            public uint   CasterId { get; set; }
-            public byte   Unknown4 { get; set; }
+            public uint  UnitId { get; set; }
+            public byte  TargetFlags { get; set; }
             public Position Position { get; set; } = new Position();
-            public float  Yaw { get; set; }
-            public uint   Unknown21 { get; set; }
+            public float Yaw { get; set; }
+            public float Pitch { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(CasterId);
-                writer.Write(Unknown4);
+                writer.Write(UnitId);
+                writer.Write(TargetFlags);
                 Position.Write(writer);
                 writer.Write(Yaw);
-                writer.Write(Unknown21);
+                writer.Write(Pitch);
             }
         }
 
         public class TelegraphPosition : IWritable
         {   
-            public ushort Unknown0 { get; set; }
-            public uint   CasterId { get; set; }
-            public byte   Unknown6 { get; set; }
+            public ushort TelegraphId { get; set; }
+            public uint   AttachedUnitId { get; set; }
+            public byte   TargetFlags { get; set; }
             public Position Position { get; set; } = new Position();
             public float  Yaw { get; set; }
-            public uint   Unknown23 { get; set; }
+            public float  Pitch { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown0);
-                writer.Write(CasterId);
-                writer.Write(Unknown6);
+                writer.Write(TelegraphId);
+                writer.Write(AttachedUnitId);
+                writer.Write(TargetFlags);
                 Position.Write(writer);
                 writer.Write(Yaw);
-                writer.Write(Unknown23);
+                writer.Write(Pitch);
             }
         }
 

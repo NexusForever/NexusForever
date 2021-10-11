@@ -35,7 +35,7 @@ namespace NexusForever.ClientConnector
                 Console.Write("Type in your language: [en,de]");
                 string language = Console.ReadLine();
 
-                ClientConfiguration clientConfig = new ClientConfiguration
+                var clientConfig = new ClientConfiguration
                 {
                     HostName = hostName,
                     Language = language
@@ -50,8 +50,8 @@ namespace NexusForever.ClientConnector
 
         private static void LaunchClient(ClientConfiguration config)
         {
-            STARTUPINFO si = new STARTUPINFO();
-            PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
+            var si = new STARTUPINFO();
+            var pi = new PROCESS_INFORMATION();
 
             string client = "WildStar64.exe";
             if (!File.Exists(client))

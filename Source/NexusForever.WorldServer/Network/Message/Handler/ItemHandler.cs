@@ -1,15 +1,12 @@
-﻿using System.Threading.Tasks;
-using NexusForever.Shared.Game.Events;
-using NexusForever.Shared.GameTable;
+﻿using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.Shared.Network;
 using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Prerequisite;
 using NexusForever.WorldServer.Game.Spell;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
@@ -19,7 +16,22 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientItemMove)]
         public static void HandleItemMove(WorldSession session, ClientItemMove itemMove)
         {
-            session.Player.Inventory.ItemMove(itemMove.From, itemMove.To);
+            Item item = session.Player.Inventory.GetItem(itemMove.From);
+            if (item == null)
+                throw new InvalidPacketValueException();
+
+            GenericError? result = session.Player.Inventory.CanMoveItem(item, itemMove.To);
+            if (result.HasValue)
+            {
+                session.EnqueueMessageEncrypted(new ServerItemError
+                {
+                    ItemGuid  = item.Guid,
+                    ErrorCode = result.Value
+                });
+                return;
+            }
+
+            session.Player.Inventory.ItemMove(item, itemMove.To);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemSplit)]
@@ -41,7 +53,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            ItemSpecialEntry itemSpecial = GameTableManager.Instance.ItemSpecial.GetEntry(item.Entry.ItemSpecialId00);
+            ItemSpecialEntry itemSpecial = GameTableManager.Instance.ItemSpecial.GetEntry(item.Info.Entry.ItemSpecialId00);
             if (itemSpecial == null)
                 throw new InvalidPacketValueException();
 
@@ -71,7 +83,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            GenericUnlockEntryEntry entry = GameTableManager.Instance.GenericUnlockEntry.GetEntry(item.Entry.GenericUnlockSetId);
+            GenericUnlockEntryEntry entry = GameTableManager.Instance.GenericUnlockEntry.GetEntry(item.Info.Entry.GenericUnlockSetId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
@@ -90,25 +102,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(item.Entry.HousingDecorInfoId);
+            HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(item.Info.Entry.HousingDecorInfoId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
-            Task<Residence> task = ResidenceManager.Instance.GetResidence(session.Player.Name);
-            session.EnqueueEvent(new TaskGenericEvent<Residence>(task,
-                residence =>
-            {
-                if (residence == null)
-                    residence = ResidenceManager.Instance.CreateResidence(session.Player);
-
-                if (session.Player.Inventory.ItemUse(item))
-                {
-                    if (session.Player.Map is ResidenceMap residenceMap)
-                        residenceMap.DecorCreate(entry, 1);
-                    else
-                        residence.DecorCreate(entry);
-                }
-            }));
+            if (session.Player.Inventory.ItemUse(item))
+                session.Player.ResidenceManager.DecorCreate(entry);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemMoveToSupplySatchel)]

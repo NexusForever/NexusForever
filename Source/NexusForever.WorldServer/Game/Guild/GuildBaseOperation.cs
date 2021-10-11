@@ -221,7 +221,7 @@ namespace NexusForever.WorldServer.Game.Guild
             GuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
-                AddRank((byte)operation.Rank, operation.TextValue, (GuildRankPermission)operation.Data);
+                AddRank((byte)operation.Rank, operation.TextValue, (GuildRankPermission)operation.Data.UInt32Data);
                 AnnounceGuildRankChange();
                 AnnounceGuildResult(GuildResult.RankCreated, operation.Rank, operation.TextValue);
             }
@@ -327,7 +327,7 @@ namespace NexusForever.WorldServer.Game.Guild
             if (info.Result == GuildResult.Success)
             {
                 // TODO: research why disabled needs to be removed
-                var permissions = (GuildRankPermission)operation.Data & ~GuildRankPermission.Disabled;
+                var permissions = (GuildRankPermission)operation.Data.UInt32Data & ~GuildRankPermission.Disabled;
                 rank.Permissions = permissions;
 
                 AnnounceGuildRankChange();

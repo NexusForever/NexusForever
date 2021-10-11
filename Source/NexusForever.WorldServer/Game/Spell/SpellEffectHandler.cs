@@ -5,6 +5,7 @@ using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Map;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -72,7 +73,13 @@ namespace NexusForever.WorldServer.Game.Spell
                 });
             }*/
 
-            player.Map.EnqueueAdd(mount, player.Position);
+            var position = new MapPosition
+            {
+                Position = player.Position
+            };
+
+            if (player.Map.CanEnter(mount, position))
+                player.Map.EnqueueAdd(mount, position);
 
             // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464
             // FIXME: also cast 80530,Mount Sprint  - Tier 2,36122
@@ -182,7 +189,14 @@ namespace NexusForever.WorldServer.Game.Spell
             }
 
             var vanityPet = new VanityPet(player, info.Entry.DataBits00);
-            player.Map.EnqueueAdd(vanityPet, player.Position);
+
+            var position = new MapPosition
+            {
+                Position = player.Position
+            };
+
+            if (player.Map.CanEnter(vanityPet, position))
+                player.Map.EnqueueAdd(vanityPet, position);
         }
 
         [SpellEffectHandler(SpellEffectType.TitleGrant)]
@@ -192,6 +206,11 @@ namespace NexusForever.WorldServer.Game.Spell
                 return;
 
             player.TitleManager.AddTitle((ushort)info.Entry.DataBits00);
+        }
+
+        [SpellEffectHandler(SpellEffectType.Fluff)]
+        private void HandleEffectFluff(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        {
         }
     }
 }

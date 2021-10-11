@@ -169,7 +169,7 @@ namespace NexusForever.Shared.GameTable
                     if (reader.BaseStream.Position != recordStartPosition)
                         reader.BaseStream.Position = recordStartPosition;
 
-                    T entry = new T();
+                    var entry = new T();
 
                     int fieldIndex = 0;
                     FieldInfo[] typeFields = attributeCache.Keys.ToArray();

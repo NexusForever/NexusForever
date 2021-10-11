@@ -1,6 +1,7 @@
 ﻿using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
+using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.Reputation.Static;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
@@ -53,8 +54,10 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         {
             switch (comparison)
             {
-                case PrerequisiteComparison.Equal: // Active or Completed
-                    return player.QuestManager.GetQuestState((ushort)objectId) == null;
+                case PrerequisiteComparison.Equal:
+                    return player.QuestManager.GetQuestState((ushort)objectId) == (QuestState)value;
+                case PrerequisiteComparison.NotEqual:
+                    return player.QuestManager.GetQuestState((ushort)objectId) != (QuestState)value;
                 default:
                     log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Quest}!");
                     return false;

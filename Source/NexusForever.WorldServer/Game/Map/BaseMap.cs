@@ -13,6 +13,8 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Map.Search;
+using NexusForever.WorldServer.Game.Map.Static;
+using NexusForever.WorldServer.Game.Static;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -30,43 +32,73 @@ namespace NexusForever.WorldServer.Game.Map
 
         public WorldEntry Entry { get; private set; }
         public MapFile File { get; private set; }
-        public uint InstanceId { get; private set; }
 
         private readonly MapGrid[] grids = new MapGrid[MapDefines.WorldGridCount * MapDefines.WorldGridCount];
-        private readonly HashSet<(uint GridX, uint GridZ)> activeGrids = new HashSet<(uint GridX, uint GridZ)>();
+        private readonly HashSet<(uint GridX, uint GridZ)> activeGrids = new();
 
-        private readonly ConcurrentQueue<IGridAction> pendingActions = new ConcurrentQueue<IGridAction>();
+        protected readonly ConcurrentQueue<IGridAction> pendingActions = new();
 
-        private readonly QueuedCounter entityCounter = new QueuedCounter();
-        private readonly Dictionary<uint /*guid*/, GridEntity> entities = new Dictionary<uint /*guid*/, GridEntity>();
+        private readonly QueuedCounter entityCounter = new();
+        protected readonly Dictionary<uint /*guid*/, GridEntity> entities = new();
         private EntityCache entityCache;
 
-        public virtual void Initialise(MapInfo info, Player player)
+        /// <summary>
+        /// Initialise <see cref="BaseMap"/> with <see cref="WorldEntry"/>.
+        /// </summary>
+        public virtual void Initialise(WorldEntry entry)
         {
-            Entry       = info.Entry;
+            Entry       = entry;
             File        = BaseMapManager.Instance.GetBaseMap(Entry.AssetPath);
-            InstanceId  = info.InstanceId;
             entityCache = EntityCacheManager.Instance.GetEntityCache((ushort)Entry.Id);
         }
-        
+
+        /// <summary>
+        /// Invoked each world tick with the delta since the previous tick occurred.
+        /// </summary>
         public virtual void Update(double lastTick)
         {
-            uint actionThreshold = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridActionThreshold ?? 100u;
-            foreach (IGridAction action in pendingActions.Dequeue(actionThreshold))
+            ProcessGridActions();
+            UpdateGrids(lastTick);
+        }
+
+        private void ProcessGridActions()
+        {
+            var newActions = new List<IGridAction>();
+            foreach (IGridAction action in pendingActions.Dequeue(
+                ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridActionThreshold ?? 100u))
             {
                 switch (action)
                 {
                     case GridActionAdd actionAdd:
                     {
-                        if (!AddEntity(actionAdd.Entity, actionAdd.Vector))
+                        if (CanAddEntity(actionAdd.Entity, actionAdd.Vector))
+                            AddEntity(actionAdd.Entity, actionAdd.Vector);
+                        else
                         {
-                            // retry threshold to prevent and issues with stuck actions
+                            // retry threshold to prevent any issues with stuck actions
                             actionAdd.RequeueCount++;
-                            if (actionAdd.RequeueCount > 5u)
+                            if (actionAdd.RequeueCount > (ConfigurationManager<WorldServerConfiguration>.Instance.Config.Map.GridActionMaxRetry ?? 5u))
+                            {
                                 log.Error($"Failed to add entity to map {Entry.Id} at position X: {actionAdd.Vector.X}, Y: {actionAdd.Vector.Y}, Z: {actionAdd.Vector.Z}!");
+                            }
                             else
-                                pendingActions.Enqueue(action);
+                                newActions.Add(action);
                         }
+
+                        break;
+                    }
+                    case GridActionPending actionPending:
+                    {
+                        if (actionPending.Entity.Map == null)
+                        {
+                            newActions.Add(new GridActionAdd
+                            {
+                                Entity = actionPending.Entity,
+                                Vector = actionPending.Vector
+                            });
+                        }
+                        else
+                            newActions.Add(actionPending);
 
                         break;
                     }
@@ -79,32 +111,97 @@ namespace NexusForever.WorldServer.Game.Map
                 }
             }
 
-            var gridsToRemove = new HashSet<(uint GridX, uint GridZ)>();
+            // new actions are added to the queue after processing so they are processed starting next update
+            foreach (IGridAction action in newActions)
+                pendingActions.Enqueue(action);
+        }
+
+        private void UpdateGrids(double lastTick)
+        {
+            var unloadedGrids = new List<MapGrid>();
             foreach ((uint gridX, uint gridZ) in activeGrids)
             {
                 MapGrid grid = GetGrid(gridX, gridZ);
-
                 grid.Update(lastTick);
-                // make sure the grid has fully unloaded before removing from active grids
-                if (grid.PendingUnload && DeactivateGrid(grid))
-                    gridsToRemove.Add((gridX, gridZ));
+
+                if (grid.UnloadStatus == MapUnloadStatus.Complete)
+                    unloadedGrids.Add(grid);
             }
 
-            foreach ((uint GridX, uint GridZ) coord in gridsToRemove)
-                activeGrids.Remove(coord);
-        }
+            foreach (MapGrid grid in unloadedGrids)
+            {
+                grids[grid.Coord.Z * MapDefines.WorldGridCount + grid.Coord.X] = null;
+                activeGrids.Remove(grid.Coord);
 
-        public virtual void OnAddToMap(Player player)
-        {
+                log.Trace($"Deactivated grid at X:{grid.Coord.X}, Z:{grid.Coord.Z}.");
+            }
         }
 
         /// <summary>
-        /// Enqueue <see cref="GridEntity"/> to be added to <see cref="BaseMap"/> at <see cref="Vector3"/>.
+        /// Enqueue <see cref="GridEntity"/> to be added to <see cref="BaseMap"/>.
         /// </summary>
-        public void EnqueueAdd(GridEntity entity, Vector3 position)
+        /// <remarks>
+        /// Characters should not be added directly through this method.
+        /// Use <see cref="Player.TeleportTo(MapPosition, TeleportReason)"/> instead.
+        /// </remarks>
+        public void EnqueueAdd(GridEntity entity, MapPosition position)
         {
             entity.OnEnqueueAddToMap();
-            pendingActions.Enqueue(new GridActionAdd(entity, position));
+
+            if (entity.Map != null)
+            {
+                // entity is on an existing map, will need to be removed before add
+                entity.RemoveFromMap();
+
+                pendingActions.Enqueue(new GridActionPending
+                {
+                    Entity = entity,
+                    Vector = position.Position
+                });
+            }
+            else
+            {
+                pendingActions.Enqueue(new GridActionAdd
+                {
+                    Entity = entity,
+                    Vector = position.Position
+                });
+            }
+        }
+
+        /// <summary>
+        /// Returns if <see cref="GridEntity"/> can be added to <see cref="BaseMap"/>.
+        /// </summary>
+        public virtual bool CanEnter(GridEntity entity, MapPosition position)
+        {
+            if (!IsValidPosition(position.Position))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns if <see cref="Player"/> can be added to <see cref="BaseMap"/>.
+        /// </summary>
+        public virtual GenericError? CanEnter(Player player, MapPosition position)
+        {
+            if (!IsValidPosition(position.Position))
+                return GenericError.InstanceInvalidDestination;
+
+            return null;
+        }
+
+        private bool IsValidPosition(Vector3 position)
+        {
+            // make sure player position falls within a valid grid
+            int radius = (MapDefines.GridSize * MapDefines.WorldGridCount) / 2;
+            if (position.X < -radius || position.X > radius
+                || position.Z < -radius || position.Z > radius)
+                return false;
+
+            // TODO: check if map file has a grid at position?
+
+            return true;
         }
 
         /// <summary>
@@ -113,18 +210,10 @@ namespace NexusForever.WorldServer.Game.Map
         public void EnqueueRemove(GridEntity entity)
         {
             entity.OnEnqueueRemoveFromMap();
-            pendingActions.Enqueue(new GridActionRemove(entity));
-        }
-
-        /// <summary>
-        /// Remove <see cref="GridEntity"/> from the <see cref="BaseMap"/>.
-        /// </summary>
-        /// <remarks>
-        /// This will remove the entity right away, this should only be used in a few cases such as <see cref="MapGrid"/> unloading.
-        /// </remarks>
-        public void RemoveDirect(GridEntity entity)
-        {
-            RemoveEntity(entity);
+            pendingActions.Enqueue(new GridActionRemove
+            {
+                Entity = entity
+            });
         }
 
         /// <summary>
@@ -132,11 +221,15 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         public void EnqueueRelocate(GridEntity entity, Vector3 position)
         {
-            pendingActions.Enqueue(new GridActionRelocate(entity, position));
+            pendingActions.Enqueue(new GridActionRelocate
+            {
+                Entity = entity,
+                Vector = position
+            });
         }
 
         /// <summary>
-        /// Return all <see cref="GridEntity"/>'s in map that satisfy <see cref="ISearchCheck"/>.
+        /// Return all <see cref="GridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck"/>.
         /// </summary>
         public void Search(Vector3 vector, float radius, ISearchCheck check, out List<GridEntity> intersectedEntities)
         {
@@ -155,6 +248,30 @@ namespace NexusForever.WorldServer.Game.Map
                     var searchVector = new Vector3(x, 0f, z);
                     // don't activate new grids during search
                     GetGrid(searchVector)?.Search(searchVector, check, intersectedEntities);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return all <see cref="MapGrid"/>'s from <see cref="Vector3"/> in range.
+        /// </summary>
+        public void GridSearch(Vector3 vector, float radius, out List<MapGrid> intersectedGrids)
+        {
+            // negative radius is unlimited distance
+            if (radius < 0)
+            {
+                intersectedGrids = GetActiveGrids().ToList();
+                return;
+            }
+
+            intersectedGrids = new List<MapGrid>();
+            for (float z = vector.Z - radius; z < vector.Z + radius + MapDefines.GridSize; z += MapDefines.GridSize)
+            {
+                for (float x = vector.X - radius; x < vector.X + radius + MapDefines.GridSize; x += MapDefines.GridSize)
+                {
+                    MapGrid grid = GetGrid(new Vector3(x, 0f, z));
+                    if (grid != null)
+                        intersectedGrids.Add(grid);
                 }
             }
         }
@@ -210,6 +327,12 @@ namespace NexusForever.WorldServer.Game.Map
             return GetGrid(gridX, gridZ);
         }
 
+        protected IEnumerable<MapGrid> GetActiveGrids()
+        {
+            return activeGrids
+                .Select(g => GetGrid(g.GridX, g.GridZ));
+        }
+
         /// <summary>
         /// Activate one or more <see cref="MapGrid"/>'s at <see cref="Vector"/> depending on vision range of <see cref="GridEntity"/>.
         /// </summary>
@@ -233,61 +356,67 @@ namespace NexusForever.WorldServer.Game.Map
         /// </summary>
         private void ActivateGrid(uint gridX, uint gridZ)
         {
-            var grid = new MapGrid(gridX, gridZ);
+            // instance grids are not unloaded, the entire instance is unloaded instead during inactivity
+            var grid = new MapGrid(gridX, gridZ, this is not MapInstance);
             grids[gridZ * MapDefines.WorldGridCount + gridX] = grid;
             activeGrids.Add(grid.Coord);
 
             log.Trace($"Activated grid at X:{gridX}, Z:{gridZ}.");
 
+            SpawnGrid(gridX, gridZ);
+        }
+
+        protected virtual void SpawnGrid(uint gridX, uint gridZ)
+        {
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
                 // non issue once all entities types are handled
                 WorldEntity entity = EntityManager.Instance.NewEntity((EntityType)model.Type) ?? EntityManager.Instance.NewEntity(EntityType.Simple);
                 entity.Initialise(model);
 
-                var vector = new Vector3(model.X, model.Y, model.Z);
-                EnqueueAdd(entity, vector);
+                var position = new MapPosition
+                {
+                    Position = new Vector3(model.X, model.Y, model.Z)
+                };
+
+                if (CanEnter(entity, position))
+                    EnqueueAdd(entity, position);
             }
         }
 
-        /// <summary>
-        /// Deactivate single <see cref="MapGrid"/>.
-        /// </summary>
-        private bool DeactivateGrid(MapGrid grid)
+        private bool CanAddEntity(GridEntity entity, Vector3 vector)
         {
-            if (!grid.Unload())
+            ActivateGrid(entity, vector);
+
+            // if the grid doesn't exist we can't add the new entity to it
+            MapGrid grid = GetGrid(vector);
+            if (grid == null)
                 return false;
 
-            grids[grid.Coord.Z * MapDefines.WorldGridCount + grid.Coord.X] = null;
+            // if the grid is unloading we can't add the new entity to it
+            // we will need to wait for the grid to fully unload
+            if (grid.UnloadStatus.HasValue)
+                return false;
 
-            log.Trace($"Deactivated grid at X:{grid.Coord.X}, Z:{grid.Coord.Z}.");
             return true;
         }
 
-        private bool AddEntity(GridEntity entity, Vector3 vector)
+        protected virtual void AddEntity(GridEntity entity, Vector3 vector)
         {
             Debug.Assert(entity.Map == null);
 
-            ActivateGrid(entity, vector);
             MapGrid grid = GetGrid(vector);
-
-            // if the grid is unloading we can't add the new entity to it
-            // we will need to wait for the grid to fully unload before adding
-            // push the action to the back of the queue and try again in the future
-            if (grid.PendingUnload)
-                return false;
-
             grid.AddEntity(entity, vector);
 
             uint guid = entityCounter.Dequeue();
             entities.Add(guid, entity);
+
             entity.OnAddToMap(this, guid, vector);
 
             log.Trace($"Added entity {entity.Guid} to map {Entry.Id}.");
-            return true;
         }
 
-        private void RemoveEntity(GridEntity entity)
+        protected virtual void RemoveEntity(GridEntity entity)
         {
             Debug.Assert(entity.Map != null);
 
@@ -297,10 +426,11 @@ namespace NexusForever.WorldServer.Game.Map
 
             entityCounter.Enqueue(entity.Guid);
             entities.Remove(entity.Guid);
+
             entity.OnRemoveFromMap();
         }
 
-        private void RelocateEntity(GridEntity entity, Vector3 vector)
+        protected virtual void RelocateEntity(GridEntity entity, Vector3 vector)
         {
             Debug.Assert(entity.Map != null);
 

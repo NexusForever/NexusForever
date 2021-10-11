@@ -7,11 +7,11 @@ namespace NexusForever.WorldServer.Network.Message.Model
     [Message(GameMessageOpcode.ClientHousingCrateAllDecor)]
     public class ClientHousingCrateAllDecor : IReadable
     {
-        public TargetPlayerIdentity TargetPlayer { get; } = new TargetPlayerIdentity();
+        public TargetResidence TargetResidence { get; } = new();
 
         public void Read(GamePacketReader reader)
         {
-            TargetPlayer.Read(reader);
+            TargetResidence.Read(reader);
         }
     }
 }

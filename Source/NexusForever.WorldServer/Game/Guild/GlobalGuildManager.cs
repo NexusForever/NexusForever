@@ -13,8 +13,10 @@ using NexusForever.Shared.Database;
 using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Guild.Static;
+using NexusForever.WorldServer.Game.Housing;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Guild
@@ -32,15 +34,15 @@ namespace NexusForever.WorldServer.Game.Guild
         public ulong NextGuildId => nextGuildId++;
         private ulong nextGuildId;
 
-        private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new Dictionary<ulong, GuildBase>();
-        private readonly Dictionary<string, ulong> guildNameCache = new Dictionary<string, ulong>(StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<ulong, List<ulong>> guildMemberCache = new Dictionary<ulong, List<ulong>>();
+        private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new();
+        private readonly Dictionary<string, ulong> guildNameCache = new(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<ulong, List<ulong>> guildMemberCache = new();
 
         private ImmutableDictionary<GuildOperation, (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate)> guildOperationHandlers;
         private delegate GuildResultInfo GuildOperationHandlerResultDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
         private delegate void GuildOperationHandlerDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
 
-        private readonly UpdateTimer saveTimer = new UpdateTimer(SaveDuration);
+        private readonly UpdateTimer saveTimer = new(SaveDuration);
 
         /// <summary>
         /// Initialise the <see cref="GlobalGuildManager"/>, and build cache of all existing guilds
@@ -173,6 +175,8 @@ namespace NexusForever.WorldServer.Game.Guild
                     if (guild.PendingDelete)
                     {
                         guilds.Remove(guild.Id);
+                        guildNameCache.Remove(guild.Name);
+
                         if (guild.PendingCreate)
                             continue;
                     }
@@ -186,12 +190,41 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
+        /// Validate all <see cref="Community"/> to make sure they have a corrosponding residence.
+        /// </summary>
+        /// <remarks>
+        /// This function is mainly here for migrating communities created before the implementation of community plots.
+        /// If this happens normally there could be a bigger issue.
+        /// </remarks>
+        public void ValidateCommunityResidences()
+        {
+            foreach (GuildBase guild in guilds.Values)
+            {
+                if (guild is not Community community)
+                    continue;
+
+                if (community.Residence != null)
+                    continue;
+
+                community.Residence = GlobalResidenceManager.Instance.CreateCommunity(community);
+                log.Warn($"Created new residence {community.Residence.Id} for Community {community.Id} which was missing a residence!");
+            }
+        }
+
+        /// <summary>
         /// Returns <see cref="GuildBase"/> with supplied id.
         /// </summary>
         public GuildBase GetGuild(ulong guildId)
         {
-            guilds.TryGetValue(guildId, out GuildBase guild);
-            return guild;
+            return guilds.TryGetValue(guildId, out GuildBase guild) ? guild : null;
+        }
+
+        /// <summary>
+        /// Returns <see cref="GuildBase"/> with supplied id.
+        /// </summary>
+        public T GetGuild<T>(ulong guildId) where T : GuildBase
+        {
+            return guilds.TryGetValue(guildId, out GuildBase guild) ? (T)guild : null;
         }
 
         /// <summary>
@@ -200,6 +233,14 @@ namespace NexusForever.WorldServer.Game.Guild
         public GuildBase GetGuild(string name)
         {
             return guildNameCache.TryGetValue(name, out ulong guildId) ? GetGuild(guildId) : null;
+        }
+
+        /// <summary>
+        /// Returns <see cref="GuildBase"/> with supplied name.
+        /// </summary>
+        public T GetGuild<T>(string name) where T : GuildBase
+        {
+            return guildNameCache.TryGetValue(name, out ulong guildId) ? (T)GetGuild(guildId) : null;
         }
 
         /// <summary>
@@ -270,8 +311,12 @@ namespace NexusForever.WorldServer.Game.Guild
                     guild = new ArenaTeam(type, name, leaderRankName, councilRankName, memberRankName);
                     break;
                 case GuildType.Community:
-                    guild = new Community(name, leaderRankName, councilRankName, memberRankName);
+                {
+                    var community = new Community(name, leaderRankName, councilRankName, memberRankName);
+                    community.Residence = GlobalResidenceManager.Instance.CreateCommunity(community);
+                    guild = community;
                     break;
+                }
                 default:
                     throw new ArgumentException();
             }
@@ -292,9 +337,12 @@ namespace NexusForever.WorldServer.Game.Guild
 
                 player.Session.EnqueueMessageEncrypted(new ServerChat
                 {
-                    Channel = ChatChannelType.Debug,
-                    Name    = "GuildManager",
-                    Text    = $"{operation.Operation} not implemented!",
+                    Channel  = new Channel
+                    {
+                        Type = ChatChannelType.Debug
+                    },
+                    FromName = "GlobalGuildManager",
+                    Text     = $"{operation.Operation} not implemented!",
                 });
 
                 return;

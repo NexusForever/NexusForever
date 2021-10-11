@@ -25,8 +25,8 @@ namespace NexusForever.StsServer.Network
         private Arc4Provider serverNewEncryption;
 
         private FragmentedStsPacket onDeck;
-        private readonly ConcurrentQueue<ClientStsPacket> incomingPackets = new ConcurrentQueue<ClientStsPacket>();
-        private readonly Queue<ServerStsPacket> outgoingPackets = new Queue<ServerStsPacket>();
+        private readonly ConcurrentQueue<ClientStsPacket> incomingPackets = new();
+        private readonly Queue<ServerStsPacket> outgoingPackets = new();
 
         private uint sequence;
 
@@ -64,7 +64,7 @@ namespace NexusForever.StsServer.Network
             }
         }
 
-        protected override void OnData(byte[] data)
+        protected override uint OnData(byte[] data)
         {
             clientEncryption?.Decrypt(data);
 
@@ -85,6 +85,8 @@ namespace NexusForever.StsServer.Network
                     }
                 }
             }
+
+            return 0u;
         }
 
         public override void Update(double lastTick)

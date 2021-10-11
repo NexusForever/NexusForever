@@ -22,8 +22,23 @@ namespace NexusForever.Database.Character
 
         public async Task Save(Action<CharacterContext> action)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             action.Invoke(context);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Save(ISaveCharacter entity)
+        {
+            await using var context = new CharacterContext(config);
+            entity.Save(context);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task Save(IEnumerable<ISaveCharacter> entities)
+        {
+            await using var context = new CharacterContext(config);
+            foreach (ISaveCharacter entity in entities)
+                entity.Save(context);
             await context.SaveChangesAsync();
         }
 
@@ -51,66 +66,54 @@ namespace NexusForever.Database.Character
         public ulong GetNextCharacterId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.Character.DefaultIfEmpty().Max(s => s.Id);
             return context.Character
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public async Task<CharacterModel> GetCharacterById(ulong characterId)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             return await context.Character.FirstOrDefaultAsync(e => e.Id == characterId);
         }
 
         public async Task<CharacterModel> GetCharacterByName(string name)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
             return await context.Character.FirstOrDefaultAsync(e => e.Name == name);
         }
 
         public ulong GetNextItemId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.Item.DefaultIfEmpty().Max(s => s.Id);
             return context.Item
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public ulong GetNextResidenceId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.Residence.DefaultIfEmpty().Max(r => r.Id);
             return context.Residence
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public ulong GetNextDecorId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.ResidenceDecor.DefaultIfEmpty().Max(r => r.DecorId);
             return context.ResidenceDecor
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.DecorId))
-                .ToList()[0];
+                .Select(r => r.DecorId)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public async Task<List<CharacterModel>> GetCharacters(uint accountId)
         {
-            using var context = new CharacterContext(config);
+            await using var context = new CharacterContext(config);
 
             IQueryable<CharacterModel> query = context.Character.Where(c => c.AccountId == accountId);
             await query.SelectMany(c => c.Appearance).LoadAsync();
@@ -161,67 +164,62 @@ namespace NexusForever.Database.Character
             return context.Character.Any(c => c.Name == characterName);
         }
 
-        public async Task<ResidenceModel> GetResidence(ulong residenceId)
-        {
-            using var context = new CharacterContext(config);
-            return await context.Residence
-                .Include(r => r.Decor)
-                .Include(r => r.Plot)
-                .Include(r => r.Character)
-                .SingleOrDefaultAsync(r => r.Id == residenceId);
-        }
-
-        public async Task<ResidenceModel> GetResidence(string name)
-        {
-            using var context = new CharacterContext(config);
-            return await context.Residence
-                .Include(r => r.Decor)
-                .Include(r => r.Plot)
-                .Include(r => r.Character)
-                .SingleOrDefaultAsync(r => r.Character.Name == name);
-        }
-
-        public List<ResidenceModel> GetPublicResidences()
+        public List<ResidenceModel> GetResidences()
         {
             using var context = new CharacterContext(config);
             return context.Residence
+                .Include(r => r.Plot)
+                .Include(r => r.Decor)
                 .Include(r => r.Character)
-                .Where(r => r.PrivacyLevel == 0 && r.Character.OriginalName == null)
+                .Include(r => r.Guild)
+                // only load residences where the owner character or guild hasn't been deleted
+                .Where(r => (r.OwnerId.HasValue && !r.Character.DeleteTime.HasValue) || (r.GuildOwnerId.HasValue && !r.Guild.DeleteTime.HasValue))
                 .ToList();
         }
 
         public ulong GetNextMailId()
         {
             using var context = new CharacterContext(config);
-
-            // see EF bug 17988
-            // return context.CharacterMail.DefaultIfEmpty().Max(s => s.Id);
             return context.CharacterMail
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public ulong GetNextGuildId()
         {
             using var context = new CharacterContext(config);
-
             return context.Guild
-                .GroupBy(i => 1)
-                .Select(g => g.Max(s => s.Id))
-                .ToList()[0];
+                .Select(r => r.Id)
+                .DefaultIfEmpty()
+                .Max();
         }
 
         public List<GuildModel> GetGuilds()
         {
             using var context = new CharacterContext(config);
-
             return context.Guild
                 .Where(g => g.DeleteTime == null)
                 .Include(g => g.GuildRank)
                 .Include(g => g.GuildMember)
                 .Include(g => g.GuildData)
+                .Include(g => g.Achievement)
                 .ToList();
+        }
+
+        public List<ChatChannelModel> GetChatChannels()
+        {
+            using var context = new CharacterContext(config);
+            return context.ChatChannel
+                .Include(c => c.Members)
+                .ToList();
+        }
+
+        public List<CharacterCreateModel> GetCharacterCreationData()
+        {
+            using var context = new CharacterContext(config);
+
+            return context.CharacterCreate.ToList();
         }
     }
 }

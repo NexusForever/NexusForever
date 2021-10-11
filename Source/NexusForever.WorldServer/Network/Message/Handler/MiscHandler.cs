@@ -86,11 +86,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         /// <summary>
-        /// The client sends this after every teleport, when it has entered the world.
+        /// Client sends this when it has received everything it needs to leave the loading screen.
+        /// For housing maps, this also includes things such as residences and plots.
+        /// See 0x732990 in the client for more information.
         /// </summary>
         [MessageHandler(GameMessageOpcode.ClientEnteredWorld)]
         public static void HandleClientEnteredWorld(WorldSession session, ClientEnteredWorld enteredWorld)
         {
+            if (!session.Player.IsLoading)
+                throw new InvalidPacketValueException();
+
+            session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
+            session.Player.IsLoading = false;
         }
     }
 }

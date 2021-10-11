@@ -8,6 +8,7 @@ using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Network.Message;
 using NexusForever.Shared.Network.Message.Model;
 using NexusForever.Shared.Network.Packet;
+using NexusForever.Shared.Network.Static;
 
 namespace NexusForever.Shared.Network
 {
@@ -21,8 +22,8 @@ namespace NexusForever.Shared.Network
         protected PacketCrypt encryption;
 
         private FragmentedBuffer onDeck;
-        private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new ConcurrentQueue<ClientGamePacket>();
-        private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new ConcurrentQueue<ServerGamePacket>();
+        private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new();
+        private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new();
 
         /// <summary>
         /// Enqueue <see cref="IWritable"/> to be sent to the client.
@@ -101,7 +102,7 @@ namespace NexusForever.Shared.Network
             encryption = new PacketCrypt(key);
         }
 
-        protected override void OnData(byte[] data)
+        protected override uint OnData(byte[] data)
         {
             using (var stream = new MemoryStream(data))
             using (var reader = new GamePacketReader(stream))
@@ -111,6 +112,13 @@ namespace NexusForever.Shared.Network
                     // no packet on deck waiting for additional information, new data will be part of a new packet
                     if (onDeck == null)
                     {
+                        if (stream.Remaining() < sizeof(uint))
+                        {
+                            // we don't have enough data to know the length of the next packet
+                            // return the remaining buffer so new data can be appended
+                            return stream.Remaining();
+                        }
+
                         uint size = reader.ReadUInt();
                         onDeck = new FragmentedBuffer(size - sizeof(uint));
                     }
@@ -125,6 +133,8 @@ namespace NexusForever.Shared.Network
                     }
                 }
             }
+
+            return 0u;
         }
 
         protected override void OnDisconnect()
@@ -188,7 +198,7 @@ namespace NexusForever.Shared.Network
                 catch (InvalidPacketValueException exception)
                 {
                     log.Error(exception);
-                    RequestedDisconnect = true;
+                    ForceDisconnect();
                 }
                 catch (Exception exception)
                 {

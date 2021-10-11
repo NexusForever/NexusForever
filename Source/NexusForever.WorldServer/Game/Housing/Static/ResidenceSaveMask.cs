@@ -8,21 +8,23 @@ namespace NexusForever.WorldServer.Game.Housing.Static
     [Flags]
     public enum ResidenceSaveMask
     {
-        None            = 0x0000,
-        Create          = 0x0001,
-        Name            = 0x0002,
-        Wallpaper       = 0x0004,
-        Roof            = 0x0008,
-        Entryway        = 0x0010,
-        Door            = 0x0020,
-        Ground          = 0x0040,
-        Sky             = 0x0080,
-        Flags           = 0x0100,
-        ResourceSharing = 0x0200,
-        GardenSharing   = 0x0400,
-        Decor           = 0x0800,
-        Plot            = 0x1000,
-        PrivacyLevel    = 0x2000,
-        Music           = 0x4000
+        None            = 0x000000,
+        Create          = 0x000001,
+        Name            = 0x000002,
+        Wallpaper       = 0x000004,
+        Roof            = 0x000008,
+        Entryway        = 0x000010,
+        Door            = 0x000020,
+        Ground          = 0x000040,
+        Sky             = 0x000080,
+        Flags           = 0x000100,
+        ResourceSharing = 0x000200,
+        GardenSharing   = 0x000400,
+        Decor           = 0x000800,
+        Plot            = 0x001000,
+        PrivacyLevel    = 0x002000,
+        Music           = 0x004000,
+        PropertyInfo    = 0x008000,
+        GuildOwner      = 0x010000
     }
 }

@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using NexusForever.Shared.Network;
 
 namespace NexusForever.WorldServer.Game.Entity.Network.Command
@@ -8,8 +6,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetVelocityKeys)]
     public class SetVelocityKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new List<uint>();
-        public List<Velocity> Velocities = new List<Velocity>();
+        public List<uint> Times = new();
+        public List<Velocity> Velocities = new();
 
         public byte Type { get; set; }
         public uint Offset { get; set; }
@@ -17,13 +15,12 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
 
         public void Read(GamePacketReader reader)
         {
-            uint Count = reader.ReadUShort(10u);
-            Velocity velocity = new Velocity();
-
-            for (int i = 0; i < Count; i++)
+            uint count = reader.ReadUShort(10u);
+            for (int i = 0; i < count; i++)
                 Times.Add(reader.ReadUInt());
 
-            for (int i = 0; i < Count; i++)
+            var velocity = new Velocity();
+            for (int i = 0; i < count; i++)
             {
                 velocity.Read(reader);
                 Velocities.Add(velocity);
@@ -38,7 +35,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
         {
             writer.Write(Times.Count, 10u);
 
-            foreach (var time in Times)
+            foreach (uint time in Times)
                 writer.Write(time);
 
             Velocities.ForEach(v => v.Write(writer));

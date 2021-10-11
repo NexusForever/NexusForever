@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Game.Entity
     public class GenericUnlockManager : ISaveAuth, IEnumerable<GenericUnlock>
     {
         private readonly WorldSession session;
-        private readonly Dictionary<uint, GenericUnlock> unlocks = new Dictionary<uint, GenericUnlock>();
+        private readonly Dictionary<uint, GenericUnlock> unlocks = new();
 
         /// <summary>
         /// Create a new <see cref="GenericUnlockManager"/> from <see cref="AccountModel"/> database model.

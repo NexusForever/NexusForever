@@ -1,14 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
+using NexusForever.Database.Character.Model;
 using NexusForever.Database.World.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Database;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Quest.Static;
+using NexusForever.WorldServer.Game.Reputation.Static;
 using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Game
@@ -23,22 +27,16 @@ namespace NexusForever.WorldServer.Game
         public ulong NextCharacterId => nextCharacterId++;
 
         /// <summary>
-        /// Id to be assigned to the next created item.
-        /// </summary>
-        public ulong NextItemId => nextItemId++;
-
-        /// <summary>
         /// Id to be assigned to the next created mail.
         /// </summary>
         public ulong NextMailId => nextMailId++;
 
         private ulong nextCharacterId;
-        private ulong nextItemId;
         private ulong nextMailId;
 
+        private ImmutableDictionary<(Race, Faction, CharacterCreationStart), Location> characterCreationData;
         private ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
-        private ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItems;
         private ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
         private ImmutableDictionary</*zoneId*/uint, /*tutorialId*/uint> zoneTutorials;
@@ -53,16 +51,41 @@ namespace NexusForever.WorldServer.Game
         public void Initialise()
         {
             nextCharacterId = DatabaseManager.Instance.CharacterDatabase.GetNextCharacterId() + 1ul;
-            nextItemId      = DatabaseManager.Instance.CharacterDatabase.GetNextItemId() + 1ul;
             nextMailId      = DatabaseManager.Instance.CharacterDatabase.GetNextMailId() + 1ul;
 
+            CacheCharacterCreate();
             CacheCharacterCustomisations();
-            CacheInventoryEquipSlots();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
             CacheTutorials();
             CacheCreatureTargetGroups();
             CacheRewardPropertiesByTier();
+        }
+
+        private void CacheCharacterCreate()
+        {
+            var entries = ImmutableDictionary.CreateBuilder<(Race, Faction, CharacterCreationStart), Location>();
+            foreach (CharacterCreateModel model in DatabaseManager.Instance.CharacterDatabase.GetCharacterCreationData())
+            {
+                entries.Add(((Race)model.Race, (Faction)model.Faction, (CharacterCreationStart)model.CreationStart), new Location
+                (
+                    GameTableManager.Instance.World.GetEntry(model.WorldId),
+                    new Vector3
+                    {
+                        X = model.X,
+                        Y = model.Y,
+                        Z = model.Z
+                    },
+                    new Vector3
+                    {
+                        X = model.Rx,
+                        Y = model.Ry,
+                        Z = model.Rz
+                    }
+                ));
+            }
+
+            characterCreationData = entries.ToImmutable();
         }
 
         private void CacheCharacterCustomisations()
@@ -78,24 +101,6 @@ namespace NexusForever.WorldServer.Game
             }
 
             characterCustomisations = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
-        }
-
-        private void CacheInventoryEquipSlots()
-        {
-            var entries = new Dictionary<ItemSlot, List<EquippedItem>>();
-            foreach (FieldInfo field in typeof(ItemSlot).GetFields())
-            {
-                foreach (EquippedItemAttribute attribute in field.GetCustomAttributes<EquippedItemAttribute>())
-                {
-                    ItemSlot slot = (ItemSlot)field.GetValue(null);
-                    if (!entries.ContainsKey(slot))
-                        entries.Add(slot, new List<EquippedItem>());
-
-                    entries[slot].Add(attribute.Slot);
-                }
-            }
-
-            equippedItems = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
         public void CacheInventoryBagCapacities()
@@ -192,14 +197,6 @@ namespace NexusForever.WorldServer.Game
         }
 
         /// <summary>
-        /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="EquippedItem"/>'s for supplied <see cref="ItemSlot"/>.
-        /// </summary>
-        public ImmutableList<EquippedItem> GetEquippedBagIndexes(ItemSlot slot)
-        {
-            return equippedItems.TryGetValue(slot, out ImmutableList<EquippedItem> entries) ? entries : null;
-        }
-
-        /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="ItemDisplaySourceEntryEntry"/>'s for the supplied itemSource.
         /// </summary>
         public ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
@@ -229,6 +226,14 @@ namespace NexusForever.WorldServer.Game
         public ImmutableList<RewardPropertyPremiumModifierEntry> GetRewardPropertiesForTier(AccountTier tier)
         {
             return rewardPropertiesByTier.TryGetValue(tier, out ImmutableList<RewardPropertyPremiumModifierEntry> entries) ? entries : ImmutableList<RewardPropertyPremiumModifierEntry>.Empty;
+        }
+
+        /// <summary>
+        /// Returns a <see cref="Location"/> describing the starting location for a given <see cref="Race"/>, <see cref="Faction"/> and Creation Type combination.
+        /// </summary>
+        public Location GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart)
+        {
+            return characterCreationData.TryGetValue((race, faction, creationStart), out Location location) ? location : null;
         }
     }
 }

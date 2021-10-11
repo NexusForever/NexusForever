@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using NexusForever.Shared;
-using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Map;
@@ -25,9 +24,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public float ActivationRange { get; protected set; }
 
-        protected readonly Dictionary<uint, GridEntity> visibleEntities = new Dictionary<uint, GridEntity>();
+        protected readonly Dictionary<uint, GridEntity> visibleEntities = new();
 
-        private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = new HashSet<(uint GridX, uint GridZ)>();
+        private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = new();
 
         /// <summary>
         /// Enqueue  <see cref="GridEntity"/> for removal from the <see cref="BaseMap"/>.
@@ -39,19 +38,7 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Remove <see cref="GridEntity"/> from the <see cref="BaseMap"/>.
-        /// </summary>
-        /// <remarks>
-        /// This will remove the entity right away, this should only be used in a few cases such as <see cref="MapGrid"/> unloading.
-        /// </remarks>
-        public void RemoveFromMapDirect()
-        {
-            Debug.Assert(Map != null);
-            Map.RemoveDirect(this);
-        }
-
-        /// <summary>
-        /// Enqueue  <see cref="GridEntity"/> for relocation on the <see cref="BaseMap"/>.
+        /// Enqueue <see cref="GridEntity"/> for relocation on the <see cref="BaseMap"/>.
         /// </summary>
         public void Relocate(Vector3 position)
         {
@@ -104,7 +91,10 @@ namespace NexusForever.WorldServer.Game.Entity
             visibleGrids.Clear();
 
             Guid        = 0;
-            PreviousMap = new MapInfo(Map.Entry);
+            PreviousMap = new MapInfo
+            {
+                Entry = Map.Entry
+            };
             Map         = null;
         }
 
@@ -117,10 +107,10 @@ namespace NexusForever.WorldServer.Game.Entity
             UpdateVision();
             UpdateGridVision();
 
-            uint worldAreaId = Map.File.GetWorldAreaId(vector);
-            if (Zone?.Id != worldAreaId)
+            uint? worldAreaId = Map.File.GetWorldAreaId(vector);
+            if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
             {
-                Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId);
+                Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId.Value);
                 OnZoneUpdate();
             }
         }
@@ -205,25 +195,17 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Search for all <see cref="MapGrid"/>'s the <see cref="GridEntity"/> can see with the current <see cref="BaseMap"/> vision range.
-        /// </summary>
-        private void GridSearch(Vector3 vector, List<(uint GridX, uint GridZ)> intersectedGrids)
-        {
-            for (float z = vector.Z - Map.VisionRange; z < vector.Z + Map.VisionRange + MapDefines.GridSize; z += MapDefines.GridSize)
-                for (float x = vector.X - Map.VisionRange; x < vector.X + Map.VisionRange + MapDefines.GridSize; x += MapDefines.GridSize)
-                    intersectedGrids.Add(MapGrid.GetGridCoord(new Vector3(x, 0f, z)));
-        }
-
-        /// <summary>
         /// Update all <see cref="MapGrid"/>'s in vision range.
         /// </summary>
         private void UpdateGridVision()
         {
-            var intersectedGrids = new List<(uint GridX, uint GridZ)>();
-            GridSearch(Position, intersectedGrids);
+            Map.GridSearch(Position, Map.VisionRange, out List<MapGrid> intersectedGrids);
+            List<(uint X, uint Z)> visibleGridCoords = intersectedGrids
+                .Select(g => g.Coord)
+                .ToList();
 
             // new grids now in vision range
-            foreach ((uint gridX, uint gridZ) in intersectedGrids.Except(visibleGrids))
+            foreach ((uint gridX, uint gridZ) in visibleGridCoords.Except(visibleGrids))
             {
                 visibleGrids.Add((gridX, gridZ));
                 if (this is Player)
@@ -231,7 +213,7 @@ namespace NexusForever.WorldServer.Game.Entity
             }
 
             // old grids now out of vision range
-            foreach ((uint gridX, uint gridZ) in visibleGrids.Except(intersectedGrids).ToList())
+            foreach ((uint gridX, uint gridZ) in visibleGrids.Except(visibleGridCoords).ToList())
                 RemoveVisible(gridX, gridZ);
         }
 

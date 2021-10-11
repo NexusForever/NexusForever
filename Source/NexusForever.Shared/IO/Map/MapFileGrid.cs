@@ -13,7 +13,7 @@ namespace NexusForever.Shared.IO.Map
         public uint X { get; protected set; }
         public uint Y { get; protected set; }
 
-        protected readonly Dictionary<uint /*hash*/, MapFileCell> cells = new Dictionary<uint, MapFileCell>();
+        protected readonly Dictionary<uint /*hash*/, MapFileCell> cells = new();
 
         private static (uint cellX, uint cellY) GetCellCoord(Vector3 vector)
         {
@@ -43,12 +43,12 @@ namespace NexusForever.Shared.IO.Map
         }
 
         /// <summary>
-        /// Return world area id at supplied position.
+        /// Return world zone id at supplied position.
         /// </summary>
-        public uint GetWorldAreaId(Vector3 vector)
+        public uint? GetWorldZoneId(Vector3 vector)
         {
             MapFileCell cell = GetCell(vector);
-            return cell?.GetWorldAreaIds()?.FirstOrDefault(worldAreaId => worldAreaId != 0u) ?? 0u;
+            return cell?.GetWorldZoneId(vector);
         }
 
         /// <summary>

@@ -3,18 +3,19 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.Guild.Static;
-using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Game.Guild
 {
-    public partial class Guild : GuildBase
+    public partial class Guild : GuildChat
     {
         public override uint MaxMembers => 40u;
 
         public GuildStandard Standard { get; }
+        public GuildAchievementManager AchievementManager { get; }
 
         public string MessageOfTheDay
         {
@@ -40,18 +41,18 @@ namespace NexusForever.WorldServer.Game.Guild
 
         private GuildSaveMask saveMask;
 
-        private ChatChannel memberChannel;
-        private ChatChannel officerChannel;
-
         /// <summary>
         /// Create a new <see cref="Guild"/> from an existing database model.
         /// </summary>
         public Guild(GuildModel model) 
             : base(model)
         {
-            Standard        = new GuildStandard(model.GuildData);
-            messageOfTheDay = model.GuildData.MessageOfTheDay;
-            additionalInfo  = model.GuildData.AdditionalInfo;
+            Standard           = new GuildStandard(model.GuildData);
+            AchievementManager = new GuildAchievementManager(this, model);
+            messageOfTheDay    = model.GuildData.MessageOfTheDay;
+            additionalInfo     = model.GuildData.AdditionalInfo;
+
+            InitialiseChatChannels(ChatChannelType.Guild, ChatChannelType.GuildOfficer);
         }
 
         /// <summary>
@@ -60,15 +61,12 @@ namespace NexusForever.WorldServer.Game.Guild
         public Guild(string name, string leaderRankName, string councilRankName, string memberRankName, GuildStandard standard)
             : base(GuildType.Guild, name, leaderRankName, councilRankName, memberRankName)
         {
-            Standard        = standard;
-            messageOfTheDay = "";
-            additionalInfo  = "";
-        }
+            Standard           = standard;
+            AchievementManager = new GuildAchievementManager(this);
+            messageOfTheDay    = "";
+            additionalInfo     = "";
 
-        protected override void InitialiseChatChannels()
-        {
-            memberChannel  = SocialManager.Instance.RegisterChatChannel(ChatChannelType.Guild, Id);
-            officerChannel = SocialManager.Instance.RegisterChatChannel(ChatChannelType.GuildOfficer, Id);
+            InitialiseChatChannels(ChatChannelType.Guild, ChatChannelType.GuildOfficer);
         }
 
         protected override void Save(CharacterContext context, GuildBaseSaveMask baseSaveMask)
@@ -108,6 +106,8 @@ namespace NexusForever.WorldServer.Game.Guild
 
                 saveMask = GuildSaveMask.None;
             }
+
+            AchievementManager.Save(context);
         }
 
         public override GuildData Build()
@@ -131,24 +131,17 @@ namespace NexusForever.WorldServer.Game.Guild
             };
         }
 
-        protected override void MemberOnline(GuildMember member)
+        /// <summary>
+        /// Set if taxes are enabled for <see cref="Guild"/>.
+        /// </summary>
+        public void SetTaxes(bool enabled)
         {
-            if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
-                memberChannel.AddMember(member.CharacterId);
-            if (member.Rank.HasPermission(GuildRankPermission.OfficerChat))
-                officerChannel.AddMember(member.CharacterId);
+            if (enabled)
+                SetFlag(GuildFlag.Taxes);
+            else
+                RemoveFlag(GuildFlag.Taxes);
 
-            base.MemberOnline(member);
-        }
-
-        protected override void MemberOffline(GuildMember member)
-        {
-            if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
-                memberChannel.RemoveMember(member.CharacterId);
-            if (member.Rank.HasPermission(GuildRankPermission.OfficerChat))
-                officerChannel.RemoveMember(member.CharacterId);
-
-            base.MemberOffline(member);
+            SendGuildFlagUpdate();
         }
     }
 }

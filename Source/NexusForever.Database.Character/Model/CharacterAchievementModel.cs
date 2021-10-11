@@ -2,7 +2,7 @@
 
 namespace NexusForever.Database.Character.Model
 {
-    public class CharacterAchievementModel
+    public class CharacterAchievementModel : IAchievementModel
     {
         public ulong Id { get; set; }
         public ushort AchievementId { get; set; }

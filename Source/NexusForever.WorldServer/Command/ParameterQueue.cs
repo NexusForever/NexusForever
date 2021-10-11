@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Command
         public string BreadcrumbTrail => string.Join(' ', breadcrumbs.Reverse());
 
         private readonly Queue<string> queue;
-        private readonly Stack<string> breadcrumbs = new Stack<string>();
+        private readonly Stack<string> breadcrumbs = new();
 
         /// <summary>
         /// Create a new <see cref="ParameterQueue"/> from an array of parameters.

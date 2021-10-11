@@ -24,14 +24,12 @@ namespace NexusForever.WorldServer.Game.Quest
             get => state;
             set
             {
+                QuestState oldState = state;
+
                 state = value;
                 saveMask |= QuestSaveMask.State;
 
-                player.Session.EnqueueMessageEncrypted(new ServerQuestStateChange
-                {
-                    QuestId    = Id,
-                    QuestState = State
-                });
+                OnStateChange(oldState);
             }
         }
 
@@ -86,7 +84,7 @@ namespace NexusForever.WorldServer.Game.Quest
         private QuestSaveMask saveMask;
 
         private readonly Player player;
-        private readonly List<QuestObjective> objectives = new List<QuestObjective>();
+        private readonly List<QuestObjective> objectives = new();
 
         private UpdateTimer questTimer;
 
@@ -230,6 +228,14 @@ namespace NexusForever.WorldServer.Game.Quest
         }
 
         /// <summary>
+        /// Returns if <see cref="Quest"/> can be deleted from DB.
+        /// </summary>
+        public bool CanDelete()
+        {
+            return Info.IsQuestMentioned != true;
+        }
+
+        /// <summary>
         /// Returns if <see cref="Quest"/> can be abandoned.
         /// </summary>
         public bool CanAbandon()
@@ -251,7 +257,7 @@ namespace NexusForever.WorldServer.Game.Quest
             if (Info.Entry.QuestShareEnum == 0u)
                 return false;
 
-            return State == QuestState.Accepted || State == QuestState.Achieved || State == QuestState.Completed;
+            return State is QuestState.Accepted or QuestState.Achieved or QuestState.Completed;
         }
 
         /// <summary>
@@ -262,9 +268,12 @@ namespace NexusForever.WorldServer.Game.Quest
             if (PendingDelete)
                 return;
 
+            if (State == QuestState.Achieved)
+                return;
+
             // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (QuestObjective objective in objectives
-                .Where(o => o.Entry.Type == (uint)type && o.Entry.Data == data)
+                .Where(o => o.ObjectiveInfo.Entry.Type == (uint)type && o.ObjectiveInfo.Entry.Data == data)
                 .OrderByDescending(o => o.Index))
             {
                 if (objective.IsComplete())
@@ -273,11 +282,18 @@ namespace NexusForever.WorldServer.Game.Quest
                 if (!CanUpdateObjective(objective))
                     continue;
 
+                uint oldProgress = objective.Progress;
                 objective.ObjectiveUpdate(progress);
-                SendQuestObjectiveUpdate(objective);
+
+                if (objective.Progress != oldProgress)
+                    SendQuestObjectiveUpdate(objective);
             }
 
-            if (objectives.All(o => o.IsComplete()) && State != QuestState.Achieved)
+            // TODO: Should you be able to complete optional objectives after required are completed?
+            if (RequiredObjectivesComplete())
+                CompleteOptionalObjectives();
+
+            if (objectives.All(o => o.IsComplete()))
                 State = QuestState.Achieved;
         }
 
@@ -289,7 +305,10 @@ namespace NexusForever.WorldServer.Game.Quest
             if (PendingDelete)
                 return;
 
-            QuestObjective objective = objectives.SingleOrDefault(i => i.Entry.Id == id);
+            if (State == QuestState.Achieved)
+                return;
+
+            QuestObjective objective = objectives.SingleOrDefault(o => o.ObjectiveInfo.Id == id);
             if (objective == null)
                 return;
 
@@ -299,8 +318,15 @@ namespace NexusForever.WorldServer.Game.Quest
             if (!CanUpdateObjective(objective))
                 return;
 
+            uint oldProgress = objective.Progress;
             objective.ObjectiveUpdate(progress);
-            SendQuestObjectiveUpdate(objective);
+
+            if (objective.Progress != oldProgress)
+                SendQuestObjectiveUpdate(objective);
+
+            // TODO: Should you be able to complete optional objectives after required are completed?
+            if (RequiredObjectivesComplete())
+                CompleteOptionalObjectives();
 
             if (objectives.All(o => o.IsComplete()))
                 State = QuestState.Achieved;
@@ -308,8 +334,7 @@ namespace NexusForever.WorldServer.Game.Quest
 
         private bool CanUpdateObjective(QuestObjective objective)
         {
-            // sequential objectives
-            if ((objective.Entry.Flags & 0x02) != 0)
+            if (objective.ObjectiveInfo.IsSequential())
             {
                 for (int i = 0; i < objective.Index; i++)
                     if (!objectives[i].IsComplete())
@@ -320,14 +345,52 @@ namespace NexusForever.WorldServer.Game.Quest
             return true;
         }
 
+        private bool RequiredObjectivesComplete()
+        {
+            return objectives
+                .Where(o => !o.ObjectiveInfo.IsOptional())
+                .All(o => o.IsComplete());
+        }
+
+        private void CompleteOptionalObjectives()
+        {
+            foreach (QuestObjective objective in objectives
+                .Where(o => o.ObjectiveInfo.IsOptional() && !o.IsComplete()))
+            {
+                objective.Complete();
+                SendQuestObjectiveUpdate(objective);
+            }
+        }
+
         private void SendQuestObjectiveUpdate(QuestObjective objective)
         {
+            // Only update objectives if the state isn't complete. Some scripts will complete quest without objective update.
+            if (State == QuestState.Completed)
+                return;
+
             player.Session.EnqueueMessageEncrypted(new ServerQuestObjectiveUpdate
             {
                 QuestId   = Id,
                 Index     = objective.Index,
                 Completed = objective.Progress
             });
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="QuestState"/> for <see cref="Quest"/> is updated.
+        /// </summary>
+        private void OnStateChange(QuestState oldState)
+        {
+            player.Session.EnqueueMessageEncrypted(new ServerQuestStateChange
+            {
+                QuestId    = Id,
+                QuestState = State
+            });
+
+            // check if this quest and state is a trigger for a new communicator message
+            foreach (CommunicatorMessage message in GlobalQuestManager.Instance.GetQuestCommunicatorQuestStateTriggers(Id, state))
+                if (message.Meets(player))
+                    player.QuestManager.QuestMention(message.QuestId);
         }
 
         public IEnumerator<QuestObjective> GetEnumerator()

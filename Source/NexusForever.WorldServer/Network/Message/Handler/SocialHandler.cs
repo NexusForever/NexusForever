@@ -9,6 +9,7 @@ using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
@@ -37,7 +38,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
             }
             else
-                SocialManager.Instance.HandleClientChat(session, chat);
+                GlobalChatManager.Instance.HandleClientChat(session, chat);
         }
 
         [MessageHandler(GameMessageOpcode.ClientEmote)]
@@ -67,9 +68,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientWhoRequest)]
         public static void HandleWhoRequest(WorldSession session, ClientWhoRequest request)
         {
-            List<ServerWhoResponse.WhoPlayer> players = new List<ServerWhoResponse.WhoPlayer>
+            var players = new List<ServerWhoResponse.WhoPlayer>
             {
-                new ServerWhoResponse.WhoPlayer
+                new()
                 {
                     Name = session.Player.Name,
                     Level = session.Player.Level,
@@ -91,7 +92,116 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientChatWhisper)]
         public static void HandleWhisper(WorldSession session, ClientChatWhisper whisper)
         {
-            SocialManager.Instance.HandleWhisperChat(session, whisper);
+            GlobalChatManager.Instance.HandleWhisperChat(session, whisper);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatJoin)]
+        public static void HandleChatJoin(WorldSession session, ClientChatJoin chatJoin)
+        {
+            ChatResult result = session.Player.ChatManager.CanJoin(chatJoin.Name, chatJoin.Password);
+            if (result != ChatResult.Ok)
+            {
+                session.EnqueueMessageEncrypted(new ServerChatJoinResult
+                {
+                    Type   = chatJoin.Type,
+                    Name   = chatJoin.Name,
+                    Result = result
+                });
+                return;
+            }
+
+            session.Player.ChatManager.Join(chatJoin.Name, chatJoin.Password);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatLeave)]
+        public static void HandleChatLeave(WorldSession session, ClientChatLeave chatLeave)
+        {
+            ChatResult result = session.Player.ChatManager.CanLeave(chatLeave.Channel.ChatId);
+            if (result != ChatResult.Ok)
+            {
+                GlobalChatManager.Instance.SendChatResult(session, chatLeave.Channel.Type, chatLeave.Channel.ChatId, result);
+                return;
+            }
+
+            session.Player.ChatManager.Leave(chatLeave.Channel.ChatId, ChatChannelLeaveReason.Leave);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatKick)]
+        public static void HandleChatKick(WorldSession session, ClientChatKick chatKick)
+        {
+            ChatResult result = session.Player.ChatManager.CanKick(chatKick.Channel.ChatId, chatKick.CharacterName);
+            if (result != ChatResult.Ok)
+            {
+                GlobalChatManager.Instance.SendChatResult(session, chatKick.Channel.Type, chatKick.Channel.ChatId, result);
+                return;
+            }
+
+            session.Player.ChatManager.Kick(chatKick.Channel.ChatId, chatKick.CharacterName);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatList)]
+        public static void HandleChatList(WorldSession session, ClientChatList chatList)
+        {
+            ChatResult result = session.Player.ChatManager.CanListMembers(chatList.Channel.ChatId);
+            if (result != ChatResult.Ok)
+            {
+                GlobalChatManager.Instance.SendChatResult(session, chatList.Channel.Type, chatList.Channel.ChatId, result);
+                return;
+            }
+
+            session.Player.ChatManager.ListMembers(chatList.Channel.ChatId);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatPassword)]
+        public static void HandleChatPassword(WorldSession session, ClientChatPassword chatPassword)
+        {
+            ChatResult result = session.Player.ChatManager.CanSetPassword(chatPassword.Channel.ChatId, chatPassword.Password);
+            if (result != ChatResult.Ok)
+            {
+                GlobalChatManager.Instance.SendChatResult(session, chatPassword.Channel.Type, chatPassword.Channel.ChatId, result);
+                return;
+            }
+
+            session.Player.ChatManager.SetPassword(chatPassword.Channel.ChatId, chatPassword.Password);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatOwner)]
+        public static void HandleChatOwner(WorldSession session, ClientChatOwner chatOwner)
+        {
+            ChatResult result = session.Player.ChatManager.CanPassOwner(chatOwner.Channel.ChatId, chatOwner.CharacterName);
+            if (result != ChatResult.Ok)
+            {
+                GlobalChatManager.Instance.SendChatResult(session, chatOwner.Channel.Type, chatOwner.Channel.ChatId, result);
+                return;
+            }
+
+            session.Player.ChatManager.PassOwner(chatOwner.Channel.ChatId, chatOwner.CharacterName);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatModerator)]
+        public static void HandleChatModerator(WorldSession session, ClientChatModerator chatModerator)
+        {
+            ChatResult result = session.Player.ChatManager.CanMakeModerator(chatModerator.Channel.ChatId, chatModerator.CharacterName);
+            if (result != ChatResult.Ok)
+            {
+                GlobalChatManager.Instance.SendChatResult(session, chatModerator.Channel.Type, chatModerator.Channel.ChatId, result);
+                return;
+            }
+
+            session.Player.ChatManager.MakeModerator(chatModerator.Channel.ChatId, chatModerator.CharacterName, chatModerator.Status);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientChatMute)]
+        public static void HandleChatMute(WorldSession session, ClientChatMute chatMute)
+        {
+            ChatResult result = session.Player.ChatManager.CanMute(chatMute.Channel.ChatId, chatMute.CharacterName);
+            if (result != ChatResult.Ok)
+            {
+                GlobalChatManager.Instance.SendChatResult(session, chatMute.Channel.Type, chatMute.Channel.ChatId, result);
+                return;
+            }
+
+            session.Player.ChatManager.Mute(chatMute.Channel.ChatId, chatMute.CharacterName, chatMute.Status);
         }
     }
 }

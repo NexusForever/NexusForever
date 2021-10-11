@@ -269,11 +269,14 @@ namespace NexusForever.Shared.GameTable
         [GameData("Item2.tbl")]
         public GameTable<Item2Entry> Item { get; private set; }
 
+        [GameData]
         public GameTable<Item2CategoryEntry> Item2Category { get; private set; }
+
+        [GameData]
         public GameTable<Item2FamilyEntry> Item2Family { get; private set; }
 
-        [GameData("Item2Type.tbl")]
-        public GameTable<Item2TypeEntry> ItemType { get; private set; }
+        [GameData]
+        public GameTable<Item2TypeEntry> Item2Type { get; private set; }
 
         public GameTable<ItemBudgetEntry> ItemBudget { get; private set; }
         public GameTable<ItemColorSetEntry> ItemColorSet { get; private set; }
@@ -293,6 +296,8 @@ namespace NexusForever.Shared.GameTable
         public GameTable<ItemRuneInstanceEntry> ItemRuneInstance { get; private set; }
         public GameTable<ItemSetEntry> ItemSet { get; private set; }
         public GameTable<ItemSetBonusEntry> ItemSetBonus { get; private set; }
+
+        [GameData]
         public GameTable<ItemSlotEntry> ItemSlot { get; private set; }
 
         [GameData]
@@ -692,14 +697,14 @@ namespace NexusForever.Shared.GameTable
 
         private async Task LoadGameTablesAsync()
         {
-            List<Exception> exceptions = new List<Exception>();
+            var exceptions = new List<Exception>();
             int loadCount = Environment.ProcessorCount * 2;
             if (loadCount < minimumThreads)
                 loadCount = minimumThreads;
             if (loadCount > maximumThreads)
                 loadCount = maximumThreads;
 
-            List<Task> tasks = new List<Task>();
+            var tasks = new List<Task>();
             async Task WaitForNextTaskToFinish()
             {
                 Task next = await Task.WhenAny(tasks);
@@ -739,7 +744,7 @@ namespace NexusForever.Shared.GameTable
                 return fileName;
             }
 
-            List<PropertyInfo> properties = new List<PropertyInfo>();
+            var properties = new List<PropertyInfo>();
             // It's done this way so we load the text first, because it's huge.
             foreach (PropertyInfo property in typeof(GameTableManager).GetProperties())
             {

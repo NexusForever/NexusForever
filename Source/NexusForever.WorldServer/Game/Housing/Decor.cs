@@ -3,15 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Housing.Static;
+using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Housing
 {
-    public class Decor : ISaveCharacter
+    public class Decor : ISaveCharacter, IBuildable<ServerHousingResidenceDecor.Decor>
     {
-        public ulong Id { get; }
+        public ulong Id => Residence.Id;
         public ulong DecorId { get; }
         public HousingDecorInfoEntry Entry { get; }
 
@@ -99,41 +100,19 @@ namespace NexusForever.WorldServer.Game.Housing
 
         private ushort colourShiftId;
 
+        public Residence Residence { get; }
+
         private DecorSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="Decor"/> from an existing database model.
+        /// Returns if <see cref="Decor"/> is enqueued to be saved to the database.
         /// </summary>
-        public Decor(ResidenceDecor model)
-        {
-            Id            = model.Id;
-            DecorId       = model.DecorId;
-            Entry         = GameTableManager.Instance.HousingDecorInfo.GetEntry(model.DecorInfoId);
-            type          = (DecorType)model.DecorType;
-            plotIndex     = model.PlotIndex;
-            position      = new Vector3(model.X, model.Y, model.Z);
-            rotation      = new Quaternion(model.Qx, model.Qy, model.Qz, model.Qw);
-            scale         = model.Scale;
-            decorParentId = model.DecorParentId;
-            colourShiftId = model.ColourShiftId;
-
-            saveMask = DecorSaveMask.None;
-        }
+        public bool PendingCreate => (saveMask & DecorSaveMask.Create) != 0;
 
         /// <summary>
-        /// Create a new <see cref="Decor"/> from a <see cref="HousingDecorInfoEntry"/> template.
+        /// Returns if <see cref="Decor"/> is enqueued to be deleted from the database.
         /// </summary>
-        public Decor(ulong id, ulong decorId, HousingDecorInfoEntry entry)
-        {
-            Id       = id;
-            DecorId  = decorId;
-            Entry    = entry;
-            type     = DecorType.Crate;
-            position = Vector3.Zero;
-            rotation = Quaternion.Identity;
-
-            saveMask = DecorSaveMask.Create;
-        }
+        public bool PendingDelete => (saveMask & DecorSaveMask.Delete) != 0;
 
         /// <summary>
         /// Enqueue <see cref="Decor"/> to be deleted from the database.
@@ -141,6 +120,62 @@ namespace NexusForever.WorldServer.Game.Housing
         public void EnqueueDelete()
         {
             saveMask = DecorSaveMask.Delete;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Decor"/> from an existing database model.
+        /// </summary>
+        public Decor(Residence residence, ResidenceDecor model, HousingDecorInfoEntry entry)
+        {
+            DecorId       = model.DecorId;
+            Entry         = entry;
+            type          = (DecorType)model.DecorType;
+            plotIndex     = model.PlotIndex;
+            position      = new Vector3(model.X, model.Y, model.Z);
+            rotation      = new Quaternion(model.Qx, model.Qy, model.Qz, model.Qw);
+            scale         = model.Scale;
+            decorParentId = model.DecorParentId;
+            colourShiftId = model.ColourShiftId;
+            Residence     = residence;
+
+            saveMask = DecorSaveMask.None;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Decor"/> from a <see cref="HousingDecorInfoEntry"/> template.
+        /// </summary>
+        public Decor(Residence residence, ulong decorId, HousingDecorInfoEntry entry)
+        {
+            DecorId   = decorId;
+            Entry     = entry;
+            type      = DecorType.Crate;
+            position  = Vector3.Zero;
+            rotation  = Quaternion.Identity;
+            Residence = residence;
+
+            saveMask = DecorSaveMask.Create;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="Decor"/> from an existing <see cref="Decor"/>.
+        /// </summary>
+        /// <remarks>
+        /// Copies all data from the source <see cref="Decor"/> with a new id.
+        /// </remarks>
+        public Decor(Residence residence, Decor decor, ulong decorId)
+        {
+            DecorId       = decorId;
+            Entry         = decor.Entry;
+            type          = decor.Type;
+            plotIndex     = decor.PlotIndex;
+            position      = decor.Position;
+            rotation      = decor.Rotation;
+            scale         = decor.Scale;
+            decorParentId = decor.DecorParentId;
+            colourShiftId = decor.ColourShiftId;
+            Residence     = residence;
+
+            saveMask = DecorSaveMask.Create;
         }
 
         public void Save(CharacterContext context)
@@ -259,6 +294,24 @@ namespace NexusForever.WorldServer.Game.Housing
         {
             Move(DecorType.Crate, Vector3.Zero, Quaternion.Identity, 0f);
             DecorParentId = 0u;
+        }
+
+        public ServerHousingResidenceDecor.Decor Build()
+        {
+            return new()
+            {
+                RealmId       = WorldServer.RealmId,
+                DecorId       = DecorId,
+                ResidenceId   = Residence.Id,
+                DecorType     = Type,
+                PlotIndex     = PlotIndex,
+                Scale         = Scale,
+                Position      = Position,
+                Rotation      = Rotation,
+                DecorInfoId   = Entry.Id,
+                ParentDecorId = DecorParentId,
+                ColourShift   = ColourShiftId
+            };
         }
     }
 }

@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         private readonly Player player;
-        private readonly Dictionary<uint, Datacube> datacubes = new Dictionary<uint, Datacube>();
+        private readonly Dictionary<uint, Datacube> datacubes = new();
 
         /// <summary>
         /// Create a new <see cref="DatacubeManager"/> from an existing database model.

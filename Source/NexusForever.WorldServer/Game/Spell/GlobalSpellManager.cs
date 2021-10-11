@@ -31,8 +31,8 @@ namespace NexusForever.WorldServer.Game.Spell
         private uint nextCastingId = 1;
         private uint nextEffectId = 1;
 
-        private readonly Dictionary<uint, SpellBaseInfo> spellBaseInfoStore = new Dictionary<uint, SpellBaseInfo>();
-        private readonly Dictionary<SpellEffectType, SpellEffectDelegate> spellEffectDelegates =  new Dictionary<SpellEffectType, SpellEffectDelegate>();
+        private readonly Dictionary<uint, SpellBaseInfo> spellBaseInfoStore = new();
+        private readonly Dictionary<SpellEffectType, SpellEffectDelegate> spellEffectDelegates =  new();
 
         // entry caches
         private ImmutableDictionary<uint, ImmutableList<Spell4Entry>> spellEntries;

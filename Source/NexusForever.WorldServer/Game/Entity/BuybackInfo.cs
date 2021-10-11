@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Game.Entity
     public class BuybackInfo : IEnumerable<BuybackItem>
     {
         private uint currentUniqueId;
-        private readonly Dictionary<uint /*UniqueId*/, BuybackItem> buybackItems = new Dictionary<uint, BuybackItem>();
+        private readonly Dictionary<uint /*UniqueId*/, BuybackItem> buybackItems = new();
 
         /// <summary>
         /// Return stored <see cref="BuybackItem"/> with supplied unique id.

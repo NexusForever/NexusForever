@@ -35,6 +35,17 @@ namespace NexusForever.WorldServer.Game.Guild
         }
         private string note;
 
+        public int CommunityPlotReservation
+        {
+            get => communityPlotReservation;
+            set
+            {
+                communityPlotReservation = value;
+                saveMask |= GuildMemberSaveMask.CommunityPlotReservation;
+            }
+        }
+        private int communityPlotReservation;
+
         private GuildMemberSaveMask saveMask;
 
         /// <summary>
@@ -52,12 +63,13 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         public GuildMember(GuildMemberModel model, GuildBase guild, GuildRank guildRank)
         {
-            Guild       = guild;
-            CharacterId = model.CharacterId;
-            rank        = guildRank;
-            note        = model.Note;
+            Guild                    = guild;
+            CharacterId              = model.CharacterId;
+            rank                     = guildRank;
+            note                     = model.Note;
+            communityPlotReservation = model.CommunityPlotReservation;
 
-            saveMask    = GuildMemberSaveMask.None;
+            saveMask = GuildMemberSaveMask.None;
         }
 
         /// <summary>
@@ -65,12 +77,13 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         public GuildMember(GuildBase guild, ulong characterId, GuildRank guildRank, string note = "")
         {
-            Guild       = guild;
-            CharacterId = characterId;
-            rank        = guildRank;
-            this.note   = note;
+            Guild                    = guild;
+            CharacterId              = characterId;
+            rank                     = guildRank;
+            this.note                = note;
+            communityPlotReservation = -1;
 
-            saveMask    = GuildMemberSaveMask.Create;
+            saveMask = GuildMemberSaveMask.Create;
         }
 
         /// <summary>
@@ -108,6 +121,11 @@ namespace NexusForever.WorldServer.Game.Guild
                     model.Note = note;
                     entity.Property(p => p.Note).IsModified = true;
                 }
+                if ((saveMask & GuildMemberSaveMask.CommunityPlotReservation) != 0)
+                {
+                    model.CommunityPlotReservation = communityPlotReservation;
+                    entity.Property(p => p.CommunityPlotReservation).IsModified = true;
+                }
             }
 
             saveMask = GuildMemberSaveMask.None;
@@ -121,16 +139,17 @@ namespace NexusForever.WorldServer.Game.Guild
             ICharacter characterInfo = CharacterManager.Instance.GetCharacterInfo(CharacterId);
             return new NetworkGuildMember
             {
-                Realm              = WorldServer.RealmId,
-                CharacterId        = CharacterId,
-                Rank               = rank.Index,
-                Name               = characterInfo.Name,
-                Sex                = characterInfo.Sex,
-                Class              = characterInfo.Class,
-                Path               = characterInfo.Path,
-                Level              = characterInfo.Level,
-                Note               = Note,
-                LastLogoutTimeDays = characterInfo.GetOnlineStatus() ?? 0f
+                Realm                    = WorldServer.RealmId,
+                CharacterId              = CharacterId,
+                Rank                     = rank.Index,
+                Name                     = characterInfo.Name,
+                Sex                      = characterInfo.Sex,
+                Class                    = characterInfo.Class,
+                Path                     = characterInfo.Path,
+                Level                    = characterInfo.Level,
+                Note                     = Note,
+                LastLogoutTimeDays       = characterInfo.GetOnlineStatus() ?? 0f,
+                CommunityPlotReservation = communityPlotReservation
             };
         }
 

@@ -11,7 +11,7 @@ namespace NexusForever.WorldServer.Game.Map
         public uint GridCount => (uint)entities.Count;
         public uint EntityCount { get; }
 
-        private readonly Dictionary<(uint GridX, uint GridZ), HashSet<EntityModel>> entities = new Dictionary<(uint GridX, uint GridZ), HashSet<EntityModel>>();
+        private readonly Dictionary<(uint GridX, uint GridZ), HashSet<EntityModel>> entities = new();
 
         public EntityCache(ImmutableList<EntityModel> models)
         {

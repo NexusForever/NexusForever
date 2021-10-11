@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         public uint PvpDraws { get; set; }
         public string Note { get; set; }
         public uint Unknown10 { get; set; }
-        public int Unknown11 { get; set; } = -1;
+        public int CommunityPlotReservation { get; set; } = -1;
 
         public void Write(GamePacketWriter writer)
         {
@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             writer.Write(PvpDraws);
             writer.WriteStringWide(Note);
             writer.Write(Unknown10);
-            writer.Write(Unknown11);
+            writer.Write(CommunityPlotReservation);
         }
     }
 }

@@ -79,9 +79,9 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         public abstract uint MaxMembers { get; }
 
-        protected readonly SortedDictionary</*index*/byte, GuildRank> ranks = new SortedDictionary<byte, GuildRank>();
-        protected readonly Dictionary</*characterId*/ulong, GuildMember> members = new Dictionary<ulong, GuildMember>();
-        protected readonly List</*characterId*/ulong> onlineMembers = new List<ulong>();
+        protected readonly SortedDictionary</*index*/byte, GuildRank> ranks = new();
+        protected readonly Dictionary</*characterId*/ulong, GuildMember> members = new();
+        protected readonly List</*characterId*/ulong> onlineMembers = new();
 
         /// <summary>
         /// Create a new <see cref="GuildBase"/> from an existing database model.
@@ -102,13 +102,11 @@ namespace NexusForever.WorldServer.Game.Guild
             {
                 if (!ranks.TryGetValue(memberModel.Rank, out GuildRank rank))
                     throw new DatabaseDataException($"Guild member {memberModel.Id} has an invalid rank {memberModel.Rank} for guild {memberModel.Guild.Id}!");
-
+                
                 var member = new GuildMember(memberModel, this, rank);
                 rank.AddMember(member);
                 members.Add(memberModel.CharacterId, member);
             }
-
-            InitialiseChatChannels();
 
             saveMask = GuildBaseSaveMask.None;
         }
@@ -125,7 +123,6 @@ namespace NexusForever.WorldServer.Game.Guild
             CreateTime = DateTime.Now;
 
             InitialiseRanks(leaderRankName, councilRankName, memberRankName);
-            InitialiseChatChannels();
 
             saveMask = GuildBaseSaveMask.Create;
         }
@@ -135,11 +132,6 @@ namespace NexusForever.WorldServer.Game.Guild
             AddRank(0, leaderRankName, GuildRankPermission.Leader, ulong.MaxValue, ulong.MaxValue, ulong.MaxValue);
             AddRank(1, councilRankName, GuildRankPermission.Council, ulong.MaxValue, ulong.MaxValue, ulong.MaxValue);
             AddRank(9, memberRankName, GuildRankPermission.MemberChat, 0, 0, 0);
-        }
-
-        protected virtual void InitialiseChatChannels()
-        {
-            // deliberately empty
         }
 
         /// <summary>
@@ -293,6 +285,9 @@ namespace NexusForever.WorldServer.Game.Guild
             AnnounceGuildResult(GuildResult.MemberOnline, referenceText: player.Name);
         }
 
+        /// <summary>
+        /// Invoked when a <see cref="GuildMember"/> comes online.
+        /// </summary>
         protected virtual void MemberOnline(GuildMember member)
         {
             onlineMembers.Add(member.CharacterId);
@@ -312,6 +307,9 @@ namespace NexusForever.WorldServer.Game.Guild
             AnnounceGuildResult(GuildResult.MemberOffline, referenceText: player.Name);
         }
 
+        /// <summary>
+        /// Invoked when a <see cref="GuildMember"/> goes offline.
+        /// </summary>
         protected virtual void MemberOffline(GuildMember member)
         {
             onlineMembers.Remove(member.CharacterId);
@@ -346,12 +344,12 @@ namespace NexusForever.WorldServer.Game.Guild
                 log.Trace($"Guild{Id} has no leader, new member {player.CharacterId} will be assigned to leader.");
 
                 LeaderId = player.CharacterId;
-                member   = AddMember(player.CharacterId, 0);
+                member   = AddMember(player, 0);
                 SendGuildResult(player.Session, GuildResult.YouCreated, Id, referenceText: Name);
             }
             else
             {
-                member = AddMember(player.CharacterId);
+                member = AddMember(player);
                 SendGuildResult(player.Session, GuildResult.YouJoined, Id, referenceText: Name);
             }
 
@@ -440,7 +438,7 @@ namespace NexusForever.WorldServer.Game.Guild
 
             if (!disband)
             {
-                SendToOnlineUsers(new ServerGuildMemberRemove
+                Broadcast(new ServerGuildMemberRemove
                 {
                     RealmId        = WorldServer.RealmId,
                     GuildId        = Id,
@@ -622,15 +620,15 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Add a new <see cref="GuildMember"/> with supplied character id.
         /// </summary>
-        private GuildMember AddMember(ulong characterId, byte rank = 9)
+        private GuildMember AddMember(Player player, byte rank = 9)
         {
             if (!ranks.TryGetValue(rank, out GuildRank guildRank))
                 throw new ArgumentException($"Invalid rank {rank} for guild {Id}.");
 
-            if (members.TryGetValue(characterId, out GuildMember member))
+            if (members.TryGetValue(player.CharacterId, out GuildMember member))
             {
                 if (!member.PendingDelete)
-                    throw new InvalidOperationException($"Member {characterId} for guild {Id} already exists!");
+                    throw new InvalidOperationException($"Member {player.CharacterId} for guild {Id} already exists!");
 
                 // rank is pending delete, reuse object
                 member.EnqueueDelete(false);
@@ -638,14 +636,14 @@ namespace NexusForever.WorldServer.Game.Guild
             else
             {
                 // new members default to the lowest rank
-                member = new GuildMember(this, characterId, guildRank);
-                members.Add(characterId, member);
+                member = new GuildMember(this, player.CharacterId, guildRank);
+                members.Add(player.CharacterId, member);
             }
 
             MemberOnline(member);
             guildRank.AddMember(member);
 
-            log.Trace($"Added member {characterId} to guild {Id}.");
+            log.Trace($"Added member {player.CharacterId} to guild {Id}.");
             return member;
         }
 
@@ -685,9 +683,13 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Return <see cref="GuildMember"/> with supplied character name.
         /// </summary>
-        public GuildMember GetMember(string name)
+        public GuildMember GetMember(string memberName)
         {
-            return GetMember(CharacterManager.Instance.GetCharacterIdByName(name));
+            ulong? characterId = CharacterManager.Instance.GetCharacterIdByName(memberName);
+            if (characterId == null)
+                return null;
+
+            return GetMember(characterId.Value);
         }
 
         /// <summary>
@@ -716,15 +718,12 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Send <see cref="IWritable"/> to all online members.
         /// </summary>
-        protected void SendToOnlineUsers(IWritable writable)
+        public void Broadcast(IWritable writable)
         {
             foreach (ulong characterId in onlineMembers)
             {
                 Player player = CharacterManager.Instance.GetPlayer(characterId);
-                if (player?.Session == null)
-                    continue;
-
-                player.Session.EnqueueMessageEncrypted(writable);
+                player?.Session?.EnqueueMessageEncrypted(writable);
             }
         }
 
@@ -733,7 +732,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         private void AnnounceGuildResult(GuildResult result, uint referenceId = 0, string referenceText = "")
         {
-            SendToOnlineUsers(new ServerGuildResult
+            Broadcast(new ServerGuildResult
             {
                 Result        = result,
                 RealmId       = WorldServer.RealmId,
@@ -746,9 +745,9 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Send <see cref="ServerGuildMemberChange"/> to all online members with supplied <see cref="GuildMember"/>.
         /// </summary>
-        private void AnnounceGuildMemberChange(GuildMember member)
+        protected void AnnounceGuildMemberChange(GuildMember member)
         {
-            SendToOnlineUsers(new ServerGuildMemberChange
+            Broadcast(new ServerGuildMemberChange
             {
                 RealmId           = WorldServer.RealmId,
                 GuildId           = Id,
@@ -763,11 +762,39 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         private void AnnounceGuildRankChange()
         {
-            SendToOnlineUsers(new ServerGuildRankChange
+            Broadcast(new ServerGuildRankChange
             {
                 RealmId = WorldServer.RealmId,
                 GuildId = Id,
                 Ranks   = GetGuildRanksPackets().ToList()
+            });
+        }
+
+        protected void SendGuildFlagUpdate()
+        {
+            Broadcast(new ServerGuildFlagUpdate
+            {
+                RealmId = WorldServer.RealmId,
+                GuildId = Id,
+                Value   = (uint)Flags
+            });
+        }
+
+        /// <summary>
+        /// Rename <see cref="GuildBase"/> with supplied name.
+        /// </summary>
+        public virtual void RenameGuild(string name)
+        {
+            Name = name;
+
+            Broadcast(new ServerGuildRename
+            {
+                TargetGuild = new TargetGuild
+                {
+                    RealmId = WorldServer.RealmId,
+                    GuildId = Id
+                },
+                Name = name
             });
         }
 

@@ -10,12 +10,12 @@ namespace NexusForever.Shared.IO.Map
     public class MapFile : IReadable, IEnumerable<MapFileGrid>
     {
         protected const uint Magic   = 0x504D464Eu; // NFMP
-        protected const uint Version = 2u;
+        protected const uint Version = 3u;
         protected const uint Build   = 16042u;
 
         public string Asset { get; protected set; }
 
-        protected readonly Dictionary<uint /*hash*/, MapFileGrid> grids = new Dictionary<uint, MapFileGrid>();
+        protected readonly Dictionary<uint /*hash*/, MapFileGrid> grids = new();
 
         private static (uint gridX, uint gridY) GetGridCoord(Vector3 vector)
         {
@@ -62,13 +62,10 @@ namespace NexusForever.Shared.IO.Map
         /// <summary>
         /// Return world area id at supplied position.
         /// </summary>
-        public uint GetWorldAreaId(Vector3 vector)
+        public uint? GetWorldAreaId(Vector3 vector)
         {
             MapFileGrid grid = GetGrid(vector);
-            if (grid == null)
-                return 0u;
-
-            return grid.GetWorldAreaId(vector);
+            return grid?.GetWorldZoneId(vector);
         }
 
         /// <summary>

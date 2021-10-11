@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
-using NexusForever.Database;
 using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {
-    public class CharacterAchievementManager : BaseAchievementManager
+    public sealed class CharacterAchievementManager : BaseAchievementManager<CharacterAchievementModel>
     {
         private readonly Player owner;
+        protected override ulong OwnerId => owner.CharacterId;
 
         /// <summary>
         /// Create a new <see cref="CharacterAchievementManager"/> from existing <see cref="CharacterModel"/> database model.
@@ -16,40 +16,24 @@ namespace NexusForever.WorldServer.Game.Achievement
         public CharacterAchievementManager(Player owner, CharacterModel model)
         {
             this.owner = owner;
-
-            foreach (CharacterAchievementModel achievementModel in model.Achievement)
-            {
-                AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(achievementModel.AchievementId);
-                if (info == null)
-                    throw new DatabaseDataException($"Character {model.Id} has invalid achievement {achievementModel.AchievementId} stored!");
-
-                if (!info.IsPlayerAchievement)
-                    throw new DatabaseDataException($"Character {model.Id} has guild achievement {achievementModel.AchievementId} stored!");
-
-                var achievement = new CharacterAchievement(achievementModel, info);
-                if (achievement.IsComplete())
-                    AchievementPoints += GetAchievementPoints(achievement.Info);
-
-                achievements.Add(achievement.Id, achievement);
-            }
-        }
-
-        protected override Achievement CreateAchievement(AchievementInfo info)
-        {
-            return new CharacterAchievement(owner.CharacterId, info);
+            Initialise(model.Achievement, true);
         }
 
         /// <summary>
-        /// Send initial <see cref="Achievement"/> information to owner on login.
+        /// Send initial <see cref="Achievement{T}"/> information to owner on login.
         /// </summary>
-        public void SendInitialPackets()
+        /// <remarks>
+        /// Guild achievements will also be sent if owner is part of a <see cref="Guild.Guild"/>.
+        /// </remarks>
+        public override void SendInitialPackets(Player _)
         {
-            SendInitialPackets(owner);
+            base.SendInitialPackets(owner);
+            owner.GuildManager.Guild?.AchievementManager.SendInitialPackets(owner);
         }
 
-        protected override void SendAchievementUpdate(IEnumerable<Achievement> updates)
+        protected override void SendAchievementUpdate(IEnumerable<Achievement<CharacterAchievementModel>> updates)
         {
-            SendAchievementUpdate(owner, updates);
+            owner.Session.EnqueueMessageEncrypted(BuildAchievementUpdate(updates));
         }
 
         /// <summary>
@@ -58,13 +42,10 @@ namespace NexusForever.WorldServer.Game.Achievement
         public override void CheckAchievements(Player target, AchievementType type, uint objectId, uint objectIdAlt = 0u, uint count = 1u)
         {
             CheckAchievements(target, GlobalAchievementManager.Instance.GetCharacterAchievements(type), objectId, objectIdAlt, count);
-
-            // TODO
-            /*if (inGuild)
-                guild.AchievementManager.CheckAchievements(target, GlobalAchievementManager.GetGuildAchievements(type), objectId, objectIdAlt, count);*/
+            target.GuildManager.Guild?.AchievementManager.CheckAchievements(target, type, objectId, objectIdAlt, count);
         }
 
-        protected override void CompleteAchievement(Achievement achievement)
+        protected override void CompleteAchievement(Achievement<CharacterAchievementModel> achievement)
         {
             base.CompleteAchievement(achievement);
 

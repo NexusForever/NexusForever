@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Command.Handler
         [Command(Permission.MovementSpline, "A collection of commands to control entity spline movement.", "spline")]
         public class MovementSplineCategory : CommandCategory
         {
-            private static readonly Dictionary<uint, List<Vector3>> entityNodes = new Dictionary<uint, List<Vector3>>();
+            private static readonly Dictionary<uint, List<Vector3>> entityNodes = new();
 
             [Command(Permission.MovementSplineAdd, "A position to target entity spine nodes.", "add")]
             public void MovementSplineAddHandler(ICommandContext context)

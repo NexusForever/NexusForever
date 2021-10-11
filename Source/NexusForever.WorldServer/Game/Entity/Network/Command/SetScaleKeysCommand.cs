@@ -8,11 +8,11 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetScaleKeys)]
     public class SetScaleKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new List<uint>();
+        public List<uint> Times = new();
         public byte Type { get; set; }
         public uint Offset { get; set; }
         public bool Blend { get; set; }
-        public List<ushort> Scales = new List<ushort>();
+        public List<ushort> Scales = new();
 
         public void Read(GamePacketReader reader)
         {

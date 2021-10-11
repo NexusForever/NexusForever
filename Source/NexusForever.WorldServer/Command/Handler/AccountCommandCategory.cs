@@ -1,6 +1,7 @@
 ﻿using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Command.Context;
+using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -10,13 +11,11 @@ namespace NexusForever.WorldServer.Command.Handler
     {
         [Command(Permission.AccountCreate, "Create a new account.", "create")]
         public void HandleAccountCreate(ICommandContext context,
-            [Parameter("Email address for the new account")]
+            [Parameter("Email address for the new account", converter: typeof(StringLowerParameterConverter))]
             string email,
             [Parameter("Password for the new account")]
             string password)
         {
-            email = email.ToLower();
-
             if (DatabaseManager.Instance.AuthDatabase.AccountExists(email))
             {
                 context.SendMessage("Account with that username already exists. Please try another.");

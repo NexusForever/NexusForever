@@ -11,18 +11,27 @@ namespace NexusForever.WorldServer.Game.Social
 {
     public class ChatMessageBuilder
     {
-        private readonly ChatChannelType channel;
-
-        private readonly StringBuilder builder = new StringBuilder();
-        private readonly List<ChatFormat> formats = new List<ChatFormat>();
-
-        /// <summary>
-        /// Create a new <see cref="ChatMessageBuilder"/> with the supplied <see cref="ChatChannelType"/>.
-        /// </summary>
-        public ChatMessageBuilder(ChatChannelType channel)
+        public ChatChannelType Type { get; set; }
+        public ulong ChatId { get; set; }
+        public bool GM { get; set; }
+        public bool Self { get; set; }
+        public bool AutoResponse { get; set; }
+        public ulong FromCharacterId { get; set; }
+        public ushort FromCharacterRealmId { get; set; }
+        public string FromName { get; set; }
+        public string FromRealm { get; set; }
+        public ChatPresenceState PresenceState { get; set; }
+        public string Text
         {
-            this.channel = channel;
+            get => builder.ToString();
+            set => builder.Append(value);
         }
+        public List<ChatFormat> Formats { get; set; } = new();
+        public bool CrossFaction { get; set; }
+        public uint Guid { get; set; }
+        public byte PremiumTier { get; set; }
+
+        private readonly StringBuilder builder = new();
 
         /// <summary>
         /// Append text to the end of the message.
@@ -41,7 +50,7 @@ namespace NexusForever.WorldServer.Game.Social
                 throw new ArgumentException($"Invalid item entry id {itemId}!");
 
             builder.Append("[I]");
-            formats.Add(new ChatFormat
+            Formats.Add(new ChatFormat
             {
                 Type        = ChatFormatType.ItemItemId,
                 StartIndex  = (ushort)(builder.Length - 3),
@@ -62,7 +71,7 @@ namespace NexusForever.WorldServer.Game.Social
                 throw new ArgumentException($"Invalid quest entry id {questId}!");
 
             builder.Append("[Q]");
-            formats.Add(new ChatFormat
+            Formats.Add(new ChatFormat
             {
                 Type        = ChatFormatType.QuestId,
                 StartIndex  = (ushort)(builder.Length - 3),
@@ -81,9 +90,29 @@ namespace NexusForever.WorldServer.Game.Social
         {
             return new ServerChat
             {
-                Channel = channel,
-                Text    = builder.ToString(),
-                Formats = new List<ChatFormat>(formats)
+                Channel       = new Channel
+                {
+                    Type   = Type,
+                    ChatId = ChatId
+                },
+                GM            = GM,
+                Self          = Self,
+                AutoResponse  = AutoResponse,
+
+                From          = new TargetPlayerIdentity
+                {
+                    RealmId     = FromCharacterRealmId,
+                    CharacterId = FromCharacterId
+                },
+               
+                FromName      = FromName,
+                FromRealm     = FromRealm,
+                PresenceState = PresenceState,
+                Text          = builder.ToString(),
+                Formats       = Formats,
+                CrossFaction  = CrossFaction,
+                Guid          = Guid,
+                PremiumTier   = PremiumTier
             };
         }
     }

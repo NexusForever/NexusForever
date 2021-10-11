@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Game.Spell.Event
     {
         public bool HasPendingEvent => events.Count != 0;
 
-        private readonly List<SpellEvent> events = new List<SpellEvent>();
+        private readonly List<SpellEvent> events = new();
 
         public void Update(double lastTick)
         {

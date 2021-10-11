@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Network.Message;
 using AchievementNetworkModel = NexusForever.WorldServer.Network.Message.Model.Shared.Achievement;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {
-    public abstract class Achievement : ISaveCharacter, IBuildable<AchievementNetworkModel>
+    public class Achievement<T> : ISaveCharacter, IBuildable<AchievementNetworkModel>
+        where T : class, IAchievementModel, new()
     {
         [Flags]
         protected enum SaveMask
@@ -59,28 +62,83 @@ namespace NexusForever.WorldServer.Game.Achievement
 
         protected SaveMask saveMask;
 
-        /// <summary>
-        /// Create a new <see cref="Achievement"/> from <see cref="AchievementInfo"/> and supplied data.
-        /// </summary>
-        protected Achievement(AchievementInfo info, uint data0, uint data1, DateTime? dateCompleted, bool save)
-        {
-            Info               = info;
-            this.data0         = data0;
-            this.data1         = data1;
-            this.dateCompleted = dateCompleted;
+        // this can either be a characterId or guildId depending on the achievement type
+        private readonly ulong ownerId;
 
-            if (save)
-                saveMask |= SaveMask.Create;
+        /// <summary>
+        /// Create a new <see cref="Achievement{T}"/> from an existing database model.
+        /// </summary>
+        public Achievement(AchievementInfo info, IAchievementModel model)
+        {
+            ownerId       = model.Id;
+            Info          = info;
+            data0         = model.Data0;
+            data1         = model.Data1;
+            DateCompleted = model.DateCompleted;
         }
 
-        public abstract void Save(CharacterContext context);
+        /// <summary>
+        /// Create a new <see cref="Achievement{T}"/> from <see cref="AchievementInfo"/> and supplied data.
+        /// </summary>
+        public Achievement(ulong ownerId, AchievementInfo info)
+        {
+            this.ownerId = ownerId;
+            Info         = info;
+
+            saveMask |= SaveMask.Create;
+        }
+
+        public void Save(CharacterContext context)
+        {
+            if (saveMask == SaveMask.None)
+                return;
+
+            if ((saveMask & SaveMask.Create) != 0)
+            {
+                context.Add(new T
+                {
+                    Id            = ownerId,
+                    AchievementId = Id,
+                    Data0         = Data0,
+                    Data1         = Data1,
+                    DateCompleted = DateCompleted
+                });
+            }
+            else
+            {
+                var model = new T
+                {
+                    Id            = ownerId,
+                    AchievementId = Id
+                };
+
+                EntityEntry<T> entity = context.Attach(model);
+                if ((saveMask & SaveMask.Data0) != 0)
+                {
+                    model.Data0 = Data0;
+                    entity.Property(p => p.Data0).IsModified = true;
+                }
+                if ((saveMask & SaveMask.Data1) != 0)
+                {
+                    model.Data1 = Data1;
+                    entity.Property(p => p.Data1).IsModified = true;
+                }
+                if ((saveMask & SaveMask.TimeCompleted) != 0)
+                {
+                    model.DateCompleted = DateCompleted;
+                    entity.Property(p => p.DateCompleted).IsModified = true;
+                }
+            }
+
+            saveMask = SaveMask.None;
+        }
 
         /// <summary>
         /// Build a network model from <see cref="Achievement"/>.
         /// </summary>
         public AchievementNetworkModel Build()
         {
-            return new AchievementNetworkModel
+            return new()
             {
                 AchievementId = Id,
                 Data0         = Data0,

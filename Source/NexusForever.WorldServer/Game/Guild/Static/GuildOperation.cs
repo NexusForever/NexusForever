@@ -23,6 +23,8 @@
         TaxUpdate               = 29,
         RepairLimitChange       = 30,
         InitGuildWindow         = 32,
-        AdditionalInfo          = 33
+        AdditionalInfo          = 33,
+        PlotReservation         = 41,
+        PlotReservationRemoval  = 42
     }
 }

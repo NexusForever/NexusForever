@@ -8,8 +8,8 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetStateKeys)]
     public class SetStateKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new List<uint>();
-        public List<uint> States = new List<uint>();
+        public List<uint> Times = new();
+        public List<uint> States = new();
 
         public uint Offset { get; set; }
 

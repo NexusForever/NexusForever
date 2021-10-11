@@ -7,10 +7,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Model;
 using NexusForever.WorldServer.Game.Social.Static;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
-using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -29,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             quantity ??= 1u;
             charges ??= 1u;
-            context.GetTargetOrInvoker<Player>().Inventory.ItemCreate(itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
+            context.GetTargetOrInvoker<Player>().Inventory.ItemCreate(InventoryLocation.Inventory, itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
         }
 
         [Command(Permission.ItemLookup, "Lookup an item by partial name.", "lookup")]
@@ -55,8 +52,11 @@ namespace NexusForever.WorldServer.Command.Handler
             var target = context.GetTargetOrInvoker<Player>();
             foreach (Item2Entry itemEntry in searchResults)
             {
-                var builder = new ChatMessageBuilder(ChatChannelType.System);
-                builder.AppendText($"({itemEntry.Id}) ");
+                var builder = new ChatMessageBuilder
+                {
+                    Type = ChatChannelType.System,
+                    Text = $"({itemEntry.Id}) "
+                };
                 builder.AppendItem(itemEntry.Id);
                 target.Session.EnqueueMessageEncrypted(builder.Build());
             }

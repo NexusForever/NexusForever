@@ -24,12 +24,12 @@ namespace NexusForever.WorldServer.Game.Entity
     public class MailManager : IUpdate, ISaveCharacter
     {
         private readonly Player player;
-        private readonly Queue<MailItem> outgoingMail = new Queue<MailItem>();
-        private readonly List<MailItem> pendingMail = new List<MailItem>();
-        private readonly Dictionary<ulong, MailItem> availableMail = new Dictionary<ulong, MailItem>();
+        private readonly Queue<MailItem> outgoingMail = new();
+        private readonly List<MailItem> pendingMail = new();
+        private readonly Dictionary<ulong, MailItem> availableMail = new();
 
         // timer to check pending mail ever second
-        private readonly UpdateTimer mailTimer = new UpdateTimer(1000d);
+        private readonly UpdateTimer mailTimer = new(1000d);
 
         /// <summary>
         /// Create a new <see cref="MailManager"/> from existing <see cref="CharacterModel"/> database model.
@@ -186,7 +186,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void SendMail(ClientMailSend mailSend)
         {
-            player.Session.EnqueueEvent(new TaskGenericEvent<CharacterModel>(DatabaseManager.Instance.CharacterDatabase.GetCharacterByName(mailSend.Name),
+            player.Session.Events.EnqueueEvent(new TaskGenericEvent<CharacterModel>(DatabaseManager.Instance.CharacterDatabase.GetCharacterByName(mailSend.Name),
                 targetCharacter =>
             {
                 var items = new List<Item>();
@@ -215,6 +215,9 @@ namespace NexusForever.WorldServer.Game.Entity
                         {
                             Item item = player.Inventory.GetItem(itemGuid);
                             if (item == null)
+                                return GenericError.MailInvalidInventorySlot;
+
+                            if (item.Location == InventoryLocation.Equipped)
                                 return GenericError.MailInvalidInventorySlot;
 
                             // TODO: Check the Item can be traded.
@@ -296,11 +299,11 @@ namespace NexusForever.WorldServer.Game.Entity
             var items = new List<Item>();
             foreach (uint itemId in itemIds)
             {
-                Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
-                if (itemEntry == null)
+                ItemInfo info = ItemManager.Instance.GetItemInfo(itemId);
+                if (info == null)
                     throw new ArgumentException($"Invalid item {itemId} for mail attachment!");
 
-                var item = new Item(null, itemEntry);
+                var item = new Item(null, info);
                 items.Add(item);
             }
 
@@ -506,7 +509,7 @@ namespace NexusForever.WorldServer.Game.Entity
                 if (unitId == 0u || !IsTargetMailBoxInRange(unitId))
                     return GenericError.MailMailBoxOutOfRange;
 
-                if (player.Inventory.IsInventoryFull())
+                if (player.Inventory.IsInventoryFull(InventoryLocation.Inventory))
                     return GenericError.ItemInventoryFull;
 
                 return GenericError.Ok;

@@ -1,4 +1,6 @@
-﻿namespace NexusForever.Shared.Game
+﻿using System;
+
+namespace NexusForever.Shared.Game
 {
     public class UpdateTimer : IUpdate
     {
@@ -16,6 +18,16 @@
             this.duration = duration;
             Time          = duration;
             IsTicking     = start;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="UpdateTimer"/> with supplied starting duration.
+        /// </summary>
+        public UpdateTimer(TimeSpan span, bool start = true)
+        {
+            duration  = span.TotalSeconds;
+            Time      = duration;
+            IsTicking = start;
         }
 
         public void Update(double lastTick)

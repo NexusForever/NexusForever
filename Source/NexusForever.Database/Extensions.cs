@@ -12,7 +12,7 @@ namespace NexusForever.Database
             switch (connectionString.Provider)
             {
                 case DatabaseProvider.MySql:
-                    optionsBuilder.UseMySql(connectionString.ConnectionString, b =>
+                    optionsBuilder.UseMySql(connectionString.ConnectionString, ServerVersion.AutoDetect(connectionString.ConnectionString), b =>
                     {
                         b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
                     });

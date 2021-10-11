@@ -25,7 +25,7 @@ namespace NexusForever.WorldServer.Game.Storefront
         public bool Visible { get; }
         public ImmutableList<Category> Categories { get; }
 
-        private readonly Dictionary</*offerId*/uint, OfferItem> offerItems = new Dictionary<uint, OfferItem>();
+        private readonly Dictionary</*offerId*/uint, OfferItem> offerItems = new();
 
         /// <summary>
         /// Create a new <see cref="OfferGroup"/> from an existing database model.

@@ -163,8 +163,15 @@
         GuildRegister               = 101,
         GuildJoin                   = 102,
 
+        // map
+        Map                         = 103,
+        MapUnload                   = 104,
+        MapPlayerRemove             = 105,
+        MapPlayerRemoveCancel       = 106,
+
         // non command permissions
         InstantLogout               = 10000,
-        Signature                   = 10001
+        Signature                   = 10001,
+        BypassInstanceLimits        = 10002
     }
 }

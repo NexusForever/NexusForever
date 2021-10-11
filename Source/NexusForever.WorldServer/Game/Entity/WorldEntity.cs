@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Game.Entity
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Dictionary<Property, PropertyValue> Properties { get; } = new Dictionary<Property, PropertyValue>();
+        public Dictionary<Property, PropertyValue> Properties { get; } = new();
 
         public uint EntityId { get; protected set; }
         public uint CreatureId { get; protected set; }
@@ -68,9 +68,9 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public uint ControllerGuid { get; set; }
 
-        protected readonly Dictionary<Stat, StatValue> stats = new Dictionary<Stat, StatValue>();
+        protected readonly Dictionary<Stat, StatValue> stats = new();
 
-        private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new Dictionary<ItemSlot, ItemVisual>();
+        private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new();
 
         /// <summary>
         /// Create a new <see cref="WorldEntity"/> with supplied <see cref="EntityType"/>.
@@ -113,7 +113,7 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Invoked each world tick with the delta since the previous tick occured.
+        /// Invoked each world tick with the delta since the previous tick occurred.
         /// </summary>
         public override void Update(double lastTick)
         {
@@ -124,7 +124,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
+            var entityCreatePacket = new ServerEntityCreate
             {
                 Guid         = Guid,
                 Type         = Type,

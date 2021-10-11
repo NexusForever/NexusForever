@@ -11,8 +11,12 @@ namespace NexusForever.WorldServer.Game.Quest
     {
         public Quest2Entry Entry { get; }
         public Quest2DifficultyEntry DifficultyEntry { get; }
-        public ImmutableList<QuestObjectiveEntry> Objectives { get; }
-        public ImmutableDictionary<uint, Quest2RewardEntry> Rewards { get; }
+
+        public ImmutableList<Quest2Entry> PrerequisiteQuests { get; private set; }
+        public ImmutableList<QuestObjectiveInfo> Objectives { get; private set; }
+        public ImmutableDictionary<uint, Quest2RewardEntry> Rewards { get; private set; }
+
+        public bool IsQuestMentioned => GlobalQuestManager.Instance.GetQuestCommunicatorMessages((ushort)Entry.Id).ToList().Count > 0u;
 
         /// <summary>
         /// Create a new <see cref="QuestInfo"/> using supplied <see cref="Quest2Entry"/>.
@@ -22,18 +26,37 @@ namespace NexusForever.WorldServer.Game.Quest
             Entry           = entry;
             DifficultyEntry = GameTableManager.Instance.Quest2Difficulty.GetEntry(Entry.Quest2DifficultyId);
 
-            ImmutableList<QuestObjectiveEntry>.Builder objectiveBuilder = ImmutableList.CreateBuilder<QuestObjectiveEntry>();
-            foreach (uint objectiveId in entry.Objectives.Where(o => o != 0u))
-                objectiveBuilder.Add(GameTableManager.Instance.QuestObjective.GetEntry(objectiveId));
+            InitialisePrerequisiteQuests();
+            InitialiseObjectives();
+            InitialiseRewards();
+        }
 
-            Objectives = objectiveBuilder.ToImmutable();
+        private void InitialisePrerequisiteQuests()
+        {
+            ImmutableList<Quest2Entry>.Builder builder = ImmutableList.CreateBuilder<Quest2Entry>();
+            foreach (uint questId in Entry.PrerequisiteQuests.Where(q => q != 0u))
+                builder.Add(GameTableManager.Instance.Quest2.GetEntry(questId));
 
-            ImmutableDictionary<uint, Quest2RewardEntry>.Builder rewardBuilder = ImmutableDictionary.CreateBuilder<uint, Quest2RewardEntry>();
+            PrerequisiteQuests = builder.ToImmutable();
+        }
+
+        private void InitialiseObjectives()
+        {
+            ImmutableList<QuestObjectiveInfo>.Builder builder = ImmutableList.CreateBuilder<QuestObjectiveInfo>();
+            foreach (uint objectiveId in Entry.Objectives.Where(o => o != 0u))
+                builder.Add(new QuestObjectiveInfo(GameTableManager.Instance.QuestObjective.GetEntry(objectiveId)));
+
+            Objectives = builder.ToImmutable();
+        }
+
+        private void InitialiseRewards()
+        {
+            ImmutableDictionary<uint, Quest2RewardEntry>.Builder builder = ImmutableDictionary.CreateBuilder<uint, Quest2RewardEntry>();
             foreach (Quest2RewardEntry rewardEntry in GameTableManager.Instance.Quest2Reward.Entries
-                .Where(e => e.Quest2Id == entry.Id))
-                rewardBuilder.Add(rewardEntry.Id, rewardEntry);
+                .Where(e => e.Quest2Id == Entry.Id))
+                builder.Add(rewardEntry.Id, rewardEntry);
 
-            Rewards = rewardBuilder.ToImmutable();
+            Rewards = builder.ToImmutable();
         }
 
         public bool IsAutoComplete()
@@ -46,7 +69,12 @@ namespace NexusForever.WorldServer.Game.Quest
         /// </summary>
         public bool IsCommunicatorReceived()
         {
-            return (Entry.Flags & 0x08) != 0;
+            return (Entry.Flags & 0x08) != 0 ;
+        }
+
+        public bool CanBeCalledBack()
+        {
+            return (Entry.Flags & 0x04) != 0;
         }
 
         public bool CannotAbandon()

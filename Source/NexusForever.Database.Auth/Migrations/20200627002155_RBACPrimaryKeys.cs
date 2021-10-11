@@ -7,7 +7,7 @@ namespace NexusForever.Database.Auth.Migrations
         // This migration was manually edited due to a bug #678 in Pomelo.EntityFrameworkCore.MySql
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
+            /*migrationBuilder.DropForeignKey(
                 name: "FK__account_permission_id__account_id",
                 table: "account_permission");
 
@@ -114,12 +114,12 @@ namespace NexusForever.Database.Auth.Migrations
                 principalTable: "permission",
                 principalColumn: "id",
                 onUpdate: ReferentialAction.Restrict,
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade);*/
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
+            /*migrationBuilder.DropForeignKey(
                 name: "FK__account_permission_id__account_id",
                 table: "account_permission");
 
@@ -226,7 +226,7 @@ namespace NexusForever.Database.Auth.Migrations
                 principalTable: "permission",
                 principalColumn: "id",
                 onUpdate: ReferentialAction.Restrict,
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade);*/
         }
     }
 }

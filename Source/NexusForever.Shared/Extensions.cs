@@ -21,7 +21,7 @@ namespace NexusForever.Shared
 
         public static IEnumerable<T> Dequeue<T>(this ConcurrentQueue<T> queue, uint count)
         {
-            for (uint i = 0u; i < count && queue.Count > 0; i++)
+            for (uint i = 0u; i < count && !queue.IsEmpty; i++)
             {
                 queue.TryDequeue(out T result);
                 yield return result;

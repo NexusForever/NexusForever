@@ -3,8 +3,10 @@ using System.Collections.Immutable;
 using NexusForever.Shared.GameTable.Static;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.RBAC.Static;
+using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Context
 {
@@ -56,13 +58,14 @@ namespace NexusForever.WorldServer.Command.Context
             Player player = (Player)Invoker;
             foreach (string line in text.Trim().Split(Environment.NewLine))
             {
-                player.Session.EnqueueMessageEncrypted(new ServerChat
+                var builder = new ChatMessageBuilder
                 {
-                    Guid    = player.Guid,
-                    Channel = ChatChannelType.System,
-                    Name    = name,
-                    Text    = line
-                });
+                    Type     = ChatChannelType.System,
+                    FromName = name,
+                    Text     = line,
+                    Guid     = player.Guid
+                };
+                player.Session.EnqueueMessageEncrypted(builder.Build());
             }
         }
     }

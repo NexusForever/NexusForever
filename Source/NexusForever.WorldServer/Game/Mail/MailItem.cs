@@ -73,8 +73,8 @@ namespace NexusForever.WorldServer.Game.Mail
 
         private MailSaveMask saveMask;
 
-        private readonly List<MailAttachment> mailAttachments = new List<MailAttachment>();
-        private readonly HashSet<MailAttachment> deletedAttachments = new HashSet<MailAttachment>();
+        private readonly List<MailAttachment> mailAttachments = new();
+        private readonly HashSet<MailAttachment> deletedAttachments = new();
 
         /// <summary>
         /// Create a new <see cref="MailItem"/> from an existing <see cref="CharacterMailModel"/>.

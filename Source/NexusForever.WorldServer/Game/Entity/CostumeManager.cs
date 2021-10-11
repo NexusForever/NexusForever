@@ -28,8 +28,8 @@ namespace NexusForever.WorldServer.Game.Entity
         private const double CostumeSwapCooldown = 15d;
 
         private readonly Player player;
-        private readonly Dictionary<byte, Costume> costumes = new Dictionary<byte, Costume>();
-        private readonly Dictionary<uint, CostumeUnlock> costumeUnlocks = new Dictionary<uint, CostumeUnlock>();
+        private readonly Dictionary<byte, Costume> costumes = new();
+        private readonly Dictionary<uint, CostumeUnlock> costumeUnlocks = new();
         private double costumeSwapCooldown;
 
         /// <summary>

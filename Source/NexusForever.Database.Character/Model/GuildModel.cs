@@ -5,12 +5,6 @@ namespace NexusForever.Database.Character.Model
 {
     public class GuildModel
     {
-        public GuildModel()
-        {
-            GuildRank = new HashSet<GuildRankModel>();
-            GuildMember = new HashSet<GuildMemberModel>();
-        }
-
         public ulong Id { get; set; }
         public uint Flags { get; set; }
         public byte Type { get; set; }
@@ -21,8 +15,10 @@ namespace NexusForever.Database.Character.Model
         public string OriginalName { get; set; }
         public ulong? OriginalLeaderId { get; set; }
 
-        public ICollection<GuildRankModel> GuildRank { get; set; }
-        public ICollection<GuildMemberModel> GuildMember { get; set; }
         public GuildDataModel GuildData { get; set; }
+        public ICollection<GuildRankModel> GuildRank { get; set; } = new HashSet<GuildRankModel>();
+        public ICollection<GuildMemberModel> GuildMember { get; set; } = new HashSet<GuildMemberModel>();
+        public ICollection<GuildAchievementModel> Achievement { get; set; } = new HashSet<GuildAchievementModel>();
+        public ICollection<ResidenceModel> Residence { get; set; } = new HashSet<ResidenceModel>();
     }
 }

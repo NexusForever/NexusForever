@@ -93,7 +93,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             foreach ((CurrencyType currencyTypeId, ulong currencyAmount) in currencyChanges)
                 session.Player.CurrencyManager.CurrencySubtractAmount(currencyTypeId, currencyAmount);
 
-            session.Player.Inventory.ItemCreate(itemEntry.Id, vendorPurchase.VendorItemQty * itemEntry.BuyFromVendorStackCount);
+            session.Player.Inventory.ItemCreate(InventoryLocation.Inventory, itemEntry.Id, vendorPurchase.VendorItemQty * itemEntry.BuyFromVendorStackCount);
         }
 
         [MessageHandler(GameMessageOpcode.ClientSellItemToVendor)]
@@ -103,21 +103,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (vendorInfo == null)
                 return;
 
-            Item2Entry itemEntry = session.Player.Inventory.GetItem(vendorSell.ItemLocation).Entry;
-            if (itemEntry == null)
+            ItemInfo info = session.Player.Inventory.GetItem(vendorSell.ItemLocation).Info;
+            if (info == null)
                 return;
 
             float costMultiplier = vendorInfo.SellPriceMultiplier * vendorSell.Quantity;
 
             // do all sanity checks before modifying currency
             var currencyChange = new List<(CurrencyType CurrencyTypeId, ulong CurrencyAmount)>();
-            for (int i = 0; i < itemEntry.CurrencyTypeIdSellToVendor.Length; i++)
+            for (int i = 0; i < info.Entry.CurrencyTypeIdSellToVendor.Length; i++)
             {
-                CurrencyType currencyId = (CurrencyType)itemEntry.CurrencyTypeIdSellToVendor[i];
+                CurrencyType currencyId = (CurrencyType)info.Entry.CurrencyTypeIdSellToVendor[i];
                 if (currencyId == CurrencyType.None)
                     continue;
 
-                ulong currencyAmount = (ulong)(itemEntry.CurrencyAmountSellToVendor[i] * costMultiplier);
+                ulong currencyAmount = (ulong)(info.Entry.CurrencyAmountSellToVendor[i] * costMultiplier);
                 currencyChange.Add((currencyId, currencyAmount));
             }
 

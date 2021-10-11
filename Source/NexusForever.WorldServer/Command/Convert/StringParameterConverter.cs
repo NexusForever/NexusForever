@@ -6,7 +6,7 @@ namespace NexusForever.WorldServer.Command.Convert
     [Convert(typeof(string))]
     public class StringParameterConverter : IParameterConvert
     {
-        public object Convert(ICommandContext context, ParameterQueue queue)
+        public virtual object Convert(ICommandContext context, ParameterQueue queue)
         {
             string parameter = queue.Dequeue();
             if (!parameter.StartsWith('"'))
@@ -15,13 +15,13 @@ namespace NexusForever.WorldServer.Command.Convert
             // concat parameters between quotes
             // "this will be passed as a single parameter"
             var sb = new StringBuilder();
-            parameter = parameter.Substring(1);
+            parameter = parameter[1..];
 
             while (true)
             {
                 if (parameter.EndsWith('"'))
                 {
-                    sb.Append(parameter.Substring(0, parameter.Length - 1));
+                    sb.Append(parameter[..^1]);
                     break;
                 }
 
@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Command.Convert
                 if (queue.Count == 0)
                     break;
 
-                sb.Append(" ");
+                sb.Append(' ');
                 parameter = queue.Dequeue();
             }
 

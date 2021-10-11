@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Entity
         private const uint MaxPathLevel = 30u;
 
         private readonly Player player;
-        private readonly Dictionary<Path, PathEntry> paths = new Dictionary<Path, PathEntry>();
+        private readonly Dictionary<Path, PathEntry> paths = new();
 
         /// <summary>
         /// Create a new <see cref="PathManager"/> from <see cref="Player"/> database model.
@@ -241,7 +241,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
             // TODO: Check if there's bag space. Otherwise queue? Or is there an overflow inventory?
             if (pathRewardEntry.Item2Id > 0)
-                player.Inventory.ItemCreate(pathRewardEntry.Item2Id, 1, ItemUpdateReason.PathReward);
+                player.Inventory.ItemCreate(InventoryLocation.Inventory, pathRewardEntry.Item2Id, 1, ItemUpdateReason.PathReward);
 
             if (pathRewardEntry.Spell4Id > 0)
             {
@@ -251,7 +251,6 @@ namespace NexusForever.WorldServer.Game.Entity
 
             if (pathRewardEntry.CharacterTitleId > 0)
                 player.TitleManager.AddTitle((ushort)pathRewardEntry.CharacterTitleId);
-
         }
 
         private PathUnlockedMask GetPathUnlockedMask()

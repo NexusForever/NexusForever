@@ -15,8 +15,8 @@ namespace NexusForever.Shared.Game
 
         private ushort? serverRealmId;
 
-        private readonly UpdateTimer checkTimer = new UpdateTimer(60d);
-        private readonly UpdateTimer pingCheckTimer = new UpdateTimer(15d);
+        private readonly UpdateTimer checkTimer = new(60d);
+        private readonly UpdateTimer pingCheckTimer = new(15d);
 
         private volatile bool shutdownRequested;
 

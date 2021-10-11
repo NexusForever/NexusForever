@@ -14,12 +14,12 @@ namespace NexusForever.StsServer.Network.Message.Handler
         [MessageHandler("/Auth/LoginStart", SessionState.Connected)]
         public static void HandleLoginStart(StsSession session, ClientLoginStartMessage loginStart)
         {
-            session.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountByEmailAsync(loginStart.LoginName),
+            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountByEmailAsync(loginStart.LoginName),
                 account =>
             {
                 if (account == null)
                 {
-                    session.EnqueueMessageError(new ServerErrorMessage((int) ErrorCode.InvalidAccountNameOrPassword));
+                    session.EnqueueMessageError(new ServerErrorMessage((int)ErrorCode.InvalidAccountNameOrPassword));
                     return;
                 }
 
@@ -27,11 +27,11 @@ namespace NexusForever.StsServer.Network.Message.Handler
 
                 byte[] s = account.S.ToByteArray();
                 byte[] v = account.V.ToByteArray();
-                session.KeyExchange = new Srp6Provider(account.Email, s, v);
+                session.KeyExchange = new Srp6Provider(loginStart.LoginName, s, v);
 
                 byte[] B = session.KeyExchange.GenerateServerCredentials();
-                using (MemoryStream stream = new MemoryStream())
-                using (BinaryWriter writer = new BinaryWriter(stream))
+                using (var stream = new MemoryStream())
+                using (var writer = new BinaryWriter(stream))
                 {
                     writer.Write(s.Length);
                     writer.Write(s, 0, s.Length);
@@ -56,14 +56,14 @@ namespace NexusForever.StsServer.Network.Message.Handler
             byte[] key = session.KeyExchange.CalculateSessionKey();
             if (!session.KeyExchange.VerifyClientEvidenceMessage(keyData.M1))
             {
-                session.EnqueueMessageError(new ServerErrorMessage((int) ErrorCode.InvalidAccountNameOrPassword));
+                session.EnqueueMessageError(new ServerErrorMessage((int)ErrorCode.InvalidAccountNameOrPassword));
                 return;
             }
 
             byte[] M2 = session.KeyExchange.CalculateServerEvidenceMessage();
 
-            using (MemoryStream stream = new MemoryStream())
-            using (BinaryWriter writer = new BinaryWriter(stream))
+            using (var stream = new MemoryStream())
+            using (var writer = new BinaryWriter(stream))
             {
                 writer.Write(M2.Length);
                 writer.Write(M2, 0, M2.Length);
@@ -95,7 +95,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
         public static void HandleRequestGameToken(StsSession session, RequestGameTokenMessage requestGameToken)
         {
             Guid guid = RandomProvider.GetGuid();
-            session.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountGameToken(session.Account, guid.ToByteArray().ToHexString()),
+            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountGameToken(session.Account, guid.ToByteArray().ToHexString()),
                 () =>
             {
                 session.EnqueueMessageOk(new RequestGameTokenResponse

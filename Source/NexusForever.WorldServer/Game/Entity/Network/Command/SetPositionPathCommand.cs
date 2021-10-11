@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
     [EntityCommand(EntityCommand.SetPositionPath)]
     public class SetPositionPathCommand : IEntityCommandModel
     {
-        public List<Position> Positions { get; set; } = new List<Position>();
+        public List<Position> Positions { get; set; } = new();
         public float Speed { get; set; }
         public SplineType Type { get; set; }
         public SplineMode Mode { get; set; }
@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Game.Entity.Network.Command
             uint count = reader.ReadUShort(10u);
             for (int i = 0; i < count; i++)
             {
-                Position position = new Position();
+                var position = new Position();
                 position.Read(reader);
                 Positions.Add(position);
             }

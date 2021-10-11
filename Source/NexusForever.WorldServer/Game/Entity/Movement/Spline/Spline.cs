@@ -14,7 +14,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Spline
     {
         public float Length { get; private set; }
 
-        protected readonly List<SplinePoint> points = new List<SplinePoint>();
+        protected readonly List<SplinePoint> points = new();
 
         private SplineTypeBase type;
         private ISplineMode mode;

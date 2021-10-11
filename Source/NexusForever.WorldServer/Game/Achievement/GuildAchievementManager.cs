@@ -1,25 +1,40 @@
 ﻿using System.Collections.Generic;
+using NexusForever.Database.Character.Model;
 using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Game.Achievement
 {
-    // TODO: finish implementing this when guild PR is accepted
-    public class GuildAchievementManager : BaseAchievementManager
+    public sealed class GuildAchievementManager : BaseAchievementManager<GuildAchievementModel>
     {
-        // private Guild guild;
+        private readonly Guild.Guild guild;
+        protected override ulong OwnerId => guild.Id;
 
-        protected override Achievement CreateAchievement(AchievementInfo info)
+        /// <summary>
+        /// Create a new <see cref="CharacterAchievementManager"/> from existing <see cref="GuildModel"/> database model.
+        /// </summary>
+        public GuildAchievementManager(Guild.Guild guild, GuildModel model)
         {
-            return new GuildAchievement(/*guild.Id*/123, info);
+            this.guild = guild;
+            Initialise(model.Achievement, false);
         }
 
-        protected override void SendAchievementUpdate(IEnumerable<Achievement> updates)
+        /// <summary>
+        /// Create a new <see cref="CharacterAchievementManager"/> for <see cref="Guild.Guild"/>.
+        /// </summary>
+        public GuildAchievementManager(Guild.Guild guild)
         {
-            /*foreach (Player member in guild)
-                SendAchievementUpdate(member, grants);*/
+            this.guild = guild;
         }
 
+        protected override void SendAchievementUpdate(IEnumerable<Achievement<GuildAchievementModel>> updates)
+        {
+            guild.Broadcast(BuildAchievementUpdate(updates));
+        }
+
+        /// <summary>
+        /// Update or complete player achievements of <see cref="AchievementType"/> as <see cref="Player"/> with supplied object ids.
+        /// </summary>
         public override void CheckAchievements(Player target, AchievementType type, uint objectId, uint objectIdAlt = 0, uint count = 1)
         {
             CheckAchievements(target, GlobalAchievementManager.Instance.GetGuildAchievements(type), objectId, objectIdAlt, count);

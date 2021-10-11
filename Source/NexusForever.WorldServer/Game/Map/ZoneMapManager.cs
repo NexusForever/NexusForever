@@ -6,6 +6,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Shared.Game.Map;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Achievement.Static;
 using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Game.Map
@@ -16,10 +17,10 @@ namespace NexusForever.WorldServer.Game.Map
         private const byte RateLimit = 10;
 
         private ushort currentZoneMap;
-        private ZoneMapCoordinate currentZoneMapCoordinate = new ZoneMapCoordinate();
+        private ZoneMapCoordinate currentZoneMapCoordinate = new();
         private Vector3 lastPosition;
 
-        private readonly Dictionary<ushort /*ZoneMapId*/, ZoneMap> zoneMaps = new Dictionary<ushort, ZoneMap>();
+        private readonly Dictionary<ushort /*ZoneMapId*/, ZoneMap> zoneMaps = new();
 
         private readonly Player player;
 
@@ -69,7 +70,7 @@ namespace NexusForever.WorldServer.Game.Map
                 return;
 
             // rate limit for e.g. micro movement when idle swimming in a current
-            if (lastPosition.X < vector.X+RateLimit && lastPosition.Y < vector.Y+RateLimit && lastPosition.Z < vector.Z+RateLimit)
+            if (Vector3.Distance(lastPosition, vector) < RateLimit)
                 return;
 
             lastPosition = vector;
@@ -101,6 +102,9 @@ namespace NexusForever.WorldServer.Game.Map
 
                 zoneMap?.AddHexGroup((ushort)mapZoneHexGroup.Id);
             }
+
+            if (zoneMap.IsComplete)
+                player.AchievementManager.CheckAchievements(player, AchievementType.MapComplete, currentZoneMap);
         }
 
         private static ZoneMapCoordinate Points2ZoneMapCoordinate(Vector3 position)
