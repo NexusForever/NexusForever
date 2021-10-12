@@ -64,6 +64,21 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             }
         }
 
+        [PrerequisiteCheck(PrerequisiteType.Prerequisite)]
+        private static bool PrerequisiteCheckPrerequisite(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.NotEqual:
+                    return !Instance.Meets(player, objectId);
+                case PrerequisiteComparison.Equal:
+                    return Instance.Meets(player, objectId);
+                default:
+                    log.Warn($"Unhandled {comparison} for {PrerequisiteType.Prerequisite}!");
+                    return false;
+            }
+        }
+
         [PrerequisiteCheck(PrerequisiteType.Path)]
         private static bool PrerequisiteCheckPath(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
@@ -145,6 +160,51 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                     log.Warn($"Unhandled {comparison} for {PrerequisiteType.Vital}!");
                     return false;
             }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.SpellObj)]
+        private static bool PrerequisiteCheckSpellObj(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            // TODO: Confirm how the objectId is calculated. It seems like this check always checks for a Spell that is determined by an objectId.
+
+            // Error message is "Spell requirement not met"
+
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.SpellManager.GetSpell(value) != null;
+                case PrerequisiteComparison.NotEqual:
+                    return player.SpellManager.GetSpell(value) == null;
+                default:
+                    log.Warn($"Unhandled {comparison} for {PrerequisiteType.SpellObj}!");
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.Unknown194)]
+        private static bool PrerequisiteCheckUnknown194(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            // TODO: Only used in Mount check prerequisites. Its use is unknown.
+
+            return true;
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.Unknown195)]
+        private static bool PrerequisiteCheckUnknown195(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            // TODO: Only used in Mount check prerequisites. Its use is unknown.
+
+            return true;
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.Plane)]
+        private static bool PrerequisiteCheckPlane(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            // Unknown how this works at this time, but there is a Spell Effect called "ChangePlane". Could be related.
+            // TODO: Investigate further.
+
+            // Returning true by default as many mounts used this
+            return true;
         }
     }
 }
