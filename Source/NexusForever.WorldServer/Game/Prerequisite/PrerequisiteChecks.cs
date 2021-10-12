@@ -137,6 +137,21 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             }
         }
 
+        [PrerequisiteCheck(PrerequisiteType.HoverboardFlair)]
+        private static bool PrerequestCheckHoverboardFlair(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.PetCustomisationManager.GetCustomisation(PetType.HoverBoard, objectId) != null;
+                case PrerequisiteComparison.NotEqual:
+                    return player.PetCustomisationManager.GetCustomisation(PetType.HoverBoard, objectId) == null;
+                default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.HoverboardFlair}!");
+                    return false;
+            }
+        }
+
         [PrerequisiteCheck(PrerequisiteType.Vital)]
         private static bool PrerequisiteCheckVital(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
