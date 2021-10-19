@@ -172,6 +172,7 @@
         // non command permissions
         InstantLogout               = 10000,
         Signature                   = 10001,
-        BypassInstanceLimits        = 10002
+        BypassInstanceLimits        = 10002,
+        GMFlag                      = 10003
     }
 }
