@@ -13,6 +13,7 @@ using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Map.Search;
+using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Social.Model;
 using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network;
@@ -40,7 +41,7 @@ namespace NexusForever.WorldServer.Game.Social
         private readonly Dictionary<ChatChannelType, Dictionary<string, ulong>> chatChannelNames = new();
         private readonly Dictionary<ChatChannelType, Dictionary<ulong, List<ulong>>> characterChatChannels = new();
 
-        private readonly List<ChatChannelType> defaultChannelTypes = new List<ChatChannelType>
+        private readonly List<ChatChannelType> defaultChannelTypes = new()
         {
             ChatChannelType.Nexus,
             ChatChannelType.Trade,
@@ -80,10 +81,8 @@ namespace NexusForever.WorldServer.Game.Social
                 chatChannelNames[chatChannel.Type].Add(chatChannel.Name, chatChannel.Id);
             }
 
-            foreach (var channelType in defaultChannelTypes)
-            {
+            foreach (ChatChannelType channelType in defaultChannelTypes)
                 CreateChatChannel(channelType, 1, channelType.ToString());
-            }
         }
 
         private void InitialiseChatHandlers()
@@ -301,7 +300,7 @@ namespace NexusForever.WorldServer.Game.Social
             {
                 Name = session.Player.Name,
                 Guid = session.Player.Guid,
-                GM = session.AccountRbacManager.HasPermission(RBAC.Static.Permission.GMFlag)
+                GM   = session.AccountRbacManager.HasPermission(Permission.GMFlag)
             });
         }
 
@@ -311,32 +310,26 @@ namespace NexusForever.WorldServer.Game.Social
             {
                 Name = target.Name,
                 Guid = target.Guid,
-                GM = target.Session.AccountRbacManager.HasPermission(RBAC.Static.Permission.GMFlag)
+                GM   = target.Session.AccountRbacManager.HasPermission(Permission.GMFlag)
             });
         }
 
         /// <summary>
         /// Add the <see cref="Player"/> to the chat channels sessions list for appropriate chat channels.
         /// </summary>
-        /// <param name="session"></param>
-        public void JoinChatChannels(Player player)
+        public void JoinDefaultChatChannels(Player player)
         {
-            foreach (var channelType in defaultChannelTypes)
-            {
-                GetChatChannel(channelType, 1).Join(player, null);
-            }
+            foreach (ChatChannelType channelType in defaultChannelTypes)
+                GetChatChannel(channelType, 1)?.Join(player, null);
         }
 
         /// <summary>
         /// Remove the <see cref="Player"/> from the chat channels sessions list for appropriate chat channels.
         /// </summary>
-        /// <param name="session"></param>
-        public void LeaveChatChannels(Player player)
+        public void LeaveDefaultChatChannels(Player player)
         {
-            foreach (var channelType in defaultChannelTypes)
-            {
-                GetChatChannel(channelType, 1).Leave(player.CharacterId);
-            }
+            foreach (ChatChannelType channelType in defaultChannelTypes)
+                GetChatChannel(channelType, 1)?.Leave(player.CharacterId);
         }
 
         [ChatChannelHandler(ChatChannelType.Say)]
@@ -351,7 +344,7 @@ namespace NexusForever.WorldServer.Game.Social
                 Text     = chat.Message,
                 Formats  = ParseChatLinks(session, chat.Formats).ToList(),
                 Guid     = session.Player.Guid,
-                GM       = session.AccountRbacManager.HasPermission(RBAC.Static.Permission.GMFlag)
+                GM       = session.AccountRbacManager.HasPermission(Permission.GMFlag)
             };
 
             session.Player.Map.Search(
@@ -402,7 +395,7 @@ namespace NexusForever.WorldServer.Game.Social
                 Text     = chat.Message,
                 Formats  = ParseChatLinks(session, chat.Formats).ToList(),
                 Guid     = session.Player.Guid,
-                GM       = session.AccountRbacManager.HasPermission(RBAC.Static.Permission.GMFlag)
+                GM       = session.AccountRbacManager.HasPermission(Permission.GMFlag)
             };
 
             channel.Broadcast(builder.Build(), session.Player);
@@ -435,9 +428,9 @@ namespace NexusForever.WorldServer.Game.Social
             {
                 session.EnqueueMessageEncrypted(new ServerChatWhisperFail
                 {
-                    CharacterTo = whisper.PlayerName,
+                    CharacterTo      = whisper.PlayerName,
                     IsAccountWhisper = false,
-                    Unknown1 = 1
+                    Unknown1         = 1
                 });
                 return;
             }
@@ -445,15 +438,15 @@ namespace NexusForever.WorldServer.Game.Social
             // target player message
             var builder = new ChatMessageBuilder
             {
-                Type         = ChatChannelType.Whisper,
-                Self         = false,
-                FromName     = session.Player.Name,
-                Text         = whisper.Message,
-                Formats      = ParseChatLinks(session, whisper.Formats).ToList(),
-                CrossFaction = session.Player.Faction1 != target.Faction1,
-                FromCharacterId = session.Player.CharacterId,
+                Type                 = ChatChannelType.Whisper,
+                Self                 = false,
+                FromName             = session.Player.Name,
+                Text                 = whisper.Message,
+                Formats              = ParseChatLinks(session, whisper.Formats).ToList(),
+                CrossFaction         = session.Player.Faction1 != target.Faction1,
+                FromCharacterId      = session.Player.CharacterId,
                 FromCharacterRealmId = WorldServer.RealmId,
-                GM           = session.AccountRbacManager.HasPermission(RBAC.Static.Permission.GMFlag)
+                GM                   = session.AccountRbacManager.HasPermission(Permission.GMFlag)
             };
             target.Session.EnqueueMessageEncrypted(builder.Build());
 

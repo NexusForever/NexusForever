@@ -72,14 +72,9 @@ namespace NexusForever.WorldServer.Game.Social
 
         public bool IsGuildChannel()
         {
-            return Type == ChatChannelType.Guild
-                || Type == ChatChannelType.GuildOfficer
-                || Type == ChatChannelType.Community
-                || Type == ChatChannelType.Society
-                || Type == ChatChannelType.WarParty
-                || Type == ChatChannelType.WarPartyOfficer
-                || Type == ChatChannelType.Nexus
-                || Type == ChatChannelType.Trade;
+            return Type is ChatChannelType.Guild or ChatChannelType.GuildOfficer or ChatChannelType.Community or
+                ChatChannelType.Society or ChatChannelType.WarParty or ChatChannelType.WarPartyOfficer or
+                ChatChannelType.Nexus or ChatChannelType.Trade;
         }
 
         /// <summary>
