@@ -26,8 +26,16 @@ namespace NexusForever.Shared.Network.Message
         {
         }
 
+        /// <summary>
+        /// Initialise <see cref="MessageManager"/> and any related resources.
+        /// </summary>
         public void Initialise()
         {
+            if (clientMessageFactories != null)
+                throw new InvalidOperationException();
+
+            log.Info("Initialisng message manager...");
+
             InitialiseMessages();
             InitialiseMessageHandlers();
         }
@@ -122,17 +130,26 @@ namespace NexusForever.Shared.Network.Message
             log.Info($"Initialised {clientMessageHandlers.Count} message handler(s).");
         }
 
+        /// <summary>
+        /// Return <see cref="IReadable"/> model for incoming packet with <see cref="GameMessageOpcode"/>.
+        /// </summary>
         public IReadable GetMessage(GameMessageOpcode opcode)
         {
             return clientMessageFactories.TryGetValue(opcode, out MessageFactoryDelegate factory)
                 ? factory.Invoke() : null;
         }
 
+        /// <summary>
+        /// Return <see cref="GameMessageOpcode"/> for outgoing <see cref="IWritable"/> model.
+        /// </summary>
         public bool GetOpcode(IWritable message, out GameMessageOpcode opcode)
         {
             return serverMessageOpcodes.TryGetValue(message.GetType(), out opcode);
         }
 
+        /// <summary>
+        /// Return <see cref="MessageHandlerDelegate"/> delegate for incoming packet with <see cref="GameMessageOpcode"/>.
+        /// </summary>
         public MessageHandlerDelegate GetMessageHandler(GameMessageOpcode opcode)
         {
             return clientMessageHandlers.TryGetValue(opcode, out MessageHandlerDelegate handler)

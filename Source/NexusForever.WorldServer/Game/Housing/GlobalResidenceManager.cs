@@ -51,6 +51,9 @@ namespace NexusForever.WorldServer.Game.Housing
         {
         }
 
+        /// <summary>
+        /// Initialise <see cref="GlobalResidenceManager"/> and any related resources.
+        /// </summary>
         public void Initialise()
         {
             nextResidenceId = DatabaseManager.Instance.CharacterDatabase.GetNextResidenceId() + 1ul;
@@ -106,19 +109,36 @@ namespace NexusForever.WorldServer.Game.Housing
             log.Info($"Loaded {residences.Count} housing residences!");
         }
 
+        /// <summary>
+        /// Shutdown <see cref="GlobalResidenceManager"/> and any related resources.
+        /// </summary>
+        /// <remarks>
+        /// This will force save all residences.
+        /// </remarks>
+        public void Shutdown()
+        {
+            log.Info("Shutting down residence manager...");
+
+            SaveResidences();
+        }
+
         public void Update(double lastTick)
         {
             timeToSave -= lastTick;
             if (timeToSave <= 0d)
             {
-                var tasks = new List<Task>();
-                foreach (Residence residence in residences.Values)
-                    tasks.Add(DatabaseManager.Instance.CharacterDatabase.Save(residence.Save));
-
-                Task.WaitAll(tasks.ToArray());
-
+                SaveResidences();
                 timeToSave = SaveDuration;
             }
+        }
+
+        private void SaveResidences()
+        {
+            var tasks = new List<Task>();
+            foreach (Residence residence in residences.Values)
+                tasks.Add(DatabaseManager.Instance.CharacterDatabase.Save(residence.Save));
+
+            Task.WaitAll(tasks.ToArray());
         }
 
         /// <summary>

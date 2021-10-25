@@ -1,14 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Systemd;
+using Microsoft.Extensions.Hosting.WindowsServices;
+using Microsoft.Extensions.Logging;
 using NLog;
-using NexusForever.AuthServer.Network;
-using NexusForever.Shared;
-using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Game;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
+using NLog.Extensions.Logging;
 
 namespace NexusForever.AuthServer
 {
@@ -20,30 +19,40 @@ namespace NexusForever.AuthServer
         private const string Title = "NexusForever: Authentication Server (RELEASE)";
         #endif
 
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private static readonly NLog.ILogger log = LogManager.GetCurrentClassLogger();
 
         private static void Main()
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            Console.Title = Title;
-            log.Info("Initialising...");
+            IHostBuilder builder = new HostBuilder()
+                .ConfigureLogging(lb =>
+                {
+                    // only applicable to logging done through host
+                    // other logging is still done directly though NLog
+                    lb.ClearProviders()
+                        .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace)
+                        .AddNLog();
+                })
+                .ConfigureServices(sc =>
+                {
+                    sc.AddHostedService<HostedService>();
+                })
+                .UseWindowsService()
+                .UseSystemd();
 
-            ConfigurationManager<AuthServerConfiguration>.Instance.Initialise("AuthServer.json");
+            if (!WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService())
+                Console.Title = Title;
 
-            DatabaseManager.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Database);
-
-            ServerManager.Instance.Initialise();
-
-            MessageManager.Instance.Initialise();
-            NetworkManager<AuthSession>.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Network);
-
-            WorldManager.Instance.Initialise(lastTick =>
+            try
             {
-                NetworkManager<AuthSession>.Instance.Update(lastTick);
-            });
-
-            log.Info("Ready!");
+                IHost host = builder.Build();
+                host.Run();
+            }
+            catch (Exception e)
+            {
+                log.Fatal(e);
+            }
         }
     }
 }

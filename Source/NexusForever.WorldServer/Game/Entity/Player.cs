@@ -314,8 +314,12 @@ namespace NexusForever.WorldServer.Game.Entity
         }
 
         /// <summary>
-        /// Save <see cref="Account"/> and <see cref="ServerCharacterList.Character"/> to the database.
+        /// Save <see cref="Player"/> to database, invoke supplied <see cref="Action"/> once save is complete.
         /// </summary>
+        /// <remarks>
+        /// This is a delayed save, <see cref="AuthContext"/> changes are saved first followed by <see cref="CharacterContext"/> changes.
+        /// Packets for session will not be handled until save is complete.
+        /// </remarks>
         public void Save(Action callback = null)
         {
             Session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.Save(Save),
@@ -336,6 +340,22 @@ namespace NexusForever.WorldServer.Game.Entity
             Session.CanProcessPackets = false;
         }
 
+        /// <summary>
+        /// Save <see cref="Player"/> to database.
+        /// </summary>
+        /// <remarks>
+        /// This is an instant save, <see cref="AuthContext"/> changes are saved first followed by <see cref="CharacterContext"/> changes.
+        /// This will block the calling thread until the database save is complete. 
+        /// </remarks>
+        public async void SaveDirect()
+        {
+            await DatabaseManager.Instance.AuthDatabase.Save(Save);
+            await DatabaseManager.Instance.CharacterDatabase.Save(Save);
+        }
+
+        /// <summary>
+        /// Save database changes for <see cref="Player"/> to <see cref="AuthContext"/>.
+        /// </summary>
         public void Save(AuthContext context)
         {
             Session.AccountRbacManager.Save(context);
@@ -347,6 +367,9 @@ namespace NexusForever.WorldServer.Game.Entity
             KeybindingManager.Save(context);
         }
 
+        /// <summary>
+        /// Save database changes for <see cref="Player"/> to <see cref="CharacterContext"/>.
+        /// </summary>
         public void Save(CharacterContext context)
         {
             var model = new CharacterModel

@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Message to broadcast.")]
             string message)
         {
-            foreach (WorldSession session in NetworkManager<WorldSession>.Instance.GetSessions())
+            foreach (WorldSession session in NetworkManager<WorldSession>.Instance)
             {
                 session.EnqueueMessageEncrypted(new ServerRealmBroadcast
                 {

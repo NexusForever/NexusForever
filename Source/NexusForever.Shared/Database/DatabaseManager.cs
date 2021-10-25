@@ -19,18 +19,41 @@ namespace NexusForever.Shared.Database
         {
         }
 
+        /// <summary>
+        /// Initialise <see cref="DatabaseManager"/> and any related resources.
+        /// </summary>
         public void Initialise(DatabaseConfig config)
         {
+            if (AuthDatabase != null || CharacterDatabase != null || WorldDatabase != null)
+                throw new InvalidOperationException();
+
+            log.Info("Initialising database manager...");
+
             if (config.Auth != null)
+            {
                 AuthDatabase = new AuthDatabase(config);
+                log.Info("Initialising auth database...");
+            }
 
             if (config.Character != null)
+            {
                 CharacterDatabase = new CharacterDatabase(config);
+                log.Info("Initialising character database...");
+            }
 
             if (config.World != null)
+            {
                 WorldDatabase = new WorldDatabase(config);
+                log.Info("Initialising world database...");
+            }
         }
 
+        /// <summary>
+        /// Apply any pending Entity Framework database migrations to the databases.
+        /// </summary>
+        /// <remarks>
+        /// This should only be called by a single server to prevent conflicts.
+        /// </remarks>
         public void Migrate()
         {
             log.Info("Applying database migrations...");

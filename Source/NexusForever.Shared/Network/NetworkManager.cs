@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using NexusForever.Shared.Configuration;
+using NLog;
 
 namespace NexusForever.Shared.Network
 {
-    public sealed class NetworkManager<T> : Singleton<NetworkManager<T>>, IUpdate where T : NetworkSession, new()
+    public sealed class NetworkManager<T> : Singleton<NetworkManager<T>>, IEnumerable<T>, IUpdate where T : NetworkSession, new()
     {
+        private static readonly ILogger log = LogManager.GetLogger($"NetworkManager<{typeof(T).FullName}>");
+
         private ConnectionListener<T> connectionListener;
 
         private readonly ConcurrentQueue<T> pendingAdd = new();
@@ -20,13 +24,32 @@ namespace NexusForever.Shared.Network
         {
         }
 
+        /// <summary>
+        /// Initialise <see cref="NetworkManager{T}"/> and any related resources.
+        /// </summary>
         public void Initialise(NetworkConfig config)
         {
+            if (connectionListener != null)
+                throw new InvalidOperationException();
+
+            log.Info("Initialising network manager...");
+
             connectionListener = new ConnectionListener<T>(IPAddress.Parse(config.Host), config.Port);
-            connectionListener.OnNewSession += (session) =>
-            {
-                pendingAdd.Enqueue(session);
-            };
+            connectionListener.OnNewSession += session => pendingAdd.Enqueue(session);
+        }
+
+        /// <summary>
+        /// Shutdown <see cref="NetworkManager{T}"/> and any related resources.
+        /// </summary>
+        public void Shutdown()
+        {
+            if (connectionListener == null)
+                throw new InvalidOperationException();
+
+            log.Info("Shutting down network manager...");
+
+            connectionListener.Shutdown();
+            connectionListener = null;
         }
 
         /// <summary>
@@ -48,24 +71,25 @@ namespace NexusForever.Shared.Network
                 sessions.Remove(session);
         }
 
+        /// <summary>
+        /// Return session that meets supplied predicate.
+        /// </summary>
+        /// <remarks>
+        /// An exception will be thrown if multiple sessions meet the predicate.
+        /// </remarks>
         public T GetSession(Func<T, bool> func)
         {
             return sessions.SingleOrDefault(func);
         }
 
-        public IEnumerable<T> GetSessions()
+        public IEnumerator<T> GetEnumerator()
         {
-            return sessions;
+            return sessions.GetEnumerator();
         }
 
-        public IEnumerable<T> GetSessions(Func<T, bool> func)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return sessions.Where(func);
-        }
-
-        public void Shutdown()
-        {
-            connectionListener?.Shutdown();
+            return GetEnumerator();
         }
     }
 }

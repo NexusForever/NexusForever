@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Game.Guild
 {
     public sealed class GlobalGuildManager : Singleton<GlobalGuildManager>
     {
-        private static ILogger log { get; } = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
@@ -49,6 +49,11 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         public void Initialise()
         {
+            if (guilds.Count != 0)
+                throw new InvalidOperationException();
+
+            log.Info("Starting guild manager...");
+
             nextGuildId = DatabaseManager.Instance.CharacterDatabase.GetNextGuildId() + 1ul;
 
             InitialiseGuilds();
@@ -161,7 +166,20 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
-        /// Invoked each world tick with the delta since the previous tick occured.
+        /// Shutdown <see cref="GlobalGuildManager"/> and any related resources.
+        /// </summary>
+        /// <remarks>
+        /// This will force save all guilds.
+        /// </remarks>
+        public void Shutdown()
+        {
+            log.Info("Shutting down guild manager...");
+
+            SaveGuilds();
+        }
+
+        /// <summary>
+        /// Invoked each world tick with the delta since the previous tick occurred.
         /// </summary>
         public void Update(double lastTick)
         {
@@ -169,28 +187,33 @@ namespace NexusForever.WorldServer.Game.Guild
 
             if (saveTimer.HasElapsed)
             {
-                var tasks = new List<Task>();
-                foreach (GuildBase guild in guilds.Values.ToList())
-                {
-                    if (guild.PendingDelete)
-                    {
-                        guilds.Remove(guild.Id);
-                        guildNameCache.Remove(guild.Name);
-
-                        if (guild.PendingCreate)
-                            continue;
-                    }
-
-                    tasks.Add(DatabaseManager.Instance.CharacterDatabase.Save(guild.Save));
-                }
-                    
-                Task.WaitAll(tasks.ToArray());
+                SaveGuilds();
                 saveTimer.Reset();
             }
         }
 
+        private void SaveGuilds()
+        {
+            var tasks = new List<Task>();
+            foreach (GuildBase guild in guilds.Values.ToList())
+            {
+                if (guild.PendingDelete)
+                {
+                    guilds.Remove(guild.Id);
+                    guildNameCache.Remove(guild.Name);
+
+                    if (guild.PendingCreate)
+                        continue;
+                }
+
+                tasks.Add(DatabaseManager.Instance.CharacterDatabase.Save(guild.Save));
+            }
+
+            Task.WaitAll(tasks.ToArray());
+        }
+
         /// <summary>
-        /// Validate all <see cref="Community"/> to make sure they have a corrosponding residence.
+        /// Validate all <see cref="Community"/> to make sure they have a corresponding residence.
         /// </summary>
         /// <remarks>
         /// This function is mainly here for migrating communities created before the implementation of community plots.
