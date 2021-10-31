@@ -27,5 +27,13 @@ namespace NexusForever.Shared
                 yield return result;
             }
         }
+
+        /// <summary>
+        /// Round <see cref="TimeSpan"/> down to supplied <see cref="TimeSpan"/> interval.
+        /// </summary>
+        public static TimeSpan RoundDown(this TimeSpan span, TimeSpan intervalSpan)
+        {
+            return new TimeSpan((long)Math.Round(span.Ticks / (decimal)intervalSpan.Ticks, MidpointRounding.ToZero) * intervalSpan.Ticks);
+        }
     }
 }

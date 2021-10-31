@@ -148,6 +148,9 @@
         // realm
         Realm                       = 82,
         RealmMOTD                   = 94,
+        RealmShutdown               = 107,
+        RealmShutdownStart          = 108,
+        RealmShutdownCancel         = 109,
 
         // story board
         Story                       = 95,

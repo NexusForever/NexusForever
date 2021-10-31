@@ -811,6 +811,8 @@ namespace NexusForever.WorldServer.Game.Entity
             GuildManager.OnLogin();
             ChatManager.OnLogin();
             GlobalChatManager.Instance.JoinDefaultChatChannels(this);
+
+            ShutdownManager.Instance.OnLogin(this);
         }
 
         private void OnLogout()
