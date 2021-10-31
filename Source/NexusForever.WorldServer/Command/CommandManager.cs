@@ -169,9 +169,8 @@ namespace NexusForever.WorldServer.Command
 
                 // reading console input like this allows for a clean cancel of the thread
                 // using the standard read methods blocks the thread
-                ConsoleKeyInfo cki;
                 var sb = new StringBuilder();
-                do
+                while (true)
                 {
                     while (!Console.KeyAvailable)
                     {
@@ -181,10 +180,13 @@ namespace NexusForever.WorldServer.Command
                         Thread.Sleep(100);
                     }
 
-                    cki = Console.ReadKey();
+                    ConsoleKeyInfo cki = Console.ReadKey();
+                    if (cki.Key == ConsoleKey.Enter)
+                        break;
+
                     sb.Append(cki.KeyChar);
 
-                } while (cki.Key != ConsoleKey.Enter);
+                }
 
                 HandleCommandDelay(new ConsoleCommandContext(), sb.ToString());
             }
