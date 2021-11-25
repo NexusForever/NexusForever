@@ -51,5 +51,13 @@ namespace NexusForever.WorldServer.Command.Handler
             foreach (WorldSession session in NetworkManager<WorldSession>.Instance)
                 GlobalChatManager.Instance.SendMessage(session, WorldServer.RealmMotd, "MOTD", ChatChannelType.Realm);
         }
+
+        [Command(Permission.RealmMaxPlayers, "Set the maximum players allowed to connect.", "max")]
+        public void HandleRealmMax(ICommandContext context,
+            [Parameter("Max players allowed.")]
+            uint maxPlayers)
+        {
+            LoginQueueManager.Instance.SetMaxPlayers(maxPlayers);
+        }
     }
 }

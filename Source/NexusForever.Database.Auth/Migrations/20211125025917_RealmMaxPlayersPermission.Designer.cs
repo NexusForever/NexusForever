@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Auth;
 
 namespace NexusForever.Database.Auth.Migrations
 {
     [DbContext(typeof(AuthContext))]
-    partial class AuthContextModelSnapshot : ModelSnapshot
+    [Migration("20211125025917_RealmMaxPlayersPermission")]
+    partial class RealmMaxPlayersPermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -868,11 +870,6 @@ namespace NexusForever.Database.Auth.Migrations
                         {
                             Id = 109u,
                             Name = "Command: RealmShutdownCancel"
-                        },
-                        new
-                        {
-                            Id = 110u,
-                            Name = "Command: QuestList"
                         },
                         new
                         {

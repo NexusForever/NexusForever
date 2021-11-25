@@ -152,6 +152,7 @@
         RealmShutdown               = 107,
         RealmShutdownStart          = 108,
         RealmShutdownCancel         = 109,
+        RealmMaxPlayers             = 111,
 
         // story board
         Story                       = 95,

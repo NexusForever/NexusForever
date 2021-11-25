@@ -26,5 +26,6 @@ namespace NexusForever.WorldServer
         public string MessageOfTheDay { get; set; }
         public uint LengthOfInGameDay { get; set; }
         public bool CrossFactionChat { get; set; } = true;
+        public uint MaxPlayers { get; set; } = 50u;
     }
 }

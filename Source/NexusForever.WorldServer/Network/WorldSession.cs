@@ -14,6 +14,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Game;
 
 namespace NexusForever.WorldServer.Network
 {
@@ -30,6 +31,7 @@ namespace NexusForever.WorldServer.Network
         public EntitlementManager EntitlementManager { get; private set; }
 
         public AccountTier AccountTier => AccountRbacManager.HasPermission(Permission.Signature) ? AccountTier.Signature : AccountTier.Basic;
+        public bool InWorld = false;
 
         public override void OnAccept(Socket newSocket)
         {
@@ -57,6 +59,10 @@ namespace NexusForever.WorldServer.Network
         {
             base.OnDisconnect();
             Player?.CleanUp();
+
+            // We check that Account isn't null because AuthServer pings World to check if online
+            if (Account != null)
+                LoginQueueManager.Instance.OnDisconnect(this);
         }
 
         /// <summary>

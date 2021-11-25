@@ -38,5 +38,6 @@
     "RealmId": 1,
     "MessageOfTheDay": "Welcome to this NexusForever server!",
     "LengthOfInGameDay": 12600,
-    "CrossFactionChat": true
+    "CrossFactionChat": true,
+    "MaxPlayers":  50
 }

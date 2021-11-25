@@ -241,6 +241,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 });
 
                 session.EnqueueMessageEncrypted(serverCharacterList);
+                LoginQueueManager.Instance.HandleNewConnection(session);
             }));
         }
 
