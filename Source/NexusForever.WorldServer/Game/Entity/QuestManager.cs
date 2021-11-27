@@ -684,7 +684,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public IEnumerable<Quest.Quest> GetActiveQuests()
         {
-            return activeQuests.Values.AsEnumerable();
+            return activeQuests.Values;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Text;
-using NexusForever.Shared.GameTable;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
