@@ -15,12 +15,14 @@ namespace NexusForever.MapGenerator.IO.Map
 
             if ((cell.Flags & ChnkCellFlags.Zone) != 0)
             {
+                worldZoneIds = new uint[4];
                 Array.Copy(cell.WorldZoneIds, worldZoneIds, 4);
                 flags |= Flags.Zone;
             }
 
             if ((cell.Flags & ChnkCellFlags.HeightMap) != 0)
             {
+                heightMap = new float[17, 17];
                 for (int y = 0; y < 17; y++)
                     for (int x = 0; x < 17; x++)
                         heightMap[x, y] = (cell.Heightmap[x + 1, y + 1] / 8.0f) - 2048f;
@@ -30,6 +32,7 @@ namespace NexusForever.MapGenerator.IO.Map
 
             if ((cell.Flags & ChnkCellFlags.ZoneBound) != 0)
             {
+                worldZoneBounds = new byte[64, 64];
                 for (int y = 0; y < 64; y++)
                     for (int x = 0; x < 64; x++)
                         worldZoneBounds[x, y] = cell.WorldZoneBounds[x, y];

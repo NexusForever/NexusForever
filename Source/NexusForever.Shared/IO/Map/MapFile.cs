@@ -71,13 +71,10 @@ namespace NexusForever.Shared.IO.Map
         /// <summary>
         /// Return terrain height at supplied position.
         /// </summary>
-        public float GetTerrainHeight(Vector3 vector)
+        public float? GetTerrainHeight(Vector3 vector)
         {
             MapFileGrid grid = GetGrid(vector);
-            if (grid == null)
-                return 0f;
-
-            return grid.GetTerrainHeight(vector);
+            return grid?.GetTerrainHeight(vector);
         }
 
         private MapFileGrid GetGrid(Vector3 vector)

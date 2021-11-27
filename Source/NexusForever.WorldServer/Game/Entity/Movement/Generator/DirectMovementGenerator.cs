@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Game.Entity.Movement.Generator
             for (int i = 0; i < MathF.Floor(Vector3.Distance(Begin, Final) / StepSize); i++)
             {
                 Vector3 next = points[points.Count - 1].GetPoint2D(angle, StepSize);
-                next.Y = Map.GetTerrainHeight(next.X, next.Z);
+                next.Y = Map?.GetTerrainHeight(next.X, next.Z) ?? 0f;
                 points.Add(next);
             }
 

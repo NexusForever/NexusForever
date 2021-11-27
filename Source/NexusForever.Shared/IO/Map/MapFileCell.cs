@@ -24,9 +24,9 @@ namespace NexusForever.Shared.IO.Map
 
         protected Flags flags;
 
-        protected readonly uint[] worldZoneIds = new uint[4];
-        protected readonly byte[,] worldZoneBounds = new byte[64, 64];
-        protected readonly float[,] heightMap = new float[17, 17];
+        protected uint[] worldZoneIds;
+        protected byte[,] worldZoneBounds;
+        protected float[,] heightMap;
 
         public void Read(BinaryReader reader)
         {
@@ -44,12 +44,14 @@ namespace NexusForever.Shared.IO.Map
                 {
                     case Flags.Zone:
                     {
+                        worldZoneIds = new uint[4];
                         for (int j = 0; j < worldZoneIds.Length; j++)
                             worldZoneIds[j] = reader.ReadUInt32();
                         break;
                     }
                     case Flags.Height:
                     {
+                        heightMap = new float[17, 17];
                         for (int y = 0; y < 17; y++)
                             for (int x = 0; x < 17; x++)
                                 heightMap[x, y] = reader.ReadSingle();
@@ -57,6 +59,7 @@ namespace NexusForever.Shared.IO.Map
                     }
                     case Flags.ZoneBound:
                     {
+                        worldZoneBounds = new byte[64, 64];
                         for (int y = 0; y < 64; y++)
                             for (int x = 0; x < 64; x++)
                                 worldZoneBounds[x, y] = reader.ReadByte();
@@ -98,6 +101,9 @@ namespace NexusForever.Shared.IO.Map
         /// </summary>
         public bool HasRoadMarch(Vector3 vector)
         {
+            if ((flags & Flags.ZoneBound) == 0)
+                return false;
+
             return (GetZoneBoundFlags(vector) & ZoneBoundFlags.RoadMarch) != 0;
         }
 
@@ -113,8 +119,11 @@ namespace NexusForever.Shared.IO.Map
         /// <summary>
         /// Return terrain height at supplied position.
         /// </summary>
-        public float GetTerrainHeight(Vector3 vector)
+        public float? GetTerrainHeight(Vector3 vector)
         {
+            if ((flags & Flags.Zone) == 0)
+                return null;
+
             float trueX = vector.X + MapDefines.WorldGridOrigin * MapDefines.GridSize;
             float trueZ = vector.Z + MapDefines.WorldGridOrigin * MapDefines.GridSize;
 
