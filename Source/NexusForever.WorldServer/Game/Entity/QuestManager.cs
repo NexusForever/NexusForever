@@ -678,5 +678,13 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (Quest.Quest quest in activeQuests.Values)
                 quest.ObjectiveUpdate(id, progress);
         }
+
+        /// <summary>
+        /// Returns a collection of all active quests.
+        /// </summary>
+        public IEnumerable<Quest.Quest> GetActiveQuests()
+        {
+            return activeQuests.Values;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
@@ -7,6 +8,8 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Quest;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.RBAC.Static;
+using NexusForever.WorldServer.Game.Social;
+using NexusForever.WorldServer.Game.Social.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -14,6 +17,25 @@ namespace NexusForever.WorldServer.Command.Handler
     [CommandTarget(typeof(Player))]
     public class QuestCommandCategory : CommandCategory
     {
+        [Command(Permission.QuestList, "List all active quests.", "list")]
+        public void HandleQuestList(ICommandContext context)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine($"Active quests for {context.GetTargetOrInvoker<Player>().Name}");
+            builder.AppendLine("=============================");
+            context.SendMessage(builder.ToString());
+            foreach (Quest quest in context.GetTargetOrInvoker<Player>().QuestManager.GetActiveQuests())
+            {
+                var chatBuilder = new ChatMessageBuilder
+                {
+                    Type = ChatChannelType.System,
+                    Text = $"({quest.Id}) "
+                };
+                chatBuilder.AppendQuest(quest.Id);
+                context.GetTargetOrInvoker<Player>().Session.EnqueueMessageEncrypted(chatBuilder.Build());
+            }
+        }
+
         [Command(Permission.QuestAdd, "Add a new quest to character.", "add")]
         public void HandleQuestAdd(ICommandContext context,
             [Parameter("Quest entry id to add to character.")]
