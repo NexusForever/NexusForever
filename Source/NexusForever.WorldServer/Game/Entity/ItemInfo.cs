@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public bool IsEquippable()
         {
-            return SlotEntry?.EquippedSlotFlags != 0u;
+            return SlotEntry != null && SlotEntry.EquippedSlotFlags != 0u;
         }
 
         /// <summary>
