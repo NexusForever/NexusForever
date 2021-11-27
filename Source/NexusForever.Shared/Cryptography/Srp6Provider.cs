@@ -33,7 +33,7 @@ namespace NexusForever.Shared.Cryptography
 
         public static byte[] GenerateVerifier(byte[] s, string I, string p)
         {
-            using var sha256 = new SHA256Managed();
+            using SHA256 sha256 = SHA256.Create();
             byte[] P = sha256.ComputeHash(Encoding.ASCII.GetBytes($"{I}:{p}"));
             BigInteger x = Hash(true, new BigInteger(s, true), new BigInteger(P, true));
             return BigInteger.ModPow(g, x, N).ToByteArray();
@@ -88,7 +88,7 @@ namespace NexusForever.Shared.Cryptography
             if (A == BigInteger.Zero || B == BigInteger.Zero || S == BigInteger.Zero)
                 throw new CryptographicException("Missing data from previous operations: A, B, S");
 
-            using var sha256 = new SHA256Managed();
+            using SHA256 sha256 = SHA256.Create();
             var IHash = sha256.ComputeHash(I);
             BigInteger serverM1 = Hash(false, Hash(false, N) ^ Hash(false, g),
                 new BigInteger(IHash, true), s, A, B, K);
@@ -117,7 +117,7 @@ namespace NexusForever.Shared.Cryptography
 
         private static BigInteger Hash(bool reverse, params BigInteger[] integers)
         {
-            using var sha256 = new SHA256Managed();
+            using SHA256 sha256 = SHA256.Create();
             sha256.Initialize();
 
             for (int i = 0; i < integers.Length; i++)
@@ -163,7 +163,7 @@ namespace NexusForever.Shared.Cryptography
             for (uint i = 0u; i < F.Length; i++)
                 F[i] = T[i * 2 + 1];
 
-            using var sha256 = new SHA256Managed();
+            using SHA256 sha256 = SHA256.Create();
             byte[] G = sha256.ComputeHash(E);
             byte[] H = sha256.ComputeHash(F);
 
