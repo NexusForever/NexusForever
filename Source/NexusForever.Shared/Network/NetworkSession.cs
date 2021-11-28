@@ -12,6 +12,11 @@ namespace NexusForever.Shared.Network
         protected static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
+        /// Unique id for <see cref="NetworkSession"/>.
+        /// </summary>
+        public string Id { get; private set; }
+
+        /// <summary>
         /// <see cref="IEvent"/> queue that will be processed during <see cref="NetworkSession"/> update.
         /// </summary>
         public EventQueue Events { get; } = new();
@@ -38,10 +43,24 @@ namespace NexusForever.Shared.Network
             if (socket != null)
                 throw new InvalidOperationException();
 
+            Id = Guid.NewGuid().ToString();
+
             socket = newSocket;
             socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveDataCallback, null);
 
-            log.Trace($"New client connected. {newSocket.RemoteEndPoint}");
+            log.Trace($"New client {Id} connected from {newSocket.RemoteEndPoint}.");
+        }
+
+        /// <summary>
+        /// Update <see cref="NetworkSession"/> existing id with a new supplied id.
+        /// </summary>
+        /// <remarks>
+        /// This should be used when the default session id can be replaced with a known unique id.
+        /// </remarks>
+        public void UpdateId(string id)
+        {
+            log.Trace($"Client {Id} updated id to {id}.");
+            Id = id;
         }
 
         /// <summary>
@@ -55,7 +74,12 @@ namespace NexusForever.Shared.Network
                 Heartbeat.Update(lastTick);
 
             if (Heartbeat.Flatline || disconnectState == DisconnectState.Pending)
+            {
+                if (Heartbeat.Flatline)
+                    log.Trace($"Client {Id} has flatlined.");
+
                 OnDisconnect();
+            }
         }
 
         protected virtual void OnDisconnect()
@@ -63,7 +87,7 @@ namespace NexusForever.Shared.Network
             EndPoint remoteEndPoint = socket.RemoteEndPoint;
             socket.Close();
 
-            log.Trace($"Client disconnected. {remoteEndPoint}");
+            log.Trace($"Client {Id} disconnected. {remoteEndPoint}");
 
             disconnectState = DisconnectState.Complete;
         }

@@ -35,21 +35,5 @@ namespace NexusForever.Shared
         {
             return new TimeSpan((long)Math.Round(span.Ticks / (decimal)intervalSpan.Ticks, MidpointRounding.ToZero) * intervalSpan.Ticks);
         }
-
-        /// <summary>
-        /// Remove a specific element from a <see cref="Queue"/>.
-        /// </summary>
-        public static void Remove<T>(this Queue<T> queue, T itemToRemove) where T : class
-        {
-            var list = queue.ToList(); //Needs to be copy, so we can clear the queue
-            queue.Clear();
-            foreach (var item in list)
-            {
-                if (item == itemToRemove)
-                    continue;
-
-                queue.Enqueue(item);
-            }
-        }
     }
 }

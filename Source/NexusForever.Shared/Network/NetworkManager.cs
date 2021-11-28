@@ -17,8 +17,9 @@ namespace NexusForever.Shared.Network
 
         private readonly ConcurrentQueue<T> pendingAdd = new();
         private readonly Queue<T> pendingRemove = new();
+        private readonly Queue<(T, string)> pendingUpdate = new();
 
-        private readonly HashSet<T> sessions = new();
+        private readonly Dictionary<string, T> sessions = new();
 
         private NetworkManager()
         {
@@ -53,22 +54,48 @@ namespace NexusForever.Shared.Network
         }
 
         /// <summary>
+        /// Update session existing id with a new supplied id.
+        /// </summary>
+        /// <remarks>
+        /// This should be used when the default session id can be replaced with a known unique id.
+        /// </remarks>
+        public void UpdateSessionId(T session, string id)
+        {
+            pendingUpdate.Enqueue((session, id));
+        }
+
+        /// <summary>
         /// Invoked each world tick with the delta since the previous tick occurred.
         /// </summary>
         public void Update(double lastTick)
         {
             while (pendingAdd.TryDequeue(out T session))
-                sessions.Add(session);
+                sessions.Add(session.Id, session);
 
-            foreach (T session in sessions)
+            foreach (T session in sessions.Values)
             {
                 session.Update(lastTick);
                 if (session.CanDispose())
                     pendingRemove.Enqueue(session);
             }
 
+            while (pendingUpdate.TryDequeue(out (T Session, string Id) update))
+            {
+                sessions.Remove(update.Session.Id);
+                update.Session.UpdateId(update.Id);
+                sessions.Add(update.Id, update.Session);
+            }
+
             while (pendingRemove.TryDequeue(out T session))
-                sessions.Remove(session);
+                sessions.Remove(session.Id);
+        }
+
+        /// <summary>
+        /// Return session with supplied id.
+        /// </summary>
+        public T GetSession(string id)
+        {
+            return sessions.TryGetValue(id, out T session) ? session : null;
         }
 
         /// <summary>
@@ -79,12 +106,12 @@ namespace NexusForever.Shared.Network
         /// </remarks>
         public T GetSession(Func<T, bool> func)
         {
-            return sessions.SingleOrDefault(func);
+            return sessions.Values.SingleOrDefault(func);
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            return sessions.GetEnumerator();
+            return sessions.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

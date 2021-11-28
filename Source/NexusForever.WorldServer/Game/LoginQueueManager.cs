@@ -1,29 +1,38 @@
-﻿using NexusForever.Shared;
+﻿using System;
+using System.Collections.Generic;
+using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Network;
-using NexusForever.WorldServer.Game.RBAC;
+using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Handler;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using NLog;
 
 namespace NexusForever.WorldServer.Game
 {
     public class LoginQueueManager : Singleton<LoginQueueManager>, IUpdate
     {
-        private readonly Queue<WorldSession> sessionsQueued = new();
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private int connectedPlayers
+        public class QueueData
         {
-            get => _connectedPlayers;
-            set
-            {
-                _connectedPlayers = Math.Clamp(value, 0, int.MaxValue);
-            }
+            public string Id { get; init; }
+            public uint Position { get; set; }
         }
-        private int _connectedPlayers = 0;
+
+        /// <summary>
+        /// Amount of sessions admited to server.
+        /// </summary>
+        /// <remarks>
+        /// This will not necessarily match the total amount of connected sessions or players.
+        /// </remarks>
+        public uint ConnectedPlayers { get; private set; }
+
+        private readonly Dictionary<string, QueueData> queueData = new();
+        private readonly Queue<string> queue = new();
+
         private uint maximumPlayers = ConfigurationManager<WorldServerConfiguration>.Instance.Config.MaxPlayers;
         private UpdateTimer queueCheck = new(TimeSpan.FromSeconds(5));
 
@@ -31,94 +40,157 @@ namespace NexusForever.WorldServer.Game
         {
         }
 
-        public void Initialise()
-        {
-        }
-
         public void Update(double lastTick)
         {
             queueCheck.Update(lastTick);
+            if (!queueCheck.HasElapsed)
+                return;
 
-            if (queueCheck.HasElapsed)
+            if (queue.Count > 0u)
             {
-                if (sessionsQueued.Count > 0u)
+                while (queue.Count > 0u && CanEnterWorld())
                 {
-                    while (CanEnterWorld())
+                    if (queue.TryDequeue(out string id))
                     {
-                        if(sessionsQueued.TryDequeue(out WorldSession session))
-                            AdmitAccount(session);
+                        queueData.Remove(id);
+                        AdmitSession(id);
                     }
-
-                    foreach (WorldSession remainingSession in sessionsQueued)
-                        SendQueueStatus((uint)sessionsQueued.ToArray().ToList().IndexOf(remainingSession) + 1, remainingSession);
                 }
-                queueCheck.Reset();
+
+                RecalculateQueuePositions();
             }
+
+            queueCheck.Reset();
         }
 
         /// <summary>
-        /// Handle a new connection to the world.
+        /// Attempt to admit session to realm, if the world is full the session will be queued.
         /// </summary>
-        public bool HandleNewConnection(WorldSession session)
+        /// <remarks>
+        /// Returns <see cref="true"/> if the session was admited to the realm.
+        /// </remarks>
+        public bool OnNewSession(WorldSession session)
         {
-            if (session.InWorld)
-                return true;
-
-            if (!CanEnterWorld(session))
+            // check if session is already in queue
+            // this allows the account to rejoin the queue after a disconnect
+            if (queueData.TryGetValue(session.Id, out QueueData data))
             {
-                sessionsQueued.Enqueue(session);
-                SendQueueStatus((uint)sessionsQueued.ToArray().ToList().IndexOf(session) + 1, session);
+                log.Trace($"Session {session.Id} has rejoined the queue.");
+
+                SendQueueStatus(session, data.Position);
                 return false;
             }
 
-            connectedPlayers += 1;
-            session.InWorld = true;
+            // session is not in the queue
+            // check if the realm is currently accepting new sessions
+            if (!CanEnterWorld(session))
+            {
+                log.Trace($"Session {session.Id} has joined the queue.");
+
+                uint position = (uint)queue.Count + 1u;
+
+                queue.Enqueue(session.Id);
+                queueData.Add(session.Id, new QueueData
+                {
+                    Id       = session.Id,
+                    Position = position
+                });
+
+                SendQueueStatus(session, position);
+                return false;
+            }
+
+            AdmitSession(session);
             return true;
         }
 
         /// <summary>
-        /// Removes a specific session from the Queue.
+        /// Remove session from realm queue.
         /// </summary>
         public void OnDisconnect(WorldSession session)
         {
-            connectedPlayers -= 1;
-            sessionsQueued.Remove(session);
+            // current admited session count will be reduced if session isn't queued
+            if (session.IsQueued != false)
+                return;
+
+            checked
+            {
+                ConnectedPlayers--;
+            }
         }
 
         /// <summary>
-        /// Set the Maximum Players Allowed to be in World.
+        /// Set the maximum number of admitted sessions allowed in the realm.
         /// </summary>
         public void SetMaxPlayers(uint newMaximumPlayers)
         {
             maximumPlayers = newMaximumPlayers;
+            log.Info($"Updated realm session limit to {maximumPlayers}.");
         }
 
-        private void AdmitAccount(WorldSession session)
+        private void AdmitSession(string id)
         {
-            connectedPlayers += 1;
-            session.InWorld = true;
+            // there is a possibility the session will not exist if the player has disconnected during the queue
+            WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(id);
+            if (session == null)
+                return;
+
+            AdmitSession(session);
+
             session.EnqueueMessageEncrypted(new ServerQueueFinish());
+            CharacterHandler.SendCharacterListPackets(session);
         }
 
-        private bool CanEnterWorld(WorldSession session = null)
+        private void AdmitSession(WorldSession session)
         {
-            if (session != null && session.InWorld)
-                return true;
+            log.Trace($"Admitting session {session.Id} into the realm.");
 
-            if (session != null && session.AccountRbacManager.HasPermission(RBAC.Static.Permission.GMFlag))
-                return true;
+            session.IsQueued = false;
 
-            if (connectedPlayers >= maximumPlayers)
-                return false;
-
-            return true;
+            checked
+            {
+                ConnectedPlayers++;
+            }
         }
 
-        private void SendQueueStatus(uint queuePosition, WorldSession session)
+        private bool CanEnterWorld(WorldSession session)
+        {
+            // accounts with GM permission are exempt from queue (lucky you!)
+            if (session.AccountRbacManager.HasPermission(Permission.GMFlag))
+                return true;
+
+            return CanEnterWorld();
+        }
+
+        private bool CanEnterWorld()
+        {
+            // potentially more checks?
+            // world locked, ect...?
+            return ConnectedPlayers < maximumPlayers;
+        }
+
+        private void RecalculateQueuePositions()
+        {
+            uint position = 1u;
+            foreach (string id in queue)
+            {
+                if (!queueData.TryGetValue(id, out QueueData data))
+                    continue;
+
+                data.Position = position++;
+
+                // there is a possibility the session will not exist if the player has disconnected during the queue
+                WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(data.Id);
+                if (session != null)
+                    SendQueueStatus(session, data.Position);
+            }
+        }
+
+        private static void SendQueueStatus(WorldSession session, uint queuePosition)
         {
             session.EnqueueMessageEncrypted(new ServerQueueStatus
             {
-                QueuePosition = queuePosition,
+                QueuePosition   = queuePosition,
                 WaitTimeSeconds = (uint)(queuePosition * 30f)
             });
         }

@@ -31,7 +31,14 @@ namespace NexusForever.WorldServer.Network
         public EntitlementManager EntitlementManager { get; private set; }
 
         public AccountTier AccountTier => AccountRbacManager.HasPermission(Permission.Signature) ? AccountTier.Signature : AccountTier.Basic;
-        public bool InWorld = false;
+
+        /// <summary>
+        /// Determines if the <see cref="WorldSession"/> is queued to enter the realm.
+        /// </summary>
+        /// <remarks>
+        /// This occurs when the world has reached the maximum number of allowed players.
+        /// </remarks>
+        public bool? IsQueued { get; set; }
 
         public override void OnAccept(Socket newSocket)
         {
@@ -74,6 +81,7 @@ namespace NexusForever.WorldServer.Network
                 throw new InvalidOperationException();
 
             Account = account;
+            NetworkManager<WorldSession>.Instance.UpdateSessionId(this, account.Id.ToString());
 
             // managers
             AccountRbacManager     = new AccountRBACManager(this, account);
