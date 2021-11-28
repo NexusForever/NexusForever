@@ -75,6 +75,7 @@ namespace NexusForever.Shared.Network
 
             if (Heartbeat.Flatline || disconnectState == DisconnectState.Pending)
             {
+                // no defibrillator is going to save this session
                 if (Heartbeat.Flatline)
                     log.Trace($"Client {Id} has flatlined.");
 

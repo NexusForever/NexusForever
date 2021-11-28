@@ -70,7 +70,7 @@ namespace NexusForever.Shared.Network
         public void Update(double lastTick)
         {
             while (pendingAdd.TryDequeue(out T session))
-                sessions.Add(session.Id, session);
+                AddSession(session);
 
             foreach (T session in sessions.Values)
             {
@@ -80,14 +80,31 @@ namespace NexusForever.Shared.Network
             }
 
             while (pendingUpdate.TryDequeue(out (T Session, string Id) update))
-            {
-                sessions.Remove(update.Session.Id);
-                update.Session.UpdateId(update.Id);
-                sessions.Add(update.Id, update.Session);
-            }
+                UpdateSession(update.Session, update.Id);
 
             while (pendingRemove.TryDequeue(out T session))
                 sessions.Remove(session.Id);
+        }
+
+        private void AddSession(T session)
+        {
+            if (sessions.TryGetValue(session.Id, out T existingSession))
+            {
+                // there is already an existing session with this key, disconnect it
+                log.Trace($"New session with id {session.Id} conflicts with existing session.");
+
+                existingSession.ForceDisconnect();
+                UpdateSession(existingSession, Guid.NewGuid().ToString());
+            }
+
+            sessions.Add(session.Id, session);
+        }
+
+        private void UpdateSession(T session, string id)
+        {
+            sessions.Remove(session.Id);
+            session.UpdateId(id);
+            AddSession(session);
         }
 
         /// <summary>
