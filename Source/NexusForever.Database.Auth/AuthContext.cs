@@ -900,6 +900,11 @@ namespace NexusForever.Database.Auth
                         Id   = 110,
                         Name = "Command: QuestList"
                     },
+                    new PermissionModel()
+                    {
+                        Id   = 111,
+                        Name = "Command: RealmMaxPlayers"
+                    },
                     new PermissionModel
                     {
                         Id   = 10000,

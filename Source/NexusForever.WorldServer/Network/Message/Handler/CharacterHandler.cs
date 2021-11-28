@@ -119,7 +119,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientCharacterList)]
-        public static void HandleCharacterList(WorldSession session, ClientCharacterList characterList)
+        public static void HandleCharacterList(WorldSession session, ClientCharacterList _)
+        {
+            // only handle session in queue once
+            // TODO: might need to move this as HandleCharacterList is called multiple times
+            if (!session.IsQueued.HasValue)
+                LoginQueueManager.Instance.OnNewSession(session);
+
+            if (session.IsQueued == false)
+                SendCharacterListPackets(session);
+        }
+
+        public static void SendCharacterListPackets(WorldSession session)
         {
             session.Events.EnqueueEvent(new TaskGenericEvent<List<CharacterModel>>(DatabaseManager.Instance.CharacterDatabase.GetCharacters(session.Account.Id),
                 characters =>
@@ -247,6 +258,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientCharacterCreate)]
         public static void HandleCharacterCreate(WorldSession session, ClientCharacterCreate characterCreate)
         {
+            if (session.IsQueued == true)
+                throw new InvalidPacketValueException();
+
             CharacterModifyResult? GetResult()
             {
                 // TODO: validate name and path
@@ -473,6 +487,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientCharacterDelete)]
         public static void HandleCharacterDelete(WorldSession session, ClientCharacterDelete characterDelete)
         {
+            if (session.IsQueued == true)
+                throw new InvalidPacketValueException();
+
             CharacterModel characterToDelete = session.Characters.FirstOrDefault(c => c.Id == characterDelete.CharacterId);
 
             (CharacterModifyResult, uint) GetResult()
@@ -548,6 +565,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientCharacterSelect)]
         public static void HandleCharacterSelect(WorldSession session, ClientCharacterSelect characterSelect)
         {
+            if (session.IsQueued == true)
+                throw new InvalidPacketValueException();
+
             CharacterModel character = session.Characters.SingleOrDefault(c => c.Id == characterSelect.CharacterId);
             if (character == null)
             {

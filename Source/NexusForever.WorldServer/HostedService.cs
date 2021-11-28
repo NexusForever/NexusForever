@@ -89,6 +89,7 @@ namespace NexusForever.WorldServer
                 GlobalGuildManager.Instance.Update(lastTick);
                 GlobalResidenceManager.Instance.Update(lastTick); // must be after guild update
                 GlobalChatManager.Instance.Update(lastTick);
+                LoginQueueManager.Instance.Update(lastTick);
                 ShutdownManager.Instance.Update(lastTick);
 
                 // process commands after everything else in the tick has processed

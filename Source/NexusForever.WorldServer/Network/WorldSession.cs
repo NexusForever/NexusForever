@@ -14,6 +14,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Game;
 
 namespace NexusForever.WorldServer.Network
 {
@@ -30,6 +31,14 @@ namespace NexusForever.WorldServer.Network
         public EntitlementManager EntitlementManager { get; private set; }
 
         public AccountTier AccountTier => AccountRbacManager.HasPermission(Permission.Signature) ? AccountTier.Signature : AccountTier.Basic;
+
+        /// <summary>
+        /// Determines if the <see cref="WorldSession"/> is queued to enter the realm.
+        /// </summary>
+        /// <remarks>
+        /// This occurs when the world has reached the maximum number of allowed players.
+        /// </remarks>
+        public bool? IsQueued { get; set; }
 
         public override void OnAccept(Socket newSocket)
         {
@@ -57,6 +66,10 @@ namespace NexusForever.WorldServer.Network
         {
             base.OnDisconnect();
             Player?.CleanUp();
+
+            // We check that Account isn't null because AuthServer pings World to check if online
+            if (Account != null)
+                LoginQueueManager.Instance.OnDisconnect(this);
         }
 
         /// <summary>
@@ -68,6 +81,7 @@ namespace NexusForever.WorldServer.Network
                 throw new InvalidOperationException();
 
             Account = account;
+            NetworkManager<WorldSession>.Instance.UpdateSessionId(this, account.Id.ToString());
 
             // managers
             AccountRbacManager     = new AccountRBACManager(this, account);
