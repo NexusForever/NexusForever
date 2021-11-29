@@ -5,6 +5,7 @@ using System.Linq;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
+using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Network;
 
@@ -16,6 +17,8 @@ namespace NexusForever.WorldServer.Game.RBAC
 
         private readonly Dictionary<Permission, AccountPermission> permissions = new();
         private readonly Dictionary<Role, AccountRole> roles = new();
+
+        private Role defaultRole = (Role)(ConfigurationManager<WorldServerConfiguration>.Instance.Config.DefaultRole ?? (uint)Role.Player);
 
         /// <summary>
         /// Create a new <see cref="AccountRBACManager"/> from an existing database model.
@@ -40,6 +43,15 @@ namespace NexusForever.WorldServer.Game.RBAC
                     throw new DatabaseDataException($"Account {model.Id} has invalid role {roleModel.RoleId}!");
 
                 roles.Add(rbacRole.Role, new AccountRole(roleModel, rbacRole));
+            }
+
+            if (roles.Count == 0)
+            {
+                RBACRole rbacRole = RBACManager.Instance.GetRole(defaultRole);
+                if (rbacRole == null)
+                    throw new DatabaseDataException($"Account {model.Id} has invalid role {defaultRole}!");
+
+                roles.Add(rbacRole.Role, new AccountRole(model.Id, rbacRole));
             }
         }
 
