@@ -262,7 +262,7 @@ namespace NexusForever.WorldServer.Game.Entity
             foreach (RewardPropertyPremiumModifierEntry modifierEntry in AssetManager.Instance.GetRewardPropertiesForTier(session.AccountTier)
                 .Where(e => (EntitlementType)e.EntitlementIdModifierCount == type))
             {
-                UpdateRewardProperty((RewardPropertyType)modifierEntry.EntitlementIdModifierCount, value, modifierEntry.RewardPropertyData);
+                UpdateRewardProperty((RewardPropertyType)modifierEntry.RewardPropertyId, value, modifierEntry.RewardPropertyData);
             }
         }
 
