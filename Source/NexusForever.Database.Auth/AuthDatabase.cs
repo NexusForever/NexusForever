@@ -69,6 +69,7 @@ namespace NexusForever.Database.Auth
         {
             using var context = new AuthContext(config);
             return await context.Account
+                .AsSplitQuery()
                 .Include(a => a.AccountCostumeUnlock)
                 .Include(a => a.AccountCurrency)
                 .Include(a => a.AccountGenericUnlock)
