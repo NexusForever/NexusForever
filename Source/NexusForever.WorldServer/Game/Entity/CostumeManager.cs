@@ -163,7 +163,8 @@ namespace NexusForever.WorldServer.Game.Entity
                 costumes.Add(costume.Index, costume);
             }
 
-            SetCostume((sbyte)costumeSave.Index, costume);
+            if (costumeSave.Index == player.CostumeIndex)
+                player.Inventory.VisualUpdate(costume);
 
             SendCostume(costume);
             SendCostumeSaveResult(CostumeSaveResult.Saved, costumeSave.Index, costumeSave.MannequinIndex);
