@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using NexusForever.Cryptography;
 using NexusForever.Database;
@@ -27,6 +27,15 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 });
             }
 
+            void SendServerAuthDeniedSuspended(NpLoginResult result, float suspendedDays)
+            {
+                session.EnqueueMessageEncrypted(new ServerAuthDenied
+                {
+                    LoginResult = result,
+                    SuspendedDays = suspendedDays
+                });
+            }
+
             if (helloAuth.Build != 16042)
             {
                 SendServerAuthDenied(NpLoginResult.ClientServerVersionMismatch);
@@ -40,6 +49,19 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 if (account == null)
                 {
                     SendServerAuthDenied(NpLoginResult.ErrorInvalidToken);
+                    return;
+                }
+
+                if (account.BanTime != null)
+                {
+                    SendServerAuthDenied(NpLoginResult.ErrorAccountBanned);
+                    return;
+                }
+
+                DateTime? latestSuspension = account.AccountSuspension.Max(suspension => suspension.EndTime as DateTime?);
+                if (latestSuspension != null && latestSuspension > DateTime.Now)
+                {
+                    SendServerAuthDeniedSuspended(NpLoginResult.AccountSuspended, (float)((DateTime)latestSuspension - DateTime.Now).TotalDays);
                     return;
                 }
 

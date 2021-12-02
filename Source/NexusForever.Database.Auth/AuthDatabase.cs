@@ -60,7 +60,9 @@ namespace NexusForever.Database.Auth
         public async Task<AccountModel> GetAccountByGameTokenAsync(string email, string gameToken)
         {
             using var context = new AuthContext(config);
-            return await context.Account.SingleOrDefaultAsync(a => a.Email == email && a.GameToken == gameToken);
+            return await context.Account
+                .Include(a => a.AccountSuspension)
+                .SingleOrDefaultAsync(a => a.Email == email && a.GameToken == gameToken);
         }
 
         /// <summary>

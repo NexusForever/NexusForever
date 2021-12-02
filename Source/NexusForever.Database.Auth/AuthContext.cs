@@ -14,6 +14,7 @@ namespace NexusForever.Database.Auth
         public DbSet<AccountKeybindingModel> AccountKeybinding { get; set; }
         public DbSet<AccountPermissionModel> AccountPermission { get; set; }
         public DbSet<AccountRoleModel> AccountRole { get; set; }
+        public DbSet<AccountSuspensionModel> AccountSuspension { get; set; }
         public DbSet<PermissionModel> Permission { get; set; }
         public DbSet<RoleModel> Role { get; set; }
         public DbSet<RolePermissionModel> RolePermission { get; set; }
@@ -59,6 +60,11 @@ namespace NexusForever.Database.Auth
                     .HasColumnName("createTime")
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("current_timestamp()");
+
+                entity.Property(e => e.BanTime)
+                    .HasColumnName("banTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValue(null);
 
                 entity.Property(e => e.Email)
                     .IsRequired()
@@ -338,6 +344,34 @@ namespace NexusForever.Database.Auth
                     .WithMany(f => f.AccountRole)
                     .HasForeignKey(e => e.RoleId)
                     .HasConstraintName("FK__account_role_role_id__role_id");
+            });
+
+            modelBuilder.Entity<AccountSuspensionModel>(entity =>
+            {
+                entity.ToTable("account_suspension");
+
+                entity.HasKey(e => e.Id)
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.StartTime)
+                    .HasColumnName("startTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("current_timestamp()");
+
+                entity.Property(e => e.EndTime)
+                    .HasColumnName("endTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("current_timestamp()");
+
+                entity.HasOne(e => e.Account)
+                    .WithMany(f => f.AccountSuspension)
+                    .HasForeignKey(e => e.Id)
+                    .HasConstraintName("FK__account_suspension_id__account_id");
             });
 
             modelBuilder.Entity<PermissionModel>(entity =>

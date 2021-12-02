@@ -13,7 +13,7 @@ namespace NexusForever.Network.Auth.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(LoginResult);
+            writer.Write(LoginResult, 32);
             writer.Write(Unknown4);
             writer.Write(SuspendedDays);
         }
