@@ -13,6 +13,8 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Guild;
 using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Housing.Static;
+using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
 namespace NexusForever.WorldServer.Game.Housing
@@ -148,6 +150,7 @@ namespace NexusForever.WorldServer.Game.Housing
         {
             var residence = new Residence(player);
             StoreResidence(residence, player);
+            player.ResidenceManager.SetResidence(residence);
 
             log.Trace($"Created new residence {residence.Id} for player {player.Name}.");
             return residence;
@@ -260,6 +263,20 @@ namespace NexusForever.WorldServer.Game.Housing
             residenceSearchCache.Remove(name);
         }
 
+        /// <summary>
+        /// Remove an existing <see cref="Residence"/> from cache by supplied <see cref="Community"/>.
+        /// </summary>
+        /// <param name="community"></param>
+        public void RemoveCommunity(Community community)
+        {
+            DeregisterCommunityVists(community.Residence.Id);
+
+            residences.Remove(community.Residence.Id);
+
+            communityOwnerCache.Remove(community.Residence.GuildOwnerId.Value);
+            communitySearchCache.Remove(community.Name);
+        }
+
         public ResidenceEntrance GetResidenceEntrance(PropertyInfoId propertyInfoId)
         {
             HousingPropertyInfoEntry propertyEntry = GameTableManager.Instance.HousingPropertyInfo.GetEntry((ulong)propertyInfoId);
@@ -336,6 +353,27 @@ namespace NexusForever.WorldServer.Game.Housing
                 .Values
                 .OrderBy(r => random.Next())
                 .Take(50);
+        }
+
+        /// <summary>
+        /// Sends Random Visitable Communities to given <see cref="WorldSession"/>.
+        /// </summary>
+        /// <param name="session"></param>
+        public void SendRandomVisitableCommunities(WorldSession session)
+        {
+            var serverHousingRandomCommunityList = new ServerHousingRandomCommunityList();
+            foreach (PublicCommunity community in GetRandomVisitableCommunities())
+            {
+                serverHousingRandomCommunityList.Communities.Add(new ServerHousingRandomCommunityList.Community
+                {
+                    RealmId = WorldServer.RealmId,
+                    NeighborhoodId = community.NeighbourhoodId,
+                    Owner = community.Owner,
+                    Name = community.Name
+                });
+            }
+
+            session.EnqueueMessageEncrypted(serverHousingRandomCommunityList);
         }
     }
 }

@@ -89,6 +89,7 @@ namespace NexusForever.WorldServer.Game.Map
             if (entity is not Player player)
                 return;
 
+            GlobalResidenceManager.Instance.SendRandomVisitableCommunities(player.Session);
             SendResidences(player);
             SendResidencePlots(player);
             SendResidenceDecor(player);
