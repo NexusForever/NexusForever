@@ -324,10 +324,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public CurrencyType GetVendorSellCurrency(byte index)
         {
-            if (Info.Entry.CurrencyTypeIdSellToVendor[index] != 0u)
-                return (CurrencyType)Info.Entry.CurrencyTypeIdSellToVendor[index];
-
-            return CurrencyType.None;
+            return Info.GetVendorSellCurrency(index);
         }
 
         /// <summary>
@@ -338,7 +335,6 @@ namespace NexusForever.Game.Entity
             if (Info.Entry.CurrencyTypeIdSellToVendor[index] != 0u)
                 return Info.Entry.CurrencyAmountSellToVendor[index];
 
-            // most items that sell for credits have their sell amount calculated and not stored in the tbl
             return CalculateVendorSellAmount();
         }
 
@@ -347,7 +343,9 @@ namespace NexusForever.Game.Entity
             // TODO: Rawaho was lazy and didn't finish this
             // GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(559);
             // uint cost = Entry.PowerLevel * entry.Dataint01;
-            return 0u;
+
+            // TODO: Add calculations for Runes or other things that would increase worth amount.
+            return Info.CalculateVendorSellAmount();
         }
     }
 }

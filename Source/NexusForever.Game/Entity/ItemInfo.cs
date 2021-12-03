@@ -17,6 +17,7 @@ namespace NexusForever.Game.Entity
         public ItemSlotEntry SlotEntry { get; }
         public ItemBudgetEntry BudgetEntry { get; }
         public ItemStatEntry StatEntry { get; }
+        public ItemQualityEntry QualityEntry { get; }
         public SecondaryItemFlags SecondaryItemFlags { get; }
 
         public float ItemPower { get; private set; }
@@ -34,6 +35,7 @@ namespace NexusForever.Game.Entity
             SlotEntry     = GameTableManager.Instance.ItemSlot.GetEntry(TypeEntry.ItemSlotId);
             BudgetEntry   = GameTableManager.Instance.ItemBudget.GetEntry(Entry.ItemBudgetId);
             StatEntry     = GameTableManager.Instance.ItemStat.GetEntry(Entry.ItemStatId);
+            QualityEntry  = GameTableManager.Instance.ItemQuality.GetEntry(Entry.ItemQualityId);
 
             // the client combines the flags from the family, category and type entries into a single value
             SecondaryItemFlags = FamilyEntry.Flags | CategoryEntry.Flags | TypeEntry.Flags;
@@ -323,6 +325,41 @@ namespace NexusForever.Game.Entity
 
             // TODO: research this...
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns the <see cref="CurrencyType"/> this <see cref="IItemInfo"/> sells for at a vendor.
+        /// </summary>
+        public CurrencyType GetVendorSellCurrency(byte index)
+        {
+            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
+                return (CurrencyType)Entry.CurrencyTypeIdSellToVendor[index];
+
+            return CurrencyType.None;
+        }
+
+        /// <summary>
+        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="IItemInfo"/> sells for at a vendor.
+        /// </summary>
+        public uint GetVendorSellAmount(byte index)
+        {
+            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
+                return Entry.CurrencyAmountSellToVendor[index];
+
+            // most items that sell for credits have their sell amount calculated and not stored in the tbl
+            return CalculateVendorSellAmount();
+        }
+
+        public uint CalculateVendorSellAmount()
+        {
+            // TODO: Rawaho was lazy and didn't finish this
+            // GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(559);
+            // uint cost = Entry.PowerLevel * entry.Dataint01;
+
+            // Kirmmin's Temporary Sell Value (Accurate for items between PowerLevel 20 and 50)
+            float baseVal = ((((Entry.PowerLevel * Entry.PowerLevel) * Entry.ItemQualityId) * TypeEntry.VendorMultiplier) * CategoryEntry.VendorMultiplier);
+            float moddedValue = MathF.Floor(baseVal * 1.125f);
+            return (uint)(moddedValue > 0f ? moddedValue : 1u);
         }
 
         /// <summary>
