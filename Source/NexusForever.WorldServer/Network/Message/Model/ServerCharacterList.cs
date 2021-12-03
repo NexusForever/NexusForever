@@ -93,7 +93,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
             }
         }
 
-        public ulong Id { get; set; }
+        public ulong ServerTime { get; set; } = WorldServer.GetServerTime();
         public List<Character> Characters { get; } = new List<Character>();
         public List<uint> Unknown14 { get; set; } = new List<uint>(); // Believe this to be Enabled Character Creation Ids, but could not get the client to do anything different.
         public List<uint> DisabledCharacterCreationIds { get; set; } = new List<uint>();
@@ -109,7 +109,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Id);
+            writer.Write(ServerTime);
             writer.Write(Characters.Count);
 
             foreach (Character character in Characters)

@@ -33,6 +33,7 @@ namespace NexusForever.WorldServer
         public static string RealmMotd { get; set; }
 
         private static readonly CancellationTokenSource cancellationToken = new();
+        private static int serverTimeOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).Hours;
 
         private static async Task Main()
         {
@@ -76,6 +77,14 @@ namespace NexusForever.WorldServer
         public static void Shutdown()
         {
             cancellationToken.Cancel();
+        }
+
+        /// <summary>
+        /// Get the current Server Time in FileTime format.
+        /// </summary>
+        public static ulong GetServerTime()
+        {
+            return (ulong)DateTime.UtcNow.AddHours(serverTimeOffset).ToFileTime();
         }
     }
 }
