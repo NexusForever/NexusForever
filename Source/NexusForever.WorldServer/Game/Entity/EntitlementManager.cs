@@ -9,6 +9,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 
@@ -161,6 +162,56 @@ namespace NexusForever.WorldServer.Game.Entity
                     .ToList()
             });
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public void AddEntitlement(EntitlementType type, int value)
+        {
+            GenericError CheckEntitlement(EntitlementEntry entry)
+            {
+                EntitlementFlags entitlementFlags = (EntitlementFlags)entry.Flags;
+                if (value > entry.MaxCount)
+                    return GenericError.AccountItemMaxEntitlementCount;
+
+                if (entitlementFlags.HasFlag(EntitlementFlags.Disabled))
+                    return GenericError.DbFailure;
+
+                if (entitlementFlags.HasFlag(EntitlementFlags.Character))
+                {
+                    if (GetCharacterEntitlement(type)?.Amount + value > entry.MaxCount)
+                        return GenericError.AccountItemMaxEntitlementCount;
+                }
+                else
+                {
+                    if (GetAccountEntitlement(type)?.Amount + value > entry.MaxCount)
+                        return GenericError.AccountItemMaxEntitlementCount;
+                }
+
+                return GenericError.Ok;
+            }
+
+            EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type);
+            if (entry == null)
+                throw new ArgumentException($"Invalid entitlement type {type}!");
+
+            EntitlementFlags entitlementFlags = (EntitlementFlags)entry.Flags;
+            GenericError entitlementCheck = CheckEntitlement(entry);
+            if (entitlementCheck != GenericError.Ok)
+            {
+                session.Player?.SendGenericError(entitlementCheck);
+                return;
+            }
+
+            if (entitlementFlags.HasFlag(EntitlementFlags.Character))
+                SetCharacterEntitlement(type, entry, value);
+            else
+                SetAccountEntitlement(type, entry, value);
+        }
 
         /// <summary>
         /// Create or update account <see cref="EntitlementType"/> with supplied value.
@@ -169,12 +220,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// A positive value must be supplied for new entitlements otherwise an <see cref="ArgumentException"/> will be thrown.
         /// For existing entitlements a positive value will increment and a negative value will decrement the entitlement value.
         /// </remarks>
-        public void SetAccountEntitlement(EntitlementType type, int value)
+        private void SetAccountEntitlement(EntitlementType type, EntitlementEntry entry, int value)
         {
-            EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type);
-            if (entry == null)
-                throw new ArgumentException($"Invalid entitlement type {type}!");
-
             AccountEntitlement entitlement = SetEntitlement(accountEntitlements, entry, value,
                 () => new AccountEntitlement(session.Account.Id, entry, (uint)value));
 
@@ -194,12 +241,8 @@ namespace NexusForever.WorldServer.Game.Entity
         /// A positive value must be supplied for new entitlements otherwise an <see cref="ArgumentException"/> will be thrown.
         /// For existing entitlements a positive value will increment and a negative value will decrement the entitlement value.
         /// </remarks>
-        public void SetCharacterEntitlement(EntitlementType type, int value)
+        private void SetCharacterEntitlement(EntitlementType type, EntitlementEntry entry, int value)
         {
-            EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type);
-            if (entry == null)
-                throw new ArgumentException($"Invalid entitlement type {type}!");
-
             CharacterEntitlement entitlement = SetEntitlement(characterEntitlements, entry, value,
                 () => new CharacterEntitlement(session.Player.CharacterId, entry, (uint)value));
 
