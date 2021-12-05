@@ -32,8 +32,9 @@ namespace NexusForever.WorldServer
         /// </summary>
         public static string RealmMotd { get; set; }
 
+        private static TimeSpan serverTimeOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
+
         private static readonly CancellationTokenSource cancellationToken = new();
-        private static int serverTimeOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).Hours;
 
         private static async Task Main()
         {
@@ -84,7 +85,7 @@ namespace NexusForever.WorldServer
         /// </summary>
         public static ulong GetServerTime()
         {
-            return (ulong)DateTime.UtcNow.AddHours(serverTimeOffset).ToFileTime();
+            return (ulong)DateTime.UtcNow.Add(serverTimeOffset).ToFileTime();
         }
     }
 }
