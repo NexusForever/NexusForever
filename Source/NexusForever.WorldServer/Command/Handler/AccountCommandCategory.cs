@@ -3,6 +3,7 @@ using NexusForever.Shared.Cryptography;
 using NexusForever.Shared.Database;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
+using NexusForever.WorldServer.Command.Static;
 using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -16,7 +17,7 @@ namespace NexusForever.WorldServer.Command.Handler
             string email,
             [Parameter("Password for the new account")]
             string password,
-            [Parameter("Role")]
+            [Parameter("Role", ParameterFlags.Optional)]
             uint? role = null)
         {
             if (DatabaseManager.Instance.AuthDatabase.AccountExists(email))
@@ -25,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            role ??= (ConfigurationManager<WorldServerConfiguration>.Instance.Config.DefaultRole ?? 1u);
+            role ??= (ConfigurationManager<WorldServerConfiguration>.Instance.Config.DefaultRole ?? (uint)Role.Player);
 
             (string salt, string verifier) = PasswordProvider.GenerateSaltAndVerifier(email, password);
             DatabaseManager.Instance.AuthDatabase.CreateAccount(email, salt, verifier, (uint)role);

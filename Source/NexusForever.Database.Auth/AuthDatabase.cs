@@ -100,8 +100,8 @@ namespace NexusForever.Database.Auth
             var model = new AccountModel
             {
                 Email = email,
-                S = s,
-                V = v,
+                S     = s,
+                V     = v
             };
             model.AccountRole.Add(new AccountRoleModel
             {
