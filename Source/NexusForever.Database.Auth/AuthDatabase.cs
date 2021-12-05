@@ -92,18 +92,23 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Create a new account with the supplied email, salt and password verifier that is inserted into the database.
         /// </summary>
-        public void CreateAccount(string email, string s, string v)
+        public void CreateAccount(string email, string s, string v, uint role)
         {
             if (AccountExists(email))
                 throw new InvalidOperationException($"Account with that username already exists.");
 
             using var context = new AuthContext(config);
-            context.Account.Add(new AccountModel
+            var model = new AccountModel
             {
                 Email = email,
                 S     = s,
                 V     = v
+            };
+            model.AccountRole.Add(new AccountRoleModel
+            {
+                RoleId = role
             });
+            context.Account.Add(model);
 
             context.SaveChanges();
         }
