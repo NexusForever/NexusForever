@@ -4,6 +4,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
+using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -14,6 +15,7 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Setting;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Session;
+using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -63,6 +65,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// Returns if <see cref="IPlayer"/>'s client is currently in a loading screen.
         /// </summary>
         bool IsLoading { get; set; }
+
+        IGroupMember GroupMembership1 { get; }
+        IGroupMember GroupMembership2 { get; }
+        IGroupInvite GroupInvite { get; set; }
 
         IInventory Inventory { get; }
         ICurrencyManager CurrencyManager { get; }
@@ -200,5 +206,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove a <see cref="Property"/> modifier by a item that is currently affecting this <see cref="IPlayer"/>.
         /// </summary>
         void RemoveItemProperty(Property property, ItemSlot itemSlot);
+
+        void AddToGroup(IGroupMember membership);
+
+        void RemoveFromGroup(IGroupMember membership);
+
+        GroupMember BuildGroupMember();
     }
 }

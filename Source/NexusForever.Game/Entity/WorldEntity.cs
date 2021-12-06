@@ -122,6 +122,12 @@ namespace NexusForever.Game.Entity
             set => SetStat(Stat.Level, value);
         }
 
+        public uint InterruptArmor
+        {
+            get => GetStatInteger(Stat.InterruptArmour) ?? 1u;
+            set => SetStat(Stat.InterruptArmour, value);
+        }
+
         public bool Sheathed
         {
             get => Convert.ToBoolean(GetStatInteger(Stat.Sheathed) ?? 0u);
@@ -243,6 +249,8 @@ namespace NexusForever.Game.Entity
             MovementManager.SetPosition(vector, false);
 
             base.OnAddToMap(map, guid, vector);
+
+            UpdateZone(vector);
         }
 
         /// <summary>
@@ -267,7 +275,11 @@ namespace NexusForever.Game.Entity
         public override void OnRelocate(Vector3 vector)
         {
             base.OnRelocate(vector);
+            UpdateZone(vector);
+        }
 
+        private void UpdateZone(Vector3 vector)
+        {
             uint? worldAreaId = Map.File.GetWorldAreaId(vector);
             if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
             {
