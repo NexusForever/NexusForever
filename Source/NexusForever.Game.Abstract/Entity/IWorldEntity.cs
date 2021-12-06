@@ -39,6 +39,7 @@ namespace NexusForever.Game.Abstract.Entity
         uint Health { get; }
         uint Shield { get; }
         uint Level { get; set; }
+        uint InterruptArmor { get; set; }
         bool Sheathed { get; set; }
 
         /// <summary>

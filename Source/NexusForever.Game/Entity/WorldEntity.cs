@@ -113,6 +113,12 @@ namespace NexusForever.Game.Entity
             set => SetStat(Stat.Level, value);
         }
 
+        public uint InterruptArmor
+        {
+            get => GetStatInteger(Stat.InterruptArmour) ?? 1u;
+            set => SetStat(Stat.InterruptArmour, value);
+        }
+
         public bool Sheathed
         {
             get => Convert.ToBoolean(GetStatInteger(Stat.Sheathed) ?? 0u);
