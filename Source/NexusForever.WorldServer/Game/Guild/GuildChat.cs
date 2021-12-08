@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
-        /// Initialise member and office <see cref="ChatChannel"/>'s.
+        /// Initialise member and office <see cref="ChatChannel"/>s.
         /// </summary>
         public void InitialiseChatChannels(ChatChannelType? memberChannelType, ChatChannelType? officerChannelType)
         {

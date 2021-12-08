@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -35,8 +36,8 @@ namespace NexusForever.WorldServer.Game.Guild
         private ulong nextGuildId;
 
         private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new();
-        private readonly Dictionary<string, ulong> guildNameCache = new(StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<ulong, List<ulong>> guildMemberCache = new();
+        private readonly Dictionary<(GuildType, string), ulong> guildNameCache = new(new GuildNameEqualityComparer());
+        private readonly Dictionary</*guildId*/ ulong, List</*memberId*/ ulong>> guildMemberCache = new();
 
         private ImmutableDictionary<GuildOperation, (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate)> guildOperationHandlers;
         private delegate GuildResultInfo GuildOperationHandlerResultDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
@@ -89,7 +90,7 @@ namespace NexusForever.WorldServer.Game.Guild
                 }
 
                 guilds.Add(guild.Id, guild);
-                guildNameCache.Add(guild.Name, guild.Id);
+                guildNameCache.Add((guild.Type, guild.Name), guild.Id);
 
                 // cache character guilds for faster lookup on character login
                 List<GuildMember> members = guild.ToList();
@@ -200,7 +201,7 @@ namespace NexusForever.WorldServer.Game.Guild
                 if (guild.PendingDelete)
                 {
                     guilds.Remove(guild.Id);
-                    guildNameCache.Remove(guild.Name);
+                    guildNameCache.Remove((guild.Type, guild.Name));
 
                     if (guild.PendingCreate)
                         continue;
@@ -251,19 +252,19 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
-        /// Returns <see cref="GuildBase"/> with supplied name.
+        /// Returns <see cref="GuildBase"/> with supplied <see cref="GuildType"/> and name.
         /// </summary>
-        public GuildBase GetGuild(string name)
+        public GuildBase GetGuild(GuildType guildType, string name)
         {
-            return guildNameCache.TryGetValue(name, out ulong guildId) ? GetGuild(guildId) : null;
+            return guildNameCache.TryGetValue((guildType, name), out ulong guildId) ? GetGuild(guildId) : null; 
         }
 
         /// <summary>
-        /// Returns <see cref="GuildBase"/> with supplied name.
+        /// Returns <see cref="GuildBase"/> with supplied <see cref="GuildType"> and name.
         /// </summary>
-        public T GetGuild<T>(string name) where T : GuildBase
+        public T GetGuild<T>(GuildType guildType, string name) where T : GuildBase
         {
-            return guildNameCache.TryGetValue(name, out ulong guildId) ? (T)GetGuild(guildId) : null;
+            return guildNameCache.TryGetValue((guildType, name), out ulong guildId) ? (T)GetGuild(guildId) : null;
         }
 
         /// <summary>
@@ -345,7 +346,7 @@ namespace NexusForever.WorldServer.Game.Guild
             }
 
             guilds.Add(guild.Id, guild);
-            guildNameCache.Add(guild.Name, guild.Id);
+            guildNameCache.Add((guild.Type, guild.Name), guild.Id);
             return guild;
         }
 
@@ -397,6 +398,28 @@ namespace NexusForever.WorldServer.Game.Guild
                 GuildResultInfo info = handlers.ResultDelegate.Invoke(guild, member, player, operation);
                 info.GuildId = guild.Id;
                 return info;
+            }
+        }
+        private class GuildNameEqualityComparer : IEqualityComparer<(GuildType, string)>
+        {
+            public bool Equals((GuildType, string) x, (GuildType, string) y)
+            {
+                if (x.Item1 == y.Item1)
+                {
+                    if (ReferenceEquals(x.Item2, y.Item2)) return true;
+                    if (x.Item2 is null) return false;
+                    if (y.Item2 is null) return false;
+                    if (x.Item2.GetType() != y.Item2.GetType()) return false;
+
+                    return string.Equals(x.Item2, y.Item2, StringComparison.InvariantCultureIgnoreCase);
+                }
+
+                return false;
+            }
+
+            public int GetHashCode([DisallowNull] (GuildType, string) obj)
+            {
+                return obj.Item2?.GetHashCode() ?? 0;
             }
         }
     }
