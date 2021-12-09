@@ -225,7 +225,7 @@ namespace NexusForever.WorldServer.Game.Guild
             if (!TextFilterManager.Instance.IsTextValid(name) || !TextFilterManager.Instance.IsTextValid(name, UserText.GuildName))
                 return new GuildResultInfo(GuildResult.InvalidGuildName, referenceString: name);
 
-            if (GlobalGuildManager.Instance.GetGuild(name) != null)
+            if (GlobalGuildManager.Instance.GetGuild(type, name) != null)
                 return new GuildResultInfo(GuildResult.GuildNameUnavailable, referenceString: name);
 
             var rankNames = new List<string> { leaderRankName, councilRankName, memberRankName };
