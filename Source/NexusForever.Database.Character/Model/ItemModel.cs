@@ -1,4 +1,6 @@
-﻿namespace NexusForever.Database.Character.Model
+﻿using System.Collections.Generic;
+
+namespace NexusForever.Database.Character.Model
 {
     public class ItemModel
     {
@@ -14,5 +16,6 @@
 
         public CharacterModel Character { get; set; }
         public CharacterMailAttachmentModel MailAttachment { get; set; }
+        public ICollection<ItemRuneModel> Runes { get; set; } = new HashSet<ItemRuneModel>();
     }
 }

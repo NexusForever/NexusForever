@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
         public ItemLocation LocationData { get; set; }
         public uint StackCount { get; set; }
         public uint Charges { get; set; }
-        public ulong RandomCircuitData { get; set; }
+        public double RandomCircuitData { get; set; }
         public uint RandomGlyphData { get; set; }
         public ulong ThresholdData { get; set; }
         public float Durability { get; set; }
@@ -81,7 +81,7 @@ namespace NexusForever.WorldServer.Network.Message.Model.Shared
             Microchips.ForEach(m => writer.Write(m));
             writer.Write(Glyphs.Count, 4u);
             Glyphs.ForEach(g => writer.Write(g));
-            writer.Write(Glyphs.Count, 6u);
+            writer.Write(Unknown88.Count, 6u);
             Unknown88.ForEach(u => u.Write(writer));
 
             writer.Write(EffectiveItemLevel);
