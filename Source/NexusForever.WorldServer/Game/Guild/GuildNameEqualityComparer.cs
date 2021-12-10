@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Game.Guild
 
         public int GetHashCode((GuildType, string) obj)
         {
-            return obj.Item2?.GetHashCode() ?? 0;
+            return base.GetHashCode();
         }
     }
 }
