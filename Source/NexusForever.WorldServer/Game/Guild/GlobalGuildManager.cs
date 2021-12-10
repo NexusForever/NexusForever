@@ -36,7 +36,7 @@ namespace NexusForever.WorldServer.Game.Guild
         private ulong nextGuildId;
 
         private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new();
-        private readonly Dictionary<(GuildType, string), ulong> guildNameCache = new(new GuildNameEqualityComparer());
+        private readonly Dictionary<(GuildType Type, string Name), /*guildId*/ ulong> guildNameCache = new(new GuildNameEqualityComparer());
         private readonly Dictionary</*guildId*/ ulong, List</*memberId*/ ulong>> guildMemberCache = new();
 
         private ImmutableDictionary<GuildOperation, (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate)> guildOperationHandlers;
