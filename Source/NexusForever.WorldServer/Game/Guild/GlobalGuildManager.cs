@@ -256,7 +256,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </summary>
         public GuildBase GetGuild(GuildType guildType, string name)
         {
-            return guildNameCache.TryGetValue((guildType, name), out ulong guildId) ? GetGuild(guildId) : null;
+            return guildNameCache.TryGetValue((guildType, name), out ulong guildId) ? GetGuild(guildId) : null; 
         }
 
         /// <summary>
@@ -398,28 +398,6 @@ namespace NexusForever.WorldServer.Game.Guild
                 GuildResultInfo info = handlers.ResultDelegate.Invoke(guild, member, player, operation);
                 info.GuildId = guild.Id;
                 return info;
-            }
-        }
-        private class GuildNameEqualityComparer : IEqualityComparer<(GuildType, string)>
-        {
-            public bool Equals((GuildType, string) x, (GuildType, string) y)
-            {
-                if (x.Item1 == y.Item1)
-                {
-                    if (ReferenceEquals(x.Item2, y.Item2))      return true;
-                    if (x.Item2 is null)                        return false;
-                    if (y.Item2 is null)                        return false;
-                    if (x.Item2.GetType() != y.Item2.GetType()) return false;
-
-                    return string.Equals(x.Item2, y.Item2, StringComparison.InvariantCultureIgnoreCase);
-                }
-
-                return false;
-            }
-
-            public int GetHashCode([DisallowNull] (GuildType, string) obj)
-            {
-                return base.GetHashCode();
             }
         }
     }
