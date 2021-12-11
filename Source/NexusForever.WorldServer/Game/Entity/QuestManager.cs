@@ -553,6 +553,11 @@ namespace NexusForever.WorldServer.Game.Entity
 
         private void RewardQuest(QuestInfo info, ushort reward)
         {
+            // Handle all Rewards that are not chosen
+            foreach (Quest2RewardEntry rewardEntry in info.Rewards.Values.Where(x => x.Flags == 0))
+                RewardQuest(rewardEntry);
+
+            // Handle any chosen rewards
             if (reward != 0)
             {
                 if (!info.Rewards.TryGetValue(reward, out Quest2RewardEntry entry))
