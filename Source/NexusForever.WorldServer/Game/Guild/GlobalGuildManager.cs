@@ -335,12 +335,12 @@ namespace NexusForever.WorldServer.Game.Guild
                     guild = new ArenaTeam(type, name, leaderRankName, councilRankName, memberRankName);
                     break;
                 case GuildType.Community:
-                    {
-                        var community = new Community(name, leaderRankName, councilRankName, memberRankName);
-                        community.Residence = GlobalResidenceManager.Instance.CreateCommunity(community);
-                        guild = community;
-                        break;
-                    }
+                {
+                    var community = new Community(name, leaderRankName, councilRankName, memberRankName);
+                    community.Residence = GlobalResidenceManager.Instance.CreateCommunity(community);
+                    guild = community;
+                    break;
+                }
                 default:
                     throw new ArgumentException();
             }
