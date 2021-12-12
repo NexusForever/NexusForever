@@ -78,5 +78,12 @@ namespace NexusForever.WorldServer.Game.Guild
             if (officerChannel != null)
                 officerChannel.Name = name;
         }
+
+        public override void DisbandGuild()
+        {
+            base.DisbandGuild();
+
+            GlobalChatManager.Instance.RemoveFromDictionaries(this);
+        }
     }
 }

@@ -351,6 +351,21 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
+        /// Removes the given <see cref="GuildBase"/> from local dictionaries to free keys for future use.
+        /// </summary>
+        /// <remarks>
+        /// This method should only be called under the assumption that the next save will remove <see cref="GuildBase"/> from the database.
+        /// </remarks>
+        public void RemoveFromDictionaries(GuildBase guild)
+        {
+            if (!guilds.TryGetValue(guild.Id, out guild))
+                throw new ArgumentException($"Guild {guild.Name}({guild.Id}) not found in local dictionaries.");
+
+            guildNameCache.Remove((guild.Type, guild.Name));
+            guildMemberCache.Remove(guild.Id);
+        }
+
+        /// <summary>
         /// Invoke operation delegate to handle <see cref="GuildOperation"/>.
         /// </summary>
         public void HandleGuildOperation(Player player, ClientGuildOperation operation)

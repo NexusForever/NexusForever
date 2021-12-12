@@ -10,6 +10,7 @@ using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Guild.Static;
+using NexusForever.WorldServer.Game.Social;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
 using NexusForever.WorldServer.Network.Message.Model.Shared;
@@ -465,7 +466,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Disband <see cref="GuildBase"/>.
         /// </summary>
-        public void DisbandGuild()
+        public virtual void DisbandGuild()
         {
             foreach (GuildMember member in members.Values.ToList())
             {
@@ -476,6 +477,8 @@ namespace NexusForever.WorldServer.Game.Guild
                 else
                     LeaveGuild(member, true);
             }
+
+            GlobalGuildManager.Instance.RemoveFromDictionaries(this);
 
             saveMask |= GuildBaseSaveMask.Delete;
             log.Trace($"Guild {Id} was disbanded.");

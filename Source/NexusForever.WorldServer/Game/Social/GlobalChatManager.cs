@@ -12,6 +12,8 @@ using NexusForever.Shared.Database;
 using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Game.Guild;
+using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Map.Search;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Social.Model;
@@ -137,7 +139,7 @@ namespace NexusForever.WorldServer.Game.Social
                 saveTimer.Reset();
             }
         }
-
+        
         private void UpdateCustomChannels()
         {
             var tasks = new List<Task>();
@@ -148,7 +150,7 @@ namespace NexusForever.WorldServer.Game.Social
                     chatChannels[ChatChannelType.Custom].Remove(channel.Id);
                     chatChannelNames[ChatChannelType.Custom].Remove(channel.Name);
 
-                    if (channel.PendingCreate)
+                    if(channel.PendingCreate)
                         continue;
                 }
 
@@ -213,6 +215,53 @@ namespace NexusForever.WorldServer.Game.Social
             }
 
             return channel;
+        }
+
+        /// <summary>
+        /// Removes the given <see cref="GuildChat"/> from local dictionaries to free keys for future use.
+        /// </summary>
+        /// <remarks>
+        /// This method should only be called under the assumption that the next save will remove <see cref="GuildChat"/> from the database.
+        /// </remarks>
+        public void RemoveFromDictionaries(GuildChat guildChat)
+        {
+            ChatChannelType channelType;
+            ChatChannelType? officerChannelType = null;
+
+            switch(guildChat.Type)
+            {
+                case GuildType.Guild:
+                    channelType = ChatChannelType.Guild;
+                    officerChannelType = ChatChannelType.GuildOfficer;
+                    break;
+                case GuildType.Circle:
+                    channelType = ChatChannelType.Society;
+                    break;
+                case GuildType.Community:
+                    channelType = ChatChannelType.Community;
+                    break;
+                case GuildType.WarParty:
+                    channelType = ChatChannelType.WarParty;
+                    officerChannelType = ChatChannelType.WarPartyOfficer;
+                    break;
+                default:
+                    throw new ArgumentException($"GuildChat {guildChat.Name}({guildChat.Id}) has incompatible type.");
+            }
+
+            if (!chatChannels[channelType].TryGetValue(guildChat.Id, out ChatChannel channel))
+                throw new ArgumentException($"No guild chat channel found for guild {guildChat.Name}({guildChat.Id}).");
+
+            chatChannelNames[channelType].Remove(channel.Name);
+            chatChannels[channelType].Remove(channel.Id);
+
+            if(officerChannelType.HasValue)
+            {
+                if (!chatChannels[officerChannelType.Value].TryGetValue(guildChat.Id, out ChatChannel officerChannel))
+                    throw new ArgumentException($"Guild {guildChat.Name}({guildChat.Id}) is of type {guildChat.Type}, but has no Officer channel.");
+
+                chatChannelNames[officerChannelType.Value].Remove(officerChannel.Name);
+                chatChannels[officerChannelType.Value].Remove(officerChannel.Id);
+            }
         }
 
         /// <summary>
@@ -295,7 +344,6 @@ namespace NexusForever.WorldServer.Game.Social
 
         private void SendChatAccept(WorldSession session)
         {
-
             session.EnqueueMessageEncrypted(new ServerChatAccept
             {
                 Name = session.Player.Name,
