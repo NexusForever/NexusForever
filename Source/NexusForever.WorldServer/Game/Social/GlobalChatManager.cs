@@ -218,10 +218,10 @@ namespace NexusForever.WorldServer.Game.Social
         }
 
         /// <summary>
-        /// Removes the given <see cref="ChatChannel"/>s belonging to a <see cref="GuildChat"/> from local dictionaries to free keys for future use.
+        /// Removes the given <see cref="ChatChannel"/> from local dictionaries to free keys for future use.
         /// </summary>
         /// <remarks>
-        /// This method should only be called under the assumption that the next save will remove <see cref="GuildChat"/> from the database.
+        /// This method should only be called under the assumption that the next save will remove <see cref="ChatChannel"/> from the database.
         /// </remarks>
         public void RemoveFromDictionaries(ChatChannel channel)
         {
