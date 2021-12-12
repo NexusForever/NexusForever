@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -34,5 +35,26 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="castingId">Casting ID of the spell to cancel</param>
         void CancelSpellCast(uint castingId);
+
+        /// <summary>
+        /// Checks if this <see cref="IUnitEntity"/> is currently casting a spell.
+        /// </summary>
+        /// <returns></returns>
+        bool IsCasting();
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id
+        /// </summary>
+        bool HasSpell(uint spell4Id, out ISpell spell, bool isCasting = false);
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="CastMethod"/>
+        /// </summary>
+        bool HasSpell(CastMethod castMethod, out ISpell spell);
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Func"/> predicate.
+        /// </summary>
+        bool HasSpell(Func<ISpell, bool> predicate, out ISpell spell);
     }
 }

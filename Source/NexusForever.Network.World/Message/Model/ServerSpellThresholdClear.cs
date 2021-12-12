@@ -1,9 +1,9 @@
-using NexusForever.Network.Message;
+﻿using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.Server0814)]
-    public class Server0814 : IWritable
+    [Message(GameMessageOpcode.ServerSpellThresholdClear)]
+    public class ServerSpellThresholdClear : IWritable
     {
         public uint Spell4Id { get; set; }
         public bool Unknown0 { get; set; }

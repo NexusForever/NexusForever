@@ -1,7 +1,9 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Entity;
+using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
@@ -23,12 +25,15 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Proxy)]
         public static void HandleEffectProxy(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            target.CastSpell(info.Entry.DataBits00, new SpellParameters
-            {
-                ParentSpellInfo        = spell.Parameters.SpellInfo,
-                RootSpellInfo          = spell.Parameters.RootSpellInfo,
-                UserInitiatedSpellCast = false
-            });
+            // Some Proxies can be triggered only a certain amount of times per cast, by any target, and we evaluate all targets at once to apply Proxy effects.
+            // This checks that value to ensure we've not exceeded the unique number of times this can fire.
+            // A good example of this is for the Esper Ability Telekinetic Strike, it has a Proxy that grants Psi point when it hits an enemy.
+            // However, Esper's can only generate a maximum of 1 Psi Point per cast. This tracks that value that seems to indicate it's a 1-time effect per cast.
+            if (spell.GetEffectTriggerCount(info.Entry.Id, out uint count))
+                if (count >= info.Entry.DataBits04)
+                    return;
+
+            spell.AddProxy(new Proxy(target, info.Entry, spell, spell.Parameters));
         }
 
         [SpellEffectHandler(SpellEffectType.Disguise)]
@@ -86,13 +91,34 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Teleport)]
         public static void HandleEffectTeleport(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
+            if (!(target is Player player))
+                return;
+
             WorldLocation2Entry locationEntry = GameTableManager.Instance.WorldLocation2.GetEntry(info.Entry.DataBits00);
             if (locationEntry == null)
                 return;
 
-            if (target is IPlayer player)
+            // Handle Housing Teleport
+            if (locationEntry.WorldId == 1229)
+            {
+                IResidence residence = GlobalResidenceManager.Instance.GetResidenceByOwner(player.Name);
+                if (residence == null)
+                    residence = GlobalResidenceManager.Instance.CreateResidence(player);
+
+                IResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(residence.PropertyInfoId);
                 if (player.CanTeleport())
-                    player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
+                {
+                    player.Rotation = entrance.Rotation.ToEulerDegrees();
+                    player.TeleportTo(entrance.Entry, entrance.Position, residence.Parent?.Id ?? residence.Id);
+                    return;
+                }
+            }
+
+            if (player.CanTeleport())
+            {
+                player.Rotation = new Quaternion(locationEntry.Facing0, locationEntry.Facing1, locationEntry.Facing2, locationEntry.Facing3).ToEulerDegrees();
+                player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
+            }
         }
 
         [SpellEffectHandler(SpellEffectType.FullScreenEffect)]
@@ -209,6 +235,12 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Fluff)]
         public static void HandleEffectFluff(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
+        }
+
+        [SpellEffectHandler(SpellEffectType.Activate)]
+        public static void HandleEffectActivate(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            spell.Parameters.ClientSideInteraction?.HandleSuccess(spell);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Entity;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
@@ -16,6 +18,7 @@ namespace NexusForever.Game.Spell
         public Vector3 Position { get; private set; }
         public Vector3 Rotation { get; private set; }
         public TelegraphDamageEntry TelegraphDamage { get; }
+        public TelegraphTargetTypeFlags TelegraphTargetTypeFlags => (TelegraphTargetTypeFlags)TelegraphDamage.TargetTypeFlags;
 
         private float casterHitRadius => Caster.HitRadius * 0.5f;
 
@@ -61,13 +64,48 @@ namespace NexusForever.Game.Spell
             Rotation = new Vector3(rotationRadians, Rotation.Y, Rotation.Z);
         }
 
-        /// <summary>
-        /// Returns any <see cref="IUnitEntity"/> inside the <see cref="ITelegraph"/>.
-        /// </summary>
-        public IEnumerable<IUnitEntity> GetTargets()
+        private void FilterTargets(IEnumerable<ISpellTargetInfo> targets, ISearchCheck check, out List<ISpellTargetInfo> filteredTargets)
         {
-            Caster.Map.Search(Position, GridSearchSize(), new SearchCheckTelegraph(this, Caster), out List<IGridEntity> targets);
-            return targets.Select(t => t as IUnitEntity);
+            filteredTargets = new();
+            filteredTargets = targets.Where(x => check.CheckEntity(x.Entity)).ToList();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="IEnumerable{T}"/> containing all <see cref="ISpellTargetInfo"/> that can be targeted by this <see cref="ITelegraph"/>.
+        /// </summary>
+        public IEnumerable<ISpellTargetInfo> GetTargets(ISpell spell, List<ISpellTargetInfo> targets)
+        {
+            FilterTargets(targets, new SearchCheckTelegraph(this, Caster), out targets);
+
+            foreach (var target in targets.ToList())
+                if (!(EvaluateDamageFlagsForTarget(target.Entity, spell)))
+                    targets.Remove(target);
+
+            return targets;
+        }
+
+        private bool EvaluateDamageFlagsForTarget(IGridEntity target, ISpell spell)
+        {
+            TelegraphDamageFlag damageFlag = (TelegraphDamageFlag)TelegraphDamage.TelegraphDamageFlags;
+
+            // This is Invalid
+            //if (damageFlag.HasFlag(TelegraphDamageFlag.SpellMustBeMultiPhase))
+            //    if (spell.CastMethod != CastMethod.Multiphase)
+            //        return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBeNPC))
+                if (Caster is IPlayer)
+                    return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.CasterMustBePlayer))
+                if (Caster is not IPlayer)
+                    return false;
+
+            if (damageFlag.HasFlag(TelegraphDamageFlag.TargetMustBeUnit))
+                if (target is not IUnitEntity)
+                    return false;
+
+            return true;
         }
 
         /// <summary>

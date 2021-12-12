@@ -70,7 +70,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     session.Player.CastSpell(itemSpecial.Spell4IdOnActivate, new SpellParameters
                     {
                         PrimaryTargetId = itemUse.TargetUnitId,
-                        Position        = itemUse.Position
+                        TargetPosition  = itemUse.Position
                     });
                 }
             }

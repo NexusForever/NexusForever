@@ -2,6 +2,7 @@
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using System.Collections;
 
 namespace NexusForever.Game.Spell
 {
@@ -62,6 +63,23 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
+        /// Initialise this <see cref="ISpellBaseInfo"/>.
+        /// </summary>
+        public void Intitialise()
+        {
+            if (spellInfoStore == null)
+                return;
+
+            foreach (ISpellInfo spell in spellInfoStore)
+            {
+                if (spell == null)
+                    continue;
+
+                spell.Initialise();
+            }
+        }
+
+        /// <summary>
         /// Return <see cref="ISpellInfo"/> for the supplied spell tier.
         /// </summary>
         public ISpellInfo GetSpellInfo(byte tier)
@@ -69,6 +87,18 @@ namespace NexusForever.Game.Spell
             if (tier < 1)
                 tier = 1;
             return spellInfoStore[tier - 1];
+        }
+
+        public IEnumerator<ISpellInfo> GetEnumerator()
+        {
+            return spellInfoStore
+                .Select(s => s)
+                .GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

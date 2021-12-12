@@ -30,7 +30,6 @@ namespace NexusForever.Game.Abstract.Entity
         Static.Entity.Path Path { get; set; }
         DateTime PathActivatedTime { get; }
         InputSets InputKeySet { get; set; }
-        byte InnateIndex { get; set; }
 
         DateTime CreateTime { get; }
         double TimePlayedTotal { get; }
