@@ -218,50 +218,18 @@ namespace NexusForever.WorldServer.Game.Social
         }
 
         /// <summary>
-        /// Removes the given <see cref="GuildChat"/> from local dictionaries to free keys for future use.
+        /// Removes the given <see cref="ChatChannel"/>s belonging to a <see cref="GuildChat"/> from local dictionaries to free keys for future use.
         /// </summary>
         /// <remarks>
         /// This method should only be called under the assumption that the next save will remove <see cref="GuildChat"/> from the database.
         /// </remarks>
-        public void RemoveFromDictionaries(GuildChat guildChat)
+        public void RemoveFromDictionaries(ChatChannel channel)
         {
-            ChatChannelType channelType;
-            ChatChannelType? officerChannelType = null;
+            if (!chatChannels[channel.Type].TryGetValue(channel.Id, out channel))
+                throw new ArgumentException($"No chat channel found in local dictionaries for {channel.Name}({channel.Id}).");
 
-            switch(guildChat.Type)
-            {
-                case GuildType.Guild:
-                    channelType = ChatChannelType.Guild;
-                    officerChannelType = ChatChannelType.GuildOfficer;
-                    break;
-                case GuildType.Circle:
-                    channelType = ChatChannelType.Society;
-                    break;
-                case GuildType.Community:
-                    channelType = ChatChannelType.Community;
-                    break;
-                case GuildType.WarParty:
-                    channelType = ChatChannelType.WarParty;
-                    officerChannelType = ChatChannelType.WarPartyOfficer;
-                    break;
-                default:
-                    throw new ArgumentException($"GuildChat {guildChat.Name}({guildChat.Id}) has incompatible type.");
-            }
-
-            if (!chatChannels[channelType].TryGetValue(guildChat.Id, out ChatChannel channel))
-                throw new ArgumentException($"No guild chat channel found for guild {guildChat.Name}({guildChat.Id}).");
-
-            chatChannelNames[channelType].Remove(channel.Name);
-            chatChannels[channelType].Remove(channel.Id);
-
-            if(officerChannelType.HasValue)
-            {
-                if (!chatChannels[officerChannelType.Value].TryGetValue(guildChat.Id, out ChatChannel officerChannel))
-                    throw new ArgumentException($"Guild {guildChat.Name}({guildChat.Id}) is of type {guildChat.Type}, but has no Officer channel.");
-
-                chatChannelNames[officerChannelType.Value].Remove(officerChannel.Name);
-                chatChannels[officerChannelType.Value].Remove(officerChannel.Id);
-            }
+            chatChannelNames[channel.Type].Remove(channel.Name);
+            chatChannels[channel.Type].Remove(channel.Id);
         }
 
         /// <summary>

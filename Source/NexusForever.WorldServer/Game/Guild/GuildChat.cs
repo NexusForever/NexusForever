@@ -83,7 +83,10 @@ namespace NexusForever.WorldServer.Game.Guild
         {
             base.DisbandGuild();
 
-            GlobalChatManager.Instance.RemoveFromDictionaries(this);
+            GlobalChatManager.Instance.RemoveFromDictionaries(memberChannel);
+
+            if (officerChannel is not null)
+                GlobalChatManager.Instance.RemoveFromDictionaries(officerChannel);
         }
     }
 }
