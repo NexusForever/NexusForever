@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract.Combat;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
@@ -43,6 +43,26 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove all <see cref="Property"/> modifiers by a Spell that is currently affecting this <see cref="IUnitEntity"/>
         /// </summary>
         void RemoveSpellProperties(uint spell4Id);
+
+        /// Checks if this <see cref="IUnitEntity"/> is currently casting a spell.
+        /// </summary>
+        /// <returns></returns>
+        bool IsCasting();
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id
+        /// </summary>
+        bool HasSpell(uint spell4Id, out ISpell spell, bool isCasting = false);
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="CastMethod"/>
+        /// </summary>
+        bool HasSpell(CastMethod castMethod, out ISpell spell);
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Func"/> predicate.
+        /// </summary>
+        bool HasSpell(Func<ISpell, bool> predicate, out ISpell spell);
 
         /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.

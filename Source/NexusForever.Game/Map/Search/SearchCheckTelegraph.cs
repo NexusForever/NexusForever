@@ -1,6 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Map.Search
 {
@@ -17,7 +18,10 @@ namespace NexusForever.Game.Map.Search
 
         public bool CheckEntity(IUnitEntity entity)
         {
-            if (entity == caster)
+            if (telegraph.TelegraphTargetTypeFlags.HasFlag(TelegraphTargetTypeFlags.Self) && entity != caster)
+                return false;
+
+            if (telegraph.TelegraphTargetTypeFlags.HasFlag(TelegraphTargetTypeFlags.Other) && entity == caster)
                 return false;
 
             return telegraph.InsideTelegraph(entity.Position, entity.HitRadius);

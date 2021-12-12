@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract.Spell
@@ -10,11 +11,12 @@ namespace NexusForever.Game.Abstract.Spell
         Vector3 Position { get; }
         Vector3 Rotation { get; }
         TelegraphDamageEntry TelegraphDamage { get; }
+        TelegraphTargetTypeFlags TelegraphTargetTypeFlags { get; }
 
         /// <summary>
-        /// Returns any <see cref="IUnitEntity"/> inside the <see cref="ITelegraph"/>.
+        /// Returns a <see cref="IEnumerable{T}"/> containing all <see cref="ISpellTargetInfo"/> that can be targeted by this <see cref="ITelegraph"/>.
         /// </summary>
-        IEnumerable<IUnitEntity> GetTargets();
+        IEnumerable<ISpellTargetInfo> GetTargets(ISpell spell, List<ISpellTargetInfo> targets);
 
         /// <summary>
         /// Returns whether the supplied <see cref="Vector3"/> is inside the telegraph.

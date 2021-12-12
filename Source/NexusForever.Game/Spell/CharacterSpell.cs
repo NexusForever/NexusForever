@@ -3,6 +3,10 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Prerequisite;
+using NexusForever.Game.Static.Spell;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared.Game;
 
@@ -21,7 +25,9 @@ namespace NexusForever.Game.Spell
         public IPlayer Owner { get; }
         public ISpellBaseInfo BaseInfo { get; }
         public ISpellInfo SpellInfo { get; private set; }
+        public ISpellInfo AlternateSpellInfo { get; private set; }
         public IItem Item { get; }
+        public uint GlobalCooldownEnum => SpellInfo.Entry.GlobalCooldownEnum;
 
         public byte Tier
         {
@@ -43,6 +49,9 @@ namespace NexusForever.Game.Spell
         private UnlockedSpellSaveMask saveMask;
 
         private UpdateTimer rechargeTimer;
+        private bool buttonPressed;
+        private CastMethod castMethod;
+        private bool noCooldown => SpellInfo.Entry.SpellCoolDown == 0 && SpellInfo.Entry.SpellCoolDownIds.Where(x => x != 0).Count() == 0u;
 
         /// <summary>
         /// Create a new <see cref="ICharacterSpell"/> from an existing database model.
@@ -54,6 +63,12 @@ namespace NexusForever.Game.Spell
             SpellInfo = baseInfo.GetSpellInfo(tier);
             Item      = item;
             tier      = model.Tier;
+            castMethod = (CastMethod)baseInfo.Entry.CastMethod;
+            if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
+            {
+                Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
+                AlternateSpellInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
+            }
 
             InitialiseAbilityCharges();
         }
@@ -68,6 +83,12 @@ namespace NexusForever.Game.Spell
             SpellInfo = baseInfo.GetSpellInfo(tier);
             Item      = item;
             this.tier = tier;
+            castMethod = (CastMethod)baseInfo.Entry.CastMethod;
+            if (SpellInfo.Entry.Spell4IdMechanicAlternateSpell > 0)
+            {
+                Spell4Entry alternativeEntry = GameTableManager.Instance.Spell4.GetEntry(SpellInfo.Entry.Spell4IdMechanicAlternateSpell);
+                AlternateSpellInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(alternativeEntry.Spell4BaseIdBaseSpell).GetSpellInfo(tier);
+            }
 
             InitialiseAbilityCharges();
 
@@ -79,21 +100,21 @@ namespace NexusForever.Game.Spell
             if (MaxAbilityCharges == 0u)
                 return;
 
-            rechargeTimer  = new UpdateTimer(SpellInfo.Entry.AbilityRechargeTime / 1000d);
+            rechargeTimer = new(SpellInfo.Entry.AbilityRechargeTime / 1000d, false);
             AbilityCharges = MaxAbilityCharges;
             SendChargeUpdate();
         }
 
         public void Update(double lastTick)
         {
-            if (MaxAbilityCharges > 0 && AbilityCharges < MaxAbilityCharges)
+            if (MaxAbilityCharges > 0 && rechargeTimer.IsTicking)
             {
                 rechargeTimer.Update(lastTick);
                 if (rechargeTimer.HasElapsed)
                 {
                     AbilityCharges = Math.Clamp(AbilityCharges + SpellInfo.Entry.AbilityRechargeCount, 0u, MaxAbilityCharges);
                     SendChargeUpdate();
-                    rechargeTimer.Reset();
+                    rechargeTimer.Reset(AbilityCharges < MaxAbilityCharges);
                 }
             }
         }
@@ -134,11 +155,26 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
+        /// Used to call this spell from the <see cref="ISpellManager"/>. For use in continuous casting.
+        /// </summary>
+        public void SpellManagerCast()
+        {
+            if (!buttonPressed)
+                throw new InvalidOperationException($"Spell should not cast because button is not held down!");
+
+            CastSpell();
+        }
+
+        /// <summary>
         /// Used for when the client does not have continuous casting enabled
         /// </summary>
         public void Cast()
         {
+            Owner.SpellManager.SetAsContinuousCast(null);
+
+            buttonPressed = true;
             CastSpell();
+            buttonPressed = false;
         }
 
         /// <summary>
@@ -147,20 +183,46 @@ namespace NexusForever.Game.Spell
         public void Cast(bool buttonPressed)
         {
             // TODO: Handle continuous casting of spell for Player if button remains depressed
+            this.buttonPressed = buttonPressed;
 
             // If the player depresses button after the spell had exceeded its threshold, don't try and recast the spell until button is pressed down again.
-            if (!buttonPressed)
+            if (buttonPressed && castMethod != CastMethod.ChargeRelease)
+                Owner.SpellManager.SetAsContinuousCast(this);
+            else if (!buttonPressed && castMethod != CastMethod.ChargeRelease)
+            {
+                Owner.SpellManager.SetAsContinuousCast(null);
                 return;
+            }
+            else
+                Owner.SpellManager.SetAsContinuousCast(null);
 
             CastSpell();
         }
 
         private void CastSpell()
         {
+            var spellInfoToCast = SpellInfo;
+            if (AlternateSpellInfo != null && CheckRunnerOverride())
+                spellInfoToCast = AlternateSpellInfo;
+
+            // For Threshold Spells
+            if (Owner.HasSpell(spellInfoToCast.Entry.Id, out ISpell spell, isCasting: castMethod == CastMethod.ChargeRelease))
+            {
+                if ((spell.CastMethod == CastMethod.RapidTap || spell.CastMethod == CastMethod.ChargeRelease) && !spell.IsFinished)
+                {
+                    spell.Cast();
+                    return;
+                }
+            }
+
+            if (!buttonPressed)
+                return;
+
             Owner.CastSpell(new SpellParameters
             {
                 CharacterSpell         = this,
-                SpellInfo              = SpellInfo,
+                RootSpellInfo          = SpellInfo,
+                SpellInfo              = spellInfoToCast,
                 UserInitiatedSpellCast = true
             });
         }
@@ -170,7 +232,10 @@ namespace NexusForever.Game.Spell
             if (AbilityCharges == 0)
                 throw new SpellException("No charges available.");
 
+            // TODO: Ability Charges are affected by ModifyCooldown spell effect. Needs to be handled to adjust Charge timer. Possibly move charges to SpellManager.
             AbilityCharges -= 1;
+            if (!rechargeTimer.IsTicking)
+                rechargeTimer.Reset(true);
             SendChargeUpdate();
         }
 
@@ -181,6 +246,15 @@ namespace NexusForever.Game.Spell
                 SpellId            = Item.Id,
                 AbilityChargeCount = AbilityCharges
             });
+        }
+
+        private bool CheckRunnerOverride()
+        {
+            foreach (PrerequisiteEntry runnerPrereq in SpellInfo.PrerequisiteRunners)
+                if (PrerequisiteManager.Instance.Meets(Owner, runnerPrereq.Id))
+                    return true;
+
+            return false;
         }
     }
 }

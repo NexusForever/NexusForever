@@ -69,7 +69,7 @@ namespace NexusForever.Game.Entity
             Flags       = 0x0020,
             Innate      = 0x0080,
             Sex         = 0x0100,
-            Race        = 0x0200,
+            Race        = 0x0200
         }
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
@@ -149,17 +149,6 @@ namespace NexusForever.Game.Entity
             }
         }
         private InputSets inputKeySet;
-
-        public byte InnateIndex
-        {
-            get => innateIndex;
-            set
-            {
-                innateIndex = value;
-                saveMask |= PlayerSaveMask.Innate;
-            }
-        }
-        private byte innateIndex;
 
         public override uint Level
         {
@@ -275,7 +264,6 @@ namespace NexusForever.Game.Entity
             InputKeySet       = (InputSets)model.InputKeySet;
             Faction1          = (Faction)model.FactionId;
             Faction2          = (Faction)model.FactionId;
-            innateIndex       = model.InnateIndex;
             flags             = (CharacterFlag)model.Flags;
 
             CreateTime        = model.CreateTime;
@@ -484,12 +472,6 @@ namespace NexusForever.Game.Entity
                 {
                     model.Flags = (uint)Flags;
                     entity.Property(p => p.Flags).IsModified = true;
-                }
-
-                if ((saveMask & PlayerSaveMask.Innate) != 0)
-                {
-                    model.InnateIndex = InnateIndex;
-                    entity.Property(p => p.InnateIndex).IsModified = true;
                 }
 
                 if ((saveMask & PlayerSaveMask.Sex) != 0)
@@ -708,11 +690,6 @@ namespace NexusForever.Game.Entity
             AchievementManager.SendInitialPackets(null);
             Account.RewardPropertyManager.SendInitialPackets();
             ResurrectionManager.SendInitialPackets();
-
-            Session.EnqueueMessageEncrypted(new ServerPlayerInnate
-            {
-                InnateIndex = InnateIndex
-            });
 
             log.Trace($"Player {Name} took {(DateTime.UtcNow - start).TotalMilliseconds}ms to send packets after add to map.");
         }

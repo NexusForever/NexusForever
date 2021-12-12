@@ -125,6 +125,7 @@ namespace NexusForever.Game.Entity
             foreach (ISpell spell in pendingSpells.ToArray())
             {
                 spell.Update(lastTick);
+                spell.LateUpdate(lastTick);
                 if (spell.IsFinished)
                     pendingSpells.Remove(spell);
             }
@@ -247,6 +248,48 @@ namespace NexusForever.Game.Entity
                 Shield += (uint)(MaxShieldCapacity * GetPropertyValue(Property.ShieldRegenPct) * statUpdateTimer.Duration);
         }
 
+        /// Checks if this <see cref="IUnitEntity"/> is currently casting a spell.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsCasting()
+        {
+            foreach (Spell.Spell spell in pendingSpells)
+                if (spell.IsCasting)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Spell4Entry"/> Id
+        /// </summary>
+        public bool HasSpell(uint spell4Id, out ISpell spell, bool isCasting = false)
+        {
+            spell = pendingSpells.FirstOrDefault(i => i.IsCasting == isCasting && !i.IsFinished && i.Spell4Id == spell4Id);
+
+            return spell != null;
+        }
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="CastMethod"/>
+        /// </summary>
+        public bool HasSpell(CastMethod castMethod, out ISpell spell)
+        {
+            spell = pendingSpells.FirstOrDefault(i => !i.IsCasting && !i.IsFinished && i.CastMethod == castMethod);
+
+            return spell != null;
+        }
+
+        /// <summary>
+        /// Check if this <see cref="IUnitEntity"/> has a spell active with the provided <see cref="Func"/> predicate.
+        /// </summary>
+        public bool HasSpell(Func<ISpell, bool> predicate, out ISpell spell)
+        {
+            spell = pendingSpells.FirstOrDefault(predicate);
+
+            return spell != null;
+        }
+
         /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
@@ -313,8 +356,18 @@ namespace NexusForever.Game.Entity
                     player.Dismount();
             }
 
-            var spell = new Spell.Spell(this, parameters);
-            spell.Cast();
+            CastMethod castMethod = (CastMethod)parameters.SpellInfo.BaseInfo.Entry.CastMethod;
+            if (parameters.ClientSideInteraction != null)
+                castMethod = CastMethod.ClientSideInteraction;
+
+            var spell = GlobalSpellManager.Instance.NewSpell(castMethod, this, parameters);
+            if (!spell.Cast())
+                return;
+
+            // Don't store spell if it failed to initialise
+            if (spell.IsFailed)
+                return;
+
             pendingSpells.Add(spell);
         }
 

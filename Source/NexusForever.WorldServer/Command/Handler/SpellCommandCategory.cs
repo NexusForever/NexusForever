@@ -74,7 +74,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (spell4Id.HasValue)
-                target.SpellManager.SetSpellCooldown(spell4Id.Value, 0d);
+                target.SpellManager.SetSpellCooldown(spell4Id.Value, 0d, true);
             else
                 target.SpellManager.ResetAllSpellCooldowns();
         }

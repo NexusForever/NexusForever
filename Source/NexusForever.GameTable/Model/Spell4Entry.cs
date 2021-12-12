@@ -75,9 +75,8 @@ namespace NexusForever.GameTable.Model
         public uint Spell4CCConditionsIdCaster;
         public uint Spell4CCConditionsIdTarget;
         public uint SpellCoolDownIdGlobal;
-        public uint SpellCoolDownId00;
-        public uint SpellCoolDownId01;
-        public uint SpellCoolDownId02;
+        [GameTableFieldArray(3u)]
+        public uint[] SpellCoolDownIds;
         public uint Spell4GroupListId;
         public uint MissileSpeed;
         public uint MinMissileSpeed;

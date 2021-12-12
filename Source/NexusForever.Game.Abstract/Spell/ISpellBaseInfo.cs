@@ -3,7 +3,7 @@ using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract.Spell
 {
-    public interface ISpellBaseInfo
+    public interface ISpellBaseInfo : IEnumerable<ISpellInfo>
     {
         Spell4BaseEntry Entry { get; }
         Spell4HitResultsEntry HitResult { get; }

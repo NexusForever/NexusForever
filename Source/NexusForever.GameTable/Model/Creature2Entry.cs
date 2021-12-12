@@ -16,14 +16,10 @@ namespace NexusForever.GameTable.Model
         public uint Creature2OutfitGroupId;
         public uint PrerequisiteIdVisibility;
         public float ModelScale;
-        public uint Spell4IdActivate00;
-        public uint Spell4IdActivate01;
-        public uint Spell4IdActivate02;
-        public uint Spell4IdActivate03;
-        public uint PrerequisiteIdActivateSpell00;
-        public uint PrerequisiteIdActivateSpell01;
-        public uint PrerequisiteIdActivateSpell02;
-        public uint PrerequisiteIdActivateSpell03;
+        [GameTableFieldArray(4u)]
+        public uint[] Spell4IdActivate;
+        [GameTableFieldArray(4u)]
+        public uint[] PrerequisiteIdActivateSpells;
         public uint ActivateSpellCastTime;
         public float ActivateSpellMinRange;
         public float ActivateSpellMaxRange;

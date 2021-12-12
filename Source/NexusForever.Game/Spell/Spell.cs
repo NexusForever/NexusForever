@@ -1,3 +1,4 @@
+using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
@@ -5,7 +6,6 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
-using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
@@ -14,6 +14,7 @@ using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
+using NexusForever.Shared.Game;
 using NLog;
 
 namespace NexusForever.Game.Spell
@@ -23,29 +24,63 @@ namespace NexusForever.Game.Spell
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public ISpellParameters Parameters { get; }
+
+        public IUnitEntity Caster => caster;
+        protected readonly IUnitEntity caster;
+
         public uint CastingId { get; }
-        public bool IsCasting => status == SpellStatus.Casting;
-        public bool IsFinished => status == SpellStatus.Finished;
+        public uint Spell4Id => Parameters.SpellInfo.Entry.Id;
+        public CastMethod CastMethod { get; protected set; }
 
-        public IUnitEntity Caster { get; }
+        public bool IsCasting => _IsCasting();
+        public bool IsFinished => status == SpellStatus.Finished || status == SpellStatus.Failed;
+        public bool IsFailed => status == SpellStatus.Failed;
+        public bool IsWaiting => status == SpellStatus.Waiting;
+        public bool HasGroup(uint groupId) => Parameters.SpellInfo.GroupList?.SpellGroupIds.Contains(groupId) ?? false;
 
-        private SpellStatus status;
+        protected SpellStatus status
+        {
+            get => _status;
+            set
+            {
+                if (_status == value)
+                    return;
 
-        private readonly List<ISpellTargetInfo> targets = new();
-        private readonly List<ITelegraph> telegraphs = new();
+                var previousStatus = _status;
+                _status = value;
+                OnStatusChange(previousStatus, value);
+            }
+        }
+        private SpellStatus _status;
 
-        private readonly ISpellEventManager events = new SpellEventManager();
+        protected byte currentPhase = 255;
+        protected uint duration = 0;
+
+        protected readonly ISpellEventManager events = new SpellEventManager();
+
+        protected readonly List<ISpellTargetInfo> targets = new();
+        protected readonly List<ITelegraph> telegraphs = new();
+        protected readonly List<IProxy> proxies = new();
+        protected Dictionary<uint /*effectId*/, uint/*count*/> effectTriggerCount = new();
+        protected Dictionary<uint /*effectId*/, double/*effectTimer*/> effectRetriggerTimers = new();
+
+        private UpdateTimer persistCheck = new(0.1d);
 
         private IScriptCollection scriptCollection;
 
-        public Spell(IUnitEntity caster, ISpellParameters parameters)
+        public Spell(IUnitEntity caster, ISpellParameters parameters, CastMethod castMethod)
         {
-            Caster     = caster;
-            Parameters = parameters;
-            CastingId  = GlobalSpellManager.Instance.NextCastingId;
-            status     = SpellStatus.Initiating;
+            this.caster = caster;
+            Parameters  = parameters;
+
+            CastingId   = GlobalSpellManager.Instance.NextCastingId;
+            CastMethod  = castMethod;
+            status      = SpellStatus.Initiating;
 
             parameters.RootSpellInfo ??= parameters.SpellInfo;
+
+            if (this is not SpellThreshold && parameters.SpellInfo.Thresholds.Count > 0)
+                throw new NotImplementedException();
 
             scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<ISpell>(this, parameters.SpellInfo.Entry.Id);
         }
@@ -58,27 +93,44 @@ namespace NexusForever.Game.Spell
             scriptCollection = null;
         }
 
-        public void Update(double lastTick)
+        /// <summary>
+        /// Invoked each world tick with the delta since the previous tick occurred.
+        /// </summary>
+        public virtual void Update(double lastTick)
         {
+            if (status == SpellStatus.Initiating)
+                return;
+
             scriptCollection.Invoke<IUpdate>(s => s.Update(lastTick));
 
             events.Update(lastTick);
+            CheckPersistance(lastTick);
+        }
 
-            if (status == SpellStatus.Executing && !events.HasPendingEvent)
+        /// <summary>
+        /// Invoked each world tick, after Update() for this <see cref="ISpell"/>, with the delta since the previous tick occurred.
+        /// </summary>
+        public void LateUpdate(double lastTick)
+        {
+            if (CanFinish())
             {
-                // spell effects have finished executing
                 status = SpellStatus.Finished;
-                log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has finished.");
 
-                // TODO: add a timer to count down on the Effect before sending the finish - sending the finish will e.g. wear off the buff
-                //SendSpellFinish();
+                if (Parameters.PositionalUnitId > 0)
+                    caster.GetVisible<WorldEntity>(Parameters.PositionalUnitId)?.RemoveFromMap();
+
+                foreach (ISpellTargetInfo target in targets)
+                    RemoveEffects(target);
+
+                SendSpellFinish();
+                log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has finished.");
             }
         }
 
         /// <summary>
         /// Begin cast, checking prerequisites before initiating.
         /// </summary>
-        public void Cast()
+        protected bool CanCast()
         {
             if (status != SpellStatus.Initiating)
                 throw new InvalidOperationException();
@@ -88,29 +140,52 @@ namespace NexusForever.Game.Spell
             CastResult result = CheckCast();
             if (result != CastResult.Ok)
             {
+                // Swallow Proxy CastResults
+                if (Parameters.IsProxy)
+                    return false;
+
+                if (caster is IPlayer)
+                    (caster as IPlayer).SpellManager.SetAsContinuousCast(null);
+
                 SendSpellCastResult(result);
-                return;
+                status = SpellStatus.Failed;
+                return false;
             }
 
-            if (Caster is IPlayer player)
-                if (Parameters.SpellInfo.GlobalCooldown != null)
-                    player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.GlobalCooldown.CooldownTime / 1000d);
+            return true;
+        }
+
+        /// <summary>
+        /// Begin cast, checking prerequisites before initiating.
+        /// </summary>
+        public virtual bool Cast()
+        {
+            if (!CanCast())
+                return false;
+
+            // TODO: Handle all GlobalCooldownEnums. It looks like it's just a "Type" that the GCD is stored against. Each spell checks the GCD for its type.
+            if (caster is IPlayer player)
+            {
+                if (Parameters.SpellInfo.GlobalCooldown != null && !Parameters.IsProxy)
+                    player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.Entry.GlobalCooldownEnum, Parameters.SpellInfo.GlobalCooldown.CooldownTime / 1000d);
+                else if (Parameters.IsProxy)
+                    player.SpellManager.SetSpellCooldown(Parameters.SpellInfo, Parameters.CooldownOverride / 1000d);
+            }
 
             // It's assumed that non-player entities will be stood still to cast (most do). 
             // TODO: There are a handful of telegraphs that are attached to moving units (specifically rotating units) which this needs to be updated to account for.
-            if (Caster is not IPlayer)
+            if (!(caster is IPlayer))
                 InitialiseTelegraphs();
 
-            SendSpellStart();
+            // TODO: Fire Script's OnCast
 
-            // enqueue spell to be executed after cast time
-            events.EnqueueEvent(new SpellEvent(Parameters.SpellInfo.Entry.CastTime / 1000d, Execute));
-            status = SpellStatus.Casting;
-
-            log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
+            return true;
         }
 
-        private CastResult CheckCast()
+        /// <summary>
+        /// Returns a <see cref="CastResult"/> describing whether or not this <see cref="ISpell"/> can be cast by its caster.
+        /// </summary>
+        protected CastResult CheckCast()
         {
             CastResult preReqCheck = CheckPrerequisites();
             if (preReqCheck != CastResult.Ok)
@@ -120,18 +195,44 @@ namespace NexusForever.Game.Spell
             if (ccResult != CastResult.Ok)
                 return ccResult;
 
-            if (Caster is IPlayer player)
+            if (caster is IPlayer player)
             {
-                if (player.SpellManager.GetSpellCooldown(Parameters.SpellInfo.Entry.Id) > 0d)
+                if (IsCasting && Parameters.UserInitiatedSpellCast && !Parameters.IsProxy)
+                    return CastResult.SpellAlreadyCasting;
+
+                // TODO: Some spells can be cast during other spell casts. Reflect that in this check
+                if (caster.IsCasting() && Parameters.UserInitiatedSpellCast && !Parameters.IsProxy)
+                    return CastResult.SpellAlreadyCasting;
+
+                if (player.SpellManager.GetSpellCooldown(Parameters.SpellInfo.Entry.Id) > 0d &&
+                    Parameters.UserInitiatedSpellCast &&
+                    !Parameters.IsProxy)
                     return CastResult.SpellCooldown;
 
-                // this isn't entirely correct, research GlobalCooldownEnum
-                if (Parameters.SpellInfo.Entry.GlobalCooldownEnum == 0
-                    && player.SpellManager.GetGlobalSpellCooldown() > 0d)
+                foreach (SpellCoolDownEntry coolDownEntry in Parameters.SpellInfo.Cooldowns)
+                {
+                    if (player.SpellManager.GetSpellCooldownByCooldownId(coolDownEntry.Id) > 0d &&
+                        Parameters.UserInitiatedSpellCast &&
+                        !Parameters.IsProxy)
+                        return CastResult.SpellCooldown;
+                }
+
+                if (player.SpellManager.GetGlobalSpellCooldown(Parameters.SpellInfo.Entry.GlobalCooldownEnum) > 0d &&
+                    !Parameters.IsProxy &&
+                    Parameters.UserInitiatedSpellCast)
                     return CastResult.SpellGlobalCooldown;
 
                 if (Parameters.CharacterSpell?.MaxAbilityCharges > 0 && Parameters.CharacterSpell?.AbilityCharges == 0)
                     return CastResult.SpellNoCharges;
+
+                CastResult resourceConditions = CheckResourceConditions();
+                if (resourceConditions != CastResult.Ok)
+                {
+                    if (Parameters.UserInitiatedSpellCast && !Parameters.IsProxy)
+                        player.SpellManager.SetAsContinuousCast(null);
+
+                    return resourceConditions;
+                }
             }
 
             return CastResult.Ok;
@@ -140,9 +241,10 @@ namespace NexusForever.Game.Spell
         private CastResult CheckPrerequisites()
         {
             // TODO: Remove below line and evaluate PreReq's for Non-Player Entities
-            if (Caster is not IPlayer player)
+            if (caster is not IPlayer player)
                 return CastResult.Ok;
 
+            // Runners override the Caster Check, allowing the Caster to Cast the spell due to this Prerequisite being met
             if (Parameters.SpellInfo.CasterCastPrerequisite != null && !CheckRunnerOverride(player))
             {
                 if (!PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.CasterCastPrerequisite.Id))
@@ -166,6 +268,9 @@ namespace NexusForever.Game.Spell
             return CastResult.Ok;
         }
 
+        /// <summary>
+        /// Returns whether the Caster is in a state where they can ignore Resource or other constraints.
+        /// </summary>
         private bool CheckRunnerOverride(IPlayer player)
         {
             foreach (PrerequisiteEntry runnerPrereq in Parameters.SpellInfo.PrerequisiteRunners)
@@ -175,7 +280,7 @@ namespace NexusForever.Game.Spell
             return false;
         }
 
-        private CastResult CheckCCConditions()
+        protected CastResult CheckCCConditions()
         {
             // TODO: this just looks like a mask for CCState enum
             if (Parameters.SpellInfo.CasterCCConditions != null)
@@ -190,121 +295,425 @@ namespace NexusForever.Game.Spell
             return CastResult.Ok;
         }
 
+        protected CastResult CheckResourceConditions()
+        {
+            if (!(caster is Player player))
+                return CastResult.Ok;
+
+            bool runnerOveride = CheckRunnerOverride(player);
+            if (runnerOveride)
+                return CastResult.Ok;
+
+            //for (int i = 0; i < parameters.SpellInfo.Entry.CasterInnateRequirements.Length; i++)
+            //{
+            //    uint innateRequirement = parameters.SpellInfo.Entry.CasterInnateRequirements[i];
+            //    if (innateRequirement == 0)
+            //        continue;
+
+            //    switch (parameters.SpellInfo.Entry.CasterInnateRequirementEval[i])
+            //    {
+            //        case 2:
+            //            if (caster.GetVitalValue((Vital)innateRequirement) < parameters.SpellInfo.Entry.CasterInnateRequirementValues[i])
+            //                return GlobalSpellManager.Instance.GetFailedCastResultForVital((Vital)innateRequirement);
+            //            break;
+            //    }
+            //}
+
+            //for (int i = 0; i < parameters.SpellInfo.Entry.InnateCostTypes.Length; i++)
+            //{
+            //    uint innateCostType = parameters.SpellInfo.Entry.InnateCostTypes[i];
+            //    if (innateCostType == 0)
+            //        continue;
+
+            //    if (caster.GetVitalValue((Vital)innateCostType) < parameters.SpellInfo.Entry.InnateCosts[i])
+            //        return GlobalSpellManager.Instance.GetFailedCastResultForVital((Vital)innateCostType);
+            //}
+
+            return CastResult.Ok;
+        }
+
+        /// <summary>
+        /// Initialises a <see cref="ITelegraph"/> per <see cref="TelegraphDamageEntry"/> as associated with this <see cref="ISpell"/>.
+        /// </summary>
         private void InitialiseTelegraphs()
         {
             telegraphs.Clear();
+
+            Vector3 position = caster.Position;
+            if (Parameters.PositionalUnitId > 0)
+                position = caster.GetVisible<IWorldEntity>(Parameters.PositionalUnitId)?.Position ?? caster.Position;
+
+            Vector3 rotation = caster.Rotation;
+            if (Parameters.PositionalUnitId > 0)
+                rotation = caster.GetVisible<IWorldEntity>(Parameters.PositionalUnitId)?.Rotation ?? caster.Rotation;
+
             foreach (TelegraphDamageEntry telegraphDamageEntry in Parameters.SpellInfo.Telegraphs)
-                telegraphs.Add(new Telegraph(telegraphDamageEntry, Caster, Caster.Position, Caster.Rotation));
+                telegraphs.Add(new Telegraph(telegraphDamageEntry, caster, caster.Position, caster.Rotation));
         }
 
         /// <summary>
         /// Cancel cast with supplied <see cref="CastResult"/>.
         /// </summary>
-        public void CancelCast(CastResult result)
+        public virtual void CancelCast(CastResult result)
         {
-            if (status != SpellStatus.Casting)
-                throw new InvalidOperationException();
-
-            if (Caster is IPlayer player && !player.IsLoading)
+            if (caster is IPlayer player && !player.IsLoading)
             {
                 player.Session.EnqueueMessageEncrypted(new Server07F9
                 {
                     ServerUniqueId = CastingId,
-                    CastResult     = result,
-                    CancelCast     = true
+                    CastResult = result,
+                    CancelCast = true
                 });
+
+                if (result == CastResult.CasterMovement)
+                    player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.Entry.GlobalCooldownEnum, 0d);
+
+                player.SpellManager.SetAsContinuousCast(null);
+
+                SendSpellCastResult(result);
             }
 
             events.CancelEvents();
-            status = SpellStatus.Executing;
+            status = SpellStatus.Finishing;
 
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} cast was cancelled.");
         }
 
-        private void Execute()
+        protected virtual void Execute(bool handleCDAndCost = true)
         {
+            SpellStatus previousStatus = status;
             status = SpellStatus.Executing;
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started executing.");
 
-            if (Caster is IPlayer player)
-                if (Parameters.SpellInfo.Entry.SpellCoolDown != 0u)
-                    player.SpellManager.SetSpellCooldown(Parameters.SpellInfo.Entry.Id, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
+            if (handleCDAndCost)
+            {
+                if ((currentPhase == 0 || currentPhase == 255))
+                {
+                    CostSpell();
+                    SetCooldown();
+                }
+            }
 
-            SelectTargets();
-            ExecuteEffects();
-            CostSpell();
+            // Clear Effects so that we don't duplicate Effect information back to the client.
+            targets.ForEach(t => t.Effects.Clear());
+            effectTriggerCount.Clear();
 
-            SendSpellGo();
+            // Order below must not change.
+            SelectTargets();  // First Select Targets
+            ExecuteEffects(); // All Effects are evaluated and executed (after SelectTargets())
+            HandleProxies();  // Any Proxies that are added by Effets are evaluated and executed (after ExecuteEffects())
+            SendSpellGo();    // Inform the Client once all evaluations are taken place (after Effects & Proxies are executed)
+
+            if (duration > 0 || Parameters.SpellInfo.Entry.SpellDuration > 0)
+                SendBuffsApplied(targets.Where(x => x.TargetSelectionState == TargetSelectionState.New).Select(x => x.Entity.Guid).ToList());
         }
 
-        private void CostSpell()
+        protected void HandleProxies()
+        {
+            foreach (IProxy proxy in proxies)
+                proxy.Evaluate();
+
+            foreach (IProxy proxy in proxies)
+                proxy.Cast(caster, events);
+
+            proxies.Clear();
+        }
+
+        protected void SetCooldown()
+        {
+            if (!(caster is IPlayer player))
+                return;
+
+            if (Parameters.SpellInfo.Entry.SpellCoolDown != 0u)
+                player.SpellManager.SetSpellCooldown(Parameters.SpellInfo, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
+        }
+
+        protected void CostSpell()
         {
             if (Parameters.CharacterSpell?.MaxAbilityCharges > 0)
                 Parameters.CharacterSpell.UseCharge();
+
+            // TODO: Handle costing Vital Resources
         }
 
-        private void SelectTargets()
+        protected virtual void SelectTargets()
         {
-            targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Caster, Caster));
+            List<uint> uniqueTargets = new();
 
-            if (Parameters.PrimaryTargetId != 0)
+            // We clear targets every time this is called for this spell so we don't have duplicate targets.
+            targets.Clear();
+
+            // Add Caster Entity with the appropriate SpellEffectTargetFlags.
+            targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Caster, caster));
+
+            // Add Targeted Entity with the appropriate SpellEffectTargetFlags.
+            if (Parameters.PrimaryTargetId > 0)
             {
-                IUnitEntity primaryTargetEntity = Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
+                IUnitEntity primaryTargetEntity = caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
                 if (primaryTargetEntity != null)
-                    targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Target, primaryTargetEntity));
+                    targets.Add(new SpellTargetInfo((SpellEffectTargetFlags.Target), primaryTargetEntity));
             }
+            else
+                targets[0].Flags |= SpellEffectTargetFlags.Target;
 
-            if (Caster is IPlayer)
+            // Targeting First Pass: Do Basic Checks to get targets for spell as needed, nearby.
+            targets.AddRange(new AoeSelection(caster, Parameters));
+
+            // Re-initiailise Telegraphs at Execute time, so that position and rotation is calculated appropriately.
+            // This is optimised to only happen on player-cast spells.
+            // TODO: Add support for this for Server Controlled entities. It is presumed most will stand still when casting.
+            if (caster is Player)
                 InitialiseTelegraphs();
 
-            foreach (ITelegraph telegraph in telegraphs)
+            if (telegraphs.Count > 0)
             {
-                foreach (IUnitEntity entity in telegraph.GetTargets())
-                    targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Telegraph, entity));
+                List<ISpellTargetInfo> allowedTargets = new();
+                foreach (ITelegraph telegraph in telegraphs)
+                {
+                    List<uint> targetGuids = new();
+
+                    // Ensure only telegraphs that apply to this Execute phase are evaluated.
+                    if (CastMethod == CastMethod.Multiphase && currentPhase < 255)
+                    {
+                        int phaseMask = 1 << currentPhase;
+                        if (telegraph.TelegraphDamage.PhaseFlags != 1 && (phaseMask & telegraph.TelegraphDamage.PhaseFlags) == 0)
+                            continue;
+                    }
+
+                    log.Trace($"Getting targets for Telegraph ID {telegraph.TelegraphDamage.Id}");
+
+                    foreach (var target in telegraph.GetTargets(this, targets))
+                    {
+                        // Ensure that this Telegraph hasn't already selected this entity
+                        if (targetGuids.Contains(target.Entity.Guid))
+                            continue;
+
+                        // Ensure that this telegraph doesn't select an entity that has already been slected by another telegraph, as the targeting flags dictate.
+                        if ((Parameters.SpellInfo.BaseInfo.Entry.TargetingFlags & 32) != 0 &&
+                            uniqueTargets.Contains(target.Entity.Guid))
+                            continue;
+
+                        target.Flags |= SpellEffectTargetFlags.Telegraph;
+                        allowedTargets.Add(target);
+                        targetGuids.Add(target.Entity.Guid);
+                        uniqueTargets.Add(target.Entity.Guid);
+                    }
+
+                    log.Trace($"Got {targets.Count} for Telegraph ID {telegraph.TelegraphDamage.Id}");
+                }
+                targets.RemoveAll(x => x.Flags == SpellEffectTargetFlags.Telegraph); // Only remove targets that are ONLY Telegraph Targeted
+                targets.AddRange(allowedTargets);
             }
+
+            if (Parameters.SpellInfo.AoeTargetConstraints != null)
+            {
+                List<ISpellTargetInfo> finalAoeTargets = new();
+                foreach (var target in targets)
+                {
+                    // Ensure that we're not exceeding the amount of targets we can select
+                    if (Parameters.SpellInfo.AoeTargetConstraints.TargetCount > 0 &&
+                        finalAoeTargets.Count > Parameters.SpellInfo.AoeTargetConstraints.TargetCount)
+                        break;
+
+                    if ((target.Flags & SpellEffectTargetFlags.Telegraph) == 0)
+                        continue;
+
+                    finalAoeTargets.Add(target);
+                }
+
+                // Finalise targets for effect execution
+                targets.RemoveAll(x => x.Flags == SpellEffectTargetFlags.Telegraph); // Only remove targets that are ONLY Telegraph Targeted
+                targets.AddRange(finalAoeTargets);
+            }
+
+            var distinctList = targets.Distinct(new SpellTargetInfo.SpellTargetInfoComparer()).ToList();
+            targets.Clear();
+            targets.AddRange(distinctList);
         }
 
         private void ExecuteEffects()
         {
-            foreach (Spell4EffectsEntry spell4EffectsEntry in Parameters.SpellInfo.Effects)
+            if (targets.Where(t => t.TargetSelectionState == TargetSelectionState.New).Count() == 0)
+                return;
+
+            if (targets.Count > 0 && CastMethod == CastMethod.Aura)
+                log.Trace($"New Targets found for {CastingId}, applying effects.");
+
+            // Using For..Loop instead of foreach intentionally, as this can be modified as effects are evaluated.
+            for (int index = 0; index < Parameters.SpellInfo.Effects.Count(); index++)
             {
-                // select targets for effect
-                List<ISpellTargetInfo> effectTargets = targets
-                    .Where(t => (t.Flags & (SpellEffectTargetFlags)spell4EffectsEntry.TargetFlags) != 0)
-                    .ToList();
+                Spell4EffectsEntry spell4EffectsEntry = Parameters.SpellInfo.Effects[index];
 
-                SpellEffectDelegate handler = GlobalSpellManager.Instance.GetEffectHandler((SpellEffectType)spell4EffectsEntry.EffectType);
-                if (handler == null)
-                    log.Warn($"Unhandled spell effect {(SpellEffectType)spell4EffectsEntry.EffectType}");
-                else
+                ExecuteEffect(spell4EffectsEntry);
+            }
+        }
+
+        private bool CanExecuteEffect(Spell4EffectsEntry spell4EffectsEntry)
+        {
+            if (caster is IPlayer player)
+            {
+                // Ensure caster can apply this effect
+                if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0 && !PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply))
+                    return false;
+            }
+
+            if (CastMethod == CastMethod.Multiphase && currentPhase < 255)
+            {
+                int phaseMask = 1 << currentPhase;
+                if ((spell4EffectsEntry.PhaseFlags != 1 && spell4EffectsEntry.PhaseFlags != uint.MaxValue) && (phaseMask & spell4EffectsEntry.PhaseFlags) == 0)
+                    return false;
+            }
+
+            if (CastMethod == CastMethod.Aura && spell4EffectsEntry.TickTime > 0 && effectRetriggerTimers[spell4EffectsEntry.Id] > 0d)
+                return false;
+
+            return true;
+        }
+
+        protected void ExecuteEffect(Spell4EffectsEntry spell4EffectsEntry)
+        {
+            if (!CanExecuteEffect(spell4EffectsEntry))
+                return;
+
+            log.Trace($"Executing SpellEffect ID {spell4EffectsEntry.Id} ({1 << currentPhase})");
+
+            // Set Allowed States for entities being affected by this ExecuteEffect
+            List<TargetSelectionState> allowedStates = new() { TargetSelectionState.New };
+            if (CastMethod == CastMethod.Aura && spell4EffectsEntry.TickTime > 0)
+                allowedStates.Add(TargetSelectionState.Existing);
+
+            // select targets for effect
+            List<ISpellTargetInfo> effectTargets = targets
+                .Where(t => allowedStates.Contains(t.TargetSelectionState) && (t.Flags & (SpellEffectTargetFlags)spell4EffectsEntry.TargetFlags) != 0)
+                .ToList();
+
+            SpellEffectDelegate handler = GlobalSpellManager.Instance.GetEffectHandler((SpellEffectType)spell4EffectsEntry.EffectType);
+            if (handler == null)
+                log.Warn($"Unhandled spell effect {(SpellEffectType)spell4EffectsEntry.EffectType}");
+            else
+            {
+                uint effectId = GlobalSpellManager.Instance.NextEffectId;
+                foreach (ISpellTargetInfo effectTarget in effectTargets)
                 {
-                    uint effectId = GlobalSpellManager.Instance.NextEffectId;
-                    foreach (SpellTargetInfo effectTarget in effectTargets)
-                    {
-                        var info = new SpellTargetInfo.SpellTargetEffectInfo(effectId, spell4EffectsEntry);
-                        effectTarget.Effects.Add(info);
+                    if (!CheckEffectApplyPrerequisites(spell4EffectsEntry, effectTarget.Entity, effectTarget.Flags))
+                        continue;
 
-                        // TODO: if there is an unhandled exception in the handler, there will be an infinite loop on Execute()
-                        handler.Invoke(this, effectTarget.Entity, info);
-                    }
+                    var info = new SpellTargetInfo.SpellTargetEffectInfo(effectId, spell4EffectsEntry);
+                    effectTarget.Effects.Add(info);
+
+                    // TODO: if there is an unhandled exception in the handler, there will be an infinite loop on Execute()
+                    handler.Invoke(this, effectTarget.Entity, info);
+
+                    // Track the number of times this effect has fired.
+                    // Some spell effects have a limited trigger count per spell cast.
+                    if (effectTriggerCount.TryGetValue(spell4EffectsEntry.Id, out uint count))
+                        effectTriggerCount[spell4EffectsEntry.Id]++;
+                    else
+                        effectTriggerCount.TryAdd(spell4EffectsEntry.Id, 1);
+                }
+
+                // Add durations for each effect so that when the Effect timer runs out, the Spell can Finish.
+                if (spell4EffectsEntry.DurationTime > 0)
+                    events.EnqueueEvent(new SpellEvent(spell4EffectsEntry.DurationTime / 1000d, () => { /* placeholder for duration */ }));
+
+                if (spell4EffectsEntry.DurationTime > 0 && spell4EffectsEntry.DurationTime > duration)
+                    duration = spell4EffectsEntry.DurationTime;
+
+                if (spell4EffectsEntry.DurationTime == 0u && ((SpellEffectFlags)spell4EffectsEntry.Flags & SpellEffectFlags.CancelOnly) != 0)
+                    Parameters.ForceCancelOnly = true;
+
+                if (spell4EffectsEntry.TickTime > 0 && effectRetriggerTimers.ContainsKey(spell4EffectsEntry.Id))
+                    effectRetriggerTimers[spell4EffectsEntry.Id] = spell4EffectsEntry.TickTime / 1000d;
+            }
+        }
+
+        protected void RemoveEffects(ISpellTargetInfo target)
+        {
+            if (target.Entity == null)
+                return;
+
+            if (targets.Count > 0 && CastMethod == CastMethod.Aura)
+                log.Trace($"Target exited spell {CastingId}'s range, removing effects.");
+
+            // TODO: Remove effects triggered by this spell from the target.
+            // target.Entity?.RemoveSpellProperties(Spell4Id);
+            // target.Entity?.RemoveProc(parameters.SpellInfo.Entry.Id);
+            // target.Entity?.RemoveTemporaryDisplayItem(Spell4Id);
+        }
+
+        private bool CheckEffectApplyPrerequisites(Spell4EffectsEntry spell4EffectsEntry, IUnitEntity unit, SpellEffectTargetFlags targetFlags)
+        {
+            bool effectCanApply = true;
+
+            // TODO: Possibly update Prereq Manager to handle other Units
+            if (unit is not IPlayer player)
+                return true;
+
+            if ((targetFlags & SpellEffectTargetFlags.Caster) != 0)
+            {
+                // TODO
+                if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0)
+                {
+                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply);
                 }
             }
+
+            if (effectCanApply && (targetFlags & SpellEffectTargetFlags.Caster) == 0)
+            {
+                if (spell4EffectsEntry.PrerequisiteIdTargetApply > 0)
+                {
+                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdTargetApply);
+                }
+            }
+
+            return effectCanApply;
         }
 
         public bool IsMovingInterrupted()
         {
             // TODO: implement correctly
-            return Parameters.SpellInfo.Entry.CastTime > 0;
+            return Parameters.UserInitiatedSpellCast && Parameters.SpellInfo.BaseInfo.SpellType.Id != 5 && Parameters.SpellInfo.Entry.CastTime > 0;
         }
 
-        private void SendSpellCastResult(CastResult castResult)
+        /// <summary>
+        /// Finish this <see cref="ISpell"/> and end all effects associated with it.
+        /// </summary>
+        public virtual void Finish()
+        {
+            if (status == SpellStatus.Finished)
+                return;
+
+            events.CancelEvents();
+            status = SpellStatus.Finishing;
+        }
+
+        private bool PassEntityChecks()
+        {
+            if (caster is IPlayer)
+                return Parameters.UserInitiatedSpellCast;
+
+            return true;
+        }
+
+        protected virtual bool _IsCasting()
+        {
+            if (Parameters.IsProxy)
+                return false;
+
+            if ((caster is not IPlayer) && status == SpellStatus.Initiating)
+                return true;
+
+            return PassEntityChecks();
+        }
+
+        protected void SendSpellCastResult(CastResult castResult)
         {
             if (castResult == CastResult.Ok)
                 return;
 
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} failed to cast {castResult}.");
 
-            if (Caster is IPlayer player && !player.IsLoading)
+            if (caster is IPlayer player && !player.IsLoading)
             {
                 player.Session.EnqueueMessageEncrypted(new ServerSpellCastResult
                 {
@@ -314,32 +723,47 @@ namespace NexusForever.Game.Spell
             }
         }
 
-        private void SendSpellStart()
+        protected virtual uint GetPrimaryTargetId()
+        {
+            if (Parameters.PrimaryTargetId > 0)
+                return Parameters.PrimaryTargetId;
+
+            if (Parameters.PositionalUnitId > 0)
+                return Parameters.PositionalUnitId;
+
+            return caster.Guid;
+        }
+
+        protected void SendSpellStart()
         {
             var spellStart = new ServerSpellStart
             {
                 CastingId              = CastingId,
-                CasterId               = Caster.Guid,
-                PrimaryTargetId        = Caster.Guid,
+                CasterId               = caster.Guid,
+                PrimaryTargetId        = GetPrimaryTargetId(),
                 Spell4Id               = Parameters.SpellInfo.Entry.Id,
                 RootSpell4Id           = Parameters.RootSpellInfo?.Entry.Id ?? 0,
                 ParentSpell4Id         = Parameters.ParentSpellInfo?.Entry.Id ?? 0,
-                FieldPosition          = new Position(Caster.Position),
-                Yaw                    = Caster.Rotation.X,
+                FieldPosition          = new Position(caster.Position),
+                Yaw                    = caster.Rotation.X,
                 UserInitiatedSpellCast = Parameters.UserInitiatedSpellCast,
-                InitialPositionData    = new List<ServerSpellStart.InitialPosition>(),
-                TelegraphPositionData  = new List<ServerSpellStart.TelegraphPosition>()
+                InitialPositionData    = new List<InitialPosition>(),
+                TelegraphPositionData  = new List<TelegraphPosition>()
             };
 
-            var unitsCasting = new List<IUnitEntity>();
-            if (Parameters.PrimaryTargetId > 0)
-                unitsCasting.Add(Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId));
-            else
-                unitsCasting.Add(Caster);
+            // TODO: Add Proxy Units
+            List<IUnitEntity> unitsCasting = new List<IUnitEntity>();
+            unitsCasting.Add(caster);
 
             foreach (IUnitEntity unit in unitsCasting)
             {
-                spellStart.InitialPositionData.Add(new ServerSpellStart.InitialPosition
+                if (unit == null)
+                    continue;
+
+                if (unit is IPlayer)
+                    continue;
+
+                spellStart.InitialPositionData.Add(new InitialPosition
                 {
                     UnitId      = unit.Guid,
                     Position    = new Position(unit.Position),
@@ -350,9 +774,11 @@ namespace NexusForever.Game.Spell
 
             foreach (IUnitEntity unit in unitsCasting)
             {
+                if (unit == null)
+                    continue;
+
                 foreach (ITelegraph telegraph in telegraphs)
-                {
-                    spellStart.TelegraphPositionData.Add(new ServerSpellStart.TelegraphPosition
+                    spellStart.TelegraphPositionData.Add(new TelegraphPosition
                     {
                         TelegraphId    = (ushort)telegraph.TelegraphDamage.Id,
                         AttachedUnitId = unit.Guid,
@@ -360,10 +786,9 @@ namespace NexusForever.Game.Spell
                         Position       = new Position(telegraph.Position),
                         Yaw            = telegraph.Rotation.X
                     });
-                }
             }
 
-            Caster.EnqueueToVisible(spellStart, true);
+            caster.EnqueueToVisible(spellStart, true);
         }
 
         private void SendSpellFinish()
@@ -371,7 +796,7 @@ namespace NexusForever.Game.Spell
             if (status != SpellStatus.Finished)
                 return;
 
-            Caster.EnqueueToVisible(new ServerSpellFinish
+            caster.EnqueueToVisible(new ServerSpellFinish
             {
                 ServerUniqueId = CastingId,
             }, true);
@@ -379,47 +804,57 @@ namespace NexusForever.Game.Spell
 
         private void SendSpellGo()
         {
+            if (CastMethod == CastMethod.Aura && targets.FirstOrDefault(x => x.TargetSelectionState == TargetSelectionState.New) == null)
+                return;
+
             var serverSpellGo = new ServerSpellGo
             {
                 ServerUniqueId     = CastingId,
-                PrimaryDestination = new Position(Caster.Position),
-                Phase              = -1
+                PrimaryDestination = new Position(caster.Position),
+                Phase              = currentPhase
             };
 
+            byte targetCount = 0;
             foreach (ISpellTargetInfo targetInfo in targets
-                .Where(t => t.Effects.Count > 0))
+                .Where(t => t.Effects.Count > 0 && t.TargetSelectionState == TargetSelectionState.New))
             {
                 var networkTargetInfo = new TargetInfo
                 {
                     UnitId        = targetInfo.Entity.Guid,
-                    TargetFlags   = 1,
+                    Ndx           = targetCount++,
+                    TargetFlags   = (byte)targetInfo.Flags,
                     InstanceCount = 1,
                     CombatResult  = CombatResult.Hit
                 };
 
                 foreach (ISpellTargetEffectInfo targetEffectInfo in targetInfo.Effects)
                 {
-                    var networkTargetEffectInfo = new TargetInfo.EffectInfo
+
+                    if ((SpellEffectType)targetEffectInfo.Entry.EffectType == SpellEffectType.Proxy)
+                        continue;
+
+                    var networkTargetEffectInfo = new EffectInfo
                     {
                         Spell4EffectId = targetEffectInfo.Entry.Id,
                         EffectUniqueId = targetEffectInfo.EffectId,
-                        TimeRemaining  = -1
+                        DelayTime = targetEffectInfo.Entry.DelayTime,
+                        TimeRemaining = duration > 0 ? (int)duration : -1
                     };
 
                     if (targetEffectInfo.Damage != null)
                     {
                         networkTargetEffectInfo.InfoType = 1;
-                        networkTargetEffectInfo.DamageDescriptionData = new TargetInfo.EffectInfo.DamageDescription
+                        networkTargetEffectInfo.DamageDescriptionData = new DamageDescription
                         {
-                            RawDamage          = targetEffectInfo.Damage.RawDamage,
-                            RawScaledDamage    = targetEffectInfo.Damage.RawScaledDamage,
-                            AbsorbedAmount     = targetEffectInfo.Damage.AbsorbedAmount,
+                            RawDamage = targetEffectInfo.Damage.RawDamage,
+                            RawScaledDamage = targetEffectInfo.Damage.RawScaledDamage,
+                            AbsorbedAmount = targetEffectInfo.Damage.AbsorbedAmount,
                             ShieldAbsorbAmount = targetEffectInfo.Damage.ShieldAbsorbAmount,
-                            AdjustedDamage     = targetEffectInfo.Damage.AdjustedDamage,
-                            OverkillAmount     = targetEffectInfo.Damage.OverkillAmount,
-                            KilledTarget       = targetEffectInfo.Damage.KilledTarget,
-                            CombatResult       = CombatResult.Hit,
-                            DamageType         = targetEffectInfo.Damage.DamageType
+                            AdjustedDamage = targetEffectInfo.Damage.AdjustedDamage,
+                            OverkillAmount = targetEffectInfo.Damage.OverkillAmount,
+                            KilledTarget = targetEffectInfo.Damage.KilledTarget,
+                            CombatResult = CombatResult.Hit,
+                            DamageType = targetEffectInfo.Damage.DamageType
                         };
                     }
 
@@ -431,11 +866,10 @@ namespace NexusForever.Game.Spell
 
             var unitsCasting = new List<IUnitEntity>
             {
-                Caster
+                caster
             };
 
             foreach (IUnitEntity unit in unitsCasting)
-            {
                 serverSpellGo.InitialPositionData.Add(new InitialPosition
                 {
                     UnitId      = unit.Guid,
@@ -443,12 +877,9 @@ namespace NexusForever.Game.Spell
                     TargetFlags = 3,
                     Yaw         = unit.Rotation.X
                 });
-            }
 
             foreach (IUnitEntity unit in unitsCasting)
-            {
                 foreach (ITelegraph telegraph in telegraphs)
-                {
                     serverSpellGo.TelegraphPositionData.Add(new TelegraphPosition
                     {
                         TelegraphId    = (ushort)telegraph.TelegraphDamage.Id,
@@ -457,10 +888,37 @@ namespace NexusForever.Game.Spell
                         Position       = new Position(telegraph.Position),
                         Yaw            = telegraph.Rotation.X
                     });
-                }
-            }
 
-            Caster.EnqueueToVisible(serverSpellGo, true);
+            caster.EnqueueToVisible(serverSpellGo, true);
+        }
+
+        private void SendBuffsApplied(List<uint> unitIds)
+        {
+            if (unitIds.Count == 0)
+                return;
+
+            var serverSpellBuffsApply = new ServerSpellBuffsApply();
+            foreach (uint unitId in unitIds)
+                serverSpellBuffsApply.spellTargets.Add(new ServerSpellBuffsApply.SpellTarget
+                {
+                    ServerUniqueId = CastingId,
+                    TargetId       = unitId,
+                    InstanceCount  = 1 // TODO: If something stacks, we may need to grab this from the target unit
+                });
+            caster.EnqueueToVisible(serverSpellBuffsApply, true);
+        }
+
+        public void SendBuffsRemoved(List<uint> unitIds)
+        {
+            if (unitIds.Count == 0)
+                return;
+
+            ServerSpellBuffsRemoved serverSpellBuffsRemoved = new ServerSpellBuffsRemoved
+            {
+                CastingId = CastingId,
+                SpellTargets = unitIds
+            };
+            caster.EnqueueToVisible(serverSpellBuffsRemoved, true);
         }
 
         private void SendRemoveBuff(uint unitId)
@@ -468,11 +926,65 @@ namespace NexusForever.Game.Spell
             if (!Parameters.SpellInfo.BaseInfo.HasIcon)
                 throw new InvalidOperationException();
 
-            Caster.EnqueueToVisible(new ServerSpellBuffRemove
+            caster.EnqueueToVisible(new ServerSpellBuffRemove
             {
                 CastingId = CastingId,
                 CasterId  = unitId
             }, true);
+        }
+
+        private void CheckPersistance(double lastTick)
+        {
+            if (caster is not IPlayer player)
+                return;
+
+            if (Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence == 0 && Parameters.SpellInfo.Entry.PrerequisiteIdTargetPersistence == 0)
+                return;
+
+            persistCheck.Update(lastTick);
+            if (persistCheck.HasElapsed)
+            {
+                if (Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence > 0 && !PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence))
+                    Finish();
+
+                // TODO: Check if target can still persist
+
+                persistCheck.Reset();
+            }
+        }
+
+        /// <summary>
+        /// Called when this <see cref="ISpell"/> <see cref="SpellStatus"/> changes.
+        /// </summary>
+        protected virtual void OnStatusChange(SpellStatus previousStatus, SpellStatus status)
+        {
+            if (status == SpellStatus.Casting)
+                SendSpellStart();
+        }
+
+        protected virtual bool CanFinish()
+        {
+            return (status == SpellStatus.Executing && !events.HasPendingEvent && !Parameters.ForceCancelOnly) || status == SpellStatus.Finishing;
+        }
+
+        /// <summary>
+        /// Add a <see cref="IProxy"/> to this spell's execution queue.
+        /// </summary>
+        /// <param name="proxy">Proxy instance to add</param>
+        public void AddProxy(IProxy proxy)
+        {
+            proxies.Add(proxy);
+        }
+
+        /// <summary>
+        /// Returns number of times a certain effect has been triggered, for this spell cast, with a given ID.
+        /// </summary>
+        /// <param name="effectId"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        public bool GetEffectTriggerCount(uint effectId, out uint count)
+        {
+            return effectTriggerCount.TryGetValue(effectId, out count);
         }
     }
 }

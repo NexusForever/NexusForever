@@ -5,10 +5,15 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
+using NexusForever.Game.CSI;
+using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Map.Search;
+using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Social;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Social;
 using NexusForever.GameTable;
@@ -364,11 +369,57 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Invoked when <see cref="IWorldEntity"/> is cast activated.
+        /// Invoked when <see cref="WorldEntity"/> is cast activated.
         /// </summary>
-        public virtual void OnActivateCast(IPlayer activator)
+        public virtual void OnActivateCast(IPlayer activator, uint interactionId)
         {
-            // deliberately empty
+            // Handle CSI
+            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
+
+            uint spell4Id = 0;
+            for (int i = 0; i < entry.Spell4IdActivate.Length; i++)
+            {
+                if (spell4Id > 0u || i == entry.Spell4IdActivate.Length)
+                    break;
+
+                if (entry.PrerequisiteIdActivateSpells[i] > 0 && PrerequisiteManager.Instance.Meets(activator, entry.PrerequisiteIdActivateSpells[i]))
+                    spell4Id = entry.Spell4IdActivate[i];
+
+                if (spell4Id == 0u && entry.Spell4IdActivate[i] == 0u && i > 0)
+                    spell4Id = entry.Spell4IdActivate[i - 1];
+            }
+
+            if (spell4Id == 0)
+                throw new InvalidOperationException($"Spell4Id should not be 0. Unhandled Creature ActivateCast {CreatureId}");
+
+            SpellParameters parameters = new SpellParameters
+            {
+                PrimaryTargetId        = Guid,
+                ClientSideInteraction  = new ClientSideInteraction(activator, this, interactionId),
+                CastTimeOverride       = (int)entry.ActivateSpellCastTime,
+                UserInitiatedSpellCast = true
+            };
+            activator.CastSpell(spell4Id, parameters);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/>'s activate succeeds.
+        /// </summary>
+        public virtual void OnActivateSuccess(IPlayer activator)
+        {
+            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
+            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId) ?? Enumerable.Empty<uint>())
+                activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroup, targetGroupId, 1u); // Updates the objective, but seems to disable all the other targets. TODO: Investigate
+
+            // TODO: Fire Scripts
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/>'s activation fails.
+        /// </summary>
+        public virtual void OnActivateFail(IPlayer activator)
+        {
+            // TODO: Fire Scripts
         }
 
         /// <summary>
