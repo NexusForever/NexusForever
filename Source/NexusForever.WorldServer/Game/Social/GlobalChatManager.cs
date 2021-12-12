@@ -12,8 +12,6 @@ using NexusForever.Shared.Database;
 using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Game.CharacterCache;
 using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Guild;
-using NexusForever.WorldServer.Game.Guild.Static;
 using NexusForever.WorldServer.Game.Map.Search;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Social.Model;
