@@ -34,9 +34,9 @@ namespace NexusForever.WorldServer.Game.Guild
         public ulong NextGuildId => nextGuildId++;
         private ulong nextGuildId;
 
-        private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new();
-        private readonly Dictionary<(GuildType Type, string Name), /*guildId*/ ulong> guildNameCache = new(new GuildNameEqualityComparer());
-        private readonly Dictionary</*guildId*/ ulong, List</*memberId*/ ulong>> guildMemberCache = new();
+        private readonly Dictionary<ulong, GuildBase> guilds = new();
+        private readonly Dictionary<(GuildType Type, string Name), ulong> guildNameCache = new(new GuildNameEqualityComparer());
+        private readonly Dictionary</*memberId*/ ulong, List</*guildId*/ ulong>> guildMemberCache = new();
 
         private ImmutableDictionary<GuildOperation, (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate)> guildOperationHandlers;
         private delegate GuildResultInfo GuildOperationHandlerResultDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
@@ -357,11 +357,19 @@ namespace NexusForever.WorldServer.Game.Guild
         /// </remarks>
         public void RemoveFromDictionaries(GuildBase guild)
         {
-            if (!guilds.TryGetValue(guild.Id, out guild))
-                throw new ArgumentException($"Guild {guild.Name}({guild.Id}) not found in local dictionaries.");
+            if (!guilds.ContainsKey(guild.Id))
+                throw new KeyNotFoundException($"Guild {guild.Name}({guild.Id}) not found in local dictionaries.");
 
             guildNameCache.Remove((guild.Type, guild.Name));
-            guildMemberCache.Remove(guild.Id);
+
+            foreach (GuildMember member in guild)
+            {
+                if (!guildMemberCache.TryGetValue(member.CharacterId, out List<ulong> guildIds))
+                    throw new KeyNotFoundException($"Guild member {member.CharacterId} not found in local dictionaries.");
+                
+                guildIds.Remove(guild.Id);
+                guildMemberCache[member.CharacterId] = guildIds;
+            }
         }
 
         /// <summary>

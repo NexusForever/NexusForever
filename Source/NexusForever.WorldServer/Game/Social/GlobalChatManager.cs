@@ -216,18 +216,17 @@ namespace NexusForever.WorldServer.Game.Social
         }
 
         /// <summary>
-        /// Removes the given <see cref="ChatChannel"/> from local dictionaries to free keys for future use.
+        /// Removes the given <see cref="ChatChannel"/> from local dictionaries to free keys for future use, then adds it to the deletion queue.
         /// </summary>
-        /// <remarks>
-        /// This method should only be called under the assumption that the next save will remove <see cref="ChatChannel"/> from the database.
-        /// </remarks>
-        public void RemoveFromDictionaries(ChatChannel channel)
+        public void DeleteChannel(ChatChannel channel)
         {
-            if (!chatChannels[channel.Type].TryGetValue(channel.Id, out channel))
-                throw new ArgumentException($"No chat channel found in local dictionaries for {channel.Name}({channel.Id}).");
+            if (!chatChannels[channel.Type].ContainsKey(channel.Id))
+                throw new KeyNotFoundException($"No chat channel found in local dictionaries for {channel.Name}({channel.Id}).");
 
             chatChannelNames[channel.Type].Remove(channel.Name);
             chatChannels[channel.Type].Remove(channel.Id);
+
+            channel.EnqueueDelete(true);
         }
 
         /// <summary>
