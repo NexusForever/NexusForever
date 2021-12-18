@@ -26,7 +26,6 @@ namespace NexusForever.MapGenerator
             parserResult.WithParsed(ParameterOk);
 
             log.Info("Finished!");
-            Console.ReadLine();
         }
 
         private static void ParameterOk(Parameters parameters)
@@ -41,14 +40,20 @@ namespace NexusForever.MapGenerator
                 return;
             }
 
+            if ((parameters.Extract || parameters.Generate) && !string.IsNullOrEmpty(parameters.OutputDir))
+            {
+                if (!Directory.Exists(parameters.OutputDir))
+                    throw new DirectoryNotFoundException(parameters.OutputDir);
+            }
+
             ArchiveManager.Instance.Initialise(parameters.PatchPath);
             GameTableManager.Instance.Initialise();
 
             if (parameters.Extract)
-                ExtractionManager.Instance.Initialise();
+                ExtractionManager.Instance.Initialise(parameters.OutputDir);
             if (parameters.Generate)
             {
-                GenerationManager.Instance.Initialise();
+                GenerationManager.Instance.Initialise(parameters.OutputDir);
 
                 var start = DateTime.UtcNow;
                 if (parameters.WorldId.HasValue)

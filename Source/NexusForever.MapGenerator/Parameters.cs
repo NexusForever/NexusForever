@@ -16,6 +16,10 @@ namespace NexusForever.MapGenerator
             HelpText = "Generate base map files (.nfmap) from the area files.")]
         public bool Generate { get; set; }
 
+        [Option('o', "output",
+            HelpText = "The base directory where output files will be created.", Default = "")]
+        public string OutputDir { get; set; }
+
         [Option("debug")]
         public bool Debug { get; set; }
 
