@@ -493,7 +493,7 @@ namespace NexusForever.Database.Auth
                     new PermissionModel
                     {
                         Id   = 41,
-                        Name = "Command: EntitlementAccountAdd"
+                        Name = "Command: EntitlementAdd"
                     },
                     new PermissionModel
                     {
@@ -504,11 +504,6 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 37,
                         Name = "Category: EntitlementCharacter"
-                    },
-                    new PermissionModel
-                    {
-                        Id   = 38,
-                        Name = "Command: EntitlementCharacterAdd"
                     },
                     new PermissionModel
                     {
@@ -924,6 +919,11 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 10003,
                         Name = "Other: GMFlag"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10004,
+                        Name = "Other: EntitlementGrantOther"
                     });
             });
 

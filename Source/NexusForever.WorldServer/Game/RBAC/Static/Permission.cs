@@ -6,7 +6,7 @@
     /// </remarks>
     /// <remarks>
     /// IDs to reuse:
-    /// 
+    /// 38
     /// </remarks>
     public enum Permission
     {
@@ -67,10 +67,9 @@
         // entitlement
         Entitlement                 = 36,
         EntitlementCharacter        = 37,
-        EntitlementCharacterAdd     = 38,
         EntitlementCharacterList    = 39,
         EntitlementAccount          = 40,
-        EntitlementAccountAdd       = 41,
+        EntitlementAdd              = 41,
         EntitlementAccountList      = 42,
 
         // entity
@@ -178,6 +177,7 @@
         InstantLogout               = 10000,
         Signature                   = 10001,
         BypassInstanceLimits        = 10002,
-        GMFlag                      = 10003
+        GMFlag                      = 10003,
+        EntitlementGrantOther       = 10004
     }
 }

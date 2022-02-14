@@ -38,8 +38,8 @@ namespace NexusForever.WorldServer.Command.Handler
             }
         }
 
-        [Command(Permission.EntitlementAccountAdd, "Create or update an account entitlement.", "add")]
-        public void HandleEntitlementCommandAccountAdd(ICommandContext context,
+        [Command(Permission.EntitlementAdd, "Create or update an entitlement.", "add")]
+        public void HandleEntitlementCommandAdd(ICommandContext context,
                 [Parameter("Entitlement type to modify.", ParameterFlags.None, typeof(EnumParameterConverter<EntitlementType>))]
                 EntitlementType entitlementType,
                 [Parameter("Value to modify the entitlement.")]
@@ -52,10 +52,10 @@ namespace NexusForever.WorldServer.Command.Handler
             }
 
             Player targetPlayer = context.GetTargetOrInvoker<Player>();
-            if (targetPlayer != context.Invoker && !(context.Invoker as Player).Session.AccountRbacManager.HasPermission(Permission.GMFlag))
+            if (targetPlayer != context.Invoker && !(context.Invoker as Player).Session.AccountRbacManager.HasPermission(Permission.EntitlementGrantOther))
                 targetPlayer = context.Invoker as Player;
 
-            targetPlayer.Session.EntitlementManager.AddEntitlement(entitlementType, value);
+            targetPlayer.Session.EntitlementManager.UpdateEntitlement(entitlementType, value);
         }
     }
 }
