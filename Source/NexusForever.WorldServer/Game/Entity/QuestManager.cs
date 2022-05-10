@@ -301,7 +301,7 @@ namespace NexusForever.WorldServer.Game.Entity
             {
                 GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(655);
                 // client also hard codes 40 if entry doesn't exist
-                if (completedQuests.Count > (entry?.Dataint0 ?? 40u))
+                if (activeQuests.Count > (entry?.Dataint0 ?? 40u))
                     return false;
             }
             else
