@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private delegate bool PrerequisiteCheckDelegate(Player player, PrerequisiteComparison comparison, uint value, uint objectId);
+        private delegate bool PrerequisiteCheckDelegate(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target);
         private ImmutableDictionary<PrerequisiteType, PrerequisiteCheckDelegate> prerequisiteCheckHandlers;
 
         private PrerequisiteManager()
@@ -44,7 +44,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         /// <summary>
         /// Checks if <see cref="Player"/> meets supplied prerequisite.
         /// </summary>
-        public bool Meets(Player player, uint prerequisiteId)
+        public bool Meets(Player player, uint prerequisiteId, UnitEntity target = null)
         {
             PrerequisiteEntry entry = GameTableManager.Instance.Prerequisite.GetEntry(prerequisiteId);
             if (entry == null)
@@ -53,16 +53,16 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             switch ((EvaluationMode)entry.Flags)
             {
                 case EvaluationMode.EvaluateAND:
-                    return MeetsEvaluateAnd(player, prerequisiteId, entry);
+                    return MeetsEvaluateAnd(player, prerequisiteId, entry, target);
                 case EvaluationMode.EvaluateOR:
-                    return MeetsEvaluateOr(player, prerequisiteId, entry);
+                    return MeetsEvaluateOr(player, prerequisiteId, entry, target);
                 default:
                     log.Trace($"Unhandled EvaluationMode {entry.Flags}");
                     return false;
             }
         }
 
-        private bool MeetsEvaluateAnd(Player player, uint prerequisiteId, PrerequisiteEntry entry)
+        private bool MeetsEvaluateAnd(Player player, uint prerequisiteId, PrerequisiteEntry entry, UnitEntity target)
         {
             for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
             {
@@ -71,7 +71,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                     continue;
 
                 PrerequisiteComparison comparison = (PrerequisiteComparison)entry.PrerequisiteComparisonId[i];
-                if (!Meets(player, type, comparison, entry.Value[i], entry.ObjectId[i]))
+                if (!Meets(player, type, comparison, entry.Value[i], entry.ObjectId[i], target))
                 {
                     log.Trace($"Player {player.Name} failed prerequisite AND check ({prerequisiteId}) {type}, {comparison}, {entry.Value[i]}, {entry.ObjectId[i]}");
                     return false;
@@ -81,7 +81,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             return true;
         }
 
-        private bool MeetsEvaluateOr(Player player, uint prerequisiteId, PrerequisiteEntry entry)
+        private bool MeetsEvaluateOr(Player player, uint prerequisiteId, PrerequisiteEntry entry, UnitEntity target)
         {
             for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
             {
@@ -90,7 +90,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                     continue;
 
                 PrerequisiteComparison comparison = (PrerequisiteComparison)entry.PrerequisiteComparisonId[i];
-                if (Meets(player, type, comparison, entry.Value[i], entry.ObjectId[i]))
+                if (Meets(player, type, comparison, entry.Value[i], entry.ObjectId[i], target))
                     return true;
             }
 
@@ -98,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             return false;
         }
 
-        private bool Meets(Player player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId)
+        private bool Meets(Player player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             if (!prerequisiteCheckHandlers.TryGetValue(type, out PrerequisiteCheckDelegate handler))
             {
@@ -106,7 +106,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                 return false;
             }
 
-            return handler.Invoke(player, comparison, value, objectId);
+            return handler.Invoke(player, comparison, value, objectId, target);
         }
     }
 }

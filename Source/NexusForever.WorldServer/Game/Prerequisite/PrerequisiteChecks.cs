@@ -1,4 +1,8 @@
-﻿using NexusForever.WorldServer.Game.Entity;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NexusForever.Shared;
+using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
 using NexusForever.WorldServer.Game.Quest.Static;
@@ -9,7 +13,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
     public sealed partial class PrerequisiteManager
     {
         [PrerequisiteCheck(PrerequisiteType.Level)]
-        private static bool PrerequisiteCheckLevel(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckLevel(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -20,7 +24,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.Race)]
-        private static bool PrerequisiteCheckRace(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckRace(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -35,7 +39,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.Class)]
-        private static bool PrerequisiteCheckClass(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckClass(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -50,7 +54,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.Quest)]
-        private static bool PrerequisiteCheckQuest(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckQuest(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -65,7 +69,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.Path)]
-        private static bool PrerequisiteCheckPath(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckPath(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -79,7 +83,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.Achievement)]
-        private static bool PrerequisiteCheckAchievement(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckAchievement(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -94,7 +98,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.SpellBaseId)]
-        private static bool PrerequisiteCheckSpellBaseId(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckSpellBaseId(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -109,7 +113,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
-        private static bool PrerequisiteCheckBaseFaction(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckBaseFaction(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -123,7 +127,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.Vital)]
-        private static bool PrerequisiteCheckVital(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckVital(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
         {
             switch (comparison)
             {
@@ -143,6 +147,31 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                 //     return player.GetVitalValue((Vital)objectId) < value;
                 default:
                     log.Warn($"Unhandled {comparison} for {PrerequisiteType.Vital}!");
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.PositionalRequirement)]
+        private static bool PrerequisiteCheckPositionalRequirement(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
+        {
+            if (target == null || objectId == 0)
+                return false;
+
+            PositionalRequirementEntry entry = GameTableManager.Instance.PositionalRequirement.GetEntry(objectId);
+
+            float angle = (target.Position.GetRotationTo(player.Position) - target.Rotation).X.ToDegrees();
+            float minBounds = entry.AngleCenter - entry.AngleRange / 2f;
+            float maxBounds = entry.AngleCenter + entry.AngleRange / 2f;
+            bool isAllowed = angle >= minBounds && angle <= maxBounds;
+                 
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return isAllowed;
+                case PrerequisiteComparison.NotEqual:
+                    return !isAllowed;
+                default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.PositionalRequirement}!");
                     return false;
             }
         }
