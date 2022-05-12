@@ -65,8 +65,9 @@ namespace NexusForever.WorldServer.Game.Storefront
                 });
                 foreach (OfferItemData itemData in offerItem)
                 {
-                    ulong id = session.AccountInventory.ItemCreate(itemData.Entry);
-                    session.AccountInventory.BindItem(id);
+                    // TODO: Uncomment after AccountInventory is merged
+                    //ulong id = session.AccountInventory.ItemCreate(itemData.Entry);
+                    //session.AccountInventory.BindItem(id);
                 }
                 session.AccountCurrencyManager.CurrencySubtractAmount(accountCurrencyType, (ulong)cost);
                 transactionsAllowed = true;
