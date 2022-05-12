@@ -36,6 +36,9 @@ namespace NexusForever.WorldServer.Game.Storefront
             transactionsAllowed = true;
         }
 
+        /// <summary>
+        /// Complete purchasing an <see cref="OfferItem"/> for the associated account.
+        /// </summary>
         public void PurchaseOffer(OfferItem offerItem, AccountCurrencyType accountCurrencyType)
         {
             float cost = offerItem.GetPriceDataForCurrency(accountCurrencyType).GetCurrencyValue();
@@ -55,7 +58,6 @@ namespace NexusForever.WorldServer.Game.Storefront
 
             CreateTransaction(offerItem, accountCurrencyType, cost, () =>
             {
-                session.AccountCurrencyManager.CurrencySubtractAmount(accountCurrencyType, (ulong)cost);
                 session.EnqueueMessageEncrypted(new ServerStorePurchaseResult
                 {
                     Success = true,
@@ -66,6 +68,7 @@ namespace NexusForever.WorldServer.Game.Storefront
                     ulong id = session.AccountInventory.ItemCreate(itemData.Entry);
                     session.AccountInventory.BindItem(id);
                 }
+                session.AccountCurrencyManager.CurrencySubtractAmount(accountCurrencyType, (ulong)cost);
                 transactionsAllowed = true;
             });
         }

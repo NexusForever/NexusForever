@@ -336,5 +336,13 @@ namespace NexusForever.WorldServer.Game.Entity
 
             player.Session.EnqueueMessageEncrypted(costumeItemUnlock);
         }
+
+        /// <summary>
+        /// Returns if this <see cref="CostumeManager"/> has already unlocked an item.
+        /// </summary>
+        public bool HasCostumeItemUnlocked(uint itemId)
+        {
+            return costumeUnlocks.ContainsKey(itemId);
+        }
     }
 }

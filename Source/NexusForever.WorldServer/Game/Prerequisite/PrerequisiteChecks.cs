@@ -1,8 +1,11 @@
-﻿using NexusForever.WorldServer.Game.Entity;
+﻿using NexusForever.Shared.GameTable;
+using NexusForever.Shared.GameTable.Model;
+using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.Entity.Static;
 using NexusForever.WorldServer.Game.Prerequisite.Static;
 using NexusForever.WorldServer.Game.Quest.Static;
 using NexusForever.WorldServer.Game.Reputation.Static;
+using System;
 
 namespace NexusForever.WorldServer.Game.Prerequisite
 {
@@ -143,6 +146,55 @@ namespace NexusForever.WorldServer.Game.Prerequisite
                 //     return player.GetVitalValue((Vital)objectId) < value;
                 default:
                     log.Warn($"Unhandled {comparison} for {PrerequisiteType.Vital}!");
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.Entitlement)]
+        private static bool PrerequisiteCheckEntitlement(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
+        {
+            EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry(objectId);
+            if (entry == null)
+                throw new ArgumentException($"Invalid entitlement type {objectId}!");
+
+            uint currentValue = 0;
+
+            if ((entry.Flags & 1) != 0)
+                currentValue = player.Session.EntitlementManager.GetCharacterEntitlement((EntitlementType)objectId)?.Amount ?? 0u;
+            else
+                currentValue = player.Session.EntitlementManager.GetAccountEntitlement((EntitlementType)objectId)?.Amount ?? 0u;
+
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return currentValue == value;
+                case PrerequisiteComparison.NotEqual:
+                    return currentValue != value;
+                case PrerequisiteComparison.GreaterThanOrEqual:
+                    return currentValue >= value;
+                case PrerequisiteComparison.GreaterThan:
+                    return currentValue > value;
+                case PrerequisiteComparison.LessThanOrEqual:
+                    return currentValue <= value;
+                case PrerequisiteComparison.LessThan:
+                    return currentValue < value;
+                default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Entitlement}!");
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.CostumeUnlocked)]
+        private static bool PrerequisiteCheckCostumeUnlocked(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.CostumeManager.HasCostumeItemUnlocked(objectId);
+                case PrerequisiteComparison.NotEqual:
+                    return !player.CostumeManager.HasCostumeItemUnlocked(objectId);
+                default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.CostumeUnlocked}!");
                     return false;
             }
         }
