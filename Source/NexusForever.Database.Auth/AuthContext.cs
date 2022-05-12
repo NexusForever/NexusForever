@@ -14,6 +14,7 @@ namespace NexusForever.Database.Auth
         public DbSet<AccountKeybindingModel> AccountKeybinding { get; set; }
         public DbSet<AccountPermissionModel> AccountPermission { get; set; }
         public DbSet<AccountRoleModel> AccountRole { get; set; }
+        public DbSet<AccountStoreTransactionModel> AccountStoreTransaction { get; set; }
         public DbSet<PermissionModel> Permission { get; set; }
         public DbSet<RoleModel> Role { get; set; }
         public DbSet<RolePermissionModel> RolePermission { get; set; }
@@ -974,6 +975,48 @@ namespace NexusForever.Database.Auth
                     .WithMany(f => f.RolePermission)
                     .HasForeignKey(e => e.PermissionId)
                     .HasConstraintName("FK__role_permission_permission_id__permission_id");
+            });
+
+            modelBuilder.Entity<AccountStoreTransactionModel>(entity =>
+            {
+                entity.ToTable("account_store_transaction");
+
+                entity.HasKey(i => new { i.Id, i.TransactionId });
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.TransactionId)
+                    .HasColumnName("transactionId")
+                    .HasColumnType("int(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasColumnType("varchar(256)")
+                    .HasDefaultValue("");
+
+                entity.Property(e => e.CurrencyType)
+                    .HasColumnName("currencyType")
+                    .HasColumnType("smallint(5)")
+                    .HasDefaultValue(6);
+
+                entity.Property(e => e.Cost)
+                    .HasColumnName("cost")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.TransactionDateTime)
+                    .HasColumnName("transactionDateTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("current_timestamp()");
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.AccountStoreTransaction)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_store_transaction_id__account_id");
             });
 
             modelBuilder.Entity<ServerModel>(entity =>

@@ -110,6 +110,11 @@ namespace NexusForever.WorldServer.Game.Storefront
             SendStoreFinalise(session);
         }
 
+        public OfferItem GetOfferItem(uint id)
+        {
+            return offerGroupLookup.TryGetValue(id, out uint offerGroupId) ? offerGroups[offerGroupId].GetOfferItem(id) : null;
+        }
+
         private void SendStoreCategories(WorldSession session)
         {
             session.EnqueueMessageEncrypted(new ServerStoreCategories

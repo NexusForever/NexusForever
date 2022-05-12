@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using NexusForever.Database.World.Model;
@@ -10,7 +12,7 @@ using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Storefront
 {
-    public class OfferItem : IBuildable<ServerStoreOffers.OfferGroup.Offer>
+    public class OfferItem : IBuildable<ServerStoreOffers.OfferGroup.Offer>, IEnumerable<OfferItemData>
     {
         public uint Id { get; }
         public string Name { get; }
@@ -90,6 +92,16 @@ namespace NexusForever.WorldServer.Game.Storefront
                     .Select(p => p.Build())
                     .ToList()
             };
+        }
+
+        public IEnumerator<OfferItemData> GetEnumerator()
+        {
+            return items.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -14,6 +14,7 @@ using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Game.Static;
 using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.WorldServer.Game.Storefront;
 
 namespace NexusForever.WorldServer.Network
 {
@@ -28,6 +29,7 @@ namespace NexusForever.WorldServer.Network
         public GenericUnlockManager GenericUnlockManager { get; private set; }
         public AccountCurrencyManager AccountCurrencyManager { get; private set; }
         public EntitlementManager EntitlementManager { get; private set; }
+        public PurchaseManager PurchaseManager { get; set; }
 
         public AccountTier AccountTier => AccountRbacManager.HasPermission(Permission.Signature) ? AccountTier.Signature : AccountTier.Basic;
 
@@ -74,6 +76,7 @@ namespace NexusForever.WorldServer.Network
             GenericUnlockManager   = new GenericUnlockManager(this, account);
             AccountCurrencyManager = new AccountCurrencyManager(this, account);
             EntitlementManager     = new EntitlementManager(this, account);
+            PurchaseManager        = new PurchaseManager(this, account);
         }
 
         public void SetEncryptionKey(byte[] sessionKey)

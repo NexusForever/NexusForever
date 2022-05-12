@@ -76,6 +76,7 @@ namespace NexusForever.Database.Auth
                 .Include(a => a.AccountEntitlement)
                 .Include(a => a.AccountPermission)
                 .Include(a => a.AccountRole)
+                .Include(a => a.AccountStoreTransaction)
                 .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
         }
 
@@ -178,6 +179,32 @@ namespace NexusForever.Database.Auth
                 .Include(r => r.RolePermission)
                 .AsNoTracking()
                 .ToImmutableList();
+        }
+
+        private async Task<ulong> GetNextTransactionId()
+        {
+            await using var context = new AuthContext(config);
+
+            ulong id = context.AccountStoreTransaction
+                .Select(r => r.TransactionId)
+                .DefaultIfEmpty()
+                .Max();
+
+            return id < 10000000ul ? 10000000ul + 1ul : id + 1ul;
+        }
+
+        public async Task<AccountStoreTransactionModel> CreateStoreTransaction(AccountModel account, AccountStoreTransactionModel transaction)
+        {
+            ulong id = await GetNextTransactionId();
+
+            transaction.TransactionId = id;
+
+            await using var context = new AuthContext(config);
+            EntityEntry<AccountModel> entity = context.Attach(account);
+            context.Add(transaction);
+            await context.SaveChangesAsync();
+
+            return transaction;
         }
     }
 }

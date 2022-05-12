@@ -294,9 +294,10 @@ namespace NexusForever.Shared.Network.Message
         Server0816                      = 0x0816, // spell related: broadcast parts of 0x07FF?
         Server0817                      = 0x0817, // spell related
         Server0818                      = 0x0818,
-        ClientStorefrontPurchaseAccount = 0x0828,
-        ClientStorefrontPurchaseCharacter = 0x082A,
+        ClientStorefrontPurchaseGift    = 0x0828,
+        ClientStorefrontPurchase        = 0x082A,
         ClientStorefrontRequestCatalog  = 0x082D,
+        ClientStorefrontRequestPurchaseHistory = 0x082E,
         ClientSummonVanityPet           = 0x082F,
         ServerTimeOfDay                 = 0x0845,
         Server0854                      = 0x0854, // crafting schematic
@@ -335,12 +336,17 @@ namespace NexusForever.Shared.Network.Message
         ServerAccountItemCooldownSet    = 0x0974,
         ServerAccountItemAdd            = 0x0975,
         ServerAccountItemsPending       = 0x0979,
+        ServerAccountItemDelete         = 0x097C,
+        ServerAccountTransactionUpdate  = 0x097D,
         ServerAccountTier               = 0x097F,
         ServerGenericUnlockList         = 0x0981,
         ServerGenericUnlock             = 0x0982,
         ServerGenericUnlockResult       = 0x0985,
         ServerStoreFinalise             = 0x0987,
         ServerStoreCategories           = 0x0988,
+        ServerStoreError                = 0x098A,
         ServerStoreOffers               = 0x098B,
+        ServerStorePurchaseResult       = 0x098C,
+        ServerStorePurchaseHistory      = 0x098E
     }
 }
