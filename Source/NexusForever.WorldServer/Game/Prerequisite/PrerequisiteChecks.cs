@@ -221,5 +221,20 @@ namespace NexusForever.WorldServer.Game.Prerequisite
             // Returning true by default as many mounts used this
             return true;
         }
+
+        [PrerequisiteCheck(PrerequisiteType.PurchasedTitle)]
+        private static bool PrerequisiteCheckPurchasedTitle(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.TitleManager.HasTitle((ushort)objectId);
+                case PrerequisiteComparison.NotEqual:
+                    return !player.TitleManager.HasTitle((ushort)objectId);
+                default:
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {(PrerequisiteType)288}!");
+                    return true;
+            }
+        }
     }
 }
