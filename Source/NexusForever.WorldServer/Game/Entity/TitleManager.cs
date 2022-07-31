@@ -199,6 +199,14 @@ namespace NexusForever.WorldServer.Game.Entity
                 ActiveTitleId = 0;
         }
 
+        /// <summary>
+        /// Returns whether this <see cref="TitleManager"/> has a title available to it which has not been revoked.
+        /// </summary>
+        public bool HasTitle(ushort id)
+        {
+            return titles.TryGetValue(id, out Title title) ? !title.Revoked : false;
+        }
+
         public IEnumerator<Title> GetEnumerator()
         {
             return titles.Values

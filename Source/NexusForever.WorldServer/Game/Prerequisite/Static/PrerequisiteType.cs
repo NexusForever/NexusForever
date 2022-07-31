@@ -29,6 +29,7 @@
         Unknown195      = 195,
         SpellBaseId     = 214,
         Plane           = 232,
-        BaseFaction     = 250
+        BaseFaction     = 250,
+        PurchasedTitle  = 288
     }
 }
