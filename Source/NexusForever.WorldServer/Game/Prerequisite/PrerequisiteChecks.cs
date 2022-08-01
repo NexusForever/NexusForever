@@ -223,7 +223,7 @@ namespace NexusForever.WorldServer.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.PurchasedTitle)]
-        private static bool PrerequisiteCheckPurchasedTitle(Player player, PrerequisiteComparison comparison, uint value, uint objectId, UnitEntity target)
+        private static bool PrerequisiteCheckPurchasedTitle(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             switch (comparison)
             {
