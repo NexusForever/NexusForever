@@ -146,7 +146,7 @@ namespace NexusForever.WorldServer.Game.Map
         /// </remarks>
         public void EnqueueAdd(GridEntity entity, MapPosition position)
         {
-            entity.OnEnqueueAddToMap();
+            entity.OnEnqueueAddToMap(position);
 
             if (entity.Map != null)
             {
@@ -387,6 +387,10 @@ namespace NexusForever.WorldServer.Game.Map
         private bool CanAddEntity(GridEntity entity, Vector3 vector)
         {
             ActivateGrid(entity, vector);
+
+            // If the entity has not been removed from previous map, they should not be added to new one
+            if (entity.Map != null)
+                return false;
 
             // if the grid doesn't exist we can't add the new entity to it
             MapGrid grid = GetGrid(vector);
