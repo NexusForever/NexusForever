@@ -34,7 +34,7 @@ namespace NexusForever.WorldServer.Game.Entity
 
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
-        public MovementManager MovementManager { get; private set; }
+        public MovementManager MovementManager { get; protected set; }
 
         public uint Health
         {
@@ -102,7 +102,10 @@ namespace NexusForever.WorldServer.Game.Entity
         public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
         {
             LeashPosition   = vector;
-            MovementManager = new MovementManager(this, vector, Rotation);
+
+            if (this is not Player)
+                MovementManager = new MovementManager(this, vector, Rotation);
+                
             base.OnAddToMap(map, guid, vector);
         }
 

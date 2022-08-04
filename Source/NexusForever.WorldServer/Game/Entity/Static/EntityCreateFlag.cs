@@ -9,7 +9,6 @@ namespace NexusForever.WorldServer.Game.Entity.Static
         None             = 0x00,
         SpawnAnimation   = 0x01,
         NoSpawnAnimation = 0x02, // ??
-        Unknown02        = 0x02,
         Vendor           = 0x04,
         // 0x08 ??
         Unknown10        = 0x10,
