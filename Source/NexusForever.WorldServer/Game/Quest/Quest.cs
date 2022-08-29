@@ -119,6 +119,9 @@ namespace NexusForever.WorldServer.Game.Quest
             for (byte i = 0; i < info.Objectives.Count; i++)
                 objectives.Add(new QuestObjective(info, info.Objectives[i], i));
 
+            if (objectives.Count == 0)
+                state = QuestState.Achieved;
+
             saveMask = QuestSaveMask.Create;
         }
 
