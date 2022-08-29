@@ -44,7 +44,7 @@ namespace NexusForever.WorldServer.Game.Spell
             {
                 Id        = actionSet.Owner,
                 SpecIndex = actionSet.Index,
-                AmpId     = (byte)Entry.Id
+                AmpId     = (ushort)Entry.Id
             };
 
             if ((saveMask & AmpSaveMask.Create) != 0)
