@@ -99,5 +99,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
             session.Player.IsLoading = false;
         }
+        
+        [MessageHandler(GameMessageOpcode.ClientCinematicState)]
+        public static void HandleCinematicState(WorldSession session, ClientCinematicState cinematicState)
+        {
+            session.Player.CinematicManager.HandleClientCinematicState(cinematicState.State);
+        }
     }
 }
