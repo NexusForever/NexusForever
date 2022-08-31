@@ -1,10 +1,8 @@
-﻿using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
+using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Cinematic.Cinematics
 {
@@ -24,12 +22,12 @@ namespace NexusForever.WorldServer.Game.Cinematic.Cinematics
 
         public NoviceTutorialCombatProjector(Player player)
         {
-            Player = player;
-            Duration = 10000;
-            InitialFlags = 7;
+            Player            = player;
+            Duration          = 10000;
+            InitialFlags      = 7;
             InitialCancelMode = 2;
-            StartTransition = new Transition(0, 1, 2, 1500, 0, 1500);
-            EndTransition = new Transition(8500, 0, 0, 1500, 0, 1500);
+            StartTransition   = new Transition(0, 1, 2, 1500, 0, 1500);
+            EndTransition     = new Transition(8500, 0, 0, 1500, 0, 1500);
 
             Setup();
         }
@@ -40,12 +38,13 @@ namespace NexusForever.WorldServer.Game.Cinematic.Cinematics
             SetupTexts();
             SetupCamera();
 
-            List<IKeyframeAction> ScreenEffects = new List<IKeyframeAction>();
-            ScreenEffects.Add(new VisualEffect(21853, Player.Guid));
-            ScreenEffects.Add(new VisualEffect(50915, Player.Guid));
-            ScreenEffects.Add(new VisualEffect(50760, Player.Guid, duration: 3000));
-            ScreenEffects.Add(new VisualEffect(50761, Player.Guid, initialDelay: 3000));
-            Keyframes.Add("ScreenEffects", ScreenEffects);
+            Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
+            {
+                new VisualEffect(21853, Player.Guid),
+                new VisualEffect(50915, Player.Guid),
+                new VisualEffect(50760, Player.Guid, duration: 3000),
+                new VisualEffect(50761, Player.Guid, initialDelay: 3000)
+            });
         }
 
         private void SetupActors()
@@ -147,10 +146,10 @@ namespace NexusForever.WorldServer.Game.Cinematic.Cinematics
 
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicTransitionDurationSet
             {
-                Type = 2,
+                Type          = 2,
                 DurationStart = 1500,
-                DurationMid = 0,
-                DurationEnd = 1500
+                DurationMid   = 0,
+                DurationEnd   = 1500
             });
 
             foreach (IKeyframeAction keyframeAction in Keyframes.Values.SelectMany(i => i))

@@ -1,10 +1,8 @@
-﻿using NexusForever.Shared.Network.Message;
+﻿using System.Collections.Generic;
+using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Game.Entity;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NexusForever.WorldServer.Game.Cinematic
 {
@@ -16,33 +14,27 @@ namespace NexusForever.WorldServer.Game.Cinematic
         public ushort Flags { get; }
         public ushort Unknown0 { get; }
         public uint MovementMode { get; }
-        public float Angle { get; }
-        public bool AngleSet { get; }
+        public float? Angle { get; }
         public Position InitialPosition { get; }
-        public List<VisualEffect> InitialVisualEffects { get; } = new List<VisualEffect>();
-        public List<IKeyframeAction> Keyframes { get; } = new List<IKeyframeAction>();
+        public List<VisualEffect> InitialVisualEffects { get; } = new();
+        public List<IKeyframeAction> Keyframes { get; } = new();
         public ulong ActivePropId { get; }
         public uint SocketId { get; }
 
-        public List<IWritable> PacketsToSend { get; } = new List<IWritable>();
+        public List<IWritable> PacketsToSend { get; } = new();
 
-        public Actor(uint creatureType, ushort flags, float angle, Position position, uint initialDelay = 0, ushort unknown0 = 10, uint movementMode = 3, ulong activePropId = 0, uint socketId = 0)
+        public Actor(uint creatureType, ushort flags, float? angle, Position position, uint initialDelay = 0, ushort unknown0 = 10, uint movementMode = 3, ulong activePropId = 0, uint socketId = 0)
         {
-            Id = GlobalCinematicManager.Instance.NextCinematicId;
-            CreatureType = creatureType;
-            Flags = flags;
-            if (angle != 0f)
-            {
-                Angle = angle;
-                AngleSet = true;
-            }
-                
+            Id              = GlobalCinematicManager.Instance.NextCinematicId;
+            CreatureType    = creatureType;
+            Flags           = flags;
+            Angle           = angle;
             InitialPosition = position;
-            InitialDelay = initialDelay;
-            Unknown0 = unknown0;
-            MovementMode = movementMode;
-            ActivePropId = activePropId;
-            SocketId = socketId;
+            InitialDelay    = initialDelay;
+            Unknown0        = unknown0;
+            MovementMode    = movementMode;
+            ActivePropId    = activePropId;
+            SocketId        = socketId;
         }
 
         public void AddVisualEffect(VisualEffect visualEffect)
@@ -66,24 +58,26 @@ namespace NexusForever.WorldServer.Game.Cinematic
         {
             session.EnqueueMessageEncrypted(new ServerCinematicActor
             {
-                Delay = InitialDelay,
-                Flags = Flags,
-                Unknown0 = Unknown0,
-                SpawnHandle = Id,
-                CreatureType = CreatureType,
-                MovementMode = MovementMode,
+                Delay           = InitialDelay,
+                Flags           = Flags,
+                Unknown0        = Unknown0,
+                SpawnHandle     = Id,
+                CreatureType    = CreatureType,
+                MovementMode    = MovementMode,
                 InitialPosition = InitialPosition,
-                ActivePropId = ActivePropId,
-                SocketId = SocketId
+                ActivePropId    = ActivePropId,
+                SocketId        = SocketId
             });
-            
-            if (AngleSet)
+
+            if (Angle.HasValue)
+            {
                 session.EnqueueMessageEncrypted(new ServerCinematicActorAngle
                 {
-                    Delay = 0,
+                    Delay  = 0,
                     UnitId = Id,
-                    Angle = Angle
+                    Angle  = Angle.Value
                 });
+            }
 
             foreach (VisualEffect visualEffect in InitialVisualEffects)
                 visualEffect.Send(session);

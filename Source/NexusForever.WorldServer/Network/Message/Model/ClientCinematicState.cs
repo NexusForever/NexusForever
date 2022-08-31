@@ -12,7 +12,7 @@ namespace NexusForever.WorldServer.Network.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            State = reader.ReadEnum<CinematicState>(8u);
+            State    = reader.ReadEnum<CinematicState>(8u);
             Unknown0 = reader.ReadBit();
         }
     }

@@ -1,9 +1,7 @@
-﻿using NexusForever.WorldServer.Game.Cinematic;
+﻿using System.Collections.Generic;
+using NexusForever.WorldServer.Game.Cinematic;
 using NexusForever.WorldServer.Game.Cinematic.Static;
 using NLog;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NexusForever.WorldServer.Game.Entity
 {
@@ -11,15 +9,17 @@ namespace NexusForever.WorldServer.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private Player Owner;
-        private List<CinematicBase> QueuedCinematics = new List<CinematicBase>();
+        private Player owner;
+
+        private CinematicBase currentCinematic;
+        private readonly Queue<CinematicBase> queuedCinematics = new();
 
         /// <summary>
         /// Initialise a <see cref="CinematicManager"/> for this <see cref="Player"/>.
         /// </summary>
         public CinematicManager(Player player)
         {
-            Owner = player;
+            owner = player;
         }
 
         /// <summary>
@@ -27,21 +27,22 @@ namespace NexusForever.WorldServer.Game.Entity
         /// </summary>
         public void QueueCinematic(CinematicBase cinematic)
         {
-            QueuedCinematics.Add(cinematic);
-            if (QueuedCinematics.Count == 1u)
-                PlayQueuedCinematics();
+            queuedCinematics.Enqueue(cinematic);
+            if (currentCinematic == null && queuedCinematics.Count >= 1u)
+                PlayQueuedCinematic();
         }
 
         /// <summary>
         /// Play the next queued <see cref="CinematicBase"/>.
         /// </summary>
-        public void PlayQueuedCinematics()
+        public void PlayQueuedCinematic()
         {
-            if (QueuedCinematics.Count == 0)
+            if (queuedCinematics.Count == 0)
                 return;
 
-            QueuedCinematics[0].StartPlayback();
-            QueuedCinematics.RemoveAt(0);
+            CinematicBase cinematic = queuedCinematics.Dequeue();
+            currentCinematic = cinematic;
+            currentCinematic.StartPlayback();
         }
 
         /// <summary>
@@ -62,7 +63,8 @@ namespace NexusForever.WorldServer.Game.Entity
                     break;
                 case CinematicState.Ended:
                     // Player is back in the world. Continue any scripts that may've been paused.
-                    PlayQueuedCinematics();
+                    currentCinematic = null;
+                    PlayQueuedCinematic();
                     break;
             }
         }

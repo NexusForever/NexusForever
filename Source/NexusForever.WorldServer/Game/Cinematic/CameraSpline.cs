@@ -1,9 +1,5 @@
-﻿using NexusForever.WorldServer.Game.Cinematic.Static;
-using NexusForever.WorldServer.Network;
+﻿using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NexusForever.WorldServer.Game.Cinematic
 {
@@ -18,11 +14,11 @@ namespace NexusForever.WorldServer.Game.Cinematic
 
         public CameraSpline(uint delay, uint spline, uint splineMode, float speed, bool target = false, bool useRotation = true)
         {
-            Delay = delay;
-            Spline = spline;
-            SplineMode = splineMode;
-            Speed = speed;
-            Target = target;
+            Delay       = delay;
+            Spline      = spline;
+            SplineMode  = splineMode;
+            Speed       = speed;
+            Target      = target;
             UseRotation = useRotation;
         }
 
@@ -30,11 +26,11 @@ namespace NexusForever.WorldServer.Game.Cinematic
         {
             session.EnqueueMessageEncrypted(new ServerCinematicCameraSpline
             {
-                Delay = Delay,
-                Spline = Spline,
-                SplineMode = SplineMode,
-                Speed = Speed,
-                Target = Target,
+                Delay       = Delay,
+                Spline      = Spline,
+                SplineMode  = SplineMode,
+                Speed       = Speed,
+                Target      = Target,
                 UseRotation = UseRotation
             });
         }

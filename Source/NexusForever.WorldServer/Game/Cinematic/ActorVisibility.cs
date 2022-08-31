@@ -1,9 +1,5 @@
-﻿using NexusForever.WorldServer.Game.Cinematic.Static;
-using NexusForever.WorldServer.Network;
+﻿using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NexusForever.WorldServer.Game.Cinematic
 {
@@ -18,16 +14,16 @@ namespace NexusForever.WorldServer.Game.Cinematic
         {
             Delay = delay;
             Actor = actor;
-            Hide = hide;
+            Hide  = hide;
         }
 
         public void Send(WorldSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicActorVisibility
             {
-                Delay = Delay,
-                UnitId = Actor.Id,
-                Hide = Hide,
+                Delay    = Delay,
+                UnitId   = Actor.Id,
+                Hide     = Hide,
                 Unknown0 = Unknown0
             });
         }

@@ -1,9 +1,7 @@
-﻿using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using NexusForever.WorldServer.Game.Entity;
+using NexusForever.WorldServer.Network.Message.Model;
 
 namespace NexusForever.WorldServer.Game.Cinematic
 {
@@ -15,10 +13,10 @@ namespace NexusForever.WorldServer.Game.Cinematic
         public uint Duration { get; set; }
         public ushort InitialFlags { get; set; }
         public ushort InitialCancelMode { get; set; }
-        public Dictionary</* Id */ uint, Actor> Actors { get; } = new Dictionary<uint, Actor>();
-        public Dictionary</* Delay */ uint, /* TextId */ uint> Texts { get; } = new Dictionary<uint, uint>();
-        public Dictionary<string, List<IKeyframeAction>> Keyframes { get; } = new Dictionary<string, List<IKeyframeAction>>();
-        public List<Camera> Cameras { get; } = new List<Camera>();
+        public Dictionary</* Id */ uint, Actor> Actors { get; } = new();
+        public Dictionary</* Delay */ uint, /* TextId */ uint> Texts { get; } = new();
+        public Dictionary<string, List<IKeyframeAction>> Keyframes { get; } = new();
+        public List<Camera> Cameras { get; } = new();
         public Transition StartTransition { get; protected set; }
         public Transition EndTransition { get; protected set; }
 
@@ -48,8 +46,8 @@ namespace NexusForever.WorldServer.Game.Cinematic
             player.AddPacketToSend(new ServerCinematic0211
             {
                 Unknown0 = 0,
-                UnitId = player.Id,
-                UnitId1 = actor.Id,
+                UnitId   = player.Id,
+                UnitId1  = actor.Id,
                 Unknown3 = unknown3
             });
             playerActor = player;
@@ -87,18 +85,16 @@ namespace NexusForever.WorldServer.Game.Cinematic
         {
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicNotify
             {
-                Flags = InitialFlags,
-                Cancel = InitialCancelMode,
-                Duration = Duration,
+                Flags       = InitialFlags,
+                Cancel      = InitialCancelMode,
+                Duration    = Duration,
                 CinematicId = CinematicId
             });
-            if (StartTransition != null)
-                StartTransition.Send(Player.Session);
+            StartTransition?.Send(Player.Session);
 
             Play();
 
-            if (EndTransition != null)
-                EndTransition.Send(Player.Session);
+            EndTransition?.Send(Player.Session);
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicNotify
             {
                 Duration = Duration
@@ -121,11 +117,13 @@ namespace NexusForever.WorldServer.Game.Cinematic
         protected void SendTexts()
         {
             foreach ((uint delay, uint textId) in Texts)
+            {
                 Player.Session.EnqueueMessageEncrypted(new ServerCinematicText
                 {
-                    Delay = delay,
+                    Delay  = delay,
                     TextId = textId
                 });
+            }
         }
 
         /// <summary>
@@ -133,8 +131,7 @@ namespace NexusForever.WorldServer.Game.Cinematic
         /// </summary>
         protected void SendPlayerActor()
         {
-            if (playerActor != null)
-                playerActor.SendInitialPackets(Player.Session);
+            playerActor?.SendInitialPackets(Player.Session);
 
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicShowAnimate
             {

@@ -1,10 +1,7 @@
-﻿using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Network.Message.Model;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
+using NexusForever.WorldServer.Game.Entity;
 
 namespace NexusForever.WorldServer.Game.Cinematic.Cinematics
 {
@@ -15,13 +12,13 @@ namespace NexusForever.WorldServer.Game.Cinematic.Cinematics
 
         public EverstarGroveOnCreate(Player player)
         {
-            Player = player;
-            Duration = 15333;
-            InitialFlags = 7;
+            Player            = player;
+            Duration          = 15333;
+            InitialFlags      = 7;
             InitialCancelMode = 2;
-            CinematicId = 35;
-            StartTransition = new Transition(0, 1, 2, 1000, 0, 1500);
-            EndTransition = new Transition(14333, 0, 0, 1000, 0, 1000);
+            CinematicId       = 35;
+            StartTransition   = new Transition(0, 1, 2, 1000, 0, 1500);
+            EndTransition     = new Transition(14333, 0, 0, 1000, 0, 1000);
 
             Setup();
         }
@@ -32,11 +29,12 @@ namespace NexusForever.WorldServer.Game.Cinematic.Cinematics
             SetupTexts();
             SetupCamera();
 
-            List<IKeyframeAction> ScreenEffects = new List<IKeyframeAction>();
-            ScreenEffects.Add(new VisualEffect(21853, Player.Guid));
-            ScreenEffects.Add(new VisualEffect(24610, Player.Guid));
-            ScreenEffects.Add(new VisualEffect(24612, Player.Guid));
-            Keyframes.Add("ScreenEffects", ScreenEffects);
+            Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
+            {
+                new VisualEffect(21853, Player.Guid),
+                new VisualEffect(24610, Player.Guid),
+                new VisualEffect(24612, Player.Guid)
+            });
         }
 
         private void SetupActors()

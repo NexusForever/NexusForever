@@ -16,7 +16,6 @@ using NexusForever.Shared.GameTable.Static;
 using NexusForever.Shared.Network;
 using NexusForever.WorldServer.Game.Achievement;
 using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.WorldServer.Game.Cinematic;
 using NexusForever.WorldServer.Game.Cinematic.Cinematics;
 using NexusForever.WorldServer.Game.Entity.Network;
 using NexusForever.WorldServer.Game.Entity.Network.Model;
