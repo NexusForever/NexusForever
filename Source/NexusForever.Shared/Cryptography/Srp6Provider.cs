@@ -34,14 +34,14 @@ namespace NexusForever.Shared.Cryptography
         public static byte[] GenerateVerifier(byte[] s, string I, string p)
         {
             using SHA256 sha256 = SHA256.Create();
-            byte[] P = sha256.ComputeHash(Encoding.ASCII.GetBytes($"{I}:{p}"));
+            byte[] P = sha256.ComputeHash(Encoding.UTF8.GetBytes($"{I}:{p}"));
             BigInteger x = Hash(true, new BigInteger(s, true), new BigInteger(P, true));
             return BigInteger.ModPow(g, x, N).ToByteArray();
         }
 
         public Srp6Provider(string I, byte[] s, byte[] v)
         {
-            this.I = Encoding.ASCII.GetBytes(I);
+            this.I = Encoding.UTF8.GetBytes(I);
             this.s = new BigInteger(s, true);
             this.v = new BigInteger(v, true);
         }
