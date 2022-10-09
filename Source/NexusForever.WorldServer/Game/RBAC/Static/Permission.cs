@@ -6,7 +6,6 @@
     /// </remarks>
     /// <remarks>
     /// IDs to reuse:
-    /// 38
     /// </remarks>
     public enum Permission
     {
@@ -102,6 +101,7 @@
         Item                        = 59,
         ItemAdd                     = 6,
         ItemLookup                  = 92,
+        ItemInfo                    = 38,
 
         // movement
         Movement                    = 62,

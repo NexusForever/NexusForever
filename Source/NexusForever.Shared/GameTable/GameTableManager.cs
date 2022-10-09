@@ -278,7 +278,9 @@ namespace NexusForever.Shared.GameTable
         [GameData]
         public GameTable<Item2TypeEntry> Item2Type { get; private set; }
 
+        [GameData]
         public GameTable<ItemBudgetEntry> ItemBudget { get; private set; }
+
         public GameTable<ItemColorSetEntry> ItemColorSet { get; private set; }
 
         [GameData]

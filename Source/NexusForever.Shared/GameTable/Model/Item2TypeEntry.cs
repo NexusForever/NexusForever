@@ -1,3 +1,5 @@
+using NexusForever.Shared.GameTable.Static;
+
 namespace NexusForever.Shared.GameTable.Model
 {
     public class Item2TypeEntry
@@ -7,7 +9,7 @@ namespace NexusForever.Shared.GameTable.Model
         public uint ItemSlotId;
         public uint SoundEventIdLoot;
         public uint SoundEventIdEquip;
-        public uint Flags;
+        public SecondaryItemFlags Flags;
         public float VendorMultiplier;
         public float TurninMultiplier;
         public uint Item2CategoryId;
