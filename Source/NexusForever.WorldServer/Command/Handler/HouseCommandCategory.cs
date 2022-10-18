@@ -87,7 +87,7 @@ namespace NexusForever.WorldServer.Command.Handler
             IMapLock mapLock = MapLockManager.Instance.GetResidenceLock(residence.Parent ?? residence);
 
             IResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(residence.PropertyInfoId);
-            target.Rotation = entrance.Rotation.ToEulerDegrees();
+            target.Rotation = entrance.Rotation.ToEuler();
             target.TeleportTo(entrance.Entry, entrance.Position, mapLock);
         }
     }

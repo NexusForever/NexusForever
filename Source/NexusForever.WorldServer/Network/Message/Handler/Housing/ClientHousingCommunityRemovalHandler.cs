@@ -60,7 +60,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             // shouldn't need to check for existing instance
             // individual residence instances are unloaded when transfered to a community
             // if for some reason the instance is still unloading the residence will be initalised again after
-            session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
+            session.Player.Rotation = entrance.Rotation.ToEuler();
             session.Player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
         }
     }

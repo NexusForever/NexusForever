@@ -53,7 +53,7 @@ namespace NexusForever.Game.Guild
 
                         IMapLock mapLock = MapLockManager.Instance.GetResidenceLock(Residence);
 
-                        player.Rotation = entrance.Rotation.ToEulerDegrees();
+                        player.Rotation = entrance.Rotation.ToEuler();
                         player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
                     }
                     else
@@ -64,7 +64,7 @@ namespace NexusForever.Game.Guild
                         // otherwise they will be moved to the new instance during the unload
                         if (residence.Map != player.Map)
                         {
-                            player.Rotation = entrance.Rotation.ToEulerDegrees();
+                            player.Rotation = entrance.Rotation.ToEuler();
                             player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
                         }
 

@@ -58,7 +58,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
                 IMapLock mapLock = MapLockManager.Instance.GetResidenceLock(community.Residence);
 
-                session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
+                session.Player.Rotation = entrance.Rotation.ToEuler();
                 session.Player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
             }
             else
@@ -69,7 +69,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                 // otherwise they will be moved to the new instance during the unload
                 if (residence.Map != session.Player.Map)
                 {
-                    session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
+                    session.Player.Rotation = entrance.Rotation.ToEuler();
                     session.Player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
                 }
 
