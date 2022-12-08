@@ -8,6 +8,8 @@ using NexusForever.Shared;
 using NexusForever.Shared.GameTable;
 using NexusForever.Shared.GameTable.Model;
 using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Prerequisite;
+using NexusForever.WorldServer.Game.Prerequisite.Static;
 using NexusForever.WorldServer.Game.Spell;
 using NexusForever.WorldServer.Game.Spell.Static;
 using NexusForever.WorldServer.Network.Message.Model;
@@ -60,19 +62,22 @@ namespace NexusForever.WorldServer.Game.Entity
                 spells.Add(spellModel.Spell4BaseId, new CharacterSpell(owner, spellModel, spellBaseInfo, item));
             }
 
-            GrantSpells();
-
             for (byte i = 0; i < ActionSet.MaxActionSets; i++)
             {
                 actionSets[i] = new ActionSet(i, player);
 
-                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
-                    .Where(c => c.SpecIndex == i))
-                    actionSets[i].AddShortcut(shortcutModel);
-
                 foreach (CharacterActionSetAmpModel ampModel in model.ActionSetAmp
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddAmp(ampModel);
+            }
+
+            GrantSpells();
+
+            for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+            {
+                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
+                    .Where(c => c.SpecIndex == i))
+                    actionSets[i].AddShortcut(shortcutModel);
             }
 
             activeActionSet = model.ActiveSpec;
@@ -85,9 +90,18 @@ namespace NexusForever.WorldServer.Game.Entity
                 .Where(s => s.ClassId == (byte)player.Class && s.CharacterLevel <= player.Level)
                 .OrderBy(s => s.CharacterLevel))
             {
-                //FIXME
                 if (spellLevel.PrerequisiteId > 0)
-                    continue;
+                {
+                    PrerequisiteEntry entry = GameTableManager.Instance.Prerequisite.GetEntry(spellLevel.PrerequisiteId);
+                    // Override PrerequisiteManager as it relies on SpellManager, which we are still initializing
+                    if (entry.PrerequisiteTypeId[0] == (uint)PrerequisiteType.Amp)
+                    {
+                        if (!IsAmpEnabled((ushort)entry.ObjectId[0]))
+                            continue;
+                    }
+                    else if (!PrerequisiteManager.Instance.Meets(player, spellLevel.PrerequisiteId))
+                        continue;
+                }
 
                 Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevel.Spell4Id);
                 if (spell4Entry == null)
@@ -256,6 +270,11 @@ namespace NexusForever.WorldServer.Game.Entity
             ActionSet actionSet = GetActionSet(ActiveActionSet);
             ActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.Spell, spell4BaseId);
             return shortcut?.Tier ?? spell.Tier;
+        }
+
+        public bool IsAmpEnabled(ushort ampId)
+        {
+            return GetActionSet(ActiveActionSet).GetAmp(ampId) != null;
         }
 
         public List<CharacterSpell> GetPets()
