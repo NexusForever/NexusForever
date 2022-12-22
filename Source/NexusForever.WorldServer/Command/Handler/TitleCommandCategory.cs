@@ -1,7 +1,7 @@
-﻿using NexusForever.Shared.GameTable;
+﻿using NexusForever.Game.Entity;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.GameTable;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

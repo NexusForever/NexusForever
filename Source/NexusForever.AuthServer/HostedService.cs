@@ -2,12 +2,14 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using NexusForever.AuthServer.Network;
+using NexusForever.Database;
+using NexusForever.Database.Configuration.Model;
+using NexusForever.Game.Server;
+using NexusForever.Network;
+using NexusForever.Network.Configuration.Model;
+using NexusForever.Network.Message;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Game;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
 using NLog;
 
 namespace NexusForever.AuthServer
@@ -23,8 +25,7 @@ namespace NexusForever.AuthServer
         {
             log.Info("Starting...");
 
-            ConfigurationManager<AuthServerConfiguration>.Instance.Initialise("AuthServer.json");
-            DatabaseManager.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Database);
+            DatabaseManager.Instance.Initialise(SharedConfiguration.Instance.Get<DatabaseConfig>());
 
             ServerManager.Instance.Initialise();
 
@@ -36,7 +37,7 @@ namespace NexusForever.AuthServer
 
             // initialise network and command managers last to make sure the rest of the server is ready for invoked handlers
             MessageManager.Instance.Initialise();
-            NetworkManager<AuthSession>.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Network);
+            NetworkManager<AuthSession>.Instance.Initialise(SharedConfiguration.Instance.Get<NetworkConfig>());
 
             log.Info("Started!");
             return Task.CompletedTask;

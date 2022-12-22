@@ -6,12 +6,12 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nexus.Archive;
+using NexusForever.GameTable.Model;
+using NexusForever.IO;
+using NexusForever.IO.Area;
+using NexusForever.IO.Map;
 using NexusForever.MapGenerator.GameTable;
-using NexusForever.MapGenerator.IO.Area;
-using NexusForever.MapGenerator.IO.Map;
 using NexusForever.Shared;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.IO;
 using NLog;
 
 namespace NexusForever.MapGenerator

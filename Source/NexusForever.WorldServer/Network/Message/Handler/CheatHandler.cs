@@ -1,9 +1,10 @@
 using System;
-using NexusForever.Shared.Network.Message;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler

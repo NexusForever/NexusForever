@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Network;
+using NexusForever.Game.Social;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Social;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Static;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Static;
-using NexusForever.WorldServer.Network.Message.Model;
 using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler

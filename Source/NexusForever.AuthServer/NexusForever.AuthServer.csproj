@@ -13,7 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
+    <ProjectReference Include="..\NexusForever.Database.Auth\NexusForever.Database.Auth.csproj" />
+    <ProjectReference Include="..\NexusForever.GameTable\NexusForever.GameTable.csproj" />
+    <ProjectReference Include="..\NexusForever.Game\NexusForever.Game.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.Auth\NexusForever.Network.Auth.csproj" />
   </ItemGroup>
 
   <ItemGroup>

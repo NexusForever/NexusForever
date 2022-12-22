@@ -1,10 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using NexusForever.Database;
+using NexusForever.Database.Configuration.Model;
+using NexusForever.Network;
+using NexusForever.Network.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Network;
 using NexusForever.StsServer.Network;
 using NexusForever.StsServer.Network.Message;
 using NLog;
@@ -22,8 +24,7 @@ namespace NexusForever.StsServer
         {
             log.Info("Starting...");
 
-            ConfigurationManager<StsServerConfiguration>.Instance.Initialise("StsServer.json");
-            DatabaseManager.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database);
+            DatabaseManager.Instance.Initialise(SharedConfiguration.Instance.Get<DatabaseConfig>());
 
             // initialise world after all assets have loaded but before any network handlers might be invoked
             WorldManager.Instance.Initialise(lastTick =>
@@ -33,7 +34,7 @@ namespace NexusForever.StsServer
 
             // initialise network manager last to make sure the rest of the server is ready for invoked handlers
             MessageManager.Instance.Initialise();
-            NetworkManager<StsSession>.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Network);
+            NetworkManager<StsSession>.Instance.Initialise(SharedConfiguration.Instance.Get<NetworkConfig>());
 
             log.Info("Started!");
             return Task.CompletedTask;

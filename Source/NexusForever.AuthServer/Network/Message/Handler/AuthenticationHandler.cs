@@ -1,14 +1,15 @@
-﻿using System.Linq;
-using NexusForever.AuthServer.Network.Message.Model;
-using NexusForever.AuthServer.Network.Message.Static;
+﻿using System;
+using System.Linq;
+using NexusForever.Cryptography;
+using NexusForever.Database.Auth;
+using NexusForever.Database;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Shared;
-using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Game;
+using NexusForever.Game.Server;
+using NexusForever.Network.Auth.Model;
+using NexusForever.Network.Auth.Static;
+using NexusForever.Network.Message;
 using NexusForever.Shared.Game.Events;
-using NexusForever.Shared.Network.Message;
-using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
+using NetworkMessage = NexusForever.Network.Message.Model.Shared.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Handler
 {
@@ -31,10 +32,8 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 return;
             }
 
-            string gameToken = helloAuth.GameToken.Guid
-                .ToByteArray()
-                .ToHexString();
-            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountByGameTokenAsync(helloAuth.Email, gameToken),
+            string gameToken = Convert.ToHexString(helloAuth.GameToken.Guid.ToByteArray());
+            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.GetDatabase<AuthDatabase>().GetAccountByGameTokenAsync(helloAuth.Email, gameToken),
                 account =>
             {
                 if (account == null)
@@ -64,7 +63,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 });
 
                 byte[] sessionKey = RandomProvider.GetBytes(16u);
-                session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountSessionKey(account, sessionKey.ToHexString()),
+                session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<AuthDatabase>().UpdateAccountSessionKey(account, Convert.ToHexString(sessionKey)),
                     () =>
                 {
                     session.EnqueueMessageEncrypted(new ServerRealmInfo

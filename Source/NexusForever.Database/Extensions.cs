@@ -1,14 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using NexusForever.Database.Configuration;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using NexusForever.Database.Configuration.Model;
 
 namespace NexusForever.Database
 {
     public static class Extensions
     {
-        public static DbContextOptionsBuilder UseConfiguration(this DbContextOptionsBuilder optionsBuilder, IDatabaseConfig databaseConfiguration, DatabaseType databaseType)
+        public static DbContextOptionsBuilder UseConfiguration(this DbContextOptionsBuilder optionsBuilder, IConnectionString connectionString)
         {
-            var connectionString = databaseConfiguration.GetConnectionString(databaseType);
             switch (connectionString.Provider)
             {
                 case DatabaseProvider.MySql:

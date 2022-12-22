@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Entity.Movement.Generator;
+using NexusForever.Game.Static.Entity.Movement.Spline;
+using NexusForever.Game.Static.RBAC;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Movement.Generator;
-using NexusForever.WorldServer.Game.Entity.Movement.Spline.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

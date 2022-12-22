@@ -6,20 +6,21 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NLog;
 
 namespace NexusForever.Database.Auth
 {
-    public class AuthDatabase
+    [Database(DatabaseType.Auth)]
+    public class AuthDatabase : IDatabase
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly IDatabaseConfig config;
+        private IConnectionString config;
 
-        public AuthDatabase(IDatabaseConfig config)
+        public void Initialise(IConnectionString connectionString)
         {
-            this.config = config;
+            config = connectionString;
         }
 
         public async Task Save(Action<AuthContext> action)

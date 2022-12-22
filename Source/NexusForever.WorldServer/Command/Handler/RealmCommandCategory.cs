@@ -1,10 +1,11 @@
 ﻿using System;
-using NexusForever.Shared.Network;
+using NexusForever.Game;
+using NexusForever.Game.Network;
+using NexusForever.Game.Social;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Social;
+using NexusForever.Network;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Static;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -47,9 +48,9 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("New message of the day for the realm.")]
             string message)
         {
-            WorldServer.RealmMotd = message;
+            RealmContext.Instance.Motd = message;
             foreach (WorldSession session in NetworkManager<WorldSession>.Instance)
-                GlobalChatManager.Instance.SendMessage(session, WorldServer.RealmMotd, "MOTD", ChatChannelType.Realm);
+                GlobalChatManager.Instance.SendMessage(session, RealmContext.Instance.Motd, "MOTD", ChatChannelType.Realm);
         }
 
         [Command(Permission.RealmMaxPlayers, "Set the maximum players allowed to connect.", "max")]

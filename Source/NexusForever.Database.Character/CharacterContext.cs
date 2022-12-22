@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 
 namespace NexusForever.Database.Character
 {
@@ -45,9 +45,9 @@ namespace NexusForever.Database.Character
         public DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public DbSet<ResidencePlotModel> ResidencePlot { get; set; }
 
-        private readonly IDatabaseConfig config;
+        private readonly IConnectionString config;
 
-        public CharacterContext(IDatabaseConfig config)
+        public CharacterContext(IConnectionString config)
         {
             this.config = config;
         }
@@ -55,7 +55,7 @@ namespace NexusForever.Database.Character
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(config, DatabaseType.Character);
+                optionsBuilder.UseConfiguration(config);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,5 +1,6 @@
-﻿using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Network.Message.Model;
+﻿using NexusForever.Game.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {

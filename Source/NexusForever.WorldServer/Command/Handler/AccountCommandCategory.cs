@@ -1,10 +1,12 @@
-﻿using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database;
+﻿using NexusForever.Cryptography;
+using NexusForever.Database;
+using NexusForever.Database.Auth;
+using NexusForever.Game.Configuration.Model;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -17,19 +19,19 @@ namespace NexusForever.WorldServer.Command.Handler
             string email,
             [Parameter("Password for the new account")]
             string password,
-            [Parameter("Role", ParameterFlags.Optional)]
-            uint? role = null)
+            [Parameter("Role", ParameterFlags.Optional, typeof(EnumParameterConverter<Role>))]
+            Role? role = null)
         {
-            if (DatabaseManager.Instance.AuthDatabase.AccountExists(email))
+            if (DatabaseManager.Instance.GetDatabase<AuthDatabase>().AccountExists(email))
             {
                 context.SendMessage("Account with that username already exists. Please try another.");
                 return;
             }
 
-            role ??= (ConfigurationManager<WorldServerConfiguration>.Instance.Config.DefaultRole ?? (uint)Role.Player);
+            role ??= (SharedConfiguration.Instance.Get<RealmConfig>().DefaultRole ?? Role.Player);
 
             (string salt, string verifier) = PasswordProvider.GenerateSaltAndVerifier(email, password);
-            DatabaseManager.Instance.AuthDatabase.CreateAccount(email, salt, verifier, (uint)role);
+            DatabaseManager.Instance.GetDatabase<AuthDatabase>().CreateAccount(email, salt, verifier, (uint)role);
 
             context.SendMessage($"Account {email} created successfully");
         }
@@ -39,7 +41,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Email address of the account to delete")]
             string email)
         {
-            if (DatabaseManager.Instance.AuthDatabase.DeleteAccount(email))
+            if (DatabaseManager.Instance.GetDatabase<AuthDatabase>().DeleteAccount(email))
                 context.SendMessage($"Account {email} successfully removed!");
             else
                 context.SendMessage($"Cannot find account with Email: {email}");

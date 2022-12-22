@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using NexusForever.ClientConnector.Configuration;
 using NexusForever.ClientConnector.Native;
+using NexusForever.Shared.Configuration;
 
 namespace NexusForever.ClientConnector
 {
@@ -44,8 +45,8 @@ namespace NexusForever.ClientConnector
                 File.WriteAllText(jsonFile, JsonConvert.SerializeObject(clientConfig));
             }
 
-            ConfigurationManager<ClientConfiguration>.Initialise(jsonFile);
-            LaunchClient(ConfigurationManager<ClientConfiguration>.Config);
+            SharedConfiguration.Instance.Initialise<ClientConfiguration>(jsonFile);
+            LaunchClient(SharedConfiguration.Instance.Get<ClientConfiguration>());
         }
 
         private static void LaunchClient(ClientConfiguration config)

@@ -1,15 +1,16 @@
 using System.Linq;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Network;
-using NexusForever.WorldServer.Game.Entity.Network.Command;
-using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.WorldServer.Game.Quest.Static;
-using NexusForever.WorldServer.Game;
+using NexusForever.Game;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Network;
+using NexusForever.Game.Static.Quest;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.Network;
+using NexusForever.Network.Message;
 using NLog;
+using NexusForever.Network.World.Entity.Command;
+using NexusForever.Network.World.Entity;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {

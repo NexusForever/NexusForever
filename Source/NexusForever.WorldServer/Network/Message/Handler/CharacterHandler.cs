@@ -4,39 +4,40 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Shared;
+using NexusForever.Cryptography;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Game;
+using NexusForever.Game;
+using NexusForever.Game.CharacterCache;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Guild;
+using NexusForever.Game.Housing;
+using NexusForever.Game.Map;
+using NexusForever.Game.Network;
+using NexusForever.Game.Server;
+using NexusForever.Game.Spell;
+using NexusForever.Game.Static;
+using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Map;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Reputation;
+using NexusForever.Game.Static.Spell;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared.Game.Events;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Account.Static;
-using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Guild;
-using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Map;
-using NexusForever.WorldServer.Game.Map.Static;
-using NexusForever.WorldServer.Game.Reputation.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Game.Spell.Static;
-using NexusForever.WorldServer.Game.Static;
-using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
-using NexusForever.WorldServer.Network.Message.Static;
 using NLog;
-using CostumeEntity = NexusForever.WorldServer.Game.Entity.Costume;
-using Item = NexusForever.WorldServer.Game.Entity.Item;
-using Residence = NexusForever.WorldServer.Game.Housing.Residence;
-using NetworkMessage = NexusForever.Shared.Network.Message.Model.Shared.Message;
+using CostumeEntity = NexusForever.Game.Entity.Costume;
+using Item = NexusForever.Game.Entity.Item;
+using Residence = NexusForever.Game.Housing.Residence;
+using NetworkMessage = NexusForever.Network.Message.Model.Shared.Message;
+using NexusForever.Database.Auth;
+using NexusForever.Database;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -52,7 +53,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             foreach (ServerInfo server in ServerManager.Instance.Servers)
             {
                 RealmStatus status = RealmStatus.Up;
-                if (!server.IsOnline && server.Model.Id != WorldServer.RealmId)
+                if (!server.IsOnline && server.Model.Id != RealmContext.Instance.RealmId)
                     status = RealmStatus.Down;
 
                 serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
@@ -89,7 +90,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 throw new InvalidPacketValueException();
 
             // clicking back or selecting the current realm also triggers this packet, client crashes if we don't ignore it
-            if (server.Model.Id == WorldServer.RealmId)
+            if (server.Model.Id == RealmContext.Instance.RealmId)
                 return;
 
             // TODO: Return proper error packet if server is not online
@@ -101,7 +102,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             byte[] sessionKeyBytes  = RandomProvider.GetBytes(16u);
             string sessionKeyString = BitConverter.ToString(sessionKeyBytes).Replace("-", "");
-            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountSessionKey(session.Account, sessionKeyString),
+            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<AuthDatabase>().UpdateAccountSessionKey(session.Account, sessionKeyString),
                 () =>
             {
                 session.EnqueueMessageEncrypted(new ServerNewRealm
@@ -132,7 +133,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
         public static void SendCharacterListPackets(WorldSession session)
         {
-            session.Events.EnqueueEvent(new TaskGenericEvent<List<CharacterModel>>(DatabaseManager.Instance.CharacterDatabase.GetCharacters(session.Account.Id),
+            session.Events.EnqueueEvent(new TaskGenericEvent<List<CharacterModel>>(DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetCharacters(session.Account.Id),
                 characters =>
             {
                 byte maxCharacterLevelAchieved = 1;
@@ -165,7 +166,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 var serverCharacterList = new ServerCharacterList
                 {
-                    RealmId                        = WorldServer.RealmId,
+                    ServerTime                     = RealmContext.Instance.GetServerTime(),
+                    RealmId                        = RealmContext.Instance.RealmId,
                     // no longer used as replaced by entitlements but retail server still used to send this
                     AdditionalCount                = characterCount,
                     AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)(characterSlots - characterCount)),
@@ -186,7 +188,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Level             = character.Level,
                         WorldId           = character.WorldId,
                         WorldZoneId       = character.WorldZoneId,
-                        RealmId           = WorldServer.RealmId,
+                        RealmId           = RealmContext.Instance.RealmId,
                         Path              = (byte)character.ActivePath,
                         LastLoggedOutDays = (float)DateTime.UtcNow.Subtract(character.LastOnline ?? DateTime.UtcNow).TotalDays * -1f
                     };
@@ -264,7 +266,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             CharacterModifyResult? GetResult()
             {
                 // TODO: validate name and path
-                if (DatabaseManager.Instance.CharacterDatabase.CharacterNameExists(characterCreate.Name))
+                if (DatabaseManager.Instance.GetDatabase<CharacterDatabase>().CharacterNameExists(characterCreate.Name))
                     return CharacterModifyResult.CreateFailed_UniqueName;
 
                 CharacterCreationEntry creationEntry = GameTableManager.Instance.CharacterCreation.GetEntry(characterCreate.CharacterCreationId);
@@ -436,7 +438,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 });
 
                 // TODO: actually error check this
-                session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.CharacterDatabase.Save(c =>
+                session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<CharacterDatabase>().Save(c =>
                     {
                         c.Character.Add(character);
                         foreach (Item item in items)
@@ -547,7 +549,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 entity.Property(e => e.Name).IsModified = true;
             }
 
-            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.CharacterDatabase.Save(Save),
+            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<CharacterDatabase>().Save(Save),
                 () =>
             {
                 session.CanProcessPackets = true;

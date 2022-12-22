@@ -1,9 +1,11 @@
 using System;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NexusForever.Game;
+using NexusForever.Game.CharacterCache;
+using NexusForever.Game.Network;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -36,7 +38,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     ResultCode = 0,
                     Identity = new TargetPlayerIdentity
                     {
-                        RealmId = WorldServer.RealmId,
+                        RealmId = RealmContext.Instance.RealmId,
                         CharacterId = character.CharacterId
                     },
                     Name = character.Name,
@@ -71,7 +73,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 TargetPlayerIdentity = new TargetPlayerIdentity
                 {
-                    RealmId = WorldServer.RealmId,
+                    RealmId = RealmContext.Instance.RealmId,
                     CharacterId = session.Player.CharacterId
                 },
                 MinRandom = randomRoll.MinRandom,

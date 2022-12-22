@@ -1,9 +1,10 @@
 ﻿using System;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Account.Static;
-using NexusForever.WorldServer.Game.Static;
-using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.Game.Network;
+using NexusForever.Game.Static.Account;
+using NexusForever.GameTable;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {

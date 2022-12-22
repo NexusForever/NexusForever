@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Logging;
+using NexusForever.Shared.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
 
@@ -24,6 +25,8 @@ namespace NexusForever.AuthServer
         private static void Main()
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+
+            SharedConfiguration.Instance.Initialise<AuthServerConfiguration>("AuthServer.json");
 
             IHostBuilder builder = new HostBuilder()
                 .ConfigureLogging(lb =>

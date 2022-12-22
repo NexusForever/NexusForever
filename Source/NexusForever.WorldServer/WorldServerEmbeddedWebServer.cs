@@ -9,7 +9,7 @@ namespace NexusForever.WorldServer
     {
         public static IWebHostBuilder Build(IWebHostBuilder builder)
         {
-            builder.UseConfiguration(SharedConfiguration.Configuration)
+            builder.UseConfiguration(SharedConfiguration.Instance.Configuration)
                 .UseStartup<WorldServerStartup>()
                 .ConfigureLogging(logging =>
                 {

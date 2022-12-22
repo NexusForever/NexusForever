@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 
 namespace NexusForever.Database.Auth
 {
@@ -20,9 +20,9 @@ namespace NexusForever.Database.Auth
         public DbSet<ServerModel> Server { get; set; }
         public DbSet<ServerMessageModel> ServerMessage { get; set; }
 
-        private readonly IDatabaseConfig config;
+        private readonly IConnectionString config;
 
-        public AuthContext(IDatabaseConfig config)
+        public AuthContext(IConnectionString config)
         {
             this.config = config;
         }
@@ -30,7 +30,7 @@ namespace NexusForever.Database.Auth
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(config, DatabaseType.Auth);
+                optionsBuilder.UseConfiguration(config);
 
             optionsBuilder.EnableSensitiveDataLogging();
         }

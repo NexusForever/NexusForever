@@ -1,0 +1,43 @@
+﻿namespace NexusForever.Game.Static.Entity
+{
+    public enum EntityType
+    {
+        NonPlayer          = 0,
+        Chest              = 1,
+        Destructible       = 2,
+        Vehicle            = 3,
+        Door               = 4,
+        HarvestUnit        = 5,
+        CorpseUnit         = 6,
+        Mount              = 7,
+        CollectableUnit    = 8,
+        Taxi               = 9,
+        Simple             = 10,
+        Platform           = 11,
+        MailBox            = 12,
+        AiTurret           = 13,
+        InstancePortal     = 14,
+        Plug               = 15,
+        Residence          = 16,
+        StructuredPlug     = 17,
+        PinataLoot         = 18,
+        BindPoint          = 19,
+        Player             = 20,
+        Hidden             = 21,
+        Trigger            = 22,
+        Ghost              = 23,
+        Pet                = 24,
+        EsperPet           = 25,
+        WorldUnit          = 26,
+        ScannerUnit        = 27,
+        Camera             = 28,
+        Trap               = 29,
+        Destructibledoor   = 30,
+        Pickup             = 31,
+        SimpleCollidable   = 32,
+        HousingMannequin   = 33,
+        HousingHarvestPlug = 34,
+        HousingPlant       = 35,
+        Lockbox            = 36
+    }
+}

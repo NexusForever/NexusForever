@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Immutable;
-using NexusForever.Shared.GameTable.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Static;
-using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Social;
+using NexusForever.Game.Static;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Social;
 
 namespace NexusForever.WorldServer.Command.Context
 {

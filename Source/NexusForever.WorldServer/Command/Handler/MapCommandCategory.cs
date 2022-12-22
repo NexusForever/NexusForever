@@ -1,9 +1,9 @@
-﻿using NexusForever.WorldServer.Command.Context;
+﻿using NexusForever.Game.Entity;
+using NexusForever.Game.Map;
+using NexusForever.Game.Static.Map;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Map;
-using NexusForever.WorldServer.Game.Map.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

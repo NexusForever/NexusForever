@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NexusForever.Shared.GameTable.Model;
+using NexusForever.Game;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Social;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Social;
+using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Message.Static;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

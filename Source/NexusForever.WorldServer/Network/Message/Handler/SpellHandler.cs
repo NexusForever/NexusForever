@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Game.Spell.Static;
-using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Network;
+using NexusForever.Game.Spell;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Spell;
+using NexusForever.GameTable;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {

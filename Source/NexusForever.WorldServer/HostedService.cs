@@ -1,33 +1,38 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using NexusForever.Database;
+using NexusForever.Database.Configuration.Model;
+using NexusForever.Game;
+using NexusForever.Game.Achievement;
+using NexusForever.Game.CharacterCache;
+using NexusForever.Game.Cinematic;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Entity.Movement;
+using NexusForever.Game.Guild;
+using NexusForever.Game.Housing;
+using NexusForever.Game.Map;
+using NexusForever.Game.Network;
+using NexusForever.Game.Prerequisite;
+using NexusForever.Game.Quest;
+using NexusForever.Game.RBAC;
+using NexusForever.Game.Reputation;
+using NexusForever.Game.Server;
+using NexusForever.Game.Social;
+using NexusForever.Game.Spell;
+using NexusForever.Game.Storefront;
+using NexusForever.Game.TextFilter;
+using NexusForever.GameTable;
+using NexusForever.Network;
+using NexusForever.Network.Configuration.Model;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Entity;
+using NexusForever.Network.World.Social;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Game;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
 using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Achievement;
-using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.WorldServer.Game.Cinematic;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Movement;
-using NexusForever.WorldServer.Game.Entity.Network;
-using NexusForever.WorldServer.Game.Guild;
-using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Map;
-using NexusForever.WorldServer.Game.Prerequisite;
-using NexusForever.WorldServer.Game.Quest;
-using NexusForever.WorldServer.Game.RBAC;
-using NexusForever.WorldServer.Game.Reputation;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Game.Storefront;
-using NexusForever.WorldServer.Game.TextFilter;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Handler;
 using NLog;
 
 namespace NexusForever.WorldServer
@@ -42,8 +47,10 @@ namespace NexusForever.WorldServer
         public Task StartAsync(CancellationToken cancellationToken)
         {
             log.Info("Starting...");
-            
-            DatabaseManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
+
+            RealmContext.Instance.Initialise();
+
+            DatabaseManager.Instance.Initialise(SharedConfiguration.Instance.Get<DatabaseConfig>());
             DatabaseManager.Instance.Migrate();
 
             // RBACManager must be initialised before CommandManager
@@ -61,6 +68,7 @@ namespace NexusForever.WorldServer
             GlobalMovementManager.Instance.Initialise();
 
             GlobalCinematicManager.Instance.Initialise();
+            ChatFormatManager.Instance.Initialise();
             GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
             GlobalAchievementManager.Instance.Initialise(); // must be initialised before guilds
             GlobalGuildManager.Instance.Initialise(); // must be initialised before residences
@@ -75,9 +83,12 @@ namespace NexusForever.WorldServer
             GlobalQuestManager.Instance.Initialise();
 
             GlobalStorefrontManager.Instance.Initialise();
-            ServerManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId);
+            ServerManager.Instance.Initialise(RealmContext.Instance.RealmId);
 
             TextFilterManager.Instance.Initialise();
+
+            ShutdownManager.Instance.Initialise(WorldServer.Shutdown);
+            LoginQueueManager.Instance.Initialise(CharacterHandler.SendCharacterListPackets);
 
             // initialise world after all assets have loaded but before any network or command handlers might be invoked
             WorldManager.Instance.Initialise(lastTick =>
@@ -100,7 +111,7 @@ namespace NexusForever.WorldServer
 
             // initialise network and command managers last to make sure the rest of the server is ready for invoked handlers
             MessageManager.Instance.Initialise();
-            NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
+            NetworkManager<WorldSession>.Instance.Initialise(SharedConfiguration.Instance.Get<NetworkConfig>());
 
             CommandManager.Instance.Initialise();
 

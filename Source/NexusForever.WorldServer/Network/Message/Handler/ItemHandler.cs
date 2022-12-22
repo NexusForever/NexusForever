@@ -1,13 +1,14 @@
-﻿using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Prerequisite;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Game.Static;
-using NexusForever.WorldServer.Network.Message.Model;
+﻿using NexusForever.Game.Entity;
+using NexusForever.Game.Network;
+using NexusForever.Game.Prerequisite;
+using NexusForever.Game.Spell;
+using NexusForever.Game.Static.Entity;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -61,7 +62,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 if (itemSpecial.PrerequisiteIdGeneric00 > 0 && !PrerequisiteManager.Instance.Meets(session.Player, itemSpecial.PrerequisiteIdGeneric00))
                 {
-                    session.Player.SendGenericError(Game.Static.GenericError.UnlockItemFailed); // TODO: Confirm right error message.
+                    session.Player.SendGenericError(GenericError.UnlockItemFailed); // TODO: Confirm right error message.
                     return;
                 }
 

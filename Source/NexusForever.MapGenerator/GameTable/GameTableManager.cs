@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using Nexus.Archive;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.Shared;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
 
 namespace NexusForever.MapGenerator.GameTable
 {

@@ -1,20 +1,22 @@
 using System;
-using NexusForever.Shared;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Guild;
-using NexusForever.WorldServer.Game.Guild.Static;
-using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Housing.Static;
-using NexusForever.WorldServer.Game.Map;
-using NexusForever.WorldServer.Game.TextFilter;
-using NexusForever.WorldServer.Game.TextFilter.Static;
-using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NexusForever.Game;
+using NexusForever.Game.CharacterCache;
+using NexusForever.Game.Guild;
+using NexusForever.Game.Housing;
+using NexusForever.Game.Map;
+using NexusForever.Game.Network;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Guild;
+using NexusForever.Game.Static.Housing;
+using NexusForever.Game.Static.TextFilter;
+using NexusForever.Game.TextFilter;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -120,7 +122,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 serverHousingRandomCommunityList.Communities.Add(new ServerHousingRandomCommunityList.Community
                 {
-                    RealmId        = WorldServer.RealmId,
+                    RealmId        = RealmContext.Instance.RealmId,
                     NeighborhoodId = community.NeighbourhoodId,
                     Owner          = community.Owner,
                     Name           = community.Name
@@ -138,7 +140,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 serverHousingRandomResidenceList.Residences.Add(new ServerHousingRandomResidenceList.Residence
                 {
-                    RealmId     = WorldServer.RealmId,
+                    RealmId     = RealmContext.Instance.RealmId,
                     ResidenceId = residence.ResidenceId,
                     Owner       = residence.Owner,
                     Name        = residence.Name
@@ -254,7 +256,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
                 housingPlacedResidencesList.Residences.Add(new ServerHousingPlacedResidencesList.Residence
                 {
-                    RealmId       = WorldServer.RealmId,
+                    RealmId       = RealmContext.Instance.RealmId,
                     ResidenceId   = residenceChild.Residence.Id,
                     PlayerName    = owner ?? "",
                     PropertyIndex = (uint)residenceChild.Residence.PropertyInfoId - 100
@@ -320,7 +322,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 Result      = HousingResult.Success,
                 TargetGuild = new TargetGuild
                 {
-                    RealmId = WorldServer.RealmId,
+                    RealmId = RealmContext.Instance.RealmId,
                     GuildId = community.Id
                 }
             });

@@ -22,28 +22,13 @@ namespace NexusForever.WorldServer
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        /// <summary>
-        /// Internal unique id of the realm.
-        /// </summary>
-        public static ushort RealmId { get; private set; }
-
-        /// <summary>
-        /// Realm message of the day that is shown to players on login.
-        /// </summary>
-        public static string RealmMotd { get; set; }
-
-        private static TimeSpan serverTimeOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
-
         private static readonly CancellationTokenSource cancellationToken = new();
 
         private static async Task Main()
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            // TODO: this really should be refactored
-            ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json");
-            RealmId   = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
-            RealmMotd = ConfigurationManager<WorldServerConfiguration>.Instance.Config.MessageOfTheDay;
+            SharedConfiguration.Instance.Initialise<WorldServerConfiguration>("WorldServer.json");
 
             IHostBuilder builder = new HostBuilder() //Host.CreateDefaultBuilder()
                 // register world server service first since it needs to execute before the web host
@@ -78,14 +63,6 @@ namespace NexusForever.WorldServer
         public static void Shutdown()
         {
             cancellationToken.Cancel();
-        }
-
-        /// <summary>
-        /// Get the current Server Time in FileTime format.
-        /// </summary>
-        public static ulong GetServerTime()
-        {
-            return (ulong)DateTime.UtcNow.Add(serverTimeOffset).ToFileTime();
         }
     }
 }

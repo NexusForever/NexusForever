@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
 
 namespace NexusForever.Database.World
@@ -21,9 +21,9 @@ namespace NexusForever.Database.World
         public DbSet<StoreOfferItemPriceModel> StoreOfferItemPrice { get; set; }
         public DbSet<TutorialModel> Tutorial { get; set; }
 
-        private readonly IDatabaseConfig config;
+        private readonly IConnectionString config;
 
-        public WorldContext(IDatabaseConfig config)
+        public WorldContext(IConnectionString config)
         {
             this.config = config;
         }
@@ -31,7 +31,7 @@ namespace NexusForever.Database.World
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(config, DatabaseType.World);
+                optionsBuilder.UseConfiguration(config);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

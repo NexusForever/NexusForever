@@ -1,14 +1,13 @@
 ﻿using System.Linq;
 using System.Text;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.GameTable.Static;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Static;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Reputation;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Reputation;
-using NexusForever.WorldServer.Game.Reputation.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

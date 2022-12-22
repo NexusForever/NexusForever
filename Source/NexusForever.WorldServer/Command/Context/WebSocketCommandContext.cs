@@ -6,10 +6,10 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NexusForever.Shared.GameTable.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC;
-using NexusForever.WorldServer.Game.RBAC.Static;
+using NexusForever.Game.Entity;
+using NexusForever.Game.RBAC;
+using NexusForever.Game.Static;
+using NexusForever.Game.Static.RBAC;
 using NLog;
 
 namespace NexusForever.WorldServer.Command.Context

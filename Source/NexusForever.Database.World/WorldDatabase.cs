@@ -3,21 +3,22 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
 using NLog;
 
 namespace NexusForever.Database.World
 {
-    public class WorldDatabase
+    [Database(DatabaseType.World)]
+    public class WorldDatabase : IDatabase
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly IDatabaseConfig config;
+        private IConnectionString config;
 
-        public WorldDatabase(IDatabaseConfig config)
+        public void Initialise(IConnectionString connectionString)
         {
-            this.config = config;
+            config = connectionString;
         }
 
         public void Migrate()

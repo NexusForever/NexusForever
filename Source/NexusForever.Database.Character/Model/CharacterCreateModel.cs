@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace NexusForever.Database.Character.Model
+﻿namespace NexusForever.Database.Character.Model
 {
     public class CharacterCreateModel
     {

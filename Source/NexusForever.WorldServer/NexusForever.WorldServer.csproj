@@ -27,17 +27,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Game\NexusForever.Game.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.World\NexusForever.Network.World.csproj" />
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
   </ItemGroup>
-
-  <Import Project="./ExtractGameTableFiles.targets" Condition="$(ExtractGameTables) == 'true'" />
-
-  <Import Project="./GenerateBaseMapFiles.targets" Condition="$(GenerateMapFiles) == 'true'" />
 
   <ItemGroup>
     <None Update="WorldServer.example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Import Project="./ExtractGameTableFiles.targets" Condition="$(ExtractGameTables) == 'true'" />
+
+  <Import Project="./GenerateBaseMapFiles.targets" Condition="$(GenerateMapFiles) == 'true'" />
 
 </Project>

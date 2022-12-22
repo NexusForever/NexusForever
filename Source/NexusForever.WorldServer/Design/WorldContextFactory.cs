@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World;
 using NexusForever.Shared.Configuration;
 
@@ -9,15 +9,8 @@ namespace NexusForever.WorldServer.Design
     {
         public WorldContext CreateDbContext(string[] args)
         {
-            ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json");
-            return new WorldContext(new DatabaseConfig
-            {
-                World = new DatabaseConnectionString
-                {
-                    Provider         = DatabaseProvider.MySql,
-                    ConnectionString = ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database.World.ConnectionString
-                }
-            });
+            SharedConfiguration.Instance.Initialise<WorldServerConfiguration>("WorldServer.json");
+            return new WorldContext(SharedConfiguration.Instance.Get<DatabaseConfig>().World);
         }
     }
 }

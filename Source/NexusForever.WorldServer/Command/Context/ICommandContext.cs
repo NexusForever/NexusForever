@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
-using NexusForever.Shared.GameTable.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Static;
+using NexusForever.Game.Static.RBAC;
 
 namespace NexusForever.WorldServer.Command.Context
 {

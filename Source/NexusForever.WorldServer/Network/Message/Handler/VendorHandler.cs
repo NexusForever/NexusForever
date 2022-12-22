@@ -1,11 +1,12 @@
-﻿using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Network.Message.Model;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Network;
+using NexusForever.Game.Static.Entity;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {

@@ -4,20 +4,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NLog;
 
 namespace NexusForever.Database.Character
 {
-    public class CharacterDatabase
+    [Database(DatabaseType.Character)]
+    public class CharacterDatabase : IDatabase
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly IDatabaseConfig config;
+        private IConnectionString config;
 
-        public CharacterDatabase(IDatabaseConfig config)
+        public void Initialise(IConnectionString connectionString)
         {
-            this.config = config;
+            config = connectionString;
         }
 
         public async Task Save(Action<CharacterContext> action)
