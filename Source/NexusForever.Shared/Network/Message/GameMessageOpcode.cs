@@ -225,6 +225,8 @@ namespace NexusForever.Shared.Network.Message
         ServerItemSwap                  = 0x0568,
         ServerItemMove                  = 0x0569,
         ServerItemError                 = 0x056A,
+        ServerItemModify                = 0x056B,
+        ServerItemModifyGlyphs          = 0x056D,
         BiInputKeySet                   = 0x056F,
         ClientRequestInputKeySet        = 0x0570,
         ClientSetInputKeySet            = 0x0571,
@@ -321,7 +323,11 @@ namespace NexusForever.Shared.Network.Message
         ClientSummonVanityPet           = 0x082F,
         ServerTimeOfDay                 = 0x0845,
         Server0854                      = 0x0854, // crafting schematic
-        Server0856                      = 0x0856, // tradeskills
+        ServerTradeskillList            = 0x0856, // tradeskills
+        ClientItemRuneSocketUnlock      = 0x0859,
+        ClientItemRuneRemove            = 0x085A,
+        ClientItemRuneInsert            = 0x085B,
+        ClientItemRuneSocketReroll      = 0x085C,
         ServerVehiclePassengerAdd       = 0x086F,
         ServerEntityCCStateSet          = 0x087F,
         ServerUnitEnteredCombat         = 0x089A,

@@ -1895,6 +1895,41 @@ namespace NexusForever.Database.Character
                     .HasConstraintName("FK__item_ownerId__character_id");
             });
 
+            modelBuilder.Entity<ItemRuneModel>(entity =>
+            {
+                entity.ToTable("item_rune");
+
+                entity.HasKey(e => new { e.Id, e.Index })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Index)
+                    .HasColumnName("index")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.RuneType)
+                    .HasColumnName("runeType")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RuneItemId)
+                    .HasColumnName("runeItemId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(null);
+
+                entity.HasOne(d => d.Item)
+                    .WithMany(p => p.Runes)
+                    .HasForeignKey(d => d.Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK__itemRune_id__item_id");
+            });
+
             modelBuilder.Entity<ResidenceModel>(entity =>
             {
                 entity.ToTable("residence");

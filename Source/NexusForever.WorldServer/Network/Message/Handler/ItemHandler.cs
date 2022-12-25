@@ -125,5 +125,29 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             session.Player.SupplySatchelManager.MoveToInventory(request.MaterialId, request.Amount);
         }
+
+        [MessageHandler(GameMessageOpcode.ClientItemRuneSocketUnlock)]
+        public static void HandleClientItemUnlockRuneSocket(WorldSession session, ClientItemRuneSocketUnlock unlockRuneSocket)
+        {
+            session.Player.Inventory.RuneSlotUnlock(unlockRuneSocket.Guid, unlockRuneSocket.RuneType, unlockRuneSocket.UseServiceTokens);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientItemRuneSocketReroll)]
+        public static void HandleClientItemRuneSocketReroll(WorldSession session, ClientItemRuneSocketReroll runeSocketReroll)
+        {
+            session.Player.Inventory.RuneSlotReroll(runeSocketReroll.Guid, runeSocketReroll.SocketIndex, runeSocketReroll.RuneType);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientItemRuneInsert)]
+        public static void HandleClickItemRuneInsert(WorldSession session, ClientItemRuneInsert runeInsert)
+        {
+            session.Player.Inventory.RuneInsert(runeInsert.Guid, runeInsert.Glyphs.ToArray());
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientItemRuneRemove)]
+        public static void HandleClientItemRuneRemove(WorldSession session, ClientItemRuneRemove runeRemove)
+        {
+            session.Player.Inventory.RuneRemove(runeRemove.Guid, runeRemove.SocketIndex, runeRemove.Recover, runeRemove.UseServiceTokens);
+        }
     }
 }

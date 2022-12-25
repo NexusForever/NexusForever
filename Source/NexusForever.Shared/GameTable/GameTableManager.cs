@@ -290,10 +290,16 @@ namespace NexusForever.Shared.GameTable
         public GameTable<ItemImbuementEntry> ItemImbuement { get; private set; }
         public GameTable<ItemImbuementRewardEntry> ItemImbuementReward { get; private set; }
         public GameTable<ItemProficiencyEntry> ItemProficiency { get; private set; }
+
+        [GameData]
         public GameTable<ItemQualityEntry> ItemQuality { get; private set; }
+
         public GameTable<ItemRandomStatEntry> ItemRandomStat { get; private set; }
         public GameTable<ItemRandomStatGroupEntry> ItemRandomStatGroup { get; private set; }
+
+        [GameData]
         public GameTable<ItemRuneInstanceEntry> ItemRuneInstance { get; private set; }
+
         public GameTable<ItemSetEntry> ItemSet { get; private set; }
         public GameTable<ItemSetBonusEntry> ItemSetBonus { get; private set; }
 
