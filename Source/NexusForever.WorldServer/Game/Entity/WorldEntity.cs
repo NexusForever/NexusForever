@@ -192,7 +192,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Return the <see cref="float"/> value of the supplied <see cref="Stat"/>.
         /// </summary>
-        protected float? GetStatFloat(Stat stat)
+        public float? GetStatFloat(Stat stat)
         {
             StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Float)
@@ -207,7 +207,7 @@ namespace NexusForever.WorldServer.Game.Entity
         /// <summary>
         /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/>.
         /// </summary>
-        protected uint? GetStatInteger(Stat stat)
+        public uint? GetStatInteger(Stat stat)
         {
             StatAttribute attribute = EntityManager.Instance.GetStatAttribute(stat);
             if (attribute?.Type != StatType.Integer)
