@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -35,9 +34,9 @@ namespace NexusForever.WorldServer.Game.Guild
         public ulong NextGuildId => nextGuildId++;
         private ulong nextGuildId;
 
-        private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new();
-        private readonly Dictionary<(GuildType Type, string Name), /*guildId*/ ulong> guildNameCache = new(new GuildNameEqualityComparer());
-        private readonly Dictionary</*guildId*/ ulong, List</*memberId*/ ulong>> guildMemberCache = new();
+        private readonly Dictionary<ulong, GuildBase> guilds = new();
+        private readonly Dictionary<(GuildType Type, string Name), ulong> guildNameCache = new(new GuildNameEqualityComparer());
+        private readonly Dictionary</*memberId*/ ulong, List</*guildId*/ ulong>> guildMemberCache = new();
 
         private ImmutableDictionary<GuildOperation, (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate)> guildOperationHandlers;
         private delegate GuildResultInfo GuildOperationHandlerResultDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
@@ -348,6 +347,29 @@ namespace NexusForever.WorldServer.Game.Guild
             guilds.Add(guild.Id, guild);
             guildNameCache.Add((guild.Type, guild.Name), guild.Id);
             return guild;
+        }
+
+        /// <summary>
+        /// Removes the given <see cref="GuildBase"/> from local dictionaries to free keys for future use.
+        /// </summary>
+        /// <remarks>
+        /// This method should only be called under the assumption that the next save will remove <see cref="GuildBase"/> from the database.
+        /// </remarks>
+        public void RemoveFromDictionaries(GuildBase guild)
+        {
+            if (!guilds.ContainsKey(guild.Id))
+                throw new KeyNotFoundException($"Guild {guild.Name}({guild.Id}) not found in local dictionaries.");
+
+            guildNameCache.Remove((guild.Type, guild.Name));
+
+            foreach (GuildMember member in guild)
+            {
+                if (!guildMemberCache.TryGetValue(member.CharacterId, out List<ulong> guildIds))
+                    throw new KeyNotFoundException($"Guild member {member.CharacterId} not found in local dictionaries.");
+                
+                guildIds.Remove(guild.Id);
+                guildMemberCache[member.CharacterId] = guildIds;
+            }
         }
 
         /// <summary>

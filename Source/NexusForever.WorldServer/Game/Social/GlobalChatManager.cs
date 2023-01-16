@@ -137,7 +137,7 @@ namespace NexusForever.WorldServer.Game.Social
                 saveTimer.Reset();
             }
         }
-
+        
         private void UpdateCustomChannels()
         {
             var tasks = new List<Task>();
@@ -148,7 +148,7 @@ namespace NexusForever.WorldServer.Game.Social
                     chatChannels[ChatChannelType.Custom].Remove(channel.Id);
                     chatChannelNames[ChatChannelType.Custom].Remove(channel.Name);
 
-                    if (channel.PendingCreate)
+                    if(channel.PendingCreate)
                         continue;
                 }
 
@@ -213,6 +213,20 @@ namespace NexusForever.WorldServer.Game.Social
             }
 
             return channel;
+        }
+
+        /// <summary>
+        /// Removes the given <see cref="ChatChannel"/> from local dictionaries to free keys for future use, then adds it to the deletion queue.
+        /// </summary>
+        public void DeleteChannel(ChatChannel channel)
+        {
+            if (!chatChannels[channel.Type].ContainsKey(channel.Id))
+                throw new KeyNotFoundException($"No chat channel found in local dictionaries for {channel.Name}({channel.Id}).");
+
+            chatChannelNames[channel.Type].Remove(channel.Name);
+            chatChannels[channel.Type].Remove(channel.Id);
+
+            channel.EnqueueDelete(true);
         }
 
         /// <summary>
@@ -295,7 +309,6 @@ namespace NexusForever.WorldServer.Game.Social
 
         private void SendChatAccept(WorldSession session)
         {
-
             session.EnqueueMessageEncrypted(new ServerChatAccept
             {
                 Name = session.Player.Name,

@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Game.Guild
         }
 
         /// <summary>
-        /// Initialise member and office <see cref="ChatChannel"/>'s.
+        /// Initialise member and office <see cref="ChatChannel"/>s.
         /// </summary>
         public void InitialiseChatChannels(ChatChannelType? memberChannelType, ChatChannelType? officerChannelType)
         {
@@ -77,6 +77,16 @@ namespace NexusForever.WorldServer.Game.Guild
                 memberChannel.Name = name;
             if (officerChannel != null)
                 officerChannel.Name = name;
+        }
+
+        public override void DisbandGuild()
+        {
+            base.DisbandGuild();
+
+            GlobalChatManager.Instance.DeleteChannel(memberChannel);
+
+            if (officerChannel != null)
+                GlobalChatManager.Instance.DeleteChannel(officerChannel);
         }
     }
 }
