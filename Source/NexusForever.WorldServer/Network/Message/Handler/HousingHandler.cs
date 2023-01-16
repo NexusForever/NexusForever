@@ -115,19 +115,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientHousingRandomCommunityList)]
         public static void HandleHousingRandomCommunityList(WorldSession session, ClientHousingRandomCommunityList _)
         {
-            var serverHousingRandomCommunityList = new ServerHousingRandomCommunityList();
-            foreach (PublicCommunity community in GlobalResidenceManager.Instance.GetRandomVisitableCommunities())
-            {
-                serverHousingRandomCommunityList.Communities.Add(new ServerHousingRandomCommunityList.Community
-                {
-                    RealmId        = WorldServer.RealmId,
-                    NeighborhoodId = community.NeighbourhoodId,
-                    Owner          = community.Owner,
-                    Name           = community.Name
-                });
-            }
-
-            session.EnqueueMessageEncrypted(serverHousingRandomCommunityList);
+            GlobalResidenceManager.Instance.SendRandomVisitableCommunities(session);
         }
 
         [MessageHandler(GameMessageOpcode.ClientHousingRandomResidenceList)]
@@ -468,26 +456,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (community?.Residence == null)
                 throw new InvalidPacketValueException();
 
-            ResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(PropertyInfoId.Residence);
-            if (entrance == null)
-                throw new InvalidOperationException();
-
-            ResidenceChild child = community.Residence.GetChild(session.Player.CharacterId);
-            if (child == null)
-                throw new InvalidOperationException();
-
-            if (child.Residence.Map != null)
-                child.Residence.Map.RemoveChild(child.Residence);
-            else
-                child.Residence.Parent.RemoveChild(child.Residence);
-
-            child.Residence.PropertyInfoId = PropertyInfoId.Residence;
-
-            // shouldn't need to check for existing instance
-            // individual residence instances are unloaded when transfered to a community
-            // if for some reason the instance is still unloading the residence will be initalised again after
-            session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
-            session.Player.TeleportTo(entrance.Entry, entrance.Position, child.Residence.Id);
+            community.RemoveChildResidence(session.Player);
         }
     }
 }

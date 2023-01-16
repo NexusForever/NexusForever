@@ -22,6 +22,14 @@ namespace NexusForever.WorldServer.Game.Housing
         }
 
         /// <summary>
+        /// Should only be used by <see cref="GlobalResidenceManager"/> when creating a <see cref="Residence"/>.
+        /// </summary>
+        public void SetResidence(Residence residence)
+        {
+            Residence = residence;
+        }
+
+        /// <summary>
         /// Create new <see cref="Decor"/> from supplied <see cref="HousingDecorInfoEntry"/> to residence your crate.
         /// </summary>
         /// <remarks>

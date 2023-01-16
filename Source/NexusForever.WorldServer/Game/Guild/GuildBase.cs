@@ -465,7 +465,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Disband <see cref="GuildBase"/>.
         /// </summary>
-        public void DisbandGuild()
+        public virtual void DisbandGuild()
         {
             foreach (GuildMember member in members.Values.ToList())
             {
@@ -650,7 +650,7 @@ namespace NexusForever.WorldServer.Game.Guild
         /// <summary>
         /// Add an existing <see cref="GuildMember"/> with supplied character id.
         /// </summary>
-        private void RemoveMember(ulong characterId, bool disband)
+        protected virtual void RemoveMember(ulong characterId, bool disband)
         {
             if (!members.TryGetValue(characterId, out GuildMember member))
                 throw new ArgumentException($"Invalid member {characterId} for guild {Id}.");
