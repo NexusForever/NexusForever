@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Account.Unlock;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.GameTable;
@@ -9,7 +10,7 @@ using NexusForever.WorldServer.Command.Static;
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Generic, "A collection of commands to manage generic unlocks for an account.", "generic")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class GenericUnlockCommandCategory : CommandCategory
     {
         [Command(Permission.GenericUnlock, "Unlock generic unlock entry for an account.", "unlock")]
@@ -17,7 +18,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Generic unlock entry to unlock.")]
             ushort genericUnlockEntryId)
         {
-            context.GetTargetOrInvoker<Player>().Session.GenericUnlockManager.Unlock(genericUnlockEntryId);
+            context.GetTargetOrInvoker<IPlayer>().Account.GenericUnlockManager.Unlock(genericUnlockEntryId);
         }
 
         [Command(Permission.GenericUnlockAll, "Unlock all generic unlocks of type for an account.", "unlockall")]
@@ -25,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Generic unlock type to unlock all entries from.", ParameterFlags.None, typeof(EnumParameterConverter<GenericUnlockType>))]
             GenericUnlockType genericUnlockType)
         {
-            context.GetTargetOrInvoker<Player>().Session.GenericUnlockManager.UnlockAll(genericUnlockType);
+            context.GetTargetOrInvoker<IPlayer>().Account.GenericUnlockManager.UnlockAll(genericUnlockType);
         }
 
         [Command(Permission.GenericList, "ist all acquired generic unlock entries for an account.", "list")]
@@ -34,7 +35,7 @@ namespace NexusForever.WorldServer.Command.Handler
             context.SendMessage("Acquired generic unlock entries:");
 
             TextTable tt = GameTableManager.Instance.GetTextTable(context.Language);
-            foreach (GenericUnlock unlock in context.GetTargetOrInvoker<Player>().Session.GenericUnlockManager)
+            foreach (IGenericUnlock unlock in context.GetTargetOrInvoker<IPlayer>().Account.GenericUnlockManager)
             {
                 string name = tt.GetEntry(unlock.Entry.LocalizedTextIdDescription);
                 context.SendMessage($"{unlock.Entry.Id}, {unlock.Type}, {name}");

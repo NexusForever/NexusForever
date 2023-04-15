@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -12,9 +12,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class VendorHandler
     {   
-        public static void HandleClientVendor(WorldSession session, ClientEntityInteract vendor)
+        public static void HandleClientVendor(IWorldSession session, ClientEntityInteract vendor)
         {
-            var vendorEntity = session.Player.Map.GetEntity<NonPlayer>(vendor.Guid);
+            var vendorEntity = session.Player.Map.GetEntity<INonPlayer>(vendor.Guid);
             if (vendorEntity == null)
             {
                 return;
@@ -63,9 +63,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientVendorPurchase)]
-        public static void HandleVendorPurchase(WorldSession session, ClientVendorPurchase vendorPurchase)
+        public static void HandleVendorPurchase(IWorldSession session, ClientVendorPurchase vendorPurchase)
         {
-            VendorInfo vendorInfo = session.Player.SelectedVendorInfo;
+            IVendorInfo vendorInfo = session.Player.SelectedVendorInfo;
             if (vendorInfo == null)
                 return;
 
@@ -98,13 +98,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientSellItemToVendor)]
-        public static void HandleVendorSell(WorldSession session, ClientVendorSell vendorSell)
+        public static void HandleVendorSell(IWorldSession session, ClientVendorSell vendorSell)
         {
-            VendorInfo vendorInfo = session.Player.SelectedVendorInfo;
+            IVendorInfo vendorInfo = session.Player.SelectedVendorInfo;
             if (vendorInfo == null)
                 return;
 
-            ItemInfo info = session.Player.Inventory.GetItem(vendorSell.ItemLocation).Info;
+            IItemInfo info = session.Player.Inventory.GetItem(vendorSell.ItemLocation).Info;
             if (info == null)
                 return;
 
@@ -128,14 +128,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 session.Player.CurrencyManager.CurrencyAddAmount(currencyTypeId, currencyAmount);
 
             // TODO Figure out why this is showing "You deleted [item]"
-            Item soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
+            IItem soldItem = session.Player.Inventory.ItemDelete(vendorSell.ItemLocation);
             BuybackManager.Instance.AddItem(session.Player, soldItem, vendorSell.Quantity, currencyChange);
         }
 
         [MessageHandler(GameMessageOpcode.ClientBuybackItemFromVendor)]
-        public static void HandleBuybackItemFromVendor(WorldSession session, ClientBuybackItemFromVendor buybackItemFromVendor)
+        public static void HandleBuybackItemFromVendor(IWorldSession session, ClientBuybackItemFromVendor buybackItemFromVendor)
         {
-            BuybackItem buybackItem = BuybackManager.Instance.GetItem(session.Player, buybackItemFromVendor.UniqueId);
+            IBuybackItem buybackItem = BuybackManager.Instance.GetItem(session.Player, buybackItemFromVendor.UniqueId);
             if (buybackItem == null)
                 return;
 

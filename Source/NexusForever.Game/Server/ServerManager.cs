@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
+using NexusForever.Game.Abstract.Server;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
@@ -9,12 +10,12 @@ using NLog;
 
 namespace NexusForever.Game.Server
 {
-    public sealed class ServerManager : Singleton<ServerManager>
+    public sealed class ServerManager : Singleton<ServerManager>, IServerManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public ImmutableList<ServerInfo> Servers { get; private set; }
-        public ImmutableList<ServerMessageInfo> ServerMessages { get; private set; }
+        public ImmutableList<IServerInfo> Servers { get; private set; }
+        public ImmutableList<IServerMessageInfo> ServerMessages { get; private set; }
 
         private ushort? serverRealmId;
 
@@ -31,7 +32,7 @@ namespace NexusForever.Game.Server
         }
 
         /// <summary>
-        /// Initialise <see cref="ServerManager"/> and any related resources.
+        /// Initialise <see cref="IServerManager"/> and any related resources.
         /// </summary>
         public void Initialise(ushort? realmId = null)
         {
@@ -61,7 +62,7 @@ namespace NexusForever.Game.Server
         private void InitialiseServers()
         {
             Servers = DatabaseManager.Instance.GetDatabase<AuthDatabase>().GetServers()
-                .Select(s => new ServerInfo(s))
+                .Select(s => (IServerInfo)new ServerInfo(s))
                 .ToImmutableList();
         }
 
@@ -69,7 +70,7 @@ namespace NexusForever.Game.Server
         {
             ServerMessages = DatabaseManager.Instance.GetDatabase<AuthDatabase>().GetServerMessages()
                 .GroupBy(m => m.Index)
-                .Select(g => new ServerMessageInfo(g))
+                .Select(g => (IServerMessageInfo)new ServerMessageInfo(g))
                 .ToImmutableList();
         }
 
@@ -111,7 +112,7 @@ namespace NexusForever.Game.Server
         }
 
         /// <summary>
-        /// Requests for the <see cref="ServerManager"/> to begin shutdown.
+        /// Requests for the <see cref="IServerManager"/> to begin shutdown.
         /// </summary>
         public void Shutdown()
         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using NexusForever.Game.Network;
 using NexusForever.Game.Static.Account;
 using NexusForever.GameTable;
 using NexusForever.Network.Message;
@@ -11,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     public static class PathHandler
     {
         [MessageHandler(GameMessageOpcode.ClientPathActivate)]
-        public static void HandlePathActivate(WorldSession session, ClientPathActivate clientPathActivate)
+        public static void HandlePathActivate(IWorldSession session, ClientPathActivate clientPathActivate)
         {
             uint activateCooldown = GameTableManager.Instance.GameFormula.GetEntry(2366).Dataint0;
             uint bypassCost       = GameTableManager.Instance.GameFormula.GetEntry(2366).Dataint01;
@@ -22,7 +21,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 if (needToUseTokens && !clientPathActivate.UseTokens)
                     return GenericError.PathChangeOnCooldown;
 
-                bool hasEnoughTokens = session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, bypassCost); // TODO: Check user has enough tokens
+                bool hasEnoughTokens = session.Account.CurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, bypassCost); // TODO: Check user has enough tokens
                 if (needToUseTokens && clientPathActivate.UseTokens && !hasEnoughTokens)
                     return GenericError.PathChangeInsufficientFunds;
 
@@ -43,19 +42,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }
 
             if (needToUseTokens && clientPathActivate.UseTokens)
-                session.AccountCurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, bypassCost);
+                session.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, bypassCost);
 
             session.Player.PathManager.ActivatePath(clientPathActivate.Path);
         }
 
         [MessageHandler(GameMessageOpcode.ClientPathUnlock)]
-        public static void HandlePathUnlock(WorldSession session, ClientPathUnlock clientPathUnlock)
+        public static void HandlePathUnlock(IWorldSession session, ClientPathUnlock clientPathUnlock)
         {
             uint unlockCost = GameTableManager.Instance.GameFormula.GetEntry(2365).Dataint0;
 
             GenericError CanUnlockPath()
             {
-                bool hasEnoughTokens = session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, unlockCost);
+                bool hasEnoughTokens = session.Account.CurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, unlockCost);
                 if (!hasEnoughTokens)
                     return GenericError.PathInsufficientFunds;
 
@@ -73,7 +72,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             }
 
             session.Player.PathManager.UnlockPath(clientPathUnlock.Path);
-            session.AccountCurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, unlockCost);
+            session.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, unlockCost);
         }
     }
 }

@@ -1,10 +1,11 @@
-﻿using NexusForever.Game.Static.Spell;
+﻿using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Spell
 {
-    public class SpellBaseInfo
+    public class SpellBaseInfo : ISpellBaseInfo
     {
         public Spell4BaseEntry Entry { get; }
         public Spell4HitResultsEntry HitResult { get; }
@@ -23,7 +24,7 @@ namespace NexusForever.Game.Spell
         public bool IsBuff { get; }
         public bool IsDispellable { get; }
 
-        private readonly SpellInfo[] spellInfoStore;
+        private readonly ISpellInfo[] spellInfoStore;
 
         public SpellBaseInfo(Spell4BaseEntry spell4BaseEntry)
         {
@@ -61,9 +62,9 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Return <see cref="SpellInfo"/> for the supplied spell tier.
+        /// Return <see cref="ISpellInfo"/> for the supplied spell tier.
         /// </summary>
-        public SpellInfo GetSpellInfo(byte tier)
+        public ISpellInfo GetSpellInfo(byte tier)
         {
             if (tier < 1)
                 tier = 1;

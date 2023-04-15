@@ -1,10 +1,10 @@
 using NexusForever.Database.World.Model;
-using NexusForever.Network.Message;
+using NexusForever.Game.Abstract.Storefront;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Storefront
 {
-    public class Category : IBuildable<ServerStoreCategories.StoreCategory>
+    public class Category : ICategory
     {
         public uint Id { get; }
         public string Name { get; }
@@ -14,7 +14,7 @@ namespace NexusForever.Game.Storefront
         public bool Visible { get; }
 
         /// <summary>
-        /// Create a new <see cref="Category"/> from an existing database model.
+        /// Create a new <see cref="ICategory"/> from an existing database model.
         /// </summary>
         public Category(StoreCategoryModel model)
         {

@@ -5,7 +5,8 @@ using System.Reflection;
 using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Social;
@@ -17,7 +18,7 @@ using NLog;
 
 namespace NexusForever.Game.Guild
 {
-    public sealed class GlobalGuildManager : Singleton<GlobalGuildManager>
+    public sealed class GlobalGuildManager : Singleton<GlobalGuildManager>, IGlobalGuildManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -30,18 +31,18 @@ namespace NexusForever.Game.Guild
         public ulong NextGuildId => nextGuildId++;
         private ulong nextGuildId;
 
-        private readonly Dictionary</*guildId*/ ulong, GuildBase> guilds = new();
+        private readonly Dictionary</*guildId*/ ulong, IGuildBase> guilds = new();
         private readonly Dictionary<(GuildType Type, string Name), /*guildId*/ ulong> guildNameCache = new(new GuildNameEqualityComparer());
         private readonly Dictionary</*guildId*/ ulong, List</*memberId*/ ulong>> guildMemberCache = new();
 
         private ImmutableDictionary<GuildOperation, (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate)> guildOperationHandlers;
-        private delegate GuildResultInfo GuildOperationHandlerResultDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
-        private delegate void GuildOperationHandlerDelegate(GuildBase guild, GuildMember member, Player player, ClientGuildOperation operation);
+        private delegate IGuildResultInfo GuildOperationHandlerResultDelegate(IGuildBase guild, IGuildMember member, IPlayer player, ClientGuildOperation operation);
+        private delegate void GuildOperationHandlerDelegate(IGuildBase guild, IGuildMember member, IPlayer player, ClientGuildOperation operation);
 
         private readonly UpdateTimer saveTimer = new(SaveDuration);
 
         /// <summary>
-        /// Initialise the <see cref="GlobalGuildManager"/>, and build cache of all existing guilds
+        /// Initialise the <see cref="IGlobalGuildManager"/>, and build cache of all existing guilds.
         /// </summary>
         public void Initialise()
         {
@@ -60,7 +61,7 @@ namespace NexusForever.Game.Guild
         {
             foreach (GuildModel model in DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetGuilds())
             {
-                GuildBase guild;
+                IGuildBase guild;
                 switch ((GuildType)model.Type)
                 {
                     case GuildType.Guild:
@@ -88,8 +89,8 @@ namespace NexusForever.Game.Guild
                 guildNameCache.Add((guild.Type, guild.Name), guild.Id);
 
                 // cache character guilds for faster lookup on character login
-                List<GuildMember> members = guild.ToList();
-                foreach (GuildMember member in members)
+                List<IGuildMember> members = guild.ToList();
+                foreach (IGuildMember member in members)
                     TrackCharacterGuild(member.CharacterId, guild.Id);
 
                 log.Trace($"Initialised guild {guild.Name}({guild.Id}) with {members.Count} members.");
@@ -114,14 +115,14 @@ namespace NexusForever.Game.Guild
                     #region Debug
                     ParameterInfo[] parameterInfo = method.GetParameters();
                     Debug.Assert(parameterInfo.Length == 3);
-                    Debug.Assert(parameterInfo[0].ParameterType == typeof(GuildMember));
-                    Debug.Assert(parameterInfo[1].ParameterType == typeof(Player));
+                    Debug.Assert(parameterInfo[0].ParameterType == typeof(IGuildMember));
+                    Debug.Assert(parameterInfo[1].ParameterType == typeof(IPlayer));
                     Debug.Assert(parameterInfo[2].ParameterType == typeof(ClientGuildOperation));
                     #endregion
 
-                    ParameterExpression guildParameter = Expression.Parameter(typeof(GuildBase));
-                    ParameterExpression memberParameter = Expression.Parameter(typeof(GuildMember));
-                    ParameterExpression playerParameter = Expression.Parameter(typeof(Player));
+                    ParameterExpression guildParameter = Expression.Parameter(typeof(IGuildBase));
+                    ParameterExpression memberParameter = Expression.Parameter(typeof(IGuildMember));
+                    ParameterExpression playerParameter = Expression.Parameter(typeof(IPlayer));
                     ParameterExpression operationParameter = Expression.Parameter(typeof(ClientGuildOperation));
 
                     MethodCallExpression callExpression = Expression.Call(
@@ -132,7 +133,7 @@ namespace NexusForever.Game.Guild
                         operationParameter);
 
                     // guild operation handlers can have 2 different delegates depending on whether the handler returns a result or void
-                    if (method.ReturnType == typeof(GuildResultInfo))
+                    if (method.ReturnType == typeof(IGuildResultInfo))
                     {
                         Expression<GuildOperationHandlerResultDelegate> lambdaExpression = Expression.Lambda<GuildOperationHandlerResultDelegate>(
                             callExpression,
@@ -162,7 +163,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Shutdown <see cref="GlobalGuildManager"/> and any related resources.
+        /// Shutdown <see cref="IGlobalGuildManager"/> and any related resources.
         /// </summary>
         /// <remarks>
         /// This will force save all guilds.
@@ -209,7 +210,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Validate all <see cref="Community"/> to make sure they have a corresponding residence.
+        /// Validate all <see cref="ICommunity"/> to make sure they have a corresponding residence.
         /// </summary>
         /// <remarks>
         /// This function is mainly here for migrating communities created before the implementation of community plots.
@@ -217,7 +218,7 @@ namespace NexusForever.Game.Guild
         /// </remarks>
         public void ValidateCommunityResidences()
         {
-            foreach (GuildBase guild in guilds.Values)
+            foreach (IGuildBase guild in guilds.Values)
             {
                 if (guild is not Community community)
                     continue;
@@ -231,44 +232,44 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns <see cref="GuildBase"/> with supplied id.
+        /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
-        public GuildBase GetGuild(ulong guildId)
+        public IGuildBase GetGuild(ulong guildId)
         {
-            return guilds.TryGetValue(guildId, out GuildBase guild) ? guild : null;
+            return guilds.TryGetValue(guildId, out IGuildBase guild) ? guild : null;
         }
 
         /// <summary>
-        /// Returns <see cref="GuildBase"/> with supplied id.
+        /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
-        public T GetGuild<T>(ulong guildId) where T : GuildBase
+        public T GetGuild<T>(ulong guildId) where T : IGuildBase
         {
-            return guilds.TryGetValue(guildId, out GuildBase guild) ? (T)guild : null;
+            return guilds.TryGetValue(guildId, out IGuildBase guild) ? (T)guild : default;
         }
 
         /// <summary>
-        /// Returns <see cref="GuildBase"/> with supplied <see cref="GuildType"/> and name.
+        /// Returns <see cref="IGuildBase"/> with supplied <see cref="GuildType"/> and name.
         /// </summary>
-        public GuildBase GetGuild(GuildType guildType, string name)
+        public IGuildBase GetGuild(GuildType guildType, string name)
         {
             return guildNameCache.TryGetValue((guildType, name), out ulong guildId) ? GetGuild(guildId) : null; 
         }
 
         /// <summary>
-        /// Returns <see cref="GuildBase"/> with supplied <see cref="GuildType"> and name.
+        /// Returns <see cref="IGuildBase"/> with supplied <see cref="GuildType"> and name.
         /// </summary>
-        public T GetGuild<T>(GuildType guildType, string name) where T : GuildBase
+        public T GetGuild<T>(GuildType guildType, string name) where T : IGuildBase
         {
-            return guildNameCache.TryGetValue((guildType, name), out ulong guildId) ? (T)GetGuild(guildId) : null;
+            return guildNameCache.TryGetValue((guildType, name), out ulong guildId) ? (T)GetGuild(guildId) : default;
         }
 
         /// <summary>
-        /// Returns a collection of <see cref="GuildBase"/>'s in which supplied character id belongs to.
+        /// Returns a collection of <see cref="IGuildBase"/>'s in which supplied character id belongs to.
         /// </summary>
         /// <remarks>
-        /// This should only be used in situations where the local <see cref="GuildManager"/> is not accessible for a character.
+        /// This should only be used in situations where the local <see cref="IGuildManager"/> is not accessible for a character.
         /// </remarks>
-        public IEnumerable<GuildBase> GetCharacterGuilds(ulong characterId)
+        public IEnumerable<IGuildBase> GetCharacterGuilds(ulong characterId)
         {
             guildMemberCache.TryGetValue(characterId, out List<ulong> characterGuilds);
             foreach (ulong guildId in characterGuilds ?? Enumerable.Empty<ulong>())
@@ -305,14 +306,14 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Register and return a new <see cref="GuildBase"/> with the supplied parameters.
+        /// Register and return a new <see cref="IGuildBase"/> with the supplied parameters.
         /// </summary>
         /// <remarks>
-        /// The new guild does not have a leader, the first <see cref="Player"/> to join will be assigned to the leader.
+        /// The new guild does not have a leader, the first <see cref="IPlayer"/> to join will be assigned to the leader.
         /// </remarks>
-        public GuildBase RegisterGuild(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName, GuildStandard standard = null)
+        public IGuildBase RegisterGuild(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName, IGuildStandard standard = null)
         {
-            GuildBase guild;
+            IGuildBase guild;
             switch (type)
             {
                 case GuildType.Guild:
@@ -348,7 +349,7 @@ namespace NexusForever.Game.Guild
         /// <summary>
         /// Invoke operation delegate to handle <see cref="GuildOperation"/>.
         /// </summary>
-        public void HandleGuildOperation(Player player, ClientGuildOperation operation)
+        public void HandleGuildOperation(IPlayer player, ClientGuildOperation operation)
         {
             if (!guildOperationHandlers.TryGetValue(operation.Operation, out (GuildOperationHandlerDelegate, GuildOperationHandlerResultDelegate) handlers))
             {
@@ -367,19 +368,19 @@ namespace NexusForever.Game.Guild
                 return;
             }
 
-            GuildResultInfo info = HandleGuildOperation(handlers, player, operation);
+            IGuildResultInfo info = HandleGuildOperation(handlers, player, operation);
             if (info.Result != GuildResult.Success)
                 GuildBase.SendGuildResult(player.Session, info);
         }
 
-        private GuildResultInfo HandleGuildOperation((GuildOperationHandlerDelegate Delegate, GuildOperationHandlerResultDelegate ResultDelegate) handlers,
-            Player player, ClientGuildOperation operation)
+        private IGuildResultInfo HandleGuildOperation((GuildOperationHandlerDelegate Delegate, GuildOperationHandlerResultDelegate ResultDelegate) handlers,
+            IPlayer player, ClientGuildOperation operation)
         {
-            GuildBase guild = GetGuild(operation.GuildId);
+            IGuildBase guild = GetGuild(operation.GuildId);
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
-            GuildMember member = guild.GetMember(player.CharacterId);
+            IGuildMember member = guild.GetMember(player.CharacterId);
             if (member == null)
                 return new GuildResultInfo(GuildResult.NotInThatGuild);
 
@@ -390,7 +391,7 @@ namespace NexusForever.Game.Guild
             }
             else
             {
-                GuildResultInfo info = handlers.ResultDelegate.Invoke(guild, member, player, operation);
+                IGuildResultInfo info = handlers.ResultDelegate.Invoke(guild, member, player, operation);
                 info.GuildId = guild.Id;
                 return info;
             }

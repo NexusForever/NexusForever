@@ -1,17 +1,19 @@
 ﻿using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Social;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Social;
 
 namespace NexusForever.Game.Guild
 {
-    public abstract class GuildChat : GuildBase
+    public abstract class GuildChat : GuildBase, IGuildChat
     {
-        private ChatChannel memberChannel;
-        private ChatChannel officerChannel;
+        private IChatChannel memberChannel;
+        private IChatChannel officerChannel;
 
         /// <summary>
-        /// Create a new <see cref="GuildChat"/> from an existing database model.
+        /// Create a new <see cref="IGuildChat"/> from an existing database model.
         /// </summary>
         public GuildChat(GuildModel model)
             : base(model)
@@ -19,7 +21,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="GuildChat"/> using the supplied parameters.
+        /// Create a new <see cref="IGuildChat"/> using the supplied parameters.
         /// </summary>
         public GuildChat(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName)
             : base(type, name, leaderRankName, councilRankName, memberRankName)
@@ -27,7 +29,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Initialise member and office <see cref="ChatChannel"/>'s.
+        /// Initialise member and office <see cref="IChatChannel"/>'s.
         /// </summary>
         public void InitialiseChatChannels(ChatChannelType? memberChannelType, ChatChannelType? officerChannelType)
         {
@@ -38,9 +40,9 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Invoked when a <see cref="GuildMember"/> comes online.
+        /// Invoked when a <see cref="IGuildMember"/> comes online.
         /// </summary>
-        protected override void MemberOnline(GuildMember member)
+        protected override void MemberOnline(IGuildMember member)
         {
             // add member to any chat channels if applicable
             if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
@@ -52,9 +54,9 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Invoked when a <see cref="GuildMember"/> goes offline.
+        /// Invoked when a <see cref="IGuildMember"/> goes offline.
         /// </summary>
-        protected override void MemberOffline(GuildMember member)
+        protected override void MemberOffline(IGuildMember member)
         {
             // remove member to any chat channels if applicable
             if (member.Rank.HasPermission(GuildRankPermission.MemberChat))
@@ -66,7 +68,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Rename <see cref="GuildBase"/> with supplied name.
+        /// Rename <see cref="IGuildBase"/> with supplied name.
         /// </summary>
         public override void RenameGuild(string name)
         {

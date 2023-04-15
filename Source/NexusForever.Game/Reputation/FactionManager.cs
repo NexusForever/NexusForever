@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -7,11 +8,11 @@ using NLog;
 
 namespace NexusForever.Game.Reputation
 {
-    public class FactionManager : Singleton<FactionManager>
+    public class FactionManager : Singleton<FactionManager>, IFactionManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private ImmutableDictionary<Faction, FactionNode> nodes;
+        private ImmutableDictionary<Faction, IFactionNode> nodes;
 
         private FactionManager()
         {
@@ -22,30 +23,30 @@ namespace NexusForever.Game.Reputation
             DateTime start = DateTime.Now;
             log.Info("Initialising factions...");
 
-            var builder = ImmutableDictionary.CreateBuilder<Faction, FactionNode>();
+            var builder = ImmutableDictionary.CreateBuilder<Faction, IFactionNode>();
             foreach (Faction2Entry entry in GameTableManager.Instance.Faction2.Entries)
                 builder.Add((Faction)entry.Id, new FactionNode(entry));
 
             // link nodes and build the trees
-            foreach (FactionNode node in builder.Values)
+            foreach (IFactionNode node in builder.Values)
             {
                 // parent
-                builder.TryGetValue((Faction)node.Entry.Faction2IdParent, out FactionNode parent);
+                builder.TryGetValue((Faction)node.Entry.Faction2IdParent, out IFactionNode parent);
 
                 // children
-                var children = new List<FactionNode>();
+                var children = new List<IFactionNode>();
                 foreach (Faction2Entry entry in GameTableManager.Instance.Faction2.Entries
                     .Where(e => (Faction)e.Faction2IdParent == node.FactionId))
                 {
-                    builder.TryGetValue((Faction)entry.Id, out FactionNode child);
+                    builder.TryGetValue((Faction)entry.Id, out IFactionNode child);
                     children.Add(child);
                 }
 
                 // relationships
-                var relationships = new List<FactionNode>();
-                foreach (RelationshipNode relationship in node.GetRelationships())
+                var relationships = new List<IFactionNode>();
+                foreach (IRelationshipNode relationship in node.GetRelationships())
                 {
-                    builder.TryGetValue((Faction)relationship.Entry.FactionId1, out FactionNode child);
+                    builder.TryGetValue((Faction)relationship.Entry.FactionId1, out IFactionNode child);
                     relationships.Add(child);
                 }
 
@@ -59,11 +60,11 @@ namespace NexusForever.Game.Reputation
         }
 
         /// <summary>
-        /// Return the <see cref="FactionNode"/> with the supplied faction id.
+        /// Return the <see cref="IFactionNode"/> with the supplied faction id.
         /// </summary>
-        public FactionNode GetFaction(Faction factionId)
+        public IFactionNode GetFaction(Faction factionId)
         {
-            return nodes.TryGetValue(factionId, out FactionNode node) ? node : null;
+            return nodes.TryGetValue(factionId, out IFactionNode node) ? node : null;
         }
     }
 }

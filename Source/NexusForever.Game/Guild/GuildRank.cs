@@ -2,16 +2,16 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Network.Message;
 using NetworkGuildRank = NexusForever.Network.World.Message.Model.Shared.GuildRank;
 
 namespace NexusForever.Game.Guild
 {
-    public class GuildRank : IBuildable<NetworkGuildRank>, IEnumerable<GuildMember>
+    public class GuildRank : IGuildRank
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="GuildRank"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IGuildRank"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum GuildRankSaveMask
@@ -88,21 +88,21 @@ namespace NexusForever.Game.Guild
         private GuildRankSaveMask saveMask;
 
         /// <summary>
-        /// Returns if <see cref="GuildRank"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IGuildRank"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & GuildRankSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="GuildRank"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IGuildRank"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & GuildRankSaveMask.Delete) != 0;
 
         public uint MemberCount => (uint)members.Count;
 
-        private readonly Dictionary<ulong, GuildMember> members = new();
+        private readonly Dictionary<ulong, IGuildMember> members = new();
 
         /// <summary>
-        /// Create a new <see cref="GuildRank"/> from an existing database model.
+        /// Create a new <see cref="IGuildRank"/> from an existing database model.
         /// </summary>
         public GuildRank(GuildRankModel model)
         {
@@ -118,7 +118,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="GuildRank"/> using the supplied parameters.
+        /// Create a new <see cref="IGuildRank"/> using the supplied parameters.
         /// </summary>
         public GuildRank(ulong guildId, byte index, string name, GuildRankPermission permissions,
             ulong bankPermissions, ulong bankMoneyWithdrawlLimits, ulong repairLimit)
@@ -135,7 +135,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Save this <see cref="GuildRank"/> to a <see cref="GuildRankModel"/>.
+        /// Save this <see cref="IGuildRank"/> to a <see cref="GuildRankModel"/>.
         /// </summary>
         public void Save(CharacterContext context)
         {
@@ -205,7 +205,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Enqueue <see cref="GuildRank"/> to be deleted from the database.
+        /// Enqueue <see cref="IGuildRank"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool set)
         {
@@ -240,22 +240,22 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Add a new <see cref="GuildMember"/>.
+        /// Add a new <see cref="IGuildMember"/>.
         /// </summary>
-        public void AddMember(GuildMember member)
+        public void AddMember(IGuildMember member)
         {
             members.Add(member.CharacterId, member);
         }
 
         /// <summary>
-        /// Remove an existing <see cref="GuildMember"/>
+        /// Remove an existing <see cref="IGuildMember"/>
         /// </summary>
-        public void RemoveMember(GuildMember member)
+        public void RemoveMember(IGuildMember member)
         {
             members.Remove(member.CharacterId);
         }
 
-        public IEnumerator<GuildMember> GetEnumerator()
+        public IEnumerator<IGuildMember> GetEnumerator()
         {
             return members.Values.GetEnumerator();
         }

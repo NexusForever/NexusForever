@@ -2,14 +2,17 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NetworkPetCustomisation = NexusForever.Network.World.Message.Model.Shared.PetCustomisation;
 
 namespace NexusForever.Game.Entity
 {
-    public class PetCustomisation : ISaveCharacter, IEnumerable<PetFlairEntry>
+    public class PetCustomisation : IPetCustomisation
     {
+        [Flags]
         public enum PetCustomisationSaveMask
         {
             None   = 0x00,
@@ -39,7 +42,7 @@ namespace NexusForever.Game.Entity
         private PetCustomisationSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="PetCustomisation"/> from existing <see cref="CharacterPetCustomisationModel"/> database model.
+        /// Create a new <see cref="IPetCustomisation"/> from existing <see cref="CharacterPetCustomisationModel"/> database model.
         /// </summary>
         public PetCustomisation(CharacterPetCustomisationModel model)
         {
@@ -56,7 +59,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="PetCustomisation"/> from supplied <see cref="PetType"/> and object id.
+        /// Create a new <see cref="IPetCustomisation"/> from supplied <see cref="PetType"/> and object id.
         /// </summary>
         public PetCustomisation(ulong owner, PetType type, uint objectId)
         {
@@ -82,7 +85,7 @@ namespace NexusForever.Game.Entity
                     ObjectId    = ObjectId,
                     Name        = Name,
                     FlairIdMask = GenerateFlairMask()
-            };
+                };
 
                 context.Add(model);
             }
@@ -112,13 +115,26 @@ namespace NexusForever.Game.Entity
             saveMask = PetCustomisationSaveMask.None;
         }
 
+        public NetworkPetCustomisation Build()
+        {
+            return new NetworkPetCustomisation
+            {
+                PetType      = Type,
+                PetObjectId  = ObjectId,
+                PetName      = Name,
+                SlotFlairIds = flairs
+                    .Select(f => f?.Id ?? 0)
+                    .ToArray()
+            };
+        }
+
         /// <summary>
         /// Pack all flairs into a single <see cref="ulong"/>.
         /// </summary>
         private ulong GenerateFlairMask()
         {
             // pack each of the flair ids into 16 bits
-            return ((flairs[3]?.Id ?? 0ul) << 48) | ((flairs[2]?.Id ?? 0ul) << 32) | ((flairs[1]?.Id ?? 0ul) << 16) | flairs[0]?.Id ?? 0ul;
+            return (flairs[3]?.Id ?? 0ul) << 48 | (flairs[2]?.Id ?? 0ul) << 32 | (flairs[1]?.Id ?? 0ul) << 16 | flairs[0]?.Id ?? 0ul;
         }
 
         /// <summary>

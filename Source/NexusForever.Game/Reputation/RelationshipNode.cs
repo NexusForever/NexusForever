@@ -1,16 +1,17 @@
-﻿using NexusForever.Game.Static.Reputation;
+﻿using NexusForever.Game.Abstract.Reputation;
+using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Reputation
 {
-    public class RelationshipNode
+    public class RelationshipNode : IRelationshipNode
     {
         public Faction Id => (Faction)Entry.FactionId1;
         public Faction2RelationshipEntry Entry { get; }
-        public FactionNode Node { get; private set; }
+        public IFactionNode Node { get; private set; }
 
         /// <summary>
-        /// Create a new <see cref="RelationshipNode"/> with supplied <see cref="Faction2RelationshipEntry"/>.
+        /// Create a new <see cref="IRelationshipNode"/> with supplied <see cref="Faction2RelationshipEntry"/>.
         /// </summary>
         public RelationshipNode(Faction2RelationshipEntry entry)
         {
@@ -18,9 +19,9 @@ namespace NexusForever.Game.Reputation
         }
 
         /// <summary>
-        /// Link <see cref="RelationshipNode"/> with supplied <see cref="FactionNode"/>.
+        /// Link <see cref="IRelationshipNode"/> with supplied <see cref="IFactionNode"/>.
         /// </summary>
-        public void Link(FactionNode node)
+        public void Link(IFactionNode node)
         {
             if (Node != null)
                 throw new InvalidOperationException();

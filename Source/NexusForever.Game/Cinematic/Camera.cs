@@ -1,13 +1,14 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class Camera
+    public class Camera : ICamera
     {
-        public Actor CameraActor { get; }
+        public IActor CameraActor { get; }
         public List<IKeyframeAction> CameraActions { get; } = new();
 
-        public Camera(Actor cameraActor, uint initialAttachId, uint initialAttachType, bool useRotationInitially, uint initialTransitionType, ushort initialTransitionStart = 1500, ushort initialTransitionMid = 0, ushort initialTransitionEnd = 1500)
+        public Camera(IActor cameraActor, uint initialAttachId, uint initialAttachType, bool useRotationInitially, uint initialTransitionType, ushort initialTransitionStart = 1500, ushort initialTransitionMid = 0, ushort initialTransitionEnd = 1500)
         {
             CameraActor = cameraActor;
 
@@ -33,7 +34,7 @@ namespace NexusForever.Game.Cinematic
             CameraActions.Add(cameraTransition);
         }
 
-        public void SendInitialPackets(WorldSession session)
+        public void SendInitialPackets(IGameSession session)
         {
             foreach (IKeyframeAction action in CameraActions)
                 action.Send(session);

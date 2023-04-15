@@ -2,7 +2,8 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -11,7 +12,7 @@ using NLog;
 
 namespace NexusForever.Game.Spell
 {
-    public sealed class GlobalSpellManager : Singleton<GlobalSpellManager>
+    public sealed class GlobalSpellManager : Singleton<GlobalSpellManager>, IGlobalSpellManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -28,8 +29,8 @@ namespace NexusForever.Game.Spell
         private uint nextCastingId = 1;
         private uint nextEffectId = 1;
 
-        private readonly Dictionary<uint, SpellBaseInfo> spellBaseInfoStore = new();
-        private readonly Dictionary<SpellEffectType, SpellEffectDelegate> spellEffectDelegates =  new();
+        private readonly Dictionary<uint, ISpellBaseInfo> spellBaseInfoStore = new();
+        private readonly Dictionary<SpellEffectType, SpellEffectDelegate> spellEffectDelegates = new();
 
         // entry caches
         private ImmutableDictionary<uint, ImmutableList<Spell4Entry>> spellEntries;
@@ -84,17 +85,17 @@ namespace NexusForever.Game.Spell
         {
             foreach (MethodInfo method in Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .SelectMany(t => t.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)))
+                .SelectMany(t => t.GetMethods()))
             {
                 SpellEffectHandlerAttribute attribute = method.GetCustomAttribute<SpellEffectHandlerAttribute>();
                 if (attribute == null)
                     continue;
 
-                ParameterExpression spellParameter  = Expression.Parameter(typeof(Spell));
-                ParameterExpression targetParameter = Expression.Parameter(typeof(UnitEntity));
-                ParameterExpression effectParameter = Expression.Parameter(typeof(SpellTargetInfo.SpellTargetEffectInfo));
+                ParameterExpression spellParameter  = Expression.Parameter(typeof(ISpell));
+                ParameterExpression targetParameter = Expression.Parameter(typeof(IUnitEntity));
+                ParameterExpression effectParameter = Expression.Parameter(typeof(ISpellTargetEffectInfo));
 
-                MethodCallExpression call = Expression.Call(spellParameter, method, targetParameter, effectParameter);
+                MethodCallExpression call = Expression.Call(method, spellParameter, targetParameter, effectParameter);
 
                 Expression<SpellEffectDelegate> lambda =
                     Expression.Lambda<SpellEffectDelegate>(call, spellParameter, targetParameter, effectParameter);
@@ -107,7 +108,7 @@ namespace NexusForever.Game.Spell
         /// Return all <see cref="Spell4Entry"/>'s for the supplied spell base id.
         /// </summary>
         /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="SpellBaseInfo"/>.
+        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="ISpellBaseInfo"/>.
         /// </remarks>
         public IEnumerable<Spell4Entry> GetSpell4Entries(uint spell4BaseId)
         {
@@ -119,7 +120,7 @@ namespace NexusForever.Game.Spell
         /// Return all <see cref="Spell4EffectsEntry"/>'s for the supplied spell id.
         /// </summary>
         /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="SpellBaseInfo"/>.
+        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="ISpellBaseInfo"/>.
         /// </remarks>
         public IEnumerable<Spell4EffectsEntry> GetSpell4EffectEntries(uint spell4Id)
         {
@@ -131,7 +132,7 @@ namespace NexusForever.Game.Spell
         /// Return all <see cref="TelegraphDamageEntry"/>'s for the supplied spell id.
         /// </summary>
         /// <remarks>
-        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="SpellBaseInfo"/>.
+        /// This should only be used for cache related code, if you want an overview of a spell use <see cref="ISpellBaseInfo"/>.
         /// </remarks>
         public IEnumerable<TelegraphDamageEntry> GetTelegraphDamageEntries(uint spell4Id)
         {
@@ -140,15 +141,15 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Return <see cref="SpellBaseInfo"/>, if not already cached it will be generated before being returned.
+        /// Return <see cref="ISpellBaseInfo"/>, if not already cached it will be generated before being returned.
         /// </summary>
-        public SpellBaseInfo GetSpellBaseInfo(uint spell4BaseId)
+        public ISpellBaseInfo GetSpellBaseInfo(uint spell4BaseId)
         {
             Spell4BaseEntry spell4BaseEntry = GameTableManager.Instance.Spell4Base.GetEntry(spell4BaseId);
             if (spell4BaseEntry == null)
                 throw new ArgumentOutOfRangeException();
 
-            if (!spellBaseInfoStore.TryGetValue(spell4BaseId, out SpellBaseInfo spellBaseInfo))
+            if (!spellBaseInfoStore.TryGetValue(spell4BaseId, out ISpellBaseInfo spellBaseInfo))
             {
                 spellBaseInfo = new SpellBaseInfo(spell4BaseEntry);
                 spellBaseInfoStore.Add(spell4BaseId, spellBaseInfo);

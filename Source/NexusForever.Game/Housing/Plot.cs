@@ -1,17 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Housing
 {
-    public class Plot : ISaveCharacter
+    public class Plot : IPlot
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="Plot"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IPlot"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum PlotSaveMask
@@ -77,10 +78,10 @@ namespace NexusForever.Game.Housing
 
         private PlotSaveMask saveMask;
 
-        public Plug PlugEntity { get; set; }
+        public IPlug PlugEntity { get; set; }
 
         /// <summary>
-        /// Create a new <see cref="Plot"/> from an existing database model.
+        /// Create a new <see cref="IPlot"/> from an existing database model.
         /// </summary>
         public Plot(ResidencePlotModel model)
         {
@@ -95,7 +96,7 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Create a new <see cref="Plot"/> from a <see cref="HousingPlotInfoEntry"/>.
+        /// Create a new <see cref="IPlot"/> from a <see cref="HousingPlotInfoEntry"/>.
         /// </summary>
         public Plot(ulong id, HousingPlotInfoEntry entry)
         {

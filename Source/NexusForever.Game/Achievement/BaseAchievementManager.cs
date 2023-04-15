@@ -2,7 +2,8 @@
 using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Achievement;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Achievement;
@@ -11,13 +12,12 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Achievement
 {
-    public abstract class BaseAchievementManager<T> : ISaveCharacter
-        where T : class, IAchievementModel, new()
+    public abstract class BaseAchievementManager<T> : IBaseAchievementManager<T> where T : class, IAchievementModel, new()
     {
         public uint AchievementPoints { get; protected set; }
 
         protected abstract ulong OwnerId { get; }
-        protected Dictionary<ushort, Achievement<T>> achievements = new();
+        protected Dictionary<ushort, IAchievement> achievements = new();
 
         /// <summary>
         /// Initialise a collection of existing achievement database models.
@@ -26,7 +26,7 @@ namespace NexusForever.Game.Achievement
         {
             foreach (T model in models)
             {
-                AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(model.AchievementId);
+                IAchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(model.AchievementId);
                 if (info == null)
                     throw new DatabaseDataException($"{(isPlayer ? "Player" : "Guild")} {model.Id} has invalid achievement {model.AchievementId} stored!");
 
@@ -54,13 +54,13 @@ namespace NexusForever.Game.Achievement
         /// </summary>
         public bool HasCompletedAchievement(ushort id)
         {
-            return achievements.TryGetValue(id, out Achievement<T> achievement) && achievement.IsComplete();
+            return achievements.TryGetValue(id, out IAchievement achievement) && achievement.IsComplete();
         }
 
         /// <summary>
-        /// Send initial <see cref="Achievement{T}"/> information to owner on login.
+        /// Send initial <see cref="IAchievement"/> information to owner on login.
         /// </summary>
-        public virtual void SendInitialPackets(Player target)
+        public virtual void SendInitialPackets(IPlayer target)
         {
             target.Session.EnqueueMessageEncrypted(new ServerAchievementInit
             {
@@ -70,7 +70,7 @@ namespace NexusForever.Game.Achievement
             });
         }
 
-        protected ServerAchievementUpdate BuildAchievementUpdate(IEnumerable<Achievement<T>> updates)
+        protected ServerAchievementUpdate BuildAchievementUpdate(IEnumerable<IAchievement> updates)
         {
             return new()
             {
@@ -80,26 +80,26 @@ namespace NexusForever.Game.Achievement
             };
         }
 
-        protected void SendAchievementUpdate(params Achievement<T>[] updates)
+        protected void SendAchievementUpdate(params IAchievement[] updates)
         {
             SendAchievementUpdate(updates.AsEnumerable());
         }
 
-        protected abstract void SendAchievementUpdate(IEnumerable<Achievement<T>> updates);
+        protected abstract void SendAchievementUpdate(IEnumerable<IAchievement> updates);
 
         /// <summary>
         /// Grant achievement by supplied achievement id.
         /// </summary>
         public void GrantAchievement(ushort id)
         {
-            AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(id);
+            IAchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(id);
             if (info == null)
                 throw new ArgumentException();
 
             if (HasCompletedAchievement(info.Id))
                 throw new ArgumentException();
 
-            Achievement<T> achievement = GetAchievement(id);
+            IAchievement achievement = GetAchievement(id);
             if (info.ChecklistEntries.Count == 0)
                 achievement.Data0 = info.Entry.Value;
             else
@@ -112,17 +112,17 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Update or complete any achievements of <see cref="AchievementType"/> as <see cref="Player"/> with supplied object ids.
+        /// Update or complete any achievements of <see cref="AchievementType"/> as <see cref="IPlayer"/> with supplied object ids.
         /// </summary>
-        public abstract void CheckAchievements(Player target, AchievementType type, uint objectId, uint objectIdAlt = 0u, uint count = 1u);
+        public abstract void CheckAchievements(IPlayer target, AchievementType type, uint objectId, uint objectIdAlt = 0u, uint count = 1u);
 
         /// <summary>
-        /// Update or complete a collection of achievements as <see cref="Player"/> sending the result to the client.
+        /// Update or complete a collection of achievements as <see cref="IPlayer"/> sending the result to the client.
         /// </summary>
-        protected void CheckAchievements(Player target, IEnumerable<AchievementInfo> achievements, uint objectId, uint objectIdAlt, uint count)
+        protected void CheckAchievements(IPlayer target, IEnumerable<IAchievementInfo> achievements, uint objectId, uint objectIdAlt, uint count)
         {
-            var updates = new List<Achievement<T>>();
-            foreach (AchievementInfo info in achievements)
+            var updates = new List<IAchievement>();
+            foreach (IAchievementInfo info in achievements)
                 if (CheckAchievement(target, info, objectId, objectIdAlt, count))
                     updates.Add(GetAchievement(info.Id));
 
@@ -131,9 +131,9 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Update or complete <see cref="AchievementInfo"/> as <see cref="Player"/> with supplied object ids.
+        /// Update or complete <see cref="AchievementInfo"/> as <see cref="IPlayer"/> with supplied object ids.
         /// </summary>
-        private bool CheckAchievement(Player target, AchievementInfo info, uint objectId, uint objectIdAlt, uint count)
+        private bool CheckAchievement(IPlayer target, IAchievementInfo info, uint objectId, uint objectIdAlt, uint count)
         {
             if (HasCompletedAchievement(info.Id))
                 return false;
@@ -143,7 +143,7 @@ namespace NexusForever.Game.Achievement
 
             bool sendUpdate = false;
 
-            Achievement<T> achievement = null;
+            IAchievement achievement = null;
             if (info.ChecklistEntries.Count == 0)
             {
                 if (CanUpdateAchievement(target, info.Entry, objectId, objectIdAlt))
@@ -173,9 +173,9 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Check if <see cref="AchievementEntry"/> can be updated as <see cref="Player"/> with supplied object ids.
+        /// Check if <see cref="AchievementEntry"/> can be updated as <see cref="IPlayer"/> with supplied object ids.
         /// </summary>
-        private bool CanUpdateAchievement(Player player, AchievementEntry entry, uint objectId, uint objectIdAlt)
+        private bool CanUpdateAchievement(IPlayer player, AchievementEntry entry, uint objectId, uint objectIdAlt)
         {
             // TODO: should the server also check PrerequisiteId?
             if (entry.PrerequisiteIdServer != 0u && !PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteIdServer))
@@ -195,9 +195,9 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Check if <see cref="AchievementChecklistEntry"/> can be updated as <see cref="Player"/> with supplied object ids.
+        /// Check if <see cref="AchievementChecklistEntry"/> can be updated as <see cref="IPlayer"/> with supplied object ids.
         /// </summary>
-        private bool CanUpdateChecklist(Player player, AchievementChecklistEntry entry, uint objectId, uint objectIdAlt)
+        private bool CanUpdateChecklist(IPlayer player, AchievementChecklistEntry entry, uint objectId, uint objectIdAlt)
         {
             if (entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, entry.PrerequisiteId))
                 return false;
@@ -217,16 +217,16 @@ namespace NexusForever.Game.Achievement
             return true;
         }
 
-        protected virtual void CompleteAchievement(Achievement<T> achievement)
+        protected virtual void CompleteAchievement(IAchievement achievement)
         {
             achievement.DateCompleted = DateTime.UtcNow;
             AchievementPoints += GetAchievementPoints(achievement.Info);
         }
 
         /// <summary>
-        /// Returns the amount of achievement points earned when completing supplied <see cref="AchievementInfo"/>.
+        /// Returns the amount of achievement points earned when completing supplied <see cref="IAchievementInfo"/>.
         /// </summary>
-        protected uint GetAchievementPoints(AchievementInfo info)
+        protected uint GetAchievementPoints(IAchievementInfo info)
         {
             return info.Entry.AchievementPointEnum switch
             {
@@ -238,14 +238,14 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Return <see cref="Achievement"/> with supplied id, if it doesn't exist it will be created.
+        /// Return <see cref="IAchievement"/> with supplied id, if it doesn't exist it will be created.
         /// </summary>
-        private Achievement<T> GetAchievement(ushort id)
+        private IAchievement GetAchievement(ushort id)
         {
-            if (achievements.TryGetValue(id, out Achievement<T> achievement))
+            if (achievements.TryGetValue(id, out IAchievement achievement))
                 return achievement;
 
-            AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(id);
+            IAchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(id);
             if (info == null)
                 throw new ArgumentException();
 

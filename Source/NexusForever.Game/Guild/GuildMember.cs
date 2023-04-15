@@ -1,16 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.CharacterCache;
-using NexusForever.Network.Message;
+using NexusForever.Game.Abstract.Character;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Character;
 using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.GuildMember;
 
 namespace NexusForever.Game.Guild
 {
-    public class GuildMember : IBuildable<NetworkGuildMember>
+    public class GuildMember : IGuildMember
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="GuildMember"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IGuildMember"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum GuildMemberSaveMask
@@ -23,10 +24,10 @@ namespace NexusForever.Game.Guild
             CommunityPlotReservation = 0x0010
         }
 
-        public GuildBase Guild { get; }
+        public IGuildBase Guild { get; }
         public ulong CharacterId { get; }
 
-        public GuildRank Rank
+        public IGuildRank Rank
         {
             get => rank;
             set
@@ -35,7 +36,7 @@ namespace NexusForever.Game.Guild
                 saveMask |= GuildMemberSaveMask.Rank;
             }
         }
-        private GuildRank rank;
+        private IGuildRank rank;
 
         public string Note
         {
@@ -62,19 +63,19 @@ namespace NexusForever.Game.Guild
         private GuildMemberSaveMask saveMask;
 
         /// <summary>
-        /// Returns if <see cref="GuildMember"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IGuildMember"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & GuildMemberSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="GuildMember"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IGuildMember"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & GuildMemberSaveMask.Delete) != 0;
 
         /// <summary>
-        /// Create a new <see cref="GuildMember"/> from an existing database model.
+        /// Create a new <see cref="IGuildMember"/> from an existing database model.
         /// </summary>
-        public GuildMember(GuildMemberModel model, GuildBase guild, GuildRank guildRank)
+        public GuildMember(GuildMemberModel model, IGuildBase guild, IGuildRank guildRank)
         {
             Guild                    = guild;
             CharacterId              = model.CharacterId;
@@ -86,9 +87,9 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="GuildMember"/> from the supplied member information.
+        /// Create a new <see cref="IGuildMember"/> from the supplied member information.
         /// </summary>
-        public GuildMember(GuildBase guild, ulong characterId, GuildRank guildRank, string note = "")
+        public GuildMember(IGuildBase guild, ulong characterId, IGuildRank guildRank, string note = "")
         {
             Guild                    = guild;
             CharacterId              = characterId;
@@ -100,7 +101,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Save this <see cref="GuildMember"/> to a <see cref="GuildMemberModel"/>
+        /// Save this <see cref="IGuildMember"/> to a <see cref="GuildMemberModel"/>
         /// </summary>
         public void Save(CharacterContext context)
         {
@@ -145,11 +146,11 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Return a <see cref="NetworkGuildMember"/> packet of this <see cref="GuildMember"/>
+        /// Return a <see cref="NetworkGuildMember"/> packet of this <see cref="IGuildMember"/>
         /// </summary>
         public NetworkGuildMember Build()
         {
-            ICharacter characterInfo = CharacterManager.Instance.GetCharacterInfo(CharacterId);
+            ICharacter characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
             return new NetworkGuildMember
             {
                 Realm                    = RealmContext.Instance.RealmId,
@@ -167,7 +168,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Enqueue <see cref="GuildMember"/> to be deleted from the database.
+        /// Enqueue <see cref="IGuildMember"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool set)
         {

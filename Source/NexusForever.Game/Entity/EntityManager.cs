@@ -13,10 +13,11 @@ using NexusForever.GameTable.Model;
 using NexusForever.IO.Map;
 using NexusForever.Shared;
 using NLog;
+using NexusForever.Game.Abstract.Entity;
 
 namespace NexusForever.Game.Entity
 {
-    public sealed class EntityManager : Singleton<EntityManager>
+    public sealed class EntityManager : Singleton<EntityManager>, IEntityManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -43,7 +44,7 @@ namespace NexusForever.Game.Entity
 
             foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
-                DatabaseEntity attribute = type.GetCustomAttribute<DatabaseEntity>();
+                DatabaseEntityAttribute attribute = type.GetCustomAttribute<DatabaseEntityAttribute>();
                 if (attribute == null)
                     continue;
 
@@ -88,7 +89,7 @@ namespace NexusForever.Game.Entity
                 if (!mapFiles.TryGetValue(model.World, out MapFile mapFile))
                 {
                     WorldEntry entry = GameTableManager.Instance.World.GetEntry(model.World);
-                    mapFile = BaseMapManager.Instance.GetBaseMap(entry.AssetPath);
+                    mapFile = MapIOManager.Instance.GetBaseMap(entry.AssetPath);
                     mapFiles.Add(model.World, mapFile);
                 }
 
@@ -107,9 +108,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Return a new <see cref="WorldEntity"/> of supplied <see cref="EntityType"/>.
+        /// Return a new <see cref="IWorldEntity"/> of supplied <see cref="EntityType"/>.
         /// </summary>
-        public WorldEntity NewEntity(EntityType type)
+        public IWorldEntity NewEntity(EntityType type)
         {
             return entityFactories.TryGetValue(type, out EntityFactoryDelegate factory) ? factory.Invoke() : null;
         }

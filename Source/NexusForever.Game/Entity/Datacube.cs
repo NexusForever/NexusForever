@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
+using NetworkDatacube = NexusForever.Network.World.Message.Model.Shared.Datacube;
 
 namespace NexusForever.Game.Entity
 {
-    public class Datacube
+    public class Datacube : IDatacube
     {
         [Flags]
         public enum DatacubeSaveMask
@@ -32,11 +34,15 @@ namespace NexusForever.Game.Entity
 
         private DatacubeSaveMask saveMask;
 
+        private readonly IPlayer player;
+
         /// <summary>
-        /// Create a new <see cref="Datacube"/> from the supplied id, <see cref="DatacubeType"/> and progress.
+        /// Create a new <see cref="IDatacube"/> from the supplied id, <see cref="DatacubeType"/> and progress.
         /// </summary>
-        public Datacube(ushort id, DatacubeType type, uint progress)
+        public Datacube(IPlayer player, ushort id, DatacubeType type, uint progress)
         {
+            this.player = player;
+
             Id       = id;
             Type     = type;
             Progress = progress;
@@ -45,23 +51,25 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="Datacube"/> from an existing database model.
+        /// Create a new <see cref="IDatacube"/> from an existing database model.
         /// </summary>
-        public Datacube(CharacterDatacubeModel model)
+        public Datacube(IPlayer player, CharacterDatacubeModel model)
         {
+            this.player = player;
+
             Id       = model.Datacube;
             Type     = (DatacubeType)model.Type;
             Progress = model.Progress;
         }
 
-        public void Save(CharacterContext context, ulong characterId)
+        public void Save(CharacterContext context)
         {
             if (saveMask == DatacubeSaveMask.None)
                 return;
 
             var model = new CharacterDatacubeModel
             {
-                Id       = characterId,
+                Id       = player.CharacterId,
                 Type     = (byte)Type,
                 Datacube = Id,
                 Progress = Progress
@@ -76,6 +84,15 @@ namespace NexusForever.Game.Entity
             }
 
             saveMask = DatacubeSaveMask.None;
+        }
+
+        public NetworkDatacube Build()
+        {
+            return new NetworkDatacube
+            {
+                DatacubeId = Id,
+                Progress   = Progress
+            };
         }
     }
 }

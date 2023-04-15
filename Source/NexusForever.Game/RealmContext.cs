@@ -1,21 +1,22 @@
-﻿using NexusForever.Game.Configuration.Model;
+﻿using NexusForever.Game.Abstract;
+using NexusForever.Game.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 
 namespace NexusForever.Game;
 
-public class RealmContext : Singleton<RealmContext>
+public class RealmContext : Singleton<RealmContext>, IRealmContext
 {
     public ushort RealmId { get; private set; }
     public string Motd { get; set; }
 
-    private static readonly TimeSpan serverTimeOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
+    private readonly TimeSpan serverTimeOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
 
     public void Initialise()
     {
         RealmConfig config = SharedConfiguration.Instance.Get<RealmConfig>();
         RealmId = config.RealmId;
-        Motd = config.MessageOfTheDay;
+        Motd    = config.MessageOfTheDay;
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
@@ -7,7 +8,7 @@ using NexusForever.Network.World.Message.Model;
 namespace NexusForever.Game.Entity
 {
     [DatabaseEntity(EntityType.Door)]
-    public class Door : WorldEntity
+    public class Door : WorldEntity, IDoor
     {
         public bool IsOpen => GetStatEnum<StandState>(Stat.StandState) == StandState.State1;
 
@@ -33,7 +34,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Used to open this <see cref="Door"/>.
+        /// Used to open this <see cref="IDoor"/>.
         /// </summary>
         public void OpenDoor()
         {
@@ -46,7 +47,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Used to close this <see cref="Door"/>.
+        /// Used to close this <see cref="IDoor"/>.
         /// </summary>
         public void CloseDoor()
         {

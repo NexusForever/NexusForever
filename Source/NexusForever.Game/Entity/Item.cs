@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -10,10 +11,10 @@ using NetworkItem = NexusForever.Network.World.Message.Model.Shared.Item;
 
 namespace NexusForever.Game.Entity
 {
-    public class Item : ISaveCharacter
+    public class Item : IItem
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="Item"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IItem"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum ItemSaveMask
@@ -62,7 +63,7 @@ namespace NexusForever.Game.Entity
         }
 
         public uint Id => Info?.Id ?? SpellEntry.Id;
-        public ItemInfo Info { get; }
+        public IItemInfo Info { get; }
         public Spell4BaseEntry SpellEntry { get; }
         public ulong Guid { get; }
 
@@ -162,16 +163,18 @@ namespace NexusForever.Game.Entity
         }
 
         private uint expirationTimeLeft;
-        
+
         /// <summary>
-        /// Returns if <see cref="Item"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IItem"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & ItemSaveMask.Create) != 0;
+
+        public bool PendingDelete => (saveMask & ItemSaveMask.Delete) != 0;
 
         private ItemSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="Item"/> from an existing database model.
+        /// Create a new <see cref="IItem"/> from an existing database model.
         /// </summary>
         public Item(ItemModel model)
         {
@@ -189,14 +192,14 @@ namespace NexusForever.Game.Entity
                 Info = ItemManager.Instance.GetItemInfo(model.ItemId);
             else
                 SpellEntry = GameTableManager.Instance.Spell4Base.GetEntry(model.ItemId);
-            
+
             saveMask = ItemSaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="Item"/> from an <see cref="ItemInfo"/> template.
+        /// Create a new <see cref="IItem"/> from an <see cref="IItemInfo"/> template.
         /// </summary>
-        public Item(ulong? owner, ItemInfo info, uint count = 1u, uint initialCharges = 0)
+        public Item(ulong? owner, IItemInfo info, uint count = 1u, uint initialCharges = 0)
         {
             Guid             = ItemManager.Instance.NextItemId;
             characterId      = owner;
@@ -212,7 +215,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="Item"/> from a <see cref="Spell4BaseEntry"/> template.
+        /// Create a new <see cref="IItem"/> from a <see cref="Spell4BaseEntry"/> template.
         /// </summary>
         public Item(ulong owner, Spell4BaseEntry entry, uint count = 1u)
         {
@@ -231,9 +234,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Enqueue <see cref="Item"/> to be deleted from the database.
+        /// Enqueue <see cref="IItem"/> to be deleted from the database.
         /// </summary>
-        public void EnqueueDelete()
+        public void EnqueueDelete(bool state)
         {
             saveMask = ItemSaveMask.Delete;
         }
@@ -319,9 +322,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Return a network representation of the current <see cref="Item"/> for use in a item related packet.
+        /// Return a network representation of the current <see cref="IItem"/> for use in a item related packet.
         /// </summary>
-        public NetworkItem BuildNetworkItem()
+        public NetworkItem Build()
         {
             var networkItem = new NetworkItem
             {
@@ -346,7 +349,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Returns the <see cref="CurrencyType"/> this <see cref="Item"/> sells for at a vendor.
+        /// Returns the <see cref="CurrencyType"/> this <see cref="IItem"/> sells for at a vendor.
         /// </summary>
         public CurrencyType GetVendorSellCurrency(byte index)
         {
@@ -357,7 +360,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="Item"/> sells for at a vendor.
+        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="IItem"/> sells for at a vendor.
         /// </summary>
         public uint GetVendorSellAmount(byte index)
         {

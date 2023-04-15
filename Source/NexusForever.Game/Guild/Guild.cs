@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Achievement;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Social;
@@ -8,10 +10,10 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Game.Guild
 {
-    public partial class Guild : GuildChat
+    public partial class Guild : GuildChat, IGuild
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="Guild"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IGuild"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum GuildSaveMask
@@ -23,8 +25,8 @@ namespace NexusForever.Game.Guild
 
         public override uint MaxMembers => 40u;
 
-        public GuildStandard Standard { get; }
-        public GuildAchievementManager AchievementManager { get; }
+        public IGuildStandard Standard { get; }
+        public IGuildAchievementManager AchievementManager { get; }
 
         public string MessageOfTheDay
         {
@@ -51,7 +53,7 @@ namespace NexusForever.Game.Guild
         private GuildSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="Guild"/> from an existing database model.
+        /// Create a new <see cref="IGuild"/> from an existing database model.
         /// </summary>
         public Guild(GuildModel model) 
             : base(model)
@@ -65,9 +67,9 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="Guild"/> using the supplied parameters.
+        /// Create a new <see cref="IGuild"/> using the supplied parameters.
         /// </summary>
-        public Guild(string name, string leaderRankName, string councilRankName, string memberRankName, GuildStandard standard)
+        public Guild(string name, string leaderRankName, string councilRankName, string memberRankName, IGuildStandard standard)
             : base(GuildType.Guild, name, leaderRankName, councilRankName, memberRankName)
         {
             Standard           = standard;
@@ -141,7 +143,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Set if taxes are enabled for <see cref="Guild"/>.
+        /// Set if taxes are enabled for <see cref="IGuild"/>.
         /// </summary>
         public void SetTaxes(bool enabled)
         {

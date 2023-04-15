@@ -1,4 +1,5 @@
 ﻿using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -8,9 +9,9 @@ using NexusForever.Network.World.Entity.Model;
 namespace NexusForever.Game.Entity
 {
     [DatabaseEntity(EntityType.NonPlayer)]
-    public class NonPlayer : UnitEntity
+    public class NonPlayer : UnitEntity, INonPlayer
     {
-        public VendorInfo VendorInfo { get; private set; }
+        public IVendorInfo VendorInfo { get; private set; }
 
         public NonPlayer()
             : base(EntityType.NonPlayer)

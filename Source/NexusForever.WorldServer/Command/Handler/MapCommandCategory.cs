@@ -1,4 +1,6 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Entity;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.RBAC;
@@ -8,13 +10,13 @@ using NexusForever.WorldServer.Command.Convert;
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Map, "A collection of commands to manage maps.", "map")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class MapCommandCategory : CommandCategory
     {
         [Command(Permission.MapUnload, "Unload current map instance.", "unload")]
         public void HandleMapUnload(ICommandContext context)
         {
-            Player player = context.GetTargetOrInvoker<Player>();
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
             if (player.Map is not MapInstance instance)
             {
                 context.SendError("Current map is not an instance!");
@@ -29,7 +31,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Removal reason.", converter: typeof(EnumParameterConverter<WorldRemovalReason>))]
             WorldRemovalReason removalReason)
         {
-            Player player = context.GetTargetOrInvoker<Player>();
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
             if (player.Map is not MapInstance instance)
             {
                 context.SendError("Current map is not an instance!");
@@ -42,8 +44,8 @@ namespace NexusForever.WorldServer.Command.Handler
         [Command(Permission.MapPlayerRemoveCancel, "Cancel removal of player from current map instance.", "cancel")]
         public void HandleMapPlayerRemoveCancel(ICommandContext context)
         {
-            Player player = context.GetTargetOrInvoker<Player>();
-            if (player.Map is not MapInstance instance)
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
+            if (player.Map is not IMapInstance instance)
             {
                 context.SendError("Current map is not an instance!");
                 return;

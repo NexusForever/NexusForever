@@ -1,9 +1,10 @@
 ﻿using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
+using NexusForever.Game.Abstract.RBAC;
 
 namespace NexusForever.Game.RBAC
 {
-    public class AccountPermission : ISaveAuth
+    public class AccountPermission : IAccountPermission
     {
         [Flags]
         private enum SaveMask
@@ -14,24 +15,24 @@ namespace NexusForever.Game.RBAC
         }
 
         public uint Id { get; }
-        public RBACPermission Permission { get; }
+        public IRBACPermission Permission { get; }
 
         /// <summary>
-        /// Returns if <see cref="AccountPermission"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IAccountPermission"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & SaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="AccountPermission"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IAccountPermission"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & SaveMask.Delete) != 0;
 
         private SaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="AccountPermission"/> from an existing database model.
+        /// Create a new <see cref="IAccountPermission"/> from an existing database model.
         /// </summary>
-        public AccountPermission(AccountPermissionModel model, RBACPermission permission)
+        public AccountPermission(AccountPermissionModel model, IRBACPermission permission)
         {
             Id         = model.Id;
             Permission = permission;
@@ -39,9 +40,9 @@ namespace NexusForever.Game.RBAC
         }
 
         /// <summary>
-        /// Create a new <see cref="AccountPermission"/> from a <see cref="RBACPermission"/>.
+        /// Create a new <see cref="IAccountPermission"/> from a <see cref="IRBACPermission"/>.
         /// </summary>
-        public AccountPermission(uint id, RBACPermission permission)
+        public AccountPermission(uint id, IRBACPermission permission)
         {
             Id         = id;
             Permission = permission;
@@ -68,7 +69,7 @@ namespace NexusForever.Game.RBAC
         }
 
         /// <summary>
-        /// Enqueue <see cref="AccountPermission"/> to be deleted from the database.
+        /// Enqueue <see cref="IAccountPermission"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool delete)
         {

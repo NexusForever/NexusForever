@@ -1,9 +1,10 @@
 ﻿using System.Collections.Immutable;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
 
 namespace NexusForever.Game.Entity
 {
-    public class VendorInfo
+    public class VendorInfo : IVendorInfo
     {
         public uint Id { get; }
         public float SellPriceMultiplier { get; }

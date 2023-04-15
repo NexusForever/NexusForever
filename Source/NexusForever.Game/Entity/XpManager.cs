@@ -1,13 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Entity
 {
-    public class XpManager
+    public class XpManager : IXpManager
     {
         public uint TotalXp
         {
@@ -15,7 +16,7 @@ namespace NexusForever.Game.Entity
             private set
             {
                 totalXp = value;
-                saveMask |= Player.PlayerSaveMask.Xp;
+                isDirty = true;
             }
         }
         private uint totalXp;
@@ -26,18 +27,18 @@ namespace NexusForever.Game.Entity
             private set
             {
                 restBonusXp = value;
-                saveMask |= Player.PlayerSaveMask.Xp;
+                isDirty = true;
             }
         }
         private uint restBonusXp;
 
-        private Player.PlayerSaveMask saveMask;
-        private readonly Player player;
+        private bool isDirty;
+        private readonly IPlayer player;
 
         /// <summary>
-        /// Create a new <see cref="XpManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// Create a new <see cref="IXpManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public XpManager(Player player, CharacterModel model)
+        public XpManager(IPlayer player, CharacterModel model)
         {
             this.player = player;
             totalXp = model.TotalXp;
@@ -47,22 +48,19 @@ namespace NexusForever.Game.Entity
 
         public void Save(CharacterContext context)
         {
-            if (saveMask == Player.PlayerSaveMask.None)
+            if (!isDirty)
                 return;
 
-            if ((saveMask & Player.PlayerSaveMask.Xp) != 0)
-            {
-                // character is attached in Player::Save, this will only be local lookup
-                CharacterModel character = context.Character.Find(player.CharacterId);
-                character.TotalXp = TotalXp;
-                character.RestBonusXp = RestBonusXp;
+            // character is attached in Player::Save, this will only be local lookup
+            CharacterModel character = context.Character.Find(player.CharacterId);
+            character.TotalXp = TotalXp;
+            character.RestBonusXp = RestBonusXp;
 
-                EntityEntry<CharacterModel> entity = context.Entry(character);
-                entity.Property(p => p.TotalXp).IsModified = true;
-                entity.Property(p => p.RestBonusXp).IsModified = true;
-            }
+            EntityEntry<CharacterModel> entity = context.Entry(character);
+            entity.Property(p => p.TotalXp).IsModified = true;
+            entity.Property(p => p.RestBonusXp).IsModified = true;
 
-            saveMask = Player.PlayerSaveMask.None;
+            isDirty = false;
         }
 
         private void CalculateRestXpAtLogin(CharacterModel model)
@@ -106,7 +104,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Grants <see cref="Player"/> the supplied experience, handling level up if necessary.
+        /// Grants <see cref="IPlayer"/> the supplied experience, handling level up if necessary.
         /// </summary>
         /// <param name="earnedXp">Experience to grant</param>
         /// <param name="reason"><see cref="ExpReason"/> for the experience grant</param>
@@ -158,7 +156,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Sets <see cref="Player"/> to the supplied level and adjusts XP accordingly. Mainly for use with GM commands.
+        /// Sets <see cref="IPlayer"/> to the supplied level and adjusts XP accordingly. Mainly for use with GM commands.
         /// </summary>
         /// <param name="newLevel">New level to be set</param>
         /// <param name="reason"><see cref="ExpReason"/> for the level grant</param>
@@ -181,7 +179,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Grants <see cref="Player"/> the supplied level and adjusts XP accordingly
+        /// Grants <see cref="IPlayer"/> the supplied level and adjusts XP accordingly
         /// </summary>
         /// <param name="newLevel">New level to be set</param>
         private void GrantLevel(byte newLevel)

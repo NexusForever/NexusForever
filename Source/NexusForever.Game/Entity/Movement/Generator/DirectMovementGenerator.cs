@@ -1,15 +1,16 @@
 ﻿using System.Numerics;
-using NexusForever.Game.Map;
+using NexusForever.Game.Abstract.Entity.Movement.Generator;
+using NexusForever.Game.Abstract.Map;
 
 namespace NexusForever.Game.Entity.Movement.Generator
 {
-    public class DirectMovementGenerator : IMovementGenerator
+    public class DirectMovementGenerator : IDirectMovementGenerator
     {
         private const float StepSize = 2f;
 
         public Vector3 Begin { get; set; }
         public Vector3 Final { get; set; }
-        public BaseMap Map { get; set; }
+        public IBaseMap Map { get; set; }
 
         public List<Vector3> CalculatePath()
         {

@@ -1,14 +1,15 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Spell
 {
-    public class SpellTargetInfo
+    public class SpellTargetInfo : ISpellTargetInfo
     {
-        public class SpellTargetEffectInfo
+        public class SpellTargetEffectInfo : ISpellTargetEffectInfo
         {
-            public class DamageDescription
+            public class DamageDescription : IDamageDescription
             {
                 public DamageType DamageType { get; set; }
                 public uint RawDamage { get; set; }
@@ -22,7 +23,7 @@ namespace NexusForever.Game.Spell
 
             public uint EffectId { get; }
             public Spell4EffectsEntry Entry { get; }
-            public DamageDescription Damage { get; private set; }
+            public IDamageDescription Damage { get; private set; }
 
             public SpellTargetEffectInfo(uint effectId, Spell4EffectsEntry entry)
             {
@@ -44,10 +45,10 @@ namespace NexusForever.Game.Spell
         }
 
         public SpellEffectTargetFlags Flags { get; }
-        public UnitEntity Entity { get; }
-        public List<SpellTargetEffectInfo> Effects { get; } = new List<SpellTargetEffectInfo>();
+        public IUnitEntity Entity { get; }
+        public List<ISpellTargetEffectInfo> Effects { get; } = new List<ISpellTargetEffectInfo>();
 
-        public SpellTargetInfo(SpellEffectTargetFlags flags, UnitEntity entity)
+        public SpellTargetInfo(SpellEffectTargetFlags flags, IUnitEntity entity)
         {
             Flags  = flags;
             Entity = entity;

@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class CameraSpline : IKeyframeAction
+    public class CameraSpline : ICameraSpline
     {
         public uint Spline { get; set; }
         public uint SplineMode { get; set; }
@@ -22,7 +23,7 @@ namespace NexusForever.Game.Cinematic
             UseRotation = useRotation;
         }
 
-        public void Send(WorldSession session)
+        public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicCameraSpline
             {

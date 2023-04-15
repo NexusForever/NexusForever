@@ -70,7 +70,7 @@ namespace NexusForever.Network.Message
 
             foreach (Type type in NexusForeverAssemblyHelper.GetAssemblies().SelectMany(a => a.GetTypes()))
             {
-                foreach (MethodInfo method in type.GetMethods())
+                foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
                 {
                     if (method.DeclaringType != type)
                         continue;
@@ -79,7 +79,7 @@ namespace NexusForever.Network.Message
                     if (attribute == null)
                         continue;
 
-                    ParameterExpression sessionParameter = Expression.Parameter(typeof(NetworkSession));
+                    ParameterExpression sessionParameter = Expression.Parameter(typeof(INetworkSession));
                     ParameterExpression messageParameter = Expression.Parameter(typeof(IReadable));
 
                     ParameterInfo[] parameterInfo = method.GetParameters();
@@ -88,7 +88,7 @@ namespace NexusForever.Network.Message
                     {
                         #region Debug
                         Debug.Assert(parameterInfo.Length == 2);
-                        Debug.Assert(typeof(NetworkSession).IsAssignableFrom(parameterInfo[0].ParameterType));
+                        Debug.Assert(typeof(INetworkSession).IsAssignableFrom(parameterInfo[0].ParameterType));
                         Debug.Assert(typeof(IReadable).IsAssignableFrom(parameterInfo[1].ParameterType));
                         #endregion
 

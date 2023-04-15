@@ -1,11 +1,12 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 
 namespace NexusForever.Game.Entity
 {
-    public class Plug : WorldEntity
+    public class Plug : WorldEntity, IPlug
     {
         public HousingPlotInfoEntry PlotEntry { get; }
         public HousingPlugItemEntry PlugEntry { get; }

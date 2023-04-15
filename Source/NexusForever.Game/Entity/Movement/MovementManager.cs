@@ -1,5 +1,9 @@
 using System.Collections;
 using System.Numerics;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Entity.Movement.Generator;
+using NexusForever.Game.Abstract.Entity.Movement.Spline;
 using NexusForever.Game.Entity.Movement.Generator;
 using NexusForever.Game.Entity.Movement.Spline;
 using NexusForever.Game.Static.Entity.Movement.Spline;
@@ -8,29 +12,28 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Command;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity.Movement
 {
-    public class MovementManager : IUpdate, IEnumerable<(EntityCommand, IEntityCommandModel)>
+    public class MovementManager : IMovementManager
     {
         private const double SplineGridUpdateTime = 1d;
 
-        private readonly WorldEntity owner;
+        private readonly IWorldEntity owner;
         
         private readonly Dictionary<EntityCommand, IEntityCommandModel> commands = new();
 
         private EntityCommand splineCommand;
-        private SplinePath splinePath;
+        private ISplinePath splinePath;
         private readonly UpdateTimer splineGridUpdateTimer = new(SplineGridUpdateTime);
 
         private bool isDirty;
 
         /// <summary>
-        /// Create a new <see cref="MovementManager"/> for supplied <see cref="WorldEntity"/>.
+        /// Create a new <see cref="MovementManager"/> for supplied <see cref="IWorldEntity"/>.
         /// </summary>
-        public MovementManager(WorldEntity entity, Vector3 position, Vector3 rotation)
+        public MovementManager(IWorldEntity entity, Vector3 position, Vector3 rotation)
         {
             owner = entity;
 
@@ -297,7 +300,7 @@ namespace NexusForever.Game.Entity.Movement
             LaunchSpline(nodes, SplineType.Linear, mode, speed);
         }
 
-        public void Follow(WorldEntity entity, float distance)
+        public void Follow(IWorldEntity entity, float distance)
         {
             AddCommand(new SetRotationFaceUnitCommand
             {

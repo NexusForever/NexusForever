@@ -1,11 +1,12 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class Actor
+    public class Actor : IActor
     {
         public uint Id { get; }
         public uint InitialDelay { get; }
@@ -15,7 +16,7 @@ namespace NexusForever.Game.Cinematic
         public uint MovementMode { get; }
         public float? Angle { get; }
         public Position InitialPosition { get; }
-        public List<VisualEffect> InitialVisualEffects { get; } = new();
+        public List<IVisualEffect> InitialVisualEffects { get; } = new();
         public List<IKeyframeAction> Keyframes { get; } = new();
         public ulong ActivePropId { get; }
         public uint SocketId { get; }
@@ -36,7 +37,7 @@ namespace NexusForever.Game.Cinematic
             SocketId        = socketId;
         }
 
-        public void AddVisualEffect(VisualEffect visualEffect)
+        public void AddVisualEffect(IVisualEffect visualEffect)
         {
             visualEffect.SetActor(this);
 
@@ -53,7 +54,7 @@ namespace NexusForever.Game.Cinematic
             Keyframes.Add(new ActorVisibility(delay, this, hide));
         }
 
-        public void SendInitialPackets(WorldSession session)
+        public void SendInitialPackets(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicActor
             {
@@ -78,7 +79,7 @@ namespace NexusForever.Game.Cinematic
                 });
             }
 
-            foreach (VisualEffect visualEffect in InitialVisualEffects)
+            foreach (IVisualEffect visualEffect in InitialVisualEffects)
                 visualEffect.Send(session);
 
             foreach (IWritable message in PacketsToSend)

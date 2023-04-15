@@ -1,10 +1,11 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Game.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class CinematicBase
+    public class CinematicBase : ICinematicBase
     {
         protected Player Player { get; set; }
 
@@ -12,36 +13,36 @@ namespace NexusForever.Game.Cinematic
         public uint Duration { get; set; }
         public ushort InitialFlags { get; set; }
         public ushort InitialCancelMode { get; set; }
-        public Dictionary</* Id */ uint, Actor> Actors { get; } = new();
+        public Dictionary</* Id */ uint, IActor> Actors { get; } = new();
         public Dictionary</* Delay */ uint, /* TextId */ uint> Texts { get; } = new();
         public Dictionary<string, List<IKeyframeAction>> Keyframes { get; } = new();
-        public List<Camera> Cameras { get; } = new();
-        public Transition StartTransition { get; protected set; }
-        public Transition EndTransition { get; protected set; }
+        public List<ICamera> Cameras { get; } = new();
+        public ITransition StartTransition { get; protected set; }
+        public ITransition EndTransition { get; protected set; }
 
-        protected Actor playerActor;
+        protected IActor playerActor;
 
         public CinematicBase()
         {
         }
 
         /// <summary>
-        /// Add an <see cref="Actor"/>, and any initial <see cref="VisualEffect"/> to the Cinematic playback
+        /// Add an <see cref="IActor"/>, and any initial <see cref="IVisualEffect"/> to the Cinematic playback
         /// </summary>
-        protected void AddActor(Actor actor, List<VisualEffect> initialVisuals)
+        protected void AddActor(IActor actor, List<IVisualEffect> initialVisuals)
         {
-            foreach (VisualEffect visualEffect in initialVisuals)
+            foreach (IVisualEffect visualEffect in initialVisuals)
                 actor.AddVisualEffect(visualEffect);
 
             Actors.Add(actor.Id, actor);
         }
 
         /// <summary>
-        /// Set an <see cref="Actor"/> as the instance the Player will be spawned in. (Important for playback)
+        /// Set an <see cref="IActor"/> as the instance the Player will be spawned in. (Important for playback)
         /// </summary>
-        protected void SetAsPlayerActor(Actor actor, Position initialPosition, uint unknown3)
+        protected void SetAsPlayerActor(IActor actor, Position initialPosition, uint unknown3)
         {
-            Actor player = new Actor(0, 7, 0f, initialPosition, unknown0: 0);
+            IActor player = new Actor(0, 7, 0f, initialPosition, unknown0: 0);
             player.AddPacketToSend(new ServerCinematic0211
             {
                 Unknown0 = 0,
@@ -53,9 +54,9 @@ namespace NexusForever.Game.Cinematic
         }
 
         /// <summary>
-        /// Get a readied <see cref="Actor"/> that is queued for the Cinematic playback based on it's CreatureType ID
+        /// Get a readied <see cref="IActor"/> that is queued for the Cinematic playback based on it's CreatureType ID
         /// </summary>
-        protected Actor GetActor(uint creatureType)
+        protected IActor GetActor(uint creatureType)
         {
             return Actors.Values.FirstOrDefault(i => i.CreatureType == creatureType);
         }
@@ -70,15 +71,15 @@ namespace NexusForever.Game.Cinematic
         }
 
         /// <summary>
-        /// Add a <see cref="Camera"/> to the Cinematic playback.
+        /// Add a <see cref="ICamera"/> to the Cinematic playback.
         /// </summary>
-        protected void AddCamera(Camera camera)
+        protected void AddCamera(ICamera camera)
         {
             Cameras.Add(camera);
         }
 
         /// <summary>
-        /// Starts Playback for this <see cref="CinematicBase"/>, sending the packets to the Player.
+        /// Starts Playback for this <see cref="ICinematicBase"/>, sending the packets to the Player.
         /// </summary>
         public void StartPlayback()
         {
@@ -102,11 +103,11 @@ namespace NexusForever.Game.Cinematic
         }
 
         /// <summary>
-        /// Sends all packet data to the Player for all <see cref="Actor"/> stored for playback.
+        /// Sends all packet data to the Player for all <see cref="IActor"/> stored for playback.
         /// </summary>
         protected void SendActors()
         {
-            foreach (Actor actor in Actors.Values)
+            foreach (IActor actor in Actors.Values)
                 actor.SendInitialPackets(Player.Session);
         }
 
@@ -126,7 +127,7 @@ namespace NexusForever.Game.Cinematic
         }
 
         /// <summary>
-        /// Sends packet data to the Player for the Player <see cref="Actor"/> instance stored for playback.
+        /// Sends packet data to the Player for the Player <see cref="IActor"/> instance stored for playback.
         /// </summary>
         protected void SendPlayerActor()
         {
@@ -152,11 +153,11 @@ namespace NexusForever.Game.Cinematic
         }
 
         /// <summary>
-        /// Sends all packet data to the Player for all <see cref="Camera"/> stored for playback.
+        /// Sends all packet data to the Player for all <see cref="ICamera"/> stored for playback.
         /// </summary>
         protected void SendCameras()
         {
-            foreach (Camera camera in Cameras)
+            foreach (ICamera camera in Cameras)
                 camera.SendInitialPackets(Player.Session);
         }
 

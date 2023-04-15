@@ -1,4 +1,5 @@
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -8,7 +9,7 @@ using NexusForever.Network.World.Entity.Model;
 namespace NexusForever.Game.Entity
 {
     [DatabaseEntity(EntityType.Simple)]
-    public class Simple : UnitEntity
+    public class Simple : UnitEntity, ISimple
     {
         public byte QuestChecklistIdx { get; private set; }
 
@@ -32,21 +33,21 @@ namespace NexusForever.Game.Entity
             };
         }
 
-        public override void OnActivate(Player activator)
+        public override void OnActivate(IPlayer activator)
         {
             Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
             if (entry.DatacubeId != 0u)
                 activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, int.MaxValue);
         }
 
-        public override void OnActivateCast(Player activator)
+        public override void OnActivateCast(IPlayer activator)
         {
             uint progress = (uint)(1 << QuestChecklistIdx);
 
             Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
             if (entry.DatacubeId != 0u)
             {
-                Datacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeId, DatacubeType.Datacube);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeId, DatacubeType.Datacube);
                 if (datacube == null)
                     activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, progress);
                 else
@@ -58,7 +59,7 @@ namespace NexusForever.Game.Entity
 
             if (entry.DatacubeVolumeId != 0u)
             {
-                Datacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeVolumeId, DatacubeType.Journal);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeVolumeId, DatacubeType.Journal);
                 if (datacube == null)
                     activator.DatacubeManager.AddDatacubeVolume((ushort)entry.DatacubeVolumeId, progress);
                 else

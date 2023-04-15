@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -8,10 +9,10 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Entity
 {
-    public class CostumeItem : ISaveCharacter
+    public class CostumeItem : ICostumeItem
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="CostumeItem"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="ICostumeItem"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum CostumeItemSaveMask
@@ -39,7 +40,7 @@ namespace NexusForever.Game.Entity
                 ramps[i] = (int)entry.RampIndex;
             }
 
-            return (int)((ramps[2] & 0x3FF | 0xFFFFF800) << 20) | ((ramps[1] & 0x3FF) << 10) | (ramps[0] & 0x3FF);
+            return (int)((ramps[2] & 0x3FF | 0xFFFFF800) << 20) | (ramps[1] & 0x3FF) << 10 | ramps[0] & 0x3FF;
         }
 
         public CostumeItemSlot Slot { get; }
@@ -53,7 +54,7 @@ namespace NexusForever.Game.Entity
                 if (itemId == value)
                     return;
 
-                Entry  = GameTableManager.Instance.Item.GetEntry(value);
+                Entry = GameTableManager.Instance.Item.GetEntry(value);
                 itemId = value;
 
                 saveMask |= CostumeItemSaveMask.ItemId;
@@ -77,14 +78,14 @@ namespace NexusForever.Game.Entity
 
         private int dyeData;
 
-        private readonly Costume costume;
+        private readonly ICostume costume;
 
         private CostumeItemSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="CostumeItem"/> from an existing <see cref="CharacterCostumeItemModel"/> database model.
+        /// Create a new <see cref="ICostumeItem"/> from an existing <see cref="CharacterCostumeItemModel"/> database model.
         /// </summary>
-        public CostumeItem(Costume costume, CharacterCostumeItemModel model)
+        public CostumeItem(ICostume costume, CharacterCostumeItemModel model)
         {
             this.costume = costume;
             Slot         = (CostumeItemSlot)model.Slot;
@@ -94,9 +95,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="CostumeItem"/> from packet <see cref="ClientCostumeSave"/>.
+        /// Create a new <see cref="ICostumeItem"/> from packet <see cref="ClientCostumeSave"/>.
         /// </summary>
-        public CostumeItem(Costume costume, ClientCostumeSave.CostumeItem item, CostumeItemSlot slot)
+        public CostumeItem(ICostume costume, ClientCostumeSave.CostumeItem item, CostumeItemSlot slot)
         {
             this.costume = costume;
             Slot         = slot;

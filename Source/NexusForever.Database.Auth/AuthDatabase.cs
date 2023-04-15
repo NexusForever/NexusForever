@@ -131,12 +131,14 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Update <see cref="AccountModel"/> with supplied game token asynchronously.
         /// </summary>
-        public async Task UpdateAccountGameToken(AccountModel account, string gameToken)
+        public async Task UpdateAccountGameToken(uint accountId, string gameToken)
         {
-            account.GameToken = gameToken;
-
             using var context = new AuthContext(config);
-            EntityEntry<AccountModel> entity = context.Attach(account);
+            EntityEntry<AccountModel> entity = context.Attach(new AccountModel
+            {
+                Id        = accountId,
+                GameToken = gameToken
+            });
             entity.Property(p => p.GameToken).IsModified = true;
             await context.SaveChangesAsync();
         }
@@ -144,12 +146,14 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Update <see cref="AccountModel"/> with supplied session key asynchronously.
         /// </summary>
-        public async Task UpdateAccountSessionKey(AccountModel account, string sessionKey)
+        public async Task UpdateAccountSessionKey(uint accountId, string sessionKey)
         {
-            account.SessionKey = sessionKey;
-
             await using var context = new AuthContext(config);
-            EntityEntry<AccountModel> entity = context.Attach(account);
+            EntityEntry<AccountModel> entity = context.Attach(new AccountModel
+            {
+                Id         = accountId,
+                SessionKey = sessionKey
+            });
             entity.Property(p => p.SessionKey).IsModified = true;
             await context.SaveChangesAsync();
         }

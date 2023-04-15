@@ -4,11 +4,13 @@ using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Setting;
 using NetworkBinding = NexusForever.Network.World.Message.Model.Shared.Binding;
 
 namespace NexusForever.Game.Setting
 {
-    public class Keybinding : ISaveCharacter, ISaveAuth
+    // TODO: split this further to seperate character and account keybind specific methods
+    public class Keybinding : IKeybinding
     {
         [Flags]
         public enum BindingSaveMask
@@ -438,6 +440,26 @@ namespace NexusForever.Game.Setting
                 EventTypeEnum02 = networkBinding.EventTypeEnum02;
                 saveMask |= BindingSaveMask.EventTypeEnum02;
             }
+        }
+
+        public NetworkBinding Build()
+        {
+            return new NetworkBinding
+            {
+                InputActionId   = InputActionId,
+                DeviceEnum00    = DeviceEnum00,
+                DeviceEnum01    = DeviceEnum01,
+                DeviceEnum02    = DeviceEnum02,
+                Code00          = Code00,
+                Code01          = Code01,
+                Code02          = Code02,
+                MetaKeys00      = MetaKeys00,
+                MetaKeys01      = MetaKeys01,
+                MetaKeys02      = MetaKeys02,
+                EventTypeEnum00 = EventTypeEnum00,
+                EventTypeEnum01 = EventTypeEnum01,
+                EventTypeEnum02 = EventTypeEnum02
+            };
         }
     }
 }

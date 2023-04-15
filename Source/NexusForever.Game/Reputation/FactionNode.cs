@@ -1,11 +1,12 @@
 ﻿using System.Collections.Immutable;
+using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Reputation
 {
-    public class FactionNode
+    public class FactionNode : IFactionNode
     {
         /// <summary>
         /// Return faction level based on supplied reputation.
@@ -51,13 +52,13 @@ namespace NexusForever.Game.Reputation
 
         public Faction FactionId => (Faction)Entry.Id;
         public Faction2Entry Entry { get; }
-        public FactionNode Parent { get; private set; }
+        public IFactionNode Parent { get; private set; }
 
-        private ImmutableList<FactionNode> children;
-        private readonly ImmutableList<RelationshipNode> relationships;
+        private ImmutableList<IFactionNode> children;
+        private readonly ImmutableList<IRelationshipNode> relationships;
 
         /// <summary>
-        /// Create a new <see cref="FactionNode"/> with the supplied <see cref="Faction2Entry"/>.
+        /// Create a new <see cref="IFactionNode"/> with the supplied <see cref="Faction2Entry"/>.
         /// </summary>
         public FactionNode(Faction2Entry entry)
         {
@@ -67,31 +68,31 @@ namespace NexusForever.Game.Reputation
             relationships = GameTableManager.Instance.Faction2Relationship.Entries
                 .Where(e => (Faction)e.FactionId0 == FactionId)
                 .GroupBy(e => e.FactionId1)
-                .Select(g => new RelationshipNode(g.First()))
+                .Select(g => (IRelationshipNode)new RelationshipNode(g.First()))
                 .ToImmutableList();
         }
 
         /// <summary>
-        /// Link <see cref="FactionNode"/> with supplied parent and child <see cref="FactionNode"/>'s.
+        /// Link <see cref="IFactionNode"/> with supplied parent and child <see cref="IFactionNode"/>'s.
         /// </summary>
-        public void Link(FactionNode parentNode, List<FactionNode> childNodes, List<FactionNode> relationshipNodes)
+        public void Link(IFactionNode parentNode, List<IFactionNode> childNodes, List<IFactionNode> relationshipNodes)
         {
             if (Parent != null)
                 throw new InvalidOperationException();
             if (children != null)
                 throw new InvalidOperationException();
 
-            Parent   = parentNode;
+            Parent = parentNode;
             children = childNodes.ToImmutableList();
 
-            foreach (RelationshipNode relationship in relationships)
+            foreach (IRelationshipNode relationship in relationships)
                 relationship.Link(relationshipNodes.SingleOrDefault(n => n.FactionId == relationship.Id));
         }
 
         /// <summary>
-        /// Traverse up tree looking for <see cref="FactionNode"/> for supplied <see cref="Faction"/>.
+        /// Traverse up tree looking for <see cref="IFactionNode"/> for supplied <see cref="Faction"/>.
         /// </summary>
-        public FactionNode GetAscendant(Faction factionId)
+        public IFactionNode GetAscendant(Faction factionId)
         {
             if (Parent == null)
                 return null;
@@ -103,16 +104,16 @@ namespace NexusForever.Game.Reputation
         }
 
         /// <summary>
-        /// Traverse down tree looking for <see cref="FactionNode"/> for supplied <see cref="Faction"/>.
+        /// Traverse down tree looking for <see cref="IFactionNode"/> for supplied <see cref="Faction"/>.
         /// </summary>
-        public FactionNode GetDescendent(Faction factionId)
+        public IFactionNode GetDescendent(Faction factionId)
         {
-            foreach (FactionNode child in children)
+            foreach (IFactionNode child in children)
             {
                 if (child.FactionId == factionId)
                     return child;
 
-                FactionNode ss = child.GetDescendent(factionId);
+                IFactionNode ss = child.GetDescendent(factionId);
                 if (ss != null)
                     return ss;
             }
@@ -120,12 +121,12 @@ namespace NexusForever.Game.Reputation
             return null;
         }
 
-        public IEnumerable<FactionNode> GetChildren()
+        public IEnumerable<IFactionNode> GetChildren()
         {
             return children;
         }
 
-        public IEnumerable<RelationshipNode> GetRelationships()
+        public IEnumerable<IRelationshipNode> GetRelationships()
         {
             return relationships;
         }
@@ -135,12 +136,12 @@ namespace NexusForever.Game.Reputation
         /// </summary>
         public FactionLevel? GetFriendshipFactionLevel(Faction factionId)
         {
-            foreach (RelationshipNode relationship in relationships)
+            foreach (IRelationshipNode relationship in relationships)
             {
                 if (relationship.Node.FactionId == factionId)
                     return (FactionLevel)relationship.Entry.FactionLevel;
 
-                FactionNode node = relationship.Node.GetDescendent(factionId);
+                IFactionNode node = relationship.Node.GetDescendent(factionId);
                 if (node != null)
                     return (FactionLevel)relationship.Entry.FactionLevel;
             }

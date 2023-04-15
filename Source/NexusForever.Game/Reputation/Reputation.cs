@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Static.Reputation;
 
 namespace NexusForever.Game.Reputation
 {
-    public class Reputation : ISaveCharacterExtended
+    public class Reputation : IReputation
     {
         [Flags]
         private enum SaveMask
@@ -16,7 +18,7 @@ namespace NexusForever.Game.Reputation
         }
 
         public Faction Id => Entry.FactionId;
-        public FactionNode Entry { get; }
+        public IFactionNode Entry { get; }
 
         public float Amount
         {
@@ -32,11 +34,15 @@ namespace NexusForever.Game.Reputation
 
         private SaveMask saveMask;
 
+        private readonly IPlayer player;
+
         /// <summary>
-        /// Create a new <see cref="Reputation"/> from an existing database model.
+        /// Create a new <see cref="IReputation"/> from an existing database model.
         /// </summary>
-        public Reputation(FactionNode entry, CharacterReputation model)
+        public Reputation(IPlayer player, IFactionNode entry, CharacterReputation model)
         {
+            this.player = player;
+
             Entry    = entry;
             amount   = model.Amount;
 
@@ -44,24 +50,26 @@ namespace NexusForever.Game.Reputation
         }
 
         /// <summary>
-        /// Create a new <see cref="Reputation"/> from the supplied <see cref="FactionNode"/> and amount.
+        /// Create a new <see cref="IReputation"/> from the supplied <see cref="IFactionNode"/> and amount.
         /// </summary>
-        public Reputation(FactionNode entry, float amount)
+        public Reputation(IPlayer player, IFactionNode entry, float amount)
         {
+            this.player = player;
+
             Entry       = entry;
             this.amount = amount;
 
             saveMask    = SaveMask.Create;
         }
 
-        public void Save(ulong characterId, CharacterContext context)
+        public void Save(CharacterContext context)
         {
             if (saveMask == SaveMask.None)
                 return;
 
             var model = new CharacterReputation
             {
-                Id        = characterId,
+                Id        = player.CharacterId,
                 FactionId = (uint)Id,
                 Amount    = Amount
             };

@@ -1,25 +1,26 @@
 ﻿using System.Collections;
 using System.Numerics;
-using NexusForever.Game.Entity.Movement.Spline.Implementation;
+using NexusForever.Game.Abstract.Entity.Movement.Spline;
+using NexusForever.Game.Abstract.Entity.Movement.Spline.Type;
 using NexusForever.Game.Static.Entity.Movement.Spline;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Entity.Movement.Spline
 {
-    public class Spline : IEnumerable<SplinePoint>
+    public class Spline : ISpline
     {
         public float Length { get; private set; }
 
-        protected readonly List<SplinePoint> points = new();
+        protected readonly List<ISplinePoint> points = new();
 
-        private SplineTypeBase type;
+        private ISplineType type;
         private ISplineMode mode;
 
         /// <summary>
-        /// Initialise a new single spline with supplied <see cref="SplineTypeBase"/> and <see cref="ISplineMode"/>.
+        /// Initialise a new single spline with supplied <see cref="ISplineType"/> and <see cref="ISplineMode"/>.
         /// </summary>
-        public void Initialise(ushort splineId, SplineTypeBase splineType, ISplineMode splineMode)
+        public void Initialise(ushort splineId, ISplineType splineType, ISplineMode splineMode)
         {
             type = splineType;
             mode = splineMode;
@@ -49,9 +50,9 @@ namespace NexusForever.Game.Entity.Movement.Spline
         }
 
         /// <summary>
-        /// Initialise a new custom spline with supplied <see cref="SplineTypeBase"/> and <see cref="ISplineMode"/>.
+        /// Initialise a new custom spline with supplied <see cref="ISplineType"/> and <see cref="ISplineMode"/>.
         /// </summary>
-        public void Initialise(List<Vector3> nodes, SplineTypeBase splineType, ISplineMode splineMode)
+        public void Initialise(List<Vector3> nodes, ISplineType splineType, ISplineMode splineMode)
         {
             type = splineType;
             mode = splineMode;
@@ -69,7 +70,7 @@ namespace NexusForever.Game.Entity.Movement.Spline
         /// </summary>
         public Vector3 GetFinalPoint(SplineDirection direction)
         {
-            SplinePoint p = points[(int)(direction == SplineDirection.Forward ? type.TopIndex + 1 : type.TopReverseIndex - 1)];
+            ISplinePoint p = points[(int)(direction == SplineDirection.Forward ? type.TopIndex + 1 : type.TopReverseIndex - 1)];
             return p.Position;
         }
 
@@ -86,7 +87,7 @@ namespace NexusForever.Game.Entity.Movement.Spline
         /// </summary>
         public float GetNextLength(SplineDirection direction, uint point)
         {
-            SplinePoint p = points[(int)(direction == SplineDirection.Forward ? point : point - 1)];
+            ISplinePoint p = points[(int)(direction == SplineDirection.Forward ? point : point - 1)];
             return p.Length;
         }
 
@@ -98,7 +99,7 @@ namespace NexusForever.Game.Entity.Movement.Spline
             return type.GetInterpolatedPoint(direction, p, points);
         }
 
-        public IEnumerator<SplinePoint> GetEnumerator()
+        public IEnumerator<ISplinePoint> GetEnumerator()
         {
             return points.GetEnumerator();
         }

@@ -1,5 +1,6 @@
 using System.Numerics;
-using NexusForever.Game.Map;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -11,7 +12,7 @@ using NetworkVehiclePassenger = NexusForever.Network.World.Message.Model.Shared.
 
 namespace NexusForever.Game.Entity
 {
-    public class Mount : Vehicle
+    public class Mount : Vehicle, IMount
     {
         public uint OwnerGuid { get; }
         public PetType MountType { get; }
@@ -21,7 +22,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public ItemDisplayEntry PilotDisplayInfo { get; }
 
-        public Mount(Player owner, uint spell4Id, uint creatureId, uint vehicleId, uint itemDisplayId)
+        public Mount(IPlayer owner, uint spell4Id, uint creatureId, uint vehicleId, uint itemDisplayId)
             : base(EntityType.Mount, creatureId, vehicleId, spell4Id)
         {
             OwnerGuid        = owner.Guid;
@@ -62,7 +63,7 @@ namespace NexusForever.Game.Entity
             return entityCreate;
         }
 
-        public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
+        public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
         {
             base.OnAddToMap(map, guid, vector);
 
@@ -70,7 +71,7 @@ namespace NexusForever.Game.Entity
             CreateFlags |= EntityCreateFlag.NoSpawnAnimation;
         }
 
-        protected override void OnPassengerAdd(Player player, VehicleSeatType seatType, byte seatPosition)
+        protected override void OnPassengerAdd(IPlayer player, VehicleSeatType seatType, byte seatPosition)
         {
             if (seatType != VehicleSeatType.Pilot)
                 return;
@@ -84,7 +85,7 @@ namespace NexusForever.Game.Entity
                 });
             }
 
-            PetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(MountType, SpellEntry.Id);
+            IPetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(MountType, SpellEntry.Id);
             if (customisation != null)
             {
                 ItemSlot slot = ItemSlot.MountFront;
@@ -114,7 +115,7 @@ namespace NexusForever.Game.Entity
             UpdateVisuals(player);
         }
 
-        protected override void OnPassengerRemove(Player player, VehicleSeatType seatType, byte seatPosition)
+        protected override void OnPassengerRemove(IPlayer player, VehicleSeatType seatType, byte seatPosition)
         {
             if (seatType != VehicleSeatType.Pilot)
                 return;
@@ -144,7 +145,7 @@ namespace NexusForever.Game.Entity
             UpdateVisuals(player);
         }
 
-        private void UpdateVisuals(Player player)
+        private void UpdateVisuals(IPlayer player)
         {
             var visualUpdate = new ServerEntityVisualUpdate
             {

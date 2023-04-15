@@ -1,7 +1,8 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.TextFilter;
-using NexusForever.Game.TextFilter;
+using NexusForever.Game.Text.Filter;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Guild
@@ -9,9 +10,9 @@ namespace NexusForever.Game.Guild
     public partial class Guild
     {
         [GuildOperationHandler(GuildOperation.AdditionalInfo)]
-        private GuildResultInfo GuildOperationAdditionalInfo(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationAdditionalInfo(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildResultInfo GetResult()
+            IGuildResultInfo GetResult()
             {
                 if (member.Rank.Index > 0)
                     return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
@@ -23,7 +24,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo result = GetResult();
+            IGuildResultInfo result = GetResult();
             if (result.Result == GuildResult.Success)
             {
                 AdditionalInfo = operation.TextValue;
@@ -40,9 +41,9 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.MessageOfTheDay)]
-        private GuildResultInfo GuildOperationMessageOfTheDay(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationMessageOfTheDay(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildResultInfo GetResult()
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.MessageOfTheDay))
                     return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
@@ -54,7 +55,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo result = GetResult();
+            IGuildResultInfo result = GetResult();
             if (result.Result == GuildResult.Success)
             {
                 MessageOfTheDay = operation.TextValue;
@@ -71,9 +72,9 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.TaxUpdate)]
-        private GuildResultInfo GuildOperationTaxUpdate(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationTaxUpdate(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildResultInfo GetResult()
+            IGuildResultInfo GetResult()
             {
                 if (member.Rank.Index > 0)
                     return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
@@ -81,7 +82,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo result = GetResult();
+            IGuildResultInfo result = GetResult();
             if (result.Result == GuildResult.Success)
                 SetTaxes(Convert.ToBoolean(operation.Data));
 

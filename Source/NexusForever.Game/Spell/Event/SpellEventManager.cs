@@ -1,16 +1,16 @@
-﻿using NexusForever.Shared;
+﻿using NexusForever.Game.Abstract.Spell.Event;
 
 namespace NexusForever.Game.Spell.Event
 {
-    public class SpellEventManager : IUpdate
+    public class SpellEventManager : ISpellEventManager
     {
         public bool HasPendingEvent => events.Count != 0;
 
-        private readonly List<SpellEvent> events = new();
+        private readonly List<ISpellEvent> events = new();
 
         public void Update(double lastTick)
         {
-            foreach (SpellEvent spellEvent in events.ToArray())
+            foreach (ISpellEvent spellEvent in events.ToArray())
             {
                 spellEvent.Update(lastTick);
                 if (spellEvent.Delay <= 0d)
@@ -21,7 +21,7 @@ namespace NexusForever.Game.Spell.Event
             }
         }
 
-        public void EnqueueEvent(SpellEvent spellEvent)
+        public void EnqueueEvent(ISpellEvent spellEvent)
         {
             events.Add(spellEvent);
         }

@@ -1,8 +1,9 @@
 ﻿using NexusForever.Database.Auth.Model;
+using NexusForever.Game.Abstract.Server;
 
 namespace NexusForever.Game.Server
 {
-    public class ServerMessageInfo
+    public class ServerMessageInfo : IServerMessageInfo
     {
         public byte Index { get; }
         public List<string> Messages { get; }

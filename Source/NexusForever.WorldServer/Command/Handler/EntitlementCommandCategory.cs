@@ -1,7 +1,9 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Account.Entitlement;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
@@ -9,7 +11,7 @@ using NexusForever.WorldServer.Command.Static;
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Entitlement, "A collection of commands to manage account and character entitlements.", "entitlement")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class EntitlementCommandCategory : CommandCategory
     {
         [Command(Permission.EntitlementAccount, "A collection of commands to manage account entitlements", "account")]
@@ -18,9 +20,9 @@ namespace NexusForever.WorldServer.Command.Handler
             [Command(Permission.EntitlementAccountList, "List all entitlements for character.", "list")]
             public void HandleEntitlementCommandAccountList(ICommandContext context)
             {
-                Player player = context.GetTargetOrInvoker<Player>();
-                context.SendMessage($"Entitlements for account {player.Session.Account.Id}:");
-                foreach (AccountEntitlement entitlement in player.Session.EntitlementManager.GetAccountEntitlements()) 
+                IPlayer player = context.GetTargetOrInvoker<IPlayer>();
+                context.SendMessage($"Entitlements for account {player.Account.Id}:");
+                foreach (IAccountEntitlement entitlement in player.Account.EntitlementManager) 
                     context.SendMessage($"Entitlement: {entitlement.Type}, Value: {entitlement.Amount}");
             }
         }
@@ -31,9 +33,9 @@ namespace NexusForever.WorldServer.Command.Handler
             [Command(Permission.EntitlementCharacterList, "List all entitlements for account.", "list")]
             public void HandleEntitlementCommandCharacterList(ICommandContext context)
             {
-                Player player = context.GetTargetOrInvoker<Player>();
-                context.SendMessage($"Entitlements for character {player.Session.Player.CharacterId}:");
-                foreach (CharacterEntitlement entitlement in player.Session.EntitlementManager.GetCharacterEntitlements())
+                IPlayer player = context.GetTargetOrInvoker<IPlayer>();
+                context.SendMessage($"Entitlements for character {player.CharacterId}:");
+                foreach (ICharacterEntitlement entitlement in player.EntitlementManager)
                     context.SendMessage($"Entitlement: {entitlement.Type}, Value: {entitlement.Amount}");
             }
         }
@@ -45,17 +47,21 @@ namespace NexusForever.WorldServer.Command.Handler
                 [Parameter("Value to modify the entitlement.")]
                 int value)
         {
-            if (GameTableManager.Instance.Entitlement.GetEntry((ulong)entitlementType) == null)
+            EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)entitlementType);
+            if (entry == null)
             {
                 context.SendMessage($"{entitlementType} isn't a valid entitlement id!");
                 return;
             }
 
-            Player targetPlayer = context.GetTargetOrInvoker<Player>();
-            if (targetPlayer != context.Invoker && !(context.Invoker as Player).Session.AccountRbacManager.HasPermission(Permission.EntitlementGrantOther))
-                targetPlayer = context.Invoker as Player;
+            IPlayer targetPlayer = context.GetTargetOrInvoker<IPlayer>();
+            if (targetPlayer != context.Invoker && !(context.Invoker as IPlayer).Account.RbacManager.HasPermission(Permission.EntitlementGrantOther))
+                targetPlayer = context.Invoker as IPlayer;
 
-            targetPlayer.Session.EntitlementManager.UpdateEntitlement(entitlementType, value);
+            if (((EntitlementFlags)entry.Flags & EntitlementFlags.Character) != 0)
+                targetPlayer.EntitlementManager.UpdateEntitlement(entitlementType, value);
+            else
+                targetPlayer.Account.EntitlementManager.UpdateEntitlement(entitlementType, value);            
         }
     }
 }

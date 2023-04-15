@@ -2,22 +2,22 @@ using System.Collections;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
 {
-    public class TitleManager : IUpdate, ISaveCharacter, IEnumerable<Title>
+    public class TitleManager : ITitleManager
     {
         public ushort ActiveTitleId
         {
             get => activeTitleId;
             set
             {
-                if (value != 0 && (!titles.TryGetValue(value, out Title title) || title.Revoked || activeTitleId == value))
+                if (value != 0 && (!titles.TryGetValue(value, out ITitle title) || title.Revoked || activeTitleId == value))
                     return;
 
                 activeTitleId = value;
@@ -34,13 +34,13 @@ namespace NexusForever.Game.Entity
         private ushort activeTitleId;
         private bool activeSaved = true;
 
-        private readonly Player player;
-        private readonly Dictionary<ushort, Title> titles = new();
+        private readonly IPlayer player;
+        private readonly Dictionary<ushort, ITitle> titles = new();
 
         /// <summary>
-        /// Create a new <see cref="TitleManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// Create a new <see cref="ITitleManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public TitleManager(Player owner, CharacterModel model)
+        public TitleManager(IPlayer owner, CharacterModel model)
         {
             player = owner;
             activeTitleId = model.Title;
@@ -53,7 +53,7 @@ namespace NexusForever.Game.Entity
 
         public void Update(double lastTick)
         {
-            foreach (Title title in this)
+            foreach (ITitle title in titles.Values)
             {
                 title.Update(lastTick);
                 if (title.TimeRemaining != null && title.TimeRemaining <= 0d)
@@ -78,20 +78,23 @@ namespace NexusForever.Game.Entity
                 activeSaved = true;
             }
 
-            foreach (Title title in titles.Values)
+            foreach (ITitle title in titles.Values)
                 title.Save(context);
         }
 
         /// <summary>
-        /// Add new <see cref="Title"/> with supplied title id, if suppress is true <see cref="ServerTitleUpdate"/> won't be sent.
+        /// Add new <see cref="ITitle"/> with supplied title id.
         /// </summary>
+        /// <remarks>
+        /// If suppress if true, update won't be sent to client.
+        /// </remarks>
         public void AddTitle(ushort titleId, bool suppress = false)
         {
             CharacterTitleEntry entry = GameTableManager.Instance.CharacterTitle.GetEntry(titleId);
             if (entry == null)
                 throw new InvalidPacketValueException();
 
-            if (titles.TryGetValue(titleId, out Title title))
+            if (titles.TryGetValue(titleId, out ITitle title))
             {
                 if (title.Revoked)
                     title.Revoked = false;
@@ -119,14 +122,17 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Revoke <see cref="Title"/> with supplied title id, if suppress is true <see cref="ServerTitleUpdate"/> won't be sent.
+        /// Revoke <see cref="ITitle"/> with supplied title id.
         /// </summary>
+        /// <remarks>
+        /// If suppress if true, update won't be sent to client.
+        /// </remarks>
         public void RevokeTitle(ushort titleId, bool suppress = false)
         {
             if (GameTableManager.Instance.CharacterTitle.GetEntry(titleId) == null)
                 throw new InvalidPacketValueException();
 
-            if (!titles.TryGetValue(titleId, out Title title))
+            if (!titles.TryGetValue(titleId, out ITitle title))
                 throw new InvalidPacketValueException();
 
             title.Revoked = true;
@@ -144,7 +150,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Send <see cref="ServerTitles"/> to owner <see cref="Player"/>.
+        /// Send all owned titles to client.
         /// </summary>
         public void SendTitles()
         {
@@ -160,8 +166,11 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// This is only used debug/command purposes.
+        /// Add all available titles.
         /// </summary>
+        /// <remarks>
+        /// This is only used debug/command purposes.
+        /// </remarks>
         public void AddAllTitles()
         {
             ushort[] titleIds = GameTableManager.Instance.CharacterTitle.Entries
@@ -176,8 +185,11 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// This is only used debug/command purposes.
+        /// Remove all available titles.
         /// </summary>
+        /// <remarks>
+        /// This is only used debug/command purposes.
+        /// </remarks>
         public void RevokeAllTitles()
         {
             ushort[] titleIds = titles.Values
@@ -193,19 +205,19 @@ namespace NexusForever.Game.Entity
 
         private void EnsureActiveTitleIsOwned()
         {
-            if (activeTitleId != 0 && (!titles.TryGetValue(activeTitleId, out Title title) || title.Revoked))
+            if (activeTitleId != 0 && (!titles.TryGetValue(activeTitleId, out ITitle title) || title.Revoked))
                 ActiveTitleId = 0;
         }
 
         /// <summary>
-        /// Returns whether this <see cref="TitleManager"/> has a title available to it which has not been revoked.
+        /// Returns if title with supplied id is owned.
         /// </summary>
         public bool HasTitle(ushort id)
         {
-            return titles.TryGetValue(id, out Title title) && !title.Revoked;
+            return titles.TryGetValue(id, out ITitle title) && !title.Revoked;
         }
 
-        public IEnumerator<Title> GetEnumerator()
+        public IEnumerator<ITitle> GetEnumerator()
         {
             return titles.Values
                 .Where(t => !t.Revoked)

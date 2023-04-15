@@ -1,4 +1,5 @@
 ﻿using System;
+using NexusForever.Network.Sts;
 
 namespace NexusForever.StsServer.Network.Message
 {

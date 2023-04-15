@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Social;
 using NexusForever.GameTable;
 using NexusForever.Network.World.Message.Model;
@@ -7,7 +8,7 @@ using NexusForever.Network.World.Social.Model;
 
 namespace NexusForever.Game.Social
 {
-    public class ChatMessageBuilder
+    public class ChatMessageBuilder : IChatMessageBuilder
     {
         public ChatChannelType Type { get; set; }
         public ulong ChatId { get; set; }

@@ -1,15 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared;
 using NexusForever.Shared.Game;
-using ItemEntity = NexusForever.Game.Entity.Item;
 
 namespace NexusForever.Game.Spell
 {
-    public class CharacterSpell : ISaveCharacter, IUpdate
+    public class CharacterSpell : ICharacterSpell
     {
         [Flags]
         public enum UnlockedSpellSaveMask
@@ -19,10 +18,10 @@ namespace NexusForever.Game.Spell
             Tier   = 0x0002
         }
 
-        public Player Owner { get; }
-        public SpellBaseInfo BaseInfo { get; }
-        public SpellInfo SpellInfo { get; private set; }
-        public ItemEntity Item { get; }
+        public IPlayer Owner { get; }
+        public ISpellBaseInfo BaseInfo { get; }
+        public ISpellInfo SpellInfo { get; private set; }
+        public IItem Item { get; }
 
         public byte Tier
         {
@@ -46,9 +45,9 @@ namespace NexusForever.Game.Spell
         private UpdateTimer rechargeTimer;
 
         /// <summary>
-        /// Create a new <see cref="CharacterSpell"/> from an existing database model.
+        /// Create a new <see cref="ICharacterSpell"/> from an existing database model.
         /// </summary>
-        public CharacterSpell(Player player, CharacterSpellModel model, SpellBaseInfo baseInfo, ItemEntity item)
+        public CharacterSpell(IPlayer player, CharacterSpellModel model, ISpellBaseInfo baseInfo, IItem item)
         {
             Owner     = player;
             BaseInfo  = baseInfo;
@@ -60,9 +59,9 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Create a new <see cref="CharacterSpell"/> from a <see cref="SpellBaseInfo"/>.
+        /// Create a new <see cref="ICharacterSpell"/> from a <see cref="ISpellBaseInfo"/>.
         /// </summary>
-        public CharacterSpell(Player player, SpellBaseInfo baseInfo, byte tier, ItemEntity item)
+        public CharacterSpell(IPlayer player, ISpellBaseInfo baseInfo, byte tier, IItem item)
         {
             Owner     = player;
             BaseInfo  = baseInfo ?? throw new ArgumentNullException();

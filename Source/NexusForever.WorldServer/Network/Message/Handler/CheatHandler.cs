@@ -1,6 +1,5 @@
 using System;
-using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.WorldServer.Command;
@@ -14,12 +13,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(GameMessageOpcode.ClientCheat)]
-        public static void HandleCheat(WorldSession session, ClientCheat cheat)
+        public static void HandleCheat(IWorldSession session, ClientCheat cheat)
         {
             try
             {
-                var target  = session.Player.GetVisible<WorldEntity>(session.Player.TargetGuid);
-                var context = new WorldSessionCommandContext(session.Player, target);
+                var target  = session.Player.GetVisible<IWorldEntity>(session.Player.TargetGuid);
+                var context = new WorldSessionCommandContext(session, target);
                 CommandManager.Instance.HandleCommand(context, cheat.Message);
             }
             catch (Exception e)

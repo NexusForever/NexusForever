@@ -4,6 +4,7 @@ using NexusForever.Cryptography;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
+using NexusForever.Network.Sts;
 using NexusForever.Network.Sts.Model;
 using NexusForever.Shared.Game.Events;
 
@@ -95,7 +96,9 @@ namespace NexusForever.StsServer.Network.Message.Handler
         public static void HandleRequestGameToken(StsSession session, RequestGameTokenMessage requestGameToken)
         {
             Guid guid = RandomProvider.GetGuid();
-            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<AuthDatabase>().UpdateAccountGameToken(session.Account, Convert.ToHexString(guid.ToByteArray())),
+
+            session.Account.GameToken = Convert.ToHexString(guid.ToByteArray());
+            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<AuthDatabase>().UpdateAccountGameToken(session.Account.Id, session.Account.GameToken),
                 () =>
             {
                 session.EnqueueMessageOk(new RequestGameTokenResponse

@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.RBAC;
 using NexusForever.Game.RBAC;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
@@ -18,8 +19,8 @@ namespace NexusForever.WorldServer.Command.Context
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public WorldEntity Invoker { get; }
-        public WorldEntity Target { get; }
+        public IWorldEntity Invoker { get; }
+        public IWorldEntity Target { get; }
 
         public Language Language { get; } = Language.English;
         public ImmutableHashSet<Permission> Permissions { get; }
@@ -34,7 +35,7 @@ namespace NexusForever.WorldServer.Command.Context
             this.webSocket = webSocket;
 
             // console role needs to exist in order for the websocket command context to work
-            RBACRole role = RBACManager.Instance.GetRole(Role.WebSocket);
+            IRBACRole role = RBACManager.Instance.GetRole(Role.WebSocket);
             if (role == null)
                 throw new InvalidDataException("WebSocket role doesn't exist!");
 
@@ -58,11 +59,11 @@ namespace NexusForever.WorldServer.Command.Context
         }
 
         /// <summary>
-        /// Return <see cref="WorldEntity"/> target, if no target is present return the <see cref="WorldEntity"/> invoker.
+        /// Return <see cref="IWorldEntity"/> target, if no target is present return the <see cref="IWorldEntity"/> invoker.
         /// </summary>
-        public T GetTargetOrInvoker<T>() where T : WorldEntity
+        public T GetTargetOrInvoker<T>() where T : IWorldEntity
         {
-            return null;
+            return default;
         }
 
         private async void SendWebSocketMessage(string text, string type)

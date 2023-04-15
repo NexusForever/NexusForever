@@ -28,17 +28,17 @@ namespace NexusForever.Database.Character
             await context.SaveChangesAsync();
         }
 
-        public async Task Save(ISaveCharacter entity)
+        public async Task Save(IDatabaseCharacter entity)
         {
             await using var context = new CharacterContext(config);
             entity.Save(context);
             await context.SaveChangesAsync();
         }
 
-        public async Task Save(IEnumerable<ISaveCharacter> entities)
+        public async Task Save(IEnumerable<IDatabaseCharacter> entities)
         {
             await using var context = new CharacterContext(config);
-            foreach (ISaveCharacter entity in entities)
+            foreach (IDatabaseCharacter entity in entities)
                 entity.Save(context);
             await context.SaveChangesAsync();
         }

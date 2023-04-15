@@ -1,31 +1,25 @@
 using System.Collections.Immutable;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Storefront;
 using NexusForever.Game.Static.Storefront;
-using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Storefront
 {
-    public class OfferGroup : IBuildable<ServerStoreOffers.OfferGroup>
+    public class OfferGroup : IOfferGroup
     {
-        public struct Category
-        {
-            public uint Id { get; set; }
-            public uint Index { get; set; }
-        }
-
         public uint Id { get; }
         public DisplayFlag DisplayFlags { get; }
         public string Name { get; }
         public string Description { get; }
         public ushort DisplayInfoOverride { get; }
         public bool Visible { get; }
-        public ImmutableList<Category> Categories { get; }
+        public ImmutableList<IOfferGroupCategory> Categories { get; }
 
-        private readonly Dictionary</*offerId*/uint, OfferItem> offerItems = new();
+        private readonly Dictionary</*offerId*/uint, IOfferItem> offerItems = new();
 
         /// <summary>
-        /// Create a new <see cref="OfferGroup"/> from an existing database model.
+        /// Create a new <see cref="IOfferGroup"/> from an existing database model.
         /// </summary>
         public OfferGroup(StoreOfferGroupModel model)
         {
@@ -36,12 +30,12 @@ namespace NexusForever.Game.Storefront
             DisplayInfoOverride = model.DisplayInfoOverride;
             Visible      = Convert.ToBoolean(model.Visible);
 
-            var builder = ImmutableList.CreateBuilder<Category>();
+            var builder = ImmutableList.CreateBuilder<IOfferGroupCategory>();
             foreach (StoreOfferGroupCategoryModel categoryModel in model.StoreOfferGroupCategory)
             {
                 if (Convert.ToBoolean(categoryModel.Visible))
                 {
-                    builder.Add(new Category
+                    builder.Add(new OfferGroupCategory
                     {
                         Id    = categoryModel.CategoryId,
                         Index = categoryModel.Index
@@ -59,11 +53,11 @@ namespace NexusForever.Game.Storefront
         }
 
         /// <summary>
-        /// Returns an <see cref="OfferItem"/> matching the supplied offer ID, if it exists
+        /// Returns an <see cref="IOfferItem"/> matching the supplied offer ID, if it exists.
         /// </summary>
-        public OfferItem GetOfferItem(uint offerId)
+        public IOfferItem GetOfferItem(uint offerId)
         {
-            return offerItems.TryGetValue(offerId, out OfferItem offerItem) ? offerItem : null;
+            return offerItems.TryGetValue(offerId, out IOfferItem offerItem) ? offerItem : null;
         }
 
         public ServerStoreOffers.OfferGroup Build()

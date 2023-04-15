@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class Scene : IKeyframeAction
+    public class Scene : IScene
     {
         public uint Delay { get; }
         public uint SceneId { get; }
@@ -14,7 +15,7 @@ namespace NexusForever.Game.Cinematic
             SceneId = sceneId;
         }
 
-        public void Send(WorldSession session)
+        public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicScene
             {

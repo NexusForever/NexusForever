@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
@@ -11,18 +12,18 @@ using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Entity
 {
-    public class PathManager: ISaveCharacter, IEnumerable<PathEntry>
+    public class PathManager : IPathManager
     {
         private const uint MaxPathCount = 4u;
         private const uint MaxPathLevel = 30u;
 
-        private readonly Player player;
-        private readonly Dictionary<Path, PathEntry> paths = new();
+        private readonly IPlayer player;
+        private readonly Dictionary<Path, IPathEntry> paths = new();
 
         /// <summary>
-        /// Create a new <see cref="PathManager"/> from <see cref="Player"/> database model.
+        /// Create a new <see cref="IPathManager"/> from <see cref="IPlayer"/> database model.
         /// </summary>
-        public PathManager(Player owner, CharacterModel model)
+        public PathManager(IPlayer owner, CharacterModel model)
         {
             player = owner;
             foreach (CharacterPathModel pathModel in model.Path)
@@ -48,9 +49,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="PathEntry"/>.
+        /// Create a new <see cref="IPathEntry"/>.
         /// </summary>
-        private PathEntry PathCreate(Path path, bool unlocked = false)
+        private IPathEntry PathCreate(Path path, bool unlocked = false)
         {
             if (path > Path.Explorer)
                 return null;
@@ -68,20 +69,16 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Checks to see if a <see cref="Player"/>'s <see cref="Path"/> is active
+        /// Checks to see if a <see cref="IPlayer"/>'s <see cref="Path"/> is active.
         /// </summary>
-        /// <param name="pathToCheck"></param>
-        /// <returns></returns>
         public bool IsPathActive(Path pathToCheck)
         {
             return player.Path == pathToCheck;
         }
 
         /// <summary>
-        /// Attempts to activate a <see cref="Player"/>'s <see cref="Path"/>
+        /// Attempts to activate a <see cref="IPlayer"/>'s <see cref="Path"/>.
         /// </summary>
-        /// <param name="pathToActivate"></param>
-        /// <returns></returns>
         public void ActivatePath(Path pathToActivate)
         {
             if (pathToActivate > Path.Explorer)
@@ -89,7 +86,7 @@ namespace NexusForever.Game.Entity
 
             if (!IsPathUnlocked(pathToActivate))
                 throw new ArgumentException("Path is not unlocked.");
-            
+
             if (IsPathActive(pathToActivate))
                 throw new ArgumentException("Path is already active.");
 
@@ -101,20 +98,16 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Checks to see if a <see cref="Player"/>'s <see cref="Path"/> is mathced by a corresponding <see cref="PathUnlockedMask"/> flag
+        /// Checks to see if a <see cref="IPlayer"/>'s <see cref="Path"/> is mathced by a corresponding <see cref="PathUnlockedMask"/> flag.
         /// </summary>
-        /// <param name="pathToUnlock"></param>
-        /// <returns></returns>
         public bool IsPathUnlocked(Path pathToUnlock)
         {
             return GetPathEntry(pathToUnlock).Unlocked;
         }
 
         /// <summary>
-        /// Attemps to adjust the <see cref="Player"/>'s <see cref="PathUnlockedMask"/> status
+        /// Attemps to adjust the <see cref="IPlayer"/>'s <see cref="PathUnlockedMask"/> status.
         /// </summary>
-        /// <param name="pathToUnlock"></param>
-        /// <returns></returns>
         public void UnlockPath(Path pathToUnlock)
         {
             if (pathToUnlock > Path.Explorer)
@@ -130,9 +123,8 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Add XP to the current <see cref="Path"/>
+        /// Add XP to the current <see cref="Path"/>.
         /// </summary>
-        /// <param name="xp"></param>
         public void AddXp(uint xp)
         {
             if (xp == 0)
@@ -142,7 +134,7 @@ namespace NexusForever.Game.Entity
 
             if (GetCurrentLevel(path) < MaxPathLevel)
             {
-                PathEntry entry = GetPathEntry(path);
+                IPathEntry entry = GetPathEntry(path);
 
                 checked
                 {
@@ -159,10 +151,8 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Get the current <see cref="Path"/> level for the <see cref="Player"/>
+        /// Get the current <see cref="Path"/> level for the <see cref="IPlayer"/>.
         /// </summary>
-        /// <param name="path">The path being checked</param>
-        /// <returns></returns>
         private uint GetCurrentLevel(Path path)
         {
             return GameTableManager.Instance.PathLevel.Entries
@@ -170,10 +160,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Get the level based on an amount of XP
+        /// Get the level based on an amount of XP.
         /// </summary>
         /// <param name="xp">The XP value to get the level by</param>
-        /// <returns></returns>
         private uint GetLevelByExperience(uint xp)
         {
             return GameTableManager.Instance.PathLevel.Entries
@@ -185,7 +174,6 @@ namespace NexusForever.Game.Entity
         /// </summary>
         /// <param name="totalXp">Path XP after XP earned has been applied</param>
         /// <param name="xpGained">XP just earned</param>
-        /// <returns></returns>
         private IEnumerable<uint> CheckForLevelUp(uint totalXp, uint xpGained)
         {
             uint currentLevel = GetLevelByExperience(totalXp - xpGained);
@@ -203,7 +191,7 @@ namespace NexusForever.Game.Entity
         {
             // TODO: look at this in more in depth, might be a better way to handle
             uint baseRewardObjectId = (uint)path * MaxPathLevel + 7u; // 7 is the base offset
-            uint pathRewardObjectId = baseRewardObjectId + (Math.Clamp(level - 2, 0, 29)); // level - 2 is used because the objectIDs start at level 2 and a -2 offset was needed
+            uint pathRewardObjectId = baseRewardObjectId + Math.Clamp(level - 2, 0, 29); // level - 2 is used because the objectIDs start at level 2 and a -2 offset was needed
 
             IEnumerable<PathRewardEntry> pathRewardEntries = GameTableManager.Instance.PathReward.Entries
                 .Where(x => x.ObjectId == pathRewardObjectId);
@@ -229,7 +217,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Grant the <see cref="Player"/> rewards from the <see cref="PathRewardEntry"/>
+        /// Grant the <see cref="IPlayer"/> rewards from the <see cref="PathRewardEntry"/>
         /// </summary>
         /// <param name="pathRewardEntry">The entry containing items, spells, or titles, to be rewarded"/></param>
         private void GrantPathReward(PathRewardEntry pathRewardEntry)
@@ -254,7 +242,7 @@ namespace NexusForever.Game.Entity
         private PathUnlockedMask GetPathUnlockedMask()
         {
             PathUnlockedMask mask = PathUnlockedMask.None;
-            foreach (PathEntry entry in paths.Values)
+            foreach (IPathEntry entry in paths.Values)
                 if (entry.Unlocked)
                     mask |= (PathUnlockedMask)(1 << (int)entry.Path);
 
@@ -264,10 +252,9 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Execute a DB Save of the <see cref="CharacterContext"/>
         /// </summary>
-        /// <param name="context"></param>
         public void Save(CharacterContext context)
         {
-            foreach (PathEntry pathEntry in paths.Values)
+            foreach (IPathEntry pathEntry in paths.Values)
                 pathEntry.Save(context);
         }
 
@@ -283,9 +270,9 @@ namespace NexusForever.Game.Entity
         {
             player.Session.EnqueueMessageEncrypted(new ServerPathLog
             {
-                ActivePath = player.Path,
-                PathProgress = paths.Values.Select(p => p.TotalXp).ToArray(),
-                PathUnlockedMask = GetPathUnlockedMask(),
+                ActivePath                  = player.Path,
+                PathProgress                = paths.Values.Select(p => p.TotalXp).ToArray(),
+                PathUnlockedMask            = GetPathUnlockedMask(),
                 TimeSinceLastActivateInDays = GetCooldownTime() // TODO: Need to figure out timestamp calculations necessary for this value to update the client appropriately
             });
         }
@@ -327,7 +314,7 @@ namespace NexusForever.Game.Entity
         {
             player.Session.EnqueueMessageEncrypted(new ServerPathUnlockResult
             {
-                Result = result,
+                Result           = result,
                 UnlockedPathMask = GetPathUnlockedMask()
             });
         }
@@ -344,13 +331,13 @@ namespace NexusForever.Game.Entity
             });
         }
 
-        private PathEntry GetPathEntry(Path path)
+        private IPathEntry GetPathEntry(Path path)
         {
-            paths.TryGetValue(path, out PathEntry pathEntry);
+            paths.TryGetValue(path, out IPathEntry pathEntry);
             return pathEntry;
         }
 
-        private void SetPathEntry(Path path, PathEntry entry)
+        private void SetPathEntry(Path path, IPathEntry entry)
         {
             paths[path] = entry;
         }
@@ -360,7 +347,7 @@ namespace NexusForever.Game.Entity
             return GetEnumerator();
         }
 
-        public IEnumerator<PathEntry> GetEnumerator()
+        public IEnumerator<IPathEntry> GetEnumerator()
         {
             return paths.Values.GetEnumerator();
         }

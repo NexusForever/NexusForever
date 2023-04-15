@@ -1,4 +1,6 @@
 using System.Numerics;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
@@ -9,32 +11,30 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Spell
 {
-    public delegate void SpellEffectDelegate(Spell spell, UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info);
-
-    public partial class Spell
+    public static class SpellHandler
     {
         [SpellEffectHandler(SpellEffectType.Damage)]
-        private void HandleEffectDamage(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectDamage(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             // TODO: calculate damage
             info.AddDamage((DamageType)info.Entry.DamageType, 1337);
         }
 
         [SpellEffectHandler(SpellEffectType.Proxy)]
-        private void HandleEffectProxy(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectProxy(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             target.CastSpell(info.Entry.DataBits00, new SpellParameters
             {
-                ParentSpellInfo        = parameters.SpellInfo,
-                RootSpellInfo          = parameters.RootSpellInfo,
+                ParentSpellInfo        = spell.Parameters.SpellInfo,
+                RootSpellInfo          = spell.Parameters.RootSpellInfo,
                 UserInitiatedSpellCast = false
             });
         }
 
         [SpellEffectHandler(SpellEffectType.Disguise)]
-        private void HandleEffectDisguise(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectDisguise(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             Creature2Entry creature2 = GameTableManager.Instance.Creature2.GetEntry(info.Entry.DataBits02);
@@ -49,16 +49,16 @@ namespace NexusForever.Game.Spell
         }
 
         [SpellEffectHandler(SpellEffectType.SummonMount)]
-        private void HandleEffectSummonMount(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectSummonMount(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             // TODO: handle NPC mounting?
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             if (!player.CanMount())
                 return;
 
-            var mount = new Mount(player, parameters.SpellInfo.Entry.Id, info.Entry.DataBits00, info.Entry.DataBits01, info.Entry.DataBits04);
+            var mount = new Mount(player, spell.Parameters.SpellInfo.Entry.Id, info.Entry.DataBits00, info.Entry.DataBits01, info.Entry.DataBits04);
             mount.EnqueuePassengerAdd(player, VehicleSeatType.Pilot, 0);
 
             // usually for hover boards
@@ -84,28 +84,28 @@ namespace NexusForever.Game.Spell
         }
 
         [SpellEffectHandler(SpellEffectType.Teleport)]
-        private void HandleEffectTeleport(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectTeleport(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             WorldLocation2Entry locationEntry = GameTableManager.Instance.WorldLocation2.GetEntry(info.Entry.DataBits00);
             if (locationEntry == null)
                 return;
 
-            if (target is Player player)
+            if (target is IPlayer player)
                 if (player.CanTeleport())
                     player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
         }
 
         [SpellEffectHandler(SpellEffectType.FullScreenEffect)]
-        private void HandleFullScreenEffect(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleFullScreenEffect(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             // TODO/FIXME: Add duration into the queue so that the spell will automatically finish at the correct time. This is a workaround for Full Screen Effects.
-            events.EnqueueEvent(new Event.SpellEvent(info.Entry.DurationTime / 1000d, () => { status = SpellStatus.Finished; SendSpellFinish(); }));
+            //events.EnqueueEvent(new Event.SpellEvent(info.Entry.DurationTime / 1000d, () => { status = SpellStatus.Finished; SendSpellFinish(); }));
         }
 
         [SpellEffectHandler(SpellEffectType.RapidTransport)]
-        private void HandleEffectRapidTransport(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectRapidTransport(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            TaxiNodeEntry taxiNode = GameTableManager.Instance.TaxiNode.GetEntry(parameters.TaxiNode);
+            TaxiNodeEntry taxiNode = GameTableManager.Instance.TaxiNode.GetEntry(spell.Parameters.TaxiNode);
             if (taxiNode == null)
                 return;
 
@@ -113,7 +113,7 @@ namespace NexusForever.Game.Spell
             if (worldLocation == null)
                 return;
 
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             if (!player.CanTeleport())
@@ -125,18 +125,18 @@ namespace NexusForever.Game.Spell
         }
 
         [SpellEffectHandler(SpellEffectType.LearnDyeColor)]
-        private void HandleEffectLearnDyeColor(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectLearnDyeColor(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
-            player.Session.GenericUnlockManager.Unlock((ushort)info.Entry.DataBits00);
+            player.Account.GenericUnlockManager.Unlock((ushort)info.Entry.DataBits00);
         }
 
         [SpellEffectHandler(SpellEffectType.UnlockMount)]
-        private void HandleEffectUnlockMount(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectUnlockMount(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(info.Entry.DataBits00);
@@ -149,18 +149,18 @@ namespace NexusForever.Game.Spell
         }
 
         [SpellEffectHandler(SpellEffectType.UnlockPetFlair)]
-        private void HandleEffectUnlockPetFlair(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectUnlockPetFlair(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             player.PetCustomisationManager.UnlockFlair((ushort)info.Entry.DataBits00);
         }
 
         [SpellEffectHandler(SpellEffectType.UnlockVanityPet)]
-        private void HandleEffectUnlockVanityPet(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectUnlockVanityPet(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(info.Entry.DataBits00);
@@ -173,15 +173,15 @@ namespace NexusForever.Game.Spell
         }
 
         [SpellEffectHandler(SpellEffectType.SummonVanityPet)]
-        private void HandleEffectSummonVanityPet(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectSummonVanityPet(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             // enqueue removal of existing vanity pet if summoned
             if (player.VanityPetGuid != null)
             {
-                VanityPet oldVanityPet = player.GetVisible<VanityPet>(player.VanityPetGuid.Value);
+                IVanityPet oldVanityPet = player.GetVisible<IVanityPet>(player.VanityPetGuid.Value);
                 oldVanityPet?.RemoveFromMap();
                 player.VanityPetGuid = 0u;
             }
@@ -198,16 +198,16 @@ namespace NexusForever.Game.Spell
         }
 
         [SpellEffectHandler(SpellEffectType.TitleGrant)]
-        private void HandleEffectTitleGrant(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectTitleGrant(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (!(target is Player player))
+            if (target is not IPlayer player)
                 return;
 
             player.TitleManager.AddTitle((ushort)info.Entry.DataBits00);
         }
 
         [SpellEffectHandler(SpellEffectType.Fluff)]
-        private void HandleEffectFluff(UnitEntity target, SpellTargetInfo.SpellTargetEffectInfo info)
+        public static void HandleEffectFluff(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
         }
     }

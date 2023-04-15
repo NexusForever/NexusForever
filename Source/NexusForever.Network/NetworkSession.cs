@@ -7,7 +7,7 @@ using NLog;
 
 namespace NexusForever.Network
 {
-    public abstract class NetworkSession : IUpdate
+    public abstract class NetworkSession : IUpdate, INetworkSession
     {
         protected static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -85,10 +85,18 @@ namespace NexusForever.Network
 
         protected virtual void OnDisconnect()
         {
-            EndPoint remoteEndPoint = socket.RemoteEndPoint;
-            socket.Close();
+            try
+            {
+                EndPoint remoteEndPoint = socket.RemoteEndPoint;
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
 
-            log.Trace($"Client {Id} disconnected. {remoteEndPoint}");
+                log.Trace($"Client {Id} disconnected. {remoteEndPoint}");
+            }
+            catch (Exception e)
+            {
+                log.Error(e, $"An exception occured for client {Id} during socket close!");
+            }
 
             disconnectState = DisconnectState.Complete;
         }
@@ -126,8 +134,9 @@ namespace NexusForever.Network
 
                 socket.BeginReceive(buffer, bufferOffset, buffer.Length - bufferOffset, SocketFlags.None, ReceiveDataCallback, null);
             }
-            catch
+            catch (Exception e)
             {
+                log.Error(e, $"An exception occured for client {Id} during socket read!");
                 ForceDisconnect();
             }
         }
@@ -143,8 +152,9 @@ namespace NexusForever.Network
             {
                 socket.Send(data, 0, data.Length, SocketFlags.None);
             }
-            catch
+            catch (Exception e)
             {
+                log.Error(e, $"An exception occured for client {Id} during socket send!");
                 ForceDisconnect();
             }
         }

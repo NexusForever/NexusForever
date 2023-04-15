@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.CharacterCache;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Character;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
 using NexusForever.Game.Static.Guild;
+using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.Message.Model.Shared;
 using NexusForever.Network.World.Message.Model;
@@ -17,10 +19,10 @@ using NetworkGuildRank = NexusForever.Network.World.Message.Model.Shared.GuildRa
 
 namespace NexusForever.Game.Guild
 {
-    public abstract partial class GuildBase : IBuildable<GuildData>, IEnumerable<GuildMember>
+    public abstract partial class GuildBase : IGuildBase
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="GuildBase"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IGuildBase"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum GuildBaseSaveMask
@@ -77,26 +79,26 @@ namespace NexusForever.Game.Guild
         public uint MemberCount => (uint)members.Count;
 
         /// <summary>
-        /// Returns if <see cref="GuildBase"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IGuildBase"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & GuildBaseSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="GuildBase"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IGuildBase"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & GuildBaseSaveMask.Delete) != 0;
 
         /// <summary>
-        /// Maximum number of <see cref="GuildMember"/>'s allowed in the guild.
+        /// Maximum number of <see cref="IGuildMember"/>'s allowed in the guild.
         /// </summary>
         public abstract uint MaxMembers { get; }
 
-        protected readonly SortedDictionary</*index*/byte, GuildRank> ranks = new();
-        protected readonly Dictionary</*characterId*/ulong, GuildMember> members = new();
+        protected readonly SortedDictionary</*index*/byte, IGuildRank> ranks = new();
+        protected readonly Dictionary</*characterId*/ulong, IGuildMember> members = new();
         protected readonly List</*characterId*/ulong> onlineMembers = new();
 
         /// <summary>
-        /// Create a new <see cref="GuildBase"/> from an existing database model.
+        /// Create a new <see cref="IGuildBase"/> from an existing database model.
         /// </summary>
         protected GuildBase(GuildModel model)
         {
@@ -112,7 +114,7 @@ namespace NexusForever.Game.Guild
 
             foreach (GuildMemberModel memberModel in model.GuildMember)
             {
-                if (!ranks.TryGetValue(memberModel.Rank, out GuildRank rank))
+                if (!ranks.TryGetValue(memberModel.Rank, out IGuildRank rank))
                     throw new DatabaseDataException($"Guild member {memberModel.Id} has an invalid rank {memberModel.Rank} for guild {memberModel.Guild.Id}!");
                 
                 var member = new GuildMember(memberModel, this, rank);
@@ -124,7 +126,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="GuildBase"/> using supplied parameters.
+        /// Create a new <see cref="IGuildBase"/> using supplied parameters.
         /// </summary>
         protected GuildBase(GuildType type, string guildName, string leaderRankName, string councilRankName, string memberRankName)
         {
@@ -147,7 +149,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Save this <see cref="GuildBase"/> to a <see cref="GuildModel"/>
+        /// Save this <see cref="IGuildBase"/> to a <see cref="GuildModel"/>
         /// </summary>
         public void Save(CharacterContext context)
         {
@@ -219,7 +221,7 @@ namespace NexusForever.Game.Guild
             Save(context, saveMask);
             saveMask = GuildBaseSaveMask.None;
 
-            foreach (GuildRank rank in ranks.Values.ToList())
+            foreach (IGuildRank rank in ranks.Values.ToList())
             {
                 if (rank.PendingDelete)
                     ranks.Remove(rank.Index);
@@ -227,7 +229,7 @@ namespace NexusForever.Game.Guild
                 rank.Save(context);
             }
 
-            foreach (GuildMember member in members.Values.ToList())
+            foreach (IGuildMember member in members.Values.ToList())
             {
                 if (member.PendingDelete)
                     members.Remove(member.CharacterId);
@@ -284,11 +286,11 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Trigger login events for <see cref="Player"/> for <see cref="GuildBase"/>.
+        /// Trigger login events for <see cref="IPlayer"/> for <see cref="IGuildBase"/>.
         /// </summary>
-        public void OnPlayerLogin(Player player)
+        public void OnPlayerLogin(IPlayer player)
         {
-            if (!members.TryGetValue(player.CharacterId, out GuildMember member))
+            if (!members.TryGetValue(player.CharacterId, out IGuildMember member))
                 throw new ArgumentException($"Invalid member {player.CharacterId} for guild {Id}.");
 
             MemberOnline(member);
@@ -298,19 +300,19 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Invoked when a <see cref="GuildMember"/> comes online.
+        /// Invoked when a <see cref="IGuildMember"/> comes online.
         /// </summary>
-        protected virtual void MemberOnline(GuildMember member)
+        protected virtual void MemberOnline(IGuildMember member)
         {
             onlineMembers.Add(member.CharacterId);
         }
 
         /// <summary>
-        /// Trigger logout events for <see cref="Player"/> for <see cref="GuildBase"/>.
+        /// Trigger logout events for <see cref="IPlayer"/> for <see cref="IGuildBase"/>.
         /// </summary>
-        public void OnPlayerLogout(Player player)
+        public void OnPlayerLogout(IPlayer player)
         {
-            if (!members.TryGetValue(player.CharacterId, out GuildMember member))
+            if (!members.TryGetValue(player.CharacterId, out IGuildMember member))
                 throw new ArgumentException($"Invalid member {player.CharacterId} for guild {Id}.");
 
             MemberOffline(member);
@@ -320,17 +322,17 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Invoked when a <see cref="GuildMember"/> goes offline.
+        /// Invoked when a <see cref="IGuildMember"/> goes offline.
         /// </summary>
-        protected virtual void MemberOffline(GuildMember member)
+        protected virtual void MemberOffline(IGuildMember member)
         {
             onlineMembers.Remove(member.CharacterId);
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can join the <see cref="GuildBase"/>.
+        /// Returns if <see cref="IPlayer"/> can join the <see cref="IGuildBase"/>.
         /// </summary>
-        public virtual GuildResultInfo CanJoinGuild(Player player)
+        public virtual IGuildResultInfo CanJoinGuild(IPlayer player)
         {
             if (MemberCount >= MaxMembers)
                 return new GuildResultInfo(GuildResult.CannotInviteGuildFull);
@@ -342,15 +344,15 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Add a new <see cref="Player"/> to the <see cref="GuildBase"/>.
+        /// Add a new <see cref="IPlayer"/> to the <see cref="IGuildBase"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanJoinGuild(Player)"/> should be invoked before invoking this method.
-        /// If the <see cref="GuildBase"/> has no members the <see cref="Player"/> will become the leader.
+        /// <see cref="CanJoinGuild(IPlayer)"/> should be invoked before invoking this method.
+        /// If the <see cref="IGuildBase"/> has no members the <see cref="IPlayer"/> will become the leader.
         /// </remarks>
-        public void JoinGuild(Player player)
+        public void JoinGuild(IPlayer player)
         {
-            GuildMember member;
+            IGuildMember member;
             if (MemberCount == 0u)
             {
                 log.Trace($"Guild{Id} has no leader, new member {player.CharacterId} will be assigned to leader.");
@@ -365,23 +367,23 @@ namespace NexusForever.Game.Guild
                 SendGuildResult(player.Session, GuildResult.YouJoined, Id, referenceText: Name);
             }
 
-            SendGuildJoin(player.Session, member.Build(), new GuildPlayerLimits());
+            SendGuildJoin(player, member.Build(), new GuildPlayerLimits());
             SendGuildRoster(player.Session);
             AnnounceGuildMemberChange(member);
         }
 
-        private void SendGuildJoin(WorldSession session, NetworkGuildMember guildMember, GuildPlayerLimits playerLimits)
+        private void SendGuildJoin(IPlayer player, NetworkGuildMember guildMember, GuildPlayerLimits playerLimits)
         {
-            session.EnqueueMessageEncrypted(new ServerGuildJoin
+            player.Session.EnqueueMessageEncrypted(new ServerGuildJoin
             {
                 GuildData   = Build(),
                 Self        = guildMember,
                 SelfPrivate = playerLimits,
-                Nameplate   = session.Player.GuildManager.GuildAffiliation.Id == Id
+                Nameplate   = player.GuildManager.GuildAffiliation.Id == Id
             });
         }
 
-        private void SendGuildRoster(WorldSession session)
+        private void SendGuildRoster(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerGuildRoster
             {
@@ -395,11 +397,11 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can leave the <see cref="GuildBase"/>.
+        /// Returns if <see cref="IPlayer"/> can leave the <see cref="IGuildBase"/>.
         /// </summary>
-        public GuildResultInfo CanLeaveGuild(Player player)
+        public IGuildResultInfo CanLeaveGuild(IPlayer player)
         {
-            GuildMember member = GetMember(player.CharacterId);
+            IGuildMember member = GetMember(player.CharacterId);
             if (member == null)
                 return new GuildResultInfo(GuildResult.NotInThatGuild);
 
@@ -407,9 +409,9 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if <see cref="GuildMember"/> can leave the <see cref="GuildBase"/>.
+        /// Returns if <see cref="IGuildMember"/> can leave the <see cref="IGuildBase"/>.
         /// </summary>
-        protected virtual GuildResultInfo CanLeaveGuild(GuildMember member)
+        protected virtual IGuildResultInfo CanLeaveGuild(IGuildMember member)
         {
             if (member.Rank.Index == 0)
                 return new GuildResultInfo(GuildResult.GuildmasterCannotLeaveGuild);
@@ -418,14 +420,14 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Remove an existing <see cref="Player"/> from the <see cref="GuildBase"/>.
+        /// Remove an existing <see cref="IPlayer"/> from the <see cref="IGuildBase"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanLeaveGuild(Player)"/> should be invoked before invoking this method.
+        /// <see cref="CanLeaveGuild(IPlayer)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void LeaveGuild(Player player, GuildResult reason)
+        public void LeaveGuild(IPlayer player, GuildResult reason)
         {
-            if (!members.TryGetValue(player.CharacterId, out GuildMember member))
+            if (!members.TryGetValue(player.CharacterId, out IGuildMember member))
                 throw new ArgumentException($"Invalid member {player.CharacterId} for guild {Id}.");
 
             LeaveGuild(member, reason == GuildResult.GuildDisbanded);
@@ -439,12 +441,12 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Remove an existing <see cref="GuildMember"/> from the <see cref="GuildBase"/>.
+        /// Remove an existing <see cref="IGuildMember"/> from the <see cref="IGuildBase"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanLeaveGuild(GuildMember)"/> should be invoked before invoking this method.
+        /// <see cref="CanLeaveGuild(IGuildMember)"/> should be invoked before invoking this method.
         /// </remarks>
-        private void LeaveGuild(GuildMember member, bool disband = false)
+        private void LeaveGuild(IGuildMember member, bool disband = false)
         {
             RemoveMember(member.CharacterId, disband);
 
@@ -466,23 +468,23 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if the <see cref="GuildBase"/> can be disbanded.
+        /// Returns if the <see cref="IGuildBase"/> can be disbanded.
         /// </summary>
-        protected virtual GuildResultInfo CanDisbandGuild()
+        protected virtual IGuildResultInfo CanDisbandGuild()
         {
             // deliberately returns success
             return new GuildResultInfo(GuildResult.Success);
         }
 
         /// <summary>
-        /// Disband <see cref="GuildBase"/>.
+        /// Disband <see cref="IGuildBase"/>.
         /// </summary>
         public void DisbandGuild()
         {
-            foreach (GuildMember member in members.Values.ToList())
+            foreach (IGuildMember member in members.Values.ToList())
             {
                 // if the player is online handle through the local manager otherwise directly in the guild
-                Player player = CharacterManager.Instance.GetPlayer(member.CharacterId);
+                IPlayer player = PlayerManager.Instance.GetPlayer(member.CharacterId);
                 if (player != null)
                     player.GuildManager.LeaveGuild(Id, GuildResult.GuildDisbanded);
                 else
@@ -494,7 +496,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Add a new <see cref="GuildRank"/> using the supplied parameters.
+        /// Add a new <see cref="IGuildRank"/> using the supplied parameters.
         /// </summary>
         private void AddRank(byte index, string name, GuildRankPermission permissions = GuildRankPermission.Disabled,
             ulong bankPermissions = 0ul, ulong bankMoneyWithdrawlLimits = 0ul, ulong repairLimits = 0ul)
@@ -502,7 +504,7 @@ namespace NexusForever.Game.Guild
             if (index > 9)
                 throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum rank index is 9!");
 
-            if (ranks.TryGetValue(index, out GuildRank rank))
+            if (ranks.TryGetValue(index, out IGuildRank rank))
             {
                 if (!rank.PendingDelete)
                     throw new InvalidOperationException($"Rank {index} for guild {Id} already exists!");
@@ -525,14 +527,14 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Remove an existing <see cref="GuildRank"/> at the supplied index.
+        /// Remove an existing <see cref="IGuildRank"/> at the supplied index.
         /// </summary>
         private void RemoveRank(byte index)
         {
             if (index > 9)
                 throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum rank index is 9!");
 
-            if (!ranks.TryGetValue(index, out GuildRank rank))
+            if (!ranks.TryGetValue(index, out IGuildRank rank))
                 throw new ArgumentException($"Invalid rank {rank} for guild {Id}.");
 
             if (rank.MemberCount > 0u)
@@ -548,7 +550,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if a <see cref="GuildRank"/> exists with the given name.
+        /// Returns if a <see cref="IGuildRank"/> exists with the given name.
         /// </summary>
         private bool RankExists(string name)
         {
@@ -557,40 +559,40 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns the <see cref="GuildRank"/> using the given index
+        /// Returns the <see cref="IGuildRank"/> using the given index
         /// </summary>
-        private GuildRank GetRank(byte index)
+        private IGuildRank GetRank(byte index)
         {
-            if (ranks.TryGetValue(index, out GuildRank rank) && !rank.PendingDelete)
+            if (ranks.TryGetValue(index, out IGuildRank rank) && !rank.PendingDelete)
                 return rank;
             return null;
         }
 
         /// <summary>
-        /// Returns the <see cref="GuildRank"/> that is below the rank at the given index.
+        /// Returns the <see cref="IGuildRank"/> that is below the rank at the given index.
         /// </summary>
         /// <remarks>
         /// A demoted rank has an increased index.
         /// </remarks>
-        private GuildRank GetDemotedRank(byte index)
+        private IGuildRank GetDemotedRank(byte index)
         {
             if (index > 8)
                 throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum demote rank index is 8!");
 
             for (byte i = (byte)(index + 1); i <= 9; i++)
-                if (ranks.TryGetValue(i, out GuildRank rank))
+                if (ranks.TryGetValue(i, out IGuildRank rank))
                     return rank;
 
             return null;
         }
 
         /// <summary>
-        /// Returns the <see cref="GuildRank"/> that is above the rank at the given index.
+        /// Returns the <see cref="IGuildRank"/> that is above the rank at the given index.
         /// </summary>
         /// <remarks>
         /// A promoted rank has an decreased index.
         /// </remarks>
-        private GuildRank GetPromotedRank(byte index)
+        private IGuildRank GetPromotedRank(byte index)
         {
             if (index < 1)
                 throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, minimum promote rank index is 1!");
@@ -598,13 +600,13 @@ namespace NexusForever.Game.Guild
                 throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} out of range, maximum demote rank index is 9!");
 
             for (sbyte i = (sbyte)(index - 1); i >= 0; i--)
-                if (ranks.TryGetValue((byte)i, out GuildRank rank))
+                if (ranks.TryGetValue((byte)i, out IGuildRank rank))
                     return rank;
 
             return null;
         }
 
-        protected virtual void MemberChangeRank(GuildMember member, GuildRank newRank)
+        protected virtual void MemberChangeRank(IGuildMember member, IGuildRank newRank)
         {
             member.Rank.RemoveMember(member);
             newRank.AddMember(member);
@@ -615,13 +617,13 @@ namespace NexusForever.Game.Guild
         /// Return a collection of <see cref="Message.Model.Shared.GuildRank"/>'s.
         /// </summary>
         /// <remarks>
-        /// This will always return 10 ranks, if there are less than 10 ranks in the <see cref="GuildBase"/> empty place holders will be returned.
+        /// This will always return 10 ranks, if there are less than 10 ranks in the <see cref="IGuildBase"/> empty place holders will be returned.
         /// </remarks>
         protected IEnumerable<NetworkGuildRank> GetGuildRanksPackets()
         {
             for (byte i = 0; i < 10; i++)
             {
-                GuildRank rank = GetRank(i);
+                IGuildRank rank = GetRank(i);
                 if (rank != null)
                     yield return rank.Build();
                 else
@@ -630,14 +632,14 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Add a new <see cref="GuildMember"/> with supplied character id.
+        /// Add a new <see cref="IGuildMember"/> with supplied <see cref="IPlayer"/>.
         /// </summary>
-        private GuildMember AddMember(Player player, byte rank = 9)
+        private IGuildMember AddMember(IPlayer player, byte rank = 9)
         {
-            if (!ranks.TryGetValue(rank, out GuildRank guildRank))
+            if (!ranks.TryGetValue(rank, out IGuildRank guildRank))
                 throw new ArgumentException($"Invalid rank {rank} for guild {Id}.");
 
-            if (members.TryGetValue(player.CharacterId, out GuildMember member))
+            if (members.TryGetValue(player.CharacterId, out IGuildMember member))
             {
                 if (!member.PendingDelete)
                     throw new InvalidOperationException($"Member {player.CharacterId} for guild {Id} already exists!");
@@ -660,11 +662,11 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Add an existing <see cref="GuildMember"/> with supplied character id.
+        /// Remove an existing <see cref="IGuildMember"/> with supplied character id.
         /// </summary>
         private void RemoveMember(ulong characterId, bool disband)
         {
-            if (!members.TryGetValue(characterId, out GuildMember member))
+            if (!members.TryGetValue(characterId, out IGuildMember member))
                 throw new ArgumentException($"Invalid member {characterId} for guild {Id}.");
 
             if (!disband)
@@ -683,19 +685,19 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Return <see cref="GuildMember"/> with supplied character id.
+        /// Return <see cref="IGuildMember"/> with supplied character id.
         /// </summary>
-        public GuildMember GetMember(ulong characterId)
+        public IGuildMember GetMember(ulong characterId)
         {
-            if (members.TryGetValue(characterId, out GuildMember member) && !member.PendingDelete)
+            if (members.TryGetValue(characterId, out IGuildMember member) && !member.PendingDelete)
                 return member;
             return null;
         }
 
         /// <summary>
-        /// Return <see cref="GuildMember"/> with supplied character name.
+        /// Return <see cref="IGuildMember"/> with supplied character name.
         /// </summary>
-        public GuildMember GetMember(string memberName)
+        public IGuildMember GetMember(string memberName)
         {
             ulong? characterId = CharacterManager.Instance.GetCharacterIdByName(memberName);
             if (characterId == null)
@@ -705,17 +707,17 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Send <see cref="ServerGuildResult"/> to <see cref="WorldSession"/> based on supplied <see cref="GuildResultInfo"/>.
+        /// Send <see cref="ServerGuildResult"/> to <see cref="IGameSession"/> based on supplied <see cref="IGuildResultInfo"/>.
         /// </summary>
-        public static void SendGuildResult(WorldSession session, GuildResultInfo info)
+        public static void SendGuildResult(IGameSession session, IGuildResultInfo info)
         {
             SendGuildResult(session, info.Result, info.GuildId, info.ReferenceId, info.ReferenceString);
         }
 
         /// <summary>
-        /// Send <see cref="ServerGuildResult"/> to <see cref="WorldSession"/> based on supplied parameters.
+        /// Send <see cref="ServerGuildResult"/> to <see cref="IGameSession"/> based on supplied parameters.
         /// </summary>
-        public static void SendGuildResult(WorldSession session, GuildResult result, ulong guildId = 0ul, uint referenceId = 0u, string referenceText = "")
+        public static void SendGuildResult(IGameSession session, GuildResult result, ulong guildId = 0ul, uint referenceId = 0u, string referenceText = "")
         {
             session.EnqueueMessageEncrypted(new ServerGuildResult
             {
@@ -734,7 +736,7 @@ namespace NexusForever.Game.Guild
         {
             foreach (ulong characterId in onlineMembers)
             {
-                Player player = CharacterManager.Instance.GetPlayer(characterId);
+                IPlayer player = PlayerManager.Instance.GetPlayer(characterId);
                 player?.Session?.EnqueueMessageEncrypted(writable);
             }
         }
@@ -755,9 +757,9 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Send <see cref="ServerGuildMemberChange"/> to all online members with supplied <see cref="GuildMember"/>.
+        /// Send <see cref="ServerGuildMemberChange"/> to all online members with supplied <see cref="IGuildMember"/>.
         /// </summary>
-        protected void AnnounceGuildMemberChange(GuildMember member)
+        protected void AnnounceGuildMemberChange(IGuildMember member)
         {
             Broadcast(new ServerGuildMemberChange
             {
@@ -793,7 +795,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Rename <see cref="GuildBase"/> with supplied name.
+        /// Rename <see cref="IGuildBase"/> with supplied name.
         /// </summary>
         public virtual void RenameGuild(string name)
         {
@@ -810,7 +812,7 @@ namespace NexusForever.Game.Guild
             });
         }
 
-        public IEnumerator<GuildMember> GetEnumerator()
+        public IEnumerator<IGuildMember> GetEnumerator()
         {
             return members.Values.GetEnumerator();
         }

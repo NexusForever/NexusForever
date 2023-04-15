@@ -1,14 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Mail;
 using NexusForever.Game.Entity;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Mail
 {
-    public class MailAttachment: ISaveCharacter
+    public class MailAttachment : IMailAttachment
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="MailAttachment"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IMailAttachment"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum MailAttachmentSaveMask
@@ -20,12 +23,12 @@ namespace NexusForever.Game.Mail
 
         public ulong Id { get; }
         public uint Index { get; }
-        public Item Item { get; }
+        public IItem Item { get; }
 
         private MailAttachmentSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="MailAttachment"/> from an existing <see cref="CharacterMailAttachmentModel"/> model.
+        /// Create a new <see cref="IMailAttachment"/> from an existing <see cref="CharacterMailAttachmentModel"/> model.
         /// </summary>
         /// <param name="model"></param>
         public MailAttachment(CharacterMailAttachmentModel model)
@@ -38,9 +41,9 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Create a new <see cref="MailAttachment"/>.
+        /// Create a new <see cref="IMailAttachment"/>.
         /// </summary>
-        public MailAttachment(ulong mailId, uint index, Item item)
+        public MailAttachment(ulong mailId, uint index, IItem item)
         {
             Id       = mailId;
             Index    = index;
@@ -50,7 +53,7 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Enqueue <see cref="MailAttachment"/> to be deleted from the database.
+        /// Enqueue <see cref="IMailAttachment"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete()
         {
@@ -85,6 +88,15 @@ namespace NexusForever.Game.Mail
             }
 
             Item.Save(context);
+        }
+
+        public ServerMailAvailable.Attachment Build()
+        {
+            return new ServerMailAvailable.Attachment
+            {
+                ItemId = Item.Id,
+                Amount = Item.StackCount
+            };
         }
     }
 }

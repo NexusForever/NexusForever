@@ -1,9 +1,10 @@
 ﻿using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
+using NexusForever.Game.Abstract.RBAC;
 
 namespace NexusForever.Game.RBAC
 {
-    public class AccountRole : ISaveAuth
+    public class AccountRole : IAccountRole
     {
         [Flags]
         private enum SaveMask
@@ -14,24 +15,24 @@ namespace NexusForever.Game.RBAC
         }
 
         public uint Id { get; }
-        public RBACRole Role { get; }
+        public IRBACRole Role { get; }
 
         /// <summary>
-        /// Returns if <see cref="AccountRole"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IAccountRole"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & SaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="AccountRole"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IAccountRole"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & SaveMask.Delete) != 0;
 
         private SaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="AccountRole"/> from an existing database model.
+        /// Create a new <see cref="IAccountRole"/> from an existing database model.
         /// </summary>
-        public AccountRole(AccountRoleModel model, RBACRole role)
+        public AccountRole(AccountRoleModel model, IRBACRole role)
         {
             Id       = model.Id;
             Role     = role;
@@ -39,9 +40,9 @@ namespace NexusForever.Game.RBAC
         }
 
         /// <summary>
-        /// Create a new <see cref="AccountRole"/> from a <see cref="RBACRole"/>.
+        /// Create a new <see cref="IAccountRole"/> from a <see cref="IRBACRole"/>.
         /// </summary>
-        public AccountRole(uint id, RBACRole role)
+        public AccountRole(uint id, IRBACRole role)
         {
             Id       = id;
             Role     = role;
@@ -68,7 +69,7 @@ namespace NexusForever.Game.RBAC
         }
 
         /// <summary>
-        /// Enqueue <see cref="AccountRole"/> to be deleted from the database.
+        /// Enqueue <see cref="IAccountRole"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool delete)
         {

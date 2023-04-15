@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class CameraAttach : IKeyframeAction
+    public class CameraAttach : ICameraAttach
     {
         public uint AttachType { get; set; }
         public uint AttachId { get; set; }
@@ -11,7 +12,7 @@ namespace NexusForever.Game.Cinematic
         public uint ParentUnit { get; set; }
         public bool UseRotation { get; set; }
 
-        public CameraAttach(uint delay, uint attachId, Camera parentUnit, uint attachType = 0, bool useRotation = true)
+        public CameraAttach(uint delay, uint attachId, ICamera parentUnit, uint attachType = 0, bool useRotation = true)
         {
             Delay       = delay;
             AttachId    = attachId;
@@ -20,7 +21,7 @@ namespace NexusForever.Game.Cinematic
             UseRotation = useRotation;
         }
 
-        public void Send(WorldSession session)
+        public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicCameraAttach
             {

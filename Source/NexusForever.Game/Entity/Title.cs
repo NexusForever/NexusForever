@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
 {
-    public class Title : IUpdate, ISaveCharacter
+    public class Title : ITitle
     {
         public enum TitleSaveMask
         {
@@ -21,7 +21,7 @@ namespace NexusForever.Game.Entity
         public CharacterTitleEntry Entry { get; }
 
         /// <summary>
-        /// <see cref="Title"/> lifetime in milliseconds.
+        /// <see cref="ITitle"/> lifetime in milliseconds.
         /// </summary>
         public double? TimeRemaining
         {
@@ -50,7 +50,7 @@ namespace NexusForever.Game.Entity
         private TitleSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="Title"/> from an existing database model.
+        /// Create a new <see cref="ITitle"/> from an existing database model.
         /// </summary>
         public Title(CharacterTitleModel model)
         {
@@ -65,7 +65,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="Title"/> from a <see cref="CharacterTitleEntry"/> template.
+        /// Create a new <see cref="ITitle"/> from a <see cref="CharacterTitleEntry"/> template.
         /// </summary>
         public Title(ulong owner, CharacterTitleEntry entry)
         {

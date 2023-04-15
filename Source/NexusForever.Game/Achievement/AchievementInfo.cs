@@ -1,10 +1,11 @@
-﻿using NexusForever.Game.Static.Achievement;
+﻿using NexusForever.Game.Abstract.Achievement;
+using NexusForever.Game.Static.Achievement;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Achievement
 {
-    public class AchievementInfo
+    public class AchievementInfo : IAchievementInfo
     {
         public ushort Id => (ushort)Entry.Id;
         public AchievementEntry Entry { get; }
@@ -13,7 +14,7 @@ namespace NexusForever.Game.Achievement
         public bool IsPlayerAchievement => ((AchievementFlags)Entry.Flags & AchievementFlags.Guild) == 0;
 
         /// <summary>
-        /// Create a new <see cref="AchievementInfo"/> from <see cref="AchievementEntry"/>.
+        /// Create a new <see cref="IAchievementInfo"/> from <see cref="AchievementEntry"/>.
         /// </summary>
         public AchievementInfo(AchievementEntry entry)
         {

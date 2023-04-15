@@ -10,6 +10,7 @@
     <ProjectReference Include="..\NexusForever.Database.Auth\NexusForever.Database.Auth.csproj" />
     <ProjectReference Include="..\NexusForever.Database.Character\NexusForever.Database.Character.csproj" />
     <ProjectReference Include="..\NexusForever.Database.World\NexusForever.Database.World.csproj" />
+    <ProjectReference Include="..\NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj" />
     <ProjectReference Include="..\NexusForever.Game.Static\NexusForever.Game.Static.csproj" />
     <ProjectReference Include="..\NexusForever.GameTable\NexusForever.GameTable.csproj" />
     <ProjectReference Include="..\NexusForever.IO\NexusForever.IO.csproj" />
@@ -19,7 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Combat\" />
-    <Folder Include="Social\Model\" />
   </ItemGroup>
 
 </Project>

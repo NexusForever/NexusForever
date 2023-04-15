@@ -1,13 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable.Model;
-using NexusForever.Shared;
 
 namespace NexusForever.Game.Quest
 {
-    public class QuestObjective : IUpdate
+    public class QuestObjective : IQuestObjective
     {
         [Flags]
         public enum QuestObjectiveSaveMask
@@ -18,8 +19,8 @@ namespace NexusForever.Game.Quest
             Timer    = 0x04
         }
 
-        public QuestInfo QuestInfo { get; }
-        public QuestObjectiveInfo ObjectiveInfo { get; }
+        public IQuestInfo QuestInfo { get; }
+        public IQuestObjectiveInfo ObjectiveInfo { get; }
 
         public byte Index { get; }
 
@@ -49,11 +50,15 @@ namespace NexusForever.Game.Quest
 
         private QuestObjectiveSaveMask saveMask;
 
+        private readonly IPlayer player;
+
         /// <summary>
-        /// Create a new <see cref="QuestObjective"/> from an existing database model.
+        /// Create a new <see cref="IQuestObjective"/> from an existing database model.
         /// </summary>
-        public QuestObjective(QuestInfo questInfo, QuestObjectiveInfo objectiveInfo, CharacterQuestObjectiveModel model)
+        public QuestObjective(IPlayer owner, IQuestInfo questInfo, IQuestObjectiveInfo objectiveInfo, CharacterQuestObjectiveModel model)
         {
+            player        = owner;
+
             QuestInfo     = questInfo;
             ObjectiveInfo = objectiveInfo;
             Index         = model.Index;
@@ -62,10 +67,12 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Create a new <see cref="QuestObjective"/> from supplied <see cref="QuestObjectiveEntry"/>.
+        /// Create a new <see cref="IQuestObjective"/> from supplied <see cref="QuestObjectiveEntry"/>.
         /// </summary>
-        public QuestObjective(QuestInfo questInfo, QuestObjectiveInfo objectiveInfo, byte index)
+        public QuestObjective(IPlayer owner, IQuestInfo questInfo, IQuestObjectiveInfo objectiveInfo, byte index)
         {
+            player        = owner;
+
             QuestInfo     = questInfo;
             ObjectiveInfo = objectiveInfo;
             Index         = index;
@@ -78,7 +85,7 @@ namespace NexusForever.Game.Quest
             saveMask = QuestObjectiveSaveMask.Create;
         }
 
-        public void Save(CharacterContext context, ulong characterId)
+        public void Save(CharacterContext context)
         {
             if (saveMask == QuestObjectiveSaveMask.None)
                 return;
@@ -87,7 +94,7 @@ namespace NexusForever.Game.Quest
             {
                 context.Add(new CharacterQuestObjectiveModel
                 {
-                    Id       = characterId,
+                    Id       = player.CharacterId,
                     QuestId  = (ushort)QuestInfo.Entry.Id,
                     Index    = Index,
                     Progress = Progress
@@ -97,7 +104,7 @@ namespace NexusForever.Game.Quest
             {
                 var model = new CharacterQuestObjectiveModel
                 {
-                    Id      = characterId,
+                    Id      = player.CharacterId,
                     QuestId = (ushort)QuestInfo.Entry.Id,
                     Index   = Index
                 };
@@ -159,9 +166,7 @@ namespace NexusForever.Game.Quest
             Progress = Math.Min(progress + update, GetMaxValue());
         }
 
-        /// <summary>
-        /// Complete this <see cref="QuestObjective"/>.
-        /// </summary>
+       
         public void Complete()
         {
             Progress = GetMaxValue();

@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Network.Message;
+using NexusForever.Game.Abstract.Achievement;
 using AchievementNetworkModel = NexusForever.Network.World.Message.Model.Shared.Achievement;
 
 namespace NexusForever.Game.Achievement
 {
-    public class Achievement<T> : ISaveCharacter, IBuildable<AchievementNetworkModel>
+    public class Achievement<T> : IAchievement
         where T : class, IAchievementModel, new()
     {
         [Flags]
@@ -19,7 +19,7 @@ namespace NexusForever.Game.Achievement
             TimeCompleted = 0x08
         }
 
-        public AchievementInfo Info { get; }
+        public IAchievementInfo Info { get; }
         public ushort Id => Info.Id;
 
         public uint Data0
@@ -64,9 +64,9 @@ namespace NexusForever.Game.Achievement
         private readonly ulong ownerId;
 
         /// <summary>
-        /// Create a new <see cref="Achievement{T}"/> from an existing database model.
+        /// Create a new <see cref="IAchievement"/> from an existing database model.
         /// </summary>
-        public Achievement(AchievementInfo info, IAchievementModel model)
+        public Achievement(IAchievementInfo info, IAchievementModel model)
         {
             ownerId       = model.Id;
             Info          = info;
@@ -76,9 +76,9 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Create a new <see cref="Achievement{T}"/> from <see cref="AchievementInfo"/> and supplied data.
+        /// Create a new <see cref="IAchievement"/> from <see cref="IAchievementInfo"/> and supplied data.
         /// </summary>
-        public Achievement(ulong ownerId, AchievementInfo info)
+        public Achievement(ulong ownerId, IAchievementInfo info)
         {
             this.ownerId = ownerId;
             Info         = info;
@@ -132,7 +132,7 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Build a network model from <see cref="Achievement"/>.
+        /// Build a network model from <see cref="IAchievement"/>
         /// </summary>
         public AchievementNetworkModel Build()
         {
@@ -146,7 +146,7 @@ namespace NexusForever.Game.Achievement
         }
 
         /// <summary>
-        /// Returns if <see cref="Achievement"/> has been completed.
+        /// Returns if <see cref="IAchievement"/> has been completed.
         /// </summary>
         public bool IsComplete()
         {

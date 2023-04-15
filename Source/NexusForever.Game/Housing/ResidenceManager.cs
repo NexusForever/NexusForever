@@ -1,27 +1,28 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Housing
 {
-    public class ResidenceManager
+    public class ResidenceManager : IResidenceManager
     {
-        public Residence Residence { get; private set; }
+        public IResidence Residence { get; private set; }
 
-        private readonly Player owner;
+        private readonly IPlayer owner;
 
         /// <summary>
-        /// Create a new <see cref="ResidenceManager"/>.
+        /// Create a new <see cref="IResidenceManager"/>.
         /// </summary>
-        public ResidenceManager(Player player)
+        public ResidenceManager(IPlayer player)
         {
             owner     = player;
             Residence = GlobalResidenceManager.Instance.GetResidenceByOwner(owner.CharacterId);
         }
 
         /// <summary>
-        /// Create new <see cref="Decor"/> from supplied <see cref="HousingDecorInfoEntry"/> to residence your crate.
+        /// Create new <see cref="IDecor"/> from supplied <see cref="HousingDecorInfoEntry"/> to residence your crate.
         /// </summary>
         /// <remarks>
         /// Decor will be created for your residence regardless of the current residence you are on.
@@ -52,7 +53,7 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Send <see cref="ServerHousingBasics"/> message to <see cref="Player"/>.
+        /// Send <see cref="ServerHousingBasics"/> message to <see cref="IPlayer"/>.
         /// </summary>
         public void SendHousingBasics()
         {

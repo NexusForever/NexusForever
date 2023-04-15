@@ -2,12 +2,13 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.CharacterCache;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.TextFilter;
-using NexusForever.Game.TextFilter;
+using NexusForever.Game.Text.Filter;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NLog;
@@ -15,7 +16,7 @@ using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.Guild
 
 namespace NexusForever.Game.Guild
 {
-    public class GuildManager : ISaveCharacter, IEnumerable<GuildBase>
+    public class GuildManager : IGuildManager
     {
         [Flags]
         public enum SaveMask
@@ -27,7 +28,7 @@ namespace NexusForever.Game.Guild
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
-        /// Returns the maximum number of guilds a <see cref="Player"/> can be in by <see cref="GuildType"/>.
+        /// Returns the maximum number of guilds a <see cref="IPlayer"/> can be in by <see cref="GuildType"/>.
         /// </summary>
         private static uint GetMaximumGuildTypeCount(GuildType type)
         {
@@ -49,7 +50,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns the <see cref="GuildResult"/> when <see cref="Player"/> is at maximum number of guilds by <see cref="GuildType"/>.
+        /// Returns the <see cref="GuildResult"/> when <see cref="IPlayer"/> is at maximum number of guilds by <see cref="GuildType"/>.
         /// </summary>
         private static GuildResult GetMaximumGuildTypeError(GuildType type)
         {
@@ -72,15 +73,15 @@ namespace NexusForever.Game.Guild
             }
         }
 
-        public Guild Guild { get; private set; }
+        public IGuild Guild { get; private set; }
 
         /// <summary>
-        /// Current <see cref="GuildBase"/> affiliation.
+        /// Current <see cref="IGuildBase"/> affiliation.
         /// </summary>
         /// <remarks>
         /// This determines which guild name and type is shown in the nameplate.
         /// </remarks>
-        public GuildBase GuildAffiliation
+        public IGuildBase GuildAffiliation
         {
             get => guildAffiliation;
             set
@@ -89,26 +90,26 @@ namespace NexusForever.Game.Guild
                 saveMask |= SaveMask.Affiliation;
             }
         }
-        private GuildBase guildAffiliation;
+        private IGuildBase guildAffiliation;
 
         private SaveMask saveMask;
 
-        private readonly Player owner;
+        private readonly IPlayer owner;
 
-        private readonly Dictionary<ulong, GuildBase> guilds = new();
-        private GuildInvite pendingInvite;
+        private readonly Dictionary<ulong, IGuildBase> guilds = new();
+        private IGuildInvite pendingInvite;
 
         /// <summary>
-        /// Create a new <see cref="GuildManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// Create a new <see cref="IGuildManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public GuildManager(Player player, CharacterModel model)
+        public GuildManager(IPlayer player, CharacterModel model)
         {
             owner = player;
 
-            foreach (GuildBase guild in GlobalGuildManager.Instance.GetCharacterGuilds(owner.CharacterId))
+            foreach (IGuildBase guild in GlobalGuildManager.Instance.GetCharacterGuilds(owner.CharacterId))
             {
                 if (guild.Type == GuildType.Guild)
-                    Guild = guild as Guild;
+                    Guild = guild as IGuild;
 
                 guilds.Add(guild.Id, guild);
             }
@@ -118,7 +119,7 @@ namespace NexusForever.Game.Guild
             // check that the player is allowed to be affiliated with this guild
             // validation can fail if the player is removed from the guild or the guild is disbanded while offline
             if (model.GuildAffiliation != null)
-                GuildAffiliation = guilds.TryGetValue(model.GuildAffiliation.Value, out GuildBase guild) ? guild : guilds.Values.FirstOrDefault();
+                GuildAffiliation = guilds.TryGetValue(model.GuildAffiliation.Value, out IGuildBase guild) ? guild : guilds.Values.FirstOrDefault();
             else if (model.GuildAffiliation == null && guilds.Count > 0)
                 GuildAffiliation = guilds.Values.FirstOrDefault();
         }
@@ -145,15 +146,15 @@ namespace NexusForever.Game.Guild
         /// Return guild of supplied <see cref="GuildType"/>.
         /// </summary>
         /// <remarks>
-        /// If <see cref="Player"/> is part of multiple guilds of <see cref="GuildType"/>, the first one is returned.
+        /// If <see cref="IPlayer"/> is part of multiple guilds of <see cref="GuildType"/>, the first one is returned.
         /// </remarks>
-        public T GetGuild<T>(GuildType type) where T : GuildBase
+        public T GetGuild<T>(GuildType type) where T : IGuildBase
         {
             return (T)guilds.FirstOrDefault(g => g.Value.Type == type).Value;
         }
 
         /// <summary>
-        /// Send initial packets and trigger login events for any <see cref="GuildBase"/>'s for <see cref="Player"/>.
+        /// Send initial packets and trigger login events for any <see cref="IGuildBase"/>'s for <see cref="IPlayer"/>.
         /// </summary>
         public void OnLogin()
         {
@@ -161,7 +162,7 @@ namespace NexusForever.Game.Guild
             if (Guild != null)
                 UpdateHolomark();
 
-            foreach (GuildBase guild in guilds.Values)
+            foreach (IGuildBase guild in guilds.Values)
                 guild.OnPlayerLogin(owner);
         }
 
@@ -170,7 +171,7 @@ namespace NexusForever.Game.Guild
             var guildInit = new ServerGuildInit();
 
             uint index = 0u;
-            foreach (GuildBase guild in guilds.Values)
+            foreach (IGuildBase guild in guilds.Values)
             {
                 NetworkGuildMember member = guild.GetMember(owner.CharacterId).Build();
                 if (guildAffiliation?.Id == guild.Id)
@@ -190,20 +191,20 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Trigger logout events for any <see cref="GuildBase"/>'s for <see cref="Player"/>.
+        /// Trigger logout events for any <see cref="IGuildBase"/>'s for <see cref="IPlayer"/>.
         /// </summary>
         public void OnLogout()
         {
-            foreach (GuildBase guild in guilds.Values)
+            foreach (IGuildBase guild in guilds.Values)
                 guild.OnPlayerLogout(owner);
         }
 
         /// <summary>
         /// Returns if the supplied <see cref="ClientGuildRegister"/> information are valid to register a new guild.
         /// </summary>
-        public GuildResultInfo CanRegisterGuild(ClientGuildRegister guildRegister)
+        public IGuildResultInfo CanRegisterGuild(ClientGuildRegister guildRegister)
         {
-            GuildStandard standard = null;
+            IGuildStandard standard = null;
             if (guildRegister.GuildType == GuildType.Guild)
                 standard = new GuildStandard(guildRegister.GuildStandard);
 
@@ -214,7 +215,7 @@ namespace NexusForever.Game.Guild
         /// <summary>
         /// Returns if the supplied <see cref="GuildType"/>, name, ranks and standard are valid to register a new guild.
         /// </summary>
-        public GuildResultInfo CanRegisterGuild(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName, GuildStandard standard = null)
+        public IGuildResultInfo CanRegisterGuild(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName, IGuildStandard standard = null)
         {
             if (!CanStoreGuildType(type))
                 return new GuildResultInfo(GetMaximumGuildTypeError(type));
@@ -237,7 +238,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if a <see cref="GuildBase"/> of the supplied <see cref="GuildType"/> can be stored.
+        /// Returns if a <see cref="IGuildBase"/> of the supplied <see cref="GuildType"/> can be stored.
         /// </summary>
         /// <remarks>
         /// This will return false if the owner is at cap for the supplied <see cref="GuildType"/>.
@@ -256,7 +257,7 @@ namespace NexusForever.Game.Guild
         /// </remarks>
         public void RegisterGuild(ClientGuildRegister guildRegister)
         {
-            GuildStandard standard = null;
+            IGuildStandard standard = null;
             if (guildRegister.GuildType == GuildType.Guild)
                 standard = new GuildStandard(guildRegister.GuildStandard);
 
@@ -268,20 +269,20 @@ namespace NexusForever.Game.Guild
         /// Register a new guild with the supplied <see cref="GuildType"/>, name, ranks and standard. 
         /// </summary>
         /// <remarks>
-        /// <see cref="CanRegisterGuild(GuildType, string, string, string, string, GuildStandard)"/> should be invoked before invoking this method.
+        /// <see cref="CanRegisterGuild(GuildType, string, string, string, string, IGuildStandard)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void RegisterGuild(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName, GuildStandard standard = null)
+        public void RegisterGuild(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName, IGuildStandard standard = null)
         {
-            GuildBase guild = GlobalGuildManager.Instance.RegisterGuild(type, name, leaderRankName, councilRankName, memberRankName, standard);
+            IGuildBase guild = GlobalGuildManager.Instance.RegisterGuild(type, name, leaderRankName, councilRankName, memberRankName, standard);
             JoinGuild(guild);
         }
 
         /// <summary>
-        /// Return if <see cref="Player"/> can be invited to the supplied guild.
+        /// Return if <see cref="IPlayer"/> can be invited to the supplied guild.
         /// </summary>
-        public GuildResultInfo CanInviteToGuild(ulong id)
+        public IGuildResultInfo CanInviteToGuild(ulong id)
         {
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
+            IGuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
@@ -295,14 +296,14 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Invite <see cref="Player"/> to the supplied guild.
+        /// Invite <see cref="IPlayer"/> to the supplied guild.
         /// </summary>
         /// <remarks>
         /// <see cref="CanInviteToGuild(ulong)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void InviteToGuild(ulong id, Player invitee)
+        public void InviteToGuild(ulong id, IPlayer invitee)
         {
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
+            IGuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
             if (guild == null)
                 throw new ArgumentException($"Invalid guild {id}!");
 
@@ -324,16 +325,16 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Return if <see cref="Player"/> can accept the existing <see cref="GuildInvite"/>.
+        /// Return if <see cref="IPlayer"/> can accept the existing <see cref="IGuildInvite"/>.
         /// </summary>
-        public GuildResultInfo CanAcceptInviteToGuild()
+        public IGuildResultInfo CanAcceptInviteToGuild()
         {
             if (pendingInvite == null)
                 return new GuildResultInfo(GuildResult.NoPendingInvites);
 
             // TODO: check for expiry
 
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(pendingInvite.GuildId);
+            IGuildBase guild = GlobalGuildManager.Instance.GetGuild(pendingInvite.GuildId);
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
@@ -341,7 +342,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Accept existing <see cref="GuildInvite"/>.
+        /// Accept existing <see cref="IGuildInvite"/>.
         /// </summary>
         /// <remarks>
         /// <see cref="CanAcceptInviteToGuild"/> should be invoked before invoking this method.
@@ -351,7 +352,7 @@ namespace NexusForever.Game.Guild
             if (pendingInvite == null)
                 throw new InvalidOperationException($"Invalid guild invite for {owner.CharacterId}!");
 
-            Player invitee = CharacterManager.Instance.GetPlayer(pendingInvite.InviteeId);
+            IPlayer invitee = PlayerManager.Instance.GetPlayer(pendingInvite.InviteeId);
             if (accepted)
             {
                 if (invitee?.Session != null)
@@ -368,11 +369,11 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can join the supplied guild.
+        /// Returns if <see cref="IPlayer"/> can join the supplied guild.
         /// </summary>
-        public GuildResultInfo CanJoinGuild(ulong id)
+        public IGuildResultInfo CanJoinGuild(ulong id)
         {
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
+            IGuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
@@ -383,25 +384,25 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Adds <see cref="Player"/> the supplied guild.
+        /// Adds <see cref="IPlayer"/> the supplied guild.
         /// </summary>
         /// <remarks>
         /// <see cref="CanJoinGuild"/> should be invoked before invoking this method.
         /// </remarks>
         public void JoinGuild(ulong id)
         {
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
+            IGuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
             if (guild == null)
                 throw new ArgumentException($"Invalid guild {id}!");
 
             JoinGuild(guild);
         }
 
-        private void JoinGuild(GuildBase guild)
+        private void JoinGuild(IGuildBase guild)
         {
             guilds.Add(guild.Id, guild);
             if (guild.Type == GuildType.Guild)
-                Guild = guild as Guild;
+                Guild = guild as IGuild;
 
             if (GuildAffiliation == null)
                 UpdateGuildAffiliation(guild.Id);
@@ -412,11 +413,11 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can leave the supplied guild.
+        /// Returns if <see cref="IPlayer"/> can leave the supplied guild.
         /// </summary>
-        public GuildResultInfo CanLeaveGuild(ulong id)
+        public IGuildResultInfo CanLeaveGuild(ulong id)
         {
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
+            IGuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
@@ -424,14 +425,14 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Removes <see cref="Player"/> from the supplied guild.
+        /// Removes <see cref="IPlayer"/> from the supplied guild.
         /// </summary>
         /// <remarks>
         /// <see cref="CanLeaveGuild(ulong)"/> should be invoked before invoking this method.
         /// </remarks>
         public void LeaveGuild(ulong id, GuildResult reason = GuildResult.MemberQuit)
         {
-            GuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
+            IGuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
             if (guild == null)
                 throw new ArgumentException($"Invalid guild {id}!");
 
@@ -443,7 +444,7 @@ namespace NexusForever.Game.Guild
 
             if (GuildAffiliation?.Id == guild.Id)
             {
-                GuildBase newAffiliation = guilds.Values.FirstOrDefault();
+                IGuildBase newAffiliation = guilds.Values.FirstOrDefault();
                 if (newAffiliation != null)
                     UpdateGuildAffiliation(newAffiliation.Id);
                 else
@@ -455,11 +456,11 @@ namespace NexusForever.Game.Guild
         /// Update current guild affiliation with supplied guild id.
         /// </summary>
         /// <remarks>
-        /// If moving to or from a <see cref="Game.Guild.Guild"/>, the Holomark will also be updated or removed.
+        /// If moving to or from a <see cref="IGuild"/>, the Holomark will also be updated or removed.
         /// </remarks>
         public void UpdateGuildAffiliation(ulong guildId)
         {
-            if (!guilds.TryGetValue(guildId, out GuildBase guild))
+            if (!guilds.TryGetValue(guildId, out IGuildBase guild))
                 throw new ArgumentException($"Invalid guild id {guildId} for character {owner.CharacterId}!");
 
             // update Holomark if our new affiliation is a guild
@@ -483,7 +484,7 @@ namespace NexusForever.Game.Guild
         /// Remove existing guild affiliation.
         /// </summary>
         /// <remarks>
-        /// If existing affiliation is a <see cref="Game.Guild.Guild"/>, the Holomark will also be removed.
+        /// If existing affiliation is a <see cref="IGuild"/>, the Holomark will also be removed.
         /// </remarks>
         private void RemoveGuildAffiliation()
         {
@@ -618,7 +619,7 @@ namespace NexusForever.Game.Guild
             }, true);
         }
 
-        public IEnumerator<GuildBase> GetEnumerator()
+        public IEnumerator<IGuildBase> GetEnumerator()
         {
             return guilds.Values.GetEnumerator();
         }

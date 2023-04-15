@@ -1,32 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Entity
 {
-    public class TradeskillMaterial: ISaveCharacter
+    public class TradeskillMaterial : ITradeskillMaterial
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="TradeskillMaterial"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="ITradeskillMaterial"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum TradeskillMaterialSaveMask
         {
-            None                = 0x0000,
-            Create              = 0x0001,
-            Amount              = 0x0002
+            None   = 0x0000,
+            Create = 0x0001,
+            Amount = 0x0002
         }
 
         public TradeskillMaterialEntry Entry { get; }
         public ulong Owner { get; }
         public ushort MaterialId { get; }
-        
+
         public ushort Amount
         {
             get => amount;
-            set {
+            set
+            {
                 amount = value;
                 saveMask |= TradeskillMaterialSaveMask.Amount;
             }
@@ -37,24 +39,24 @@ namespace NexusForever.Game.Entity
 
         public TradeskillMaterial(CharacterTradeskillMaterialModel model)
         {
-            Owner = model.Id;
+            Owner      = model.Id;
             MaterialId = model.MaterialId;
-            Amount = model.Amount;
+            Amount     = model.Amount;
 
-            Entry = GameTableManager.Instance.TradeskillMaterial.GetEntry(MaterialId);
+            Entry      = GameTableManager.Instance.TradeskillMaterial.GetEntry(MaterialId);
 
-            saveMask = TradeskillMaterialSaveMask.None;
+            saveMask   = TradeskillMaterialSaveMask.None;
         }
 
         public TradeskillMaterial(ulong characterId, ushort materialId)
         {
-            Owner = characterId;
+            Owner      = characterId;
             MaterialId = materialId;
-            Amount = 0;
+            Amount     = 0;
 
-            Entry = GameTableManager.Instance.TradeskillMaterial.GetEntry(MaterialId);
+            Entry      = GameTableManager.Instance.TradeskillMaterial.GetEntry(MaterialId);
 
-            saveMask = TradeskillMaterialSaveMask.Create;
+            saveMask   = TradeskillMaterialSaveMask.Create;
         }
 
         public void Save(CharacterContext context)
@@ -66,9 +68,9 @@ namespace NexusForever.Game.Entity
             {
                 var model = new CharacterTradeskillMaterialModel
                 {
-                    Id = Owner,
+                    Id         = Owner,
                     MaterialId = MaterialId,
-                    Amount = amount
+                    Amount     = amount
                 };
 
                 context.Add(model);
@@ -77,7 +79,7 @@ namespace NexusForever.Game.Entity
             {
                 var model = new CharacterTradeskillMaterialModel
                 {
-                    Id = Owner,
+                    Id         = Owner,
                     MaterialId = MaterialId
                 };
 

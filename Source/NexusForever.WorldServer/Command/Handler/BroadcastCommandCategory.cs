@@ -1,11 +1,11 @@
-﻿using NexusForever.Game.Network;
-using NexusForever.Game.Static.RBAC;
+﻿using NexusForever.Game.Static.RBAC;
 using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
+using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

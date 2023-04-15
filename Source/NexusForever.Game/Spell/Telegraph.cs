@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
@@ -7,18 +8,18 @@ using NLog;
 
 namespace NexusForever.Game.Spell
 {
-    public class Telegraph
+    public class Telegraph : ITelegraph
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public UnitEntity Caster { get; }
+        public IUnitEntity Caster { get; }
         public Vector3 Position { get; private set; }
         public Vector3 Rotation { get; private set; }
         public TelegraphDamageEntry TelegraphDamage { get; }
 
         private float casterHitRadius => Caster.HitRadius * 0.5f;
 
-        public Telegraph(TelegraphDamageEntry telegraphDamageEntry, UnitEntity caster, Vector3 position, Vector3 rotation)
+        public Telegraph(TelegraphDamageEntry telegraphDamageEntry, IUnitEntity caster, Vector3 position, Vector3 rotation)
         {
             TelegraphDamage = telegraphDamageEntry;
             Caster          = caster;
@@ -61,12 +62,12 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Returns any <see cref="UnitEntity"/> inside the <see cref="Telegraph"/>.
+        /// Returns any <see cref="IUnitEntity"/> inside the <see cref="ITelegraph"/>.
         /// </summary>
-        public IEnumerable<UnitEntity> GetTargets()
+        public IEnumerable<IUnitEntity> GetTargets()
         {
-            Caster.Map.Search(Position, GridSearchSize(), new SearchCheckTelegraph(this, Caster), out List<GridEntity> targets);
-            return targets.Select(t => t as UnitEntity);
+            Caster.Map.Search(Position, GridSearchSize(), new SearchCheckTelegraph(this, Caster), out List<IGridEntity> targets);
+            return targets.Select(t => t as IUnitEntity);
         }
 
         /// <summary>
@@ -187,7 +188,7 @@ namespace NexusForever.Game.Spell
             if (angleDegrees > angle / 2f || angleDegrees < -angle / 2f)
             {
                 // Checks for edge radius is skipped if the caster is not a Player. This optimises this method, but also allows for player's to dodge attacks appropriately.
-                if (Caster is not Player)
+                if (Caster is not IPlayer)
                     return false;
 
                 if (angleDegrees > angle || angleDegrees < -angle)

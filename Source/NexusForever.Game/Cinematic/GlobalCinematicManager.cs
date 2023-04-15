@@ -1,11 +1,12 @@
-﻿using NexusForever.Shared;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class GlobalCinematicManager : Singleton<GlobalCinematicManager>
+    public class GlobalCinematicManager : Singleton<GlobalCinematicManager>, IGlobalCinematicManager
     {
         /// <summary>
-        /// Id to be assigned to the next Actor
+        /// Id to be assigned to the next Cinematic.
         /// </summary>
         public uint NextCinematicId => nextCinematicId++;
 
@@ -16,7 +17,7 @@ namespace NexusForever.Game.Cinematic
         }
 
         /// <summary>
-        /// Initialises the <see cref="GlobalCinematicManager"/>
+        /// Initialises the <see cref="GlobalCinematicManager"/>.
         /// </summary>
         public void Initialise()
         {

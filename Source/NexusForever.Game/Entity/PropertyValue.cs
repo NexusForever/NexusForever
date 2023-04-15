@@ -1,10 +1,10 @@
-﻿using NexusForever.Game.Static.Entity;
-using NexusForever.Network.Message;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Entity;
 using NetworkPropertyValue = NexusForever.Network.World.Message.Model.Shared.PropertyValue;
 
 namespace NexusForever.Game.Entity
 {
-    public class PropertyValue : IBuildable<NetworkPropertyValue>
+    public class PropertyValue : IPropertyValue
     {
         public Property Property { get; }
         public float BaseValue { get; }

@@ -1,7 +1,10 @@
 using System.Numerics;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Entity.Movement;
-using NexusForever.Game.Map;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
@@ -13,12 +16,12 @@ using NetworkPropertyValue = NexusForever.Network.World.Message.Model.Shared.Pro
 
 namespace NexusForever.Game.Entity
 {
-    public abstract class WorldEntity : GridEntity
+    public abstract class WorldEntity : GridEntity, IWorldEntity
     {
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Dictionary<Property, PropertyValue> Properties { get; } = new();
+        public Dictionary<Property, IPropertyValue> Properties { get; } = new();
 
         public uint EntityId { get; protected set; }
         public uint CreatureId { get; protected set; }
@@ -32,7 +35,7 @@ namespace NexusForever.Game.Entity
 
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
-        public MovementManager MovementManager { get; private set; }
+        public IMovementManager MovementManager { get; private set; }
 
         public uint Health
         {
@@ -57,21 +60,21 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Guid of the <see cref="WorldEntity"/> currently targeted.
+        /// Guid of the <see cref="IWorldEntity"/> currently targeted.
         /// </summary>
         public uint TargetGuid { get; set; }
 
         /// <summary>
-        /// Guid of the <see cref="Player"/> currently controlling this <see cref="WorldEntity"/>.
+        /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
         /// </summary>
         public uint ControllerGuid { get; set; }
 
-        protected readonly Dictionary<Stat, StatValue> stats = new();
+        protected readonly Dictionary<Stat, IStatValue> stats = new();
 
         private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new();
 
         /// <summary>
-        /// Create a new <see cref="WorldEntity"/> with supplied <see cref="EntityType"/>.
+        /// Create a new <see cref="IWorldEntity"/> with supplied <see cref="EntityType"/>.
         /// </summary>
         protected WorldEntity(EntityType type)
         {
@@ -79,7 +82,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Initialise <see cref="WorldEntity"/> from an existing database model.
+        /// Initialise <see cref="IWorldEntity"/> from an existing database model.
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
@@ -97,7 +100,7 @@ namespace NexusForever.Game.Entity
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
         }
 
-        public override void OnAddToMap(BaseMap map, uint guid, Vector3 vector)
+        public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
         {
             LeashPosition   = vector;
             MovementManager = new MovementManager(this, vector, Rotation);
@@ -155,15 +158,15 @@ namespace NexusForever.Game.Entity
 
             // Plugs should not have this portion of the packet set by this Class. The Plug Class should set it itself.
             // This is in large part due to the way Plugs are tied either to a DecorId OR Guid. Other entities do not have the same issue.
-            if (!(this is Plug))
+            if (!(this is IPlug))
             {
                 if (ActivePropId > 0 || WorldSocketId > 0)
                 {
                     entityCreatePacket.WorldPlacementData = new ServerEntityCreate.WorldPlacement
                     {
-                        Type = 1,
+                        Type         = 1,
                         ActivePropId = ActivePropId,
-                        SocketId = WorldSocketId
+                        SocketId     = WorldSocketId
                     };
                 }
             }
@@ -174,17 +177,17 @@ namespace NexusForever.Game.Entity
         // TODO: research the difference between a standard activation and cast activation
 
         /// <summary>
-        /// Invoked when <see cref="WorldEntity"/> is activated.
+        /// Invoked when <see cref="IWorldEntity"/> is activated.
         /// </summary>
-        public virtual void OnActivate(Player activator)
+        public virtual void OnActivate(IPlayer activator)
         {
             // deliberately empty
         }
 
         /// <summary>
-        /// Invoked when <see cref="WorldEntity"/> is cast activated.
+        /// Invoked when <see cref="IWorldEntity"/> is cast activated.
         /// </summary>
-        public virtual void OnActivateCast(Player activator)
+        public virtual void OnActivateCast(IPlayer activator)
         {
             // deliberately empty
         }
@@ -211,7 +214,7 @@ namespace NexusForever.Game.Entity
             if (attribute?.Type != StatType.Float)
                 throw new ArgumentException();
 
-            if (!stats.TryGetValue(stat, out StatValue statValue))
+            if (!stats.TryGetValue(stat, out IStatValue statValue))
                 return null;
 
             return statValue.Value;
@@ -226,7 +229,7 @@ namespace NexusForever.Game.Entity
             if (attribute?.Type != StatType.Integer)
                 throw new ArgumentException();
 
-            if (!stats.TryGetValue(stat, out StatValue statValue))
+            if (!stats.TryGetValue(stat, out IStatValue statValue))
                 return null;
 
             return (uint)statValue.Value;
@@ -253,7 +256,7 @@ namespace NexusForever.Game.Entity
             if (attribute?.Type != StatType.Float)
                 throw new ArgumentException();
 
-            if (stats.TryGetValue(stat, out StatValue statValue))
+            if (stats.TryGetValue(stat, out IStatValue statValue))
                 statValue.Value = value;
             else
             {
@@ -285,7 +288,7 @@ namespace NexusForever.Game.Entity
             if (attribute?.Type != StatType.Integer)
                 throw new ArgumentException();
 
-            if (stats.TryGetValue(stat, out StatValue statValue))
+            if (stats.TryGetValue(stat, out IStatValue statValue))
                 statValue.Value = value;
             else
             {
@@ -347,7 +350,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Update the display info for the <see cref="WorldEntity"/>, this overrides any other appearance changes.
+        /// Update the display info for the <see cref="IWorldEntity"/>, this overrides any other appearance changes.
         /// </summary>
         public void SetDisplayInfo(uint displayInfo)
         {
@@ -361,14 +364,13 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Enqueue broadcast of <see cref="IWritable"/> to all visible <see cref="Player"/>'s in range.
+        /// Enqueue broadcast of <see cref="IWritable"/> to all visible <see cref="IPlayer"/>'s in range.
         /// </summary>
         public void EnqueueToVisible(IWritable message, bool includeSelf = false)
         {
-            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
-            foreach (WorldEntity entity in visibleEntities.Values)
+            foreach (IGridEntity entity in visibleEntities.Values)
             {
-                if (!(entity is Player player))
+                if (entity is not IPlayer player)
                     continue;
 
                 if (!includeSelf && (Guid == entity.Guid || ControllerGuid == entity.Guid))
@@ -379,11 +381,11 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Return <see cref="Disposition"/> between <see cref="WorldEntity"/> and <see cref="Faction"/>.
+        /// Return <see cref="Disposition"/> between <see cref="IWorldEntity"/> and <see cref="Faction"/>.
         /// </summary>
         public virtual Disposition GetDispositionTo(Faction factionId, bool primary = true)
         {
-            FactionNode targetFaction = FactionManager.Instance.GetFaction(factionId);
+            IFactionNode targetFaction = FactionManager.Instance.GetFaction(factionId);
             if (targetFaction == null)
                 throw new ArgumentException($"Invalid faction {factionId}!");
 
@@ -392,7 +394,7 @@ namespace NexusForever.Game.Entity
             if (dispositionFromFactionTarget.HasValue)
                 return dispositionFromFactionTarget.Value;
 
-            FactionNode invokeFaction = FactionManager.Instance.GetFaction(primary ? Faction1 : Faction2);
+            IFactionNode invokeFaction = FactionManager.Instance.GetFaction(primary ? Faction1 : Faction2);
             Disposition? dispositionFromFactionInvoker = GetDispositionFromFactionFriendship(invokeFaction, factionId);
             if (dispositionFromFactionInvoker.HasValue)
                 return dispositionFromFactionInvoker.Value;
@@ -403,7 +405,7 @@ namespace NexusForever.Game.Entity
             return Disposition.Neutral;
         }
 
-        private Disposition? GetDispositionFromFactionFriendship(FactionNode node, Faction factionId)
+        private Disposition? GetDispositionFromFactionFriendship(IFactionNode node, Faction factionId)
         {
             if (node == null)
                 return null;

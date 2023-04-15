@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Entity;
 using NexusForever.Network.World.Entity;
 
@@ -41,12 +42,12 @@ namespace NexusForever.Game.Cinematic.Cinematics
             Position initialPosition = new Position(new Vector3(-773.25146484375f, -904.217041015625f, -2269.524658203125f));
 
             Actor ship = new Actor(ACTOR_AURIN_SHIP, 6, 3.1415929794311523f, initialPosition);
-            AddActor(ship, new List<VisualEffect>
+            AddActor(ship, new List<IVisualEffect>
             {
                 new VisualEffect(11096)
             });
 
-            AddActor(new Actor(ACTOR_RAPTARUK, 6, 3.1415929794311523f, initialPosition), new List<VisualEffect>
+            AddActor(new Actor(ACTOR_RAPTARUK, 6, 3.1415929794311523f, initialPosition), new List<IVisualEffect>
             {
                 new VisualEffect(11096)
             });

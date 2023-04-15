@@ -1,30 +1,31 @@
-﻿using NexusForever.Game.Cinematic;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Cinematic;
 using NLog;
 
 namespace NexusForever.Game.Entity
 {
-    public class CinematicManager
+    public class CinematicManager : ICinematicManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private Player owner;
+        private IPlayer owner;
 
-        private CinematicBase currentCinematic;
-        private readonly Queue<CinematicBase> queuedCinematics = new();
+        private ICinematicBase currentCinematic;
+        private readonly Queue<ICinematicBase> queuedCinematics = new();
 
         /// <summary>
-        /// Initialise a <see cref="CinematicManager"/> for this <see cref="Player"/>.
+        /// Initialise a <see cref="ICinematicManager"/> for this <see cref="IPlayer"/>.
         /// </summary>
-        public CinematicManager(Player player)
+        public CinematicManager(IPlayer player)
         {
             owner = player;
         }
 
         /// <summary>
-        /// Queue a <see cref="CinematicBase"/> to be played.
+        /// Queue a <see cref="ICinematicBase"/> to be played.
         /// </summary>
-        public void QueueCinematic(CinematicBase cinematic)
+        public void QueueCinematic(ICinematicBase cinematic)
         {
             queuedCinematics.Enqueue(cinematic);
             if (currentCinematic == null && queuedCinematics.Count >= 1u)
@@ -32,14 +33,14 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Play the next queued <see cref="CinematicBase"/>.
+        /// Play the next queued <see cref="ICinematicBase"/>.
         /// </summary>
         public void PlayQueuedCinematic()
         {
             if (queuedCinematics.Count == 0)
                 return;
 
-            CinematicBase cinematic = queuedCinematics.Dequeue();
+            ICinematicBase cinematic = queuedCinematics.Dequeue();
             currentCinematic = cinematic;
             currentCinematic.StartPlayback();
         }
@@ -47,7 +48,6 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Handle the <see cref="CinematicState"/> the Client sent back. Only to be called from Client Handlers.
         /// </summary>
-        /// <param name="cinematicState"></param>
         public void HandleClientCinematicState(CinematicState cinematicState)
         {
             switch (cinematicState)

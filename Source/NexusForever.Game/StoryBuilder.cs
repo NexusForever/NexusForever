@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -7,12 +8,12 @@ using NexusForever.Shared;
 
 namespace NexusForever.Game
 {
-    public class StoryBuilder : Singleton<StoryBuilder>
+    public class StoryBuilder : Singleton<StoryBuilder>, IStoryBuilder
     {
         /// <summary>
-        /// Sends a story panel to the <see cref="Player"/> based on the provided <see cref="StoryPanelEntry"/>.
+        /// Sends a story panel to the <see cref="IPlayer"/> based on the provided <see cref="StoryPanelEntry"/>.
         /// </summary>
-        public void SendStoryPanel(StoryPanelEntry entry, Player player)
+        public void SendStoryPanel(StoryPanelEntry entry, IPlayer player)
         {
             if (entry == null)
                 throw new ArgumentNullException(nameof(entry));
@@ -32,9 +33,9 @@ namespace NexusForever.Game
         }
 
         /// <summary>
-        /// Sends a story communicator window to the <see cref="Player"/>.
+        /// Sends a story communicator window to the <see cref="IPlayer"/>.
         /// </summary>
-        public void SendStoryCommunicator(uint textId, uint creatureId, Player player, uint durationMs = 10000, StoryPanelType storyPanelType = StoryPanelType.Default, WindowType windowTypeId = WindowType.LeftAligned, uint soundEventId = 0, byte priority = 0)
+        public void SendStoryCommunicator(uint textId, uint creatureId, IPlayer player, uint durationMs = 10000, StoryPanelType storyPanelType = StoryPanelType.Default, WindowType windowTypeId = WindowType.LeftAligned, uint soundEventId = 0, byte priority = 0)
         {
             if (textId == 0)
                 throw new ArgumentOutOfRangeException(nameof(textId));
@@ -57,7 +58,7 @@ namespace NexusForever.Game
             });
         }
 
-        private StoryMessage.Player BuildPlayer(Player player)
+        private StoryMessage.Player BuildPlayer(IPlayer player)
         {
             return new StoryMessage.Player
             {

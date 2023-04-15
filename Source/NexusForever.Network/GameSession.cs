@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Net.Sockets;
 using NexusForever.Cryptography;
 using NexusForever.Network.Message;
@@ -9,12 +8,17 @@ using NexusForever.Shared;
 
 namespace NexusForever.Network
 {
-    public abstract class GameSession : NetworkSession
+    public abstract class GameSession : NetworkSession, IGameSession
     {
         /// <summary>
         /// Determines if queued incoming packets can be processed during a world update.
         /// </summary>
-        public bool CanProcessPackets { get; set; } = true;
+        public bool CanProcessIncomingPackets { get; set; } = true;
+
+        /// <summary>
+        /// Determines if queued outgoing packets can be processed during a world update.
+        /// </summary>
+        public bool CanProcessOutgoingPackets { get; set; } = true;
 
         protected PacketCrypt encryption;
 
@@ -67,7 +71,6 @@ namespace NexusForever.Network
             log.Trace($"Sent packet {opcode}(0x{opcode:X}).");
         }
 
-        [Conditional("DEBUG")]
         public void EnqueueMessageEncrypted(uint opcode, string hex)
         {
             using (var stream = new MemoryStream())
@@ -138,21 +141,24 @@ namespace NexusForever.Network
         {
             base.OnDisconnect();
 
+            // clear any pending packets and prevent any new packets from being processed
+            CanProcessIncomingPackets = false;
+            CanProcessOutgoingPackets = false;
             incomingPackets.Clear();
             outgoingPackets.Clear();
         }
 
         public override void Update(double lastTick)
         {
+            base.Update(lastTick);
+
             // process pending packet queue
-            while (CanProcessPackets && incomingPackets.TryDequeue(out ClientGamePacket packet))
+            while (CanProcessIncomingPackets && incomingPackets.TryDequeue(out ClientGamePacket packet))
                 HandlePacket(packet);
 
             // flush pending packet queue
-            while (outgoingPackets.TryDequeue(out ServerGamePacket packet))
+            while (CanProcessOutgoingPackets && outgoingPackets.TryDequeue(out ServerGamePacket packet))
                 FlushPacket(packet);
-
-            base.Update(lastTick);
         }
 
         protected void HandlePacket(ClientGamePacket packet)
@@ -205,7 +211,7 @@ namespace NexusForever.Network
         }
 
         [MessageHandler(GameMessageOpcode.ClientEncrypted)]
-        public void HandleEncryptedPacket(ClientEncrypted encrypted)
+        private void HandleEncryptedPacket(ClientEncrypted encrypted)
         {
             byte[] data = encryption.Decrypt(encrypted.Data, encrypted.Data.Length);
 
@@ -214,7 +220,7 @@ namespace NexusForever.Network
         }
 
         [MessageHandler(GameMessageOpcode.ClientPacked)]
-        public void HandlePacked(ClientPacked packed)
+        private void HandlePacked(ClientPacked packed)
         {
             var packet = new ClientGamePacket(packed.Data);
             HandlePacket(packet);

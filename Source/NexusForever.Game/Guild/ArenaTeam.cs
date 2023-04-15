@@ -1,9 +1,10 @@
 ﻿using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Guild;
 
 namespace NexusForever.Game.Guild
 {
-    public class ArenaTeam : GuildBase
+    public class ArenaTeam : GuildBase, IArenaTeam
     {
         public override uint MaxMembers
         {
@@ -20,15 +21,15 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="ArenaTeam"/> using <see cref="GuildModel"/>
+        /// Create a new <see cref="IArenaTeam"/> using <see cref="GuildModel"/>
         /// </summary>
-        public ArenaTeam(GuildModel baseModel) 
+        public ArenaTeam(GuildModel baseModel)
             : base(baseModel)
         {
         }
 
         /// <summary>
-        /// Create a new <see cref="ArenaTeam"/> using the supplied parameters.
+        /// Create a new <see cref="IArenaTeam"/> using the supplied parameters.
         /// </summary>
         public ArenaTeam(GuildType type, string name, string leaderRankName, string councilRankName, string memberRankName)
             : base(type, name, leaderRankName, councilRankName, memberRankName)

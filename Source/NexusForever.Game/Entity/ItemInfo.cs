@@ -1,10 +1,11 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Entity
 {
-    public class ItemInfo
+    public class ItemInfo : IItemInfo
     {
         public uint Id => Entry.Id;
         public Item2Entry Entry { get; }
@@ -14,7 +15,7 @@ namespace NexusForever.Game.Entity
         public ItemSlotEntry SlotEntry { get; }
 
         /// <summary>
-        /// Create a new <see cref="ItemInfo"/> from <see cref="Item2Entry"/> entry.
+        /// Create a new <see cref="IItemInfo"/> from <see cref="Item2Entry"/> entry.
         /// </summary>
         public ItemInfo(Item2Entry entry)
         {
@@ -38,7 +39,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool IsEquippableIntoSlot(EquippedItem bagIndex)
         {
-            return (SlotEntry?.EquippedSlotFlags & (1u << (int)bagIndex)) != 0;
+            return (SlotEntry?.EquippedSlotFlags & 1u << (int)bagIndex) != 0;
         }
 
         /// <summary>

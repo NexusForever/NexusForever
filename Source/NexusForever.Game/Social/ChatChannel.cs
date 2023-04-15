@@ -2,29 +2,31 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.CharacterCache;
+using NexusForever.Game.Abstract.Character;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Social;
+using NexusForever.Game.Character;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Social;
 using NexusForever.Game.Static.TextFilter;
-using NexusForever.Game.TextFilter;
+using NexusForever.Game.Text.Filter;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using NexusForever.Network.World.Message.Static;
 using NLog;
 
 namespace NexusForever.Game.Social
 {
-    public class ChatChannel : IEnumerable<ChatChannelMember>, ISaveCharacter
+    public class ChatChannel : IChatChannel
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         [Flags]
         public enum ChatChannelSaveMask
         {
-            None = 0x00,
-            Create = 0x01,
-            Delete = 0x02,
+            None     = 0x00,
+            Create   = 0x01,
+            Delete   = 0x02,
             Password = 0x04
         }
 
@@ -43,22 +45,22 @@ namespace NexusForever.Game.Social
         }
         private string password;
 
-        private readonly Dictionary<ulong, ChatChannelMember> members = new();
+        private readonly Dictionary<ulong, IChatChannelMember> members = new();
 
         private ChatChannelSaveMask saveMask;
 
         /// <summary>
-        /// Returns if <see cref="ChatChannel"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IChatChannel"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & ChatChannelSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="ChatChannel"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IChatChannel"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & ChatChannelSaveMask.Delete) != 0;
 
         /// <summary>
-        /// Enqueue <see cref="ChatChannel"/> to be deleted from the database.
+        /// Enqueue <see cref="IChatChannel"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool set)
         {
@@ -76,7 +78,7 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Create a new <see cref="ChatChannel"/> with supplied <see cref="ChatChannelType"/> and id.
+        /// Create a new <see cref="IChatChannel"/> with supplied <see cref="ChatChannelType"/> and id.
         /// </summary>
         public ChatChannel(ChatChannelType type, ulong id, string name, string password = null)
         {
@@ -89,7 +91,7 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Create a new <see cref="ChatChannel"/> from an existing database model.
+        /// Create a new <see cref="IChatChannel"/> from an existing database model.
         /// </summary>
         public ChatChannel(ChatChannelModel model)
         {
@@ -138,12 +140,12 @@ namespace NexusForever.Game.Social
                 saveMask = ChatChannelSaveMask.None;
             }
 
-            foreach (ChatChannelMember member in members.Values)
+            foreach (IChatChannelMember member in members.Values)
                 member.Save(context);
         }
 
         /// <summary>
-        /// Returns if supplied character is a member of the <see cref="ChatChannel"/>.
+        /// Returns if supplied character is a member of the <see cref="IChatChannel"/>.
         /// </summary>
         public bool IsMember(ulong characterId)
         {
@@ -151,11 +153,11 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Invoked when a <see cref="Player"/> comes online.
+        /// Invoked when a <see cref="IPlayer"/> comes online.
         /// </summary>
-        public void OnMemberLogin(Player player)
+        public void OnMemberLogin(IPlayer player)
         {
-            ChatChannelMember member = GetMember(player.CharacterId);
+            IChatChannelMember member = GetMember(player.CharacterId);
             if (member == null)
                 return;
 
@@ -174,11 +176,11 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Invoked when a <see cref="Player"/> goes offline.
+        /// Invoked when a <see cref="IPlayer"/> goes offline.
         /// </summary>
-        public void OnMemberLogout(Player player)
+        public void OnMemberLogout(IPlayer player)
         {
-            ChatChannelMember member = GetMember(player.CharacterId);
+            IChatChannelMember member = GetMember(player.CharacterId);
             if (member == null)
                 return;
 
@@ -186,11 +188,11 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can join the <see cref="ChatChannel"/> with supplied password.
+        /// Returns if <see cref="IPlayer"/> can join the <see cref="IChatChannel"/> with supplied password.
         /// </summary>
-        public ChatResult CanJoin(Player player, string password)
+        public ChatResult CanJoin(IPlayer player, string password)
         {
-            ChatChannelMember member = GetMember(player.CharacterId);
+            IChatChannelMember member = GetMember(player.CharacterId);
             if (member != null)
                 return ChatResult.AlreadyMember;
 
@@ -201,12 +203,12 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Add a new <see cref="Player"/> to the <see cref="ChatChannel"/> with supplied password.
+        /// Add a new <see cref="IPlayer"/> to the <see cref="IChatChannel"/> with supplied password.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanJoin(Player, string)"/> should be invoked before invoking this method.
+        /// <see cref="CanJoin(IPlayer, string)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void Join(Player player, string password)
+        public void Join(IPlayer player, string password)
         {
             if (!string.IsNullOrEmpty(Password) && Password != password)
                 return;
@@ -226,7 +228,7 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Add a new character to <see cref="ChatChannel"/>.
+        /// Add a new character to <see cref="IChatChannel"/>.
         /// </summary>
         public void Join(ulong characterId)
         {
@@ -235,7 +237,7 @@ namespace NexusForever.Game.Social
             if (members.Count == 0)
                 flags |= ChatChannelMemberFlags.Owner;
 
-            if (members.TryGetValue(characterId, out ChatChannelMember member))
+            if (members.TryGetValue(characterId, out IChatChannelMember member))
             {
                 if (!member.PendingDelete)
                     throw new InvalidOperationException($"Member {characterId} for chat channel {Type},{Id} already exists!");
@@ -255,9 +257,9 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Remove an existing <see cref="Player"/> from <see cref="ChatChannel"/> with supplied <see cref="Player"/>.
+        /// Remove an existing <see cref="IPlayer"/> from <see cref="IChatChannel"/> with supplied <see cref="ChatChannelLeaveReason"/>.
         /// </summary>
-        public void Leave(Player player, ChatChannelLeaveReason reason)
+        public void Leave(IPlayer player, ChatChannelLeaveReason reason)
         {
             Leave(player.CharacterId);
 
@@ -273,11 +275,11 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Remove an existing character from <see cref="ChatChannel"/>.
+        /// Remove an existing character from <see cref="IChatChannel"/>.
         /// </summary>
         public void Leave(ulong characterId)
         {
-            if (!members.TryGetValue(characterId, out ChatChannelMember member))
+            if (!members.TryGetValue(characterId, out IChatChannelMember member))
                 return;
 
             member.IsOnline = false;
@@ -296,7 +298,7 @@ namespace NexusForever.Game.Social
             if (member.HasFlag(ChatChannelMemberFlags.Owner)
                 && !IsGuildChannel())
             {
-                ChatChannelMember newOwner = members
+                IChatChannelMember newOwner = members
                     .FirstOrDefault(m => m.Value.HasFlag(ChatChannelMemberFlags.Moderator))
                     .Value ?? members.FirstOrDefault().Value;
 
@@ -309,18 +311,18 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can kick target from <see cref="ChatChannel"/>.
+        /// Returns if <see cref="IPlayer"/> can kick target from <see cref="IChatChannel"/>.
         /// </summary>
-        public ChatResult CanKick(Player player, string target)
+        public ChatResult CanKick(IPlayer player, string target)
         {
-            ChatChannelMember invokeMember = GetMember(player.CharacterId);
+            IChatChannelMember invokeMember = GetMember(player.CharacterId);
             if (invokeMember == null)
                 return ChatResult.NotMember;
 
             if (!invokeMember.HasFlag(ChatChannelMemberFlags.Owner | ChatChannelMemberFlags.Moderator))
                 return ChatResult.NoPermissions;
 
-            ChatChannelMember targetMember = GetMember(target);
+            IChatChannelMember targetMember = GetMember(target);
             if (targetMember == null)
                 return ChatResult.NotMember;
 
@@ -331,19 +333,23 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Kick target from <see cref="ChatChannel"/>.
+        /// Kick target from <see cref="IChatChannel"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanKick(Player, string)"/> should be invoked before invoking this method.
+        /// <see cref="CanKick(IPlayer, string)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void Kick(Player player, string target)
+        public void Kick(IPlayer player, string target)
         {
-            ICharacter targetCharacter = CharacterManager.Instance.GetCharacterInfo(target);
+            ICharacter targetCharacter = CharacterManager.Instance.GetCharacter(target);
             if (targetCharacter == null)
                 return;
 
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(targetCharacter.CharacterId);
+            if (targetPlayer == null)
+                return;
+
             // if the player is online handle through the local manager otherwise directly in the channel
-            if (targetCharacter is Player targetPlayer)
+            if (targetPlayer != null)
                 targetPlayer.ChatManager.Leave(Id, ChatChannelLeaveReason.Kicked);
             else
                 Leave(targetCharacter.CharacterId);
@@ -362,11 +368,11 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// List all members of <see cref="ChatChannel"/>.
+        /// List all members of <see cref="IChatChannel"/>.
         /// </summary>
-        public void ListMembers(Player player)
+        public void ListMembers(IPlayer player)
         {
-            ChatChannelMember member = GetMember(player.CharacterId);
+            IChatChannelMember member = GetMember(player.CharacterId);
             if (member == null)
                 return;
 
@@ -376,7 +382,7 @@ namespace NexusForever.Game.Social
                 ChannelId = Id,
                 Names     = members.Values
                     .Where(m => !m.PendingDelete && m.IsOnline)
-                    .Select(m => CharacterManager.Instance.GetCharacterInfo(m.CharacterId).Name)
+                    .Select(m => CharacterManager.Instance.GetCharacter(m.CharacterId).Name)
                     .ToList(),
                 Flags     = members.Values
                     .Where(m => !m.PendingDelete)
@@ -387,11 +393,11 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can set password of <see cref="ChatChannel"/>.
+        /// Returns if <see cref="IPlayer"/> can set password of <see cref="IChatChannel"/>.
         /// </summary>
-        public ChatResult CanSetPassword(Player player, string password)
+        public ChatResult CanSetPassword(IPlayer player, string password)
         {
-            ChatChannelMember member = GetMember(player.CharacterId);
+            IChatChannelMember member = GetMember(player.CharacterId);
             if (member == null)
                 return ChatResult.NotMember;
 
@@ -406,14 +412,14 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Set password for <see cref="ChatChannel"/>.
+        /// Set password for <see cref="IChatChannel"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanSetPassword(Player, string)"/> should be invoked before invoking this method.
+        /// <see cref="CanSetPassword(IPlayer, string)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void SetPassword(Player player, string password)
+        public void SetPassword(IPlayer player, string password)
         {
-            ChatChannelMember member = GetMember(player.CharacterId);
+            IChatChannelMember member = GetMember(player.CharacterId);
             if (member == null)
                 return;
 
@@ -441,18 +447,18 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can make target owner of <see cref="ChatChannel"/>.
+        /// Returns if <see cref="IPlayer"/> can make target owner of <see cref="IChatChannel"/>.
         /// </summary>
-        public ChatResult CanPassOwner(Player player, string target)
+        public ChatResult CanPassOwner(IPlayer player, string target)
         {
-            ChatChannelMember invokeMember = GetMember(player.CharacterId);
+            IChatChannelMember invokeMember = GetMember(player.CharacterId);
             if (invokeMember == null)
                 return ChatResult.NotMember;
 
             if (!invokeMember.HasFlag(ChatChannelMemberFlags.Owner))
                 return ChatResult.NoPermissions;
 
-            ChatChannelMember targetMember = GetMember(target);
+            IChatChannelMember targetMember = GetMember(target);
             if (targetMember == null)
                 return ChatResult.NotMember;
 
@@ -463,21 +469,21 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Make target owner of <see cref="ChatChannel"/>.
+        /// Make target owner of <see cref="IChatChannel"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanPassOwner(Player, string)"/> should be invoked before invoking this method.
+        /// <see cref="CanPassOwner(IPlayer, string)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void PassOwner(Player player, string target)
+        public void PassOwner(IPlayer player, string target)
         {
-            ChatChannelMember invokeMember = GetMember(player.CharacterId);
+            IChatChannelMember invokeMember = GetMember(player.CharacterId);
             if (invokeMember == null)
                 return;
 
             if (!invokeMember.HasFlag(ChatChannelMemberFlags.Owner))
                 return;
 
-            ChatChannelMember targetMember = GetMember(target);
+            IChatChannelMember targetMember = GetMember(target);
             if (targetMember == null)
                 return;
 
@@ -500,18 +506,18 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can make target a moderator in <see cref="ChatChannel"/>.
+        /// Returns if <see cref="IPlayer"/> can make target a moderator in <see cref="IChatChannel"/>.
         /// </summary>
-        public ChatResult CanMakeModerator(Player player, string target)
+        public ChatResult CanMakeModerator(IPlayer player, string target)
         {
-            ChatChannelMember invokeMember = GetMember(player.CharacterId);
+            IChatChannelMember invokeMember = GetMember(player.CharacterId);
             if (invokeMember == null)
                 return ChatResult.NotMember;
 
             if (!invokeMember.HasFlag(ChatChannelMemberFlags.Owner))
                 return ChatResult.NoPermissions;
 
-            ChatChannelMember targetMember = GetMember(target);
+            IChatChannelMember targetMember = GetMember(target);
             if (targetMember == null)
                 return ChatResult.NotMember;
 
@@ -522,21 +528,21 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Make target moderator in <see cref="ChatChannel"/>.
+        /// Make target moderator in <see cref="IChatChannel"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanMakeModerator(Player, string)"/> should be invoked before invoking this method.
+        /// <see cref="CanMakeModerator(IPlayer, string)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void MakeModerator(Player player, string target, bool status)
+        public void MakeModerator(IPlayer player, string target, bool status)
         {
-            ChatChannelMember invokeMember = GetMember(player.CharacterId);
+            IChatChannelMember invokeMember = GetMember(player.CharacterId);
             if (invokeMember == null)
                 return;
 
             if (!invokeMember.HasFlag(ChatChannelMemberFlags.Owner))
                 return;
 
-            ChatChannelMember targetMember = GetMember(target);
+            IChatChannelMember targetMember = GetMember(target);
             if (targetMember == null)
                 return;
 
@@ -561,18 +567,18 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can mute target in <see cref="ChatChannel"/>.
+        /// Returns if <see cref="IPlayer"/> can mute target in <see cref="IChatChannel"/>.
         /// </summary>
-        public ChatResult CanMuteMember(Player player, string target)
+        public ChatResult CanMuteMember(IPlayer player, string target)
         {
-            ChatChannelMember invokeMember = GetMember(player.CharacterId);
+            IChatChannelMember invokeMember = GetMember(player.CharacterId);
             if (invokeMember == null)
                 return ChatResult.NotMember;
 
             if (!invokeMember.HasFlag(ChatChannelMemberFlags.Owner | ChatChannelMemberFlags.Moderator))
                 return ChatResult.NoPermissions;
 
-            ChatChannelMember targetMember = GetMember(target);
+            IChatChannelMember targetMember = GetMember(target);
             if (targetMember == null)
                 return ChatResult.NotMember;
 
@@ -583,21 +589,21 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Mute or unmute target in <see cref="ChatChannel"/>.
+        /// Mute or unmute target in <see cref="IChatChannel"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanMuteMember(Player, string)"/> should be invoked before invoking this method.
+        /// <see cref="CanMuteMember(IPlayer, string)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void MuteMember(Player player, string target, bool status)
+        public void MuteMember(IPlayer player, string target, bool status)
         {
-            ChatChannelMember invokeMember = GetMember(player.CharacterId);
+            IChatChannelMember invokeMember = GetMember(player.CharacterId);
             if (invokeMember == null)    
                 return;
 
             if (!invokeMember.HasFlag(ChatChannelMemberFlags.Owner | ChatChannelMemberFlags.Moderator))
                 return;
 
-            ChatChannelMember targetMember = GetMember(target);
+            IChatChannelMember targetMember = GetMember(target);
             if (targetMember == null)
                 return;
 
@@ -622,11 +628,11 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Returns if <see cref="Player"/> can broadcast in the <see cref="ChatChannel"/>.
+        /// Returns if <see cref="IPlayer"/> can broadcast in the <see cref="IChatChannel"/>.
         /// </summary>
-        public ChatResult CanBroadcast(Player player, string text)
+        public ChatResult CanBroadcast(IPlayer player, string text)
         {
-            ChatChannelMember member = GetMember(player.CharacterId);
+            IChatChannelMember member = GetMember(player.CharacterId);
             if (member == null)
                 return ChatResult.NotMember;
 
@@ -641,17 +647,17 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Broadcast <see cref="IWritable"/> to all members in the <see cref="ChatChannel"/>.
+        /// Broadcast <see cref="IWritable"/> to all members in the <see cref="IChatChannel"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="CanBroadcast(Player, string)"/> should be invoked before invoking this method.
+        /// <see cref="CanBroadcast(IPlayer, string)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void Broadcast(IWritable message, Player except = null)
+        public void Broadcast(IWritable message, IPlayer except = null)
         {
-            foreach (ChatChannelMember member in members.Values
+            foreach (IChatChannelMember member in members.Values
                 .Where(m => m.IsOnline && !m.PendingDelete))
             {
-                Player player = CharacterManager.Instance.GetPlayer(member.CharacterId);
+                IPlayer player = PlayerManager.Instance.GetPlayer(member.CharacterId);
                 if (player != except)
                 {
                     player?.Session?.EnqueueMessageEncrypted(message);
@@ -659,16 +665,16 @@ namespace NexusForever.Game.Social
             }
         }
 
-        private ChatChannelMember GetMember(ulong characterId)
+        private IChatChannelMember GetMember(ulong characterId)
         {
-            if (members.TryGetValue(characterId, out ChatChannelMember member)
+            if (members.TryGetValue(characterId, out IChatChannelMember member)
                 && !member.PendingDelete)
                 return member;
 
             return null;
         }
 
-        private ChatChannelMember GetMember(string name)
+        private IChatChannelMember GetMember(string name)
         {
             ulong? characterId = CharacterManager.Instance.GetCharacterIdByName(name);
             if (characterId == null)
@@ -677,7 +683,7 @@ namespace NexusForever.Game.Social
             return GetMember(characterId.Value);
         }
 
-        public IEnumerator<ChatChannelMember> GetEnumerator()
+        public IEnumerator<IChatChannelMember> GetEnumerator()
         {
             return members.Values.GetEnumerator();
         }

@@ -1,10 +1,11 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class VisualEffect : IKeyframeAction
+    public class VisualEffect : IVisualEffect
     {
         public uint Id { get; }
         public uint UnitId { get; private set; }
@@ -38,12 +39,12 @@ namespace NexusForever.Game.Cinematic
             RemoveOnCameraEnd = removeOnCameraEnd;
         }
 
-        public void SetActor(Actor unit)
+        public void SetActor(IActor unit)
         {
             UnitId = unit.Id;
         }
 
-        public void Send(WorldSession session)
+        public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicVisualEffect
             {

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Numerics;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -10,14 +11,14 @@ using NetworkVehiclePassenger = NexusForever.Network.World.Message.Model.Shared.
 
 namespace NexusForever.Game.Entity
 {
-    public class Vehicle : WorldEntity, IEnumerable<VehiclePassenger>
+    public class Vehicle : WorldEntity, IVehicle
     {
         public Creature2Entry CreatureEntry { get; }
         public UnitVehicleEntry VehicleEntry { get; }
         public Spell4Entry SpellEntry { get; }
 
-        protected readonly List<VehiclePassenger> passengers = new();
-        private readonly Queue<VehiclePassenger> pendingAdd = new();
+        protected readonly List<IVehiclePassenger> passengers = new();
+        private readonly Queue<IVehiclePassenger> pendingAdd = new();
 
         public Vehicle()
             : base(EntityType.Vehicle)
@@ -59,9 +60,9 @@ namespace NexusForever.Game.Entity
 
         public override void OnRemoveFromMap()
         {
-            foreach (VehiclePassenger passenger in passengers)
+            foreach (IVehiclePassenger passenger in passengers)
             {
-                Player entity = GetVisible<Player>(passenger.Guid);
+                IPlayer entity = GetVisible<IPlayer>(passenger.Guid);
                 PassengerRemove(entity, passenger);
             }
 
@@ -70,9 +71,9 @@ namespace NexusForever.Game.Entity
 
         public override void OnRelocate(Vector3 vector)
         {
-            foreach (VehiclePassenger passenger in passengers)
+            foreach (IVehiclePassenger passenger in passengers)
             {
-                Player entity = GetVisible<Player>(passenger.Guid);
+                IPlayer entity = GetVisible<IPlayer>(passenger.Guid);
                 Map.EnqueueRelocate(entity, vector);
             }
 
@@ -82,30 +83,30 @@ namespace NexusForever.Game.Entity
         public override void Update(double lastTick)
         {
             // passengers are delay added to make sure the vehicle exists at the client
-            while (pendingAdd.TryDequeue(out VehiclePassenger passenger))
+            while (pendingAdd.TryDequeue(out IVehiclePassenger passenger))
                 PassengerAdd(passenger);
         }
 
         /// <summary>
-        /// Return <see cref="VehiclePassenger"/> with supplied guid.
+        /// Return <see cref="IVehiclePassenger"/> with supplied guid.
         /// </summary>
-        public VehiclePassenger GetPassenger(uint guid)
+        public IVehiclePassenger GetPassenger(uint guid)
         {
             return passengers.SingleOrDefault(p => p.Guid == guid);
         }
 
         /// <summary>
-        /// Return <see cref="VehiclePassenger"/> with supplied <see cref="VehicleSeatType"/> and seat position.
+        /// Return <see cref="IVehiclePassenger"/> with supplied <see cref="VehicleSeatType"/> and seat position.
         /// </summary>
-        public VehiclePassenger GetPassenger(VehicleSeatType seatType, byte seatPosition)
+        public IVehiclePassenger GetPassenger(VehicleSeatType seatType, byte seatPosition)
         {
             return passengers.SingleOrDefault(p => p.SeatType == seatType && p.SeatPosition == seatPosition);
         }
 
         /// <summary>
-        /// Enqueue <see cref="Player"/> to be added as a passenger with supplied <see cref="VehicleSeatType"/> and seat position.
+        /// Enqueue <see cref="IPlayer"/> to be added as a passenger with supplied <see cref="VehicleSeatType"/> and seat position.
         /// </summary>
-        public void EnqueuePassengerAdd(Player player, VehicleSeatType seatType, byte seatPosition)
+        public void EnqueuePassengerAdd(IPlayer player, VehicleSeatType seatType, byte seatPosition)
         {
             if (seatType >= VehicleSeatType.Invalid)
                 throw new ArgumentOutOfRangeException();
@@ -136,10 +137,10 @@ namespace NexusForever.Game.Entity
             pendingAdd.Enqueue(new VehiclePassenger(seatType, seatPosition, player.Guid));
         }
 
-        private void PassengerAdd(VehiclePassenger passenger)
+        private void PassengerAdd(IVehiclePassenger passenger)
         {
             // possible for a player to no longer be visible due to delayed add
-            Player player = GetVisible<Player>(passenger.Guid);
+            IPlayer player = GetVisible<IPlayer>(passenger.Guid);
             if (player == null)
                 return;
 
@@ -204,32 +205,31 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Invoked when <see cref="Player"/> is added as a passenger to <see cref="VehicleSeatType"/> and seat position.
+        /// Invoked when <see cref="IPlayer"/> is added as a passenger to <see cref="VehicleSeatType"/> and seat position.
         /// </summary>
-        protected virtual void OnPassengerAdd(Player player, VehicleSeatType seatType, byte seatPosition)
+        protected virtual void OnPassengerAdd(IPlayer player, VehicleSeatType seatType, byte seatPosition)
         {
             // deliberately empty
         }
 
         /// <summary>
-        /// Remove <see cref="Player"/> as a passenger.
+        /// Remove <see cref="IPlayer"/> as a passenger.
         /// </summary>
-        public void PassengerRemove(Player player)
+        public void PassengerRemove(IPlayer player)
         {
-            VehiclePassenger passenger = GetPassenger(player.Guid);
+            IVehiclePassenger passenger = GetPassenger(player.Guid);
             if (passenger == null)
                 throw new ArgumentException();
 
             PassengerRemove(player, passenger);
         }
 
-        private void PassengerRemove(Player player, VehiclePassenger passenger)
+        private void PassengerRemove(IPlayer player, IVehiclePassenger passenger)
         {
             player.VehicleGuid = 0;
             player.MovementManager.SetPosition(Position);
             player.MovementManager.SetRotation(Rotation);
             player.MovementManager.BroadcastCommands();
-
 
             if (passenger.SeatType == VehicleSeatType.Pilot)
                 player.SetControl(player);
@@ -249,14 +249,14 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Invoked when <see cref="Player"/> is removed as a passenger from <see cref="VehicleSeatType"/> and seat position.
+        /// Invoked when <see cref="IPlayer"/> is removed as a passenger from <see cref="VehicleSeatType"/> and seat position.
         /// </summary>
-        protected virtual void OnPassengerRemove(Player player, VehicleSeatType seatType, byte seatPosition)
+        protected virtual void OnPassengerRemove(IPlayer player, VehicleSeatType seatType, byte seatPosition)
         {
             // deliberately empty
         }
 
-        public IEnumerator<VehiclePassenger> GetEnumerator()
+        public IEnumerator<IVehiclePassenger> GetEnumerator()
         {
             return passengers.GetEnumerator();
         }

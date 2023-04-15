@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Social;
@@ -10,7 +9,6 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Static;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Context;
 using NLog;
@@ -24,14 +22,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         private const string CommandPrefix = "!";
 
         [MessageHandler(GameMessageOpcode.ClientChat)]
-        public static void HandleChat(WorldSession session, ClientChat chat)
+        public static void HandleChat(IWorldSession session, ClientChat chat)
         {
             if (chat.Message.StartsWith(CommandPrefix))
             {
                 try
                 {
-                    var target  = session.Player.GetVisible<WorldEntity>(session.Player.TargetGuid);
-                    var context = new WorldSessionCommandContext(session.Player, target);
+                    var target  = session.Player.GetVisible<IWorldEntity>(session.Player.TargetGuid);
+                    var context = new WorldSessionCommandContext(session, target);
                     CommandManager.Instance.HandleCommand(context, chat.Message.Substring(CommandPrefix.Length));
                 }
                 catch (Exception e)
@@ -40,11 +38,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 }
             }
             else
-                GlobalChatManager.Instance.HandleClientChat(session, chat);
+                GlobalChatManager.Instance.HandleClientChat(session.Player, chat);
         }
 
         [MessageHandler(GameMessageOpcode.ClientEmote)]
-        public static void HandleEmote(WorldSession session, ClientEmote emote)
+        public static void HandleEmote(IWorldSession session, ClientEmote emote)
         {
             StandState standState = StandState.Stand;
             if (emote.EmoteId != 0)
@@ -68,20 +66,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientWhoRequest)]
-        public static void HandleWhoRequest(WorldSession session, ClientWhoRequest request)
+        public static void HandleWhoRequest(IWorldSession session, ClientWhoRequest request)
         {
             var players = new List<ServerWhoResponse.WhoPlayer>
             {
                 new()
                 {
-                    Name = session.Player.Name,
-                    Level = session.Player.Level,
-                    Race = session.Player.Race,
-                    Class = session.Player.Class,
-                    Path = session.Player.Path,
+                    Name    = session.Player.Name,
+                    Level   = session.Player.Level,
+                    Race    = session.Player.Race,
+                    Class   = session.Player.Class,
+                    Path    = session.Player.Path,
                     Faction = session.Player.Faction1,
-                    Sex = session.Player.Sex,
-                    Zone = session.Player.Zone.Id
+                    Sex     = session.Player.Sex,
+                    Zone    = session.Player.Zone.Id
                 }
             };
 
@@ -92,13 +90,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatWhisper)]
-        public static void HandleWhisper(WorldSession session, ClientChatWhisper whisper)
+        public static void HandleWhisper(IWorldSession session, ClientChatWhisper whisper)
         {
-            GlobalChatManager.Instance.HandleWhisperChat(session, whisper);
+            GlobalChatManager.Instance.HandleWhisperChat(session.Player, whisper);
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatJoin)]
-        public static void HandleChatJoin(WorldSession session, ClientChatJoin chatJoin)
+        public static void HandleChatJoin(IWorldSession session, ClientChatJoin chatJoin)
         {
             ChatResult result = session.Player.ChatManager.CanJoin(chatJoin.Name, chatJoin.Password);
             if (result != ChatResult.Ok)
@@ -116,7 +114,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatLeave)]
-        public static void HandleChatLeave(WorldSession session, ClientChatLeave chatLeave)
+        public static void HandleChatLeave(IWorldSession session, ClientChatLeave chatLeave)
         {
             ChatResult result = session.Player.ChatManager.CanLeave(chatLeave.Channel.ChatId);
             if (result != ChatResult.Ok)
@@ -129,7 +127,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatKick)]
-        public static void HandleChatKick(WorldSession session, ClientChatKick chatKick)
+        public static void HandleChatKick(IWorldSession session, ClientChatKick chatKick)
         {
             ChatResult result = session.Player.ChatManager.CanKick(chatKick.Channel.ChatId, chatKick.CharacterName);
             if (result != ChatResult.Ok)
@@ -142,7 +140,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatList)]
-        public static void HandleChatList(WorldSession session, ClientChatList chatList)
+        public static void HandleChatList(IWorldSession session, ClientChatList chatList)
         {
             ChatResult result = session.Player.ChatManager.CanListMembers(chatList.Channel.ChatId);
             if (result != ChatResult.Ok)
@@ -155,7 +153,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatPassword)]
-        public static void HandleChatPassword(WorldSession session, ClientChatPassword chatPassword)
+        public static void HandleChatPassword(IWorldSession session, ClientChatPassword chatPassword)
         {
             ChatResult result = session.Player.ChatManager.CanSetPassword(chatPassword.Channel.ChatId, chatPassword.Password);
             if (result != ChatResult.Ok)
@@ -168,7 +166,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatOwner)]
-        public static void HandleChatOwner(WorldSession session, ClientChatOwner chatOwner)
+        public static void HandleChatOwner(IWorldSession session, ClientChatOwner chatOwner)
         {
             ChatResult result = session.Player.ChatManager.CanPassOwner(chatOwner.Channel.ChatId, chatOwner.CharacterName);
             if (result != ChatResult.Ok)
@@ -181,7 +179,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatModerator)]
-        public static void HandleChatModerator(WorldSession session, ClientChatModerator chatModerator)
+        public static void HandleChatModerator(IWorldSession session, ClientChatModerator chatModerator)
         {
             ChatResult result = session.Player.ChatManager.CanMakeModerator(chatModerator.Channel.ChatId, chatModerator.CharacterName);
             if (result != ChatResult.Ok)
@@ -194,7 +192,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChatMute)]
-        public static void HandleChatMute(WorldSession session, ClientChatMute chatMute)
+        public static void HandleChatMute(IWorldSession session, ClientChatMute chatMute)
         {
             ChatResult result = session.Player.ChatManager.CanMute(chatMute.Channel.ChatId, chatMute.CharacterName);
             if (result != ChatResult.Ok)

@@ -3,13 +3,15 @@ using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Setting;
 using NexusForever.Game.Static.Setting;
 using NexusForever.Network.World.Message.Model;
 using NetworkBinding = NexusForever.Network.World.Message.Model.Shared.Binding;
 
 namespace NexusForever.Game.Setting
 {
-    public class KeybindingSet : ISaveCharacter, ISaveAuth, IEnumerable<Keybinding>
+    // TODO: split this further to seperate character and account keybind specific methods
+    public class KeybindingSet : IKeybindingSet
     {
         public ulong Owner { get; }
         public InputSets InputSet { get; }
@@ -17,7 +19,7 @@ namespace NexusForever.Game.Setting
 
         private bool isDirty;
 
-        private readonly Dictionary<ushort, Keybinding> bindings = new();
+        private readonly Dictionary<ushort, IKeybinding> bindings = new();
 
         /// <summary>
         /// Create a new <see cref="KeybindingSet"/> from an existing database model.
@@ -48,7 +50,7 @@ namespace NexusForever.Game.Setting
             if (!isDirty)
                 return;
 
-            foreach (Keybinding binding in bindings.Values.ToList())
+            foreach (IKeybinding binding in bindings.Values.ToList())
             {
                 if (binding.PendingDelete)
                     bindings.Remove(binding.InputActionId);
@@ -64,7 +66,7 @@ namespace NexusForever.Game.Setting
             if (!isDirty)
                 return;
 
-            foreach (Keybinding binding in bindings.Values.ToList())
+            foreach (IKeybinding binding in bindings.Values.ToList())
             {
                 if (binding.PendingDelete)
                     bindings.Remove(binding.InputActionId);
@@ -88,7 +90,7 @@ namespace NexusForever.Game.Setting
             foreach (ushort inputActionId in bindings.Keys
                 .Except(biInputKeySet.Bindings.Select(b => b.InputActionId)))
             {
-                Keybinding binding = bindings[inputActionId];
+                IKeybinding binding = bindings[inputActionId];
                 if (binding.PendingCreate)
                     bindings.Remove(inputActionId);
                 else
@@ -97,7 +99,7 @@ namespace NexusForever.Game.Setting
 
             foreach (NetworkBinding networkBinding in biInputKeySet.Bindings)
             {
-                if (!bindings.TryGetValue(networkBinding.InputActionId, out Keybinding binding))
+                if (!bindings.TryGetValue(networkBinding.InputActionId, out IKeybinding binding))
                     bindings.Add(networkBinding.InputActionId, new Keybinding(Owner, networkBinding));
                 else
                 {
@@ -109,7 +111,7 @@ namespace NexusForever.Game.Setting
             }
         }
 
-        public IEnumerator<Keybinding> GetEnumerator()
+        public IEnumerator<IKeybinding> GetEnumerator()
         {
             return bindings.Values.Where(b => !b.PendingDelete).GetEnumerator();
         }

@@ -1,58 +1,72 @@
-﻿using NexusForever.Database.Auth;
-using NexusForever.Database.Auth.Model;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
-using NexusForever.Shared;
 using NLog;
-using NetworkCostume = NexusForever.Network.World.Message.Model.Shared.Costume;
 
 namespace NexusForever.Game.Entity
 {
-    public class CostumeManager : ISaveAuth, ISaveCharacter, IUpdate
+    public class CostumeManager : ICostumeManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public byte CostumeCap => (byte)(player.Session.EntitlementManager.GetRewardProperty(RewardPropertyType.CostumeSlots).GetValue(0) ?? 4u);
+        public byte CostumeCap => (byte)(player.Account.RewardPropertyManager.GetRewardProperty(RewardPropertyType.CostumeSlots).GetValue(0) ?? 4u);
+
+        public sbyte CostumeIndex
+        {
+            get => costumeIndex;
+            set
+            {
+                costumeIndex = value;
+                isDirty = true;
+            }
+        }
+        private sbyte costumeIndex;
+
+        private bool isDirty;
 
         // hard limit, array storing costumes at client is 12 in size 
         private const byte MaxCostumes = 12;
         private const double CostumeSwapCooldown = 15d;
 
-        private readonly Player player;
-        private readonly Dictionary<byte, Costume> costumes = new();
-        private readonly Dictionary<uint, CostumeUnlock> costumeUnlocks = new();
+        private readonly IPlayer player;
+        private readonly Dictionary<byte, ICostume> costumes = new();
         private double costumeSwapCooldown;
 
         /// <summary>
-        /// Create a new <see cref="CurrencyManager"/> from existing <see cref="AccountModel"/> and <see cref="CharacterModel"/> database models.
+        /// Create a new <see cref="ICostumeManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public CostumeManager(Player owner, AccountModel accountModel, CharacterModel characterModel)
+        public CostumeManager(IPlayer owner, CharacterModel characterModel)
         {
             player = owner;
 
+            costumeIndex = characterModel.ActiveCostumeIndex;
+
             foreach (CharacterCostumeModel costumeModel in characterModel.Costume)
                 costumes.Add(costumeModel.Index, new Costume(costumeModel));
-
-            foreach (AccountCostumeUnlockModel costumeUnlockModel in accountModel.AccountCostumeUnlock)
-                costumeUnlocks.Add(costumeUnlockModel.ItemId, new CostumeUnlock(costumeUnlockModel));
-        }
-
-        public void Save(AuthContext context)
-        {
-            foreach (CostumeUnlock costumeItem in costumeUnlocks.Values)
-                costumeItem.Save(context);
         }
 
         public void Save(CharacterContext context)
         {
-            foreach (Costume costume in costumes.Values)
+            foreach (ICostume costume in costumes.Values)
                 costume.Save(context);
+
+            if (isDirty)
+            {
+                // character is attached in Player::Save, this will only be local lookup
+                CharacterModel character = context.Character.Find(player.CharacterId);
+                EntityEntry<CharacterModel> entity = context.Entry(character);
+
+                character.ActiveCostumeIndex = CostumeIndex;
+                entity.Property(p => p.ActiveCostumeIndex).IsModified = true;
+
+                isDirty = false;
+            }
         }
 
         public void Update(double lastTick)
@@ -69,16 +83,16 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Return <see cref="Costume"/> at supplied index.
+        /// Return <see cref="ICostume"/> at supplied index.
         /// </summary>
-        public Costume GetCostume(byte index)
+        public ICostume GetCostume(byte index)
         {
-            costumes.TryGetValue(index, out Costume costume);
+            costumes.TryGetValue(index, out ICostume costume);
             return costume;
         }
 
         /// <summary>
-        /// Validate then save or update <see cref="Costume"/> from <see cref="ClientCostumeSave"/> packet.
+        /// Validate then save or update <see cref="ICostume"/> from <see cref="ClientCostumeSave"/> packet.
         /// </summary>
         public void SaveCostume(ClientCostumeSave costumeSave)
         {
@@ -117,7 +131,7 @@ namespace NexusForever.Game.Entity
                     return;
                 }*/
 
-                if (!costumeUnlocks.ContainsKey(costumeItem.ItemId))
+                if (!player.Account.CostumeManager.HasItemUnlock(costumeItem.ItemId))
                 {
                     SendCostumeSaveResult(CostumeSaveResult.ItemNotUnlocked);
                     return;
@@ -142,7 +156,7 @@ namespace NexusForever.Game.Entity
                         return;
                     }
 
-                    if (!player.Session.GenericUnlockManager.IsDyeUnlocked(costumeItem.Dyes[i]))
+                    if (!player.Account.GenericUnlockManager.IsDyeUnlocked(costumeItem.Dyes[i]))
                     {
                         SendCostumeSaveResult(CostumeSaveResult.DyeNotUnlocked);
                         return;
@@ -152,7 +166,7 @@ namespace NexusForever.Game.Entity
 
             // TODO: charge player
 
-            if (costumes.TryGetValue((byte)costumeSave.Index, out Costume costume))
+            if (costumes.TryGetValue((byte)costumeSave.Index, out ICostume costume))
                 costume.Update(costumeSave);
             else
             {
@@ -160,7 +174,7 @@ namespace NexusForever.Game.Entity
                 costumes.Add(costume.Index, costume);
             }
 
-            if (costumeSave.Index == player.CostumeIndex)
+            if (costumeSave.Index == CostumeIndex)
                 player.Inventory.VisualUpdate(costume);
 
             SendCostume(costume);
@@ -168,7 +182,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Equip <see cref="Costume"/> at supplied index.
+        /// Equip <see cref="ICostume"/> at supplied index.
         /// </summary>
         public void SetCostume(int index)
         {
@@ -180,7 +194,7 @@ namespace NexusForever.Game.Entity
                 throw new ArgumentOutOfRangeException();
 
             // if costume is null appearance will be returned to default
-            costumes.TryGetValue((byte)index, out Costume costume);
+            costumes.TryGetValue((byte)index, out ICostume costume);
 
             if (costumeSwapCooldown > 0d)
                 throw new InvalidOperationException();
@@ -188,10 +202,10 @@ namespace NexusForever.Game.Entity
             SetCostume((sbyte)index, costume);
         }
 
-        private void SetCostume(sbyte index, Costume costume)
+        private void SetCostume(sbyte index, ICostume costume)
         {
             player.Inventory.VisualUpdate(costume);
-            player.CostumeIndex = index;
+            CostumeIndex = index;
 
             // 15 second cooldown for changing costumes, hardcoded in binary
             costumeSwapCooldown = CostumeSwapCooldown;
@@ -199,111 +213,23 @@ namespace NexusForever.Game.Entity
             log.Trace($"Set costume to index {index}");
         }
 
-        /// <summary>
-        /// Unlock costume item for <see cref="Item"/> at supplied <see cref="ItemLocation"/>.
-        /// </summary>
-        public void UnlockItem(ItemLocation location)
-        {
-            Item item = player.Inventory.GetItem(location);
-            if (item == null)
-            {
-                SendCostumeItemUnlock(CostumeUnlockResult.InvalidItem);
-                return;
-            }
-
-            if (costumeUnlocks.TryGetValue(item.Id, out CostumeUnlock costumeUnlock) && !costumeUnlock.PendingDelete)
-            {
-                SendCostumeItemUnlock(CostumeUnlockResult.AlreadyKnown);
-                return;
-            }
-
-            if (costumeUnlocks.Count >= GetMaxUnlockItemCount())
-            {
-                SendCostumeItemUnlock(CostumeUnlockResult.OutOfSpace);
-                return;
-            }
-
-            // TODO: make item soulbound
-
-            if (costumeUnlock != null)
-                costumeUnlock.EnqueueDelete(false);
-            else
-                costumeUnlocks.Add(item.Id, new CostumeUnlock(player.Session.Account, item.Id));
-            
-            SendCostumeItemUnlock(CostumeUnlockResult.UnlockSuccess, item.Id);
-        }
-
-        private uint GetMaxUnlockItemCount()
-        {
-            // client defaults to 1000 if entry doesn't exist
-            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(1203);
-            if (entry == null)
-                return 1000u;
-
-            return entry.Dataint0/* + countFromEntitlements*/;
-        }
-
-        /// <summary>
-        /// Forget costume item unlock of supplied item id.
-        /// </summary>
-        public void ForgetItem(uint itemId)
-        {
-            Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(itemId);
-            if (itemEntry == null)
-            {
-                SendCostumeItemUnlock(CostumeUnlockResult.InvalidItem);
-                return;
-            }
-
-            if (!costumeUnlocks.TryGetValue(itemId, out CostumeUnlock costumeUnlock))
-            {
-                SendCostumeItemUnlock(CostumeUnlockResult.ForgetItemFailed);
-                return;
-            }
-
-            costumeUnlock.EnqueueDelete(true);
-            SendCostumeItemUnlock(CostumeUnlockResult.ForgetItemSuccess, itemId);
-        }
-
         public void SendInitialPackets()
         {
-            player.Session.EnqueueMessageEncrypted(new ServerCostumeItemList
-            {
-                Items = costumeUnlocks.Keys.ToList()
-            });
-
             player.Session.EnqueueMessageEncrypted(new ServerCostumeList
             {
-                Costumes = costumes.Values.Select(BuildNetworkCostume).ToList()
+                Costumes = costumes.Values.Select(c => c.Build()).ToList()
             });
         }
 
         /// <summary>
-        /// Send <see cref="ServerCostume"/> with supplied <see cref="Costume"/>.
+        /// Send <see cref="ServerCostume"/> with supplied <see cref="ICostume"/>.
         /// </summary>
-        private void SendCostume(Costume costume)
+        private void SendCostume(ICostume costume)
         {
             player.Session.EnqueueMessageEncrypted(new ServerCostume
             {
-                Costume = BuildNetworkCostume(costume)
+                Costume = costume.Build()
             });
-        }
-
-        private NetworkCostume BuildNetworkCostume(Costume costume)
-        {
-            var networkCostume = new NetworkCostume
-            {
-                Index = costume.Index,
-                Mask  = costume.Mask
-            };
-
-            foreach (CostumeItem costumeItem in costume)
-            {
-                networkCostume.ItemIds[(byte)costumeItem.Slot] = costumeItem.ItemId;
-                networkCostume.DyeData[(byte)costumeItem.Slot] = costumeItem.DyeData;
-            }
-
-            return networkCostume;
         }
 
         /// <summary>
@@ -317,22 +243,6 @@ namespace NexusForever.Game.Entity
                 Result         = result,
                 MannequinIndex = mannequinIndex
             });
-        }
-
-        /// <summary>
-        /// Send <see cref="ServerCostumeItemUnlock"/> will supplied <see cref="CostumeUnlockResult"/> and optional item id.
-        /// </summary>
-        private void SendCostumeItemUnlock(CostumeUnlockResult result, uint itemId = 0u)
-        {
-            var costumeItemUnlock = new ServerCostumeItemUnlock
-            {
-                Result = result
-            };
-
-            if (itemId != 0u)
-                costumeItemUnlock.ItemId = itemId;
-
-            player.Session.EnqueueMessageEncrypted(costumeItemUnlock);
         }
     }
 }

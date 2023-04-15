@@ -1,11 +1,12 @@
 ﻿using System.Numerics;
-using NexusForever.Game.Entity.Movement.Spline.Implementation;
+using NexusForever.Game.Abstract.Entity.Movement.Spline;
+using NexusForever.Game.Abstract.Entity.Movement.Spline.Type;
+using NexusForever.Game.Entity.Movement.Spline.Type;
 using NexusForever.Game.Static.Entity.Movement.Spline;
-using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity.Movement.Spline
 {
-    public class SplinePath : IUpdate
+    public class SplinePath : ISplinePath
     {
         public SplineType Type { get; }
         public SplineMode Mode { get; }
@@ -14,14 +15,14 @@ namespace NexusForever.Game.Entity.Movement.Spline
         public float Position { get; private set; }
         public bool IsFinialised { get; private set; }
 
-        private readonly Spline spline;
+        private readonly ISpline spline;
 
         private uint point;
         private SplineDirection direction;
         private float remaining;
 
         /// <summary>
-        /// Create a new single spline <see cref="SplinePath"/> with supplied <see cref="SplineMode"/> and speed.
+        /// Create a new single spline <see cref="ISplinePath"/> with supplied <see cref="SplineMode"/> and speed.
         /// </summary>
         public SplinePath(ushort splineId, SplineMode mode, float speed)
         {
@@ -29,7 +30,7 @@ namespace NexusForever.Game.Entity.Movement.Spline
             Mode     = mode;
             Speed    = speed;
 
-            SplineTypeBase splineType = new SplineTypeCatmullRomTbl();
+            ISplineType splineType = new SplineTypeCatmullRomTbl();
 
             ISplineMode splineMode = GlobalMovementManager.Instance.NewSplineMode(mode);
             if (splineMode == null)
@@ -44,7 +45,7 @@ namespace NexusForever.Game.Entity.Movement.Spline
         }
 
         /// <summary>
-        /// Create a new custom spline <see cref="SplinePath"/> with supplied <see cref="SplineType"/>, <see cref="SplineMode"/> and speed.
+        /// Create a new custom spline <see cref="ISplinePath"/> with supplied <see cref="SplineType"/>, <see cref="SplineMode"/> and speed.
         /// </summary>
         public SplinePath(List<Vector3> nodes, SplineType type, SplineMode mode, float speed)
         {
@@ -52,7 +53,7 @@ namespace NexusForever.Game.Entity.Movement.Spline
             Mode  = mode;
             Speed = speed;
 
-            SplineTypeBase splineType;
+            ISplineType splineType;
             switch (type)
             {
                 case SplineType.Linear:

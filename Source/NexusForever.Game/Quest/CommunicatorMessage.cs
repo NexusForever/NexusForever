@@ -1,15 +1,16 @@
-﻿using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Quest
 {
-    public class CommunicatorMessage
+    public class CommunicatorMessage : ICommunicatorMessage
     {
         public uint Id => entry.Id;
         public ushort QuestId => (ushort)entry.QuestIdDelivered;
@@ -17,7 +18,7 @@ namespace NexusForever.Game.Quest
         private readonly CommunicatorMessagesEntry entry;
 
         /// <summary>
-        /// Create a new <see cref="CommunicatorMessage"/> with supplied <see cref="CommunicatorMessagesEntry"/>.
+        /// Create a new <see cref="ICommunicatorMessage"/> with supplied <see cref="CommunicatorMessagesEntry"/>.
         /// </summary>
         public CommunicatorMessage(CommunicatorMessagesEntry entry)
         {
@@ -25,9 +26,9 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Checks if <see cref="Player"/> meets the required conditions for this quest to be added to their communicator.
+        /// Checks if <see cref="IPlayer"/> meets the required conditions for this quest to be added to their communicator.
         /// </summary>
-        public bool Meets(Player player)
+        public bool Meets(IPlayer player)
         {
             if (entry.WorldId != 0u && entry.WorldId != player.Map.Entry.Id)
                 return false;
@@ -69,9 +70,9 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Send communicator message to <see cref="WorldSession"/>.
+        /// Send communicator message to <see cref="IGameSession"/>.
         /// </summary>
-        public void Send(WorldSession session)
+        public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCommunicatorMessage
             {

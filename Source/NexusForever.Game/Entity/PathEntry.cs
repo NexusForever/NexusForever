@@ -1,26 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Entity
 {
-    public class PathEntry : ISaveCharacter
+    public class PathEntry : IPathEntry
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="PathEntry"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IPathEntry"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum PathSaveMask
         {
-            None                = 0x0000,
-            Create              = 0x0001,
-            Unlocked            = 0x0002,
-            XPChange            = 0x0004,
-            LevelChange         = 0x0008
+            None        = 0x0000,
+            Create      = 0x0001,
+            Unlocked    = 0x0002,
+            XPChange    = 0x0004,
+            LevelChange = 0x0008
         }
 
-        public Path Path { get; set;  }
+        public Path Path { get; set; }
         public ulong CharacterId { get; set; }
 
         public bool Unlocked
@@ -68,7 +69,7 @@ namespace NexusForever.Game.Entity
         private PathSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="PathEntry"/> for a <see cref="Player"/> from <see cref="CharacterPathModel"/>
+        /// Create a new <see cref="IPathEntry"/> for a <see cref="IPlayer"/> from <see cref="CharacterPathModel"/>
         /// </summary>
         public PathEntry(CharacterPathModel model)
         {
@@ -77,12 +78,12 @@ namespace NexusForever.Game.Entity
             unlocked      = Convert.ToBoolean(model.Unlocked);
             totalXp       = model.TotalXp;
             levelRewarded = model.LevelRewarded;
-            
+
             saveMask      = PathSaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="PathEntry"/>
+        /// Create a new <see cref="IPathEntry"/>
         /// </summary>
         public PathEntry(ulong owner, Path path, bool isUnlocked)
         {

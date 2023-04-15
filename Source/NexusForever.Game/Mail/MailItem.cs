@@ -3,15 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Mail;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Mail;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Game.Mail
 {
-    public class MailItem : IEnumerable<MailAttachment>
+    public class MailItem : IMailItem
     {
-         /// <summary>
-        /// Determines which fields need saving for <see cref="MailItem"/> when being saved to the database.
+        /// <summary>
+        /// Determines which fields need saving for <see cref="IMailItem"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum MailSaveMask
@@ -78,18 +81,20 @@ namespace NexusForever.Game.Mail
         public DateTime CreateTime { get; }
         public float ExpiryTime => 30f; // TODO: Make this configurable
 
+        public bool PendingCreate => (saveMask & MailSaveMask.Create) != 0;
+
         /// <summary>
-        /// Returns if <see cref="MailItem"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IMailItem"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & MailSaveMask.Delete) != 0;
 
         private MailSaveMask saveMask;
 
-        private readonly List<MailAttachment> mailAttachments = new();
-        private readonly HashSet<MailAttachment> deletedAttachments = new();
+        private readonly List<IMailAttachment> mailAttachments = new();
+        private readonly HashSet<IMailAttachment> deletedAttachments = new();
 
         /// <summary>
-        /// Create a new <see cref="MailItem"/> from an existing <see cref="CharacterMailModel"/>.
+        /// Create a new <see cref="IMailItem"/> from an existing <see cref="CharacterMailModel"/>.
         /// </summary>
         public MailItem(CharacterMailModel model)
         {
@@ -117,7 +122,7 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Create a new <see cref="MailItem"/> from supplied <see cref="MailParameters"/>.
+        /// Create a new <see cref="IMailItem"/> from supplied <see cref="IMailParameters"/>.
         /// </summary>
         public MailItem(MailParameters parameters)
         {
@@ -157,9 +162,9 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Enqueue <see cref="MailItem"/> to be deleted from the database.
+        /// Enqueue <see cref="IMailItem"/> to be deleted from the database.
         /// </summary>
-        public void EnqueueDelete()
+        public void EnqueueDelete(bool state)
         {
             saveMask = MailSaveMask.Delete;
         }
@@ -232,25 +237,25 @@ namespace NexusForever.Game.Mail
                 saveMask = MailSaveMask.None;
             }
 
-            foreach (MailAttachment mailAttachment in mailAttachments)
+            foreach (IMailAttachment mailAttachment in mailAttachments)
                 mailAttachment.Save(context);
 
-            foreach (MailAttachment mailAttachment in deletedAttachments)
+            foreach (IMailAttachment mailAttachment in deletedAttachments)
                 mailAttachment.Save(context);
 
             deletedAttachments.Clear();
         }
 
         /// <summary>
-        /// Returns the specific <see cref="MailAttachment"/> based on its index.
+        /// Returns the specific <see cref="IMailAttachment"/> based on its index.
         /// </summary>
-        public MailAttachment GetAttachment(uint index)
+        public IMailAttachment GetAttachment(uint index)
         {
             return index < mailAttachments.Count ? mailAttachments[(int)index] : null;
         }
 
         /// <summary>
-        /// Mark this <see cref="MailItem"/> as read by the player.
+        /// Mark this <see cref="IMailItem"/> as read by the player.
         /// </summary>
         public void MarkAsRead()
         {
@@ -258,7 +263,7 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Mark this <see cref="MailItem"/> as paid, or taken the currency attached.
+        /// Mark this <see cref="IMailItem"/> as paid, or taken the currency attached.
         /// </summary>
         public void PayOrTakeCash()
         {
@@ -267,7 +272,7 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Mark this <see cref="MailItem"/> as not returnable.
+        /// Mark this <see cref="IMailItem"/> as not returnable.
         /// </summary>
         public void MarkAsNotReturnable()
         {
@@ -275,7 +280,7 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Return this <see cref="MailItem"/> to sender.
+        /// Return this <see cref="IMailItem"/> to sender.
         /// </summary>
         public void ReturnMail()
         {
@@ -306,17 +311,17 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Add a <see cref="MailAttachment"/> to this <see cref="MailItem"/>.
+        /// Add a <see cref="IMailAttachment"/> to this <see cref="IMailItem"/>.
         /// </summary>
-        public void AttachmentAdd(MailAttachment mailAttachment)
+        public void AttachmentAdd(IMailAttachment mailAttachment)
         {
             mailAttachments.Add(mailAttachment);
         }
 
         /// <summary>
-        /// Remove a <see cref="MailAttachment"/> from this <see cref="MailItem"/>.
+        /// Remove a <see cref="IMailAttachment"/> from this <see cref="IMailItem"/>.
         /// </summary>
-        public void AttachmentDelete(MailAttachment mailAttachment, uint index)
+        public void AttachmentDelete(IMailAttachment mailAttachment, uint index)
         {
             mailAttachment.EnqueueDelete();
 
@@ -324,7 +329,38 @@ namespace NexusForever.Game.Mail
             deletedAttachments.Add(mailAttachment);
         }
 
-        public IEnumerator<MailAttachment> GetEnumerator()
+        public ServerMailAvailable.Mail Build()
+        {
+            bool isPlayer = SenderType == SenderType.Player || SenderType == SenderType.GM;
+
+            var serverMailItem = new ServerMailAvailable.Mail
+            {
+                MailId               = Id,
+                SenderType           = SenderType,
+                Subject              = Subject,
+                Message              = Message,
+                TextEntrySubject     = TextEntrySubject,
+                TextEntryMessage     = TextEntryMessage,
+                CreatureId           = !isPlayer ? CreatureId : 0,
+                CurrencyGiftType     = 0,
+                CurrencyGiftAmount   = !IsCashOnDelivery && !HasPaidOrCollectedCurrency ? CurrencyAmount : 0,
+                CostOnDeliveryAmount = IsCashOnDelivery && !HasPaidOrCollectedCurrency ? CurrencyAmount : 0,
+                ExpiryTimeInDays     = ExpiryTime,
+                Flags                = Flags,
+                Sender = new TargetPlayerIdentity
+                {
+                    RealmId     = isPlayer ? RealmContext.Instance.RealmId : (ushort)0,
+                    CharacterId = isPlayer ? SenderId : 0ul
+                },
+            };
+
+            foreach (IMailAttachment attachment in mailAttachments)
+                serverMailItem.Attachments.Add(attachment.Build());
+
+            return serverMailItem;
+        }
+
+        public IEnumerator<IMailAttachment> GetEnumerator()
         {
             return mailAttachments.GetEnumerator();
         }

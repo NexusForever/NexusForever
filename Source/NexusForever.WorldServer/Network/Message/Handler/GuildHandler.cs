@@ -1,5 +1,5 @@
-﻿using NexusForever.Game.Guild;
-using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Guild;
 using NexusForever.Game.Static.Account;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
@@ -13,9 +13,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     public static class GuildHandler
     {
         [MessageHandler(GameMessageOpcode.ClientGuildRegister)]
-        public static void HandleGuildRegister(WorldSession session, ClientGuildRegister guildRegister)
+        public static void HandleGuildRegister(IWorldSession session, ClientGuildRegister guildRegister)
         {
-            GuildResultInfo GetResult()
+            IGuildResultInfo GetResult()
             {
                 // hardcoded GameFormula entries come from client GuildLib.GetCreateCost/GetAlternateCreateCost
                 switch (guildRegister.GuildType)
@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     case GuildType.Community:
                     {
                         GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(1159);
-                        if (guildRegister.AlternateCost && !session.AccountCurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, entry.Dataint01))
+                        if (guildRegister.AlternateCost && !session.Account.CurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, entry.Dataint01))
                             return new GuildResultInfo(GuildResult.NotEnoughCredits); // this right guild result for account credits?
                         if (!guildRegister.AlternateCost && !session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, entry.Dataint0))
                             return new GuildResultInfo(GuildResult.NotEnoughCredits);
@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 return session.Player.GuildManager.CanRegisterGuild(guildRegister);
             }
 
-            GuildResultInfo result = GetResult();
+            IGuildResultInfo result = GetResult();
             if (result.Result != GuildResult.Success)
             {
                 GuildBase.SendGuildResult(session, result);
@@ -52,22 +52,22 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientGuildHolomarkUpdate)]
-        public static void HandleHolomarkUpdate(WorldSession session, ClientGuildHolomarkUpdate guildHolomarkUpdate)
+        public static void HandleHolomarkUpdate(IWorldSession session, ClientGuildHolomarkUpdate guildHolomarkUpdate)
         {
             session.Player.GuildManager.UpdateHolomark(guildHolomarkUpdate.LeftHidden, guildHolomarkUpdate.RightHidden,
                 guildHolomarkUpdate.BackHidden, guildHolomarkUpdate.DistanceNear);
         }
 
         [MessageHandler(GameMessageOpcode.ClientGuildOperation)]
-        public static void HandleOperation(WorldSession session, ClientGuildOperation clientGuildOperation)
+        public static void HandleOperation(IWorldSession session, ClientGuildOperation clientGuildOperation)
         {
             GlobalGuildManager.Instance.HandleGuildOperation(session.Player, clientGuildOperation);
         }
 
         [MessageHandler(GameMessageOpcode.ClientGuildInviteResponse)]
-        public static void HandleInviteResponse(WorldSession session, ClientGuildInviteResponse guildInviteResponse)
+        public static void HandleInviteResponse(IWorldSession session, ClientGuildInviteResponse guildInviteResponse)
         {
-            GuildResultInfo info = session.Player.GuildManager.CanAcceptInviteToGuild();
+            IGuildResultInfo info = session.Player.GuildManager.CanAcceptInviteToGuild();
             if (info.Result != GuildResult.Success)
             {
                 GuildBase.SendGuildResult(session, info);

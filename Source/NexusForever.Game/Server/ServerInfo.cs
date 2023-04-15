@@ -1,11 +1,12 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using NexusForever.Database.Auth.Model;
+using NexusForever.Game.Abstract.Server;
 using NLog;
 
 namespace NexusForever.Game.Server
 {
-    public class ServerInfo
+    public class ServerInfo : IServerInfo
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 

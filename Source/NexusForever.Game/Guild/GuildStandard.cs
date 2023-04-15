@@ -1,15 +1,15 @@
 ﻿using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Guild;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.Message;
 using NetworkGuildStandard = NexusForever.Network.World.Message.Model.Shared.GuildStandard;
 
 namespace NexusForever.Game.Guild
 {
-    public class GuildStandard : IBuildable<NetworkGuildStandard>
+    public class GuildStandard : IGuildStandard
     {
-        public class GuildStandardPart : IBuildable<NetworkGuildStandard.GuildStandardPart>
+        public class GuildStandardPart : IGuildStandardPart
         {
             public GuildStandardPartType Type { get; }
             public GuildStandardPartEntry GuildStandardPartEntry { get; }
@@ -18,7 +18,7 @@ namespace NexusForever.Game.Guild
             public ushort DyeColorRampId3 { get; }
 
             /// <summary>
-            /// Create a new <see cref="GuildStandardPart"/> with supplied parameters.
+            /// Create a new <see cref="IGuildStandardPart"/> with supplied parameters.
             /// </summary>
             public GuildStandardPart(GuildStandardPartType type, ushort guildStandardPartId,
                 ushort dyeColorRampId1, ushort dyeColorRampId2, ushort dyeColorRampId3)
@@ -35,7 +35,7 @@ namespace NexusForever.Game.Guild
             }
 
             /// <summary>
-            /// Returns if <see cref="GuildStandardPart"/> contains valid data.
+            /// Returns if <see cref="IGuildStandardPart"/> contains valid data.
             /// </summary>
             public bool Validate()
             {
@@ -58,12 +58,12 @@ namespace NexusForever.Game.Guild
             }
         }
 
-        public GuildStandardPart BackgroundIcon { get; }
-        public GuildStandardPart ForegroundIcon { get; }
-        public GuildStandardPart ScanLines { get; }
+        public IGuildStandardPart BackgroundIcon { get; }
+        public IGuildStandardPart ForegroundIcon { get; }
+        public IGuildStandardPart ScanLines { get; }
 
         /// <summary>
-        /// Create a new <see cref="GuildStandard"/> from an existing database model.
+        /// Create a new <see cref="IGuildStandard"/> from an existing database model.
         /// </summary>
         public GuildStandard(GuildDataModel model)
         {
@@ -73,7 +73,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="GuildStandard"/> from a network model.
+        /// Create a new <see cref="IGuildStandard"/> from a network model.
         /// </summary>
         public GuildStandard(NetworkGuildStandard model)
         {
@@ -86,7 +86,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Create a new <see cref="GuildStandard"/> from supplied ids.
+        /// Create a new <see cref="IGuildStandard"/> from supplied ids.
         /// </summary>
         public GuildStandard(ushort backgroundIconPartId, ushort foregroundIconPartId, ushort scanLinesPartId)
         {
@@ -96,11 +96,11 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Returns if <see cref="GuildStandard"/> contains valid data.
+        /// Returns if <see cref="IGuildStandard"/> contains valid data.
         /// </summary>
         public bool Validate()
         {
-            GuildStandardPart[] parts = { BackgroundIcon, ForegroundIcon, ScanLines };
+            IGuildStandardPart[] parts = { BackgroundIcon, ForegroundIcon, ScanLines };
             return parts.All(part => part.Validate());
         }
 

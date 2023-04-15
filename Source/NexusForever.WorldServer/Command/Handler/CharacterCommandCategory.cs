@@ -1,11 +1,11 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.WorldServer.Command.Context;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Character, "A collection of commands to manage a character.", "character")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class CharacterCommandCategory : CommandCategory
     {
         [Command(Permission.CharacterXP, "Add XP to character.", "xp")]
@@ -13,14 +13,14 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Amount of XP to grant character.")]
             uint amount)
         {
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (target.Level >= 50)
             {
                 context.SendMessage("You must be less than max level.");
                 return;
             }
 
-            target.GrantXp(amount);
+            target.XpManager.GrantXp(amount);
         }
 
         [Command(Permission.CharacterLevel, "Add level to character", "level")]
@@ -28,7 +28,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Level to set character.")]
             byte level)
         {
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (level <= target.Level || level > 50)
             {
                 context.SendMessage("Level must be greater than your current level and less than max level.");
@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Command.Handler
         [Command(Permission.CharacterSave, "Save any pending changes to the character to the database.", "save")]
         public void HandleCharacterSave(ICommandContext context)
         {
-            context.GetTargetOrInvoker<Player>().Save();
+            context.GetTargetOrInvoker<IPlayer>().Save();
         }
     }
 }

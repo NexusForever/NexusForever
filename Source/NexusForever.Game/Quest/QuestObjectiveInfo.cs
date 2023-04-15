@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Static.Quest;
+﻿using NexusForever.Game.Abstract.Quest;
+using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Quest
 {
-    public class QuestObjectiveInfo
+    public class QuestObjectiveInfo : IQuestObjectiveInfo
     {
         public uint Id => Entry.Id;
         public QuestObjectiveType Type => (QuestObjectiveType)Entry.Type;

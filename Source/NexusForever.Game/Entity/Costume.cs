@@ -2,15 +2,17 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Message.Model;
+using NetworkCostume = NexusForever.Network.World.Message.Model.Shared.Costume;
 
 namespace NexusForever.Game.Entity
 {
-    public class Costume : ISaveCharacter, IEnumerable<CostumeItem>
+    public class Costume : ICostume
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="Costume"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="ICostume"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum CostumeSaveMask
@@ -40,27 +42,27 @@ namespace NexusForever.Game.Entity
 
         private uint mask;
 
-        private readonly CostumeItem[] items = new CostumeItem[MaxCostumeItems];
+        private readonly ICostumeItem[] items = new CostumeItem[MaxCostumeItems];
 
         private CostumeSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="Costume"/> from an existing <see cref="CharacterCostumeModel"/> database model.
+        /// Create a new <see cref="ICostume"/> from an existing <see cref="CharacterCostumeModel"/> database model.
         /// </summary>
         public Costume(CharacterCostumeModel model)
         {
             Owner = model.Id;
             Index = model.Index;
             mask  = model.Mask;
-            
+
             foreach (CharacterCostumeItemModel costumeItemModel in model.CostumeItem)
                 items[costumeItemModel.Slot] = new CostumeItem(this, costumeItemModel);
         }
 
         /// <summary>
-        /// Create a new <see cref="Costume"/> from packet <see cref="ClientCostumeSave"/>.
+        /// Create a new <see cref="ICostume"/> from packet <see cref="ClientCostumeSave"/>.
         /// </summary>
-        public Costume(Player player, ClientCostumeSave costumeSave)
+        public Costume(IPlayer player, ClientCostumeSave costumeSave)
         {
             Owner = player.CharacterId;
             Index = (byte)costumeSave.Index;
@@ -108,20 +110,20 @@ namespace NexusForever.Game.Entity
                 saveMask = CostumeSaveMask.None;
             }
 
-            foreach (CostumeItem costumeItem in items)
+            foreach (ICostumeItem costumeItem in items)
                 costumeItem.Save(context);
         }
 
         /// <summary>
-        /// Return <see cref="CostumeItem"/> at supplied index.
+        /// Return <see cref="ICostumeItem"/> at supplied index.
         /// </summary>
-        public CostumeItem GetItem(CostumeItemSlot slot)
+        public ICostumeItem GetItem(CostumeItemSlot slot)
         {
             return items[(int)slot];
         }
 
         /// <summary>
-        /// Update <see cref="Costume"/> from <see cref="ClientCostumeSave"/>.
+        /// Update <see cref="ICostume"/> from <see cref="ClientCostumeSave"/>.
         /// </summary>
         public void Update(ClientCostumeSave costumeSave)
         {
@@ -133,10 +135,27 @@ namespace NexusForever.Game.Entity
                 items[i].DyeData = CostumeItem.GenerateDyeMask(costumeSave.Items[i].Dyes);
             }
         }
-        
-        public IEnumerator<CostumeItem> GetEnumerator()
+
+        public NetworkCostume Build()
         {
-            return items.Cast<CostumeItem>().GetEnumerator();
+            var networkCostume = new NetworkCostume
+            {
+                Index = Index,
+                Mask = Mask
+            };
+
+            foreach (ICostumeItem costumeItem in items)
+            {
+                networkCostume.ItemIds[(byte)costumeItem.Slot] = costumeItem.ItemId;
+                networkCostume.DyeData[(byte)costumeItem.Slot] = costumeItem.DyeData;
+            }
+
+            return networkCostume;
+        }
+
+        public IEnumerator<ICostumeItem> GetEnumerator()
+        {
+            return items.Cast<ICostumeItem>().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

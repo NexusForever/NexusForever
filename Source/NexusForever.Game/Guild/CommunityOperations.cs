@@ -1,4 +1,6 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Guild;
@@ -7,11 +9,11 @@ using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Guild
-{ 
+{
     public partial class Community
     {
         [GuildOperationHandler(GuildOperation.PlotReservation)]
-        private GuildResultInfo GuildOperationCommunityPlotReservation(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationCommunityPlotReservation(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
             if (!member.Rank.HasPermission(GuildRankPermission.ReserveCommunityPlot))
                 return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
@@ -19,18 +21,18 @@ namespace NexusForever.Game.Guild
             if (operation.Data.Int32Data < -1 || operation.Data.Int32Data > 4)
                 throw new InvalidPacketValueException();
 
-            Residence residence = player.ResidenceManager.Residence;
+            IResidence residence = player.ResidenceManager.Residence;
             if (residence == null)
                 throw new InvalidPacketValueException();
 
-            ResidenceChild sourceResidence = Residence.GetChild(member.CharacterId);
+            IResidenceChild sourceResidence = Residence.GetChild(member.CharacterId);
 
             if (operation.Data.Int32Data != -1)
             {
-                ResidenceChild targetResidence = Residence.GetChild((PropertyInfoId)(100 + operation.Data.Int32Data));
+                IResidenceChild targetResidence = Residence.GetChild((PropertyInfoId)(100 + operation.Data.Int32Data));
                 if (targetResidence == null)
                 {
-                    ResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance((PropertyInfoId)(100 + operation.Data.Int32Data));
+                    IResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance((PropertyInfoId)(100 + operation.Data.Int32Data));
                     if (entrance == null)
                         throw new InvalidPacketValueException();
 
@@ -108,16 +110,16 @@ namespace NexusForever.Game.Guild
 
         // This operation is slightly different to the removal above, it is used when removing the reservation of another player 
         [GuildOperationHandler(GuildOperation.PlotReservationRemoval)]
-        private GuildResultInfo GuildOperationCommunityPlotReservationRemoval(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationCommunityPlotReservationRemoval(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
             if (!member.Rank.HasPermission(GuildRankPermission.RemoveCommunityPlotReservation))
                 return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
 
-            GuildMember targetMember = GetMember(operation.TextValue);
+            IGuildMember targetMember = GetMember(operation.TextValue);
             if (targetMember == null)
                 throw new InvalidPacketValueException();
 
-            ResidenceChild child = Residence.GetChild(targetMember.CharacterId);
+            IResidenceChild child = Residence.GetChild(targetMember.CharacterId);
             if (child == null)
                 throw new InvalidPacketValueException();
 

@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using NexusForever.Database.Character;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NLog;
 
 namespace NexusForever.Game.Entity
 {
-    public class Bag : IEnumerable<Item>
+    public class Bag : IBag
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -13,7 +14,7 @@ namespace NexusForever.Game.Entity
         public uint Slots => (uint)items.Length;
         public uint SlotsRemaining { get; private set; }
 
-        private Item[] items;
+        private IItem[] items;
 
         public Bag(InventoryLocation location, uint capacity)
         {
@@ -44,17 +45,17 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Returns <see cref="Item"/> with the supplied guid.
+        /// Returns <see cref="IItem"/> with the supplied guid.
         /// </summary>
-        public Item GetItem(ulong guid)
+        public IItem GetItem(ulong guid)
         {
             return items.SingleOrDefault(i => i.Guid == guid);
         }
 
         /// <summary>
-        /// Returns <see cref="Item"/> found at the supplied bag index.
+        /// Returns <see cref="IItem"/> found at the supplied bag index.
         /// </summary>
-        public Item GetItem(uint bagIndex)
+        public IItem GetItem(uint bagIndex)
         {
             if (bagIndex >= items.Length)
                 throw new ArgumentOutOfRangeException();
@@ -91,9 +92,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Add <see cref="Item"/> to the bag at the supplied bag index.
+        /// Add <see cref="IItem"/> to the bag at the supplied bag index.
         /// </summary>
-        public void AddItem(Item item, uint bagIndex)
+        public void AddItem(IItem item, uint bagIndex)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
@@ -115,9 +116,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Remove existing <see cref="Item"/> from the bag at the supplied bag index.
+        /// Remove existing <see cref="IItem"/> from the bag at the supplied bag index.
         /// </summary>
-        public void RemoveItem(Item item)
+        public void RemoveItem(IItem item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
@@ -125,15 +126,15 @@ namespace NexusForever.Game.Entity
                 throw new ArgumentException();
             if (items[item.BagIndex] == null)
                 throw new ArgumentException();
-            
+
             items[item.BagIndex] = null;
 
             log.Trace($"Removed item 0x{item.Guid:X16} from bag {Location} at index {item.BagIndex}.");
 
             item.PreviousLocation = item.Location;
             item.PreviousBagIndex = item.BagIndex;
-            item.Location         = InventoryLocation.None;
-            item.BagIndex         = 0u;
+            item.Location = InventoryLocation.None;
+            item.BagIndex = 0u;
 
             checked
             {
@@ -145,9 +146,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Move existing <see cref="Item"/> in <see cref="Bag"/> to supplied empty bag index.
+        /// Move existing <see cref="IItem"/> in <see cref="IBag"/> to supplied empty bag index.
         /// </summary>
-        public void MoveItem(Item item, uint bagIndex)
+        public void MoveItem(IItem item, uint bagIndex)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
@@ -170,9 +171,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Swap 2 existing <see cref="Item"/> bag indexes in <see cref="Bag"/> with each other.
+        /// Swap 2 existing <see cref="IItem"/> bag indexes in <see cref="IBag"/> with each other.
         /// </summary>
-        public void SwapItem(Item item, Item item2)
+        public void SwapItem(IItem item, IItem item2)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
@@ -187,9 +188,9 @@ namespace NexusForever.Game.Entity
             if (items[item2.BagIndex] == null)
                 throw new ArgumentException();
 
-            item.PreviousLocation  = item.Location;
+            item.PreviousLocation = item.Location;
             item2.PreviousLocation = item2.Location;
-            item.PreviousBagIndex  = item.BagIndex;
+            item.PreviousBagIndex = item.BagIndex;
             item2.PreviousBagIndex = item2.BagIndex;
 
             items[item.BagIndex] = item2;
@@ -215,7 +216,7 @@ namespace NexusForever.Game.Entity
             log.Trace($"Resized bag {Location} from {items.Length - capacityChange} to {items.Length} slots.");
         }
 
-        public IEnumerator<Item> GetEnumerator()
+        public IEnumerator<IItem> GetEnumerator()
         {
             return items
                 .Where(i => i != null)

@@ -2,11 +2,12 @@
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Game.Entity
 {
-    public class StatValue
+    public class StatValue : IStatValue
     {
         [Flags]
         public enum StatSaveMask
@@ -36,7 +37,7 @@ namespace NexusForever.Game.Entity
         private StatSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="StatValue"/> from an existing database model.
+        /// Create a new <see cref="IStatValue"/> from an existing database model.
         /// </summary>
         public StatValue(CharacterStatModel model)
         {
@@ -46,7 +47,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="StatValue"/> from an existing database model.
+        /// Create a new <see cref="IStatValue"/> from an existing database model.
         /// </summary>
         public StatValue(EntityStatModel model)
         {
@@ -56,7 +57,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="StatValue"/> from supplied <see cref="Stat"/> and value.
+        /// Create a new <see cref="IStatValue"/> from supplied <see cref="Stat"/> and value.
         /// </summary>
         public StatValue(Stat stat, uint value)
         {
@@ -67,7 +68,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="StatValue"/> from supplied <see cref="Stat"/> and value.
+        /// Create a new <see cref="IStatValue"/> from supplied <see cref="Stat"/> and value.
         /// </summary>
         public StatValue(Stat stat, float value)
         {

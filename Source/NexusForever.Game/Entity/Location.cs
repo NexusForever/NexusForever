@@ -1,9 +1,10 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Entity
 {
-    public class Location
+    public class Location : ILocation
     {
         public WorldEntry World { get; private set; }
         public Vector3 Position { get; private set; }

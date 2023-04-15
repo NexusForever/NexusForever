@@ -1,8 +1,9 @@
-﻿using NexusForever.Game.Static.Mail;
+﻿using NexusForever.Game.Abstract.Mail;
+using NexusForever.Game.Static.Mail;
 
 namespace NexusForever.Game.Mail
 {
-    public class MailParameters
+    public class MailParameters : IMailParameters
     {
         public ulong RecipientCharacterId { get; set; }
         public ulong SenderCharacterId { get; set; }

@@ -1,41 +1,29 @@
 ﻿using System.Collections.Immutable;
-using System.Numerics;
 using System.Reflection;
 using NexusForever.Database;
 using NexusForever.Database.Character;
-using NexusForever.Database.Character.Model;
 using NexusForever.Database.World;
 using NexusForever.Database.World.Model;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
-using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 
 namespace NexusForever.Game
 {
-    public sealed class AssetManager : Singleton<AssetManager>
+    public sealed class AssetManager : Singleton<AssetManager>, IAssetManager
     {
         public static ImmutableDictionary<InventoryLocation, uint> InventoryLocationCapacities { get; private set; }
-
-        /// <summary>
-        /// Id to be assigned to the next created character.
-        /// </summary>
-        public ulong NextCharacterId => nextCharacterId++;
 
         /// <summary>
         /// Id to be assigned to the next created mail.
         /// </summary>
         public ulong NextMailId => nextMailId++;
 
-        private ulong nextCharacterId;
         private ulong nextMailId;
-
-        private ImmutableDictionary<(Race, Faction, CharacterCreationStart), Location> characterCreationData;
-        private ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
         private ImmutableDictionary<uint, ImmutableList<ItemDisplaySourceEntryEntry>> itemDisplaySourcesEntry;
 
@@ -50,11 +38,8 @@ namespace NexusForever.Game
 
         public void Initialise()
         {
-            nextCharacterId = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextCharacterId() + 1ul;
-            nextMailId      = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextMailId() + 1ul;
+            nextMailId = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextMailId() + 1ul;
 
-            CacheCharacterCreate();
-            CacheCharacterCustomisations();
             CacheInventoryBagCapacities();
             CacheItemDisplaySourceEntries();
             CacheTutorials();
@@ -62,48 +47,7 @@ namespace NexusForever.Game
             CacheRewardPropertiesByTier();
         }
 
-        private void CacheCharacterCreate()
-        {
-            var entries = ImmutableDictionary.CreateBuilder<(Race, Faction, CharacterCreationStart), Location>();
-            foreach (CharacterCreateModel model in DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetCharacterCreationData())
-            {
-                entries.Add(((Race)model.Race, (Faction)model.Faction, (CharacterCreationStart)model.CreationStart), new Location
-                (
-                    GameTableManager.Instance.World.GetEntry(model.WorldId),
-                    new Vector3
-                    {
-                        X = model.X,
-                        Y = model.Y,
-                        Z = model.Z
-                    },
-                    new Vector3
-                    {
-                        X = model.Rx,
-                        Y = model.Ry,
-                        Z = model.Rz
-                    }
-                ));
-            }
-
-            characterCreationData = entries.ToImmutable();
-        }
-
-        private void CacheCharacterCustomisations()
-        {
-            var entries = new Dictionary<uint, List<CharacterCustomizationEntry>>();
-            foreach (CharacterCustomizationEntry entry in GameTableManager.Instance.CharacterCustomization.Entries)
-            {
-                uint primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
-                if (!entries.ContainsKey(primaryKey))
-                    entries.Add(primaryKey, new List<CharacterCustomizationEntry>());
-
-                entries[primaryKey].Add(entry);
-            }
-
-            characterCustomisations = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
-        }
-
-        public void CacheInventoryBagCapacities()
+        private void CacheInventoryBagCapacities()
         {
             var entries = new Dictionary<InventoryLocation, uint>();
             foreach (FieldInfo field in typeof(InventoryLocation).GetFields())
@@ -188,15 +132,6 @@ namespace NexusForever.Game
         }
 
         /// <summary>
-        /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
-        /// </summary>
-        public ImmutableList<CharacterCustomizationEntry> GetPrimaryCharacterCustomisation(uint race, uint sex, uint label, uint value)
-        {
-            uint key = (value << 24) | (label << 16) | (sex << 8) | race;
-            return characterCustomisations.TryGetValue(key, out ImmutableList<CharacterCustomizationEntry> entries) ? entries : null;
-        }
-
-        /// <summary>
         /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="ItemDisplaySourceEntryEntry"/>'s for the supplied itemSource.
         /// </summary>
         public ImmutableList<ItemDisplaySourceEntryEntry> GetItemDisplaySource(uint itemSource)
@@ -226,14 +161,6 @@ namespace NexusForever.Game
         public ImmutableList<RewardPropertyPremiumModifierEntry> GetRewardPropertiesForTier(AccountTier tier)
         {
             return rewardPropertiesByTier.TryGetValue(tier, out ImmutableList<RewardPropertyPremiumModifierEntry> entries) ? entries : ImmutableList<RewardPropertyPremiumModifierEntry>.Empty;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="Location"/> describing the starting location for a given <see cref="Race"/>, <see cref="Faction"/> and Creation Type combination.
-        /// </summary>
-        public Location GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart)
-        {
-            return characterCreationData.TryGetValue((race, faction, creationStart), out Location location) ? location : null;
         }
     }
 }

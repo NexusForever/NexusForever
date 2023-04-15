@@ -1,32 +1,32 @@
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.Network.World.Message.Model;
-using NetworkDatacube = NexusForever.Network.World.Message.Model.Shared.Datacube;
 
 namespace NexusForever.Game.Entity
 {
-    public class DatacubeManager : ISaveCharacter
+    public class DatacubeManager : IDatacubeManager
     {
         private static uint DatacubeHash(ushort id, DatacubeType type)
         {
-            return ((uint)id << 16) | (uint)type;
+            return (uint)id << 16 | (uint)type;
         }
 
-        private readonly Player player;
-        private readonly Dictionary<uint, Datacube> datacubes = new();
+        private readonly IPlayer player;
+        private readonly Dictionary<uint, IDatacube> datacubes = new();
 
         /// <summary>
-        /// Create a new <see cref="DatacubeManager"/> from an existing database model.
+        /// Create a new <see cref="IDatacubeManager"/> from an existing database model.
         /// </summary>
-        public DatacubeManager(Player owner, CharacterModel characterModel)
+        public DatacubeManager(IPlayer owner, CharacterModel characterModel)
         {
             player = owner;
-            
+
             foreach (CharacterDatacubeModel model in characterModel.Datacube)
             {
-                var datacube = new Datacube(model);
+                var datacube = new Datacube(player, model);
                 uint hash = DatacubeHash(datacube.Id, datacube.Type);
                 datacubes.Add(hash, datacube);
             }
@@ -34,42 +34,42 @@ namespace NexusForever.Game.Entity
 
         public void Save(CharacterContext context)
         {
-            foreach (Datacube datacube in datacubes.Values)
-                datacube.Save(context, player.CharacterId);
+            foreach (IDatacube datacube in datacubes.Values)
+                datacube.Save(context);
         }
 
         /// <summary>
-        /// Return <see cref="Datacube"/> with supplied id and <see cref="DatacubeType"/>.
+        /// Return <see cref="IDatacube"/> with supplied id and <see cref="DatacubeType"/>.
         /// </summary>
-        public Datacube GetDatacube(ushort id, DatacubeType type)
+        public IDatacube GetDatacube(ushort id, DatacubeType type)
         {
             uint hash = DatacubeHash(id, type);
-            return datacubes.TryGetValue(hash, out Datacube datacube) ? datacube : null;
+            return datacubes.TryGetValue(hash, out IDatacube datacube) ? datacube : null;
         }
 
         /// <summary>
-        /// Create a new <see cref="Datacube"/> of type <see cref="DatacubeType.Datacube"/> with supplied id and progress.
+        /// Create a new <see cref="IDatacube"/> of type <see cref="DatacubeType.Datacube"/> with supplied id and progress.
         /// </summary>
         public void AddDatacube(ushort id, uint progress)
         {
             if (GameTableManager.Instance.Datacube.GetEntry(id) == null)
                 throw new ArgumentException();
-            
-            var datacube = new Datacube(id, DatacubeType.Datacube, progress);
+
+            var datacube = new Datacube(player, id, DatacubeType.Datacube, progress);
             datacubes.Add(DatacubeHash(id, DatacubeType.Datacube), datacube);
 
             SendDatacube(datacube);
         }
 
         /// <summary>
-        /// Create a new <see cref="Datacube"/> of type <see cref="DatacubeType.Journal"/> with supplied id and progress.
+        /// Create a new <see cref="IDatacube"/> of type <see cref="DatacubeType.Journal"/> with supplied id and progress.
         /// </summary>
         public void AddDatacubeVolume(ushort id, uint progress)
         {
             if (GameTableManager.Instance.DatacubeVolume.GetEntry(id) == null)
                 throw new ArgumentException();
 
-            var datacube = new Datacube(id, DatacubeType.Journal, progress);
+            var datacube = new Datacube(player, id, DatacubeType.Journal, progress);
             datacubes.Add(DatacubeHash(id, DatacubeType.Journal), datacube);
 
             SendDatacubeVolume(datacube);
@@ -78,40 +78,31 @@ namespace NexusForever.Game.Entity
         public void SendInitialPackets()
         {
             var datacubeUpdateList = new ServerDatacubeUpdateList();
-            foreach (Datacube datacube in datacubes.Values)
+            foreach (IDatacube datacube in datacubes.Values)
             {
                 if (datacube.Type == DatacubeType.Datacube)
-                    datacubeUpdateList.DatacubeData.Add(BuildNetworkDatacube(datacube));
+                    datacubeUpdateList.DatacubeData.Add(datacube.Build());
                 else
-                    datacubeUpdateList.DatacubeVolumeData.Add(BuildNetworkDatacube(datacube));
+                    datacubeUpdateList.DatacubeVolumeData.Add(datacube.Build());
             }
 
             player.Session.EnqueueMessageEncrypted(datacubeUpdateList);
         }
 
-        public void SendDatacube(Datacube datacube)
+        public void SendDatacube(IDatacube datacube)
         {
             player.Session.EnqueueMessageEncrypted(new ServerDatacubeUpdate
             {
-                DatacubeData = BuildNetworkDatacube(datacube)
+                DatacubeData = datacube.Build()
             });
         }
 
-        public void SendDatacubeVolume(Datacube datacube)
+        public void SendDatacubeVolume(IDatacube datacube)
         {
             player.Session.EnqueueMessageEncrypted(new ServerDatacubeVolumeUpdate
             {
-                DatacubeVolumeData = BuildNetworkDatacube(datacube)
+                DatacubeVolumeData = datacube.Build()
             });
-        }
-
-        private NetworkDatacube BuildNetworkDatacube(Datacube datacube)
-        {
-            return new NetworkDatacube
-            {
-                DatacubeId = datacube.Id,
-                Progress   = datacube.Progress
-            };
         }
     }
 }

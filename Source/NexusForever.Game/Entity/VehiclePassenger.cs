@@ -1,8 +1,9 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Game.Entity
 {
-    public class VehiclePassenger
+    public class VehiclePassenger : IVehiclePassenger
     {
         public VehicleSeatType SeatType { get; }
         public byte SeatPosition { get; }

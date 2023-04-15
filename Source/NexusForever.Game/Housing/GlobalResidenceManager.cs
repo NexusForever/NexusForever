@@ -1,8 +1,11 @@
 ﻿using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.CharacterCache;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Character;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Abstract.Housing;
+using NexusForever.Game.Character;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Housing;
@@ -13,7 +16,7 @@ using NLog;
 
 namespace NexusForever.Game.Housing
 {
-    public sealed class GlobalResidenceManager : Singleton<GlobalResidenceManager>, IUpdate
+    public sealed class GlobalResidenceManager : Singleton<GlobalResidenceManager>, IGlobalResidenceManager
     {
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
@@ -32,14 +35,14 @@ namespace NexusForever.Game.Housing
         public ulong NextDecorId => nextDecorId++;
         private ulong nextDecorId;
 
-        private readonly Dictionary<ulong, Residence> residences = new();
+        private readonly Dictionary<ulong, IResidence> residences = new();
         private readonly Dictionary<ulong, ulong> residenceOwnerCache = new();
         private readonly Dictionary<ulong, ulong> communityOwnerCache = new();
         private readonly Dictionary<string, ulong> residenceSearchCache = new(StringComparer.InvariantCultureIgnoreCase);
         private readonly Dictionary<string, ulong> communitySearchCache = new(StringComparer.InvariantCultureIgnoreCase);
 
-        private readonly Dictionary<ulong, PublicResidence> visitableResidences = new();
-        private readonly Dictionary<ulong, PublicCommunity> visitableCommunities = new();
+        private readonly Dictionary<ulong, IPublicResidence> visitableResidences = new();
+        private readonly Dictionary<ulong, IPublicCommunity> visitableCommunities = new();
 
         private double timeToSave = SaveDuration;
 
@@ -48,7 +51,7 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Initialise <see cref="GlobalResidenceManager"/> and any related resources.
+        /// Initialise <see cref="IGlobalResidenceManager"/> and any related resources.
         /// </summary>
         public void Initialise()
         {
@@ -64,16 +67,16 @@ namespace NexusForever.Game.Housing
             {
                 if (model.OwnerId.HasValue)
                 {
-                    ICharacter character = CharacterManager.Instance.GetCharacterInfo(model.OwnerId.Value);
+                    ICharacter character = CharacterManager.Instance.GetCharacter(model.OwnerId.Value);
                     if (character == null)
                         throw new DatabaseDataException($"Character owner {model.OwnerId.Value} of residence {model.Id} is invalid!");
 
                     var residence = new Residence(model);
-                    StoreResidence(residence, character);
+                    StoreResidence(residence, character.Name);
                 }
                 else if (model.GuildOwnerId.HasValue)
                 {
-                    Community community = GlobalGuildManager.Instance.GetGuild<Community>(model.GuildOwnerId.Value);
+                    ICommunity community = GlobalGuildManager.Instance.GetGuild<ICommunity>(model.GuildOwnerId.Value);
                     if (community == null)
                         throw new DatabaseDataException($"Community owner {model.OwnerId.Value} of residence {model.Id} is invalid!");
 
@@ -86,14 +89,14 @@ namespace NexusForever.Game.Housing
 
             // create links between parents and children
             // only residences with both a character and guild owner are children
-            foreach (Residence residence in residences.Values
+            foreach (IResidence residence in residences.Values
                 .Where(r => r.OwnerId.HasValue && r.GuildOwnerId.HasValue))
             {
-                Community community = GlobalGuildManager.Instance.GetGuild<Community>(residence.GuildOwnerId.Value);
+                ICommunity community = GlobalGuildManager.Instance.GetGuild<ICommunity>(residence.GuildOwnerId.Value);
                 if (community == null)
                     continue;
 
-                GuildMember member = community.GetMember(residence.OwnerId.Value);
+                IGuildMember member = community.GetMember(residence.OwnerId.Value);
                 if (member == null)
                     throw new DatabaseDataException($"Residence {residence.Id} is a child of {community.Residence.Id} but character {residence.OwnerId.Value} but isn't a member of community {community.Id}!");
 
@@ -106,7 +109,7 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Shutdown <see cref="GlobalResidenceManager"/> and any related resources.
+        /// Shutdown <see cref="IGlobalResidenceManager"/> and any related resources.
         /// </summary>
         /// <remarks>
         /// This will force save all residences.
@@ -131,39 +134,39 @@ namespace NexusForever.Game.Housing
         private void SaveResidences()
         {
             var tasks = new List<Task>();
-            foreach (Residence residence in residences.Values)
+            foreach (IResidence residence in residences.Values)
                 tasks.Add(DatabaseManager.Instance.GetDatabase<CharacterDatabase>().Save(residence.Save));
 
             Task.WaitAll(tasks.ToArray());
         }
 
         /// <summary>
-        /// Create new <see cref="Residence"/> for supplied <see cref="Player"/>.
+        /// Create new <see cref="IResidence"/> for supplied <see cref="IPlayer"/>.
         /// </summary>
-        public Residence CreateResidence(Player player)
+        public IResidence CreateResidence(IPlayer player)
         {
             var residence = new Residence(player);
-            StoreResidence(residence, player);
+            StoreResidence(residence, player.Name);
 
             log.Trace($"Created new residence {residence.Id} for player {player.Name}.");
             return residence;
         }
 
-        private void StoreResidence(Residence residence, ICharacter character)
+        private void StoreResidence(IResidence residence, string name)
         {
             residences.Add(residence.Id, residence);
 
             residenceOwnerCache.Add(residence.OwnerId.Value, residence.Id);
-            residenceSearchCache.Add(character.Name, residence.Id);
+            residenceSearchCache.Add(name, residence.Id);
 
             if (residence.PrivacyLevel == ResidencePrivacyLevel.Public)
-                RegisterResidenceVists(residence, character);
+                RegisterResidenceVists(residence, name);
         }
 
         /// <summary>
-        /// Create new <see cref="Residence"/> for supplied <see cref="Community"/>.
+        /// Create new <see cref="IResidence"/> for supplied <see cref="ICommunity"/>.
         /// </summary>
-        public Residence CreateCommunity(Community community)
+        public IResidence CreateCommunity(ICommunity community)
         {
             var residence = new Residence(community);
             StoreCommunity(residence, community);
@@ -172,7 +175,7 @@ namespace NexusForever.Game.Housing
             return residence;
         }
 
-        private void StoreCommunity(Residence residence, Community community)
+        private void StoreCommunity(IResidence residence, ICommunity community)
         {
             residences.Add(residence.Id, residence);
 
@@ -182,60 +185,60 @@ namespace NexusForever.Game.Housing
             // community residences store the privacy level in the community it self as a guild flag
             if ((community.Flags & GuildFlag.CommunityPrivate) == 0)
             {
-                ICharacter character = CharacterManager.Instance.GetCharacterInfo(community.LeaderId.Value);
-                RegisterCommunityVisits(residence, community, character);
+                ICharacter character = CharacterManager.Instance.GetCharacter(community.LeaderId.Value);
+                RegisterCommunityVisits(residence, community, character.Name);
             }
         }
 
         /// <summary>
-        /// Return existing <see cref="Residence"/> by supplied residence id.
+        /// Return existing <see cref="IResidence"/> by supplied residence id.
         /// </summary>
-        public Residence GetResidence(ulong residenceId)
+        public IResidence GetResidence(ulong residenceId)
         {
-            return residences.TryGetValue(residenceId, out Residence residence) ? residence : null;
+            return residences.TryGetValue(residenceId, out IResidence residence) ? residence : null;
         }
 
         /// <summary>
-        /// Return existing <see cref="Residence"/> by supplied owner name.
+        /// Return existing <see cref="IResidence"/> by supplied owner name.
         /// </summary>
-        public Residence GetResidenceByOwner(string name)
+        public IResidence GetResidenceByOwner(string name)
         {
             return residenceSearchCache.TryGetValue(name, out ulong residenceId) ? GetResidence(residenceId) : null;
         }
 
         /// <summary>
-        /// return existing <see cref="Residence"/> by supplied owner id.
+        /// Return existing <see cref="IResidence"/> by supplied owner id.
         /// </summary>
-        public Residence GetResidenceByOwner(ulong characterId)
+        public IResidence GetResidenceByOwner(ulong characterId)
         {
             return residenceOwnerCache.TryGetValue(characterId, out ulong residenceId) ? GetResidence(residenceId) : null;
         }
 
         /// <summary>
-        /// Return existing <see cref="Residence"/> by supplied community name.
+        /// Return existing <see cref="IResidence"/> by supplied community name.
         /// </summary>
-        public Residence GetCommunityByOwner(string name)
+        public IResidence GetCommunityByOwner(string name)
         {
             return communitySearchCache.TryGetValue(name, out ulong residenceId) ? GetResidence(residenceId) : null;
         }
 
         /// <summary>
-        /// return existing <see cref="Residence"/> by supplied owner id.
+        /// return existing <see cref="IResidence"/> by supplied owner id.
         /// </summary>
-        public Residence GetCommunityByOwner(ulong communityId)
+        public IResidence GetCommunityByOwner(ulong communityId)
         {
             return communityOwnerCache.TryGetValue(communityId, out ulong residenceId) ? GetResidence(residenceId) : null;
         }
 
         /// <summary>
-        /// Remove an existing <see cref="Residence"/> by supplied character name.
+        /// Remove an existing <see cref="IResidence"/> by supplied character name.
         /// </summary>
         public void RemoveResidence(string name)
         {
             if (!residenceSearchCache.TryGetValue(name, out ulong residenceId))
                 return;
 
-            if (!residences.TryGetValue(residenceId, out Residence residence))
+            if (!residences.TryGetValue(residenceId, out IResidence residence))
                 return;
 
             if (residence.Parent != null)
@@ -256,7 +259,7 @@ namespace NexusForever.Game.Housing
             residenceSearchCache.Remove(name);
         }
 
-        public ResidenceEntrance GetResidenceEntrance(PropertyInfoId propertyInfoId)
+        public IResidenceEntrance GetResidenceEntrance(PropertyInfoId propertyInfoId)
         {
             HousingPropertyInfoEntry propertyEntry = GameTableManager.Instance.HousingPropertyInfo.GetEntry((ulong)propertyInfoId);
             if (propertyEntry == null)
@@ -269,12 +272,12 @@ namespace NexusForever.Game.Housing
         /// <summary>
         /// Register residence as visitable, this allows anyone to visit through the random property feature.
         /// </summary>
-        public void RegisterResidenceVists(Residence residence, ICharacter character)
+        public void RegisterResidenceVists(IResidence residence, string name)
         {
             visitableResidences.Add(residence.Id, new PublicResidence
             {
                 ResidenceId = residence.Id,
-                Owner       = character.Name,
+                Owner       = name,
                 Name        = residence.Name
             });
         }
@@ -282,12 +285,12 @@ namespace NexusForever.Game.Housing
         /// <summary>
         /// Register community as visitable, this allows anyone to visit through the random property feature.
         /// </summary>
-        public void RegisterCommunityVisits(Residence residence, Community community, ICharacter character)
+        public void RegisterCommunityVisits(IResidence residence, ICommunity community, string name)
         {
             visitableCommunities.Add(residence.Id, new PublicCommunity
             {
                 NeighbourhoodId = community.Id,
-                Owner           = character.Name,
+                Owner           = name,
                 Name            = community.Name
             });
         }
@@ -311,7 +314,7 @@ namespace NexusForever.Game.Housing
         /// <summary>
         /// Return 50 random registered visitable residences.
         /// </summary>
-        public IEnumerable<PublicResidence> GetRandomVisitableResidences()
+        public IEnumerable<IPublicResidence> GetRandomVisitableResidences()
         {
             // unsure if this is how it was done on retail, might need to be tweaked
             var random = new Random();
@@ -324,7 +327,7 @@ namespace NexusForever.Game.Housing
         /// <summary>
         /// Return 50 random registered visitable communities.
         /// </summary>
-        public IEnumerable<PublicCommunity> GetRandomVisitableCommunities()
+        public IEnumerable<IPublicCommunity> GetRandomVisitableCommunities()
         {
             // unsure if this is how it was done on retail, might need to be tweaked
             var random = new Random();

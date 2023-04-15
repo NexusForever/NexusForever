@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Text;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
@@ -12,7 +12,7 @@ using NexusForever.WorldServer.Command.Context;
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Entity, "A collection of commands to modify and query information about an entity.", "entity")]
-    [CommandTarget(typeof(WorldEntity))]
+    [CommandTarget(typeof(IWorldEntity))]
     public class EntityCommandCategory : CommandCategory
     {
         [Command(Permission.EntityModify, "A collection of commands to modify an entity.", "modify")]
@@ -28,14 +28,14 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                context.GetTargetOrInvoker<WorldEntity>().SetDisplayInfo(displayInfo);
+                context.GetTargetOrInvoker<IWorldEntity>().SetDisplayInfo(displayInfo);
             }
         }
 
         [Command(Permission.EntityInfo, "Get information about the target entity.", "i", "info")]
         public void HandleEntityInfo(ICommandContext context)
         {
-            WorldEntity entity = context.GetTargetOrInvoker<WorldEntity>();
+            IWorldEntity entity = context.GetTargetOrInvoker<IWorldEntity>();
 
             var builder = new StringBuilder();
             BuildHeader(context, builder, entity);
@@ -53,7 +53,7 @@ namespace NexusForever.WorldServer.Command.Handler
         [Command(Permission.EntityProperties, "Get information about the properties for the target entity.", "p", "properties")]
         public void HandleEntityProperties(ICommandContext context)
         {
-            WorldEntity entity = context.GetTargetOrInvoker<WorldEntity>();
+            IWorldEntity entity = context.GetTargetOrInvoker<IWorldEntity>();
 
             var builder = new StringBuilder();
             BuildHeader(context, builder, entity);
@@ -62,22 +62,22 @@ namespace NexusForever.WorldServer.Command.Handler
                 builder.AppendLine("No properties found!");
             else
             {
-                foreach ((Property key, PropertyValue value) in entity.Properties.OrderBy(p => p.Key))
+                foreach ((Property key, IPropertyValue value) in entity.Properties.OrderBy(p => p.Key))
                     builder.AppendLine($"{key} - Base: {value.BaseValue} - Value: {value.Value}");
             }
 
             context.SendMessage(builder.ToString());
         }
 
-        private void BuildHeader(ICommandContext context, StringBuilder builder, WorldEntity target)
+        private void BuildHeader(ICommandContext context, StringBuilder builder, IWorldEntity target)
         {
             builder.AppendLine("=============================");
             builder.AppendLine($"UnitId: {target.Guid} | DB ID: {target.EntityId} | Type: {target.Type} | CreatureID: {target.CreatureId} | Name: {GetName(target, context.Language)}");
         }
 
-        private string GetName(WorldEntity target, Language language)
+        private string GetName(IWorldEntity target, Language language)
         {
-            if (target is Player player)
+            if (target is IPlayer player)
                 return player.Name;
 
             Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(target.CreatureId);

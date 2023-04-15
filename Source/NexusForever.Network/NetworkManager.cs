@@ -9,7 +9,7 @@ namespace NexusForever.Network
 {
     public sealed class NetworkManager<T> : Singleton<NetworkManager<T>>, IEnumerable<T>, IUpdate where T : NetworkSession, new()
     {
-        private static readonly ILogger log = LogManager.GetLogger($"NetworkManager<{typeof(T).FullName}>");
+        private static readonly ILogger log = LogManager.GetLogger($"NetworkManager<{typeof(T).Name}>");
 
         private ConnectionListener<T> connectionListener;
 
@@ -81,7 +81,10 @@ namespace NexusForever.Network
                 UpdateSession(update.Session, update.Id);
 
             while (pendingRemove.TryDequeue(out T session))
+            {
                 sessions.Remove(session.Id);
+                log.Trace($"Removed session {session.Id}.");
+            }
         }
 
         private void AddSession(T session)
@@ -96,6 +99,7 @@ namespace NexusForever.Network
             }
 
             sessions.Add(session.Id, session);
+            log.Trace($"Added session {session.Id}.");
         }
 
         private void UpdateSession(T session, string id)

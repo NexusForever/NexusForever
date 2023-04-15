@@ -3,18 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Quest
 {
-    public class Quest : ISaveCharacter, IUpdate, IEnumerable<QuestObjective>
+    public class Quest : IQuest
     {
         [Flags]
-        public enum QuestSaveMask
+        private enum QuestSaveMask
         {
             None   = 0x00,
             Create = 0x01,
@@ -26,7 +26,7 @@ namespace NexusForever.Game.Quest
         }
 
         public ushort Id => (ushort)Info.Entry.Id;
-        public QuestInfo Info { get; }
+        public IQuestInfo Info { get; }
 
         public QuestState State
         {
@@ -81,26 +81,26 @@ namespace NexusForever.Game.Quest
         private DateTime? reset;
 
         /// <summary>
-        /// Returns if <see cref="Quest"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IQuest"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & QuestSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="Quest"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IQuest"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & QuestSaveMask.Delete) != 0;
 
         private QuestSaveMask saveMask;
 
-        private readonly Player player;
-        private readonly List<QuestObjective> objectives = new();
+        private readonly IPlayer player;
+        private readonly List<IQuestObjective> objectives = new();
 
         private UpdateTimer questTimer;
 
         /// <summary>
-        /// Create a new <see cref="Quest"/> from an existing database model.
+        /// Create a new <see cref="IQuest"/> from an existing database model.
         /// </summary>
-        public Quest(Player owner, QuestInfo info, CharacterQuestModel model)
+        public Quest(IPlayer owner, IQuestInfo info, CharacterQuestModel model)
         {
             player = owner;
             Info   = info;
@@ -113,20 +113,20 @@ namespace NexusForever.Game.Quest
                 questTimer = new UpdateTimer(timer.Value);
 
             foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
-                objectives.Add(new QuestObjective(info, info.Objectives[objectiveModel.Index], objectiveModel));
+                objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
         }
 
         /// <summary>
-        /// Create a new <see cref="Quest"/> from supplied <see cref="QuestInfo"/>.
+        /// Create a new <see cref="IQuest"/> from supplied <see cref="IQuestInfo"/>.
         /// </summary>
-        public Quest(Player owner, QuestInfo info)
+        public Quest(IPlayer owner, IQuestInfo info)
         {
             player = owner;
             Info   = info;
             state  = QuestState.Accepted;
 
             for (byte i = 0; i < info.Objectives.Count; i++)
-                objectives.Add(new QuestObjective(info, info.Objectives[i], i));
+                objectives.Add(new QuestObjective(player, info, info.Objectives[i], i));
 
             if (objectives.Count == 0)
                 state = QuestState.Achieved;
@@ -208,8 +208,8 @@ namespace NexusForever.Game.Quest
                 saveMask = QuestSaveMask.None;
             }
 
-            foreach (QuestObjective objective in objectives)
-                objective.Save(context, player.CharacterId);
+            foreach (IQuestObjective objective in objectives)
+                objective.Save(context);
         }
 
         public void Update(double lastTick)
@@ -229,7 +229,7 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Enqueue <see cref="Quest"/> to be deleted from the database.
+        /// Enqueue <see cref="IQuest"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool set)
         {
@@ -240,7 +240,7 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Returns if <see cref="Quest"/> can be deleted from DB.
+        /// Returns if <see cref="IQuest"/> can be deleted.
         /// </summary>
         public bool CanDelete()
         {
@@ -248,7 +248,7 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Returns if <see cref="Quest"/> can be abandoned.
+        /// Returns if <see cref="IQuest"/> can be abandoned.
         /// </summary>
         public bool CanAbandon()
         {
@@ -262,7 +262,7 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Returns if <see cref="Quest"/> can be shared with another <see cref="Player"/>.
+        /// Returns if <see cref="IQuest"/> can be shared with another <see cref="IPlayer"/>.
         /// </summary>
         public bool CanShare()
         {
@@ -273,7 +273,7 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Update any <see cref="QuestObjective"/>'s with supplied <see cref="QuestObjectiveType"/> and data with progress.
+        /// Update any <see cref="IQuestObjective"/>'s with supplied <see cref="QuestObjectiveType"/> and data with progress.
         /// </summary>
         public void ObjectiveUpdate(QuestObjectiveType type, uint data, uint progress)
         {
@@ -284,7 +284,7 @@ namespace NexusForever.Game.Quest
                 return;
 
             // Order in reverse Index so that sequential steps don't completed by the same action
-            foreach (QuestObjective objective in objectives
+            foreach (IQuestObjective objective in objectives
                 .Where(o => o.ObjectiveInfo.Entry.Type == (uint)type && o.ObjectiveInfo.Entry.Data == data)
                 .OrderByDescending(o => o.Index))
             {
@@ -310,7 +310,7 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Update any <see cref="QuestObjective"/>'s with supplied ID with progress.
+        /// Update any <see cref="IQuestObjective"/>'s with supplied ID with progress.
         /// </summary>
         public void ObjectiveUpdate(uint id, uint progress)
         {
@@ -320,7 +320,7 @@ namespace NexusForever.Game.Quest
             if (State == QuestState.Achieved)
                 return;
 
-            QuestObjective objective = objectives.SingleOrDefault(o => o.ObjectiveInfo.Id == id);
+            IQuestObjective objective = objectives.SingleOrDefault(o => o.ObjectiveInfo.Id == id);
             if (objective == null)
                 return;
 
@@ -344,7 +344,7 @@ namespace NexusForever.Game.Quest
                 State = QuestState.Achieved;
         }
 
-        private bool CanUpdateObjective(QuestObjective objective)
+        private bool CanUpdateObjective(IQuestObjective objective)
         {
             if (objective.ObjectiveInfo.IsSequential())
             {
@@ -366,7 +366,7 @@ namespace NexusForever.Game.Quest
 
         private void CompleteOptionalObjectives()
         {
-            foreach (QuestObjective objective in objectives
+            foreach (IQuestObjective objective in objectives
                 .Where(o => o.ObjectiveInfo.IsOptional() && !o.IsComplete()))
             {
                 objective.Complete();
@@ -374,7 +374,7 @@ namespace NexusForever.Game.Quest
             }
         }
 
-        private void SendQuestObjectiveUpdate(QuestObjective objective)
+        private void SendQuestObjectiveUpdate(IQuestObjective objective)
         {
             // Only update objectives if the state isn't complete. Some scripts will complete quest without objective update.
             if (State == QuestState.Completed)
@@ -389,7 +389,7 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Invoked when <see cref="QuestState"/> for <see cref="Quest"/> is updated.
+        /// Invoked when <see cref="QuestState"/> for <see cref="IQuest"/> is updated.
         /// </summary>
         private void OnStateChange(QuestState oldState)
         {
@@ -400,12 +400,12 @@ namespace NexusForever.Game.Quest
             });
 
             // check if this quest and state is a trigger for a new communicator message
-            foreach (CommunicatorMessage message in GlobalQuestManager.Instance.GetQuestCommunicatorQuestStateTriggers(Id, state))
+            foreach (ICommunicatorMessage message in GlobalQuestManager.Instance.GetQuestCommunicatorQuestStateTriggers(Id, state))
                 if (message.Meets(player))
                     player.QuestManager.QuestMention(message.QuestId);
         }
 
-        public IEnumerator<QuestObjective> GetEnumerator()
+        public IEnumerator<IQuestObjective> GetEnumerator()
         {
             return objectives.GetEnumerator();
         }

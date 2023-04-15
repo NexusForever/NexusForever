@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using NexusForever.Database;
 using NexusForever.Database.Character;
+using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
@@ -11,7 +13,7 @@ using NLog;
 
 namespace NexusForever.Game
 {
-    public class ItemManager : Singleton<ItemManager>
+    public class ItemManager : Singleton<ItemManager>, IItemManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -22,7 +24,7 @@ namespace NexusForever.Game
 
         private ulong nextItemId;
 
-        private ImmutableDictionary<uint, ItemInfo> item;
+        private ImmutableDictionary<uint, IItemInfo> item;
         private ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItemSlots;
 
         private ItemManager()
@@ -44,7 +46,7 @@ namespace NexusForever.Game
 
         private void InitialiseItemInfo()
         {
-            var builder = ImmutableDictionary.CreateBuilder<uint, ItemInfo>();
+            var builder = ImmutableDictionary.CreateBuilder<uint, IItemInfo>();
             foreach (Item2Entry entry in GameTableManager.Instance.Item.Entries)
             {
                 var info = new ItemInfo(entry);
@@ -79,11 +81,11 @@ namespace NexusForever.Game
         }
 
         /// <summary>
-        /// Return <see cref="ItemInfo"/> with supplied id.
+        /// Return <see cref="IItemInfo"/> with supplied id.
         /// </summary>
-        public ItemInfo GetItemInfo(uint id)
+        public IItemInfo GetItemInfo(uint id)
         {
-            return item.TryGetValue(id, out ItemInfo info) ? info : null;
+            return item.TryGetValue(id, out IItemInfo info) ? info : null;
         }
 
         /// <summary>

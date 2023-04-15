@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Social;
 
 namespace NexusForever.Game.Social
 {
-    public class ChatChannelMember : ISaveCharacter
+    public class ChatChannelMember : IChatChannelMember
     {
         [Flags]
-        public enum ChatChannelMemberSaveMask
+        private enum ChatChannelMemberSaveMask
         {
             None   = 0x00,
             Create = 0x01,
@@ -35,17 +36,17 @@ namespace NexusForever.Game.Social
         private ChatChannelMemberSaveMask saveMask;
 
         /// <summary>
-        /// Returns if <see cref="ChatChannel"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IChatChannelMember"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & ChatChannelMemberSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="ChatChannel"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IChatChannelMember"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & ChatChannelMemberSaveMask.Delete) != 0;
 
         /// <summary>
-        /// Enqueue <see cref="ChatChannel"/> to be deleted from the database.
+        /// Enqueue <see cref="IChatChannelMember"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool set)
         {
@@ -56,7 +57,7 @@ namespace NexusForever.Game.Social
         }
 
         /// <summary>
-        /// Create a new <see cref="ChatChannelMember"/> with supplied character id and <see cref="ChatChannelMemberFlags"/>.
+        /// Create a new <see cref="IChatChannelMember"/> with supplied character id and <see cref="ChatChannelMemberFlags"/>.
         /// </summary>
         public ChatChannelMember(ulong id, ulong characterId, ChatChannelMemberFlags flags)
         {

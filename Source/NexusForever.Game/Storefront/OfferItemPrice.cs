@@ -1,11 +1,11 @@
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Storefront;
 using NexusForever.Game.Static.Storefront;
-using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Storefront
 {
-    public class OfferItemPrice : IBuildable<ServerStoreOffers.OfferGroup.Offer.OfferCurrencyData>
+    public class OfferItemPrice : IOfferItemPrice
     {
         public uint OfferId { get; }
         public byte CurrencyId { get; }
@@ -16,7 +16,7 @@ namespace NexusForever.Game.Storefront
         public long Expiry { get; }
 
         /// <summary>
-        /// Create a new <see cref="OfferItemPrice"/> from an existing database model.
+        /// Create a new <see cref="IOfferItemPrice"/> from an existing database model.
         /// </summary>
         public OfferItemPrice(StoreOfferItemPriceModel model)
         {

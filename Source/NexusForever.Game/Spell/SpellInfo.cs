@@ -1,12 +1,13 @@
-﻿using NexusForever.GameTable;
+﻿using NexusForever.Game.Abstract.Spell;
+using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Spell
 {
-    public class SpellInfo
+    public class SpellInfo : ISpellInfo
     {
         public Spell4Entry Entry { get; }
-        public SpellBaseInfo BaseInfo { get; }
+        public ISpellBaseInfo BaseInfo { get; }
         public Spell4AoeTargetConstraintsEntry AoeTargetConstraints { get; }
         public Spell4ConditionsEntry CasterConditions { get; }
         public Spell4ConditionsEntry TargetConditions { get; }
@@ -23,7 +24,7 @@ namespace NexusForever.Game.Spell
         public List<TelegraphDamageEntry> Telegraphs { get; }
         public List<Spell4EffectsEntry> Effects { get; }
 
-        public SpellInfo(SpellBaseInfo spellBaseBaseInfo, Spell4Entry spell4Entry)
+        public SpellInfo(ISpellBaseInfo spellBaseBaseInfo, Spell4Entry spell4Entry)
         {
             Entry                          = spell4Entry;
             BaseInfo                       = spellBaseBaseInfo;
@@ -39,8 +40,8 @@ namespace NexusForever.Game.Spell
             CasterPersistencePrerequisites = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterPersistence);
             TargetPersistencePrerequisites = GameTableManager.Instance.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetPersistence);
 
-            Telegraphs = GlobalSpellManager.Instance.GetTelegraphDamageEntries(spell4Entry.Id).ToList();
-            Effects = GlobalSpellManager.Instance.GetSpell4EffectEntries(spell4Entry.Id).ToList();
+            Telegraphs                     = GlobalSpellManager.Instance.GetTelegraphDamageEntries(spell4Entry.Id).ToList();
+            Effects                        = GlobalSpellManager.Instance.GetSpell4EffectEntries(spell4Entry.Id).ToList();
 
             foreach (uint runnerId in spell4Entry.PrerequisiteIdRunners.Where(r => r != 0))
                 PrerequisiteRunners.Add(GameTableManager.Instance.Prerequisite.GetEntry(runnerId));

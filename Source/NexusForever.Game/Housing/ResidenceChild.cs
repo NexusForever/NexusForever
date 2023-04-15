@@ -1,8 +1,10 @@
-﻿namespace NexusForever.Game.Housing
+﻿using NexusForever.Game.Abstract.Housing;
+
+namespace NexusForever.Game.Housing
 {
-    public class ResidenceChild
+    public class ResidenceChild : IResidenceChild
     {
-        public Residence Residence { get; init; }
+        public IResidence Residence { get; init; }
         public bool IsTemporary { get; set; }
         public DateTime? RemovalTime { get; set; }
     }

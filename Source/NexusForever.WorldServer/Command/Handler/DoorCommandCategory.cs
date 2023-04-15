@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.WorldServer.Command.Context;
@@ -7,7 +7,7 @@ using NexusForever.WorldServer.Command.Context;
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Door, "A collection of commands to interact with door entities.", "door")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class DoorCommandCategory : CommandCategory
     {
         [Command(Permission.DoorOpen, "Open all doors within a specified range.", "open")]
@@ -17,16 +17,16 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             searchRange ??= 10f;
 
-            Player player = context.GetTargetOrInvoker<Player>();
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
             player.Map.Search(
                 player.Position,
                 searchRange.Value,
                 new SearchCheckRangeDoorOnly(player.Position, searchRange.Value, player),
-                out List<GridEntity> intersectedEntities
+                out List<IGridEntity> intersectedEntities
             );
 
             // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
-            foreach (Door door in intersectedEntities)
+            foreach (IDoor door in intersectedEntities)
             {
                 context.SendMessage($"Trying to open door {door.Guid}");
                 door.OpenDoor();
@@ -40,16 +40,16 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             searchRange ??= 10f;
 
-            Player player = context.GetTargetOrInvoker<Player>();
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
             player.Map.Search(
                 player.Position,
                 searchRange.Value,
                 new SearchCheckRangeDoorOnly(player.Position, searchRange.Value, player),
-                out List<GridEntity> intersectedEntities
+                out List<IGridEntity> intersectedEntities
             );
 
             // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
-            foreach (Door door in intersectedEntities)
+            foreach (IDoor door in intersectedEntities)
             {
                 context.SendMessage($"Trying to close door {door.Guid}");
                 door.CloseDoor();

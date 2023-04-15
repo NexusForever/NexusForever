@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity.Movement.Generator;
 using NexusForever.Game.Static.Entity.Movement.Spline;
 using NexusForever.Game.Static.RBAC;
@@ -11,7 +11,7 @@ using NexusForever.WorldServer.Command.Static;
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Movement, "A collection of commands to control entity movement.", "movement", "move")]
-    [CommandTarget(typeof(WorldEntity))]
+    [CommandTarget(typeof(IWorldEntity))]
     public class MovementCommandCategory : CommandCategory
     {
         [Command(Permission.MovementSpline, "A collection of commands to control entity spline movement.", "spline")]
@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Command(Permission.MovementSplineAdd, "A position to target entity spine nodes.", "add")]
             public void MovementSplineAddHandler(ICommandContext context)
             {
-                var entity = context.GetTargetOrInvoker<WorldEntity>();
+                var entity = context.GetTargetOrInvoker<IWorldEntity>();
                 if (!entityNodes.ContainsKey(entity.Guid))
                 {
                     entityNodes.Add(entity.Guid, new List<Vector3>());
@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Command(Permission.MovementSplineClear, "Clear all positions from target entity spline nodes.", "clear")]
             public void MovementSplineClearHandler(ICommandContext context)
             {
-                var entity = context.GetTargetOrInvoker<WorldEntity>();
+                var entity = context.GetTargetOrInvoker<IWorldEntity>();
                 if (!entityNodes.TryGetValue(entity.Guid, out List<Vector3> nodes))
                     return;
 
@@ -56,7 +56,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 mode  ??= SplineMode.OneShot;
                 speed ??= 3f;
 
-                var entity = context.GetTargetOrInvoker<WorldEntity>();
+                var entity = context.GetTargetOrInvoker<IWorldEntity>();
                 if (!entityNodes.TryGetValue(entity.Guid, out List<Vector3> nodes))
                 {
                     context.SendMessage("Selected target entity has no nodes!");
@@ -76,7 +76,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Command(Permission.MovementGeneratorDirect, "Launch spline for target entity with nodes defined by the direct movement generator.", "direct")]
             public void MovementGeneratorDirectHandler(ICommandContext context)
             {
-                var entity = context.GetTargetOrInvoker<WorldEntity>();
+                var entity = context.GetTargetOrInvoker<IWorldEntity>();
                 var generator = new DirectMovementGenerator
                 {
                     Begin = entity.Position,
@@ -90,7 +90,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Command(Permission.MovementGeneratorRandom, "Launch spline for target entity with nodes defined by the random movement generator.", "random")]
             public void MovementGeneratorRandomHandler(ICommandContext context)
             {
-                var entity = context.GetTargetOrInvoker<WorldEntity>();
+                var entity = context.GetTargetOrInvoker<IWorldEntity>();
                 var generator = new RandomMovementGenerator
                 {
                     Begin = entity.Position,

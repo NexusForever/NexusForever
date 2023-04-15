@@ -1,24 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Entity
 {
-    public class Currency : ISaveCharacter
+    public class Currency : ICurrency
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="Currency"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="ICurrency"/> when being saved to the database.
         /// </summary>
         [Flags]
         public enum CurrencySaveMask
         {
-            None               = 0x0000,
-            Create             = 0x0001,
-            Delete             = 0x0002,
-            Amount             = 0x0004,
+            None   = 0x0000,
+            Create = 0x0001,
+            Delete = 0x0002,
+            Amount = 0x0004
         }
 
         public CurrencyTypeEntry Entry { get; set; }
@@ -42,7 +43,7 @@ namespace NexusForever.Game.Entity
         private CurrencySaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="Currency"/> from an existing database model.
+        /// Create a new <see cref="ICurrency"/> from an existing database model.
         /// </summary>
         public Currency(CharacterCurrencyModel model)
         {
@@ -54,7 +55,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Create a new <see cref="Currency"/> from an <see cref="CurrencyTypeEntry"/> template.
+        /// Create a new <see cref="ICurrency"/> from an <see cref="CurrencyTypeEntry"/> template.
         /// </summary>
         public Currency(ulong owner, CurrencyTypeEntry entry, ulong value = 0u)
         {

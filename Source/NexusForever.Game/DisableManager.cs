@@ -2,12 +2,13 @@
 using NexusForever.Database;
 using NexusForever.Database.World;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Static;
 using NexusForever.Shared;
 
 namespace NexusForever.Game
 {
-    public sealed class DisableManager : Singleton<DisableManager>
+    public sealed class DisableManager : Singleton<DisableManager>, IDisableManager
     {
         private static ulong Hash(DisableType type, uint objectId)
         {

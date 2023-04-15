@@ -1,16 +1,15 @@
 using System.Linq;
 using NexusForever.Game;
-using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NLog;
-using NexusForever.Network.World.Entity.Command;
 using NexusForever.Network.World.Entity;
+using NexusForever.Network.World.Entity.Command;
 using NexusForever.Network.World.Message.Model;
+using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -19,14 +18,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         [MessageHandler(GameMessageOpcode.ClientEntityCommand)]
-        public static void HandleEntityCommand(WorldSession session, ClientEntityCommand entityCommand)
+        public static void HandleEntityCommand(IWorldSession session, ClientEntityCommand entityCommand)
         {
-            WorldEntity mover = session.Player;
+            IWorldEntity mover = session.Player;
             if (mover == null)
                 return;
 
             if (session.Player.ControlGuid != session.Player.Guid)
-                mover = session.Player.GetVisible<WorldEntity>(session.Player.ControlGuid);
+                mover = session.Player.GetVisible<IWorldEntity>(session.Player.ControlGuid);
 
             if (mover == null)
                 return;
@@ -58,9 +57,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientActivateUnit)]
-        public static void HandleActivateUnit(WorldSession session, ClientActivateUnit unit)
+        public static void HandleActivateUnit(IWorldSession session, ClientActivateUnit unit)
         {
-            WorldEntity entity = session.Player.GetVisible<WorldEntity>(unit.UnitId);
+            IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(unit.UnitId);
             if (entity == null)
                 throw new InvalidPacketValueException();
 
@@ -70,9 +69,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientActivateUnitCast)]
-        public static void HandleActivateUnitCast(WorldSession session, ClientActivateUnitCast unit)
+        public static void HandleActivateUnitCast(IWorldSession session, ClientActivateUnitCast unit)
         {
-            WorldEntity entity = session.Player.GetVisible<WorldEntity>(unit.ActivateUnitId);
+            IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(unit.ActivateUnitId);
             if (entity == null)
                 throw new InvalidPacketValueException();
 
@@ -88,7 +87,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientEntityInteract)]
         public static void HandleClientEntityInteraction(WorldSession session, ClientEntityInteract entityInteraction)
         {
-            WorldEntity entity = session.Player.GetVisible<WorldEntity>(entityInteraction.Guid);
+            IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.Guid);
             if (entity != null)
             {
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
@@ -111,7 +110,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     VendorHandler.HandleClientVendor(session, entityInteraction);
                     break;
                 case 68: // "MailboxActivate"
-                    var mailboxEntity = session.Player.Map.GetEntity<Mailbox>(entityInteraction.Guid);
+                    var mailboxEntity = session.Player.Map.GetEntity<IMailbox>(entityInteraction.Guid);
                     break;
                 case 8: // "HousingGuildNeighborhoodBrokerOpen"
                 case 40:
@@ -147,9 +146,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientEntityInteractChair)]
-        public static void HandleClientEntityInteractEmote(WorldSession session, ClientEntityInteractChair interactChair)
+        public static void HandleClientEntityInteractEmote(IWorldSession session, ClientEntityInteractChair interactChair)
         {
-            WorldEntity chair = session.Player.GetVisible<WorldEntity>(interactChair.ChairUnitId);
+            IWorldEntity chair = session.Player.GetVisible<IWorldEntity>(interactChair.ChairUnitId);
             if (chair == null)
                 throw new InvalidPacketValueException();
 

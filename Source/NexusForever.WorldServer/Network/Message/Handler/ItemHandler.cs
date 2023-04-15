@@ -1,5 +1,4 @@
-﻿using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
@@ -15,9 +14,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     public static class ItemHandler
     {
         [MessageHandler(GameMessageOpcode.ClientItemMove)]
-        public static void HandleItemMove(WorldSession session, ClientItemMove itemMove)
+        public static void HandleItemMove(IWorldSession session, ClientItemMove itemMove)
         {
-            Item item = session.Player.Inventory.GetItem(itemMove.From);
+            IItem item = session.Player.Inventory.GetItem(itemMove.From);
             if (item == null)
                 throw new InvalidPacketValueException();
 
@@ -36,21 +35,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemSplit)]
-        public static void HandleItemSplit(WorldSession session, ClientItemSplit itemSplit)
+        public static void HandleItemSplit(IWorldSession session, ClientItemSplit itemSplit)
         {
             session.Player.Inventory.ItemSplit(itemSplit.Guid, itemSplit.Location, itemSplit.Count);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemDelete)]
-        public static void HandleItemDelete(WorldSession session, ClientItemDelete itemDelete)
+        public static void HandleItemDelete(IWorldSession session, ClientItemDelete itemDelete)
         {
             session.Player.Inventory.ItemDelete(itemDelete.From);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemUse)]
-        public static void HandleItemUse(WorldSession session, ClientItemUse itemUse)
+        public static void HandleItemUse(IWorldSession session, ClientItemUse itemUse)
         {
-            Item item = session.Player.Inventory.GetItem(itemUse.Location);
+            IItem item = session.Player.Inventory.GetItem(itemUse.Location);
             if (item == null)
                 throw new InvalidPacketValueException();
 
@@ -78,9 +77,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemGenericUnlock)]
-        public static void HandleItemGenericUnlock(WorldSession session, ClientItemGenericUnlock itemGenericUnlock)
+        public static void HandleItemGenericUnlock(IWorldSession session, ClientItemGenericUnlock itemGenericUnlock)
         {
-            Item item = session.Player.Inventory.GetItem(itemGenericUnlock.Location);
+            IItem item = session.Player.Inventory.GetItem(itemGenericUnlock.Location);
             if (item == null)
                 throw new InvalidPacketValueException();
 
@@ -89,17 +88,17 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 throw new InvalidPacketValueException();
 
             // TODO: should some client error be shown for this?
-            if (!session.GenericUnlockManager.IsUnlocked((GenericUnlockType)entry.GenericUnlockTypeEnum, entry.UnlockObject))
+            if (!session.Account.GenericUnlockManager.IsUnlocked((GenericUnlockType)entry.GenericUnlockTypeEnum, entry.UnlockObject))
                 return;
 
             if (session.Player.Inventory.ItemUse(item))
-                session.GenericUnlockManager.Unlock((ushort)entry.Id);
+                session.Account.GenericUnlockManager.Unlock((ushort)entry.Id);
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemUseDecor)]
-        public static void HandleItemUseDecor(WorldSession session, ClientItemUseDecor itemUseDecor)
+        public static void HandleItemUseDecor(IWorldSession session, ClientItemUseDecor itemUseDecor)
         {
-            Item item = session.Player.Inventory.GetItem(itemUseDecor.ItemGuid);
+            IItem item = session.Player.Inventory.GetItem(itemUseDecor.ItemGuid);
             if (item == null)
                 throw new InvalidPacketValueException();
 
@@ -112,9 +111,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemMoveToSupplySatchel)]
-        public static void HandleClientItemMoveToSupplySatchel(WorldSession session, ClientItemMoveToSupplySatchel moveToSupplySatchel)
+        public static void HandleClientItemMoveToSupplySatchel(IWorldSession session, ClientItemMoveToSupplySatchel moveToSupplySatchel)
         {
-            Item item = session.Player.Inventory.GetItem(moveToSupplySatchel.ItemGuid);
+            IItem item = session.Player.Inventory.GetItem(moveToSupplySatchel.ItemGuid);
             if (item == null)
                 throw new InvalidPacketValueException();
 
@@ -122,7 +121,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientItemMoveFromSupplySatchel)]
-        public static void HandleClientItemMoveFromSupplySatchel(WorldSession session, ClientItemMoveFromSupplySatchel request)
+        public static void HandleClientItemMoveFromSupplySatchel(IWorldSession session, ClientItemMoveFromSupplySatchel request)
         {
             session.Player.SupplySatchelManager.MoveToInventory(request.MaterialId, request.Amount);
         }

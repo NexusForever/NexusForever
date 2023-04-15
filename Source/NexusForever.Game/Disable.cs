@@ -1,8 +1,9 @@
-﻿using NexusForever.Game.Static;
+﻿using NexusForever.Game.Abstract;
+using NexusForever.Game.Static;
 
 namespace NexusForever.Game
 {
-    public class Disable
+    public class Disable : IDisable
     {
         public DisableType Type { get; }
         public uint ObjectId { get; }

@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class Transition : IKeyframeAction
+    public class Transition : ITransition
     {
         public uint Delay { get; }
         public uint Flags { get; }
@@ -22,7 +23,7 @@ namespace NexusForever.Game.Cinematic
             End           = end;
         }
 
-        public void Send(WorldSession session)
+        public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicTransition
             {

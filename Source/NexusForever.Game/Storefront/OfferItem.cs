@@ -1,14 +1,14 @@
 using System.Collections.Immutable;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Storefront;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Account;
 using NexusForever.Game.Static.Storefront;
-using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Storefront
 {
-    public class OfferItem : IBuildable<ServerStoreOffers.OfferGroup.Offer>
+    public class OfferItem : IOfferItem
     {
         public uint Id { get; }
         public string Name { get; }
@@ -18,11 +18,11 @@ namespace NexusForever.Game.Storefront
         public byte Field7 { get; }
         public bool Visible { get; }
 
-        private readonly ImmutableList<OfferItemData> items;
-        private readonly ImmutableDictionary<AccountCurrencyType, OfferItemPrice> prices;
+        private readonly ImmutableList<IOfferItemData> items;
+        private readonly ImmutableDictionary<AccountCurrencyType, IOfferItemPrice> prices;
 
         /// <summary>
-        /// Create a new <see cref="OfferItem"/> from an existing database model.
+        /// Create a new <see cref="IOfferItem"/> from an existing database model.
         /// </summary>
         public OfferItem(StoreOfferItemModel model)
         {
@@ -34,13 +34,13 @@ namespace NexusForever.Game.Storefront
             Field7       = model.Field7;
             Visible      = Convert.ToBoolean(model.Visible);
 
-            var itemBuilder = ImmutableList.CreateBuilder<OfferItemData>();
+            var itemBuilder = ImmutableList.CreateBuilder<IOfferItemData>();
             foreach (StoreOfferItemDataModel itemData in model.StoreOfferItemData)
                 itemBuilder.Add(new OfferItemData(itemData));
 
             items = itemBuilder.ToImmutable();
 
-            var priceBuilder = ImmutableDictionary.CreateBuilder<AccountCurrencyType, OfferItemPrice>();
+            var priceBuilder = ImmutableDictionary.CreateBuilder<AccountCurrencyType, IOfferItemPrice>();
             foreach (StoreOfferItemPriceModel price in model.StoreOfferItemPrice)
             {
                 if (DisableManager.Instance.IsDisabled(DisableType.AccountCurrency, price.CurrencyId))
@@ -54,11 +54,11 @@ namespace NexusForever.Game.Storefront
         }
 
         /// <summary>
-        /// Get the <see cref="OfferItemPrice"/> associated with this <see cref="OfferItem"/> for the given account currency ID
+        /// Get the <see cref="IOfferItemPrice"/> associated with this <see cref="IOfferItem"/> for the given account currency ID
         /// </summary>
-        public OfferItemPrice GetPriceDataForCurrency(AccountCurrencyType currencyId)
+        public IOfferItemPrice GetPriceDataForCurrency(AccountCurrencyType currencyId)
         {
-            return prices.TryGetValue(currencyId, out OfferItemPrice itemPrice) ? itemPrice : null;
+            return prices.TryGetValue(currencyId, out IOfferItemPrice itemPrice) ? itemPrice : null;
         }
 
         public ServerStoreOffers.OfferGroup.Offer Build()
@@ -66,9 +66,9 @@ namespace NexusForever.Game.Storefront
             float pricePremium = 0f;
             float priceAlternative = 0;
 
-            if (prices.TryGetValue(AccountCurrencyType.Protobuck, out OfferItemPrice protobucksItemPrice))
+            if (prices.TryGetValue(AccountCurrencyType.Protobuck, out IOfferItemPrice protobucksItemPrice))
                 pricePremium = protobucksItemPrice.GetCurrencyValue();
-            if (prices.TryGetValue(AccountCurrencyType.Omnibit, out OfferItemPrice omnibitsItemPrice))
+            if (prices.TryGetValue(AccountCurrencyType.Omnibit, out IOfferItemPrice omnibitsItemPrice))
                 priceAlternative = omnibitsItemPrice.GetCurrencyValue();
 
             return new ServerStoreOffers.OfferGroup.Offer

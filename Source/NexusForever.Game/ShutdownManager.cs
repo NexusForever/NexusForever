@@ -1,15 +1,15 @@
 ﻿using System.Text;
+using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Network;
 using NexusForever.Game.Social;
 using NexusForever.Game.Static.Social;
-using NexusForever.Network;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game
 {
-    public class ShutdownManager : Singleton<ShutdownManager>, IUpdate
+    public class ShutdownManager : Singleton<ShutdownManager>, IShutdownManager
     {
         private UpdateTimer shutdownTick;
         private TimeSpan? shutdownSpan;
@@ -88,9 +88,9 @@ namespace NexusForever.Game
         }
 
         /// <summary>
-        /// Display pending shutdown time to <see cref="Player"/> on login.
+        /// Display pending shutdown time to <see cref="IPlayer"/> on login.
         /// </summary>
-        public void OnLogin(Player player)
+        public void OnLogin(IPlayer player)
         {
             if (!shutdownSpan.HasValue)
                 return;
@@ -150,8 +150,8 @@ namespace NexusForever.Game
 
         private void BroadcastMessage(string message)
         {
-            foreach (WorldSession session in NetworkManager<WorldSession>.Instance)
-                GlobalChatManager.Instance.SendMessage(session, message, type: ChatChannelType.Realm);
+            foreach (IPlayer player in PlayerManager.Instance)
+                GlobalChatManager.Instance.SendMessage(player.Session, message, type: ChatChannelType.Realm);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using NexusForever.Game.Network;
-using NexusForever.Game.Storefront;
+﻿using NexusForever.Game.Storefront;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
@@ -8,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     public static class AccountHandler
     {
         [MessageHandler(GameMessageOpcode.ClientStorefrontRequestCatalog)]
-        public static void HandleStorefrontRequestCatalogRealm(WorldSession session, ClientStorefrontRequestCatalog storefrontRequest)
+        public static void HandleStorefrontRequestCatalogRealm(IWorldSession session, ClientStorefrontRequestCatalog storefrontRequest)
         {
             // Packet order below, for reference and implementation
 

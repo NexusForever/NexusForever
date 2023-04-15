@@ -1,37 +1,35 @@
 ﻿using System.Numerics;
-using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Character;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Mail;
+using NexusForever.Game.Character;
 using NexusForever.Game.Mail;
-using NexusForever.Game.Network;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Mail;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
-using NexusForever.Shared;
 using NexusForever.Shared.Game;
-using NexusForever.Shared.Game.Events;
 
 namespace NexusForever.Game.Entity
 {
-    public class MailManager : IUpdate, ISaveCharacter
+    public class MailManager : IMailManager
     {
-        private readonly Player player;
-        private readonly Queue<MailItem> outgoingMail = new();
-        private readonly List<MailItem> pendingMail = new();
-        private readonly Dictionary<ulong, MailItem> availableMail = new();
+        private readonly IPlayer player;
+        private readonly Queue<IMailItem> outgoingMail = new();
+        private readonly List<IMailItem> pendingMail = new();
+        private readonly Dictionary<ulong, IMailItem> availableMail = new();
 
         // timer to check pending mail ever second
         private readonly UpdateTimer mailTimer = new(1000d);
 
         /// <summary>
-        /// Create a new <see cref="MailManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// Create a new <see cref="IMailManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public MailManager(Player owner, CharacterModel model)
+        public MailManager(IPlayer owner, CharacterModel model)
         {
             player = owner;
             foreach (CharacterMailModel mailModel in model.Mail)
@@ -50,7 +48,7 @@ namespace NexusForever.Game.Entity
             if (mailTimer.HasElapsed)
             {
                 bool sendAvailableMail = false;
-                foreach (MailItem mail in pendingMail)
+                foreach (IMailItem mail in pendingMail)
                 {
                     if (!mail.IsReadyToDeliver())
                         continue;
@@ -71,25 +69,20 @@ namespace NexusForever.Game.Entity
 
         public void Save(CharacterContext context)
         {
-            while (outgoingMail.TryDequeue(out MailItem mail))
+            while (outgoingMail.TryDequeue(out IMailItem mail))
             {
                 mail.Save(context);
 
-                MailManager mailManager;
                 if (mail.RecipientId == player.CharacterId)
-                    mailManager = player.MailManager;
+                    player.MailManager.EnqueueMail(mail);
                 else
                 {
-                    // ReSharper disable once AccessToModifiedClosure
-                    WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(c => c.Player.CharacterId == mail.RecipientId);
-                    mailManager = session?.Player.MailManager;
+                    IPlayer player = PlayerManager.Instance.GetPlayer(mail.RecipientId);
+                    player?.MailManager.EnqueueMail(mail);
                 }
-
-                // deliver mail if user is online
-                mailManager?.EnqueueMail(mail);
             }
 
-            foreach (MailItem mail in availableMail.Values.ToList())
+            foreach (IMailItem mail in availableMail.Values.ToList())
             {
                 if (mail.PendingDelete)
                     availableMail.Remove(mail.Id);
@@ -99,7 +92,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Called by <see cref="Player"/> to send available mail on entering map.
+        /// Called by <see cref="IPlayer"/> to send available mail on entering map.
         /// </summary>
         public void SendInitialPackets()
         {
@@ -113,64 +106,16 @@ namespace NexusForever.Game.Entity
                 NewMail = true
             };
 
-            foreach (MailItem mail in availableMail.Values.Where(m => !m.PendingDelete))
-                mailAvailable.MailList.Add(BuildNetworkMail(mail));
+            foreach (IMailItem mail in availableMail.Values.Where(m => !m.PendingDelete))
+                mailAvailable.MailList.Add(mail.Build());
 
             player.Session.EnqueueMessageEncrypted(mailAvailable);
         }
 
         /// <summary>
-        /// Handles converting <see cref="MailItem"/> to <see cref="ServerMailAvailable.Mail"/> for the client to process
+        /// Enqueue new incoming <see cref="IMailItem"/> to be processed.
         /// </summary>
-        private static ServerMailAvailable.Mail BuildNetworkMail(MailItem mail)
-        {
-            bool isPlayer = mail.SenderType == SenderType.Player || mail.SenderType == SenderType.GM;
-
-            var serverMailItem = new ServerMailAvailable.Mail
-            {
-                MailId               = mail.Id,
-                SenderType           = mail.SenderType,
-                Subject              = mail.Subject,
-                Message              = mail.Message,
-                TextEntrySubject     = mail.TextEntrySubject,
-                TextEntryMessage     = mail.TextEntryMessage,
-                CreatureId           = !isPlayer ? mail.CreatureId : 0,
-                CurrencyGiftType     = 0,
-                CurrencyGiftAmount   = !mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,
-                CostOnDeliveryAmount = mail.IsCashOnDelivery && !mail.HasPaidOrCollectedCurrency ? mail.CurrencyAmount : 0,
-                ExpiryTimeInDays     = mail.ExpiryTime,
-                Flags                = mail.Flags,
-                Sender = new TargetPlayerIdentity
-                {
-                    RealmId     = isPlayer ? RealmContext.Instance.RealmId : (ushort)0,
-                    CharacterId = isPlayer ? mail.SenderId : 0ul
-                },
-            };
-
-            foreach (MailAttachment attachment in mail)
-                serverMailItem.Attachments.Add(BuildNetworkMailAttachment(attachment));
-
-            return serverMailItem;
-        }
-
-        /// <summary>
-        /// Handles converting <see cref="MailAttachment"/> to <see cref="ServerMailAvailable.Attachment"/> for the client to process
-        /// </summary>
-        private static ServerMailAvailable.Attachment BuildNetworkMailAttachment(MailAttachment attachment)
-        {
-            var serverMailAttachment = new ServerMailAvailable.Attachment
-            {
-                ItemId = attachment.Item.Id,
-                Amount = attachment.Item.StackCount
-            };
-
-            return serverMailAttachment;
-        }
-
-        /// <summary>
-        /// Enqueue new incoming <see cref="MailItem"/> to be processed.
-        /// </summary>
-        public void EnqueueMail(MailItem mail)
+        public void EnqueueMail(IMailItem mail)
         {
             if (mail.IsReadyToDeliver())
                 availableMail.Add(mail.Id, mail);
@@ -179,94 +124,91 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Send mail to another <see cref="Player"/>.
+        /// Send mail to another <see cref="IPlayer"/>.
         /// </summary>
         public void SendMail(ClientMailSend mailSend)
         {
-            player.Session.Events.EnqueueEvent(new TaskGenericEvent<CharacterModel>(DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetCharacterByName(mailSend.Name),
-                targetCharacter =>
+            ICharacter targetCharacter = CharacterManager.Instance.GetCharacter(mailSend.Name);
+
+            var items = new List<IItem>();
+            GenericError GetResult()
             {
-                var items = new List<Item>();
-                GenericError GetResult()
+                if (targetCharacter == null)
+                    return GenericError.MailCannotFindPlayer;
+
+                if (targetCharacter.CharacterId == player.CharacterId)
+                    return GenericError.MailCannotMailSelf;
+
+                // TODO: Check that the player is not blocked
+
+                if (mailSend.CreditsRequested > 0ul && mailSend.CreditsSent > 0ul)
+                    return GenericError.MailCanNotHaveCoDAndGift;
+
+                if (mailSend.CreditsRequested > 0ul && mailSend.Items.All(i => i == 0ul))
+                    return GenericError.MailFailedToCreate;
+
+                if (mailSend.Items.Any(i => i != 0ul))
                 {
-                    if (targetCharacter == null)
-                        return GenericError.MailCannotFindPlayer;
+                    if (!IsTargetMailBoxInRange(mailSend.UnitId))
+                        return GenericError.MailMailBoxOutOfRange;
 
-                    if (targetCharacter.Id == player.CharacterId)
-                        return GenericError.MailCannotMailSelf;
-
-                    // TODO: Check that the player is not blocked
-
-                    if (mailSend.CreditsRequested > 0ul && mailSend.CreditsSent > 0ul)
-                        return GenericError.MailCanNotHaveCoDAndGift;
-
-                    if (mailSend.CreditsRequested > 0ul && mailSend.Items.All(i => i == 0ul))
-                        return GenericError.MailFailedToCreate;
-
-                    if (mailSend.Items.Any(i => i != 0ul))
+                    foreach (ulong itemGuid in mailSend.Items.Where(i => i != 0ul))
                     {
-                        if (!IsTargetMailBoxInRange(mailSend.UnitId))
-                            return GenericError.MailMailBoxOutOfRange;
+                        IItem item = player.Inventory.GetItem(itemGuid);
+                        if (item == null)
+                            return GenericError.MailInvalidInventorySlot;
 
-                        foreach (ulong itemGuid in mailSend.Items.Where(i => i != 0ul))
-                        {
-                            Item item = player.Inventory.GetItem(itemGuid);
-                            if (item == null)
-                                return GenericError.MailInvalidInventorySlot;
+                        if (item.Location == InventoryLocation.Equipped)
+                            return GenericError.MailInvalidInventorySlot;
 
-                            if (item.Location == InventoryLocation.Equipped)
-                                return GenericError.MailInvalidInventorySlot;
-
-                            // TODO: Check the Item can be traded.
-                            items.Add(item);
-                        }
+                        // TODO: Check the Item can be traded.
+                        items.Add(item);
                     }
-
-                    uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
-                    if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, cost))
-                        return GenericError.MailInsufficientFunds;
-
-                    if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, mailSend.CreditsSent))
-                        return GenericError.MailInsufficientFunds;
-
-                    return GenericError.Ok;
                 }
 
-                GenericError result = GetResult();
-                if (result == GenericError.Ok)
+                uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
+                if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, cost))
+                    return GenericError.MailInsufficientFunds;
+
+                if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, mailSend.CreditsSent))
+                    return GenericError.MailInsufficientFunds;
+
+                return GenericError.Ok;
+            }
+
+            GenericError result = GetResult();
+            if (result == GenericError.Ok)
+            {
+                var parameters = new MailParameters
                 {
-                    var parameters = new MailParameters
-                    {
-                        RecipientCharacterId = targetCharacter.Id,
-                        SenderCharacterId    = player.CharacterId,
-                        MessageType          = SenderType.Player,
-                        Subject              = mailSend.Subject,
-                        Body                 = mailSend.Message,
-                        MoneyToGive          = mailSend.CreditsSent,
-                        CodAmount            = mailSend.CreditsRequested,
-                        DeliveryTime         = mailSend.DeliveryTime
-                    };
+                    RecipientCharacterId = targetCharacter.CharacterId,
+                    SenderCharacterId    = player.CharacterId,
+                    MessageType          = SenderType.Player,
+                    Subject              = mailSend.Subject,
+                    Body                 = mailSend.Message,
+                    MoneyToGive          = mailSend.CreditsSent,
+                    CodAmount            = mailSend.CreditsRequested,
+                    DeliveryTime         = mailSend.DeliveryTime
+                };
 
-                    foreach (Item item in items)
-                        player.Inventory.ItemRemove(item);
+                foreach (IItem item in items)
+                    player.Inventory.ItemRemove(item);
 
-                    SendMail(parameters, items);
+                SendMail(parameters, items);
 
-                    uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
-                    player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
+                uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
+                player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
 
-                    if (mailSend.CreditsSent > 0ul)
-                        player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, mailSend.CreditsSent);
+                if (mailSend.CreditsSent > 0ul)
+                    player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, mailSend.CreditsSent);
+            }
 
-                }
-
-                player.Session.EnqueueMessageEncrypted(new ServerMailResult
-                {
-                    Action = 1,
-                    MailId = 0,
-                    Result = result
-                });
-            }));
+            player.Session.EnqueueMessageEncrypted(new ServerMailResult
+            {
+                Action = 1,
+                MailId = 0,
+                Result = result
+            });
         }
 
         /// <summary>
@@ -293,10 +235,10 @@ namespace NexusForever.Game.Entity
                 DeliveryTime         = time
             };
 
-            var items = new List<Item>();
+            var items = new List<IItem>();
             foreach (uint itemId in itemIds)
             {
-                ItemInfo info = ItemManager.Instance.GetItemInfo(itemId);
+                IItemInfo info = ItemManager.Instance.GetItemInfo(itemId);
                 if (info == null)
                     throw new ArgumentException($"Invalid item {itemId} for mail attachment!");
 
@@ -309,13 +251,12 @@ namespace NexusForever.Game.Entity
 
         // TODO: Handle sending mail from auctions to users upon auction end
         // TODO: Handle sending mail from GMs to replace missing items
-
-        private void SendMail(MailParameters parameters, IEnumerable<Item> items)
+        private void SendMail(MailParameters parameters, IEnumerable<IItem> items)
         {
             var mail = new MailItem(parameters);
 
             uint index = 0;
-            foreach (Item item in items)
+            foreach (IItem item in items)
             {
                 var attachment = new MailAttachment(mail.Id, index++, item);
                 mail.AttachmentAdd(attachment);
@@ -326,7 +267,7 @@ namespace NexusForever.Game.Entity
             outgoingMail.Enqueue(mail);
         }
 
-        private uint CalculateMailCost(DeliveryTime time, List<Item> items)
+        private uint CalculateMailCost(DeliveryTime time, List<IItem> items)
         {
             GameFormulaEntry GetMailParameters()
             {
@@ -336,16 +277,16 @@ namespace NexusForever.Game.Entity
                 return time switch
                 {
                     DeliveryTime.Instant => GameTableManager.Instance.GameFormula.GetEntry(861),
-                    DeliveryTime.Hour    => GameTableManager.Instance.GameFormula.GetEntry(862),
-                    DeliveryTime.Day     => GameTableManager.Instance.GameFormula.GetEntry(863),
-                    _                    => null
+                    DeliveryTime.Hour => GameTableManager.Instance.GameFormula.GetEntry(862),
+                    DeliveryTime.Day => GameTableManager.Instance.GameFormula.GetEntry(863),
+                    _ => null
                 };
             }
 
             GameFormulaEntry parameters = GetMailParameters();
             uint cost = parameters.Dataint0;
 
-            foreach (Item item in items)
+            foreach (IItem item in items)
             {
                 cost += parameters.Dataint01;
                 // only instant delivery speed takes item worth into consideration
@@ -362,18 +303,18 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Delete a <see cref="MailItem"/> with supplied id.
+        /// Delete a <see cref="IMailItem"/> with supplied id.
         /// </summary>
         public void MailDelete(ulong mailId)
         {
             GenericError result = GenericError.Ok;
-            if (!availableMail.TryGetValue(mailId, out MailItem mailItem))
+            if (!availableMail.TryGetValue(mailId, out IMailItem mailItem))
                 result = GenericError.MailDoesNotExist;
 
             if (result == GenericError.Ok)
             {
                 // TODO: Confirm that this user is allowed to delete this mail
-                mailItem.EnqueueDelete();
+                mailItem.EnqueueDelete(true);
 
                 player.Session.EnqueueMessageEncrypted(new ServerMailUnavailable
                 {
@@ -390,22 +331,22 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Mark a <see cref="MailItem"/> as read with supplied id.
+        /// Mark a <see cref="IMailItem"/> as read with supplied id.
         /// </summary>
         public void MailMarkAsRead(ulong mailId)
         {
-            if (!availableMail.TryGetValue(mailId, out MailItem mailItem))
+            if (!availableMail.TryGetValue(mailId, out IMailItem mailItem))
                 return;
 
             mailItem.MarkAsRead();
         }
 
         /// <summary>
-        /// Pay cash on delivery for a <see cref="MailItem"/> with supplied id.
+        /// Pay cash on delivery for a <see cref="IMailItem"/> with supplied id.
         /// </summary>
         public void MailPayCod(ulong mailId)
         {
-            MailItem mail;
+            IMailItem mail;
             GenericError GetResult()
             {
                 if (!availableMail.TryGetValue(mailId, out mail))
@@ -448,11 +389,11 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Return <see cref="MailItem"/> to original sender with supplied id.
+        /// Return <see cref="IMailItem"/> to original sender with supplied id.
         /// </summary>
         public void ReturnMail(ulong mailId)
         {
-            MailItem mailItem;
+            IMailItem mailItem;
             GenericError GetResult()
             {
                 if (!availableMail.TryGetValue(mailId, out mailItem))
@@ -487,12 +428,12 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Take attachment from <see cref="MailItem"/> with supplied id and index.
+        /// Take attachment from <see cref="IMailItem"/> with supplied id and index.
         /// </summary>
         public void MailTakeAttachment(ulong mailId, uint attachmentIndex, uint unitId)
         {
-            MailItem mailItem;
-            MailAttachment mailAttachment = null;
+            IMailItem mailItem;
+            IMailAttachment mailAttachment = null;
 
             GenericError GetResult()
             {
@@ -531,11 +472,11 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Take cash from <see cref="MailItem"/> with supplied id.
+        /// Take cash from <see cref="IMailItem"/> with supplied id.
         /// </summary>
         public void MailTakeCash(ulong mailId, uint unitId)
         {
-            MailItem mailItem;
+            IMailItem mailItem;
             GenericError GetResult()
             {
                 if (!availableMail.TryGetValue(mailId, out mailItem))
@@ -567,7 +508,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Checks to see if the targeted <see cref="Mailbox"/> is in range.
+        /// Checks to see if the targeted <see cref="IMailItem"/> is in range.
         /// </summary>
         private bool IsTargetMailBoxInRange(uint unitId)
         {
@@ -576,8 +517,8 @@ namespace NexusForever.Game.Entity
             if (entry == null)
                 throw new InvalidOperationException();
 
-            var entity = player.GetVisible<WorldEntity>(unitId);
-            return entity is Mailbox && Vector3.Distance(player.Position, entity.Position) < entry.Datafloat0;
+            var entity = player.GetVisible<IWorldEntity>(unitId);
+            return entity is IMailbox && Vector3.Distance(player.Position, entity.Position) < entry.Datafloat0;
         }
     }
 }

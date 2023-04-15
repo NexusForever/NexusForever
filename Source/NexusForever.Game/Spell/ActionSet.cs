@@ -1,6 +1,7 @@
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -12,7 +13,7 @@ using NLog;
 
 namespace NexusForever.Game.Spell
 {
-    public class ActionSet : ISaveCharacter
+    public class ActionSet : IActionSet
     {
         [Flags]
         public enum ActionSetSaveMask
@@ -36,24 +37,24 @@ namespace NexusForever.Game.Spell
         public byte AmpPoints { get; private set; }
 
         /// <summary>
-        /// Collection of <see cref="ActionSetShortcut"/> contained in the <see cref="ActionSet"/>.
+        /// Collection of <see cref="IActionSetShortcut"/> contained in the <see cref="IActionSet"/>.
         /// </summary>
-        public IEnumerable<ActionSetShortcut> Actions => actions.Values.Where(a => !a.PendingDelete);
+        public IEnumerable<IActionSetShortcut> Actions => actions.Values.Where(a => !a.PendingDelete);
 
         /// <summary>
-        /// Collection of <see cref="ActionSetAmp"/> contained in the <see cref="ActionSet"/>.
+        /// Collection of <see cref="IActionSetAmp"/> contained in the <see cref="IActionSet"/>.
         /// </summary>
-        public IEnumerable<ActionSetAmp> Amps => amps.Values.Where(a => !a.PendingDelete);
+        public IEnumerable<IActionSetAmp> Amps => amps.Values.Where(a => !a.PendingDelete);
 
-        private readonly Dictionary<UILocation, ActionSetShortcut> actions = new();
-        private readonly Dictionary<ushort, ActionSetAmp> amps = new();
+        private readonly Dictionary<UILocation, IActionSetShortcut> actions = new();
+        private readonly Dictionary<ushort, IActionSetAmp> amps = new();
 
         private ActionSetSaveMask saveMask;
 
         /// <summary>
-        /// Create a new <see cref="ActionSet"/> with supplied index.
+        /// Create a new <see cref="IActionSet"/> with supplied index.
         /// </summary>
-        public ActionSet(byte index, Player player)
+        public ActionSet(byte index, IPlayer player)
         {
             Owner      = player.CharacterId;
             Index      = index;
@@ -68,7 +69,7 @@ namespace NexusForever.Game.Spell
 
             if ((saveMask & ActionSetSaveMask.ActionSetAmps) != 0)
             {
-                foreach ((ushort id, ActionSetAmp amp) in amps.OrderBy(i => i.Value.PendingDelete == true).ToList())
+                foreach ((ushort id, IActionSetAmp amp) in amps.OrderBy(i => i.Value.PendingDelete == true).ToList())
                 {
                     if (amp.PendingDelete)
                         amps.Remove(id);
@@ -79,7 +80,7 @@ namespace NexusForever.Game.Spell
 
             if ((saveMask & ActionSetSaveMask.ActionSetActions) != 0)
             {
-                foreach ((UILocation location, ActionSetShortcut shortcut) in actions.OrderBy(i => i.Value.PendingDelete == true).ToList())
+                foreach ((UILocation location, IActionSetShortcut shortcut) in actions.OrderBy(i => i.Value.PendingDelete == true).ToList())
                 {
                     if (shortcut.PendingDelete)
                         actions.Remove(location);
@@ -92,22 +93,22 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Return <see cref="ActionSetShortcut"/> at supplied <see cref="UILocation"/>.
+        /// Return <see cref="IActionSetShortcut"/> at supplied <see cref="UILocation"/>.
         /// </summary>
-        public ActionSetShortcut GetShortcut(UILocation location)
+        public IActionSetShortcut GetShortcut(UILocation location)
         {
-            if (!actions.TryGetValue(location, out ActionSetShortcut shortcut))
+            if (!actions.TryGetValue(location, out IActionSetShortcut shortcut))
                 return null;
 
             return shortcut.PendingDelete ? null : shortcut;
         }
 
         /// <summary>
-        /// Return <see cref="ActionSetShortcut"/> with supplied <see cref="ShortcutType"/> and object id.
+        /// Return <see cref="IActionSetShortcut"/> with supplied <see cref="ShortcutType"/> and object id.
         /// </summary>
-        public ActionSetShortcut GetShortcut(ShortcutType type, uint objectId)
+        public IActionSetShortcut GetShortcut(ShortcutType type, uint objectId)
         {
-            ActionSetShortcut shortcut = actions.Values
+            IActionSetShortcut shortcut = actions.Values
                 .Where(a => !a.PendingDelete)
                 .SingleOrDefault(a => a.ShortcutType == type && a.ObjectId == objectId);
 
@@ -115,22 +116,22 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Return <see cref="ActionSetAmp"/> with supplied id.
+        /// Return <see cref="IActionSetAmp"/> with supplied id.
         /// </summary>
-        public ActionSetAmp GetAmp(ushort id)
+        public IActionSetAmp GetAmp(ushort id)
         {
-            if (!amps.TryGetValue(id, out ActionSetAmp amp))
+            if (!amps.TryGetValue(id, out IActionSetAmp amp))
                 return null;
 
             return amp.PendingDelete ? null : amp;
         }
 
         /// <summary>
-        /// Add shortcut to <see cref="ActionSet"/> to supplied <see cref="UILocation"/>.
+        /// Add shortcut to <see cref="IActionSet"/> to supplied <see cref="UILocation"/>.
         /// </summary>
         public void AddShortcut(UILocation location, ShortcutType type, uint objectId, byte tier)
         {
-            if (actions.TryGetValue(location, out ActionSetShortcut shortcut) && !shortcut.PendingDelete)
+            if (actions.TryGetValue(location, out IActionSetShortcut shortcut) && !shortcut.PendingDelete)
                 throw new InvalidOperationException($"Failed to add shortcut {type} {objectId} to {location}, location is occupied!");
 
             if (type == ShortcutType.Spell)
@@ -157,7 +158,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Add shortcut to <see cref="ActionSet"/> from an existing database model.
+        /// Add shortcut to <see cref="IActionSet"/> from an existing database model.
         /// </summary>
         public void AddShortcut(CharacterActionSetShortcutModel model)
         {
@@ -179,7 +180,7 @@ namespace NexusForever.Game.Spell
         /// </summary>
         public void UpdateSpellShortcut(uint spell4BaseId, byte tier)
         {
-            ActionSetShortcut shortcut = GetShortcut(ShortcutType.Spell, spell4BaseId);
+            IActionSetShortcut shortcut = GetShortcut(ShortcutType.Spell, spell4BaseId);
             if (shortcut == null)
                 throw new ArgumentException();
 
@@ -194,11 +195,11 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Remove shortcut from <see cref="ActionSet"/> at supplied <see cref="UILocation"/>.
+        /// Remove shortcut from <see cref="IActionSet"/> at supplied <see cref="UILocation"/>.
         /// </summary>
         public void RemoveShortcut(UILocation location)
         {
-            ActionSetShortcut shortcut = GetShortcut(location);
+            IActionSetShortcut shortcut = GetShortcut(location);
             if (shortcut == null)
                 throw new ArgumentException($"Failed to remove shortcut from {location}, location isn't occupied!");
 
@@ -234,7 +235,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Add AMP to <see cref="ActionSet"/> with supplied id.
+        /// Add AMP to <see cref="IActionSet"/> with supplied id.
         /// </summary>
         public void AddAmp(ushort id)
         {
@@ -242,7 +243,7 @@ namespace NexusForever.Game.Spell
             if (entry == null)
                 throw new ArgumentException($"Invalid eldan augmentation id {id}!");
 
-            if (amps.TryGetValue(id, out ActionSetAmp amp) && !amp.PendingDelete)
+            if (amps.TryGetValue(id, out IActionSetAmp amp) && !amp.PendingDelete)
                 throw new InvalidOperationException($"Failed to add AMP {id}, location is already occupied!");
 
             checked
@@ -261,7 +262,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Add AMP to <see cref="ActionSet"/> from an existing database model.
+        /// Add AMP to <see cref="IActionSet"/> from an existing database model.
         /// </summary>
         public void AddAmp(CharacterActionSetAmpModel model)
         {
@@ -278,7 +279,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Remove one or more AMP's from <see cref="ActionSet"/> depending on supplied <see cref="AmpRespecType"/>.
+        /// Remove one or more AMP's from <see cref="IActionSet"/> depending on supplied <see cref="AmpRespecType"/>.
         /// </summary>
         public void RemoveAmp(AmpRespecType type, uint value)
         {
@@ -286,13 +287,13 @@ namespace NexusForever.Game.Spell
             {
                 case AmpRespecType.Full:
                 {
-                    foreach (ActionSetAmp amp in Amps.ToList())
+                    foreach (IActionSetAmp amp in Amps.ToList())
                         RemoveAmp(amp);
                     break;
                 }
                 case AmpRespecType.Section:
                 {
-                    foreach (ActionSetAmp amp in Amps
+                    foreach (IActionSetAmp amp in Amps
                         .ToList()
                         .Where(a => a.Entry.EldanAugmentationCategoryId == value))
                         RemoveAmp(amp);
@@ -300,7 +301,7 @@ namespace NexusForever.Game.Spell
                 }
                 case AmpRespecType.Single:
                 {
-                    ActionSetAmp amp = GetAmp((ushort)value);
+                    IActionSetAmp amp = GetAmp((ushort)value);
                     RemoveAmp(amp);
                     break;
                 }
@@ -309,7 +310,7 @@ namespace NexusForever.Game.Spell
             }
         }
 
-        private void RemoveAmp(ActionSetAmp amp)
+        private void RemoveAmp(IActionSetAmp amp)
         {
             if (amp == null)
                 throw new ArgumentNullException();
@@ -331,7 +332,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Build a network representation of the <see cref="ActionSetShortcut"/>'s in the <see cref="ActionSet"/>.
+        /// Build a network representation of the <see cref="IActionSetShortcut"/>'s in the <see cref="IActionSet"/>.
         /// </summary>
         public ServerActionSet BuildServerActionSet()
         {
@@ -344,7 +345,7 @@ namespace NexusForever.Game.Spell
 
             for (UILocation i = 0; i < (UILocation)MaxActionCount; i++)
             {
-                ActionSetShortcut action = GetShortcut(i);
+                IActionSetShortcut action = GetShortcut(i);
                 serverActionSet.Actions.Add(new ServerActionSet.Action
                 {
                     ShortcutType = action?.ShortcutType ?? ShortcutType.None,
@@ -362,7 +363,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Build a network representation of the <see cref="ActionSetAmp"/>'s in the <see cref="ActionSet"/>.
+        /// Build a network representation of the <see cref="IActionSetAmp"/>'s in the <see cref="IActionSet"/>.
         /// </summary>
         public ServerAmpList BuildServerAmpList()
         {
@@ -371,7 +372,7 @@ namespace NexusForever.Game.Spell
                 SpecIndex = Index
             };
 
-            foreach (ActionSetAmp amp in Amps)
+            foreach (IActionSetAmp amp in Amps)
                 serverAmpList.Amps.Add((ushort)amp.Entry.Id);
 
             return serverAmpList;

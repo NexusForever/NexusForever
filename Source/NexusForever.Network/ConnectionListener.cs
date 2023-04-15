@@ -6,7 +6,7 @@ namespace NexusForever.Network
 {
     public class ConnectionListener<T> where T : NetworkSession, new()
     {
-        private static readonly ILogger log = LogManager.GetLogger($"ConnectionListener<{typeof(T).FullName}>");
+        private static readonly ILogger log = LogManager.GetLogger($"ConnectionListener<{typeof(T).Name}>");
 
         public delegate void NewSessionEvent(T socket);
 

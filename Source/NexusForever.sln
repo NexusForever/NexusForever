@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Cryptography",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Network.Sts", "NexusForever.Network.Sts\NexusForever.Network.Sts.csproj", "{A550B29D-1EBE-44CD-BA44-1AEC5161D6E4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Game.Abstract", "NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj", "{DCB696E7-5ED1-468B-AB1F-4E73930B5017}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +129,10 @@ Global
 		{A550B29D-1EBE-44CD-BA44-1AEC5161D6E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A550B29D-1EBE-44CD-BA44-1AEC5161D6E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A550B29D-1EBE-44CD-BA44-1AEC5161D6E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCB696E7-5ED1-468B-AB1F-4E73930B5017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCB696E7-5ED1-468B-AB1F-4E73930B5017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCB696E7-5ED1-468B-AB1F-4E73930B5017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCB696E7-5ED1-468B-AB1F-4E73930B5017}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -151,6 +157,7 @@ Global
 		{B5463F2F-186E-49D7-9126-0538E40F313D} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{FC2208F7-E77C-4C49-A11B-7352B2F7ECD2} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 		{A550B29D-1EBE-44CD-BA44-1AEC5161D6E4} = {F11199C0-850A-4DA7-A71B-C597581970D6}
+		{DCB696E7-5ED1-468B-AB1F-4E73930B5017} = {F11199C0-850A-4DA7-A71B-C597581970D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7D83B735-7E6A-4C1A-83C4-DD80682C2859}

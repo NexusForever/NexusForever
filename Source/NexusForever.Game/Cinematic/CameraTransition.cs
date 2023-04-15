@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class CameraTransition : IKeyframeAction
+    public class CameraTransition : ICameraTransition
     {
         public uint Delay { get; set; }
         public uint Type { get; set; }
@@ -20,7 +21,7 @@ namespace NexusForever.Game.Cinematic
             DurationEnd   = end;
         }
 
-        public void Send(WorldSession session)
+        public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicCameraTransition
             {

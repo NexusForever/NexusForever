@@ -2,25 +2,25 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Entity;
-using NexusForever.Game.Guild;
-using NexusForever.Game.Map;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Abstract.Housing;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Housing
 {
-    public class Residence : ISaveCharacter, IBuildable<ServerHousingProperties.Residence>
+    public class Residence : IResidence
     {
         /// <summary>
-        /// Determines which fields need saving for <see cref="Residence"/> when being saved to the database.
+        /// Determines which fields need saving for <see cref="IResidence"/> when being saved to the database.
         /// </summary>
         [Flags]
-        public enum ResidenceSaveMask
+        private enum ResidenceSaveMask
         {
             None            = 0x000000,
             Create          = 0x000001,
@@ -257,34 +257,34 @@ namespace NexusForever.Game.Housing
         public bool IsCommunityResidence => GuildOwnerId.HasValue && !OwnerId.HasValue;
 
         /// <summary>
-        /// <see cref="ResidenceMapInstance"/> this <see cref="Residence"/> resides on.
+        /// <see cref="IResidenceMapInstance"/> this <see cref="IResidence"/> resides on.
         /// </summary>
         /// <remarks>
         /// This can either be an individual or shared residencial map.
         /// </remarks>
-        public ResidenceMapInstance Map { get; set; }
+        public IResidenceMapInstance Map { get; set; }
 
         /// <summary>
-        /// Parent <see cref="Residence"/> for this <see cref="Residence"/>.
+        /// Parent <see cref="IResidence"/> for this <see cref="IResidence"/>.
         /// </summary>
         /// <remarks>
-        /// This will be set if the <see cref="Residence"/> is part of a <see cref="Community"/>.
+        /// This will be set if the <see cref="IResidence"/> is part of a <see cref="ICommunity"/>.
         /// </remarks>
-        public Residence Parent { get; set; }
+        public IResidence Parent { get; set; }
 
         /// <summary>
-        /// A collection of child <see cref="Residence"/> for this <see cref="Residence"/>.
+        /// A collection of child <see cref="IResidence"/> for this <see cref="IResidence"/>.
         /// </summary>
         /// <remarks>
-        /// This will contain entries if the <see cref="Residence"/> is the parent for a <see cref="Community"/>.
+        /// This will contain entries if the <see cref="IResidence"/> is the parent for a <see cref="ICommunity"/>.
         /// </remarks>
-        private readonly Dictionary<ulong, ResidenceChild> children = new();
+        private readonly Dictionary<ulong, IResidenceChild> children = new();
 
-        private readonly Dictionary<ulong, Decor> decors = new();
-        private readonly List<Plot> plots = new();
+        private readonly Dictionary<ulong, IDecor> decors = new();
+        private readonly List<IPlot> plots = new();
 
         /// <summary>
-        /// Create a new <see cref="Residence"/> from an existing database model.
+        /// Create a new <see cref="IResidence"/> from an existing database model.
         /// </summary>
         public Residence(ResidenceModel model)
         {
@@ -326,9 +326,9 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Create a new <see cref="Residence"/> from a <see cref="Player"/>.
+        /// Create a new <see cref="IResidence"/> from a <see cref="IPlayer"/>.
         /// </summary>
-        public Residence(Player player)
+        public Residence(IPlayer player)
         {
             Id             = GlobalResidenceManager.Instance.NextResidenceId;
             Type           = ResidenceType.Residence;
@@ -346,12 +346,12 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Create a new <see cref="Residence"/> for a <see cref="Community"/>.
+        /// Create a new <see cref="IResidence"/> for a <see cref="ICommunity"/>.
         /// </summary>
         /// <remarks>
-        /// This creates the parent <see cref="Residence"/> which all children are part of.
+        /// This creates the parent <see cref="IResidence"/> which all children are part of.
         /// </remarks>
-        public Residence(Community community)
+        public Residence(ICommunity community)
         {
             Id             = GlobalResidenceManager.Instance.NextResidenceId;
             Type           = ResidenceType.Community;
@@ -495,8 +495,8 @@ namespace NexusForever.Game.Housing
                 saveMask = ResidenceSaveMask.None;
             }
 
-            var decorToRemove = new List<Decor>();
-            foreach (Decor decor in decors.Values)
+            var decorToRemove = new List<IDecor>();
+            foreach (IDecor decor in decors.Values)
             {
                 if (decor.PendingDelete)
                     decorToRemove.Add(decor);
@@ -504,10 +504,10 @@ namespace NexusForever.Game.Housing
                 decor.Save(context);
             }
 
-            foreach (Decor decor in decorToRemove)
+            foreach (IDecor decor in decorToRemove)
                 decors.Remove(decor.DecorId);
 
-            foreach (Plot plot in plots)
+            foreach (IPlot plot in plots)
                 plot.Save(context);
         }
 
@@ -537,48 +537,47 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Return all <see cref="ResidenceChild"/>'s.
+        /// Return all <see cref="IResidenceChild"/>'s.
         /// </summary>
         /// <remarks>
         /// Only community residences will have child residences.
         /// </remarks>
-        public IEnumerable<ResidenceChild> GetChildren()
+        public IEnumerable<IResidenceChild> GetChildren()
         {
             return children.Values;
         }
 
         /// <summary>
-        /// Return <see cref="ResidenceChild"/> with supplied property info id.
+        /// Return <see cref="IResidenceChild"/> with supplied property info id.
         /// </summary>
         /// <remarks>
         /// Only community residences will have child residences.
         /// </remarks>
-        public ResidenceChild GetChild(PropertyInfoId propertyInfoId)
+        public IResidenceChild GetChild(PropertyInfoId propertyInfoId)
         {
             return children.Values
                 .SingleOrDefault(c => c.Residence.PropertyInfoId == propertyInfoId);
         }
 
-
         /// <summary>
-        /// Return <see cref="ResidenceChild"/> with supplied character id.
+        /// Return <see cref="IResidenceChild"/> with supplied character id.
         /// </summary>
         /// <remarks>
         /// Only community residences will have child residences.
         /// </remarks>
-        public ResidenceChild GetChild(ulong characterId)
+        public IResidenceChild GetChild(ulong characterId)
         {
             return children.Values
                 .SingleOrDefault(c => c.Residence.OwnerId == characterId);
         }
 
         /// <summary>
-        /// Add child <see cref="Residence"/> to parent <see cref="Residence"/>.
+        /// Add child <see cref="IResidence"/> to parent <see cref="IResidence"/>.
         /// </summary>
         /// <remarks>
         /// Child residences can only be added to a community.
         /// </remarks>
-        public void AddChild(Residence residence, bool temporary)
+        public void AddChild(IResidence residence, bool temporary)
         {
             if (Type != ResidenceType.Community)
                 throw new InvalidOperationException("Only community residences can have children!");
@@ -597,12 +596,12 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Remove child <see cref="Residence"/> to parent <see cref="Residence"/>.
+        /// Remove child <see cref="IResidence"/> to parent <see cref="IResidence"/>.
         /// </summary>
         /// <remarks>
         /// Child residences can only be removed from a community.
         /// </remarks>
-        public void RemoveChild(Residence residence)
+        public void RemoveChild(IResidence residence)
         {
             if (Type != ResidenceType.Community)
                 throw new InvalidOperationException("Only community residences can have children!");
@@ -614,22 +613,22 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Returns true if <see cref="Player"/> can modify the <see cref="Residence"/>.
+        /// Returns true if <see cref="IPlayer"/> can modify the <see cref="IResidence"/>.
         /// </summary>
         /// <remarks>
         /// This is valid for both community and individual residences.
         /// </remarks>
-        public bool CanModifyResidence(Player player)
+        public bool CanModifyResidence(IPlayer player)
         {
             switch (Type)
             {
                 case ResidenceType.Community:
                 {
-                    Community community = player.GuildManager.GetGuild<Community>(GuildType.Community);
+                    ICommunity community = player.GuildManager.GetGuild<ICommunity>(GuildType.Community);
                     if (community == null)
                         return false;
 
-                    GuildMember member = community.GetMember(player.CharacterId);
+                    IGuildMember member = community.GetMember(player.CharacterId);
                     if (member == null)
                         return false;
 
@@ -646,44 +645,44 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Return all <see cref="Plot"/>'s for the <see cref="Residence"/>.
+        /// Return all <see cref="IPlot"/>'s for the <see cref="IResidence"/>.
         /// </summary>
-        public IEnumerable<Plot> GetPlots()
+        public IEnumerable<IPlot> GetPlots()
         {
             return plots;
         }
 
         /// <summary>
-        /// Return all <see cref="Decor"/> for the <see cref="Residence"/>.
+        /// Return all <see cref="IDecor"/> for the <see cref="IResidence"/>.
         /// </summary>
-        public IEnumerable<Decor> GetDecor()
+        public IEnumerable<IDecor> GetDecor()
         {
             return decors.Values;
         }
 
         /// <summary>
-        /// Return all <see cref="Decor"/> placed in the world for the <see cref="Residence"/>.
+        /// Return all <see cref="IDecor"/> placed in the world for the <see cref="IResidence"/>.
         /// </summary>
-        public IEnumerable<Decor> GetPlacedDecor()
+        public IEnumerable<IDecor> GetPlacedDecor()
         {
-            foreach (Decor decor in decors.Values)
+            foreach (IDecor decor in decors.Values)
                 if (decor.Type != DecorType.Crate)
                     yield return decor;
         }
 
         /// <summary>
-        /// Return <see cref="Decor"/> with the supplied id.
+        /// Return <see cref="IDecor"/> with the supplied id.
         /// </summary>
-        public Decor GetDecor(ulong decorId)
+        public IDecor GetDecor(ulong decorId)
         {
-            decors.TryGetValue(decorId, out Decor decor);
+            decors.TryGetValue(decorId, out IDecor decor);
             return decor;
         }
 
         /// <summary>
-        /// Create a new <see cref="Decor"/> from supplied <see cref="HousingDecorInfoEntry"/> for <see cref="Residence"/>.
+        /// Create a new <see cref="IDecor"/> from supplied <see cref="HousingDecorInfoEntry"/> for <see cref="IResidence"/>.
         /// </summary>
-        public Decor DecorCreate(HousingDecorInfoEntry entry)
+        public IDecor DecorCreate(HousingDecorInfoEntry entry)
         {
             var decor = new Decor(this, GlobalResidenceManager.Instance.NextDecorId, entry);
             decors.Add(decor.DecorId, decor);
@@ -691,12 +690,12 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Create a new <see cref="Decor"/> from an existing <see cref="Decor"/>.
+        /// Create a new <see cref="IDecor"/> from an existing <see cref="IDecor"/>.
         /// </summary>
         /// <remarks>
-        /// Copies all data from the source <see cref="Decor"/> with a new id.
+        /// Copies all data from the source <see cref="IDecor"/> with a new id.
         /// </remarks>
-        public Decor DecorCopy(Decor decor)
+        public IDecor DecorCopy(IDecor decor)
         {
             var newDecor = new Decor(this, decor, GlobalResidenceManager.Instance.NextDecorId);
             decors.Add(newDecor.DecorId, newDecor);
@@ -704,29 +703,29 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Remove existing <see cref="Decor"/> from the <see cref="Residence"/>.
+        /// Remove existing <see cref="IDecor"/> from the <see cref="IResidence"/>.
         /// </summary>
         /// <remarks>
-        /// This does not queue the <see cref="Decor"/> for deletion from the database.
-        /// This is intended to be used for <see cref="Decor"/> that has yet to be saved to the database.
+        /// This does not queue the <see cref="IDecor"/> for deletion from the database.
+        /// This is intended to be used for <see cref="IDecor"/> that has yet to be saved to the database.
         /// </remarks>
-        public void DecorRemove(Decor decor)
+        public void DecorRemove(IDecor decor)
         {
             decors.Remove(decor.DecorId);
         }
 
         /// <summary>
-        /// Return <see cref="Plot"/> at the supplied index.
+        /// Return <see cref="IPlot"/> at the supplied index.
         /// </summary>
-        public Plot GetPlot(byte plotIndex)
+        public IPlot GetPlot(byte plotIndex)
         {
             return plots.FirstOrDefault(i => i.Index == plotIndex);
         }
 
         /// <summary>
-        /// Return <see cref="Plot"/> that matches the supploed Plot Info ID.
+        /// Return <see cref="IPlot"/> that matches the supploed Plot Info ID.
         /// </summary>
-        public Plot GetPlot(uint plotInfoId)
+        public IPlot GetPlot(uint plotInfoId)
         {
             return plots.FirstOrDefault(i => i.PlotInfoEntry.Id == plotInfoId);
         }

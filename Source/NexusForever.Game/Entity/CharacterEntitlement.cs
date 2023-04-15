@@ -1,30 +1,32 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Entity
 {
-    public class CharacterEntitlement : Entitlement, ISaveCharacter
+    public class CharacterEntitlement : Entitlement.Entitlement, ICharacterEntitlement
     {
-        private readonly ulong characterId;
+        private readonly IPlayer player;
 
         /// <summary>
-        /// Create a new <see cref="CharacterEntitlement"/> from an existing database model.
+        /// Create a new <see cref="ICharacterEntitlement"/> from an existing database model.
         /// </summary>
-        public CharacterEntitlement(CharacterEntitlementModel model, EntitlementEntry entry)
-            : base(entry, model.Amount, false)
+        public CharacterEntitlement(IPlayer player, CharacterEntitlementModel model, EntitlementEntry entry)
+            : base(entry, model.Amount)
         {
-            characterId = model.Id;
+            this.player = player;
         }
 
         /// <summary>
-        /// Create a new <see cref="CharacterEntitlement"/> from supplied <see cref="EntitlementEntry"/> and value.
+        /// Create a new <see cref="ICharacterEntitlement"/> from supplied <see cref="EntitlementEntry"/> and value.
         /// </summary>
-        public CharacterEntitlement(ulong characterId, EntitlementEntry entry, uint value)
-            : base(entry, value, true)
+        public CharacterEntitlement(IPlayer player, EntitlementEntry entry, uint value)
+            : base(entry, value)
         {
-            this.characterId = characterId;
+            this.player = player;
         }
 
         public void Save(CharacterContext context)
@@ -34,7 +36,7 @@ namespace NexusForever.Game.Entity
 
             var model = new CharacterEntitlementModel
             {
-                Id            = characterId,
+                Id            = player.CharacterId,
                 EntitlementId = (byte)Type,
                 Amount        = amount
             };
@@ -48,6 +50,15 @@ namespace NexusForever.Game.Entity
             }
 
             saveMask = SaveMask.None;
+        }
+
+        public ServerEntitlement Build()
+        {
+            return new ServerEntitlement
+            {
+                Entitlement = Type,
+                Count       = Amount
+            };
         }
     }
 }

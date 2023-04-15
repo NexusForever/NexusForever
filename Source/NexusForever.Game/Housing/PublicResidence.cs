@@ -1,6 +1,8 @@
-﻿namespace NexusForever.Game.Housing
+﻿using NexusForever.Game.Abstract.Housing;
+
+namespace NexusForever.Game.Housing
 {
-    public class PublicResidence
+    public class PublicResidence : IPublicResidence
     {
         public ulong ResidenceId { get; init; }
         public string Owner { get; init; }

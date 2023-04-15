@@ -1,8 +1,9 @@
-﻿using NexusForever.Game.Static.Guild;
+﻿using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Static.Guild;
 
 namespace NexusForever.Game.Guild
 {
-    public class GuildResultInfo
+    public class GuildResultInfo : IGuildResultInfo
     {
         public GuildResult Result { get; set; }
         public ulong GuildId { get; set; }

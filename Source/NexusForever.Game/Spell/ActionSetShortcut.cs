@@ -2,11 +2,12 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Spell
 {
-    public class ActionSetShortcut : ISaveCharacter
+    public class ActionSetShortcut : IActionSetShortcut
     {
         public enum ShortcutSaveMask
         {
@@ -60,12 +61,12 @@ namespace NexusForever.Game.Spell
         private byte tier;
 
         /// <summary>
-        /// Returns if <see cref="ActionSetShortcut"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IActionSetShortcut"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & ShortcutSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="ActionSetShortcut"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IActionSetShortcut"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & ShortcutSaveMask.Delete) != 0;
 
@@ -73,7 +74,7 @@ namespace NexusForever.Game.Spell
         private readonly ActionSet actionSet;
 
         /// <summary>
-        /// Create a new <see cref="ActionSetShortcut"/> from an existing database model.
+        /// Create a new <see cref="IActionSetShortcut"/> from an existing database model.
         /// </summary>
         public ActionSetShortcut(ActionSet actionSet, CharacterActionSetShortcutModel model)
         {
@@ -85,7 +86,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Create a new <see cref="ActionSetShortcut"/>.
+        /// Create a new <see cref="IActionSetShortcut"/>.
         /// </summary>
         public ActionSetShortcut(ActionSet actionSet, UILocation location, ShortcutType shortcutType, uint objectId, byte tier)
         {
@@ -155,7 +156,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Enqueue or dequeue <see cref="ActionSetShortcut"/> to be deleted from the database.
+        /// Enqueue or dequeue <see cref="IActionSetShortcut"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool set)
         {

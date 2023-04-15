@@ -1,8 +1,11 @@
-﻿using NexusForever.Game.CharacterCache;
+﻿using NexusForever.Game.Abstract.Character;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Character;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.TextFilter;
-using NexusForever.Game.TextFilter;
+using NexusForever.Game.Text.Filter;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Guild
@@ -10,9 +13,9 @@ namespace NexusForever.Game.Guild
     public partial class GuildBase
     {
         [GuildOperationHandler(GuildOperation.Disband)]
-        private GuildResultInfo GuildOperationDisband(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationDisband(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildResultInfo GetResult()
+            IGuildResultInfo GetResult()
             {
                 if (member.Rank.Index != 0)
                     return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
@@ -20,7 +23,7 @@ namespace NexusForever.Game.Guild
                 return CanDisbandGuild();
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
                 DisbandGuild();
 
@@ -28,9 +31,9 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.EditPlayerNote)]
-        private GuildResultInfo GuildOperationEditPlayerNote(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationEditPlayerNote(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildResultInfo GetResult()
+            IGuildResultInfo GetResult()
             {
                 if (!TextFilterManager.Instance.IsTextValid(operation.TextValue)
                     || !TextFilterManager.Instance.IsTextValid(operation.TextValue, UserText.GuildMemberNote))
@@ -39,7 +42,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
                 member.Note = operation.TextValue;
@@ -50,16 +53,16 @@ namespace NexusForever.Game.Guild
         }        
 
         [GuildOperationHandler(GuildOperation.InitGuildWindow)]
-        private void GuildOperationInitGuildWindow(GuildMember member, Player player, ClientGuildOperation operation)
+        private void GuildOperationInitGuildWindow(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
             // Probably want to send roster update
         }
 
         [GuildOperationHandler(GuildOperation.MemberDemote)]
-        private GuildResultInfo GuildOperationMemberDemote(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationMemberDemote(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildMember targetMember = null;
-            GuildResultInfo GetResult()
+            IGuildMember targetMember = null;
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.ChangeMemberRank))
                     return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
@@ -77,10 +80,10 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
-                GuildRank newRank = GetDemotedRank(targetMember.Rank.Index);
+                IGuildRank newRank = GetDemotedRank(targetMember.Rank.Index);
                 MemberChangeRank(targetMember, newRank);
 
                 AnnounceGuildMemberChange(targetMember);
@@ -91,10 +94,10 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.MemberPromote)]
-        private GuildResultInfo GuildOperationMemberPromote(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationMemberPromote(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildMember targetMember = null;
-            GuildResultInfo GetResult()
+            IGuildMember targetMember = null;
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.ChangeMemberRank))
                     return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
@@ -109,10 +112,10 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
-                GuildRank newRank = GetPromotedRank(targetMember.Rank.Index);
+                IGuildRank newRank = GetPromotedRank(targetMember.Rank.Index);
                 MemberChangeRank(targetMember, newRank);
 
                 AnnounceGuildMemberChange(targetMember);
@@ -123,22 +126,22 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.MemberInvite)]
-        private GuildResultInfo GuildOperationMemberInvite(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationMemberInvite(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            Player target = null;
-            GuildResultInfo GetResult()
+            IPlayer target = null;
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.Invite))
                     return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
 
-                target = CharacterManager.Instance.GetPlayer(operation.TextValue);
+                target = PlayerManager.Instance.GetPlayer(operation.TextValue);
                 if (target == null)
                     return new GuildResultInfo(GuildResult.UnknownCharacter, referenceString: operation.TextValue);
 
                 return target.GuildManager.CanInviteToGuild(Id);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result != GuildResult.Success)
                 return info;
 
@@ -147,10 +150,10 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.MemberRemove)]
-        private GuildResultInfo GuildOperationMemberRemove(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationMemberRemove(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildMember targetMember = null;
-            GuildResultInfo GetResult()
+            IGuildMember targetMember = null;
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.Kick))
                     return new GuildResultInfo(GuildResult.RankLacksRankRenamePermission);
@@ -165,26 +168,26 @@ namespace NexusForever.Game.Guild
                 return CanLeaveGuild(targetMember);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
                 // if the player is online handle through the local manager otherwise directly in the guild
-                ICharacter targetCharacter = CharacterManager.Instance.GetCharacterInfo(targetMember.CharacterId);
-                if (targetCharacter is Player targetPlayer)
+                IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(targetMember.CharacterId);
+                if (targetPlayer != null)
                     targetPlayer.GuildManager.LeaveGuild(Id, GuildResult.KickedYou);
                 else
                     LeaveGuild(targetMember);
 
-                AnnounceGuildResult(GuildResult.KickedMember, referenceText: targetCharacter.Name);
+                AnnounceGuildResult(GuildResult.KickedMember, referenceText: targetPlayer.Name);
             }
 
             return info;
         }
 
         [GuildOperationHandler(GuildOperation.MemberQuit)]
-        private GuildResultInfo GuildOperationMemberQuit(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationMemberQuit(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildResultInfo info = CanLeaveGuild(member);
+            IGuildResultInfo info = CanLeaveGuild(member);
             if (info.Result == GuildResult.Success)
             {
                 player.GuildManager.LeaveGuild(Id, GuildResult.YouQuit);
@@ -195,9 +198,9 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.RankAdd)]
-        private GuildResultInfo GuildOperationRankAdd(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationRankAdd(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildResultInfo GetResult()
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.CreateAndRemoveRank))
                     return new GuildResultInfo(GuildResult.RankLacksRankRenamePermission);
@@ -217,7 +220,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
                 AddRank((byte)operation.Rank, operation.TextValue, (GuildRankPermission)operation.Data.UInt32Data);
@@ -229,10 +232,10 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.RankDelete)]
-        private GuildResultInfo GuildOperationRankDelete(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationRankDelete(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildRank rank = null;
-            GuildResultInfo GetResult()
+            IGuildRank rank = null;
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.CreateAndRemoveRank))
                     return new GuildResultInfo(GuildResult.RankLacksRankRenamePermission);
@@ -253,7 +256,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
                 RemoveRank((byte)operation.Rank);
@@ -265,10 +268,10 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.RankRename)]
-        private GuildResultInfo GuildOperationRankRename(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationRankRename(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildRank rank = null;
-            GuildResultInfo GetResult()
+            IGuildRank rank = null;
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.RenameRank))
                     return new GuildResultInfo(GuildResult.RankLacksRankRenamePermission);
@@ -290,7 +293,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
                 rank.Name = operation.TextValue;
@@ -302,10 +305,10 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.RankPermissions)]
-        private GuildResultInfo GuildOperationRankPermissions(GuildMember member, Player player, ClientGuildOperation operation)
+        private IGuildResultInfo GuildOperationRankPermissions(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
-            GuildRank rank = null;
-            GuildResultInfo GetResult()
+            IGuildRank rank = null;
+            IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.EditLowerRankPermissions))
                     return new GuildResultInfo(GuildResult.RankLacksRankRenamePermission);
@@ -322,7 +325,7 @@ namespace NexusForever.Game.Guild
                 return new GuildResultInfo(GuildResult.Success);
             }
 
-            GuildResultInfo info = GetResult();
+            IGuildResultInfo info = GetResult();
             if (info.Result == GuildResult.Success)
             {
                 // TODO: research why disabled needs to be removed
@@ -337,13 +340,13 @@ namespace NexusForever.Game.Guild
         }
 
         [GuildOperationHandler(GuildOperation.RosterRequest)]
-        private void GuildOperationRosterRequest(GuildMember member, Player player, ClientGuildOperation operation)
+        private void GuildOperationRosterRequest(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
             SendGuildRoster(player.Session);
         }
 
         [GuildOperationHandler(GuildOperation.SetNameplateAffiliation)]
-        private void GuildOperationSetNameplateAffiliation(GuildMember member, Player player, ClientGuildOperation operation)
+        private void GuildOperationSetNameplateAffiliation(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
             player.GuildManager.UpdateGuildAffiliation(Id);
         }

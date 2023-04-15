@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 using NexusForever.Cryptography;
-using NexusForever.Database.Auth;
 using NexusForever.Database;
+using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
+using NexusForever.Game.Abstract.Server;
 using NexusForever.Game.Server;
 using NexusForever.Network.Auth.Model;
 using NexusForever.Network.Auth.Static;
@@ -43,7 +44,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 }
 
                 // TODO: might want to make this smarter in the future, eg: select a server the user has characters on
-                ServerInfo server = ServerManager.Instance.Servers.FirstOrDefault(s => s.IsOnline);
+                IServerInfo server = ServerManager.Instance.Servers.FirstOrDefault(s => s.IsOnline);
                 if (server == null)
                 {
                     SendServerAuthDenied(NpLoginResult.NoRealmsAvailableAtThisTime);
@@ -63,7 +64,9 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                 });
 
                 byte[] sessionKey = RandomProvider.GetBytes(16u);
-                session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<AuthDatabase>().UpdateAccountSessionKey(account, Convert.ToHexString(sessionKey)),
+
+                account.SessionKey = Convert.ToHexString(sessionKey);
+                session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<AuthDatabase>().UpdateAccountSessionKey(account.Id, account.SessionKey),
                     () =>
                 {
                     session.EnqueueMessageEncrypted(new ServerRealmInfo

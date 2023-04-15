@@ -1,27 +1,28 @@
 ﻿using NexusForever.Database.Character.Model;
-using NexusForever.Game.Housing;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Social;
 
 namespace NexusForever.Game.Guild
 {
-    public partial class Community : GuildChat
+    public partial class Community : GuildChat, ICommunity
     {
         public override uint MaxMembers => 20u;
 
-        public Residence Residence { get; set; }
+        public IResidence Residence { get; set; }
 
         /// <summary>
-        /// Create a new <see cref="Community"/> using <see cref="GuildModel"/>
+        /// Create a new <see cref="ICommunity"/> using <see cref="GuildModel"/>
         /// </summary>
-        public Community(GuildModel baseModel) 
+        public Community(GuildModel baseModel)
             : base(baseModel)
         {
             InitialiseChatChannels(ChatChannelType.Community, null);
         }
 
         /// <summary>
-        /// Create a new <see cref="Community"/> using the supplied parameters.
+        /// Create a new <see cref="ICommunity"/> using the supplied parameters.
         /// </summary>
         public Community(string name, string leaderRankName, string councilRankName, string memberRankName)
             : base(GuildType.Community, name, leaderRankName, councilRankName, memberRankName)
@@ -30,7 +31,7 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
-        /// Set <see cref="Community"/> privacy level.
+        /// Set <see cref="ICommunity"/> privacy level.
         /// </summary>
         public void SetCommunityPrivate(bool enabled)
         {

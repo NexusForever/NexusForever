@@ -1,6 +1,5 @@
 ﻿using System;
 using NexusForever.Game;
-using NexusForever.Game.Network;
 using NexusForever.Game.Social;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;

@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Spell
 {
-    public class ActionSetAmp : ISaveCharacter
+    public class ActionSetAmp : IActionSetAmp
     {
         public enum AmpSaveMask
         {
@@ -17,12 +18,12 @@ namespace NexusForever.Game.Spell
         public EldanAugmentationEntry Entry { get; set; }
 
         /// <summary>
-        /// Returns if <see cref="ActionSetAmp"/> is enqueued to be saved to the database.
+        /// Returns if <see cref="IActionSetAmp"/> is enqueued to be saved to the database.
         /// </summary>
         public bool PendingCreate => (saveMask & AmpSaveMask.Create) != 0;
 
         /// <summary>
-        /// Returns if <see cref="ActionSetAmp"/> is enqueued to be deleted from the database.
+        /// Returns if <see cref="IActionSetAmp"/> is enqueued to be deleted from the database.
         /// </summary>
         public bool PendingDelete => (saveMask & AmpSaveMask.Delete) != 0;
 
@@ -30,7 +31,7 @@ namespace NexusForever.Game.Spell
         private readonly ActionSet actionSet;
 
         /// <summary>
-        /// Create a new <see cref="ActionSetAmp"/> from supplied <see cref="EldanAugmentationEntry"/>.
+        /// Create a new <see cref="IActionSetAmp"/> from supplied <see cref="EldanAugmentationEntry"/>.
         /// </summary>
         public ActionSetAmp(ActionSet actionSet, EldanAugmentationEntry entry, bool isDirty)
         {
@@ -62,7 +63,7 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Enqueue or dequeue <see cref="ActionSetAmp"/> to be deleted from the database.
+        /// Enqueue or dequeue <see cref="IActionSetAmp"/> to be deleted from the database.
         /// </summary>
         public void EnqueueDelete(bool set)
         {

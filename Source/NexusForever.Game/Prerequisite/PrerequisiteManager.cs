@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Prerequisite;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -9,11 +10,11 @@ using NLog;
 
 namespace NexusForever.Game.Prerequisite
 {
-    public sealed partial class PrerequisiteManager : Singleton<PrerequisiteManager>
+    public sealed partial class PrerequisiteManager : Singleton<PrerequisiteManager>, IPrerequisiteManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private delegate bool PrerequisiteCheckDelegate(Player player, PrerequisiteComparison comparison, uint value, uint objectId);
+        private delegate bool PrerequisiteCheckDelegate(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId);
         private ImmutableDictionary<PrerequisiteType, PrerequisiteCheckDelegate> prerequisiteCheckHandlers;
 
         private PrerequisiteManager()
@@ -40,9 +41,9 @@ namespace NexusForever.Game.Prerequisite
         }
 
         /// <summary>
-        /// Checks if <see cref="Player"/> meets supplied prerequisite.
+        /// Checks if <see cref="IPlayer"/> meets supplied prerequisite.
         /// </summary>
-        public bool Meets(Player player, uint prerequisiteId)
+        public bool Meets(IPlayer player, uint prerequisiteId)
         {
             PrerequisiteEntry entry = GameTableManager.Instance.Prerequisite.GetEntry(prerequisiteId);
             if (entry == null)
@@ -60,7 +61,7 @@ namespace NexusForever.Game.Prerequisite
             }
         }
 
-        private bool MeetsEvaluateAnd(Player player, uint prerequisiteId, PrerequisiteEntry entry)
+        private bool MeetsEvaluateAnd(IPlayer player, uint prerequisiteId, PrerequisiteEntry entry)
         {
             for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
             {
@@ -79,7 +80,7 @@ namespace NexusForever.Game.Prerequisite
             return true;
         }
 
-        private bool MeetsEvaluateOr(Player player, uint prerequisiteId, PrerequisiteEntry entry)
+        private bool MeetsEvaluateOr(IPlayer player, uint prerequisiteId, PrerequisiteEntry entry)
         {
             for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
             {
@@ -96,7 +97,7 @@ namespace NexusForever.Game.Prerequisite
             return false;
         }
 
-        private bool Meets(Player player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId)
+        private bool Meets(IPlayer player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             if (!prerequisiteCheckHandlers.TryGetValue(type, out PrerequisiteCheckDelegate handler))
             {

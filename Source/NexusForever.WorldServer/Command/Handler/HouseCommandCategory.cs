@@ -1,8 +1,10 @@
 ﻿using System.Text;
 using NexusForever.Game;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Text.Search;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
@@ -11,7 +13,7 @@ using NexusForever.WorldServer.Command.Static;
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.House, "A collection of commands to modify housing residences.", "house")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class HouseCommandCategory : CommandCategory
     {
         [Command(Permission.HouseDecor, "A collection of commands to modify decor in housing residences.", "decor")]
@@ -33,7 +35,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                context.GetTargetOrInvoker<Player>().ResidenceManager.DecorCreate(entry, quantity.Value);
+                context.GetTargetOrInvoker<IPlayer>().ResidenceManager.DecorCreate(entry, quantity.Value);
             }
 
             [Command(Permission.HouseDecorLookup, "Returns a list of decor ids that match the supplied name.", "lookup")]
@@ -61,14 +63,14 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("", ParameterFlags.Optional)]
             string name)
         {
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (!target.CanTeleport())
             {
                 context.SendMessage("You have a pending teleport! Please wait to use this command.");
                 return;
             }
 
-            Residence residence = GlobalResidenceManager.Instance.GetResidenceByOwner(name ?? target.Name);
+            IResidence residence = GlobalResidenceManager.Instance.GetResidenceByOwner(name ?? target.Name);
             if (residence == null)
             {
                 if (name == null)
@@ -80,7 +82,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 }
             }
 
-            ResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(residence.PropertyInfoId);
+            IResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(residence.PropertyInfoId);
             target.Rotation = entrance.Rotation.ToEulerDegrees();
             target.TeleportTo(entrance.Entry, entrance.Position, residence.Parent?.Id ?? residence.Id);
         }

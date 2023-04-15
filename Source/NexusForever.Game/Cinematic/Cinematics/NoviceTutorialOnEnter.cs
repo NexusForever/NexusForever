@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
@@ -105,7 +106,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
 
             foreach (uint actor in actorCreatures)
             {
-                AddActor(new Actor(actor, 6, initialAngle, initialPosition), new List<VisualEffect>
+                AddActor(new Actor(actor, 6, initialAngle, initialPosition), new List<IVisualEffect>
                 {
                     new VisualEffect(45237)
                 });
@@ -130,13 +131,13 @@ namespace NexusForever.Game.Cinematic.Cinematics
             uint factionHead = Player.Faction1 == Faction.Dominion ? ACTOR_ARTEMIS : ACTOR_DORIAN;
             uint factionHolo = Player.Faction1 == Faction.Dominion ? ACTOR_ARTEMIS_HOLO : ACTOR_DORIAN_HOLO;
 
-            AddActor(new Actor(factionHead, 6, initialAngle, initialPosition), new List<VisualEffect>
+            AddActor(new Actor(factionHead, 6, initialAngle, initialPosition), new List<IVisualEffect>
                 {
                     new VisualEffect(45237)
                 });
 
             Actor holoActor = new Actor(factionHolo, 6, initialAngle, initialPosition);
-            AddActor(holoActor, new List<VisualEffect>
+            AddActor(holoActor, new List<IVisualEffect>
                 {
                     new VisualEffect(45237),
                     new VisualEffect(24490)

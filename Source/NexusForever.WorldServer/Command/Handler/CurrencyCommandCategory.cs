@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Account;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Command.Handler
         public class CurrencyAccountCommandCategory : CommandCategory
         {
             [Command(Permission.CurrencyAccountAdd, "Add currency to account.", "add")]
-            [CommandTarget(typeof(Player))]
+            [CommandTarget(typeof(IPlayer))]
             public void HandleCurrencyAccountAdd(ICommandContext context,
                 [Parameter("Account currency id to grant.", ParameterFlags.None, typeof(EnumParameterConverter<AccountCurrencyType>))]
                 AccountCurrencyType currencyId,
@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                context.GetTargetOrInvoker<Player>().Session.AccountCurrencyManager.CurrencyAddAmount(currencyId, amount);
+                context.GetTargetOrInvoker<IPlayer>().Account.CurrencyManager.CurrencyAddAmount(currencyId, amount);
             }
 
             [Command(Permission.CurrencyAccountList, "List all account currency types", "list")]
@@ -47,7 +47,7 @@ namespace NexusForever.WorldServer.Command.Handler
         public class CurrencyCharacterCommandCategory : CommandCategory
         {
             [Command(Permission.CurrencyCharacterAdd, "Add currency to character.", "add")]
-            [CommandTarget(typeof(Player))]
+            [CommandTarget(typeof(IPlayer))]
             public void HandleCurrencyCharacterAdd(ICommandContext context,
                 [Parameter("Currency id to grant.", ParameterFlags.None, typeof(EnumParameterConverter<CurrencyType>))]
                 CurrencyType currencyId,
@@ -60,7 +60,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                context.GetTargetOrInvoker<Player>().CurrencyManager.CurrencyAddAmount(currencyId, amount, true);
+                context.GetTargetOrInvoker<IPlayer>().CurrencyManager.CurrencyAddAmount(currencyId, amount, true);
             }
 
             [Command(Permission.CurrencyCharacterList, "List all currency types.", "list")]

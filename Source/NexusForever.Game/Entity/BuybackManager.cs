@@ -1,15 +1,14 @@
-﻿using NexusForever.Game.Network;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared;
 using NetworkBuybackItem = NexusForever.Network.World.Message.Model.Shared.BuybackItem;
 
 namespace NexusForever.Game.Entity
 {
-    public sealed class BuybackManager : Singleton<BuybackManager>, IUpdate
+    public sealed class BuybackManager : Singleton<BuybackManager>, IBuybackManager
     {
-        private readonly Dictionary<ulong /*CharacterId*/, BuybackInfo> buybackInfo = new();
+        private readonly Dictionary<ulong /*CharacterId*/, IBuybackInfo> buybackInfo = new();
 
         private BuybackManager()
         {
@@ -17,9 +16,9 @@ namespace NexusForever.Game.Entity
 
         public void Update(double lastTick)
         {
-            foreach ((ulong characterId, BuybackInfo info) in buybackInfo)
+            foreach ((ulong characterId, IBuybackInfo info) in buybackInfo)
             {
-                foreach (BuybackItem buybackItem in info.ToArray())
+                foreach (IBuybackItem buybackItem in info.ToArray())
                 {
                     buybackItem.Update(lastTick);
                     if (!buybackItem.HasExpired)
@@ -27,9 +26,8 @@ namespace NexusForever.Game.Entity
 
                     info.RemoveItem(buybackItem.UniqueId);
 
-                    // TODO: probably need a better way to handle this
-                    WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(s => s.Player?.CharacterId == characterId);
-                    session?.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
+                    IPlayer player = PlayerManager.Instance.GetPlayer(characterId);
+                    player.Session?.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
                     {
                         UniqueId = buybackItem.UniqueId
                     });
@@ -38,17 +36,17 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Return stored <see cref="BuybackItem"/> for <see cref="Player"/> with unique id.
+        /// Return stored <see cref="IBuybackItem"/> for <see cref="IPlayer"/> with unique id.
         /// </summary>
-        public BuybackItem GetItem(Player player, uint uniqueId)
+        public IBuybackItem GetItem(IPlayer player, uint uniqueId)
         {
-            return buybackInfo.TryGetValue(player.CharacterId, out BuybackInfo info) ? info.GetItem(uniqueId) : null;
+            return buybackInfo.TryGetValue(player.CharacterId, out IBuybackInfo info) ? info.GetItem(uniqueId) : null;
         }
 
         /// <summary>
-        /// Create a new <see cref="BuybackItem"/> from sold <see cref="Item"/> for <see cref="Player"/>.
+        /// Create a new <see cref="IBuybackItem"/> from sold <see cref="IItem"/> for <see cref="IPlayer"/>.
         /// </summary>
-        public void AddItem(Player player, Item item, uint quantity, List<(CurrencyType CurrencyTypeId, ulong CurrencyAmount)> currencyChange)
+        public void AddItem(IPlayer player, IItem item, uint quantity, List<(CurrencyType CurrencyTypeId, ulong CurrencyAmount)> currencyChange)
         {
             if (!buybackInfo.ContainsKey(player.CharacterId))
                 buybackInfo.Add(player.CharacterId, new BuybackInfo());
@@ -58,7 +56,7 @@ namespace NexusForever.Game.Entity
             var networkBuybackItem = new NetworkBuybackItem
             {
                 UniqueId = uniqueId,
-                ItemId   = item.Info.Id,
+                ItemId = item.Info.Id,
                 Quantity = quantity
             };
 
@@ -78,11 +76,11 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Remove stored <see cref="BuybackItem"/> with supplied unique id for <see cref="Player"/>.
+        /// Remove stored <see cref="IBuybackItem"/> with supplied unique id for <see cref="IPlayer"/>.
         /// </summary>
-        public void RemoveItem(Player player, BuybackItem item)
+        public void RemoveItem(IPlayer player, IBuybackItem item)
         {
-            if (!buybackInfo.TryGetValue(player.CharacterId, out BuybackInfo info))
+            if (!buybackInfo.TryGetValue(player.CharacterId, out IBuybackInfo info))
                 return;
 
             info.RemoveItem(item.UniqueId);
@@ -96,34 +94,16 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Send <see cref="ServerBuybackItems"/> for <see cref="Player"/>.
+        /// Send <see cref="ServerBuybackItems"/> for <see cref="IPlayer"/>.
         /// </summary>
-        public void SendBuybackItems(Player player)
+        public void SendBuybackItems(IPlayer player)
         {
-            if (!buybackInfo.TryGetValue(player.CharacterId, out BuybackInfo info))
+            if (!buybackInfo.TryGetValue(player.CharacterId, out IBuybackInfo info))
                 return;
 
             var serverBuybackItems = new ServerBuybackItems();
-            foreach (BuybackItem buybackItem in info)
-            {
-                var networkBuybackItem = new NetworkBuybackItem
-                {
-                    UniqueId = buybackItem.UniqueId,
-                    ItemId   = buybackItem.Item.Info.Id,
-                    Quantity = buybackItem.Quantity,
-                };
-
-                for (int i = 0; i < networkBuybackItem.CurrencyTypeId.Length; i++)
-                {
-                    if (i >= buybackItem.CurrencyChange.Count)
-                        continue;
-
-                    networkBuybackItem.CurrencyTypeId[i] = buybackItem.CurrencyChange[i].CurrencyTypeId;
-                    networkBuybackItem.CurrencyAmount[i] = buybackItem.CurrencyChange[i].CurrencyAmount;
-                }
-
-                serverBuybackItems.BuybackItems.Add(networkBuybackItem);
-            }
+            foreach (IBuybackItem buybackItem in info)
+                serverBuybackItems.BuybackItems.Add(buybackItem.Build());
 
             player.Session.EnqueueMessageEncrypted(serverBuybackItems);
         }

@@ -1,10 +1,11 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract.Housing;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Housing
 {
-    public class ResidenceEntrance
+    public class ResidenceEntrance : IResidenceEntrance
     {
         public WorldEntry Entry { get; }
         public Vector3 Position { get; }
