@@ -6,7 +6,7 @@ using NexusForever.Shared;
 
 namespace NexusForever.Network.World.Social;
 
-public class ChatFormatManager : Singleton<ChatFormatManager>
+public sealed class ChatFormatManager : Singleton<ChatFormatManager>, IChatFormatManager
 {
     private delegate IChatFormat ChatFormatFactoryDelegate();
     private ImmutableDictionary<ChatFormatType, ChatFormatFactoryDelegate> chatFormatFactories;

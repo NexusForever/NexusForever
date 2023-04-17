@@ -1,12 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
-using Microsoft.Extensions.Logging;
+using NexusForever.Database;
+using NexusForever.Network;
+using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
+using NexusForever.StsServer.Network;
+using NexusForever.StsServer.Network.Message;
 using NLog;
 using NLog.Extensions.Logging;
 
@@ -26,20 +31,25 @@ namespace NexusForever.StsServer
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            SharedConfiguration.Instance.Initialise<StsServerConfiguration>("StsServer.json");
-
             IHostBuilder builder = new HostBuilder()
                 .ConfigureLogging(lb =>
                 {
-                    // only applicable to logging done through host
-                    // other logging is still done directly though NLog
-                    lb.ClearProviders()
-                        .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace)
-                        .AddNLog();
+                    lb.AddNLog();
+                })
+                .ConfigureAppConfiguration(cb =>
+                {
+                    cb.AddJsonFile("StsServer.json", false);
                 })
                 .ConfigureServices(sc =>
                 {
                     sc.AddHostedService<HostedService>();
+
+                    sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
+
+                    sc.AddDatabase();
+                    sc.AddSingletonLegacy<IMessageManager, MessageManager>();
+                    sc.AddSingletonLegacy<INetworkManager<StsSession>, NetworkManager<StsSession>>();
+                    sc.AddShared();
                 })
                 .UseWindowsService()
                 .UseSystemd();

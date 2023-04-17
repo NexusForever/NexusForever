@@ -1,6 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Game;
@@ -33,20 +35,33 @@ using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Handler;
-using NLog;
 
 namespace NexusForever.WorldServer
 {
     public class HostedService : IHostedService
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private readonly ILogger log;
+        private readonly IWorldManager worldManager;
+
+        public HostedService(
+            IServiceProvider serviceProvider,
+            ILogger<IHostedService> log,
+            IWorldManager worldManager)
+        {
+            LegacyServiceProvider.Provider = serviceProvider;
+
+            this.log          = log;
+            this.worldManager = worldManager;
+        }
 
         /// <summary>
         /// Start <see cref="WorldServer"/> and any related resources.
         /// </summary>
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            log.Info("Starting...");
+            log.LogInformation("Starting...");
+
+            SharedConfiguration.Instance.Initialise<WorldServerConfiguration>();
 
             RealmContext.Instance.Initialise();
 
@@ -91,7 +106,7 @@ namespace NexusForever.WorldServer
             LoginQueueManager.Instance.Initialise(CharacterHandler.SendCharacterListPackets);
 
             // initialise world after all assets have loaded but before any network or command handlers might be invoked
-            WorldManager.Instance.Initialise(lastTick =>
+            worldManager.Initialise(lastTick =>
             {
                 // NetworkManager must be first and MapManager must come before everything else
                 NetworkManager<WorldSession>.Instance.Update(lastTick);
@@ -115,7 +130,7 @@ namespace NexusForever.WorldServer
 
             CommandManager.Instance.Initialise();
 
-            log.Info("Started!");
+            log.LogInformation("Started!");
             return Task.CompletedTask;
         }
 
@@ -124,7 +139,7 @@ namespace NexusForever.WorldServer
         /// </summary>
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            log.Info("Stopping...");
+            log.LogInformation("Stopping...");
 
             // stop network manager listening for incoming connections
             // it is still possible for incoming packets to be parsed though won't be handled once the world thread is stopped
@@ -138,7 +153,7 @@ namespace NexusForever.WorldServer
 
             // stop world manager processing the world thread
             // at this point no incoming packets will be handled
-            WorldManager.Instance.Shutdown();
+            worldManager.Shutdown();
 
             // save residences, guilds and players to the database
             GlobalResidenceManager.Instance.Shutdown();
@@ -147,7 +162,7 @@ namespace NexusForever.WorldServer
             foreach (WorldSession worldSession in NetworkManager<WorldSession>.Instance)
                 worldSession.Player?.SaveDirect();
 
-            log.Info("Stopped!");
+            log.LogInformation("Stopped!");
             return Task.CompletedTask;
         }
     }

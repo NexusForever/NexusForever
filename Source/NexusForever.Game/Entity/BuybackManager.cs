@@ -10,10 +10,6 @@ namespace NexusForever.Game.Entity
     {
         private readonly Dictionary<ulong /*CharacterId*/, IBuybackInfo> buybackInfo = new();
 
-        private BuybackManager()
-        {
-        }
-
         public void Update(double lastTick)
         {
             foreach ((ulong characterId, IBuybackInfo info) in buybackInfo)

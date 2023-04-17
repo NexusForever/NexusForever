@@ -27,10 +27,6 @@ namespace NexusForever.Game.Server
 
         private volatile CancellationTokenSource cancellationToken;
 
-        private ServerManager()
-        {
-        }
-
         /// <summary>
         /// Initialise <see cref="IServerManager"/> and any related resources.
         /// </summary>

@@ -5,7 +5,7 @@ using NLog;
 
 namespace NexusForever.Shared
 {
-    public sealed class WorldManager : Singleton<WorldManager>
+    public sealed class WorldManager : IWorldManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -14,12 +14,8 @@ namespace NexusForever.Shared
 
         private volatile CancellationTokenSource cancellationToken;
 
-        private WorldManager()
-        {
-        }
-
         /// <summary>
-        /// Initialise <see cref="WorldManager"/> and any related resources.
+        /// Initialise <see cref="IWorldManager"/> and any related resources.
         /// </summary>
         public void Initialise(Action<double> updateAction)
         {
@@ -59,7 +55,7 @@ namespace NexusForever.Shared
         }
 
         /// <summary>
-        /// Request shutdown of <see cref="WorldManager"/> and any related resources.
+        /// Request shutdown of <see cref="IWorldManager"/> and any related resources.
         /// </summary>
         public void Shutdown()
         {

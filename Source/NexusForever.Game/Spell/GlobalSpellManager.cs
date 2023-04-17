@@ -37,10 +37,6 @@ namespace NexusForever.Game.Spell
         private ImmutableDictionary<uint, ImmutableList<Spell4EffectsEntry>> spellEffectEntries;
         private ImmutableDictionary<uint, ImmutableList<TelegraphDamageEntry>> spellTelegraphEntries;
 
-        private GlobalSpellManager()
-        {
-        }
-
         public void Initialise()
         {
             CacheSpellEntries();

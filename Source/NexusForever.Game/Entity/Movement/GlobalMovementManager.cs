@@ -9,14 +9,10 @@ using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity.Movement
 {
-    public sealed class GlobalMovementManager : Singleton<GlobalMovementManager>, IGlobalMovementManager
+    public class GlobalMovementManager : Singleton<GlobalMovementManager>, IGlobalMovementManager
     {
         private delegate ISplineMode EntitySplineModeFactoryDelegate();
         private static ImmutableDictionary<SplineMode, EntitySplineModeFactoryDelegate> splineModeFactories;
-
-        private GlobalMovementManager()
-        {
-        }
 
         public void Initialise()
         {

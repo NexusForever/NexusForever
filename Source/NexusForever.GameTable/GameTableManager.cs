@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using NexusForever.Game.Static;
 using NexusForever.GameTable.Model;
@@ -8,8 +7,7 @@ using NLog;
 
 namespace NexusForever.GameTable
 {
-    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
-    public sealed class GameTableManager : Singleton<GameTableManager>
+    public sealed class GameTableManager : Singleton<GameTableManager>, IGameTableManager
     {
         private const int minimumThreads = 2;
         private const int maximumThreads = 16;
@@ -667,10 +665,6 @@ namespace NexusForever.GameTable
         public TextTable TextEnglish { get; private set; }
         [GameData("de-DE.bin")]
         public TextTable TextGerman { get; private set; }
-
-        private GameTableManager()
-        {
-        }
 
         public void Initialise()
         {

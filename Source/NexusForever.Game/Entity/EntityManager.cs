@@ -26,10 +26,6 @@ namespace NexusForever.Game.Entity
 
         private ImmutableDictionary<Stat, StatAttribute> statAttributes;
 
-        private EntityManager()
-        {
-        }
-
         public void Initialise()
         {
             InitialiseEntityFactories();

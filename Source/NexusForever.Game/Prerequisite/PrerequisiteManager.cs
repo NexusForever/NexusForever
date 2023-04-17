@@ -17,10 +17,6 @@ namespace NexusForever.Game.Prerequisite
         private delegate bool PrerequisiteCheckDelegate(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId);
         private ImmutableDictionary<PrerequisiteType, PrerequisiteCheckDelegate> prerequisiteCheckHandlers;
 
-        private PrerequisiteManager()
-        {
-        }
-
         public void Initialise()
         {
             var builder = ImmutableDictionary.CreateBuilder<PrerequisiteType, PrerequisiteCheckDelegate>();

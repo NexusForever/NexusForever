@@ -18,10 +18,6 @@ namespace NexusForever.Game
 
         private ImmutableDictionary<ulong, Disable> disables;
 
-        private DisableManager()
-        {
-        }
-
         public void Initialise()
         {
             var builder = ImmutableDictionary.CreateBuilder<ulong, Disable>();

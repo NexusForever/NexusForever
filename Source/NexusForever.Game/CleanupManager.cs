@@ -6,16 +6,12 @@ using NLog;
 
 namespace NexusForever.Game
 {
-    public class CleanupManager : Singleton<CleanupManager>, ICleanupManager
+    public sealed class CleanupManager : Singleton<CleanupManager>, ICleanupManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<ulong, IPlayer> pending = new();
         private readonly HashSet<uint> lockedAccounts = new();
-
-        private CleanupManager()
-        {
-        }
 
         /// <summary>
         /// Start tracking supplied <see cref="IPlayer"/> for pending cleanup.

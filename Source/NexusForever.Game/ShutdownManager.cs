@@ -9,7 +9,7 @@ using NexusForever.Shared.Game;
 
 namespace NexusForever.Game
 {
-    public class ShutdownManager : Singleton<ShutdownManager>, IShutdownManager
+    public sealed class ShutdownManager : Singleton<ShutdownManager>, IShutdownManager
     {
         private UpdateTimer shutdownTick;
         private TimeSpan? shutdownSpan;
@@ -20,10 +20,6 @@ namespace NexusForever.Game
         /// Returns if realm is currently pending a shutdown.
         /// </summary>
         public bool IsShutdownPending => shutdownTick != null;
-
-        private ShutdownManager()
-        {
-        }
 
         public void Initialise(Action callback)
         {

@@ -16,10 +16,6 @@ namespace NexusForever.Game.RBAC
         private ImmutableDictionary<Permission, IRBACPermission> permissions;
         private ImmutableDictionary<Role, IRBACRole> roles;
 
-        private RBACManager()
-        {
-        }
-
         public void Initialise()
         {
             log.Info("Initialising RBAC permissions...");

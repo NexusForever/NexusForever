@@ -46,10 +46,6 @@ namespace NexusForever.Game.Housing
 
         private double timeToSave = SaveDuration;
 
-        private GlobalResidenceManager()
-        {
-        }
-
         /// <summary>
         /// Initialise <see cref="IGlobalResidenceManager"/> and any related resources.
         /// </summary>

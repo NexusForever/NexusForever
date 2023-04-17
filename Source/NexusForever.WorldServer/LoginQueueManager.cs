@@ -12,7 +12,7 @@ using NLog;
 
 namespace NexusForever.Game
 {
-    public class LoginQueueManager : Singleton<LoginQueueManager>, IUpdate
+    public sealed class LoginQueueManager : Singleton<LoginQueueManager>, ILoginQueueManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -37,10 +37,6 @@ namespace NexusForever.Game
 
         private uint maximumPlayers = SharedConfiguration.Instance.Get<RealmConfig>().MaxPlayers;
         private UpdateTimer queueCheck = new(TimeSpan.FromSeconds(5));
-
-        private LoginQueueManager()
-        {
-        }
 
         public void Initialise(Action<WorldSession> callback)
         {

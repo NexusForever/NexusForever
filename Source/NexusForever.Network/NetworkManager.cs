@@ -7,7 +7,7 @@ using NLog;
 
 namespace NexusForever.Network
 {
-    public sealed class NetworkManager<T> : Singleton<NetworkManager<T>>, IEnumerable<T>, IUpdate where T : NetworkSession, new()
+    public sealed class NetworkManager<T> : Singleton<NetworkManager<T>>, INetworkManager<T> where T : INetworkSession, new()
     {
         private static readonly ILogger log = LogManager.GetLogger($"NetworkManager<{typeof(T).Name}>");
 
@@ -19,12 +19,8 @@ namespace NexusForever.Network
 
         private readonly Dictionary<string, T> sessions = new();
 
-        private NetworkManager()
-        {
-        }
-
         /// <summary>
-        /// Initialise <see cref="NetworkManager{T}"/> and any related resources.
+        /// Initialise <see cref="INetworkManager{T}"/> and any related resources.
         /// </summary>
         public void Initialise(NetworkConfig config)
         {
@@ -38,7 +34,7 @@ namespace NexusForever.Network
         }
 
         /// <summary>
-        /// Shutdown <see cref="NetworkManager{T}"/> and any related resources.
+        /// Shutdown <see cref="INetworkManager{T}"/> and any related resources.
         /// </summary>
         public void Shutdown()
         {
@@ -114,7 +110,7 @@ namespace NexusForever.Network
         /// </summary>
         public T GetSession(string id)
         {
-            return sessions.TryGetValue(id, out T session) ? session : null;
+            return sessions.TryGetValue(id, out T session) ? session : default;
         }
 
         /// <summary>

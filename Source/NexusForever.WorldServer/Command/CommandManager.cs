@@ -16,7 +16,7 @@ using NLog;
 
 namespace NexusForever.WorldServer.Command
 {
-    public sealed class CommandManager : Singleton<CommandManager>, IUpdate
+    public sealed class CommandManager : Singleton<CommandManager>, ICommandManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -33,12 +33,8 @@ namespace NexusForever.WorldServer.Command
 
         private volatile CancellationTokenSource cancellationToken;
 
-        private CommandManager()
-        {
-        }
-
         /// <summary>
-        /// Initialise <see cref="CommandManager"/> and any related resources.
+        /// Initialise <see cref="ICommandManager"/> and any related resources.
         /// </summary>
         public void Initialise()
         {
@@ -195,7 +191,7 @@ namespace NexusForever.WorldServer.Command
         }
 
         /// <summary>
-        /// Shutdown <see cref="CommandManager"/> and any related resources.
+        /// Shutdown <see cref="ICommandManager"/> and any related resources.
         /// </summary>
         public void Shutdown()
         {

@@ -31,10 +31,6 @@ namespace NexusForever.Game.Quest
         private ImmutableDictionary<ushort, ImmutableList<ICommunicatorMessage>> communicatorQuestStore;
         private ImmutableDictionary<(ushort /*questId*/, QuestState), ImmutableList<ICommunicatorMessage>> communicatorQuestStateTriggerStore;
 
-        private GlobalQuestManager()
-        {
-        }
-
         public void Initialise()
         {
             Stopwatch sw = Stopwatch.StartNew();

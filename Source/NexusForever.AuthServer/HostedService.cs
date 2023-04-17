@@ -1,6 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NexusForever.AuthServer.Network;
 using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
@@ -10,27 +12,40 @@ using NexusForever.Network.Configuration.Model;
 using NexusForever.Network.Message;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NLog;
 
 namespace NexusForever.AuthServer
 {
     public class HostedService : IHostedService
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private readonly ILogger log;
+        private readonly IWorldManager worldManager;
+
+        public HostedService(
+            IServiceProvider serviceProvider,
+            ILogger<IHostedService> log,
+            IWorldManager worldManager)
+        {
+            LegacyServiceProvider.Provider = serviceProvider;
+
+            this.log          = log;
+            this.worldManager = worldManager;
+        }
 
         /// <summary>
         /// Start <see cref="AuthServer"/> and any related resources.
         /// </summary>
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            log.Info("Starting...");
+            log.LogInformation("Starting...");
+
+            SharedConfiguration.Instance.Initialise<AuthServerConfiguration>();
 
             DatabaseManager.Instance.Initialise(SharedConfiguration.Instance.Get<DatabaseConfig>());
 
             ServerManager.Instance.Initialise();
 
             // initialise world after all assets have loaded but before any network or command handlers might be invoked
-            WorldManager.Instance.Initialise(lastTick =>
+            worldManager.Initialise(lastTick =>
             {
                 NetworkManager<AuthSession>.Instance.Update(lastTick);
             });
@@ -39,7 +54,7 @@ namespace NexusForever.AuthServer
             MessageManager.Instance.Initialise();
             NetworkManager<AuthSession>.Instance.Initialise(SharedConfiguration.Instance.Get<NetworkConfig>());
 
-            log.Info("Started!");
+            log.LogInformation("Started!");
             return Task.CompletedTask;
         }
 
@@ -48,7 +63,7 @@ namespace NexusForever.AuthServer
         /// </summary>
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            log.Info("Stopping...");
+            log.LogInformation("Stopping...");
 
             // stop network manager listening for incoming connections
             // it is still possible for incoming packets to be parsed though won't be handled once the world thread is stopped
@@ -59,9 +74,9 @@ namespace NexusForever.AuthServer
 
             // stop world manager processing the world thread
             // at this point no incoming packets will be handled
-            WorldManager.Instance.Shutdown();
+            worldManager.Shutdown();
 
-            log.Info("Stopped!");
+            log.LogInformation("Stopped!");
             return Task.CompletedTask;
         }
     }

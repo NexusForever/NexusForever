@@ -5,15 +5,11 @@ using NexusForever.Shared;
 
 namespace NexusForever.Network.World.Entity
 {
-    public sealed class EntityCommandManager : Singleton<EntityCommandManager>
+    public sealed class EntityCommandManager : Singleton<EntityCommandManager>, IEntityCommandManager
     {
         private delegate IEntityCommandModel EntityCommandFactoryDelegate();
         private ImmutableDictionary<EntityCommand, EntityCommandFactoryDelegate> entityCommandFactories;
         private ImmutableDictionary<Type, EntityCommand> entityCommands;
-
-        private EntityCommandManager()
-        {
-        }
 
         public void Initialise()
         {

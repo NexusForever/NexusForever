@@ -11,14 +11,10 @@ namespace NexusForever.Game.Text.Filter
     /// <summary>
     /// A manager to validate client text, this is based on client class.
     /// </summary>
-    public class TextFilterManager : Singleton<TextFilterManager>, ITextFilterManager
+    public sealed class TextFilterManager : Singleton<TextFilterManager>, ITextFilterManager
     {
         private ImmutableDictionary<Language, TextFilterLanguage> textFilters;
         private ImmutableDictionary<UserText, UserTextAttribute> userTextAttributes;
-
-        private TextFilterManager()
-        {
-        }
 
         public void Initialise()
         {

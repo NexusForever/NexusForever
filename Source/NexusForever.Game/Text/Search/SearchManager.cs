@@ -17,10 +17,6 @@ namespace NexusForever.Game.Text.Search
 
         private ImmutableDictionary<Language, ITextReverseIndex> reverseIndexDictionary;
 
-        private SearchManager()
-        {
-        }
-
         public void Initialise()
         {
             log.Info("Creating reverse text lookups.");

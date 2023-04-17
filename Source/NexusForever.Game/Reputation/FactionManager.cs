@@ -8,15 +8,11 @@ using NLog;
 
 namespace NexusForever.Game.Reputation
 {
-    public class FactionManager : Singleton<FactionManager>, IFactionManager
+    public sealed class FactionManager : Singleton<FactionManager>, IFactionManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private ImmutableDictionary<Faction, IFactionNode> nodes;
-
-        private FactionManager()
-        {
-        }
 
         public void Initialise()
         {

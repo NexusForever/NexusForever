@@ -7,9 +7,9 @@ using NLog;
 
 namespace NexusForever.Network.Message
 {
-    public delegate void MessageHandlerDelegate(NetworkSession session, IReadable message);
+    public delegate void MessageHandlerDelegate(INetworkSession session, IReadable message);
 
-    public sealed class MessageManager : Singleton<MessageManager>
+    public sealed class MessageManager : Singleton<MessageManager>, IMessageManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -20,12 +20,8 @@ namespace NexusForever.Network.Message
 
         private ImmutableDictionary<GameMessageOpcode, MessageHandlerDelegate> clientMessageHandlers;
 
-        private MessageManager()
-        {
-        }
-
         /// <summary>
-        /// Initialise <see cref="MessageManager"/> and any related resources.
+        /// Initialise <see cref="IMessageManager"/> and any related resources.
         /// </summary>
         public void Initialise()
         {

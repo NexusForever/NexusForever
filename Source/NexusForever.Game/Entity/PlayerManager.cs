@@ -7,7 +7,7 @@ using NLog;
 
 namespace NexusForever.Game.Entity
 {
-    public class PlayerManager : Singleton<PlayerManager>, IPlayerManager
+    public sealed class PlayerManager : Singleton<PlayerManager>, IPlayerManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 

@@ -14,7 +14,7 @@ namespace NexusForever.StsServer.Network.Message
 {
     public delegate void MessageHandlerDelegate(NetworkSession session, IReadable message);
 
-    public sealed class MessageManager : Singleton<MessageManager>
+    public sealed class MessageManager : Singleton<MessageManager>, IMessageManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -22,10 +22,6 @@ namespace NexusForever.StsServer.Network.Message
         private ImmutableDictionary<string, MessageFactoryDelegate> clientMessageFactories;
 
         private ImmutableDictionary<string, MessageHandlerInfo> clientMessageHandlers;
-
-        private MessageManager()
-        {
-        }
 
         public void Initialise()
         {

@@ -1,11 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
-using Microsoft.Extensions.Logging;
+using NexusForever.AuthServer.Network;
+using NexusForever.Database;
+using NexusForever.Game;
+using NexusForever.Network;
+using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
@@ -26,20 +31,25 @@ namespace NexusForever.AuthServer
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            SharedConfiguration.Instance.Initialise<AuthServerConfiguration>("AuthServer.json");
-
             IHostBuilder builder = new HostBuilder()
                 .ConfigureLogging(lb =>
                 {
-                    // only applicable to logging done through host
-                    // other logging is still done directly though NLog
-                    lb.ClearProviders()
-                        .SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace)
-                        .AddNLog();
+                    lb.AddNLog();
+                })
+                .ConfigureAppConfiguration(cb =>
+                {
+                    cb.AddJsonFile("AuthServer.json", false);
                 })
                 .ConfigureServices(sc =>
                 {
                     sc.AddHostedService<HostedService>();
+
+                    sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
+
+                    sc.AddDatabase();
+                    sc.AddGame();
+                    sc.AddNetwork<AuthSession>();
+                    sc.AddShared();
                 })
                 .UseWindowsService()
                 .UseSystemd();

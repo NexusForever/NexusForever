@@ -15,10 +15,6 @@ namespace NexusForever.Game.Achievement
         private readonly Dictionary<AchievementType, List<IAchievementInfo>> characterAchievements = new();
         private readonly Dictionary<AchievementType, List<IAchievementInfo>> guildAchievements = new();
 
-        private GlobalAchievementManager()
-        {
-        }
-
         public void Initialise()
         {
             DateTime start = DateTime.UtcNow;

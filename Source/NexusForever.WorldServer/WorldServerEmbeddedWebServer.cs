@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using NexusForever.Shared.Configuration;
-using NLog.Web;
 
 namespace NexusForever.WorldServer
 {
@@ -9,18 +6,9 @@ namespace NexusForever.WorldServer
     {
         public static IWebHostBuilder Build(IWebHostBuilder builder)
         {
-            builder.UseConfiguration(SharedConfiguration.Instance.Configuration)
-                .UseStartup<WorldServerStartup>()
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(LogLevel.Trace);
-                })
-                .UseNLog()
+            return builder.UseStartup<WorldServerStartup>()
                 .UseUrls("http://localhost:5000")
                 .PreferHostingUrls(false); // Can override in XXX.json
-
-            return builder;
         }
     }
 }

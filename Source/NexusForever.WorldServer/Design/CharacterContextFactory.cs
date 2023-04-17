@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using NexusForever.Database.Character;
 using NexusForever.Database.Configuration.Model;
-using NexusForever.Shared.Configuration;
 
 namespace NexusForever.WorldServer.Design
 {
@@ -9,8 +9,16 @@ namespace NexusForever.WorldServer.Design
     {
         public CharacterContext CreateDbContext(string[] args)
         {
-            SharedConfiguration.Instance.Initialise<WorldServerConfiguration>("WorldServer.json");
-            return new CharacterContext(SharedConfiguration.Instance.Get<DatabaseConfig>().Character);
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .AddJsonFile("WorldServer.json")
+                .Build();
+
+            IConnectionString connectionString = configuration
+                .GetSection("Database")
+                .Get<DatabaseConfig>()
+                .Character;
+
+            return new CharacterContext(connectionString);
         }
     }
 }

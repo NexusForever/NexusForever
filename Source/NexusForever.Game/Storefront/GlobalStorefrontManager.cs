@@ -27,10 +27,6 @@ namespace NexusForever.Game.Storefront
 
         private ImmutableDictionary</*offerId*/uint, /*offerGroupId*/uint> offerGroupLookup;
 
-        private GlobalStorefrontManager()
-        {
-        }
-
         public void Initialise()
         {
             InitialiseStoreCategories();

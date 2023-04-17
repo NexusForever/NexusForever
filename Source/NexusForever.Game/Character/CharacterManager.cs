@@ -33,10 +33,6 @@ namespace NexusForever.Game.Character
         private readonly Dictionary<ulong, ICharacter> characters = new();
         private readonly Dictionary<string, ulong> characterNameToId = new(StringComparer.OrdinalIgnoreCase);
 
-        private CharacterManager()
-        {
-        }
-
         /// <summary>
         /// Called to Initialise the <see cref="CharacterManager"/> at server start
         /// </summary>

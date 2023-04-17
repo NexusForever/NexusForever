@@ -1,13 +1,12 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using NexusForever.Shared.Game.Events;
 using NexusForever.Network.Static;
-using NexusForever.Shared;
+using NexusForever.Shared.Game.Events;
 using NLog;
 
 namespace NexusForever.Network
 {
-    public abstract class NetworkSession : IUpdate, INetworkSession
+    public abstract class NetworkSession : INetworkSession
     {
         protected static readonly ILogger log = LogManager.GetCurrentClassLogger();
 

@@ -38,10 +38,6 @@ namespace NexusForever.Game.Social
 
         private readonly UpdateTimer saveTimer = new(60d);
 
-        private GlobalChatManager()
-        {
-        }
-
         public void Initialise()
         {
             foreach (ChatChannelType type in Enum.GetValues(typeof(ChatChannelType)))

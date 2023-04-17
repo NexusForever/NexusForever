@@ -13,7 +13,7 @@ using NLog;
 
 namespace NexusForever.Game
 {
-    public class ItemManager : Singleton<ItemManager>, IItemManager
+    public sealed class ItemManager : Singleton<ItemManager>, IItemManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -26,10 +26,6 @@ namespace NexusForever.Game
 
         private ImmutableDictionary<uint, IItemInfo> item;
         private ImmutableDictionary<ItemSlot, ImmutableList<EquippedItem>> equippedItemSlots;
-
-        private ItemManager()
-        {
-        }
 
         public void Initialise()
         {

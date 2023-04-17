@@ -32,10 +32,6 @@ namespace NexusForever.Game
 
         private ImmutableDictionary<AccountTier, ImmutableList<RewardPropertyPremiumModifierEntry>> rewardPropertiesByTier;
 
-        private AssetManager()
-        {
-        }
-
         public void Initialise()
         {
             nextMailId = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextMailId() + 1ul;

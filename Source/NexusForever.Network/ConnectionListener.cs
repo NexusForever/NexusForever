@@ -4,14 +4,14 @@ using NLog;
 
 namespace NexusForever.Network
 {
-    public class ConnectionListener<T> where T : NetworkSession, new()
+    public class ConnectionListener<T> where T : INetworkSession, new()
     {
         private static readonly ILogger log = LogManager.GetLogger($"ConnectionListener<{typeof(T).Name}>");
 
         public delegate void NewSessionEvent(T socket);
 
         /// <summary>
-        /// Raised on <see cref="NetworkSession"/> creation for a new client.
+        /// Raised on <see cref="INetworkSession"/> creation for a new client.
         /// </summary>
         public event NewSessionEvent OnNewSession;
 

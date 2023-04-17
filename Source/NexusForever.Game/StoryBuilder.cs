@@ -8,7 +8,7 @@ using NexusForever.Shared;
 
 namespace NexusForever.Game
 {
-    public class StoryBuilder : Singleton<StoryBuilder>, IStoryBuilder
+    public sealed class StoryBuilder : Singleton<StoryBuilder>, IStoryBuilder
     {
         /// <summary>
         /// Sends a story panel to the <see cref="IPlayer"/> based on the provided <see cref="StoryPanelEntry"/>.

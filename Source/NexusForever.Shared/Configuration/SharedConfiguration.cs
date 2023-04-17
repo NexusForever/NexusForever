@@ -7,35 +7,22 @@ using NLog;
 
 namespace NexusForever.Shared.Configuration
 {
-    public class SharedConfiguration : Singleton<SharedConfiguration>
+    public class SharedConfiguration : Singleton<SharedConfiguration>, ISharedConfiguration
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public IConfiguration Configuration { get; private set; }
+        private readonly IConfiguration configuration;
 
         private ImmutableDictionary<Type, string> binds;
 
-        public void Initialise<T>(string file)
+        public SharedConfiguration(IConfiguration configuration)
         {
-            if (Configuration != null)
-                return;
-
-            InitialiseConfiguration(file);
-            InitialiseBindSections<T>();
+            this.configuration = configuration;
         }
 
-        private void InitialiseConfiguration(string file)
+        public void Initialise<T>()
         {
-            log.Info("Initialising configurations...");
-
-            IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddJsonFile(file, false, true)
-                .AddEnvironmentVariables()
-                .AddCommandLine(Environment.GetCommandLineArgs()
-                    .Skip(1)
-                    .ToArray());
-
-            Configuration = builder.Build();
+            InitialiseBindSections<T>();
         }
 
         /// <summary>
@@ -81,7 +68,7 @@ namespace NexusForever.Shared.Configuration
             if (!binds.TryGetValue(typeof(T), out string key))
                 return default;
 
-            return Configuration.GetSection(key).Get<T>();
+            return configuration.GetSection(key).Get<T>();
         }
     }
 }
