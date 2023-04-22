@@ -18,15 +18,19 @@ namespace NexusForever.MapGenerator
             "en-GB.bin"
         };
 
+        private string outputDir;
+
         private ExtractionManager()
         {
         }
 
-        public void Initialise()
+        public void Initialise(string outputDir)
         {
             log.Info("Extracting GameTables...");
 
-            Directory.CreateDirectory("tbl");
+            this.outputDir = Path.Combine(outputDir, "tbl");
+
+            Directory.CreateDirectory(this.outputDir);
 
             ExtractGameTables();
             ExtractLanguageFiles();
@@ -63,7 +67,7 @@ namespace NexusForever.MapGenerator
         /// </summary>
         private void ExtractFile(Archive archive, IArchiveFileEntry fileEntry)
         {
-            string filePath = Path.Combine("tbl", fileEntry.FileName);
+            string filePath = Path.Combine(outputDir, fileEntry.FileName);
 
             using (Stream archiveStream = archive.OpenFileStream(fileEntry))
             using (FileStream fileStream = File.OpenWrite(filePath))

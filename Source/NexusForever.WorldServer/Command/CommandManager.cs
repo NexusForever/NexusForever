@@ -5,6 +5,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using Microsoft.Extensions.Hosting.Systemd;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
@@ -13,7 +16,7 @@ using NLog;
 
 namespace NexusForever.WorldServer.Command
 {
-    public sealed class CommandManager : Singleton<CommandManager>, IUpdate
+    public sealed class CommandManager : Singleton<CommandManager>, ICommandManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -25,14 +28,26 @@ namespace NexusForever.WorldServer.Command
 
         private readonly ConcurrentQueue<PendingCommand> pendingCommands = new();
 
-        private CommandManager()
-        {
-        }
+        private Thread commandThread;
+        private readonly ManualResetEventSlim waitHandle = new();
 
+        private volatile CancellationTokenSource cancellationToken;
+
+        /// <summary>
+        /// Initialise <see cref="ICommandManager"/> and any related resources.
+        /// </summary>
         public void Initialise()
         {
+            if (cancellationToken != null)
+                throw new InvalidOperationException();
+
+            log.Info("Initialising command mananger...");
+
             BuildConverters();
             InitialiseHandlers();
+
+            if (!WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService())
+                InitialiseCommandThread();
         }
 
         private void BuildConverters()
@@ -126,6 +141,73 @@ namespace NexusForever.WorldServer.Command
             }
 
             handlers = builder.ToImmutable();
+        }
+
+        private void InitialiseCommandThread()
+        {
+            cancellationToken = new CancellationTokenSource();
+
+            commandThread = new Thread(CommandThread);
+            commandThread.Start();
+
+            // wait for command thread to start before continuing
+            waitHandle.Wait();
+        }
+
+        private void CommandThread()
+        {
+            log.Info("Started command thread.");
+            waitHandle.Set();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                Console.Write(">> ");
+
+                // reading console input like this allows for a clean cancel of the thread
+                // using the standard read methods blocks the thread
+                var sb = new StringBuilder();
+                while (true)
+                {
+                    while (!Console.KeyAvailable)
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                            return;
+
+                        Thread.Sleep(100);
+                    }
+
+                    ConsoleKeyInfo cki = Console.ReadKey();
+                    if (cki.Key == ConsoleKey.Enter)
+                        break;
+
+                    sb.Append(cki.KeyChar);
+
+                }
+
+                HandleCommandDelay(new ConsoleCommandContext(), sb.ToString());
+            }
+
+            log.Info("Stopped command thread.");
+        }
+
+        /// <summary>
+        /// Shutdown <see cref="ICommandManager"/> and any related resources.
+        /// </summary>
+        public void Shutdown()
+        {
+            log.Info("Shutting down command manager...");
+
+            // if server is running as a service the command thread is not started
+            // in this case there is no thread to shutdown, just return
+            if (cancellationToken == null)
+                return;
+
+            cancellationToken.Cancel();
+
+            commandThread.Join();
+            commandThread = null;
+
+            cancellationToken = null;
         }
 
         public void Update(double lastTick)

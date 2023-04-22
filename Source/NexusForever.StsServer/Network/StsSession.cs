@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using NexusForever.Cryptography;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Network;
+using NexusForever.Network;
+using NexusForever.Network.Sts;
+using NexusForever.Network.Sts.Model;
+using NexusForever.Shared;
 using NexusForever.StsServer.Network.Message;
-using NexusForever.StsServer.Network.Message.Model;
 using NexusForever.StsServer.Network.Packet;
 
 namespace NexusForever.StsServer.Network

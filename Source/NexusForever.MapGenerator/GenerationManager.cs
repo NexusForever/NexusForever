@@ -6,12 +6,12 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nexus.Archive;
+using NexusForever.GameTable.Model;
+using NexusForever.IO;
+using NexusForever.IO.Area;
+using NexusForever.IO.Map;
 using NexusForever.MapGenerator.GameTable;
-using NexusForever.MapGenerator.IO.Area;
-using NexusForever.MapGenerator.IO.Map;
 using NexusForever.Shared;
-using NexusForever.Shared.GameTable.Model;
-using NexusForever.Shared.IO;
 using NLog;
 
 namespace NexusForever.MapGenerator
@@ -19,16 +19,19 @@ namespace NexusForever.MapGenerator
     public sealed class GenerationManager : Singleton<GenerationManager>
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private string outputDir;
 
         private GenerationManager()
         {
         }
 
-        public void Initialise()
+        public void Initialise(string outputDir)
         {
             log.Info("Generatring base map files...");
 
-            Directory.CreateDirectory("map");
+            this.outputDir = Path.Combine(outputDir, "map");
+
+            Directory.CreateDirectory(this.outputDir);
         }
 
         /// <summary>
@@ -50,8 +53,7 @@ namespace NexusForever.MapGenerator
             foreach (WorldEntry entry in GameTableManager.Instance.World.Entries
                 .Where(e => e.AssetPath != string.Empty)
                 .GroupBy(e => e.AssetPath)
-                .Select(g => g.First())
-                .ToArray())
+                .Select(g => g.First()))
             {
                 if (singleThread)
                     ProcessWorld(entry);
@@ -105,7 +107,7 @@ namespace NexusForever.MapGenerator
 
             // Path.ChangeExtension(mapFile.Asset, "nfmap")
             // ChangeExtension doesn't behave correctly on linux
-            string filePath = Path.Combine("map", $"{mapFile.Asset}.nfmap");
+            string filePath = Path.Combine(outputDir, $"{mapFile.Asset}.nfmap");
 
             using (FileStream stream = File.Create(filePath))
             using (var writer = new BinaryWriter(stream))

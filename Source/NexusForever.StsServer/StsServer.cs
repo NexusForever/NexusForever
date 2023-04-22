@@ -1,13 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using NLog;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Systemd;
+using Microsoft.Extensions.Hosting.WindowsServices;
+using NexusForever.Database;
+using NexusForever.Network;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Network;
 using NexusForever.StsServer.Network;
 using NexusForever.StsServer.Network.Message;
+using NLog;
+using NLog.Extensions.Logging;
 
 namespace NexusForever.StsServer
 {
@@ -19,27 +25,47 @@ namespace NexusForever.StsServer
         private const string Title = "NexusForever: STS Server (RELEASE)";
         #endif
 
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private static readonly NLog.ILogger log = LogManager.GetCurrentClassLogger();
 
         private static void Main()
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            Console.Title = Title;
-            log.Info("Initialising...");
+            IHostBuilder builder = new HostBuilder()
+                .ConfigureLogging(lb =>
+                {
+                    lb.AddNLog();
+                })
+                .ConfigureAppConfiguration(cb =>
+                {
+                    cb.AddJsonFile("StsServer.json", false);
+                })
+                .ConfigureServices(sc =>
+                {
+                    sc.AddHostedService<HostedService>();
 
-            ConfigurationManager<StsServerConfiguration>.Instance.Initialise("StsServer.json");
+                    sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
 
-            DatabaseManager.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Database);
-            MessageManager.Instance.Initialise();
-            NetworkManager<StsSession>.Instance.Initialise(ConfigurationManager<StsServerConfiguration>.Instance.Config.Network);
+                    sc.AddDatabase();
+                    sc.AddSingletonLegacy<IMessageManager, MessageManager>();
+                    sc.AddSingletonLegacy<INetworkManager<StsSession>, NetworkManager<StsSession>>();
+                    sc.AddShared();
+                })
+                .UseWindowsService()
+                .UseSystemd();
 
-            WorldManager.Instance.Initialise(lastTick =>
+            if (!WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService())
+                Console.Title = Title;
+
+            try
             {
-                NetworkManager<StsSession>.Instance.Update(lastTick);
-            });
-
-            log.Info("Ready!");
+                IHost host = builder.Build();
+                host.Run();
+            }
+            catch (Exception e)
+            {
+                log.Fatal(e);
+            }
         }
     }
 }

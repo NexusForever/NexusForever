@@ -1,34 +1,24 @@
 using System;
 using System.IO;
 using System.Reflection;
-using NLog;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Systemd;
+using Microsoft.Extensions.Hosting.WindowsServices;
+using NexusForever.Database;
+using NexusForever.Game;
+using NexusForever.GameTable;
+using NexusForever.Network;
+using NexusForever.Network.World;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Game;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Command;
-using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game.RBAC;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Achievement;
-using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Movement;
-using NexusForever.WorldServer.Game.Entity.Network;
-using NexusForever.WorldServer.Game.Guild;
-using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Map;
-using NexusForever.WorldServer.Game.Prerequisite;
-using NexusForever.WorldServer.Game.Quest;
-using NexusForever.WorldServer.Game.Reputation;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Game.Storefront;
-using NexusForever.WorldServer.Game.TextFilter;
 using NexusForever.WorldServer.Network;
+using NLog;
+using NLog.Web;
 
 namespace NexusForever.WorldServer
 {
@@ -40,95 +30,62 @@ namespace NexusForever.WorldServer
         private const string Title = "NexusForever: World Server (RELEASE)";
         #endif
 
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private static readonly NLog.ILogger log = LogManager.GetCurrentClassLogger();
 
-        /// <summary>
-        /// Internal unique id of the realm.
-        /// </summary>
-        public static ushort RealmId { get; private set; }
+        private static readonly CancellationTokenSource cancellationToken = new();
 
-        /// <summary>
-        /// Realm message of the day that is shown to players on login.
-        /// </summary>
-        public static string RealmMotd { get; set; }
-
-        private static void Main()
+        private static async Task Main()
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            Console.Title = Title;
-            log.Info("Initialising...");
-
-            ConfigurationManager<WorldServerConfiguration>.Instance.Initialise("WorldServer.json");
-            RealmId   = ConfigurationManager<WorldServerConfiguration>.Instance.Config.RealmId;
-            RealmMotd = ConfigurationManager<WorldServerConfiguration>.Instance.Config.MessageOfTheDay;
-
-            DatabaseManager.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Database);
-            DatabaseManager.Instance.Migrate();
-
-            // RBACManager must be initialised before CommandManager
-            RBACManager.Instance.Initialise();
-            CommandManager.Instance.Initialise();
-
-            DisableManager.Instance.Initialise();
-
-            GameTableManager.Instance.Initialise();
-            BaseMapManager.Instance.Initialise();
-            SearchManager.Instance.Initialise();
-            EntityManager.Instance.Initialise();
-            EntityCommandManager.Instance.Initialise();
-            EntityCacheManager.Instance.Initialise();
-            FactionManager.Instance.Initialise();
-            GlobalMovementManager.Instance.Initialise();
-
-            GlobalChatManager.Instance.Initialise(); // must be initialised before guilds
-            GlobalAchievementManager.Instance.Initialise(); // must be initialised before guilds
-            GlobalGuildManager.Instance.Initialise(); // must be initialised before residences
-            CharacterManager.Instance.Initialise(); // must be initialised before residences
-            GlobalResidenceManager.Instance.Initialise();
-            GlobalGuildManager.Instance.ValidateCommunityResidences();
-
-            AssetManager.Instance.Initialise();
-            ItemManager.Instance.Initialise();
-            PrerequisiteManager.Instance.Initialise();
-            GlobalSpellManager.Instance.Initialise();
-            GlobalQuestManager.Instance.Initialise();
-
-            GlobalStorefrontManager.Instance.Initialise();
-            ServerManager.Instance.Initialise(RealmId); 
-
-            MessageManager.Instance.Initialise();
-            NetworkManager<WorldSession>.Instance.Initialise(ConfigurationManager<WorldServerConfiguration>.Instance.Config.Network);
-
-            TextFilterManager.Instance.Initialise();
-
-            WorldManager.Instance.Initialise(lastTick =>
-            {
-                // NetworkManager must be first and MapManager must come before everything else
-                NetworkManager<WorldSession>.Instance.Update(lastTick);
-                MapManager.Instance.Update(lastTick);
-
-                BuybackManager.Instance.Update(lastTick);
-                GlobalQuestManager.Instance.Update(lastTick);
-                GlobalGuildManager.Instance.Update(lastTick);
-                GlobalResidenceManager.Instance.Update(lastTick); // must be after guild update
-                GlobalChatManager.Instance.Update(lastTick);
-
-                // process commands after everything else in the tick has processed
-                CommandManager.Instance.Update(lastTick);
-            });
-
-            using (WorldServerEmbeddedWebServer.Initialise())
-            {
-                log.Info("Ready!");
-
-                while (true)
+            IHostBuilder builder = new HostBuilder()
+                .ConfigureAppConfiguration(cb =>
                 {
-                    Console.Write(">> ");
-                    string line = Console.ReadLine();
-                    CommandManager.Instance.HandleCommandDelay(new ConsoleCommandContext(), line);
-                }
+                    cb.AddJsonFile("WorldServer.json", false);
+                })
+                .ConfigureServices(sc =>
+                {
+                    // register world server service first since it needs to execute before the web host
+                    sc.AddHostedService<HostedService>();
+
+                    sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
+
+                    sc.AddDatabase();
+                    sc.AddGame();
+                    sc.AddGameTable();
+                    sc.AddNetwork<WorldSession>();
+                    sc.AddNetworkWorld();
+                    sc.AddShared();
+                    sc.AddWorld();
+                })
+                .ConfigureWebHostDefaults(wb =>
+                {
+                    WorldServerEmbeddedWebServer.Build(wb);
+                })
+                .UseNLog()
+                .UseWindowsService()
+                .UseSystemd();
+
+            if (!WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService())
+                Console.Title = Title;
+
+            try
+            {
+                var host = builder.Build();
+                await host.RunAsync(cancellationToken.Token);
             }
+            catch (Exception e)
+            {
+                log.Fatal(e);
+            }
+        }
+
+        /// <summary>
+        /// Request shutdown of <see cref="WorldServer"/>.
+        /// </summary>
+        public static void Shutdown()
+        {
+            cancellationToken.Cancel();
         }
     }
 }

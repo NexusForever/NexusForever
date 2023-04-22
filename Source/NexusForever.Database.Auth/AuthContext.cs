@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 
 namespace NexusForever.Database.Auth
 {
@@ -20,9 +20,9 @@ namespace NexusForever.Database.Auth
         public DbSet<ServerModel> Server { get; set; }
         public DbSet<ServerMessageModel> ServerMessage { get; set; }
 
-        private readonly IDatabaseConfig config;
+        private readonly IConnectionString config;
 
-        public AuthContext(IDatabaseConfig config)
+        public AuthContext(IConnectionString config)
         {
             this.config = config;
         }
@@ -30,7 +30,7 @@ namespace NexusForever.Database.Auth
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(config, DatabaseType.Auth);
+                optionsBuilder.UseConfiguration(config);
 
             optionsBuilder.EnableSensitiveDataLogging();
         }
@@ -493,7 +493,7 @@ namespace NexusForever.Database.Auth
                     new PermissionModel
                     {
                         Id   = 41,
-                        Name = "Command: EntitlementAccountAdd"
+                        Name = "Command: EntitlementAdd"
                     },
                     new PermissionModel
                     {
@@ -504,11 +504,6 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 37,
                         Name = "Category: EntitlementCharacter"
-                    },
-                    new PermissionModel
-                    {
-                        Id   = 38,
-                        Name = "Command: EntitlementCharacterAdd"
                     },
                     new PermissionModel
                     {
@@ -882,6 +877,31 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 107,
+                        Name = "Category: RealmShutdown"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 108,
+                        Name = "Command: RealmShutdownStart"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 109,
+                        Name = "Command: RealmShutdownCancel"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 110,
+                        Name = "Command: QuestList"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 111,
+                        Name = "Command: RealmMaxPlayers"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 10000,
                         Name = "Other: InstantLogout"
                     },
@@ -894,6 +914,16 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 10002,
                         Name = "Other: BypassInstanceLimits"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10003,
+                        Name = "Other: GMFlag"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10004,
+                        Name = "Other: EntitlementGrantOther"
                     });
             });
 

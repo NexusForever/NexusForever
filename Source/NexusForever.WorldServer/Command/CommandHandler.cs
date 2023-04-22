@@ -4,11 +4,11 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.RBAC;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command
 {
@@ -59,7 +59,7 @@ namespace NexusForever.WorldServer.Command
             CommandTargetAttribute targetAttribute = method.GetCustomAttribute<CommandTargetAttribute>();
             if (targetAttribute != null)
             {
-                if (!typeof(WorldEntity).IsAssignableFrom(targetAttribute.TargetType))
+                if (!typeof(IWorldEntity).IsAssignableFrom(targetAttribute.TargetType))
                     throw new CommandException($"Target type from CommandTargetAttribute must be assignable from WorldEntity for CommandHandler {string.Join(',', attribute.Commands)}!");
 
                 targetType = targetAttribute.TargetType;

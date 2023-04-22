@@ -1,7 +1,8 @@
-﻿using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Spell;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Spell;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.WorldServer.Command.Context;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -9,7 +10,7 @@ namespace NexusForever.WorldServer.Command.Handler
     public class SpellCommandCategory : CommandCategory
     {
         [Command(Permission.SpellAdd, "Add a base spell to character, optionally supplying the tier.", "add")]
-        [CommandTarget(typeof(Player))]
+        [CommandTarget(typeof(IPlayer))]
         public void HandleSpellAdd(ICommandContext context,
             [Parameter("Spell base id to add to character.")]
             uint spell4BaseId,
@@ -18,25 +19,25 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             tier ??= 1;
 
-            SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
             {
                 context.SendMessage($"Invalid spell base id {spell4BaseId}!");
                 return;
             }
 
-            SpellInfo spellInfo = spellBaseInfo.GetSpellInfo(tier.Value);
+            ISpellInfo spellInfo = spellBaseInfo.GetSpellInfo(tier.Value);
             if (spellInfo == null)
             {
                 context.SendMessage($"Invalid tier {tier.Value} for spell base id {spell4BaseId}!");
                 return;
             }
 
-            context.GetTargetOrInvoker<Player>().SpellManager.AddSpell(spell4BaseId, tier.Value);
+            context.GetTargetOrInvoker<IPlayer>().SpellManager.AddSpell(spell4BaseId, tier.Value);
         }
 
         [Command(Permission.SpellCast, "Cast a base spell for target, optionally supplying the tier.", "cast")]
-        [CommandTarget(typeof(UnitEntity))]
+        [CommandTarget(typeof(IUnitEntity))]
         public void HandleSpellCast(ICommandContext context,
             [Parameter("Spell base id to cast from target.")]
             uint spell4BaseId,
@@ -45,33 +46,33 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             tier ??= 1;
 
-            SpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
             if (spellBaseInfo == null)
             {
                 context.SendMessage($"Invalid spell base id {spell4BaseId}!");
                 return;
             }
 
-            SpellInfo spellInfo = spellBaseInfo.GetSpellInfo(tier.Value);
+            ISpellInfo spellInfo = spellBaseInfo.GetSpellInfo(tier.Value);
             if (spellInfo == null)
             {
                 context.SendMessage($"Invalid tier {tier.Value} for spell base id {spell4BaseId}!");
                 return;
             }
 
-            context.GetTargetOrInvoker<UnitEntity>().CastSpell(spell4BaseId, tier.Value, new SpellParameters
+            context.GetTargetOrInvoker<IUnitEntity>().CastSpell(spell4BaseId, tier.Value, new SpellParameters
             {
                 UserInitiatedSpellCast = false
             });
         }
 
         [Command(Permission.SpellResetCooldown, "Reset a single spell cooldown for character, if no spell if supplied all cooldowns will be reset", "resetcooldown")]
-        [CommandTarget(typeof(Player))]
+        [CommandTarget(typeof(IPlayer))]
         public void HandleSpellResetCooldown(ICommandContext context,
             [Parameter("Spell id to reset cooldown for character.")]
             uint? spell4Id)
         {
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (spell4Id.HasValue)
                 target.SpellManager.SetSpellCooldown(spell4Id.Value, 0d);
             else

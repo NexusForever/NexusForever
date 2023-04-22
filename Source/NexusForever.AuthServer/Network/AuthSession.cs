@@ -1,8 +1,8 @@
 ﻿using System.Net.Sockets;
-using NexusForever.AuthServer.Network.Message.Model;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.Shared.Network.Message.Model;
+using NexusForever.Network;
+using NexusForever.Network.Auth.Model;
+using NexusForever.Network.Message;
+using NexusForever.Network.Message.Model;
 
 namespace NexusForever.AuthServer.Network
 {

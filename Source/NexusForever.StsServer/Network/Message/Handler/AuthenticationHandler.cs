@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using NexusForever.Cryptography;
+using NexusForever.Database;
+using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Shared;
-using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Database;
+using NexusForever.Network.Sts;
+using NexusForever.Network.Sts.Model;
 using NexusForever.Shared.Game.Events;
-using NexusForever.StsServer.Network.Message.Model;
 
 namespace NexusForever.StsServer.Network.Message.Handler
 {
@@ -14,7 +15,7 @@ namespace NexusForever.StsServer.Network.Message.Handler
         [MessageHandler("/Auth/LoginStart", SessionState.Connected)]
         public static void HandleLoginStart(StsSession session, ClientLoginStartMessage loginStart)
         {
-            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.AuthDatabase.GetAccountByEmailAsync(loginStart.LoginName),
+            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(DatabaseManager.Instance.GetDatabase<AuthDatabase>().GetAccountByEmailAsync(loginStart.LoginName),
                 account =>
             {
                 if (account == null)
@@ -25,8 +26,8 @@ namespace NexusForever.StsServer.Network.Message.Handler
 
                 session.Account = account;
 
-                byte[] s = account.S.ToByteArray();
-                byte[] v = account.V.ToByteArray();
+                byte[] s = Convert.FromHexString(account.S);
+                byte[] v = Convert.FromHexString(account.V);
                 session.KeyExchange = new Srp6Provider(loginStart.LoginName, s, v);
 
                 byte[] B = session.KeyExchange.GenerateServerCredentials();
@@ -95,7 +96,9 @@ namespace NexusForever.StsServer.Network.Message.Handler
         public static void HandleRequestGameToken(StsSession session, RequestGameTokenMessage requestGameToken)
         {
             Guid guid = RandomProvider.GetGuid();
-            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.AuthDatabase.UpdateAccountGameToken(session.Account, guid.ToByteArray().ToHexString()),
+
+            session.Account.GameToken = Convert.ToHexString(guid.ToByteArray());
+            session.Events.EnqueueEvent(new TaskEvent(DatabaseManager.Instance.GetDatabase<AuthDatabase>().UpdateAccountGameToken(session.Account.Id, session.Account.GameToken),
                 () =>
             {
                 session.EnqueueMessageOk(new RequestGameTokenResponse

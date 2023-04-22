@@ -2,12 +2,21 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Database.Auth\NexusForever.Database.Auth.csproj" />
+    <ProjectReference Include="..\NexusForever.GameTable\NexusForever.GameTable.csproj" />
+    <ProjectReference Include="..\NexusForever.Game\NexusForever.Game.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.Auth\NexusForever.Network.Auth.csproj" />
   </ItemGroup>
 
   <ItemGroup>

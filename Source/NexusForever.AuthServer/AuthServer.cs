@@ -1,14 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using NLog;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Systemd;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using NexusForever.AuthServer.Network;
+using NexusForever.Database;
+using NexusForever.Game;
+using NexusForever.Network;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Database;
-using NexusForever.Shared.Game;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
+using NLog;
+using NLog.Extensions.Logging;
 
 namespace NexusForever.AuthServer
 {
@@ -20,30 +25,47 @@ namespace NexusForever.AuthServer
         private const string Title = "NexusForever: Authentication Server (RELEASE)";
         #endif
 
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private static readonly NLog.ILogger log = LogManager.GetCurrentClassLogger();
 
         private static void Main()
         {
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
-            Console.Title = Title;
-            log.Info("Initialising...");
+            IHostBuilder builder = new HostBuilder()
+                .ConfigureLogging(lb =>
+                {
+                    lb.AddNLog();
+                })
+                .ConfigureAppConfiguration(cb =>
+                {
+                    cb.AddJsonFile("AuthServer.json", false);
+                })
+                .ConfigureServices(sc =>
+                {
+                    sc.AddHostedService<HostedService>();
 
-            ConfigurationManager<AuthServerConfiguration>.Instance.Initialise("AuthServer.json");
+                    sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
 
-            DatabaseManager.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Database);
+                    sc.AddDatabase();
+                    sc.AddGame();
+                    sc.AddNetwork<AuthSession>();
+                    sc.AddShared();
+                })
+                .UseWindowsService()
+                .UseSystemd();
 
-            ServerManager.Instance.Initialise();
+            if (!WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService())
+                Console.Title = Title;
 
-            MessageManager.Instance.Initialise();
-            NetworkManager<AuthSession>.Instance.Initialise(ConfigurationManager<AuthServerConfiguration>.Instance.Config.Network);
-
-            WorldManager.Instance.Initialise(lastTick =>
+            try
             {
-                NetworkManager<AuthSession>.Instance.Update(lastTick);
-            });
-
-            log.Info("Ready!");
+                IHost host = builder.Build();
+                host.Run();
+            }
+            catch (Exception e)
+            {
+                log.Fatal(e);
+            }
         }
     }
 }

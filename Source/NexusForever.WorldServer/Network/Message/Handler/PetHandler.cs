@@ -1,16 +1,17 @@
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Spell;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class PetHandler
     {
         [MessageHandler(GameMessageOpcode.ClientSummonVanityPet)]
-        public static void HandleClientSummonVanityPet(WorldSession session, ClientSummonVanityPet summonVanityPet)
+        public static void HandleClientSummonVanityPet(IWorldSession session, ClientSummonVanityPet summonVanityPet)
         {
-            CharacterSpell spell = session.Player.SpellManager.GetSpell(summonVanityPet.Spell4BaseId);
+            ICharacterSpell spell = session.Player.SpellManager.GetSpell(summonVanityPet.Spell4BaseId);
             if (spell == null)
                 throw new InvalidPacketValueException();
 
@@ -22,7 +23,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientPetCustomisation)]
-        public static void HandleClientPetCustomisation(WorldSession session, ClientPetCustomisation petcustomisation)
+        public static void HandleClientPetCustomisation(IWorldSession session, ClientPetCustomisation petcustomisation)
         {
             session.Player.PetCustomisationManager.AddCustomisation(petcustomisation.PetType,
                 petcustomisation.PetObjectId,

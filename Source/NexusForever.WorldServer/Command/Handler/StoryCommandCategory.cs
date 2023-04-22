@@ -1,17 +1,17 @@
-﻿using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Story, "A collection of commands to send story content to characters.", "story")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class StoryCommandCategory : CommandCategory
     {
         [Command(Permission.StoryPanel, "Send a story panel to a character.", "panel", "p")]
@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            StoryBuilder.Instance.SendStoryPanel(entry, context.GetTargetOrInvoker<Player>());
+            StoryBuilder.Instance.SendStoryPanel(entry, context.GetTargetOrInvoker<IPlayer>());
         }
 
         [Command(Permission.StoryCommunicator, "Send a story communicator window to a character.", "communicator", "c")]
@@ -52,7 +52,7 @@ namespace NexusForever.WorldServer.Command.Handler
             soundEvent     ??= 0u;
             priority       ??= 0;
 
-            StoryBuilder.Instance.SendStoryCommunicator(textId, creatureId, context.GetTargetOrInvoker<Player>(),
+            StoryBuilder.Instance.SendStoryCommunicator(textId, creatureId, context.GetTargetOrInvoker<IPlayer>(),
                 duration.Value, storyPanelType.Value, windowType.Value, soundEvent.Value, priority.Value);
         }
     }

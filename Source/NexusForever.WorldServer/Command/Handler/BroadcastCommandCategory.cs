@@ -1,11 +1,11 @@
-﻿using NexusForever.Shared.Network;
+﻿using NexusForever.Game.Static.RBAC;
+using NexusForever.Network;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
 using NexusForever.WorldServer.Network;
-using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Message to broadcast.")]
             string message)
         {
-            foreach (WorldSession session in NetworkManager<WorldSession>.Instance.GetSessions())
+            foreach (WorldSession session in NetworkManager<WorldSession>.Instance)
             {
                 session.EnqueueMessageEncrypted(new ServerRealmBroadcast
                 {

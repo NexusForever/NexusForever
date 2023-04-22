@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using NexusForever.Network;
+using NexusForever.Network.Sts;
 using NexusForever.Shared;
 using NLog;
-using NexusForever.Shared.Network;
 
 namespace NexusForever.StsServer.Network.Message
 {
     public delegate void MessageHandlerDelegate(NetworkSession session, IReadable message);
 
-    public sealed class MessageManager : Singleton<MessageManager>
+    public sealed class MessageManager : Singleton<MessageManager>, IMessageManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
@@ -20,10 +22,6 @@ namespace NexusForever.StsServer.Network.Message
         private ImmutableDictionary<string, MessageFactoryDelegate> clientMessageFactories;
 
         private ImmutableDictionary<string, MessageHandlerInfo> clientMessageHandlers;
-
-        private MessageManager()
-        {
-        }
 
         public void Initialise()
         {
@@ -35,7 +33,7 @@ namespace NexusForever.StsServer.Network.Message
         {
             var messageFactories = new Dictionary<string, MessageFactoryDelegate>();
 
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            foreach (Type type in NexusForeverAssemblyHelper.GetAssemblies().SelectMany(a => a.GetTypes()))
             {
                 MessageAttribute attribute = type.GetCustomAttribute<MessageAttribute>();
                 if (attribute == null)
@@ -53,7 +51,7 @@ namespace NexusForever.StsServer.Network.Message
         {
             var messageHandlers = new Dictionary<string, MessageHandlerInfo>();
 
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            foreach (Type type in NexusForeverAssemblyHelper.GetAssemblies().SelectMany(a => a.GetTypes()))
             {
                 foreach (MethodInfo method in type.GetMethods())
                 {

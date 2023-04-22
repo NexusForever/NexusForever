@@ -1,15 +1,16 @@
-﻿using NexusForever.WorldServer.Command.Context;
+﻿using NexusForever.Game.Abstract.Achievement;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Achievement;
+using NexusForever.Game.Static.Achievement;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.Achievement;
-using NexusForever.WorldServer.Game.Achievement.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Achievement, "A collection of commands to manage player achievements.", "achievement")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class AchievementCommandCategory : CommandCategory
     {
         [Command(Permission.AchievementUpdate, "Update achievement criteria for player.", "update")]
@@ -23,7 +24,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Update count for matched criteria.")]
             uint count)
         {
-            Player player = context.GetTargetOrInvoker<Player>();
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
             player.AchievementManager.CheckAchievements(player, type, objectId, objectIdAlt, count);
         }
 
@@ -32,14 +33,14 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Achievement id to grant.")]
             ushort achievementId)
         {
-            AchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(achievementId);
+            IAchievementInfo info = GlobalAchievementManager.Instance.GetAchievement(achievementId);
             if (info == null)
             {
                 context.SendMessage($"Invalid achievement id {achievementId}!");
                 return;
             }
 
-            context.GetTargetOrInvoker<Player>().AchievementManager.GrantAchievement(achievementId);
+            context.GetTargetOrInvoker<IPlayer>().AchievementManager.GrantAchievement(achievementId);
         }
     }
 }

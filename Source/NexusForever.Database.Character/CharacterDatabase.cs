@@ -4,20 +4,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NLog;
 
 namespace NexusForever.Database.Character
 {
-    public class CharacterDatabase
+    [Database(DatabaseType.Character)]
+    public class CharacterDatabase : IDatabase
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly IDatabaseConfig config;
+        private IConnectionString config;
 
-        public CharacterDatabase(IDatabaseConfig config)
+        public void Initialise(IConnectionString connectionString)
         {
-            this.config = config;
+            config = connectionString;
         }
 
         public async Task Save(Action<CharacterContext> action)
@@ -27,17 +28,17 @@ namespace NexusForever.Database.Character
             await context.SaveChangesAsync();
         }
 
-        public async Task Save(ISaveCharacter entity)
+        public async Task Save(IDatabaseCharacter entity)
         {
             await using var context = new CharacterContext(config);
             entity.Save(context);
             await context.SaveChangesAsync();
         }
 
-        public async Task Save(IEnumerable<ISaveCharacter> entities)
+        public async Task Save(IEnumerable<IDatabaseCharacter> entities)
         {
             await using var context = new CharacterContext(config);
-            foreach (ISaveCharacter entity in entities)
+            foreach (IDatabaseCharacter entity in entities)
                 entity.Save(context);
             await context.SaveChangesAsync();
         }
@@ -113,49 +114,37 @@ namespace NexusForever.Database.Character
 
         public async Task<List<CharacterModel>> GetCharacters(uint accountId)
         {
-            await using var context = new CharacterContext(config);
-
-            IQueryable<CharacterModel> query = context.Character.Where(c => c.AccountId == accountId);
-            await query.SelectMany(c => c.Appearance).LoadAsync();
-            await query.SelectMany(c => c.Customisation).LoadAsync();
-            await query.SelectMany(c => c.Item).LoadAsync();
-            await query.SelectMany(c => c.Bone).LoadAsync();
-            await query.SelectMany(c => c.Currency).LoadAsync();
-            await query.SelectMany(c => c.Path).LoadAsync();
-            await query.SelectMany(c => c.CharacterTitle).LoadAsync();
-            await query.SelectMany(c => c.Stat).LoadAsync();
-
-            await query.SelectMany(c => c.Costume)
-                .Include(c => c.CostumeItem)
-                .LoadAsync();
-
-            await query.SelectMany(c => c.PetCustomisation).LoadAsync();
-            await query.SelectMany(c => c.PetFlair).LoadAsync();
-            await query.SelectMany(c => c.Keybinding).LoadAsync();
-            await query.SelectMany(c => c.Spell).LoadAsync();
-            await query.SelectMany(c => c.ActionSetShortcut).LoadAsync();
-            await query.SelectMany(c => c.ActionSetAmp).LoadAsync();
-            await query.SelectMany(c => c.Datacube).LoadAsync();
-
-            await query.SelectMany(c => c.Mail)
-                .Include(c => c.Attachment)
-                .ThenInclude(c => c.Item)
-                .LoadAsync();
-
-            await query.SelectMany(c => c.ZonemapHexgroup).LoadAsync();
-
-            await query.SelectMany(c => c.Quest)
-                .Include(c => c.QuestObjective)
-                .LoadAsync();
-
-            await query.SelectMany(c => c.Entitlement).LoadAsync();
-            await query.SelectMany(c => c.Achievement).LoadAsync();
-
-            await query.SelectMany(c => c.TradeskillMaterials).LoadAsync();
-
-            await query.SelectMany(c => c.Reputation).LoadAsync();
-
-            return await query.ToListAsync();
+            using var context = new CharacterContext(config);
+            return await context.Character.Where(c => c.AccountId == accountId)
+                .AsSplitQuery()
+                .Include(c => c.Appearance)
+                .Include(c => c.Customisation)
+                .Include(c => c.Item)
+                .Include(c => c.Bone)
+                .Include(c => c.Currency)
+                .Include(c => c.Path)
+                .Include(c => c.CharacterTitle)
+                .Include(c => c.Stat)
+                .Include(c => c.Costume)
+                    .ThenInclude(c => c.CostumeItem)
+                .Include(c => c.PetCustomisation)
+                .Include(c => c.PetFlair)
+                .Include(c => c.Keybinding)
+                .Include(c => c.Spell)
+                .Include(c => c.ActionSetShortcut)
+                .Include(c => c.ActionSetAmp)
+                .Include(c => c.Datacube)
+                .Include(c => c.Mail)
+                    .ThenInclude(c => c.Attachment)
+                        .ThenInclude(c => c.Item)
+                .Include(c => c.ZonemapHexgroup)
+                .Include(c => c.Quest)
+                    .ThenInclude(c => c.QuestObjective)
+                .Include(c => c.Entitlement)
+                .Include(c => c.Achievement)
+                .Include(c => c.TradeskillMaterials)
+                .Include(c => c.Reputation)
+                .ToListAsync();
         }
 
         public bool CharacterNameExists(string characterName)

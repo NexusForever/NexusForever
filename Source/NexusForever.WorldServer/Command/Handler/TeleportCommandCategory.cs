@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using NexusForever.Shared;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
+using NexusForever.Game;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Text.Search;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Teleport, "A collection of commands to manage teleporting characters.", "teleport", "port", "tele")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class TeleportCommandCategory : CommandCategory
     {
         [Command(Permission.TeleportCoordinates, "Teleport to the specified coordinates optionally specifying the world.", "coordinates")]
@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Optional world id for target teleport position.")]
             ushort? worldId)
         {
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (!target.CanTeleport())
             {
                 context.SendMessage("You have a pending teleport! Please wait to use this command.");
@@ -49,7 +49,7 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (!target.CanTeleport())
             {
                 context.SendMessage("You have a pending teleport! Please wait to use this command.");
@@ -66,7 +66,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Name of the zone for target teleport position.")]
             string name)
         {
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (!target.CanTeleport())
             {
                 context.SendMessage("You have a pending teleport! Please wait to use this command.");

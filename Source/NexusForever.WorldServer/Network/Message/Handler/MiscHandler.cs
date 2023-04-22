@@ -1,16 +1,18 @@
 using System;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.CharacterCache;
-using NexusForever.WorldServer.Network.Message.Model;
-using NexusForever.WorldServer.Network.Message.Model.Shared;
+using NexusForever.Game;
+using NexusForever.Game.Abstract.Character;
+using NexusForever.Game.Character;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
     public static class MiscHandler
     {
         [MessageHandler(GameMessageOpcode.ClientPing)]
-        public static void HandlePing(WorldSession session, ClientPing ping)
+        public static void HandlePing(IWorldSession session, ClientPing ping)
         {
             session.Heartbeat.OnHeartbeat();
         }
@@ -19,12 +21,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         /// Handled responses to Player Info Requests.
         /// TODO: Put this in the right place, this is used by Mail & Contacts, at minimum. Probably used by Guilds, Circles, etc. too.
         /// </summary>
-        /// <param name="session"></param>
-        /// <param name="request"></param>
         [MessageHandler(GameMessageOpcode.ClientPlayerInfoRequest)]
-        public static void HandlePlayerInfoRequest(WorldSession session, ClientPlayerInfoRequest request)
+        public static void HandlePlayerInfoRequest(IWorldSession session, ClientPlayerInfoRequest request)
         {
-            ICharacter character = CharacterManager.Instance.GetCharacterInfo(request.Identity.CharacterId);
+            ICharacter character = CharacterManager.Instance.GetCharacter(request.Identity.CharacterId);
             if (character == null)
                 throw new InvalidPacketValueException();
 
@@ -36,32 +36,31 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     ResultCode = 0,
                     Identity = new TargetPlayerIdentity
                     {
-                        RealmId = WorldServer.RealmId,
+                        RealmId = RealmContext.Instance.RealmId,
                         CharacterId = character.CharacterId
                     },
                     Name = character.Name,
                     Faction = character.Faction1
                 },
                 IsClassPathSet = true,
-                Path = character.Path,
+                Path  = character.Path,
                 Class = character.Class,
                 Level = character.Level,
                 IsLastLoggedOnInDaysSet = onlineStatus.HasValue,
                 LastLoggedInDays = onlineStatus.GetValueOrDefault(0f)
             });
-            
         }
 
         [MessageHandler(GameMessageOpcode.ClientToggleWeapons)]
-        public static void HandleWeaponToggle(WorldSession session, ClientToggleWeapons toggleWeapons)
+        public static void HandleWeaponToggle(IWorldSession session, ClientToggleWeapons toggleWeapons)
         {
             session.Player.Sheathed = toggleWeapons.ToggleState;
         }
 
         [MessageHandler(GameMessageOpcode.ClientRandomRollRequest)]
-        public static void HandleRandomRoll(WorldSession session, ClientRandomRollRequest randomRoll)
+        public static void HandleRandomRoll(IWorldSession session, ClientRandomRollRequest randomRoll)
         {
-            if ( randomRoll.MinRandom > randomRoll.MaxRandom)
+            if (randomRoll.MinRandom > randomRoll.MaxRandom)
                 throw new InvalidPacketValueException();
 
             if (randomRoll.MaxRandom > 1000000u)
@@ -71,7 +70,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             {
                 TargetPlayerIdentity = new TargetPlayerIdentity
                 {
-                    RealmId = WorldServer.RealmId,
+                    RealmId = RealmContext.Instance.RealmId,
                     CharacterId = session.Player.CharacterId
                 },
                 MinRandom = randomRoll.MinRandom,
@@ -81,7 +80,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientZoneChange)]
-        public static void HandleClientZoneChange(WorldSession session, ClientZoneChange zoneChange)
+        public static void HandleClientZoneChange(IWorldSession session, ClientZoneChange zoneChange)
         {
         }
 
@@ -91,13 +90,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         /// See 0x732990 in the client for more information.
         /// </summary>
         [MessageHandler(GameMessageOpcode.ClientEnteredWorld)]
-        public static void HandleClientEnteredWorld(WorldSession session, ClientEnteredWorld enteredWorld)
+        public static void HandleClientEnteredWorld(IWorldSession session, ClientEnteredWorld enteredWorld)
         {
             if (!session.Player.IsLoading)
                 throw new InvalidPacketValueException();
 
             session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
             session.Player.IsLoading = false;
+        }
+        
+        [MessageHandler(GameMessageOpcode.ClientCinematicState)]
+        public static void HandleCinematicState(IWorldSession session, ClientCinematicState cinematicState)
+        {
+            session.Player.CinematicManager.HandleClientCinematicState(cinematicState.State);
         }
     }
 }

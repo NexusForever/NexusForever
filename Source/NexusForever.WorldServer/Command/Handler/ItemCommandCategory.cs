@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NexusForever.Shared.GameTable.Model;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Social;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Social;
+using NexusForever.Game.Text.Search;
+using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Message.Static;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Item, "A collection of commands to manage items for a character.", "item")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class ItemCommandCategory : CommandCategory
     {
         [Command(Permission.ItemAdd, "Add an item to inventory, optionally specifying quantity and charges.", "add")]
@@ -26,7 +27,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             quantity ??= 1u;
             charges ??= 1u;
-            context.GetTargetOrInvoker<Player>().Inventory.ItemCreate(InventoryLocation.Inventory, itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
+            context.GetTargetOrInvoker<IPlayer>().Inventory.ItemCreate(InventoryLocation.Inventory, itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
         }
 
         [Command(Permission.ItemLookup, "Lookup an item by partial name.", "lookup")]
@@ -49,7 +50,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
             context.SendMessage($"Item lookup results for '{name}' ({searchResults.Count}):");
 
-            var target = context.GetTargetOrInvoker<Player>();
+            var target = context.GetTargetOrInvoker<IPlayer>();
             foreach (Item2Entry itemEntry in searchResults)
             {
                 var builder = new ChatMessageBuilder

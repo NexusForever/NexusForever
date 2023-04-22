@@ -6,20 +6,21 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NLog;
 
 namespace NexusForever.Database.Auth
 {
-    public class AuthDatabase
+    [Database(DatabaseType.Auth)]
+    public class AuthDatabase : IDatabase
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly IDatabaseConfig config;
+        private IConnectionString config;
 
-        public AuthDatabase(IDatabaseConfig config)
+        public void Initialise(IConnectionString connectionString)
         {
-            this.config = config;
+            config = connectionString;
         }
 
         public async Task Save(Action<AuthContext> action)
@@ -69,6 +70,7 @@ namespace NexusForever.Database.Auth
         {
             using var context = new AuthContext(config);
             return await context.Account
+                .AsSplitQuery()
                 .Include(a => a.AccountCostumeUnlock)
                 .Include(a => a.AccountCurrency)
                 .Include(a => a.AccountGenericUnlock)
@@ -91,18 +93,23 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Create a new account with the supplied email, salt and password verifier that is inserted into the database.
         /// </summary>
-        public void CreateAccount(string email, string s, string v)
+        public void CreateAccount(string email, string s, string v, uint role)
         {
             if (AccountExists(email))
                 throw new InvalidOperationException($"Account with that username already exists.");
 
             using var context = new AuthContext(config);
-            context.Account.Add(new AccountModel
+            var model = new AccountModel
             {
                 Email = email,
                 S     = s,
                 V     = v
+            };
+            model.AccountRole.Add(new AccountRoleModel
+            {
+                RoleId = role
             });
+            context.Account.Add(model);
 
             context.SaveChanges();
         }
@@ -124,12 +131,14 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Update <see cref="AccountModel"/> with supplied game token asynchronously.
         /// </summary>
-        public async Task UpdateAccountGameToken(AccountModel account, string gameToken)
+        public async Task UpdateAccountGameToken(uint accountId, string gameToken)
         {
-            account.GameToken = gameToken;
-
             using var context = new AuthContext(config);
-            EntityEntry<AccountModel> entity = context.Attach(account);
+            EntityEntry<AccountModel> entity = context.Attach(new AccountModel
+            {
+                Id        = accountId,
+                GameToken = gameToken
+            });
             entity.Property(p => p.GameToken).IsModified = true;
             await context.SaveChangesAsync();
         }
@@ -137,12 +146,14 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Update <see cref="AccountModel"/> with supplied session key asynchronously.
         /// </summary>
-        public async Task UpdateAccountSessionKey(AccountModel account, string sessionKey)
+        public async Task UpdateAccountSessionKey(uint accountId, string sessionKey)
         {
-            account.SessionKey = sessionKey;
-
             await using var context = new AuthContext(config);
-            EntityEntry<AccountModel> entity = context.Attach(account);
+            EntityEntry<AccountModel> entity = context.Attach(new AccountModel
+            {
+                Id         = accountId,
+                SessionKey = sessionKey
+            });
             entity.Property(p => p.SessionKey).IsModified = true;
             await context.SaveChangesAsync();
         }

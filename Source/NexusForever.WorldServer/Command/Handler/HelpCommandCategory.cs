@@ -1,6 +1,6 @@
-﻿using NexusForever.WorldServer.Command.Context;
+﻿using NexusForever.Game.Static.RBAC;
+using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {

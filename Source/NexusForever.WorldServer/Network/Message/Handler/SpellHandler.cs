@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.Network;
-using NexusForever.Shared.Network.Message;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.Spell;
-using NexusForever.WorldServer.Game.Spell.Static;
-using NexusForever.WorldServer.Network.Message.Model;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Spell;
+using NexusForever.GameTable;
+using NexusForever.Network;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
@@ -18,13 +18,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         /// This handler is used when the player has enabled continous casting in Settings > Controls
         /// </summary>
         [MessageHandler(GameMessageOpcode.ClientCastSpellContinuous)]
-        public static void HandleCastSpell(WorldSession session, ClientCastSpellContinuous castSpell)
+        public static void HandleCastSpell(IWorldSession session, ClientCastSpellContinuous castSpell)
         {
-            Item item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
+            IItem item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            CharacterSpell characterSpell = session.Player.SpellManager.GetSpell(item.Id);
+            ICharacterSpell characterSpell = session.Player.SpellManager.GetSpell(item.Id);
             if (characterSpell == null)
                 throw new InvalidPacketValueException();
 
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientSpellStopCast)]
-        public static void HandleSpellStopCast(WorldSession session, ClientSpellStopCast spellStopCast)
+        public static void HandleSpellStopCast(IWorldSession session, ClientSpellStopCast spellStopCast)
         {
             // TODO: handle CastResult, client only sends SpellCancelled and SpellInterrupted
             session.Player.CancelSpellCast(spellStopCast.CastingId);
@@ -42,13 +42,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         /// This Handler is ued when a player has disabled continuous casting in Settings > Controls
         /// </summary>
         [MessageHandler(GameMessageOpcode.ClientCastSpell)]
-        public static void HandleCastSpell(WorldSession session, ClientCastSpell castSpell)
+        public static void HandleCastSpell(IWorldSession session, ClientCastSpell castSpell)
         {
-            Item item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
+            IItem item = session.Player.Inventory.GetItem(InventoryLocation.Ability, castSpell.BagIndex);
             if (item == null)
                 throw new InvalidPacketValueException();
 
-            CharacterSpell characterSpell = session.Player.SpellManager.GetSpell(item.Id);
+            ICharacterSpell characterSpell = session.Player.SpellManager.GetSpell(item.Id);
             if (characterSpell == null)
                 throw new InvalidPacketValueException();
 
@@ -56,7 +56,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientCancelEffect)]
-        public static void HandlePlayerCastSpell(WorldSession session, ClientCancelEffect cancelSpell)
+        public static void HandlePlayerCastSpell(IWorldSession session, ClientCancelEffect cancelSpell)
         {
             //TODO: integrate into some Spell System removal queue & do the checks & handle stopped effects
             session.Player.EnqueueToVisible(new ServerSpellFinish
@@ -66,7 +66,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientChangeActiveActionSet)]
-        public static void HandleChangeActiveActionSet(WorldSession session, ClientChangeActiveActionSet changeActiveActionSet)
+        public static void HandleChangeActiveActionSet(IWorldSession session, ClientChangeActiveActionSet changeActiveActionSet)
         {
             session.EnqueueMessageEncrypted(new ServerChangeActiveActionSet
             {
@@ -78,23 +78,23 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientRequestActionSetChanges)]
-        public static void HandleRequestActionSetChanges(WorldSession session, ClientRequestActionSetChanges requestActionSetChanges)
+        public static void HandleRequestActionSetChanges(IWorldSession session, ClientRequestActionSetChanges requestActionSetChanges)
         {
             // TODO: check for client validity, e.g. Level & Spell4TierRequirements
 
-            ActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.ActionSetIndex);
+            IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.ActionSetIndex);
 
-            List<ActionSetShortcut> shortcuts = actionSet.Actions.ToList();
+            List<IActionSetShortcut> shortcuts = actionSet.Actions.ToList();
             for (UILocation i = 0; i < (UILocation)requestActionSetChanges.Actions.Count; i++)
             {
-                ActionSetShortcut shortcut = actionSet.GetShortcut(i);
+                IActionSetShortcut shortcut = actionSet.GetShortcut(i);
                 if (shortcut != null)
                     actionSet.RemoveShortcut(i);
 
                 uint spell4BaseId = requestActionSetChanges.Actions[(int)i];
                 if (spell4BaseId != 0u)
                 {
-                    ActionSetShortcut existingShortcut = shortcuts.SingleOrDefault(s => s.ObjectId == spell4BaseId);
+                    IActionSetShortcut existingShortcut = shortcuts.SingleOrDefault(s => s.ObjectId == spell4BaseId);
                     byte tier = existingShortcut?.Tier ?? 1;
                     actionSet.AddShortcut(i, ShortcutType.Spell, spell4BaseId, tier);
                 }
@@ -123,18 +123,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientRequestAmpReset)]
-        public static void HandleRequestAmpReset(WorldSession session, ClientRequestAmpReset requestAmpReset)
+        public static void HandleRequestAmpReset(IWorldSession session, ClientRequestAmpReset requestAmpReset)
         {
             // TODO: check for client validity 
             // TODO: handle reset cost
 
-            ActionSet actionSet = session.Player.SpellManager.GetActionSet(requestAmpReset.ActionSetIndex);
+            IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestAmpReset.ActionSetIndex);
             actionSet.RemoveAmp(requestAmpReset.RespecType, requestAmpReset.Value);
             session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
         }
 
         [MessageHandler(GameMessageOpcode.ClientNonSpellActionSetChanges)]
-        public static void HandleNonSpellActionSetChanges(WorldSession session, ClientNonSpellActionSetChanges requestActionSetChanges)
+        public static void HandleNonSpellActionSetChanges(IWorldSession session, ClientNonSpellActionSetChanges requestActionSetChanges)
         {
             // TODO: validate the rest of the shortcut types when known
 
@@ -158,7 +158,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     throw new NotImplementedException();
             }
 
-            ActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.Unknown);
+            IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestActionSetChanges.Unknown);
             if (requestActionSetChanges.ObjectId == 0u)
                 actionSet.RemoveShortcut(requestActionSetChanges.ActionBarIndex);
             else
