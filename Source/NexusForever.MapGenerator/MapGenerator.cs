@@ -3,7 +3,6 @@ using System.IO;
 using CommandLine;
 using CommandLine.Text;
 using Microsoft.Extensions.DependencyInjection;
-using NexusForever.Game.Static.Entity;
 using NexusForever.MapGenerator.GameTable;
 using NexusForever.Shared;
 using NLog;
