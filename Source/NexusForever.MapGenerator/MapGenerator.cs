@@ -60,7 +60,6 @@ namespace NexusForever.MapGenerator
 
             ArchiveManager.Instance.Initialise(parameters.PatchPath);
             GameTableManager.Instance.Initialise();
-            log.Info("TEST");
 
             if (parameters.Extract)
                 ExtractionManager.Instance.Initialise(parameters.OutputDir);
