@@ -2,7 +2,10 @@
 using System.IO;
 using CommandLine;
 using CommandLine.Text;
+using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Static.Entity;
 using NexusForever.MapGenerator.GameTable;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.MapGenerator
@@ -20,11 +23,19 @@ namespace NexusForever.MapGenerator
 
         private static void Main(string[] args)
         {
+            IServiceCollection services = new ServiceCollection();
+            services.AddSingleton<ArchiveManager>();
+            services.AddSingleton<GameTableManager>();
+            services.AddSingleton<ExtractionManager>();
+            services.AddSingleton<GenerationManager>();
+
+            LegacyServiceProvider.Provider = services.BuildServiceProvider();
+
             Console.Title = Title;
 
             parserResult = Parser.Default.ParseArguments<Parameters>(args);
             parserResult.WithParsed(ParameterOk);
-
+            
             log.Info("Finished!");
         }
 
@@ -32,6 +43,7 @@ namespace NexusForever.MapGenerator
         {
             if (!Directory.Exists(parameters.PatchPath))
                 throw new DirectoryNotFoundException();
+
 
             if (!parameters.Extract && !parameters.Generate)
             {
@@ -48,6 +60,7 @@ namespace NexusForever.MapGenerator
 
             ArchiveManager.Instance.Initialise(parameters.PatchPath);
             GameTableManager.Instance.Initialise();
+            log.Info("TEST");
 
             if (parameters.Extract)
                 ExtractionManager.Instance.Initialise(parameters.OutputDir);

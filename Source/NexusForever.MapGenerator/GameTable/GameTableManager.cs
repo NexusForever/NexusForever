@@ -10,7 +10,7 @@ namespace NexusForever.MapGenerator.GameTable
     {
         public GameTable<WorldEntry> World { get; private set; }
 
-        private GameTableManager()
+        public GameTableManager()
         {
         }
 
