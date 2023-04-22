@@ -4,8 +4,8 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # NexusForever generated files
-tbl/
-map/
+*.tbl
+*.nfmap
 
 # User-specific files
 *.suo
