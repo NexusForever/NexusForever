@@ -2,7 +2,9 @@
 using System.IO;
 using CommandLine;
 using CommandLine.Text;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.MapGenerator.GameTable;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.MapGenerator
@@ -20,6 +22,14 @@ namespace NexusForever.MapGenerator
 
         private static void Main(string[] args)
         {
+            IServiceCollection services = new ServiceCollection();
+            services.AddSingleton<ArchiveManager>();
+            services.AddSingleton<GameTableManager>();
+            services.AddSingleton<ExtractionManager>();
+            services.AddSingleton<GenerationManager>();
+
+            LegacyServiceProvider.Provider = services.BuildServiceProvider();
+
             Console.Title = Title;
 
             parserResult = Parser.Default.ParseArguments<Parameters>(args);

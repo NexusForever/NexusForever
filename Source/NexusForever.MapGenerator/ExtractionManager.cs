@@ -20,7 +20,7 @@ namespace NexusForever.MapGenerator
 
         private string outputDir;
 
-        private ExtractionManager()
+        public ExtractionManager()
         {
         }
 

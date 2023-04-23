@@ -21,7 +21,7 @@ namespace NexusForever.MapGenerator
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         private string outputDir;
 
-        private GenerationManager()
+        public GenerationManager()
         {
         }
 
