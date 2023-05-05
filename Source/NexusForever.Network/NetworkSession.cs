@@ -72,12 +72,17 @@ namespace NexusForever.Network
             if (!disconnectState.HasValue)
                 Heartbeat.Update(lastTick);
 
+            // Prevents disconnection process happening again
+            if (disconnectState == DisconnectState.Complete || disconnectState == DisconnectState.Processing)
+                return;
+
             if (Heartbeat.Flatline || disconnectState == DisconnectState.Pending)
             {
                 // no defibrillator is going to save this session
                 if (Heartbeat.Flatline)
                     log.Trace($"Client {Id} has flatlined.");
 
+                disconnectState = DisconnectState.Processing;
                 OnDisconnect();
             }
         }
