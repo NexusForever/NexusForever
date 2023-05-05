@@ -10,6 +10,11 @@ namespace NexusForever.Network.Static
         Pending,
 
         /// <summary>
+        /// Disconnection of <see cref="NetworkSession"/> is current being processed.
+        /// </summary>
+        Processing,
+
+        /// <summary>
         /// Disconnected of <see cref="NetworkSession"/> has been completed.
         /// Underlying <see cref="Socket"/> resources have been released.
         /// </summary>
