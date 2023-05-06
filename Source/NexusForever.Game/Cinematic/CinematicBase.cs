@@ -1,13 +1,13 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class CinematicBase : ICinematicBase
+    public abstract class CinematicBase : ICinematicBase
     {
-        protected Player Player { get; set; }
+        protected IPlayer Player { get; set; }
 
         public ushort CinematicId { get; set; }
         public uint Duration { get; set; }
@@ -22,9 +22,7 @@ namespace NexusForever.Game.Cinematic
 
         protected IActor playerActor;
 
-        public CinematicBase()
-        {
-        }
+        protected abstract void Setup();
 
         /// <summary>
         /// Add an <see cref="IActor"/>, and any initial <see cref="IVisualEffect"/> to the Cinematic playback
@@ -81,8 +79,11 @@ namespace NexusForever.Game.Cinematic
         /// <summary>
         /// Starts Playback for this <see cref="ICinematicBase"/>, sending the packets to the Player.
         /// </summary>
-        public void StartPlayback()
+        public void StartPlayback(IPlayer player)
         {
+            Player = player;
+            Setup();
+
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicNotify
             {
                 Flags       = InitialFlags,

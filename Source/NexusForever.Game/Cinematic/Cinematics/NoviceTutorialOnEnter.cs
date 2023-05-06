@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Cinematic;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Cinematic.Cinematics;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.World.Entity;
@@ -8,7 +8,7 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic.Cinematics
 {
-    class NoviceTutorialOnEnter : CinematicBase
+    public class NoviceTutorialOnEnter : CinematicBase, INoviceTutorialOnEnter
     {
         const uint ACTOR_CAMERA          = 73425;
         const uint ACTOR_CRYOPODS        = 73426;
@@ -23,20 +23,14 @@ namespace NexusForever.Game.Cinematic.Cinematics
         const uint VFX_ARTEMIS_VOICEOVER = 50912;
         const uint VFX_DORIAN_VOICEOVER  = 50913;
 
-        public NoviceTutorialOnEnter(Player player)
+        protected override void Setup()
         {
-            Player            = player;
             Duration          = 50000;
             InitialFlags      = 7;
             InitialCancelMode = 2;
             StartTransition   = new Transition(0, 1, 2, 1500, 0, 1500);
             EndTransition     = new Transition(48500, 0, 0);
 
-            Setup();
-        }
-
-        public void Setup()
-        {
             AddActors();
             SetupCamera();
 

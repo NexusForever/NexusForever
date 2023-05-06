@@ -4,10 +4,16 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
+using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Entity.Movement;
+using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
+using NexusForever.Game.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.Game.Static.Social;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
@@ -24,9 +30,40 @@ namespace NexusForever.Game.Entity
         public Dictionary<Property, IPropertyValue> Properties { get; } = new();
 
         public uint EntityId { get; protected set; }
-        public uint CreatureId { get; protected set; }
-        public uint DisplayInfo { get; protected set; }
-        public ushort OutfitInfo { get; protected set; }
+
+        public uint CreatureId
+        {
+            get => CreatureEntry?.Id ?? 0;
+            private set
+            {
+                CreatureEntry = GameTableManager.Instance.Creature2.GetEntry(value);
+            }
+        }
+
+        public Creature2Entry CreatureEntry { get; private set; }
+
+        public uint DisplayInfo
+        {
+            get => CreatureDisplayEntry?.Id ?? 0;
+            set
+            {
+                CreatureDisplayEntry = GameTableManager.Instance.Creature2DisplayInfo.GetEntry(value);
+            }
+        }
+
+        public Creature2DisplayInfoEntry CreatureDisplayEntry { get; private set; }
+
+        public ushort OutfitInfo
+        {
+            get => (ushort)(CreatureOutfitEntry?.Id ?? 0);
+            private set
+            {
+                CreatureOutfitEntry = GameTableManager.Instance.Creature2OutfitInfo.GetEntry(value);
+            }
+        }
+
+        public Creature2OutfitInfoEntry CreatureOutfitEntry { get; private set; }
+
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
 
@@ -82,6 +119,16 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Initialise <see cref="IWorldEntity"/> with supplied data.
+        /// </summary>
+        public void Initialise(uint creatureId, uint displayInfo, ushort outfitInfo)
+        {
+            CreatureId  = creatureId;
+            DisplayInfo = displayInfo;
+            OutfitInfo  = outfitInfo;
+        }
+
+        /// <summary>
         /// Initialise <see cref="IWorldEntity"/> from an existing database model.
         /// </summary>
         public virtual void Initialise(EntityModel model)
@@ -118,6 +165,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public override void Update(double lastTick)
         {
+            base.Update(lastTick);
             MovementManager.Update(lastTick);
         }
 
@@ -417,6 +465,59 @@ namespace NexusForever.Game.Entity
 
             // check if parent node has required friendship
             return GetDispositionFromFactionFriendship(node.Parent, factionId);
+        }
+
+        private IChatMessageBuilder BuildNpcChat(string text, ChatChannelType type)
+        {
+            return new ChatMessageBuilder
+            {
+                Type     = type,
+                Text     = text,
+                Guid     = Guid,
+                // TODO: should this be based on the players session language?
+                FromName = GameTableManager.Instance.TextEnglish.GetEntry(CreatureEntry.LocalizedTextIdName)
+            };
+        }
+
+        /// <summary>
+        /// Broadcast NPC say chat message to to <see cref="IPlayer"/> in supplied range.
+        /// </summary>
+        public void NpcSay(string text, float range = 155f)
+        {
+            if (CreatureEntry == null)
+                return;
+
+            Talk(BuildNpcChat(text, ChatChannelType.NPCSay), range);
+        }
+
+        /// <summary>
+        /// Broadcast NPC yell chat message to to <see cref="IPlayer"/> in supplied range.
+        /// </summary>
+        public void NpcYell(string text, float range = 310f)
+        {
+            if (CreatureEntry == null)
+                return;
+
+            Talk(BuildNpcChat(text, ChatChannelType.NPCYell), range);
+        }
+
+        /// <summary>
+        /// Broadcast chat message built from <see cref="IChatMessageBuilder"/> to <see cref="IPlayer"/> in supplied range.
+        /// </summary>
+        public void Talk(IChatMessageBuilder builder, float range, IGridEntity exclude = null)
+        {
+            if (Map == null)
+                throw new InvalidOperationException();
+
+            Map.Search(
+                Position,
+                range,
+                new SearchCheckRangePlayerOnly(Position, range, exclude),
+                out List<IGridEntity> intersectedEntities);
+
+            IWritable message = builder.Build();
+            foreach (IPlayer player in intersectedEntities.Cast<IPlayer>())
+                player.Session.EnqueueMessageEncrypted(message);
         }
     }
 }

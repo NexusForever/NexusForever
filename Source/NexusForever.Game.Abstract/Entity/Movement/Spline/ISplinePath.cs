@@ -11,7 +11,7 @@ namespace NexusForever.Game.Abstract.Entity.Movement.Spline
         float Speed { get; }
         float Length { get; }
         float Position { get; }
-        bool IsFinialised { get; }
+        bool IsFinialised { get; set; }
 
         /// <summary>
         /// Get current <see cref="Vector3"/> position on spline.

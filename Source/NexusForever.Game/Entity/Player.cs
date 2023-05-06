@@ -13,7 +13,6 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
-using NexusForever.Game.Cinematic.Cinematics;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -36,6 +35,8 @@ using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Script;
+using NexusForever.Script.Template;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
@@ -189,8 +190,6 @@ namespace NexusForever.Game.Entity
         private UpdateTimer saveTimer = new(SaveDuration);
         private PlayerSaveMask saveMask;
 
-        private readonly bool firstTimeLoggingIn;
-
         /// <summary>
         /// Create a new <see cref="IPlayer"/> from supplied <see cref="IGameSession"/> and <see cref="CharacterModel"/>.
         /// </summary>
@@ -221,6 +220,8 @@ namespace NexusForever.Game.Entity
 
             foreach (CharacterStatModel statModel in model.Stat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+
+            scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(this);
 
             // managers
             EntitlementManager      = new CharacterEntitlementManager(this, model);
@@ -285,7 +286,6 @@ namespace NexusForever.Game.Entity
             SetStat(Stat.Shield, 450u);
 
             PlayerManager.Instance.AddPlayer(this);
-            firstTimeLoggingIn = model.TimePlayedTotal == 0;
         }
 
         public override void Update(double lastTick)
@@ -313,6 +313,12 @@ namespace NexusForever.Game.Entity
 
                 Save();
             }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            QuestManager.Dispose();
         }
 
         /// <summary>
@@ -634,10 +640,6 @@ namespace NexusForever.Game.Entity
             });
 
             log.Trace($"Player {Name} took {(DateTime.UtcNow - start).TotalMilliseconds}ms to send packets after add to map.");
-
-            // TODO: Move this to a script
-            if (Map.Entry.Id == 3460 && firstTimeLoggingIn)
-                CinematicManager.QueueCinematic(new NoviceTutorialOnEnter(this));
         }
 
         public ItemProficiency GetItemProficiencies()
@@ -745,6 +747,8 @@ namespace NexusForever.Game.Entity
                     {
                         if (Map != null)
                             RemoveFromMap();
+
+                        Dispose();
                     });
                 }
                 finally
@@ -764,6 +768,8 @@ namespace NexusForever.Game.Entity
 
         private void OnLogin()
         {
+            scriptCollection.Invoke<IPlayerScript>(s => s.OnLogin());
+
             string motd = RealmContext.Instance.Motd;
             if (motd?.Length > 0)
                 GlobalChatManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
@@ -780,6 +786,8 @@ namespace NexusForever.Game.Entity
             GuildManager.OnLogout();
             ChatManager.OnLogout();
             GlobalChatManager.Instance.LeaveDefaultChatChannels(this);
+
+            scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }
 
         /// <summary>
@@ -838,7 +846,7 @@ namespace NexusForever.Game.Entity
             if (VanityPetGuid != null)
             {
                 IVanityPet pet = GetVisible<IVanityPet>(VanityPetGuid.Value);
-                vanityPetId = pet?.Creature.Id;
+                vanityPetId = pet?.CreatureId;
             }
 
             pendingTeleport = new PendingTeleport

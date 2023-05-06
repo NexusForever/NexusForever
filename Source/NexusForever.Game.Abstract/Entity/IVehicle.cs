@@ -5,7 +5,6 @@ namespace NexusForever.Game.Abstract.Entity
 {
     public interface IVehicle : IWorldEntity, IEnumerable<IVehiclePassenger>
     {
-        Creature2Entry CreatureEntry { get; }
         UnitVehicleEntry VehicleEntry { get; }
         Spell4Entry SpellEntry { get; }
 

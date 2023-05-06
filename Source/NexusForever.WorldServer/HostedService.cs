@@ -30,6 +30,7 @@ using NexusForever.Network.Configuration.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Social;
+using NexusForever.Script;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Command;
@@ -41,17 +42,22 @@ namespace NexusForever.WorldServer
     public class HostedService : IHostedService
     {
         private readonly ILogger log;
+
+        private readonly IScriptManager scriptManager;
         private readonly IWorldManager worldManager;
 
         public HostedService(
             IServiceProvider serviceProvider,
             ILogger<IHostedService> log,
+            IScriptManager scriptManager,
             IWorldManager worldManager)
         {
             LegacyServiceProvider.Provider = serviceProvider;
 
-            this.log          = log;
-            this.worldManager = worldManager;
+            this.log           = log;
+
+            this.scriptManager = scriptManager;
+            this.worldManager  = worldManager;
         }
 
         /// <summary>
@@ -72,6 +78,8 @@ namespace NexusForever.WorldServer
             RBACManager.Instance.Initialise();
 
             DisableManager.Instance.Initialise();
+
+            scriptManager.Initialise();
 
             GameTableManager.Instance.Initialise();
             MapIOManager.Instance.Initialise();
@@ -119,6 +127,8 @@ namespace NexusForever.WorldServer
                 GlobalChatManager.Instance.Update(lastTick);
                 LoginQueueManager.Instance.Update(lastTick);
                 ShutdownManager.Instance.Update(lastTick);
+
+                scriptManager.Update(lastTick);
 
                 // process commands after everything else in the tick has processed
                 CommandManager.Instance.Update(lastTick);

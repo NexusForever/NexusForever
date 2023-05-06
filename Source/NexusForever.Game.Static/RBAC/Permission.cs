@@ -173,6 +173,12 @@
         MapPlayerRemove             = 105,
         MapPlayerRemoveCancel       = 106,
 
+        // script
+        Script                      = 112,
+        ScriptReload                = 113,
+        ScriptInfo                  = 114,
+        ScriptAdd                   = 115,
+
         // non command permissions
         InstantLogout               = 10000,
         Signature                   = 10001,

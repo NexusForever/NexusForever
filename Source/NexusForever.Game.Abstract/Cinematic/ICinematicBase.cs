@@ -1,4 +1,6 @@
-﻿namespace NexusForever.Game.Abstract.Cinematic
+﻿using NexusForever.Game.Abstract.Entity;
+
+namespace NexusForever.Game.Abstract.Cinematic
 {
     public interface ICinematicBase
     {
@@ -16,6 +18,6 @@
         /// <summary>
         /// Starts Playback for this <see cref="ICinematicBase"/>, sending the packets to the Player.
         /// </summary>
-        void StartPlayback();
+        void StartPlayback(IPlayer player);
     }
 }

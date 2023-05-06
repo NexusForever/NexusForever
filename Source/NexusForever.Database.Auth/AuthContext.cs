@@ -900,6 +900,26 @@ namespace NexusForever.Database.Auth
                         Id   = 111,
                         Name = "Command: RealmMaxPlayers"
                     },
+                    new PermissionModel()
+                    {
+                        Id   = 112,
+                        Name = "Category: Script"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 113,
+                        Name = "Command: ScriptReload"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 114,
+                        Name = "Command: ScriptInfo"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 115,
+                        Name = "Command: ScriptAdd"
+                    },
                     new PermissionModel
                     {
                         Id   = 10000,

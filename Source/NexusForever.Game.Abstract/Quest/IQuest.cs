@@ -5,7 +5,7 @@ using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Quest
 {
-    public interface IQuest : IUpdate, IDatabaseCharacter, IDatabaseState, IEnumerable<IQuestObjective>
+    public interface IQuest : IDisposable, IUpdate, IDatabaseCharacter, IDatabaseState, IEnumerable<IQuestObjective>
     {
         ushort Id { get; }
         IQuestInfo Info { get; }

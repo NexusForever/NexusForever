@@ -2,7 +2,6 @@
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;
 using NexusForever.Network.World.Message.Model;
@@ -28,15 +27,7 @@ namespace NexusForever.Game.Social
                 GM       = player.Account.RbacManager.HasPermission(Permission.GMFlag)
             };
 
-            player.Map.Search(
-                player.Position,
-                LocalChatDistance,
-                new SearchCheckRangePlayerOnly(player.Position, LocalChatDistance, player),
-                out List<IGridEntity> intersectedEntities
-            );
-
-            var serverChat = builder.Build();
-            intersectedEntities.ForEach(e => ((Player)e).Session.EnqueueMessageEncrypted(serverChat));
+            player.Talk(builder, LocalChatDistance, player);
             SendChatAccept(player);
         }
 

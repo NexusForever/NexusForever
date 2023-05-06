@@ -13,6 +13,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.Game.Entity
@@ -69,6 +70,14 @@ namespace NexusForever.Game.Entity
                         break;
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (IQuest quest in completedQuests.Values
+                .Concat(inactiveQuests.Values)
+                .Concat(activeQuests.Values))
+                quest.Dispose();
         }
 
         public void Save(CharacterContext context)
@@ -143,6 +152,14 @@ namespace NexusForever.Game.Entity
                         }).ToList()
                     }).ToList()
             });
+        }
+
+        /// <summary>
+        /// Return <see cref="QuestState"/> for supplied quest.
+        /// </summary>
+        public QuestState? GetQuestState<T>(T questId) where T : Enum
+        {
+            return GetQuestState(questId.As<T, ushort>());
         }
 
         /// <summary>

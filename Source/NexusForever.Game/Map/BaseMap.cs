@@ -13,6 +13,9 @@ using NexusForever.GameTable.Model;
 using NexusForever.IO.Map;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Script;
+using NexusForever.Script.Template;
+using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NLog;
@@ -42,14 +45,18 @@ namespace NexusForever.Game.Map
         protected readonly Dictionary<uint /*guid*/, IGridEntity> entities = new();
         private IEntityCache entityCache;
 
+        protected IScriptCollection scriptCollection;
+
         /// <summary>
         /// Initialise <see cref="IBaseMap"/> with <see cref="WorldEntry"/>.
         /// </summary>
         public virtual void Initialise(WorldEntry entry)
         {
-            Entry       = entry;
-            File        = MapIOManager.Instance.GetBaseMap(Entry.AssetPath);
-            entityCache = EntityCacheManager.Instance.GetEntityCache((ushort)Entry.Id);
+            Entry            = entry;
+            File             = MapIOManager.Instance.GetBaseMap(Entry.AssetPath);
+            entityCache      = EntityCacheManager.Instance.GetEntityCache((ushort)Entry.Id);
+
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IBaseMap>(this, Entry.Id);
         }
 
         /// <summary>
@@ -59,6 +66,8 @@ namespace NexusForever.Game.Map
         {
             ProcessGridActions();
             UpdateGrids(lastTick);
+
+            scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
         }
 
         private void ProcessGridActions()
@@ -412,6 +421,7 @@ namespace NexusForever.Game.Map
             entities.Add(guid, entity);
 
             entity.OnAddToMap(this, guid, vector);
+            scriptCollection?.Invoke<IMapScript>(s => s.OnAddToMap(entity));
 
             log.Trace($"Added entity {entity.Guid} to map {Entry.Id}.");
         }
@@ -427,6 +437,7 @@ namespace NexusForever.Game.Map
             entityCounter.Enqueue(entity.Guid);
             entities.Remove(entity.Guid);
 
+            scriptCollection?.Invoke<IMapScript>(s => s.OnRemoveFromMap(entity));
             entity.OnRemoveFromMap();
         }
 

@@ -14,6 +14,8 @@ using NexusForever.Game;
 using NexusForever.GameTable;
 using NexusForever.Network;
 using NexusForever.Network.World;
+using NexusForever.Script;
+using NexusForever.Script.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Network;
@@ -43,18 +45,20 @@ namespace NexusForever.WorldServer
                 {
                     cb.AddJsonFile("WorldServer.json", false);
                 })
-                .ConfigureServices(sc =>
+                .ConfigureServices((hb, sc) =>
                 {
                     // register world server service first since it needs to execute before the web host
                     sc.AddHostedService<HostedService>();
 
-                    sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
+                    sc.AddOptions<ScriptConfig>().Bind(hb.Configuration.GetSection("Script"));
 
+                    sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
                     sc.AddDatabase();
                     sc.AddGame();
                     sc.AddGameTable();
                     sc.AddNetwork<WorldSession>();
                     sc.AddNetworkWorld();
+                    sc.AddScript();
                     sc.AddShared();
                     sc.AddWorld();
                 })

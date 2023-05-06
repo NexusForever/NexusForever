@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj" />
+    <ProjectReference Include="..\NexusForever.Script\NexusForever.Script.csproj" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)NexusForever.WorldServer\bin\$(Configuration)\$(TargetFramework)\$(TargetName).dll&quot;" />
+  </Target>
+
+</Project>

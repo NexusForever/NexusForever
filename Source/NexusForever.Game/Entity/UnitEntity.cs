@@ -1,5 +1,4 @@
-﻿using NexusForever.Database.World.Model;
-using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
@@ -22,23 +21,22 @@ namespace NexusForever.Game.Entity
             InitialiseHitRadius();
         }
 
-        public override void Initialise(EntityModel model)
+        public override void Dispose()
         {
-            base.Initialise(model);
+            base.Dispose();
+
+            foreach (ISpell spell in pendingSpells)
+                spell.Dispose();
         }
 
         private void InitialiseHitRadius()
         {
-            if (CreatureId == 0u)
+            if (CreatureEntry == null)
                 return;
 
-            Creature2Entry creatureEntry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
-            if (creatureEntry == null)
-                return;
-
-            Creature2ModelInfoEntry modelInfoEntry = GameTableManager.Instance.Creature2ModelInfo.GetEntry(creatureEntry.Creature2ModelInfoId);
+            Creature2ModelInfoEntry modelInfoEntry = GameTableManager.Instance.Creature2ModelInfo.GetEntry(CreatureEntry.Creature2ModelInfoId);
             if (modelInfoEntry != null)
-                HitRadius = modelInfoEntry.HitRadius * creatureEntry.ModelScale;
+                HitRadius = modelInfoEntry.HitRadius * CreatureEntry.ModelScale;
         }
 
         public override void Update(double lastTick)

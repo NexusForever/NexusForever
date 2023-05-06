@@ -5,9 +5,14 @@ using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Entity
 {
-    public interface IQuestManager : IDatabaseCharacter, IUpdate
+    public interface IQuestManager : IDisposable, IDatabaseCharacter, IUpdate
     {
         void SendInitialPackets();
+
+        /// <summary>
+        /// Return <see cref="QuestState"/> for supplied quest.
+        /// </summary>
+        QuestState? GetQuestState<T>(T questId) where T : Enum;
 
         /// <summary>
         /// Return <see cref="QuestState"/> for supplied quest.

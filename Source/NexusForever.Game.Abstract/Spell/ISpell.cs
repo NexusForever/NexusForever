@@ -3,7 +3,7 @@ using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Spell
 {
-    public interface ISpell : IUpdate
+    public interface ISpell : IDisposable, IUpdate
     {
         ISpellParameters Parameters { get; }
         uint CastingId { get; }

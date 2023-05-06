@@ -1,18 +1,17 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Cinematic;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Cinematic.Cinematics;
 using NexusForever.Network.World.Entity;
 
 namespace NexusForever.Game.Cinematic.Cinematics
 {
-    public class EverstarGroveOnCreate : CinematicBase
+    public class EverstarGroveOnCreate : CinematicBase, IEverstarGroveOnCreate
     {
         const uint ACTOR_AURIN_SHIP = 48242;
         const uint ACTOR_RAPTARUK = 35851;
 
-        public EverstarGroveOnCreate(Player player)
+        protected override void Setup()
         {
-            Player            = player;
             Duration          = 15333;
             InitialFlags      = 7;
             InitialCancelMode = 2;
@@ -20,11 +19,6 @@ namespace NexusForever.Game.Cinematic.Cinematics
             StartTransition   = new Transition(0, 1, 2, 1000, 0, 1500);
             EndTransition     = new Transition(14333, 0, 0, 1000, 0, 1000);
 
-            Setup();
-        }
-
-        private void Setup()
-        {
             SetupActors();
             SetupTexts();
             SetupCamera();

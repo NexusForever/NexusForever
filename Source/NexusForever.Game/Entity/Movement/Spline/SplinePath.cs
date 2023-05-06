@@ -1,8 +1,10 @@
-﻿using System.Numerics;
+using System.Numerics;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement.Spline;
 using NexusForever.Game.Abstract.Entity.Movement.Spline.Type;
 using NexusForever.Game.Entity.Movement.Spline.Type;
 using NexusForever.Game.Static.Entity.Movement.Spline;
+using NexusForever.Script.Template;
 
 namespace NexusForever.Game.Entity.Movement.Spline
 {
@@ -13,7 +15,17 @@ namespace NexusForever.Game.Entity.Movement.Spline
         public float Speed { get; }
         public float Length => spline.Length;
         public float Position { get; private set; }
-        public bool IsFinialised { get; private set; }
+
+        public bool IsFinialised
+        {
+            get => isFinalised;
+            set
+            {
+                owner.InvokeScriptCollection<IWorldEntityScript>(s => s.OnSplineStop());
+                isFinalised = value;
+            }
+        }
+        private bool isFinalised;
 
         private readonly ISpline spline;
 
@@ -21,14 +33,17 @@ namespace NexusForever.Game.Entity.Movement.Spline
         private SplineDirection direction;
         private float remaining;
 
+        private IWorldEntity owner;
+
         /// <summary>
         /// Create a new single spline <see cref="ISplinePath"/> with supplied <see cref="SplineMode"/> and speed.
         /// </summary>
-        public SplinePath(ushort splineId, SplineMode mode, float speed)
+        public SplinePath(IWorldEntity owner, ushort splineId, SplineMode mode, float speed)
         {
-            Type     = SplineType.CatmullRom;
-            Mode     = mode;
-            Speed    = speed;
+            this.owner = owner;
+            Type       = SplineType.CatmullRom;
+            Mode       = mode;
+            Speed      = speed;
 
             ISplineType splineType = new SplineTypeCatmullRomTbl();
 
@@ -47,11 +62,12 @@ namespace NexusForever.Game.Entity.Movement.Spline
         /// <summary>
         /// Create a new custom spline <see cref="ISplinePath"/> with supplied <see cref="SplineType"/>, <see cref="SplineMode"/> and speed.
         /// </summary>
-        public SplinePath(List<Vector3> nodes, SplineType type, SplineMode mode, float speed)
+        public SplinePath(IWorldEntity owner, List<Vector3> nodes, SplineType type, SplineMode mode, float speed)
         {
-            Type  = type;
-            Mode  = mode;
-            Speed = speed;
+            this.owner = owner;
+            Type       = type;
+            Mode       = mode;
+            Speed      = speed;
 
             ISplineType splineType;
             switch (type)
@@ -93,6 +109,7 @@ namespace NexusForever.Game.Entity.Movement.Spline
 
                 if (distance >= remaining)
                 {
+                    owner.InvokeScriptCollection<IWorldEntityScript>(s => s.OnSplinePoint(point));
                     if (!GetNextPoint())
                     {
                         IsFinialised = true;

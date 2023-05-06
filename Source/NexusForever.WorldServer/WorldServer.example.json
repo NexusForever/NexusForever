@@ -48,5 +48,13 @@
         "LengthOfInGameDay": 12600,
         "CrossFactionChat": true,
         "MaxPlayers": 50
+    },
+    "Script": {
+        "Enable": true,
+        "Directory": "",
+        "Dynamic": {
+            "Enable": true,
+            "Directory": ""
+        }
     }
 }

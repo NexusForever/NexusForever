@@ -1,8 +1,10 @@
 ﻿using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -21,8 +23,11 @@ namespace NexusForever.Game.Abstract.Entity
 
         uint EntityId { get; }
         uint CreatureId { get; }
+        Creature2Entry CreatureEntry { get; }
         uint DisplayInfo { get; }
+        Creature2DisplayInfoEntry CreatureDisplayEntry { get; }
         ushort OutfitInfo { get; }
+        Creature2OutfitInfoEntry CreatureOutfitEntry { get; }
         Faction Faction1 { get; set; }
         Faction Faction2 { get; set; }
 
@@ -96,5 +101,20 @@ namespace NexusForever.Game.Abstract.Entity
         /// Return <see cref="Disposition"/> between <see cref="IWorldEntity"/> and <see cref="Faction"/>.
         /// </summary>
         Disposition GetDispositionTo(Faction factionId, bool primary = true);
+
+        /// <summary>
+        /// Broadcast NPC say chat message to to <see cref="IPlayer"/> in supplied range.
+        /// </summary>
+        void NpcSay(string text, float range = 155f);
+
+        /// <summary>
+        /// Broadcast NPC yell chat message to to <see cref="IPlayer"/> in supplied range.
+        /// </summary>
+        void NpcYell(string text, float range = 155f);
+
+        /// <summary>
+        /// Broadcast chat message built from <see cref="IChatMessageBuilder"/> to <see cref="IPlayer"/> in supplied range.
+        /// </summary>
+        void Talk(IChatMessageBuilder builder, float range, IGridEntity exclude = null);
     }
 }

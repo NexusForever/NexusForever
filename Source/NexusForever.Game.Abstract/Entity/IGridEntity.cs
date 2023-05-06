@@ -8,7 +8,7 @@ namespace NexusForever.Game.Abstract.Entity
     /// <summary>
     /// An <see cref="IGridEntity"/> is en entity that is part of an <see cref="IMap"/> grid.
     /// </summary>
-    public interface IGridEntity : IUpdate
+    public interface IGridEntity : IDisposable, IUpdate
     {
         uint Guid { get; }
         IBaseMap Map { get; }
@@ -21,6 +21,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Distance between <see cref="IGridEntity"/> and a <see cref="IMapGrid"/> for activation.
         /// </summary>
         float ActivationRange { get; }
+
+        /// <summary>
+        /// Invoke <see cref="Action{T}"/> against <see cref="IGridEntity"/> script collection.
+        /// </summary>
+        void InvokeScriptCollection<T>(Action<T> action);
 
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> for removal from the <see cref="IBaseMap"/>.

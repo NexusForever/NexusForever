@@ -9,6 +9,9 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Script;
+using NexusForever.Script.Template.Collection;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.Game.Spell
@@ -30,6 +33,8 @@ namespace NexusForever.Game.Spell
 
         private readonly ISpellEventManager events = new SpellEventManager();
 
+        private IScriptCollection scriptCollection;
+
         public Spell(IUnitEntity caster, ISpellParameters parameters)
         {
             this.caster = caster;
@@ -38,10 +43,19 @@ namespace NexusForever.Game.Spell
             status      = SpellStatus.Initiating;
 
             parameters.RootSpellInfo ??= parameters.SpellInfo;
+
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<ISpell>(this, parameters.SpellInfo.Entry.Id);
+        }
+
+        public void Dispose()
+        {
+            ScriptManager.Instance.Unload(scriptCollection);
         }
 
         public void Update(double lastTick)
         {
+            scriptCollection.Invoke<IUpdate>(s => s.Update(lastTick));
+
             events.Update(lastTick);
 
             if (status == SpellStatus.Executing && !events.HasPendingEvent)

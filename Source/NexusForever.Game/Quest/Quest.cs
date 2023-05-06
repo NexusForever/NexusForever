@@ -7,6 +7,10 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Script;
+using NexusForever.Script.Template;
+using NexusForever.Script.Template.Collection;
+using NexusForever.Shared;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Quest
@@ -97,6 +101,8 @@ namespace NexusForever.Game.Quest
 
         private UpdateTimer questTimer;
 
+        private IScriptCollection scriptCollection;
+
         /// <summary>
         /// Create a new <see cref="IQuest"/> from an existing database model.
         /// </summary>
@@ -114,6 +120,8 @@ namespace NexusForever.Game.Quest
 
             foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
+
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
         }
 
         /// <summary>
@@ -132,6 +140,14 @@ namespace NexusForever.Game.Quest
                 state = QuestState.Achieved;
 
             saveMask = QuestSaveMask.Create;
+
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
+        }
+
+        public void Dispose()
+        {
+            ScriptManager.Instance.Unload(scriptCollection);
+            scriptCollection = null;
         }
 
         public void InitialiseTimer()
@@ -214,6 +230,8 @@ namespace NexusForever.Game.Quest
 
         public void Update(double lastTick)
         {
+            scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
+
             if (questTimer != null)
             {
                 questTimer.Update(lastTick);
@@ -299,6 +317,8 @@ namespace NexusForever.Game.Quest
 
                 if (objective.Progress != oldProgress)
                     SendQuestObjectiveUpdate(objective);
+
+                scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
             }
 
             // TODO: Should you be able to complete optional objectives after required are completed?
@@ -335,6 +355,8 @@ namespace NexusForever.Game.Quest
 
             if (objective.Progress != oldProgress)
                 SendQuestObjectiveUpdate(objective);
+
+            scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
 
             // TODO: Should you be able to complete optional objectives after required are completed?
             if (RequiredObjectivesComplete())
@@ -403,6 +425,8 @@ namespace NexusForever.Game.Quest
             foreach (ICommunicatorMessage message in GlobalQuestManager.Instance.GetQuestCommunicatorQuestStateTriggers(Id, state))
                 if (message.Meets(player))
                     player.QuestManager.QuestMention(message.QuestId);
+
+            scriptCollection?.Invoke<IQuestScript>(s => s.OnQuestStateChange(State, oldState));
         }
 
         public IEnumerator<IQuestObjective> GetEnumerator()

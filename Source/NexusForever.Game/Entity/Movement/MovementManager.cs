@@ -161,7 +161,7 @@ namespace NexusForever.Game.Entity.Movement
                 throw new ArgumentOutOfRangeException();
 
             StopSpline();
-            splinePath = new SplinePath(splineId, mode, speed);
+            splinePath = new SplinePath(owner, splineId, mode, speed);
 
             splineCommand = EntityCommand.SetPositionSpline;
             AddCommand(new SetPositionSplineCommand
@@ -206,7 +206,7 @@ namespace NexusForever.Game.Entity.Movement
                 throw new ArgumentOutOfRangeException();
 
             StopSpline();
-            splinePath = new SplinePath(nodes, type, mode, speed);
+            splinePath = new SplinePath(owner, nodes, type, mode, speed);
 
             splineCommand = EntityCommand.SetPositionPath;
             AddCommand(new SetPositionPathCommand
@@ -233,6 +233,11 @@ namespace NexusForever.Game.Entity.Movement
                 return;
 
             Vector3 position = splinePath.GetPosition();
+
+            // don't set IsFinialised again for graceful stop to prevent multiple script calls to OnSplineStop
+            if (!splinePath.IsFinialised)
+                splinePath.IsFinialised = true;
+
             owner.Relocate(position);
 
             AddCommand(new SetStateCommand

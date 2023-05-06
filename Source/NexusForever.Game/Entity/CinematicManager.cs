@@ -42,7 +42,7 @@ namespace NexusForever.Game.Entity
 
             ICinematicBase cinematic = queuedCinematics.Dequeue();
             currentCinematic = cinematic;
-            currentCinematic.StartPlayback();
+            currentCinematic.StartPlayback(owner);
         }
 
         /// <summary>

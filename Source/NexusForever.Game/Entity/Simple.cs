@@ -35,21 +35,19 @@ namespace NexusForever.Game.Entity
 
         public override void OnActivate(IPlayer activator)
         {
-            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
-            if (entry.DatacubeId != 0u)
-                activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, int.MaxValue);
+            if (CreatureEntry.DatacubeId != 0u)
+                activator.DatacubeManager.AddDatacube((ushort)CreatureEntry.DatacubeId, int.MaxValue);
         }
 
         public override void OnActivateCast(IPlayer activator)
         {
             uint progress = (uint)(1 << QuestChecklistIdx);
 
-            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
-            if (entry.DatacubeId != 0u)
+            if (CreatureEntry.DatacubeId != 0u)
             {
-                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeId, DatacubeType.Datacube);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)CreatureEntry.DatacubeId, DatacubeType.Datacube);
                 if (datacube == null)
-                    activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, progress);
+                    activator.DatacubeManager.AddDatacube((ushort)CreatureEntry.DatacubeId, progress);
                 else
                 {
                     datacube.Progress |= progress;
@@ -57,11 +55,11 @@ namespace NexusForever.Game.Entity
                 }
             }
 
-            if (entry.DatacubeVolumeId != 0u)
+            if (CreatureEntry.DatacubeVolumeId != 0u)
             {
-                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeVolumeId, DatacubeType.Journal);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)CreatureEntry.DatacubeVolumeId, DatacubeType.Journal);
                 if (datacube == null)
-                    activator.DatacubeManager.AddDatacubeVolume((ushort)entry.DatacubeVolumeId, progress);
+                    activator.DatacubeManager.AddDatacubeVolume((ushort)CreatureEntry.DatacubeVolumeId, progress);
                 else
                 {
                     datacube.Progress |= progress;

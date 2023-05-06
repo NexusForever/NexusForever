@@ -16,7 +16,7 @@ namespace NexusForever.Database.Auth.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountCostumeUnlockModel", b =>
@@ -882,6 +882,26 @@ namespace NexusForever.Database.Auth.Migrations
                         {
                             Id = 111u,
                             Name = "Command: RealmMaxPlayers"
+                        },
+                        new
+                        {
+                            Id = 112u,
+                            Name = "Category: Script"
+                        },
+                        new
+                        {
+                            Id = 113u,
+                            Name = "Command: ScriptReload"
+                        },
+                        new
+                        {
+                            Id = 114u,
+                            Name = "Command: ScriptInfo"
+                        },
+                        new
+                        {
+                            Id = 115u,
+                            Name = "Command: ScriptAdd"
                         },
                         new
                         {

@@ -13,7 +13,6 @@ namespace NexusForever.Game.Entity
 {
     public class Vehicle : WorldEntity, IVehicle
     {
-        public Creature2Entry CreatureEntry { get; }
         public UnitVehicleEntry VehicleEntry { get; }
         public Spell4Entry SpellEntry { get; }
 
@@ -29,7 +28,8 @@ namespace NexusForever.Game.Entity
         protected Vehicle(EntityType type, uint creatureId, uint vehicleId, uint spell4Id)
             : base(type)
         {
-            CreatureEntry = GameTableManager.Instance.Creature2.GetEntry(creatureId);
+            Initialise(creatureId, 0, 0);
+
             VehicleEntry  = GameTableManager.Instance.UnitVehicle.GetEntry(vehicleId != 0u ? vehicleId : CreatureEntry.UnitVehicleId);
             SpellEntry    = GameTableManager.Instance.Spell4.GetEntry(spell4Id);
 

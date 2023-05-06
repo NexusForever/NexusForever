@@ -20,7 +20,6 @@ namespace NexusForever.Game.Entity
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public uint OwnerGuid { get; private set; }
-        public Creature2Entry Creature { get; }
         public Creature2DisplayGroupEntryEntry Creature2DisplayGroup { get; }
 
         private readonly UpdateTimer followTimer = new(1d);
@@ -29,9 +28,8 @@ namespace NexusForever.Game.Entity
             : base(EntityType.Pet)
         {
             OwnerGuid               = owner.Guid;
-            Creature                = GameTableManager.Instance.Creature2.GetEntry(creature);
-            Creature2DisplayGroup   = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == Creature.Creature2DisplayGroupId);
-            DisplayInfo             = Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u;
+            Creature2DisplayGroup   = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == CreatureEntry.Creature2DisplayGroupId);
+            Initialise(creature, Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u, 0);
 
             SetProperty(Property.BaseHealth, 800.0f, 800.0f);
 
@@ -44,7 +42,7 @@ namespace NexusForever.Game.Entity
         {
             return new PetEntityModel
             {
-                CreatureId  = Creature.Id,
+                CreatureId  = CreatureEntry.Id,
                 OwnerId     = OwnerGuid,
                 Name        = ""
             };

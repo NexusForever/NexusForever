@@ -6,6 +6,10 @@ using NexusForever.Game.Map;
 using NexusForever.Game.Map.Search;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Script;
+using NexusForever.Script.Template;
+using NexusForever.Script.Template.Collection;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
 {
@@ -24,8 +28,31 @@ namespace NexusForever.Game.Entity
         public float ActivationRange { get; protected set; }
 
         protected readonly Dictionary<uint, IGridEntity> visibleEntities = new();
-
         private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = new();
+
+        protected IScriptCollection scriptCollection;
+
+        public virtual void Dispose()
+        {
+            if (scriptCollection != null)
+                ScriptManager.Instance.Unload(scriptCollection);
+        }
+
+        /// <summary>
+        /// Invoked each world tick with the delta since the previous tick occurred.
+        /// </summary>
+        public virtual void Update(double lastTick)
+        {
+            scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
+        }
+
+        /// <summary>
+        /// Invoke <see cref="Action{T}"/> against <see cref="IGridEntity"/> script collection.
+        /// </summary>
+        public void InvokeScriptCollection<T>(Action<T> action)
+        {
+            scriptCollection?.Invoke(action);
+        }
 
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> for removal from the <see cref="IBaseMap"/>.
@@ -64,6 +91,8 @@ namespace NexusForever.Game.Entity
 
             UpdateVision();
             UpdateGridVision();
+
+            scriptCollection?.Invoke<IGridEntityScript>(s => s.OnAddToMap(map));
         }
 
         /// <summary>
@@ -79,6 +108,8 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void OnRemoveFromMap()
         {
+            scriptCollection?.Invoke<IGridEntityScript>(s => s.OnRemoveFromMap(Map));
+
             foreach (IGridEntity entity in visibleEntities.Values.ToList())
                 entity.RemoveVisible(this);
 
@@ -111,6 +142,8 @@ namespace NexusForever.Game.Entity
             {
                 Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId.Value);
                 OnZoneUpdate();
+
+                scriptCollection?.Invoke<IGridEntityScript>(s => s.OnEnterZone(this, Zone.Id));
             }
         }
 
@@ -139,6 +172,8 @@ namespace NexusForever.Game.Entity
                 return;
 
             visibleEntities.Add(entity.Guid, entity);
+
+            scriptCollection?.Invoke<IGridEntityScript>(s => s.OnAddVisibleEntity(entity));
         }
 
         /// <summary>
@@ -147,6 +182,8 @@ namespace NexusForever.Game.Entity
         public virtual void RemoveVisible(IGridEntity entity)
         {
             visibleEntities.Remove(entity.Guid);
+
+            scriptCollection?.Invoke<IGridEntityScript>(s => s.OnRemoveVisibleEntity(entity));
         }
 
         /// <summary>
@@ -220,7 +257,5 @@ namespace NexusForever.Game.Entity
         {
             visibleGrids.Remove((gridX, gridZ));
         }
-
-        public abstract void Update(double lastTick);
     }
 }

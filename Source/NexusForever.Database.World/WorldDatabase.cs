@@ -48,6 +48,15 @@ namespace NexusForever.Database.World
                 .ToImmutableList();
         }
 
+        public ImmutableList<EntityModel> GetEntitiesWithSpline()
+        {
+            using var context = new WorldContext(config);
+            return context.Entity.Where(e => e.EntitySpline != null)
+                .Include(e => e.EntitySpline)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
         public ImmutableList<EntityModel> GetEntitiesWithoutArea()
         {
             using var context = new WorldContext(config);

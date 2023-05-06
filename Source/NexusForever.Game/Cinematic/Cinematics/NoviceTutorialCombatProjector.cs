@@ -1,12 +1,12 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Cinematic;
-using NexusForever.Game.Entity;
+using NexusForever.Game.Abstract.Cinematic.Cinematics;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic.Cinematics
 {
-    public class NoviceTutorialCombatProjector : CinematicBase
+    public class NoviceTutorialCombatProjector : CinematicBase, INoviceTutorialCombatProjector
     {
         const uint ACTOR_EXILE_CAMERA = 73556;
         const uint ACTOR_EXILE_PLAYER = 73557;
@@ -20,20 +20,14 @@ namespace NexusForever.Game.Cinematic.Cinematics
         const uint ACTOR_EXILE_MINE2 = 74834;
         const uint ACTOR_DOMINION_TURRET = 74835;
 
-        public NoviceTutorialCombatProjector(Player player)
+        protected override void Setup()
         {
-            Player            = player;
             Duration          = 10000;
             InitialFlags      = 7;
             InitialCancelMode = 2;
             StartTransition   = new Transition(0, 1, 2, 1500, 0, 1500);
             EndTransition     = new Transition(8500, 0, 0, 1500, 0, 1500);
 
-            Setup();
-        }
-
-        private void Setup()
-        {
             SetupActors();
             SetupTexts();
             SetupCamera();

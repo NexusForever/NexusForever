@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj" />
+    <ProjectReference Include="..\NexusForever.Script\NexusForever.Script.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CrimsonIsle\" />
+    <Folder Include="CrimsonBadlands\" />
+    <Folder Include="Deradune\" />
+    <Folder Include="Illium\" />
+    <Folder Include="Auroria\" />
+    <Folder Include="Ellevar\" />
+    <Folder Include="LevianBay\" />
+    <Folder Include="Wilderrun\" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)NexusForever.WorldServer\bin\$(Configuration)\$(TargetFramework)\$(TargetName).dll&quot;" />
+  </Target>
+
+</Project>
