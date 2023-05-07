@@ -6,6 +6,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
+using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
@@ -13,6 +14,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
+using NexusForever.Game.Character;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -45,7 +47,7 @@ using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Entity
 {
-    public class Player : UnitEntity, IPlayer
+    public class Player : UnitEntity, IPlayer, ICharacter
     {
         /// <summary>
         /// Determines which fields need saving for <see cref="IPlayer"/> when being saved to the database.
@@ -162,6 +164,8 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool IsLoading { get; set; } = true;
 
+        public float? GetOnlineStatus() => LogoutManager.State == LogoutState.Logout ? (float)(DateTime.UtcNow.Subtract(DateTime.UtcNow.AddSeconds(-1)).TotalDays * -1f) : 0f;
+
         public IInventory Inventory { get; }
         public ICurrencyManager CurrencyManager { get; }
         public IPathManager PathManager { get; }
@@ -184,6 +188,7 @@ namespace NexusForever.Game.Entity
         public ICinematicManager CinematicManager { get; }
         public ICharacterEntitlementManager EntitlementManager { get; }
         public ILogoutManager LogoutManager { get; }
+        public IContactManager ContactManager { get; }
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -247,6 +252,7 @@ namespace NexusForever.Game.Entity
             ChatManager             = new ChatManager(this);
             ResidenceManager        = new ResidenceManager(this);
             CinematicManager        = new CinematicManager(this);
+            ContactManager          = new ContactManager(this, model);
 
             LogoutManager           = new LogoutManager(this);
             LogoutManager.OnTimerFinished += Logout;
@@ -467,6 +473,7 @@ namespace NexusForever.Game.Entity
             ReputationManager.Save(context);
             GuildManager.Save(context);
             EntitlementManager.Save(context);
+            ContactManager.Save(context);
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -731,6 +738,7 @@ namespace NexusForever.Game.Entity
         {
             log.Trace($"Cleanup for character {Name}({CharacterId})...");
 
+            CharacterManager.Instance.OnLogout(this);
             PlayerManager.Instance.RemovePlayer(this);
             CleanupManager.Instance.AddPlayer(this);
 
@@ -774,6 +782,7 @@ namespace NexusForever.Game.Entity
             if (motd?.Length > 0)
                 GlobalChatManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
 
+            ContactManager.OnLogin();
             GuildManager.OnLogin();
             ChatManager.OnLogin();
             GlobalChatManager.Instance.JoinDefaultChatChannels(this);
@@ -783,6 +792,7 @@ namespace NexusForever.Game.Entity
 
         private void OnLogout()
         {
+            ContactManager.OnLogout();
             GuildManager.OnLogout();
             ChatManager.OnLogout();
             GlobalChatManager.Instance.LeaveDefaultChatChannels(this);

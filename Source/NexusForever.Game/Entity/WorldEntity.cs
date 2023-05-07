@@ -515,6 +515,10 @@ namespace NexusForever.Game.Entity
                 new SearchCheckRangePlayerOnly(Position, range, exclude),
                 out List<IGridEntity> intersectedEntities);
 
+            // Remove all session in range who are currently ignoring this person
+            if (this is IPlayer owner)
+                intersectedEntities.RemoveAll(e => owner.ContactManager.IsIgnored(owner.CharacterId)); // TODO: Could probably be cleaner by not grabbing users who are ignoring in the first place
+
             IWritable message = builder.Build();
             foreach (IPlayer player in intersectedEntities.Cast<IPlayer>())
                 player.Session.EnqueueMessageEncrypted(message);

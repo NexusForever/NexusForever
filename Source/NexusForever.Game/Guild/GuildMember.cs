@@ -4,6 +4,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Character;
+using NexusForever.Game.Entity;
 using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.GuildMember;
 
 namespace NexusForever.Game.Guild

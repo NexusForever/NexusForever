@@ -3,6 +3,7 @@ using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
+using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -88,6 +89,7 @@ namespace NexusForever.Game.Abstract.Entity
         ICinematicManager CinematicManager { get; }
         ICharacterEntitlementManager EntitlementManager { get; }
         ILogoutManager LogoutManager { get; }
+        IContactManager ContactManager { get; }
 
         IVendorInfo SelectedVendorInfo { get; set; }
 
