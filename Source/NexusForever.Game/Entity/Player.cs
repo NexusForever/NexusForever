@@ -164,7 +164,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool IsLoading { get; set; } = true;
 
-        public float? GetOnlineStatus() => LogoutManager.State == LogoutState.Logout ? (float)(DateTime.UtcNow.Subtract(DateTime.UtcNow).TotalDays * -1f) : 0f;
+        public float? GetOnlineStatus() => LogoutManager.State == LogoutState.Logout ? (float)(DateTime.UtcNow.Subtract(DateTime.UtcNow.AddSeconds(-1)).TotalDays * -1f) : 0f;
 
         public IInventory Inventory { get; }
         public ICurrencyManager CurrencyManager { get; }

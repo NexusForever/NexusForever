@@ -151,9 +151,7 @@ namespace NexusForever.Game.Guild
         /// </summary>
         public NetworkGuildMember Build()
         {
-            ICharacter characterInfo = PlayerManager.Instance.GetPlayer(CharacterId) as Player;
-            if (characterInfo == null)
-             characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
+            ICharacter characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
             return new NetworkGuildMember
             {
                 Realm                    = RealmContext.Instance.RealmId,

@@ -1,10 +1,8 @@
 using System;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Character;
-using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Contact;
 using NexusForever.Network;
 using NexusForever.Network.Message;
@@ -28,9 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientPlayerInfoRequest)]
         public static void HandlePlayerInfoRequest(IWorldSession session, ClientPlayerInfoRequest request)
         {
-            ICharacter character = PlayerManager.Instance.GetPlayer(request.Identity.CharacterId) as Player;
-            if (character == null)
-                character = CharacterManager.Instance.GetCharacter(request.Identity.CharacterId);
+            ICharacter character = CharacterManager.Instance.GetCharacter(request.Identity.CharacterId);
             if (character == null)
                 throw new InvalidPacketValueException();
             

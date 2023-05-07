@@ -135,12 +135,17 @@ namespace NexusForever.Game.Character
         /// </summary>
         public void OnLogout(IPlayer player)
         {
+            UpdateCharacterStore(player);
+
+            log.Trace($"{player.Name} (ID: {player.CharacterId}) logged out.");
+        }
+
+        private void UpdateCharacterStore(IPlayer player)
+        {
             if (!characters.ContainsKey(player.CharacterId))
                 throw new Exception($"{player.CharacterId} should exist in characters dictionary.");
 
             characters[player.CharacterId] = new Character(player);
-
-            log.Trace($"{player.Name} (ID: {player.CharacterId}) logged out.");
         }
 
         /// <summary>
@@ -164,7 +169,15 @@ namespace NexusForever.Game.Character
         /// </summary>
         public ICharacter GetCharacter(ulong characterId)
         {
-            return characters.TryGetValue(characterId, out ICharacter characterInfo) ? characterInfo : null;
+            ICharacter characterInfo = PlayerManager.Instance.GetPlayer(characterId) as Player;
+            if (characterInfo != null)
+            {
+                UpdateCharacterStore(characterInfo as Player);
+
+                return characterInfo;
+            }
+
+            return characters.TryGetValue(characterId, out characterInfo) ? characterInfo : null;
         }
 
         /// <summary>
@@ -172,6 +185,14 @@ namespace NexusForever.Game.Character
         /// </summary>
         public ICharacter GetCharacter(string name)
         {
+            ICharacter characterInfo = PlayerManager.Instance.GetPlayer(name) as Player;
+            if (characterInfo != null)
+            {
+                UpdateCharacterStore(characterInfo as Player);
+
+                return characterInfo;
+            }
+
             return characterNameToId.TryGetValue(name, out ulong characterId) ? GetCharacter(characterId) : null;
         }
 
