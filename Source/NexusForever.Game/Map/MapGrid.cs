@@ -128,7 +128,10 @@ namespace NexusForever.Game.Map
             if (UnloadStatus.HasValue)
                 return;
 
-            visibilityCount++;
+            checked
+            {
+                visibilityCount++;
+            }
 
             // cancel grid unload timer when a new player comes into range
             if (unloadTimer != null && unloadTimer.IsTicking)
@@ -140,7 +143,10 @@ namespace NexusForever.Game.Map
         /// </summary>
         public void RemoveVisiblePlayer()
         {
-            visibilityCount--;
+            checked
+            {
+                visibilityCount--;
+            }
 
             // start map grid timer when the last player leaves range
             if (unloadTimer != null && visibilityCount <= 0u)
@@ -156,7 +162,11 @@ namespace NexusForever.Game.Map
                 return;
 
             GetCell(vector).AddEntity(entity);
-            entityCount++;
+
+            checked
+            {
+                entityCount++;
+            }
 
             log.Trace($"Added entity {entity.Guid} to grid at X:{Coord.X}, Z:{Coord.Z}.");
         }
@@ -167,7 +177,11 @@ namespace NexusForever.Game.Map
         public void RemoveEntity(IGridEntity entity)
         {
             GetCell(entity.Position).RemoveEntity(entity);
-            entityCount--;
+
+            checked
+            {
+                entityCount--;
+            }
 
             log.Trace($"Removed entity {entity.Guid} to grid at X:{Coord.X}, Z:{Coord.Z}.");
         }
