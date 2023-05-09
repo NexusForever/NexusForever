@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.CSI;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
@@ -70,7 +71,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     session.Player.CastSpell(itemSpecial.Spell4IdOnActivate, new SpellParameters
                     {
                         PrimaryTargetId = itemUse.TargetUnitId,
-                        TargetPosition  = itemUse.Position
+                        TargetPosition  = itemUse.Position,
+                        ClientSideInteraction = new ClientSideInteraction(session.Player, null, itemUse.CastingId)
                     });
                 }
             }

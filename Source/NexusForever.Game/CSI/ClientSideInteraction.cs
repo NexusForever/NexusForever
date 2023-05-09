@@ -7,6 +7,15 @@ using NLog;
 
 namespace NexusForever.Game.CSI
 {
+    /// <summary>
+    /// Client Side Interactions (CSI) should be used when the client casts a spell that is not an ability on the LAS.
+    /// </summary>
+    /// <remarks>
+    /// Examples of this are: Using an Item, Interacting with entities in the world, Using Quest-Specific Spells.
+    /// Spells triggered in this way are handled slightly differently: 
+    /// - ServerSpellStartClientInteraction (0x07FD) Packet sent to the caster.
+    /// - ServerSpellStart (0x07FF) Packet sent to nearby players.
+    /// </remarks>
     public class ClientSideInteraction : IClientSideInteraction
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();

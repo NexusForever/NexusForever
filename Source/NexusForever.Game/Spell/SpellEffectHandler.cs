@@ -10,11 +10,14 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NLog;
 
 namespace NexusForever.Game.Spell
 {
     public static class SpellHandler
     {
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
         [SpellEffectHandler(SpellEffectType.Damage)]
         public static void HandleEffectDamage(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
@@ -240,6 +243,9 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Activate)]
         public static void HandleEffectActivate(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
+            if (spell.Parameters.ClientSideInteraction == null)
+                log.Error($"No CSI present for spell {spell.Spell4Id} cast by {spell.Caster.Type}");
+
             spell.Parameters.ClientSideInteraction?.HandleSuccess(spell);
         }
     }

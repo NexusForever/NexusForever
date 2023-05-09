@@ -60,6 +60,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             });
         }
 
+        /// <remarks>
+        /// Assuming this is a "Legacy" activate packet. It seems to only be used by Datacubes and some Path interact events.
+        /// May be worth considering this a "PathActivate" packet, as Datacubes, while usable by any, had special events related to Scientists.
+        /// </remarks>
         [MessageHandler(GameMessageOpcode.ClientActivateUnit)]
         public static void HandleActivateUnit(IWorldSession session, ClientActivateUnit unit)
         {
