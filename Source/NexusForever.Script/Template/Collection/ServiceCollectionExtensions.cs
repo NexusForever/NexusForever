@@ -16,6 +16,7 @@ namespace NexusForever.Script.Template.Collection
             sc.AddTransient<IOwnedScriptCollection<INonPlayer>, OwnedScriptCollection<INonPlayer>>();
             sc.AddTransient<IOwnedScriptCollection<IPlayer>, OwnedScriptCollection<IPlayer>>();
             sc.AddTransient<IOwnedScriptCollection<IQuest>, OwnedScriptCollection<IQuest>>();
+            sc.AddTransient<IOwnedScriptCollection<ISimple>, OwnedScriptCollection<ISimple>>();
             sc.AddTransient<IOwnedScriptCollection<ISpell>, OwnedScriptCollection<ISpell>>();
         }
     }

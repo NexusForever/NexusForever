@@ -55,6 +55,15 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Cast a <see cref="ISpell"/> with the supplied spell4 id.
+        /// </summary>
+        /// <param name="spell4Id"></param>
+        public void CastSpell(uint spell4Id)
+        {
+            CastSpell(spell4Id, new SpellParameters());
+        }
+
+        /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
         public void CastSpell(uint spell4Id, ISpellParameters parameters)

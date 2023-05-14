@@ -11,6 +11,12 @@ namespace NexusForever.Game.Abstract.Entity
         float HitRadius { get; }
 
         /// <summary>
+        /// Cast a <see cref="ISpell"/> with the supplied spell4 id.
+        /// </summary>
+        /// <param name="spell4Id"></param>
+        void CastSpell(uint spell4Id);
+
+        /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
         void CastSpell(uint spell4Id, ISpellParameters parameters);

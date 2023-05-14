@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using NexusForever.Game.Static.Quest;
 using NexusForever.Shared;
 
 namespace NexusForever.GameTable
@@ -251,6 +252,11 @@ namespace NexusForever.GameTable
                 return null;
 
             return Entries[lookupId];
+        }
+
+        public T GetEntry<T2>(T2 id) where T2 : Enum
+        {
+            return GetEntry(id.As<T2, uint>());
         }
     }
 }

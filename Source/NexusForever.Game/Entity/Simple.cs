@@ -1,9 +1,7 @@
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
@@ -16,7 +14,6 @@ namespace NexusForever.Game.Entity
     [DatabaseEntity(EntityType.Simple)]
     public class Simple : UnitEntity, ISimple
     {
-        public byte QuestChecklistIdx { get; private set; }
         public Action<ISimple> afterAddToMap;
 
         public Simple()
@@ -50,7 +47,7 @@ namespace NexusForever.Game.Entity
         public override void Initialise(EntityModel model)
         {
             base.Initialise(model);
-            QuestChecklistIdx = model.QuestChecklistIdx;
+            scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<ISimple>(this);
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -66,18 +63,20 @@ namespace NexusForever.Game.Entity
         {
             if (CreatureEntry.DatacubeId != 0u)
                 activator.DatacubeManager.AddDatacube((ushort)CreatureEntry.DatacubeId, int.MaxValue);
+
+            base.OnActivateSuccess(activator);
         }
 
         public override void OnActivateSuccess(IPlayer activator)
         {
+            // TODO: Move below to Datacube Manager method
             uint progress = (uint)(1 << QuestChecklistIdx);
 
-            Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
-            if (entry.DatacubeId != 0u)
+            if (CreatureEntry.DatacubeId != 0u)
             {
-                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeId, DatacubeType.Datacube);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)CreatureEntry.DatacubeId, DatacubeType.Datacube);
                 if (datacube == null)
-                    activator.DatacubeManager.AddDatacube((ushort)entry.DatacubeId, progress);
+                    activator.DatacubeManager.AddDatacube((ushort)CreatureEntry.DatacubeId, progress);
                 else
                 {
                     datacube.Progress |= progress;
@@ -85,11 +84,11 @@ namespace NexusForever.Game.Entity
                 }
             }
 
-            if (entry.DatacubeVolumeId != 0u)
+            if (CreatureEntry.DatacubeVolumeId != 0u)
             {
-                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)entry.DatacubeVolumeId, DatacubeType.Journal);
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)CreatureEntry.DatacubeVolumeId, DatacubeType.Journal);
                 if (datacube == null)
-                    activator.DatacubeManager.AddDatacubeVolume((ushort)entry.DatacubeVolumeId, progress);
+                    activator.DatacubeManager.AddDatacubeVolume((ushort)CreatureEntry.DatacubeVolumeId, progress);
                 else
                 {
                     datacube.Progress |= progress;
@@ -97,9 +96,7 @@ namespace NexusForever.Game.Entity
                 }
             }
 
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, CreatureId, 1u);
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroupChecklist, CreatureId, QuestChecklistIdx);
+            base.OnActivateSuccess(activator);
         }
 
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
