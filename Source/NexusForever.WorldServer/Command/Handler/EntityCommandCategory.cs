@@ -22,13 +22,13 @@ namespace NexusForever.WorldServer.Command.Handler
             public void HandleEntityModifyDisplayInfo(ICommandContext context,
                 uint displayInfo)
             {
-                if (GameTableManager.Instance.Creature2DisplayInfo.GetEntry(displayInfo) == null)
+                if (displayInfo != 0 && GameTableManager.Instance.Creature2DisplayInfo.GetEntry(displayInfo) == null)
                 {
                     context.SendMessage($"Invalid display info id {displayInfo}!");
                     return;
                 }
 
-                context.GetTargetOrInvoker<IWorldEntity>().SetDisplayInfo(displayInfo);
+                context.GetTargetOrInvoker<IWorldEntity>().DisplayInfo = displayInfo;
             }
         }
 

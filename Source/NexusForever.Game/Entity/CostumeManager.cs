@@ -17,7 +17,7 @@ namespace NexusForever.Game.Entity
 
         public byte CostumeCap => (byte)(player.Account.RewardPropertyManager.GetRewardProperty(RewardPropertyType.CostumeSlots).GetValue(0) ?? 4u);
 
-        public sbyte CostumeIndex
+        public byte? CostumeIndex
         {
             get => costumeIndex;
             set
@@ -26,7 +26,7 @@ namespace NexusForever.Game.Entity
                 isDirty = true;
             }
         }
-        private sbyte costumeIndex;
+        private byte? costumeIndex;
 
         private bool isDirty;
 
@@ -45,7 +45,7 @@ namespace NexusForever.Game.Entity
         {
             player = owner;
 
-            costumeIndex = characterModel.ActiveCostumeIndex;
+            costumeIndex = characterModel.ActiveCostumeIndex >= 0 ? (byte)characterModel.ActiveCostumeIndex : null;
 
             foreach (CharacterCostumeModel costumeModel in characterModel.Costume)
                 costumes.Add(costumeModel.Index, new Costume(costumeModel));
@@ -62,7 +62,7 @@ namespace NexusForever.Game.Entity
                 CharacterModel character = context.Character.Find(player.CharacterId);
                 EntityEntry<CharacterModel> entity = context.Entry(character);
 
-                character.ActiveCostumeIndex = CostumeIndex;
+                character.ActiveCostumeIndex = (sbyte)(CostumeIndex ?? -1);
                 entity.Property(p => p.ActiveCostumeIndex).IsModified = true;
 
                 isDirty = false;
@@ -92,6 +92,24 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Return <see cref="IItemVisual"/> for <see cref="ICostume"/> at suppled index and <see cref="ItemSlot"/>.
+        /// </summary>
+        public IItemVisual GetItemVisual(byte costumeIndex, ItemSlot slot)
+        {
+            ICostume costume = GetCostume(costumeIndex);
+            return costume?.GetItemVisual(slot);
+        }
+
+        /// <summary>
+        /// Return a collection of <see cref="IItemVisual"/> for <see cref="ICostume"/> at supplied index.
+        /// </summary>
+        public IEnumerable<IItemVisual> GetItemVisuals(byte costumeIndex)
+        {
+            ICostume costume = GetCostume(costumeIndex);
+            return costume != null ? costume.GetItemVisuals() : Enumerable.Empty<IItemVisual>();
+        }
+
+        /// <summary>
         /// Validate then save or update <see cref="ICostume"/> from <see cref="ClientCostumeSave"/> packet.
         /// </summary>
         public void SaveCostume(ClientCostumeSave costumeSave)
@@ -117,7 +135,7 @@ namespace NexusForever.Game.Entity
                 if (costumeItem.ItemId == 0)
                     continue;
 
-                Item2Entry itemEntry = GameTableManager.Instance.Item.GetEntry(costumeItem.ItemId);
+                IItemInfo itemEntry = ItemManager.Instance.GetItemInfo(costumeItem.ItemId);
                 if (itemEntry == null)
                 {
                     SendCostumeSaveResult(CostumeSaveResult.InvalidItem);
@@ -137,7 +155,7 @@ namespace NexusForever.Game.Entity
                     return;
                 }
 
-                ItemDisplayEntry itemDisplayEntry = GameTableManager.Instance.ItemDisplay.GetEntry(Item.GetDisplayId(itemEntry));
+                ItemDisplayEntry itemDisplayEntry = GameTableManager.Instance.ItemDisplay.GetEntry(itemEntry.GetDisplayId());
                 for (int i = 0; i < costumeItem.Dyes.Length; i++)
                 {
                     if (costumeItem.Dyes[i] == 0u)
@@ -175,7 +193,8 @@ namespace NexusForever.Game.Entity
             }
 
             if (costumeSave.Index == CostumeIndex)
-                player.Inventory.VisualUpdate(costume);
+                foreach (IItemVisual item in player.Inventory.GetItemVisuals())
+                    player.AddVisual(item);
 
             SendCostume(costume);
             SendCostumeSaveResult(CostumeSaveResult.Saved, costumeSave.Index, costumeSave.MannequinIndex);
@@ -193,19 +212,13 @@ namespace NexusForever.Game.Entity
             if (index >= CostumeCap)
                 throw new ArgumentOutOfRangeException();
 
-            // if costume is null appearance will be returned to default
-            costumes.TryGetValue((byte)index, out ICostume costume);
-
             if (costumeSwapCooldown > 0d)
                 throw new InvalidOperationException();
 
-            SetCostume((sbyte)index, costume);
-        }
+            CostumeIndex = index >= 0 ? (byte)index : null;
 
-        private void SetCostume(sbyte index, ICostume costume)
-        {
-            player.Inventory.VisualUpdate(costume);
-            CostumeIndex = index;
+            foreach (IItemVisual item in player.Inventory.GetItemVisuals())
+                player.AddVisual(item);
 
             // 15 second cooldown for changing costumes, hardcoded in binary
             costumeSwapCooldown = CostumeSwapCooldown;

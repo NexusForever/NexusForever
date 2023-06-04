@@ -1,8 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace NexusForever.Game.Static.Entity
+﻿namespace NexusForever.Game.Static.Entity
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum EquippedItem
     {
         Chest            = 0,

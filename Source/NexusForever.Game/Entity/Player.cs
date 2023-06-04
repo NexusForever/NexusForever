@@ -59,7 +59,9 @@ namespace NexusForever.Game.Entity
             Costume     = 0x0004,
             InputKeySet = 0x0008,
             Flags       = 0x0020,
-            Innate      = 0x0080
+            Innate      = 0x0080,
+            Sex         = 0x0100,
+            Race        = 0x0200,
         }
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
@@ -71,10 +73,36 @@ namespace NexusForever.Game.Entity
 
         public ulong CharacterId { get; }
         public string Name { get; }
-        public Sex Sex { get; }
-        public Race Race { get; }
+
+        public Sex Sex
+        {
+            get => sex;
+            set
+            {
+                sex = value;
+                saveMask |= PlayerSaveMask.Sex;
+
+                SetVisualEmit(true);
+            }
+        }
+
+        private Sex sex;
+
+        public Race Race
+        {
+            get => race;
+            set
+            {
+                race = value;
+                saveMask |= PlayerSaveMask.Race;
+
+                SetVisualEmit(true);
+            }
+        }
+
+        private Race race;
+
         public Class Class { get; }
-        public List<float> Bones { get; } = new();
 
         public CharacterFlag Flags
         {
@@ -184,6 +212,7 @@ namespace NexusForever.Game.Entity
         public ICinematicManager CinematicManager { get; }
         public ICharacterEntitlementManager EntitlementManager { get; }
         public ILogoutManager LogoutManager { get; }
+        public IAppearanceManager AppearanceManager { get; }
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -203,8 +232,8 @@ namespace NexusForever.Game.Entity
             Account           = account;
             CharacterId       = model.Id;
             Name              = model.Name;
-            Sex               = (Sex)model.Sex;
-            Race              = (Race)model.Race;
+            sex               = (Sex)model.Sex;
+            race              = (Race)model.Race;
             Class             = (Class)model.Class;
             path              = (Path)model.ActivePath;
             PathActivatedTime = model.PathActivatedTimestamp;
@@ -251,6 +280,8 @@ namespace NexusForever.Game.Entity
             LogoutManager           = new LogoutManager(this);
             LogoutManager.OnTimerFinished += Logout;
 
+            AppearanceManager       = new AppearanceManager(this, model);
+
             // temp
             Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
             Properties.Add(Property.ShieldCapacityMax, new PropertyValue(Property.ShieldCapacityMax, 0f, 450f));
@@ -261,21 +292,6 @@ namespace NexusForever.Game.Entity
             Properties.Add(Property.ResourceMax0, new PropertyValue(Property.ResourceMax0, 500f, 500f));
             // dash
             Properties.Add(Property.ResourceMax7, new PropertyValue(Property.ResourceMax7, 200f, 200f));
-
-            ICostume costume = null;
-            if (CostumeManager.CostumeIndex >= 0)
-                costume = CostumeManager.GetCostume((byte)CostumeManager.CostumeIndex);
-
-            SetAppearance(Inventory.GetItemVisuals(costume));
-            SetAppearance(model.Appearance
-                .Select(a => new ItemVisual
-                {
-                    Slot      = (ItemSlot)a.Slot,
-                    DisplayId = a.DisplayId
-                }));
-
-            foreach (CharacterBoneModel bone in model.Bone.OrderBy(bone => bone.BoneIndex))
-                Bones.Add(bone.Bone);
 
             SetStat(Stat.Sheathed, 1u);
 
@@ -436,6 +452,18 @@ namespace NexusForever.Game.Entity
                     entity.Property(p => p.InnateIndex).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Sex) != 0)
+                {
+                    model.Sex = (byte)Sex;
+                    entity.Property(p => p.Sex).IsModified = true;                    
+                }
+
+                if ((saveMask & PlayerSaveMask.Race) != 0)
+                {
+                    model.Race = (byte)Race;
+                    entity.Property(p => p.Race).IsModified = true;
+                }
+
                 saveMask = PlayerSaveMask.None;
             }
 
@@ -467,6 +495,7 @@ namespace NexusForever.Game.Entity
             ReputationManager.Save(context);
             GuildManager.Save(context);
             EntitlementManager.Save(context);
+            AppearanceManager.Save(context);
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -479,7 +508,9 @@ namespace NexusForever.Game.Entity
                 Race      = Race,
                 Class     = Class,
                 Sex       = Sex,
-                Bones     = Bones,
+                Bones     = AppearanceManager.GetBones()
+                    .Select(b => b.BoneValue)
+                    .ToList(),
                 Title     = TitleManager.ActiveTitleId,
                 GuildIds  = GuildManager
                     .Select(g => g.Id)
@@ -592,7 +623,7 @@ namespace NexusForever.Game.Entity
                         })
                         .ToList()
                 },
-                ActiveCostumeIndex    = CostumeManager.CostumeIndex,
+                ActiveCostumeIndex    = CostumeManager.CostumeIndex ?? -1,
                 InputKeySet           = (uint)InputKeySet,
                 CharacterEntitlements = EntitlementManager
                     .Select(e => new ServerPlayerCreate.CharacterEntitlement
@@ -904,22 +935,6 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Reset and restore default appearance for <see cref="IPlayer"/>.
-        /// </summary>
-        public void ResetAppearance()
-        {
-            DisplayInfo = 0;
-
-            EnqueueToVisible(new ServerEntityVisualUpdate
-            {
-                UnitId      = Guid,
-                Race        = (byte)Race,
-                Sex         = (byte)Sex,
-                ItemVisuals = GetAppearance().ToList()
-            }, true);
-        }
-
-        /// <summary>
         /// Make <see cref="IPlayer"/> sit on provided <see cref="IWorldEntity"/>.
         /// </summary>
         public void Sit(IWorldEntity chair)
@@ -1111,6 +1126,34 @@ namespace NexusForever.Game.Entity
             {
                 Flags = flags
             });
+        }
+
+        /// <summary>
+        /// Add or update <see cref="IItemVisual"/>.
+        /// </summary>
+        /// <remarks>
+        /// Checks for <see cref="IItemVisual"/> from <see cref="ICostume"/> if equipped for the same <see cref="ItemSlot"/> and replace if necessary.
+        /// </remarks>
+        public override void AddVisual(IItemVisual visual)
+        {
+            if (CostumeManager.CostumeIndex.HasValue)
+            {
+                IItemVisual costumeVisual = CostumeManager.GetItemVisual(CostumeManager.CostumeIndex.Value, visual.Slot);
+                if (costumeVisual != null && costumeVisual.DisplayId.HasValue)
+                    visual = costumeVisual;
+            }
+
+            base.AddVisual(visual);
+        }
+
+        protected override ServerEntityVisualUpdate BuildVisualUpdate()
+        {
+            // TODO: note sure if this should be handled better? Should Race and Sex be on the world entity?
+            // when emitting a visual update, include player specific properties
+            ServerEntityVisualUpdate update = base.BuildVisualUpdate();
+            update.Race = (byte)Race;
+            update.Sex  = (byte)Sex;
+            return update;
         }
     }
 }

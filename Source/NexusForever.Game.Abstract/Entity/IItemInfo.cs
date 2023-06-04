@@ -13,6 +13,11 @@ namespace NexusForever.Game.Abstract.Entity
         ItemSlotEntry SlotEntry { get; }
 
         /// <summary>
+        /// Return the display id for <see cref="IItemInfo"/>.
+        /// </summary>
+        ushort GetDisplayId();
+
+        /// <summary>
         /// Returns if item can be equipped into an item slot.
         /// </summary>
         bool IsEquippable();

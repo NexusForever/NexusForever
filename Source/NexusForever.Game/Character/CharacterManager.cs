@@ -10,7 +10,6 @@ using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
-using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 using NLog;
 
@@ -28,7 +27,6 @@ namespace NexusForever.Game.Character
         private ulong nextCharacterId;
 
         private ImmutableDictionary<(Race, Faction, CharacterCreationStart), ILocation> characterCreationData;
-        private ImmutableDictionary<uint, ImmutableList<CharacterCustomizationEntry>> characterCustomisations;
 
         private readonly Dictionary<ulong, ICharacter> characters = new();
         private readonly Dictionary<string, ulong> characterNameToId = new(StringComparer.OrdinalIgnoreCase);
@@ -41,7 +39,6 @@ namespace NexusForever.Game.Character
             nextCharacterId = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextCharacterId() + 1ul;
 
             CacheCharacterCreate();
-            CacheCharacterCustomisations();
 
             BuildCharacterInfoFromDb();
         }
@@ -70,21 +67,6 @@ namespace NexusForever.Game.Character
             }
 
             characterCreationData = entries.ToImmutable();
-        }
-
-        private void CacheCharacterCustomisations()
-        {
-            var entries = new Dictionary<uint, List<CharacterCustomizationEntry>>();
-            foreach (CharacterCustomizationEntry entry in GameTableManager.Instance.CharacterCustomization.Entries)
-            {
-                uint primaryKey = (entry.Value00 << 24) | (entry.CharacterCustomizationLabelId00 << 16) | (entry.Gender << 8) | entry.RaceId;
-                if (!entries.ContainsKey(primaryKey))
-                    entries.Add(primaryKey, new List<CharacterCustomizationEntry>());
-
-                entries[primaryKey].Add(entry);
-            }
-
-            characterCustomisations = entries.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
         /// <summary>
@@ -168,15 +150,6 @@ namespace NexusForever.Game.Character
         public ILocation GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart)
         {
             return characterCreationData.TryGetValue((race, faction, creationStart), out ILocation location) ? location : null;
-        }
-
-        /// <summary>
-        /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
-        /// </summary>
-        public ImmutableList<CharacterCustomizationEntry> GetPrimaryCharacterCustomisation(uint race, uint sex, uint label, uint value)
-        {
-            uint key = (value << 24) | (label << 16) | (sex << 8) | race;
-            return characterCustomisations.TryGetValue(key, out ImmutableList<CharacterCustomizationEntry> entries) ? entries : null;
         }
     }
 }

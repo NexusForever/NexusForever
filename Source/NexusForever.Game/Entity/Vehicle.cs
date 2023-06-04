@@ -82,6 +82,8 @@ namespace NexusForever.Game.Entity
 
         public override void Update(double lastTick)
         {
+            base.Update(lastTick);
+
             // passengers are delay added to make sure the vehicle exists at the client
             while (pendingAdd.TryDequeue(out IVehiclePassenger passenger))
                 PassengerAdd(passenger);

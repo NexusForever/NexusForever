@@ -50,14 +50,9 @@ namespace NexusForever.Game.Abstract.Entity
         IItem GetItem(ulong guid);
 
         /// <summary>
-        /// Returns <see cref="ItemVisual"/> for any visible items.
+        /// Returns <see cref="IItemVisual"/> for any visible items.
         /// </summary>
-        IEnumerable<ItemVisual> GetItemVisuals(ICostume costume);
-
-        /// <summary>
-        /// Update <see cref="ItemVisual"/> and broadcast to client for optional supplied <see cref="ICostume"/>.
-        /// </summary>
-        void VisualUpdate(ICostume costume);
+        IEnumerable<IItemVisual> GetItemVisuals();
 
         /// <summary>
         /// Create a new <see cref="IItem"/> from supplied <see cref="Spell4BaseEntry"/> in the first available <see cref="InventoryLocation.Ability"/> bag slot.

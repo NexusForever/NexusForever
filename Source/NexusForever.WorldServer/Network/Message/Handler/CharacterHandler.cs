@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Hosting;
 using NexusForever.Cryptography;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
@@ -14,6 +14,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Server;
 using NexusForever.Game.Character;
+using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -32,7 +33,6 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared.Game.Events;
 using NLog;
@@ -201,28 +201,30 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         var costumeManager = new CostumeManager(null, character);
 
                         ICostume costume = null;
-                        if (character.ActiveCostumeIndex >= 0)
+                        if (costumeManager.CostumeIndex.HasValue)
                             costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
 
                         listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
 
-                        foreach (ItemVisual itemVisual in inventory.GetItemVisuals(costume))
-                            listCharacter.Gear.Add(itemVisual);
+                        Dictionary<ItemSlot, IItemVisual> costumeVisuals = costume?.GetItemVisuals().ToDictionary(c => c.Slot);
+                        foreach (IItemVisual itemVisual in inventory.GetItemVisuals())
+                        {
+                            if (costumeVisuals != null
+                                && costumeVisuals.TryGetValue(itemVisual.Slot, out IItemVisual costumeVisual)
+                                && costumeVisual.DisplayId.HasValue)
+                                listCharacter.Gear.Add(costumeVisual.Build());
+                            else
+                                listCharacter.Gear.Add(itemVisual.Build());
+                        }   
 
                         foreach (CharacterAppearanceModel appearance in character.Appearance)
                         {
-                            listCharacter.Appearance.Add(new ItemVisual
+                            listCharacter.Appearance.Add(new NexusForever.Network.World.Message.Model.Shared.ItemVisual
                             {
                                 Slot = (ItemSlot)appearance.Slot,
                                 DisplayId = appearance.DisplayId
                             });
                         }
-
-                        /*foreach (CharacterCustomisation customisation in character.CharacterCustomisation)
-                        {
-                            listCharacter.Labels.Add(customisation.Label);
-                            listCharacter.Values.Add(customisation.Value);
-                        }*/
 
                         foreach (CharacterBoneModel bone in character.Bone.OrderBy(bone => bone.BoneIndex))
                         {
@@ -276,6 +278,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     && !session.Account.CurrencyManager.CanAfford(AccountCurrencyType.MaxLevelToken, 1ul))
                     return CharacterModifyResult.CreateFailed_InsufficientFunds;
 
+                List<(uint Label, uint Value)> customisations = characterCreate.Labels
+                    .Zip(characterCreate.Values, ValueTuple.Create)
+                    .ToList();
+
+                if (!CustomisationManager.Instance.Validate((Race)creationEntry.RaceId, (Sex)creationEntry.Sex, (Faction)creationEntry.FactionId, customisations))
+                    return CharacterModifyResult.CreateFailed;
+
                 return null;
             }
 
@@ -325,10 +334,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     });
                 }
 
-                // merge seperate label and value lists into a single dictonary
-                Dictionary<uint, uint> customisations = characterCreate.Labels
-                    .Zip(characterCreate.Values, (l, v) => new { l, v })
-                    .ToDictionary(p => p.l, p => p.v);
+                IList<(uint Label, uint Value)> customisations = characterCreate.Labels
+                    .Zip(characterCreate.Values, ValueTuple.Create)
+                    .ToList();
 
                 foreach ((uint label, uint value) in customisations)
                 {
@@ -337,15 +345,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                         Label = label,
                         Value = value
                     });
+                }
 
-                    CharacterCustomizationEntry entry = GetCharacterCustomisation(customisations, creationEntry.RaceId, creationEntry.Sex, label, value);
-                    if (entry == null)
-                        continue;
-
+                foreach (IItemVisual visual in CustomisationManager.Instance.GetItemVisuals((Race)character.Race, (Sex)character.Sex, customisations))
+                {
                     character.Appearance.Add(new CharacterAppearanceModel
                     {
-                        Slot      = (byte)entry.ItemSlotId,
-                        DisplayId = (ushort)entry.ItemDisplayId
+                        Slot = (byte)visual.Slot,
+                        DisplayId = (ushort)visual.DisplayId
                     });
                 }
 
@@ -467,22 +474,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 });
 
                 throw;
-            }
-
-            CharacterCustomizationEntry GetCharacterCustomisation(Dictionary<uint, uint> customisations, uint race, uint sex, uint primaryLabel, uint primaryValue)
-            {
-                ImmutableList<CharacterCustomizationEntry> entries = CharacterManager.Instance.GetPrimaryCharacterCustomisation(race, sex, primaryLabel, primaryValue);
-                if (entries == null)
-                    return null;
-                if (entries.Count == 1)
-                    return entries[0];
-
-                // customisation has multiple results, filter with secondary label and value 
-                uint secondaryLabel = entries.First(e => e.CharacterCustomizationLabelId01 != 0).CharacterCustomizationLabelId01;
-                uint secondaryValue = customisations[secondaryLabel];
-
-                CharacterCustomizationEntry entry = entries.SingleOrDefault(e => e.CharacterCustomizationLabelId01 == secondaryLabel && e.Value01 == secondaryValue);
-                return entry ?? entries.Single(e => e.CharacterCustomizationLabelId01 == 0 && e.Value01 == 0);
             }
         }
 
@@ -736,6 +727,36 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     .Select(i => i.Build())
                     .ToList()
             });
+        }
+        
+        [MessageHandler(GameMessageOpcode.ClientCharacterAppearanceChange)]
+        public static void HandleAppearanceChange(WorldSession session, ClientCharacterAppearanceChange appearanceChange)
+        {
+            List<(uint Label, uint Value)> customisations = appearanceChange.Labels
+                .Zip(appearanceChange.Values, ValueTuple.Create)
+                .ToList();
+
+            if (!CustomisationManager.Instance.Validate(appearanceChange.Race, appearanceChange.Sex, session.Player.Faction1, customisations))
+                throw new InvalidPacketValueException();
+
+            if (appearanceChange.UseServiceTokens)
+            {
+                uint cost = CustomisationManager.Instance.CalculateCostTokens(session.Player, appearanceChange.Race, appearanceChange.Sex);
+                if (!session.Player.Account.CurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, cost))
+                    return;
+
+                session.Player.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, cost);
+            }
+            else
+            {
+                uint cost = CustomisationManager.Instance.CalculateCostCredits(session.Player, appearanceChange.Race, appearanceChange.Sex, customisations, appearanceChange.Bones);
+                if (!session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, cost))
+                    return;
+
+                session.Player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
+            }
+
+            session.Player.AppearanceManager.Update(appearanceChange.Race, appearanceChange.Sex, customisations, appearanceChange.Bones);
         }
     }
 }

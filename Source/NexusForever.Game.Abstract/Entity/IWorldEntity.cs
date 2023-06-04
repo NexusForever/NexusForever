@@ -7,7 +7,6 @@ using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -22,11 +21,11 @@ namespace NexusForever.Game.Abstract.Entity
         Dictionary<Property, IPropertyValue> Properties { get; }
 
         uint EntityId { get; }
-        uint CreatureId { get; }
+        uint CreatureId { get; set; }
         Creature2Entry CreatureEntry { get; }
-        uint DisplayInfo { get; }
+        uint DisplayInfo { get; set; }
         Creature2DisplayInfoEntry CreatureDisplayEntry { get; }
-        ushort OutfitInfo { get; }
+        ushort OutfitInfo { get; set; }
         Creature2OutfitInfoEntry CreatureOutfitEntry { get; }
         Faction Faction1 { get; set; }
         Faction Faction2 { get; set; }
@@ -70,27 +69,36 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void OnActivateCast(IPlayer activator);
 
+
+        /// <summary>
+        /// Return a collection of <see cref="IItemVisual"/> for <see cref="IWorldEntity"/>.
+        /// </summary>
+        IEnumerable<IItemVisual> GetVisuals();
+
+        /// <summary>
+        /// Set <see cref="IWorldEntity"/> to broadcast all <see cref="IItemVisual"/> on next world update.
+        /// </summary>
+        void SetVisualEmit(bool status);
+
+        /// <summary>
+        /// Add or update <see cref="IItemVisual"/> at <see cref="ItemSlot"/> with supplied data.
+        /// </summary>
+        void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, int dyeData = 0);
+
+        /// <summary>
+        /// Add or update <see cref="IItemVisual"/>.
+        /// </summary>
+        void AddVisual(IItemVisual visual);
+
+        /// <summary>
+        /// Remove <see cref="IItemVisual"/> at supplied <see cref="ItemSlot"/>.
+        /// </summary>
+        void RemoveVisual(ItemSlot slot);
+
         /// <summary>
         /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/> as an <see cref="Enum"/>.
         /// </summary>
         T? GetStatEnum<T>(Stat stat) where T : struct, Enum;
-
-        /// <summary>
-        /// Update <see cref="ItemVisual"/> for multiple supplied <see cref="ItemSlot"/>.
-        /// </summary>
-        void SetAppearance(IEnumerable<ItemVisual> visuals);
-
-        /// <summary>
-        /// Update <see cref="ItemVisual"/> for supplied <see cref="ItemVisual"/>.
-        /// </summary>
-        void SetAppearance(ItemVisual visual);
-
-        IEnumerable<ItemVisual> GetAppearance();
-
-        /// <summary>
-        /// Update the display info for the <see cref="IWorldEntity"/>, this overrides any other appearance changes.
-        /// </summary>
-        void SetDisplayInfo(uint displayInfo);
 
         /// <summary>
         /// Enqueue broadcast of <see cref="IWritable"/> to all visible <see cref="IPlayer"/>'s in range.

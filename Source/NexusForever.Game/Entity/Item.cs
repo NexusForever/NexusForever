@@ -31,37 +31,6 @@ namespace NexusForever.Game.Entity
             ExpirationTimeLeft = 0x0100
         }
 
-        /// <summary>
-        /// Return the display id for <see cref="Item2Entry"/>.
-        /// </summary>
-        public static ushort GetDisplayId(Item2Entry entry)
-        {
-            if (entry == null)
-                return 0;
-
-            if (entry.ItemSourceId == 0u)
-                return (ushort)entry.ItemDisplayId;
-
-            List<ItemDisplaySourceEntryEntry> entries = AssetManager.Instance.GetItemDisplaySource(entry.ItemSourceId)
-                .Where(e => e.Item2TypeId == entry.Item2TypeId)
-                .ToList();
-
-            if (entries.Count == 1)
-                return (ushort)entries[0].ItemDisplayId;
-            else if (entries.Count > 1)
-            {
-                if (entry.ItemDisplayId > 0)
-                    return (ushort)entry.ItemDisplayId; // This is what the preview window shows for "Frozen Wrangler Mitts" (Item2Id: 28366).
-
-                ItemDisplaySourceEntryEntry fallbackVisual = entries.FirstOrDefault(e => entry.PowerLevel >= e.ItemMinLevel && entry.PowerLevel <= e.ItemMaxLevel);
-                if (fallbackVisual != null)
-                    return (ushort)fallbackVisual.ItemDisplayId;
-            }
-
-            // TODO: research this...
-            throw new NotImplementedException();
-        }
-
         public uint Id => Info?.Id ?? SpellEntry.Id;
         public IItemInfo Info { get; }
         public Spell4BaseEntry SpellEntry { get; }

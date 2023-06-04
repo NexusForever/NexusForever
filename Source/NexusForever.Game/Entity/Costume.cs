@@ -123,6 +123,42 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Get <see cref="ICostumeItem"/> for supplied <see cref="ItemSlot"/>.
+        /// </summary>
+        public ICostumeItem GetItem(ItemSlot slot)
+        {
+            return items.SingleOrDefault(i => i.ItemSlot == slot);
+        }
+
+        /// <summary>
+        /// Get <see cref="IItemVisual"/> for <see cref="ICostumeItem"/> for supplied <see cref="ItemSlot"/>.
+        /// </summary>
+        public IItemVisual GetItemVisual(ItemSlot slot)
+        {
+            ICostumeItem item = GetItem(slot);
+            return item != null ? GetItemVisual(item) : null;
+        }
+
+        private IItemVisual GetItemVisual(ICostumeItem item)
+        {
+            IItemVisual visual = item.GetItemVisual();
+
+            // remove visual if slot is hidden
+            if ((Mask & 1 << (int)item.Slot) == 0)
+                visual.DisplayId = 0;
+
+            return visual;
+        }
+
+        /// <summary>
+        /// Return a collection of <see cref="IItemVisual"/> for <see cref="ICostume"/>.
+        /// </summary>
+        public IEnumerable<IItemVisual> GetItemVisuals()
+        {
+            return items.Select(GetItemVisual);
+        }
+
+        /// <summary>
         /// Update <see cref="ICostume"/> from <see cref="ClientCostumeSave"/>.
         /// </summary>
         public void Update(ClientCostumeSave costumeSave)
@@ -141,12 +177,12 @@ namespace NexusForever.Game.Entity
             var networkCostume = new NetworkCostume
             {
                 Index = Index,
-                Mask = Mask
+                Mask  = Mask
             };
 
             foreach (ICostumeItem costumeItem in items)
             {
-                networkCostume.ItemIds[(byte)costumeItem.Slot] = costumeItem.ItemId;
+                networkCostume.ItemIds[(byte)costumeItem.Slot] = costumeItem.ItemId ?? 0;
                 networkCostume.DyeData[(byte)costumeItem.Slot] = costumeItem.DyeData;
             }
 

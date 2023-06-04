@@ -87,9 +87,9 @@ namespace NexusForever.Game
         /// <summary>
         /// Returns a collection of bag indexes for <see cref="InventoryLocation.Equipped"/> for supplied <see cref="ItemSlot"/>.
         /// </summary>
-        public ImmutableList<EquippedItem> GetEquippedBagIndexes(ItemSlot slot)
+        public IEnumerable<EquippedItem> GetEquippedBagIndexes(ItemSlot slot)
         {
-            return equippedItemSlots.TryGetValue(slot, out ImmutableList<EquippedItem> entries) ? entries : null;
+            return equippedItemSlots.TryGetValue(slot, out ImmutableList<EquippedItem> entries) ? entries : Enumerable.Empty<EquippedItem>();
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Game.Abstract
@@ -21,6 +20,6 @@ namespace NexusForever.Game.Abstract
         /// <summary>
         /// Returns a collection of bag indexes for <see cref="InventoryLocation.Equipped"/> for supplied <see cref="ItemSlot"/>.
         /// </summary>
-        ImmutableList<EquippedItem> GetEquippedBagIndexes(ItemSlot slot);
+        IEnumerable<EquippedItem> GetEquippedBagIndexes(ItemSlot slot);
     }
 }

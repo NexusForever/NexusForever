@@ -22,10 +22,9 @@ namespace NexusForever.Game.Abstract.Entity
 
         public ulong CharacterId { get; }
         public string Name { get; }
-        Sex Sex { get; }
-        Race Race { get; }
+        Sex Sex { get; set; }
+        Race Race { get; set; }
         Class Class { get; }
-        List<float> Bones { get; }
         CharacterFlag Flags { get; set; }
         Static.Entity.Path Path { get; set; }
         DateTime PathActivatedTime { get; }
@@ -88,6 +87,7 @@ namespace NexusForever.Game.Abstract.Entity
         ICinematicManager CinematicManager { get; }
         ICharacterEntitlementManager EntitlementManager { get; }
         ILogoutManager LogoutManager { get; }
+        IAppearanceManager AppearanceManager { get; }
 
         IVendorInfo SelectedVendorInfo { get; set; }
 
@@ -140,11 +140,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// Invoked when <see cref="IPlayer"/> teleport fails.
         /// </summary>
         void OnTeleportToFailed(GenericError error);
-
-        /// <summary>
-        /// Reset and restore default appearance for <see cref="IPlayer"/>.
-        /// </summary>
-        void ResetAppearance();
 
         /// <summary>
         /// Make <see cref="IPlayer"/> sit on provided <see cref="IWorldEntity"/>.

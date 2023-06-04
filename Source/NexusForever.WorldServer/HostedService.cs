@@ -9,6 +9,7 @@ using NexusForever.Game;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
+using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Guild;
@@ -109,6 +110,8 @@ namespace NexusForever.WorldServer
             ServerManager.Instance.Initialise(RealmContext.Instance.RealmId);
 
             TextFilterManager.Instance.Initialise();
+
+            CustomisationManager.Instance.Initialise();
 
             ShutdownManager.Instance.Initialise(WorldServer.Shutdown);
             LoginQueueManager.Instance.Initialise(CharacterHandler.SendCharacterListPackets);

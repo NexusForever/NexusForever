@@ -34,9 +34,10 @@ namespace NexusForever.Game.Entity
         public uint CreatureId
         {
             get => CreatureEntry?.Id ?? 0;
-            private set
+            set
             {
                 CreatureEntry = GameTableManager.Instance.Creature2.GetEntry(value);
+                SetVisualEmit(true);
             }
         }
 
@@ -48,6 +49,7 @@ namespace NexusForever.Game.Entity
             set
             {
                 CreatureDisplayEntry = GameTableManager.Instance.Creature2DisplayInfo.GetEntry(value);
+                SetVisualEmit(true);
             }
         }
 
@@ -56,9 +58,10 @@ namespace NexusForever.Game.Entity
         public ushort OutfitInfo
         {
             get => (ushort)(CreatureOutfitEntry?.Id ?? 0);
-            private set
+            set
             {
                 CreatureOutfitEntry = GameTableManager.Instance.Creature2OutfitInfo.GetEntry(value);
+                SetVisualEmit(true);
             }
         }
 
@@ -108,7 +111,8 @@ namespace NexusForever.Game.Entity
 
         protected readonly Dictionary<Stat, IStatValue> stats = new();
 
-        private readonly Dictionary<ItemSlot, ItemVisual> itemVisuals = new();
+        private bool emitVisual;
+        private readonly Dictionary<ItemSlot, IItemVisual> itemVisuals = new();
 
         /// <summary>
         /// Create a new <see cref="IWorldEntity"/> with supplied <see cref="EntityType"/>.
@@ -126,6 +130,8 @@ namespace NexusForever.Game.Entity
             CreatureId  = creatureId;
             DisplayInfo = displayInfo;
             OutfitInfo  = outfitInfo;
+
+            SetVisualEmit(false);
         }
 
         /// <summary>
@@ -133,18 +139,20 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
-            EntityId     = model.Id;
-            CreatureId   = model.Creature;
-            Rotation     = new Vector3(model.Rx, model.Ry, model.Rz);
-            DisplayInfo  = model.DisplayInfo;
-            OutfitInfo   = model.OutfitInfo;
-            Faction1     = (Faction)model.Faction1;
-            Faction2     = (Faction)model.Faction2;
-            ActivePropId = model.ActivePropId;
+            EntityId      = model.Id;
+            CreatureId    = model.Creature;
+            Rotation      = new Vector3(model.Rx, model.Ry, model.Rz);
+            DisplayInfo   = model.DisplayInfo;
+            OutfitInfo    = model.OutfitInfo;
+            Faction1      = (Faction)model.Faction1;
+            Faction2      = (Faction)model.Faction2;
+            ActivePropId  = model.ActivePropId;
             WorldSocketId = model.WorldSocketId;
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+
+            SetVisualEmit(false);
         }
 
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
@@ -167,6 +175,12 @@ namespace NexusForever.Game.Entity
         {
             base.Update(lastTick);
             MovementManager.Update(lastTick);
+
+            if (emitVisual)
+            {
+                EnqueueToVisible(BuildVisualUpdate(), true);
+                SetVisualEmit(false);
+            }
         }
 
         protected abstract IEntityModel BuildEntityModel();
@@ -189,7 +203,9 @@ namespace NexusForever.Game.Entity
                     })
                     .ToList(),
                 Commands     = MovementManager.ToList(),
-                VisibleItems = itemVisuals.Values.ToList(),
+                VisibleItems = itemVisuals
+                    .Select(v => v.Value.Build())
+                    .ToList(),
                 Properties   = Properties.Values
                     .Select(p => new NetworkPropertyValue
                     {
@@ -238,6 +254,72 @@ namespace NexusForever.Game.Entity
         public virtual void OnActivateCast(IPlayer activator)
         {
             // deliberately empty
+        }
+
+        /// <summary>
+        /// Return a collection of <see cref="IItemVisual"/> for <see cref="IWorldEntity"/>.
+        /// </summary>
+        public IEnumerable<IItemVisual> GetVisuals()
+        {
+            return itemVisuals.Values;
+        }
+
+        /// <summary>
+        /// Set <see cref="IWorldEntity"/> to broadcast all <see cref="IItemVisual"/> on next world update.
+        /// </summary>
+        public void SetVisualEmit(bool status)
+        {
+            emitVisual = status;
+        }
+
+        /// <summary>
+        /// Add or update <see cref="IItemVisual"/> at <see cref="ItemSlot"/> with supplied data.
+        /// </summary>
+        public void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, int dyeData = 0)
+        {
+            AddVisual(new ItemVisual
+            {
+                Slot        = slot,
+                DisplayId   = displayId,
+                ColourSetId = colourSetId,
+                DyeData     = dyeData
+            });
+        }
+
+        /// <summary>
+        /// Add or update <see cref="IItemVisual"/>.
+        /// </summary>
+        public virtual void AddVisual(IItemVisual visual)
+        {
+            if (!itemVisuals.ContainsKey(visual.Slot))
+                itemVisuals.Add(visual.Slot, visual);
+            else
+                itemVisuals[visual.Slot] = visual;
+
+            SetVisualEmit(true);
+        }
+
+        /// <summary>
+        /// Remove <see cref="IItemVisual"/> at supplied <see cref="ItemSlot"/>.
+        /// </summary>
+        public void RemoveVisual(ItemSlot slot)
+        {
+            itemVisuals.Remove(slot);
+            SetVisualEmit(true);
+        }
+
+        protected virtual ServerEntityVisualUpdate BuildVisualUpdate()
+        {
+            return new ServerEntityVisualUpdate
+            {
+                UnitId      = Guid,
+                CreatureId  = CreatureId,
+                DisplayInfo = DisplayInfo,
+                OutfitInfo  = OutfitInfo,
+                ItemVisuals = itemVisuals.Values
+                    .Select(v => v.Build())
+                    .ToList()
+            };
         }
 
         protected void SetProperty(Property property, float value, float baseValue = 0.0f)
@@ -365,50 +447,6 @@ namespace NexusForever.Game.Entity
         protected void SetStat<T>(Stat stat, T value) where T : Enum, IConvertible
         {
             SetStat(stat, value.ToUInt32(null));
-        }
-
-        /// <summary>
-        /// Update <see cref="ItemVisual"/> for multiple supplied <see cref="ItemSlot"/>.
-        /// </summary>
-        public void SetAppearance(IEnumerable<ItemVisual> visuals)
-        {
-            foreach (ItemVisual visual in visuals)
-                SetAppearance(visual);
-        }
-
-        /// <summary>
-        /// Update <see cref="ItemVisual"/> for supplied <see cref="ItemVisual"/>.
-        /// </summary>
-        public void SetAppearance(ItemVisual visual)
-        {
-            if (visual.DisplayId != 0)
-            {
-                if (!itemVisuals.ContainsKey(visual.Slot))
-                    itemVisuals.Add(visual.Slot, visual);
-                else
-                    itemVisuals[visual.Slot] = visual;
-            }
-            else
-                itemVisuals.Remove(visual.Slot);
-        }
-
-        public IEnumerable<ItemVisual> GetAppearance()
-        {
-            return itemVisuals.Values;
-        }
-
-        /// <summary>
-        /// Update the display info for the <see cref="IWorldEntity"/>, this overrides any other appearance changes.
-        /// </summary>
-        public void SetDisplayInfo(uint displayInfo)
-        {
-            DisplayInfo = displayInfo;
-
-            EnqueueToVisible(new ServerEntityVisualUpdate
-            {
-                UnitId      = Guid,
-                DisplayInfo = DisplayInfo
-            }, true);
         }
 
         /// <summary>

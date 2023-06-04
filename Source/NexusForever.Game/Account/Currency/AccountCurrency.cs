@@ -28,7 +28,7 @@ namespace NexusForever.Game.Account.Currency
             get => amount;
             private set
             {
-                amount += value;
+                amount = value;
                 saveMask |= AccountCurrencySaveMask.Amount;
             }
         }
