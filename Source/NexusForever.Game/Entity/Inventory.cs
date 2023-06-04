@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
@@ -171,9 +170,9 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Returns <see cref="ItemVisual"/> for any visible items.
+        /// Returns <see cref="IItemVisual"/> for any visible items.
         /// </summary>
-        public IEnumerable<ItemVisual> GetItemVisuals(ICostume costume)
+        public IEnumerable<IItemVisual> GetItemVisuals()
         {
             IBag bag = GetBag(InventoryLocation.Equipped);
             Debug.Assert(bag != null);
@@ -183,102 +182,12 @@ namespace NexusForever.Game.Entity
                 if (!IsVisualItemSlot(item.Location, item.BagIndex))
                     continue;
 
-                ItemVisual visual = GetItemVisual((ItemSlot)item.Info.TypeEntry.ItemSlotId, costume);
-                if (visual != null)
-                    yield return visual;
-            }
-        }
-
-        /// <summary>
-        /// Returns <see cref="ItemVisual"/> for supplied <see cref="ItemSlot"/>.
-        /// </summary>
-        private ItemVisual GetItemVisual(ItemSlot itemSlot, ICostume costume)
-        {
-            ImmutableList<EquippedItem> indexes = ItemManager.Instance.GetEquippedBagIndexes(itemSlot);
-            if (indexes == null || indexes.Count != 1)
-                throw new ArgumentOutOfRangeException();
-
-            EquippedItem index = indexes[0];
-
-            ICostumeItem costumeItem = null;
-            if (costume != null)
-            {
-                if (index == EquippedItem.WeaponPrimary)
-                    costumeItem = costume.GetItem(CostumeItemSlot.Weapon);
-                else if (index >= EquippedItem.Chest && index <= EquippedItem.Hands)
+                yield return new ItemVisual
                 {
-                    // skip any slot that is hidden
-                    if ((costume.Mask & 1 << (int)index) == 0)
-                        return new ItemVisual
-                        {
-                            Slot = itemSlot
-                        };
-
-                    costumeItem = costume.GetItem((CostumeItemSlot)index);
-                }
+                    Slot      = (ItemSlot)item.Info.TypeEntry.ItemSlotId,
+                    DisplayId = item.Info.GetDisplayId()
+                };
             }
-
-            IBag bag = GetBag(InventoryLocation.Equipped);
-            Debug.Assert(bag != null);
-            IItem item = bag.GetItem((uint)index);
-
-            return new ItemVisual
-            {
-                Slot      = itemSlot,
-                DisplayId = Item.GetDisplayId(costumeItem?.Entry ?? item?.Info.Entry),
-                DyeData   = costumeItem?.DyeData ?? 0
-            };
-        }
-
-        /// <summary>
-        /// Update <see cref="ItemVisual"/> and broadcast <see cref="ServerItemVisualUpdate"/> for optional supplied <see cref="ICostume"/>.
-        /// </summary>
-        public void VisualUpdate(ICostume costume)
-        {
-            var itemVisualUpdate = new ServerItemVisualUpdate
-            {
-                Guid = player.Guid
-            };
-
-            itemVisualUpdate.ItemVisuals.Add(VisualUpdate(ItemSlot.WeaponPrimary, costume));
-            for (ItemSlot index = ItemSlot.ArmorChest; index <= ItemSlot.ArmorHands; index++)
-                itemVisualUpdate.ItemVisuals.Add(VisualUpdate(index, costume));
-
-            if (!player.IsLoading)
-                player.EnqueueToVisible(itemVisualUpdate, true);
-        }
-
-        /// <summary>
-        /// Update <see cref="ItemVisual"/> and broadcast <see cref="ServerItemVisualUpdate"/> for supplied <see cref="IItem"/>
-        /// </summary>
-        private void VisualUpdate(IItem item)
-        {
-            if (item == null)
-                throw new ArgumentNullException();
-
-            var itemVisualUpdate = new ServerItemVisualUpdate
-            {
-                Guid = player.Guid
-            };
-
-            ICostume costume = null;
-            if (player.CostumeManager.CostumeIndex >= 0)
-                costume = player.CostumeManager.GetCostume((byte)player.CostumeManager.CostumeIndex);
-
-            itemVisualUpdate.ItemVisuals.Add(VisualUpdate((ItemSlot)item.Info.TypeEntry.ItemSlotId, costume));
-
-            if (!player.IsLoading)
-                player.EnqueueToVisible(itemVisualUpdate, true);
-        }
-
-        /// <summary>
-        /// Update visual for supplied <see cref="ItemSlot"/> and optional <see cref="ICostume"/>.
-        /// </summary>
-        private ItemVisual VisualUpdate(ItemSlot slot, ICostume costume)
-        {
-            ItemVisual visual = GetItemVisual(slot, costume);
-            player?.SetAppearance(visual);
-            return visual;
         }
 
         /// <summary>
@@ -737,7 +646,7 @@ namespace NexusForever.Game.Entity
             bag.AddItem(item, bagIndex);
 
             if (IsVisualItemSlot(item.Location, item.BagIndex) && player != null)
-                VisualUpdate(item);
+                player.AddVisual((ItemSlot)item.Info.TypeEntry.ItemSlotId, item.Info.GetDisplayId());
 
             if (IsEquippableBagSlot(item.Location, item.BagIndex))
                 InventoryResize(InventoryLocation.Inventory, (int)item.Info.Entry.MaxStackCount);
@@ -760,7 +669,7 @@ namespace NexusForever.Game.Entity
                 throw new ArgumentException();
 
             if (IsVisualItemSlot(item.Location, item.BagIndex) && player != null)
-                VisualUpdate(item);
+                player.RemoveVisual((ItemSlot)item.Info.TypeEntry.ItemSlotId);
 
             if (IsEquippableBagSlot(item.Location, item.BagIndex) && item.Info.IsEquippableBag())
                 InventoryResize(InventoryLocation.Inventory, (int)-item.Info.Entry.MaxStackCount);

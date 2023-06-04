@@ -1,10 +1,8 @@
-﻿using System.Collections.Immutable;
-using NexusForever.Database.Character.Model;
+﻿using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract.Character
 {
@@ -51,10 +49,5 @@ namespace NexusForever.Game.Abstract.Character
         /// Returns a <see cref="ILocation"/> describing the starting location for a given <see cref="Race"/>, <see cref="Faction"/> and Creation Type combination.
         /// </summary>
         ILocation GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart);
-
-        /// <summary>
-        /// Returns an <see cref="ImmutableList{T}"/> containing all <see cref="CharacterCustomizationEntry"/>'s for the supplied race, sex, label and value.
-        /// </summary>
-        ImmutableList<CharacterCustomizationEntry> GetPrimaryCharacterCustomisation(uint race, uint sex, uint label, uint value);
     }
 }

@@ -6,8 +6,9 @@ namespace NexusForever.Game.Entity
     {
         ulong CharacterId { get; }
         uint Label { get; }
-        bool PendingDelete { get; }
         uint Value { get; set; }
+
+        bool PendingDelete { get; }
 
         void Delete();
     }

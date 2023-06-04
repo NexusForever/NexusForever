@@ -44,24 +44,23 @@ namespace NexusForever.Game.Entity
         }
 
         public CostumeItemSlot Slot { get; }
-        public Item2Entry Entry { get; private set; }
+        public ItemSlot ItemSlot { get; }
+        public IItemInfo ItemInfo { get; private set; }
 
-        public uint ItemId
+        public uint? ItemId
         {
-            get => itemId;
+            get => ItemInfo?.Id;
             set
             {
-                if (itemId == value)
+                if (ItemInfo?.Id == value)
                     return;
 
-                Entry = GameTableManager.Instance.Item.GetEntry(value);
-                itemId = value;
-
+                ItemInfo  = value.HasValue ? ItemManager.Instance.GetItemInfo(value.Value) : null;
                 saveMask |= CostumeItemSaveMask.ItemId;
             }
         }
 
-        private uint itemId;
+        public ushort? DisplayId => ItemInfo?.GetDisplayId();
 
         public int DyeData
         {
@@ -89,9 +88,11 @@ namespace NexusForever.Game.Entity
         {
             this.costume = costume;
             Slot         = (CostumeItemSlot)model.Slot;
-            Entry        = GameTableManager.Instance.Item.GetEntry(model.ItemId);
-            itemId       = model.ItemId;
+            ItemSlot     = GetSlot(Slot);
+            ItemId       = model.ItemId > 0 ? model.ItemId : null;
             dyeData      = model.DyeData;
+
+            saveMask     = CostumeItemSaveMask.None;
         }
 
         /// <summary>
@@ -101,10 +102,26 @@ namespace NexusForever.Game.Entity
         {
             this.costume = costume;
             Slot         = slot;
-            Entry        = GameTableManager.Instance.Item.GetEntry(item.ItemId);
-            itemId       = item.ItemId;
+            ItemSlot     = GetSlot(Slot);
+            ItemId       = item.ItemId > 0 ? item.ItemId : null;
             dyeData      = GenerateDyeMask(item.Dyes);
+
             saveMask     = CostumeItemSaveMask.Create;
+        }
+
+        private static ItemSlot GetSlot(CostumeItemSlot slot)
+        {
+            return slot switch
+            {
+                CostumeItemSlot.Chest    => ItemSlot.ArmorChest,
+                CostumeItemSlot.Legs     => ItemSlot.ArmorLegs,
+                CostumeItemSlot.Head     => ItemSlot.ArmorHead,
+                CostumeItemSlot.Shoulder => ItemSlot.ArmorShoulder,
+                CostumeItemSlot.Feet     => ItemSlot.ArmorFeet,
+                CostumeItemSlot.Hands    => ItemSlot.ArmorHands,
+                CostumeItemSlot.Weapon   => ItemSlot.WeaponPrimary,
+                _                        => throw new ArgumentOutOfRangeException(nameof(slot))
+            };
         }
 
         public void Save(CharacterContext context)
@@ -120,7 +137,7 @@ namespace NexusForever.Game.Entity
                     Id      = costume.Owner,
                     Index   = costume.Index,
                     Slot    = (byte)Slot,
-                    ItemId  = itemId,
+                    ItemId  = ItemId ?? 0,
                     DyeData = dyeData
                 });
             }
@@ -137,7 +154,7 @@ namespace NexusForever.Game.Entity
                 EntityEntry<CharacterCostumeItemModel> entity = context.Attach(model);
                 if ((saveMask & CostumeItemSaveMask.ItemId) != 0)
                 {
-                    model.ItemId = itemId;
+                    model.ItemId = ItemId ?? 0;
                     entity.Property(p => p.ItemId).IsModified = true;
                 }
                 if ((saveMask & CostumeItemSaveMask.DyeData) != 0)
@@ -148,6 +165,19 @@ namespace NexusForever.Game.Entity
             }
 
             saveMask = CostumeItemSaveMask.None;
+        }
+
+        /// <summary>
+        /// Get <see cref="IItemVisual"/> for <see cref="ICostumeItem"/>.
+        /// </summary>
+        public IItemVisual GetItemVisual()
+        {
+            return new ItemVisual
+            {
+                Slot      = ItemSlot,
+                DisplayId = DisplayId,
+                DyeData   = DyeData
+            };
         }
     }
 }

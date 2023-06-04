@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
+using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -35,6 +36,7 @@ namespace NexusForever.Game
             sc.AddGameAchievement();
             sc.AddGameCharacter();
             sc.AddGameCinematic();
+            sc.AddGameCustomisation();
             sc.AddGameEntity();
             sc.AddGameGuild();
             sc.AddGameHousing();

@@ -513,39 +513,38 @@ namespace NexusForever.Game.Guild
                 throw new InvalidOperationException($"Failed to update Holomark positional data for character {owner.CharacterId}!");
 
             CharacterFlag mask = owner.Flags;
-            var itemVisuals    = new List<ItemVisual>();
 
             if (backHidden)
             {
                 mask |= CharacterFlag.HolomarkHideBack;
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardBack, DisplayId = 0 });
+                owner.RemoveVisual(ItemSlot.GuildStandardBack);
             }
             else
             {
                 mask &= ~CharacterFlag.HolomarkHideBack;
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardBack, DisplayId = (ushort)(distanceNear ? 7163 : 5580) });
+                owner.AddVisual(ItemSlot.GuildStandardBack, (ushort)(distanceNear ? 7163 : 5580));
             }
 
             if (leftHidden)
             {
                 mask |= CharacterFlag.HolomarkHideLeft;
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardShoulderL, DisplayId = 0 });
+                owner.RemoveVisual(ItemSlot.GuildStandardShoulderL);
             }
             else
             {
                 mask &= ~CharacterFlag.HolomarkHideLeft;
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardShoulderL, DisplayId = (ushort)(distanceNear ? 7164 : 5581) });
+                owner.AddVisual(ItemSlot.GuildStandardShoulderL, (ushort)(distanceNear ? 7164 : 5581));
             }
 
             if (rightHidden)
             {
                 mask |= CharacterFlag.HolomarkHideRight;
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardShoulderR, DisplayId = 0 });
+                owner.RemoveVisual(ItemSlot.GuildStandardShoulderR);
             }
             else
             {
                 mask &= ~CharacterFlag.HolomarkHideRight;
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardShoulderR, DisplayId = (ushort)(distanceNear ? 7165 : 5582) });
+                owner.AddVisual(ItemSlot.GuildStandardShoulderR, (ushort)(distanceNear ? 7165 : 5582));
             }
 
             if (distanceNear)
@@ -556,8 +555,6 @@ namespace NexusForever.Game.Guild
             // set flags directly and manually send message to prevent multiple messages through SetFlag and RemoveFlag
             owner.Flags = mask;
             owner.SendCharacterFlagsUpdated();
-
-            SendPlayerHolomarkChange(itemVisuals);
         }
 
         /// <summary>
@@ -568,23 +565,18 @@ namespace NexusForever.Game.Guild
             if (Guild == null)
                throw new InvalidOperationException($"Failed to update Holomark visual data for character {owner.CharacterId}!");
 
-            var itemVisuals = new List<ItemVisual>
-            {
-                new ItemVisual { Slot = ItemSlot.GuildStandardScanLines,      DisplayId = (ushort)Guild.Standard.ScanLines.GuildStandardPartEntry.ItemDisplayIdStandard },
-                new ItemVisual { Slot = ItemSlot.GuildStandardBackgroundIcon, DisplayId = (ushort)Guild.Standard.BackgroundIcon.GuildStandardPartEntry.ItemDisplayIdStandard },
-                new ItemVisual { Slot = ItemSlot.GuildStandardForegroundIcon, DisplayId = (ushort)Guild.Standard.ForegroundIcon.GuildStandardPartEntry.ItemDisplayIdStandard },
-                new ItemVisual { Slot = ItemSlot.GuildStandardChest,          DisplayId = 5411 }
-            };
+            owner.AddVisual(ItemSlot.GuildStandardScanLines,      (ushort)Guild.Standard.ScanLines.GuildStandardPartEntry.ItemDisplayIdStandard);
+            owner.AddVisual(ItemSlot.GuildStandardBackgroundIcon, (ushort)Guild.Standard.BackgroundIcon.GuildStandardPartEntry.ItemDisplayIdStandard);
+            owner.AddVisual(ItemSlot.GuildStandardForegroundIcon, (ushort)Guild.Standard.ForegroundIcon.GuildStandardPartEntry.ItemDisplayIdStandard);
+            owner.AddVisual(ItemSlot.GuildStandardChest,          5411);
 
             bool isNear = owner.HasFlag(CharacterFlag.HolomarkNear);
             if (!owner.HasFlag(CharacterFlag.HolomarkHideBack))
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardBack, DisplayId = (ushort)(isNear ? 7163 : 5580) });
+                owner.AddVisual(ItemSlot.GuildStandardBack, (ushort)(isNear ? 7163 : 5580));
             if (!owner.HasFlag(CharacterFlag.HolomarkHideLeft))
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardShoulderL, DisplayId = (ushort)(isNear ? 7164 : 5581) });
+                owner.AddVisual(ItemSlot.GuildStandardShoulderL, (ushort)(isNear ? 7164 : 5581));
             if (!owner.HasFlag(CharacterFlag.HolomarkHideRight))
-                itemVisuals.Add(new ItemVisual { Slot = ItemSlot.GuildStandardShoulderR, DisplayId = (ushort)(isNear ? 7165 : 5582) });
-
-            SendPlayerHolomarkChange(itemVisuals);
+                owner.AddVisual(ItemSlot.GuildStandardShoulderR, (ushort)(isNear ? 7165 : 5582));
         }
 
         /// <summary>
@@ -592,31 +584,13 @@ namespace NexusForever.Game.Guild
         /// </summary>
         public void RemoveHolomark()
         {
-            var itemVisuals = new List<ItemVisual>
-            {
-                new ItemVisual { Slot = ItemSlot.GuildStandardScanLines,      DisplayId = 0 },
-                new ItemVisual { Slot = ItemSlot.GuildStandardBackgroundIcon, DisplayId = 0 },
-                new ItemVisual { Slot = ItemSlot.GuildStandardForegroundIcon, DisplayId = 0 },
-                new ItemVisual { Slot = ItemSlot.GuildStandardChest,          DisplayId = 0 },
-                new ItemVisual { Slot = ItemSlot.GuildStandardBack,           DisplayId = 0 },
-                new ItemVisual { Slot = ItemSlot.GuildStandardShoulderL,      DisplayId = 0 },
-                new ItemVisual { Slot = ItemSlot.GuildStandardShoulderR,      DisplayId = 0 }
-            };
-
-            SendPlayerHolomarkChange(itemVisuals);
-        }
-
-        /// <summary>
-        /// Update local clients with necessary Holomark visual changes.
-        /// </summary>
-        private void SendPlayerHolomarkChange(List<ItemVisual> itemVisuals)
-        {
-            owner.SetAppearance(itemVisuals);
-            owner.EnqueueToVisible(new ServerItemVisualUpdate
-            {
-                Guid        = owner.Guid,
-                ItemVisuals = itemVisuals
-            }, true);
+            owner.RemoveVisual(ItemSlot.GuildStandardScanLines);
+            owner.RemoveVisual(ItemSlot.GuildStandardBackgroundIcon);
+            owner.RemoveVisual(ItemSlot.GuildStandardForegroundIcon);
+            owner.RemoveVisual(ItemSlot.GuildStandardChest);
+            owner.RemoveVisual(ItemSlot.GuildStandardBack);
+            owner.RemoveVisual(ItemSlot.GuildStandardShoulderL);
+            owner.RemoveVisual(ItemSlot.GuildStandardShoulderR);
         }
 
         public IEnumerator<IGuildBase> GetEnumerator()

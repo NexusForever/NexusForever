@@ -10,7 +10,7 @@ namespace NexusForever.Game.Entity
         [Flags]
         public enum CustomisationSaveMask
         {
-            None = 0x0000,
+            None   = 0x0000,
             Create = 0x0001,
             Modify = 0x0002,
             Delete = 0x0004
@@ -37,54 +37,57 @@ namespace NexusForever.Game.Entity
 
         private CustomisationSaveMask saveMask;
 
+        /// <summary>
+        /// Create a new <see cref="ICustomisation"/> from database model.
+        /// </summary>
         public Customisation(CharacterCustomisationModel model)
         {
             CharacterId = model.Id;
-            Label = model.Label;
-            value = model.Value;
+            Label       = model.Label;
+            value       = model.Value;
 
-            saveMask = CustomisationSaveMask.None;
+            saveMask    = CustomisationSaveMask.None;
         }
 
+        /// <summary>
+        /// Create a new <see cref="ICustomisation"/> from supplied data.
+        /// </summary>
         public Customisation(ulong characterId, uint label, uint value)
         {
             CharacterId = characterId;
-            Label = label;
-            this.value = value;
+            Label       = label;
+            this.value  = value;
 
-            saveMask = CustomisationSaveMask.Create;
+            saveMask    = CustomisationSaveMask.Create;
         }
 
         public void Save(CharacterContext context)
         {
-            if (saveMask != CustomisationSaveMask.None)
+            if (saveMask == CustomisationSaveMask.None)
+                return;
+
+            var model = new CharacterCustomisationModel
             {
-                var model = new CharacterCustomisationModel
-                {
-                    Id = CharacterId,
-                    Label = Label
-                };
+                Id    = CharacterId,
+                Label = Label
+            };
 
-                EntityEntry<CharacterCustomisationModel> entity = context.Attach(model);
+            EntityEntry<CharacterCustomisationModel> entity = context.Attach(model);
 
-                if ((saveMask & CustomisationSaveMask.Create) != 0)
-                {
-                    model.Value = Value;
+            if ((saveMask & CustomisationSaveMask.Create) != 0)
+            {
+                model.Value = Value;
 
-                    context.Add(model);
-                }
-                else if ((saveMask & CustomisationSaveMask.Delete) != 0)
-                {
-                    context.Entry(model).State = EntityState.Deleted;
-                }
-                else
-                {
-                    if ((saveMask & CustomisationSaveMask.Modify) != 0)
-                    {
-                        model.Value = Value;
-                        entity.Property(e => e.Value).IsModified = true;
-                    }
-                }
+                context.Add(model);
+            }
+            else if ((saveMask & CustomisationSaveMask.Delete) != 0)
+            {
+                context.Entry(model).State = EntityState.Deleted;
+            }
+            else if ((saveMask & CustomisationSaveMask.Modify) != 0)
+            {
+                model.Value = Value;
+                entity.Property(e => e.Value).IsModified = true;
             }
 
             saveMask = CustomisationSaveMask.None;

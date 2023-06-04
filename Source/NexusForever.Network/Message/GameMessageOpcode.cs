@@ -56,6 +56,7 @@ namespace NexusForever.Network.Message
         ServerPetCustomisation          = 0x012F,
         ClientRapidTransport            = 0x0141,
         ClientCharacterAppearanceChange = 0x0144,
+        ServerCharacterAppearanceResult = 0x0145,
         ServerItemDelete                = 0x0148,
         ClientItemDelete                = 0x0149,
         ClientEntityInteractChair       = 0x014E,

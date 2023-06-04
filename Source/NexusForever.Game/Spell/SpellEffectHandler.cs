@@ -34,9 +34,6 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Disguise)]
         public static void HandleEffectDisguise(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            if (target is not IPlayer player)
-                return;
-
             Creature2Entry creature2 = GameTableManager.Instance.Creature2.GetEntry(info.Entry.DataBits02);
             if (creature2 == null)
                 return;
@@ -45,7 +42,7 @@ namespace NexusForever.Game.Spell
             if (displayGroupEntry == null)
                 return;
 
-            player.SetDisplayInfo(displayGroupEntry.Creature2DisplayInfoId);
+            target.DisplayInfo = displayGroupEntry.Creature2DisplayInfoId;
         }
 
         [SpellEffectHandler(SpellEffectType.SummonMount)]

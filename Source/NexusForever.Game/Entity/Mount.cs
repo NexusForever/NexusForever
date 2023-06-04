@@ -7,7 +7,6 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
 using NetworkVehiclePassenger = NexusForever.Network.World.Message.Model.Shared.VehiclePassenger;
 
 namespace NexusForever.Game.Entity
@@ -77,13 +76,7 @@ namespace NexusForever.Game.Entity
                 return;
 
             if (PilotDisplayInfo != null)
-            {
-                player.SetAppearance(new ItemVisual
-                {
-                    Slot      = ItemSlot.Mount,
-                    DisplayId = (ushort)PilotDisplayInfo.Id
-                });
-            }
+                player.AddVisual(ItemSlot.Mount, (ushort)PilotDisplayInfo.Id);
 
             IPetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(MountType, SpellEntry.Id);
             if (customisation != null)
@@ -93,26 +86,18 @@ namespace NexusForever.Game.Entity
                 {
                     if (entry != null)
                     {
-                        var itemVisual = new ItemVisual
-                        {
-                            Slot      = slot,
-                            DisplayId = (ushort) (slot != ItemSlot.MountRight
-                                ? entry.ItemDisplayId[0]
-                                : entry.ItemDisplayId[1])
-                        };
+                        ushort displayId = (ushort)(slot != ItemSlot.MountRight ? entry.ItemDisplayId[0] : entry.ItemDisplayId[1]);
 
                         // hoverboards have their flair visuals added to the player
                         if (MountType == PetType.HoverBoard)
-                            player.SetAppearance(itemVisual);
+                            player.AddVisual(slot, displayId);
                         else
-                            SetAppearance(itemVisual);
+                            AddVisual(slot, displayId);
                     }
 
                     slot++;
                 }
             }
-
-            UpdateVisuals(player);
         }
 
         protected override void OnPassengerRemove(IPlayer player, VehicleSeatType seatType, byte seatPosition)
@@ -120,48 +105,17 @@ namespace NexusForever.Game.Entity
             if (seatType != VehicleSeatType.Pilot)
                 return;
 
-            for (ItemSlot i = ItemSlot.MountFront; i <= ItemSlot.MountRight; i++)
+            for (ItemSlot slot = ItemSlot.MountFront; slot <= ItemSlot.MountRight; slot++)
             {
-                var itemVisual = new ItemVisual
-                {
-                    Slot = i
-                };
-
                 // hoverboards have their flair visuals added to the player
                 if (MountType == PetType.HoverBoard)
-                    player.SetAppearance(itemVisual);
+                    player.RemoveVisual(slot);
                 else
-                    SetAppearance(itemVisual);
+                    RemoveVisual(slot);
             }
 
             if (PilotDisplayInfo != null)
-            {
-                player.SetAppearance(new ItemVisual
-                {
-                    Slot = ItemSlot.Mount
-                });
-            }
-
-            UpdateVisuals(player);
-        }
-
-        private void UpdateVisuals(IPlayer player)
-        {
-            var visualUpdate = new ServerEntityVisualUpdate
-            {
-                UnitId      = MountType == PetType.GroundMount ? Guid : player.Guid,
-                Race        = (byte)player.Race,
-                Sex         = (byte)player.Sex,
-                ItemVisuals = (PilotDisplayInfo == null ? GetAppearance() : player.GetAppearance()).ToList()
-            };
-
-            if (MountType == PetType.GroundMount)
-            {
-                visualUpdate.CreatureId  = CreatureEntry.Id;
-                visualUpdate.DisplayInfo = DisplayInfo;
-            }
-
-            EnqueueToVisible(visualUpdate, true);
+                player.RemoveVisual(ItemSlot.Mount);
         }
     }
 }

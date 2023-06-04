@@ -1,14 +1,20 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Static.Entity;
-using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract.Entity
 {
     public interface ICostumeItem : IDatabaseCharacter
     {
         CostumeItemSlot Slot { get; }
-        Item2Entry Entry { get; }
-        uint ItemId { get; set; }
+        ItemSlot ItemSlot { get; }
+        IItemInfo ItemInfo { get; }
+        uint? ItemId { get; set; }
+        ushort? DisplayId { get; }
         int DyeData { get; set; }
+
+        /// <summary>
+        /// Get <see cref="IItemVisual"/> for <see cref="ICostumeItem"/>.
+        /// </summary>
+        IItemVisual GetItemVisual();
     }
 }

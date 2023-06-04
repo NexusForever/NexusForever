@@ -22,10 +22,9 @@ namespace NexusForever.Game.Abstract.Entity
 
         public ulong CharacterId { get; }
         public string Name { get; }
-        Sex Sex { get; }
-        Race Race { get; }
+        Sex Sex { get; set; }
+        Race Race { get; set; }
         Class Class { get; }
-        List<float> Bones { get; }
         CharacterFlag Flags { get; set; }
         Static.Entity.Path Path { get; set; }
         DateTime PathActivatedTime { get; }
@@ -88,6 +87,7 @@ namespace NexusForever.Game.Abstract.Entity
         ICinematicManager CinematicManager { get; }
         ICharacterEntitlementManager EntitlementManager { get; }
         ILogoutManager LogoutManager { get; }
+        IAppearanceManager AppearanceManager { get; }
 
         IVendorInfo SelectedVendorInfo { get; set; }
 
@@ -142,11 +142,6 @@ namespace NexusForever.Game.Abstract.Entity
         void OnTeleportToFailed(GenericError error);
 
         /// <summary>
-        /// Reset and restore default appearance for <see cref="IPlayer"/>.
-        /// </summary>
-        void ResetAppearance();
-
-        /// <summary>
         /// Make <see cref="IPlayer"/> sit on provided <see cref="IWorldEntity"/>.
         /// </summary>
         void Sit(IWorldEntity chair);
@@ -190,15 +185,5 @@ namespace NexusForever.Game.Abstract.Entity
         bool HasFlag(CharacterFlag flag);
 
         void SendCharacterFlagsUpdated();
-
-        /// <summary>
-        /// Modifies the appearance customisation of this <see cref="Player"/>. Called directly by a packet handler.
-        /// </summary>
-        void SetCharacterCustomisation(Dictionary<uint, uint> customisations, List<float> bones, Race newRace, Sex newSex, bool usingServiceTokens);
-
-        /// <summary>
-        /// Update surrounding <see cref="IWorldEntity"/>, including the <see cref="IPlayer"/>, with a fresh appearance dataset.
-        /// </summary>
-        void EmitVisualUpdate();
     }
 }

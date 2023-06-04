@@ -94,11 +94,8 @@ namespace NexusForever.Game.Account.Currency
                 throw new ArgumentException($"Trying to remove more currency {accountCurrency.CurrencyId} than the player has!");
 
             // TODO: Ensure that we're not at cap - is there a cap?
-            if (accountCurrency.CanAfford(amount))
-            {
-                accountCurrency.SubtractAmount(amount);
-                SendAccountCurrencyUpdate(accountCurrency, reason);
-            }
+            accountCurrency.SubtractAmount(amount);
+            SendAccountCurrencyUpdate(accountCurrency, reason);
         }
 
         /// <summary>

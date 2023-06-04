@@ -1,3 +1,4 @@
+using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
@@ -5,19 +6,19 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientCharacterAppearanceChange)]
     public class ClientCharacterAppearanceChange : IReadable
     {
-        public byte Race { get; private set; } // 5
-        public byte Sex { get; private set; } // 2
+        public Race Race { get; private set; } // 5
+        public Sex Sex { get; private set; } // 2
         public uint CustomisationCount { get; private set; }
-        public List<uint> Labels { get; private set; } = new List<uint>();
-        public List<uint> Values { get; private set; } = new List<uint>();
+        public List<uint> Labels { get; private set; } = new();
+        public List<uint> Values { get; private set; } = new();
         public uint BoneCount { get; private set; }
-        public List<float> Bones { get; private set; } = new List<float>();
+        public List<float> Bones { get; private set; } = new();
         public bool UseServiceTokens { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            Race = reader.ReadByte(5);
-            Sex = reader.ReadByte(2);
+            Race = reader.ReadEnum<Race>(5);
+            Sex  = reader.ReadEnum<Sex>(2);
 
             CustomisationCount = reader.ReadUInt();
             for (int i = 0; i < CustomisationCount; i++)

@@ -8,9 +8,9 @@ namespace NexusForever.GameTable.Model
         public uint ItemSlotId;
         public uint ItemDisplayId;
         public uint Flags;
-        public uint CharacterCustomizationLabelId00;
-        public uint CharacterCustomizationLabelId01;
-        public uint Value00;
-        public uint Value01;
+        [GameTableFieldArray(2)]
+        public uint[] CharacterCustomizationLabelId;
+        [GameTableFieldArray(2)]
+        public uint[] Value;
     }
 }

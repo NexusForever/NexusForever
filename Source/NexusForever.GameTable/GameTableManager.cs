@@ -68,7 +68,10 @@ namespace NexusForever.GameTable
         [GameData]
         public GameTable<CharacterCustomizationEntry> CharacterCustomization { get; private set; }
 
+        [GameData]
         public GameTable<CharacterCustomizationLabelEntry> CharacterCustomizationLabel { get; private set; }
+
+        [GameData]
         public GameTable<CharacterCustomizationSelectionEntry> CharacterCustomizationSelection { get; private set; }
 
         [GameData]

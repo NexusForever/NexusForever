@@ -2,6 +2,7 @@
 {
     public enum Race
     {
+        None    = 0,
         Human   = 1,
         Eshara  = 2,
         Granok  = 3,

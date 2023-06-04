@@ -10,7 +10,7 @@ namespace NexusForever.Game.Entity
         [Flags]
         public enum BoneSaveMask
         {
-            None = 0x0000,
+            None   = 0x0000,
             Create = 0x0001,
             Modify = 0x0002,
             Delete = 0x0004
@@ -37,54 +37,57 @@ namespace NexusForever.Game.Entity
 
         private BoneSaveMask saveMask;
 
+        /// <summary>
+        /// Create a new <see cref="IBone"/> from database model.
+        /// </summary>
         public Bone(CharacterBoneModel model)
         {
-            Owner = model.Id;
+            Owner     = model.Id;
             BoneIndex = model.BoneIndex;
             boneValue = model.Bone;
 
-            saveMask = BoneSaveMask.None;
+            saveMask  = BoneSaveMask.None;
         }
 
+        /// <summary>
+        /// Create a new <see cref="IBone"/> from supplied data.
+        /// </summary>
         public Bone(ulong characterId, byte boneIndex, float value)
         {
-            Owner = characterId;
+            Owner     = characterId;
             BoneIndex = boneIndex;
             boneValue = value;
 
-            saveMask = BoneSaveMask.Create;
+            saveMask  = BoneSaveMask.Create;
         }
 
         public void Save(CharacterContext context)
         {
-            if (saveMask != BoneSaveMask.None)
+            if (saveMask == BoneSaveMask.None)
+                return;
+
+            var model = new CharacterBoneModel
             {
-                var model = new CharacterBoneModel
-                {
-                    Id = Owner,
-                    BoneIndex = BoneIndex
-                };
+                Id        = Owner,
+                BoneIndex = BoneIndex
+            };
 
-                EntityEntry<CharacterBoneModel> entity = context.Attach(model);
+            EntityEntry<CharacterBoneModel> entity = context.Attach(model);
 
-                if ((saveMask & BoneSaveMask.Create) != 0)
-                {
-                    model.Bone = BoneValue;
+            if ((saveMask & BoneSaveMask.Create) != 0)
+            {
+                model.Bone = BoneValue;
 
-                    context.Add(model);
-                }
-                else if ((saveMask & BoneSaveMask.Delete) != 0)
-                {
-                    context.Entry(model).State = EntityState.Deleted;
-                }
-                else
-                {
-                    if ((saveMask & BoneSaveMask.Modify) != 0)
-                    {
-                        model.Bone = BoneValue;
-                        entity.Property(e => e.Bone).IsModified = true;
-                    }
-                }
+                context.Add(model);
+            }
+            else if ((saveMask & BoneSaveMask.Delete) != 0)
+            {
+                context.Entry(model).State = EntityState.Deleted;
+            }
+            else if ((saveMask & BoneSaveMask.Modify) != 0)
+            {
+                model.Bone = BoneValue;
+                entity.Property(e => e.Bone).IsModified = true;
             }
 
             saveMask = BoneSaveMask.None;

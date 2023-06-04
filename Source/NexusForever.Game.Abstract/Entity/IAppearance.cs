@@ -5,9 +5,10 @@ namespace NexusForever.Game.Entity
 {
     public interface IAppearance : IDatabaseCharacter
     {
-        ushort DisplayId { get; set; }
-        ItemSlot ItemSlot { get; }
         ulong Owner { get; }
+        ItemSlot ItemSlot { get; }
+        ushort DisplayId { get; set; }
+
         bool PendingDelete { get; }
 
         void Delete();

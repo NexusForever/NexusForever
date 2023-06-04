@@ -27,6 +27,34 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Return the display id for <see cref="IItemInfo"/>.
+        /// </summary>
+        public ushort GetDisplayId()
+        {
+            if (Entry.ItemSourceId == 0u)
+                return (ushort)Entry.ItemDisplayId;
+
+            List<ItemDisplaySourceEntryEntry> entries = AssetManager.Instance.GetItemDisplaySource(Entry.ItemSourceId)
+                .Where(e => e.Item2TypeId == Entry.Item2TypeId)
+                .ToList();
+
+            if (entries.Count == 1)
+                return (ushort)entries[0].ItemDisplayId;
+            else if (entries.Count > 1)
+            {
+                if (Entry.ItemDisplayId > 0)
+                    return (ushort)Entry.ItemDisplayId; // This is what the preview window shows for "Frozen Wrangler Mitts" (Item2Id: 28366).
+
+                ItemDisplaySourceEntryEntry fallbackVisual = entries.FirstOrDefault(e => Entry.PowerLevel >= e.ItemMinLevel && Entry.PowerLevel <= e.ItemMaxLevel);
+                if (fallbackVisual != null)
+                    return (ushort)fallbackVisual.ItemDisplayId;
+            }
+
+            // TODO: research this...
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Returns if item can be equipped into an item slot.
         /// </summary>
         public bool IsEquippable()

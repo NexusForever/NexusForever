@@ -11,7 +11,7 @@ namespace NexusForever.Game.Entity
         [Flags]
         public enum AppearanceSaveMask
         {
-            None = 0x0000,
+            None   = 0x0000,
             Create = 0x0001,
             Modify = 0x0002,
             Delete = 0x0004
@@ -38,54 +38,57 @@ namespace NexusForever.Game.Entity
 
         private AppearanceSaveMask saveMask;
 
+        /// <summary>
+        /// Create a new <see cref="IAppearance"/> from database model.
+        /// </summary>
         public Appearance(CharacterAppearanceModel model)
         {
-            Owner = model.Id;
-            ItemSlot = (ItemSlot)model.Slot;
+            Owner     = model.Id;
+            ItemSlot  = (ItemSlot)model.Slot;
             displayId = model.DisplayId;
 
-            saveMask = AppearanceSaveMask.None;
+            saveMask  = AppearanceSaveMask.None;
         }
 
+        /// <summary>
+        /// Create a new <see cref="IAppearance"/> from supplied data.
+        /// </summary>
         public Appearance(ulong characterId, ItemSlot itemSlot, ushort displayId)
         {
-            Owner = characterId;
-            ItemSlot = itemSlot;
+            Owner          = characterId;
+            ItemSlot       = itemSlot;
             this.displayId = displayId;
 
-            saveMask = AppearanceSaveMask.Create;
+            saveMask       = AppearanceSaveMask.Create;
         }
 
         public void Save(CharacterContext context)
         {
-            if (saveMask != AppearanceSaveMask.None)
+            if (saveMask == AppearanceSaveMask.None)
+                return;
+
+            var model = new CharacterAppearanceModel
             {
-                var model = new CharacterAppearanceModel
-                {
-                    Id = Owner,
-                    Slot = (byte)ItemSlot
-                };
+                Id   = Owner,
+                Slot = (byte)ItemSlot
+            };
 
-                EntityEntry<CharacterAppearanceModel> entity = context.Attach(model);
+            EntityEntry<CharacterAppearanceModel> entity = context.Attach(model);
 
-                if ((saveMask & AppearanceSaveMask.Create) != 0)
-                {
-                    model.DisplayId = DisplayId;
+            if ((saveMask & AppearanceSaveMask.Create) != 0)
+            {
+                model.DisplayId = DisplayId;
 
-                    context.Add(model);
-                }
-                else if ((saveMask & AppearanceSaveMask.Delete) != 0)
-                {
-                    context.Entry(model).State = EntityState.Deleted;
-                }
-                else
-                {
-                    if ((saveMask & AppearanceSaveMask.Modify) != 0)
-                    {
-                        model.DisplayId = DisplayId;
-                        entity.Property(e => e.DisplayId).IsModified = true;
-                    }
-                }
+                context.Add(model);
+            }
+            else if ((saveMask & AppearanceSaveMask.Delete) != 0)
+            {
+                context.Entry(model).State = EntityState.Deleted;
+            }
+            else if ((saveMask & AppearanceSaveMask.Modify) != 0)
+            {
+                model.DisplayId = DisplayId;
+                entity.Property(e => e.DisplayId).IsModified = true;
             }
 
             saveMask = AppearanceSaveMask.None;
