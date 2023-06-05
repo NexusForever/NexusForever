@@ -49,7 +49,10 @@ namespace NexusForever.Game.Spell
 
         public void Dispose()
         {
-            ScriptManager.Instance.Unload(scriptCollection);
+            if (scriptCollection != null)
+                ScriptManager.Instance.Unload(scriptCollection);
+
+            scriptCollection = null;
         }
 
         public void Update(double lastTick)

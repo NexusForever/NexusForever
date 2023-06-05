@@ -146,7 +146,9 @@ namespace NexusForever.Game.Quest
 
         public void Dispose()
         {
-            ScriptManager.Instance.Unload(scriptCollection);
+            if (scriptCollection != null)
+                ScriptManager.Instance.Unload(scriptCollection);
+
             scriptCollection = null;
         }
 
