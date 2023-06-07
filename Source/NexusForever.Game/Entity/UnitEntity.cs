@@ -138,5 +138,13 @@ namespace NexusForever.Game.Entity
             ISpell spell = pendingSpells.SingleOrDefault(s => s.CastingId == castingId);
             spell?.CancelCast(CastResult.SpellCancelled);
         }
+
+        /// <summary>
+        /// Returns an active <see cref="ISpell"/> that is affecting this <see cref="IUnitEntity"/>
+        /// </summary>
+        public ISpell GetActiveSpell(Func<ISpell, bool> func)
+        {
+            return pendingSpells.FirstOrDefault(func);
+        }
     }
 }

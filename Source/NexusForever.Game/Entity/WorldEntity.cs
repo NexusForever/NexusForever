@@ -18,6 +18,7 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Shared.Game;
 using NetworkPropertyValue = NexusForever.Network.World.Message.Model.Shared.PropertyValue;
 
 namespace NexusForever.Game.Entity
@@ -27,7 +28,15 @@ namespace NexusForever.Game.Entity
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Dictionary<Property, IPropertyValue> Properties { get; } = new();
+
+        /// <summary>
+        /// Property related cached data
+        /// </summary>
+        public Dictionary<Property, IPropertyValue> Properties { get; } = new Dictionary<Property, IPropertyValue>();
+        private Dictionary<Property, float> BaseProperties { get; } = new Dictionary<Property, float>();
+        private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> ItemProperties { get; } = new Dictionary<Property, Dictionary<ItemSlot, float>>();
+        private Dictionary<Property, Dictionary</*spell4Id*/uint, ISpellPropertyModifier>> SpellProperties { get; } = new Dictionary<Property, Dictionary<uint, ISpellPropertyModifier>>();
+        private HashSet<Property> DirtyProperties { get; } = new HashSet<Property>();
 
         public uint EntityId { get; protected set; }
 
@@ -80,17 +89,51 @@ namespace NexusForever.Game.Entity
         public uint Health
         {
             get => GetStatInteger(Stat.Health) ?? 0u;
+            set
+            {
+                SetStat(Stat.Health, Math.Clamp(value, 0u, MaxHealth)); // TODO: Confirm MaxHealth is actually the maximum health would be at.
+                EnqueueToVisible(new ServerEntityHealthUpdate
+                {
+                    UnitId = Guid,
+                    Health = Health
+                });
+                if (this is IPlayer player)
+                    player.Session.EnqueueMessageEncrypted(new ServerPlayerHealthUpdate
+                    {
+                        UnitId = Guid,
+                        Health = Health,
+                        Mask = (UpdateHealthMask)4
+                    });
+            }
         }
 
-        public float Shield
+        public uint MaxHealth
+        {
+            get => (uint)GetPropertyValue(Property.BaseHealth);
+            set => SetBaseProperty(Property.BaseHealth, value);
+        }
+
+        public uint Shield
         {
             get => GetStatInteger(Stat.Shield) ?? 0u;
+            set => SetStat(Stat.Shield, Math.Clamp(value, 0u, MaxShieldCapacity)); // TODO: Handle overshield
+        }
+
+        public uint MaxShieldCapacity
+        {
+            get => (uint)GetPropertyValue(Property.ShieldCapacityMax);
+            set => SetBaseProperty(Property.ShieldCapacityMax, value);
         }
 
         public uint Level
         {
             get => GetStatInteger(Stat.Level) ?? 1u;
-            set => SetStat(Stat.Level, value);
+            set
+            {
+                SetStat(Stat.Level, value);
+                if (this is Player player)
+                    player.BuildBaseProperties();
+            }
         }
 
         public bool Sheathed
@@ -109,7 +152,12 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public uint ControllerGuid { get; set; }
 
-        protected readonly Dictionary<Stat, IStatValue> stats = new();
+        /// <summary>
+        /// Initial stab at a timer to regenerate Health & Shield values.
+        /// </summary>
+        private UpdateTimer statUpdateTimer = new UpdateTimer(0.25); // TODO: Long-term this should be absorbed into individual timers for each Stat regeneration method
+
+        protected readonly Dictionary<Stat, IStatValue> stats = new Dictionary<Stat, IStatValue>();
 
         private bool emitVisual;
         private readonly Dictionary<ItemSlot, IItemVisual> itemVisuals = new();
@@ -153,6 +201,8 @@ namespace NexusForever.Game.Entity
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
             SetVisualEmit(false);
+
+            BuildBaseProperties();
         }
 
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
@@ -181,13 +231,27 @@ namespace NexusForever.Game.Entity
                 EnqueueToVisible(BuildVisualUpdate(), true);
                 SetVisualEmit(false);
             }
+
+            statUpdateTimer.Update(lastTick);
+            if (statUpdateTimer.HasElapsed)
+            {
+                HandleStatUpdate(lastTick);
+                statUpdateTimer.Reset();
+            }
+
+            if (!HasPendingPropertyChanges)
+                return;
+
+            EnqueueToVisible(BuildPropertyUpdates(), true);
         }
 
         protected abstract IEntityModel BuildEntityModel();
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            var entityCreatePacket = new ServerEntityCreate
+            DirtyProperties.Clear();
+
+            ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
             {
                 Guid         = Guid,
                 Type         = Type,
@@ -322,17 +386,248 @@ namespace NexusForever.Game.Entity
             };
         }
 
-        protected void SetProperty(Property property, float value, float baseValue = 0.0f)
+              /// <summary>
+        /// Used to build the <see cref="ServerEntityPropertiesUpdate"/> from all modified <see cref="Property"/>
+        /// </summary>
+        private ServerEntityPropertiesUpdate BuildPropertyUpdates()
         {
-            if (Properties.ContainsKey(property))
-                Properties[property].Value = value;
-            else
-                Properties.Add(property, new PropertyValue(property, baseValue, value));
+            if (!HasPendingPropertyChanges)
+                return null;
+            
+            ServerEntityPropertiesUpdate propertyUpdatePacket = new ServerEntityPropertiesUpdate()
+            {
+                UnitId = Guid
+            };
+            
+            foreach (Property propertyUpdate in DirtyProperties)
+            {
+                IPropertyValue propertyValue = CalculateProperty(propertyUpdate);
+                if (Properties.ContainsKey(propertyUpdate))
+                    Properties[propertyUpdate] = propertyValue;
+                else
+                    Properties.Add(propertyUpdate, propertyValue);
+
+                OnPropertyUpdate(propertyUpdate, propertyValue.Value);
+
+                propertyUpdatePacket.Properties.Add(propertyValue.Build());
+            }
+
+            DirtyProperties.Clear();
+            return propertyUpdatePacket;
         }
 
-        protected float? GetPropertyValue(Property property)
+        /// <summary>
+        /// Calculates and builds a <see cref="PropertyValue"/> for this Entity's <see cref="Property"/>
+        /// </summary>
+        private IPropertyValue CalculateProperty(Property property)
+        {
+            float baseValue = GetBasePropertyValue(property);
+            float value = baseValue;
+            baseValue = GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property).DefaultValue;
+            float itemValue = 0f;
+
+            float originalValue = value;
+
+            // Run through spell adjustments first because they could adjust base properties
+            // dataBits01 appears to be some form of Priority or Math Operator
+            foreach (ISpellPropertyModifier spellModifier in GetSpellPropertyModifiers(property).OrderByDescending(s => s.Priority))
+            {
+                foreach (IPropertyModifier alteration in spellModifier.Alterations)
+                {
+                    // TODO: Add checks to ensure we're not modifying FlatValue and Percentage in the same effect?
+
+                    _ = alteration.ModType switch
+                    {
+                        ModType.FlatValue  => value += alteration.Value,
+                        ModType.Percentage => value *= alteration.Value,
+                        ModType.LevelScale => value += alteration.Value * Level,
+                    };
+                }
+            }
+
+            foreach (KeyValuePair<ItemSlot, float> itemStats in GetItemProperties(property))
+                itemValue += itemStats.Value;
+
+            value += itemValue;
+
+#if DEBUG
+            if (this is IPlayer player && !player.IsLoading)
+                player.SendSystemMessage($"Property {property} changing from {originalValue} to {value}.");
+#endif
+
+            return new PropertyValue(property, baseValue, value);
+        }
+
+        /// <summary>
+        /// Used on entering world to set the <see cref="WorldEntity"/> base <see cref="PropertyValue"/>
+        /// </summary>
+        public virtual void BuildBaseProperties()
+        {
+            ServerEntityPropertiesUpdate propertiesUpdate = BuildPropertyUpdates();
+
+            if (this is not IPlayer player)
+                return;
+
+            if (!player.IsLoading)
+                player.EnqueueToVisible(propertiesUpdate, true);
+        }
+
+        public bool HasPendingPropertyChanges => DirtyProperties.Count != 0;
+
+        /// <summary>
+        /// Sets the base value for a <see cref="Property"/>
+        /// </summary>
+        public void SetBaseProperty(Property property, float value)
+        {
+            if (BaseProperties.ContainsKey(property))
+                BaseProperties[property] = value;
+            else
+                BaseProperties.Add(property, value);
+
+            DirtyProperties.Add(property);
+        }
+
+        /// <summary>
+        /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="PropertyModifier"/> instance
+        /// </summary>
+        public void AddItemProperty(Property property, ItemSlot itemSlot, float value)
+        {
+            if (ItemProperties.ContainsKey(property))
+            {
+                var itemDict = ItemProperties[property];
+
+                if (itemDict.ContainsKey(itemSlot))
+                    itemDict[itemSlot] = value;
+                else
+                    itemDict.Add(itemSlot, value);
+            }
+            else
+            {
+                ItemProperties.Add(property, new Dictionary<ItemSlot, float>
+                {
+                    { itemSlot, value }
+                });
+            }
+
+            DirtyProperties.Add(property);
+        }
+
+        /// <summary>
+        /// Remove a <see cref="Property"/> modifier by a Spell that is currently affecting this <see cref="WorldEntity"/>
+        /// </summary>
+        public void RemoveItemProperty(Property property, ItemSlot itemSlot)
+        {
+            if (ItemProperties.ContainsKey(property))
+            {
+                var itemDict = ItemProperties[property];
+
+                if (itemDict.ContainsKey(itemSlot))
+                    itemDict.Remove(itemSlot);
+            }
+
+            DirtyProperties.Add(property);
+        }
+
+        /// <summary>
+        /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="IPropertyModifier"/> instance
+        /// </summary>
+        public void AddSpellModifierProperty(ISpellPropertyModifier spellModifier, uint spell4Id)
+        {
+            if (SpellProperties.ContainsKey(spellModifier.Property))
+            {
+                var spellDict = SpellProperties[spellModifier.Property];
+
+                if (spellDict.ContainsKey(spell4Id))
+                    spellDict[spell4Id] = spellModifier;
+                else
+                    spellDict.Add(spell4Id, spellModifier);
+            }
+            else
+            {
+                SpellProperties.Add(spellModifier.Property, new Dictionary<uint, ISpellPropertyModifier>
+                {
+                    { spell4Id, spellModifier }
+                });
+            }
+
+            DirtyProperties.Add(spellModifier.Property);
+        }
+
+        /// <summary>
+        /// Remove a <see cref="Property"/> modifier by a Spell that is currently affecting this <see cref="WorldEntity"/>
+        /// </summary>
+        public void RemoveSpellProperty(Property property, uint spell4Id)
+        {
+            if (SpellProperties.ContainsKey(property))
+        {
+                var spellDict = SpellProperties[property];
+
+                if (spellDict.ContainsKey(spell4Id))
+                    spellDict.Remove(spell4Id);
+            }
+
+            DirtyProperties.Add(property);
+        }
+
+        /// <summary>
+        /// Remove all <see cref="Property"/> modifiers by a Spell that is currently affecting this <see cref="WorldEntity"/>
+        /// </summary>
+        public void RemoveSpellProperties(uint spell4Id)
+        {
+            List<Property> propertiesWithSpell = SpellProperties.Where(i => i.Value.Keys.Contains(spell4Id)).Select(p => p.Key).ToList();
+
+            foreach (Property property in propertiesWithSpell)
+                RemoveSpellProperty(property, spell4Id);
+        }
+
+        /// <summary>
+        /// Return the base value for this <see cref="WorldEntity"/>'s <see cref="Property"/>
+        /// </summary>
+        private float GetBasePropertyValue(Property property)
+        {
+            return BaseProperties.ContainsKey(property) ? BaseProperties[property] : GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property).DefaultValue;
+        }
+
+        /// <summary>
+        /// Return all item property values for this <see cref="WorldEntity"/>'s <see cref="Property"/>
+        /// </summary>
+        private Dictionary<ItemSlot, float> GetItemProperties(Property property)
+        {
+            return ItemProperties.TryGetValue(property, out Dictionary<ItemSlot, float> properties) ? properties : new Dictionary<ItemSlot, float>();
+        }
+
+        /// <summary>
+        /// Return all <see cref="IPropertyModifier"/> for this <see cref="WorldEntity"/>'s <see cref="Property"/>
+        /// </summary>
+        private IEnumerable<ISpellPropertyModifier> GetSpellPropertyModifiers(Property property)
+        {
+            return SpellProperties.ContainsKey(property) ? SpellProperties[property].Values : Enumerable.Empty<ISpellPropertyModifier>();
+        }
+
+        /// <summary>
+        /// Returns the current value for this <see cref="WorldEntity"/>'s <see cref="Property"/>
+        /// </summary>
+        public float GetPropertyValue(Property property)
         {
             return Properties.ContainsKey(property) ? Properties[property].Value : default;
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="WorldEntity"/> has a <see cref="Property"/> updated.
+        /// </summary>
+        protected virtual void OnPropertyUpdate(Property property, float newValue)
+        {
+            switch (property)
+            {
+                case Property.BaseHealth:
+                    if (newValue < Health)
+                        Health = MaxHealth;
+                    break;
+                case Property.ShieldCapacityMax:
+                    if (newValue < Shield)
+                        Shield = MaxShieldCapacity;
+                    break;
+            }
         }
 
         /// <summary>
@@ -447,6 +742,21 @@ namespace NexusForever.Game.Entity
         protected void SetStat<T>(Stat stat, T value) where T : Enum, IConvertible
         {
             SetStat(stat, value.ToUInt32(null));
+        }
+
+        /// <summary>
+        /// Handles regeneration of Stat Values. Used to provide a hook into the Update method, for future implementation.
+        /// </summary>
+        private void HandleStatUpdate(double lastTick)
+        {
+            // TODO: This should probably get moved to a Calculation Library/Manager at some point. There will be different timers on Stat refreshes, but right now the timer is hardcoded to every 0.25s.
+            // Probably worth considering an Attribute-grouped Class that allows us to run differentt regeneration methods & calculations for each stat.
+
+            if (Health < MaxHealth)
+                Health += (uint)(MaxHealth / 200f);
+
+            if (Shield < MaxShieldCapacity)
+                Shield += (uint)(MaxShieldCapacity * GetPropertyValue(Property.ShieldRegenPct) * statUpdateTimer.Duration);
         }
 
         /// <summary>

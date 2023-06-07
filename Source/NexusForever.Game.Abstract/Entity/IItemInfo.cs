@@ -1,5 +1,7 @@
 ﻿using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Static;
+using System.Collections.Immutable;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -11,6 +13,12 @@ namespace NexusForever.Game.Abstract.Entity
         Item2CategoryEntry CategoryEntry { get; }
         Item2TypeEntry TypeEntry { get; }
         ItemSlotEntry SlotEntry { get; }
+        ItemBudgetEntry BudgetEntry { get; }
+        ItemStatEntry StatEntry { get; }
+        SecondaryItemFlags SecondaryItemFlags { get; }
+
+        float ItemPower { get; }
+        ImmutableDictionary<Property, float> Properties { get; }
 
         /// <summary>
         /// Return the display id for <see cref="IItemInfo"/>.

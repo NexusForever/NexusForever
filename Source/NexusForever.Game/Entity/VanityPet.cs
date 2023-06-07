@@ -31,7 +31,7 @@ namespace NexusForever.Game.Entity
             Creature2DisplayGroup   = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == CreatureEntry.Creature2DisplayGroupId);
             Initialise(creature, Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u, 0);
 
-            SetProperty(Property.BaseHealth, 800.0f, 800.0f);
+            SetBaseProperty(Property.BaseHealth, 800.0f);
 
             SetStat(Stat.Health, 800u);
             SetStat(Stat.Level, 3u);

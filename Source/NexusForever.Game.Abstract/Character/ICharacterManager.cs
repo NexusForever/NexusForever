@@ -1,4 +1,5 @@
-﻿using NexusForever.Database.Character.Model;
+﻿using System.Collections.Immutable;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
@@ -49,5 +50,15 @@ namespace NexusForever.Game.Abstract.Character
         /// Returns a <see cref="ILocation"/> describing the starting location for a given <see cref="Race"/>, <see cref="Faction"/> and Creation Type combination.
         /// </summary>
         ILocation GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart);
+
+        /// <summary>
+        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="IPropertyValue"/> for any character
+        /// </summary>
+        ImmutableList<IPropertyModifier> GetCharacterBaseProperties();
+
+        /// <summary>
+        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="IPropertyValue"/> for a character class
+        /// </summary>
+        ImmutableList<IPropertyModifier> GetCharacterClassBaseProperties(Class @class);
     }
 }

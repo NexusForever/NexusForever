@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database;
@@ -13,6 +14,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
+using NexusForever.Game.Character;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -282,16 +284,7 @@ namespace NexusForever.Game.Entity
 
             AppearanceManager       = new AppearanceManager(this, model);
 
-            // temp
-            Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
-            Properties.Add(Property.ShieldCapacityMax, new PropertyValue(Property.ShieldCapacityMax, 0f, 450f));
-            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
-            Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
-            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
-            // sprint
-            Properties.Add(Property.ResourceMax0, new PropertyValue(Property.ResourceMax0, 500f, 500f));
-            // dash
-            Properties.Add(Property.ResourceMax7, new PropertyValue(Property.ResourceMax7, 200f, 200f));
+            BuildBaseProperties();
 
             SetStat(Stat.Sheathed, 1u);
 
@@ -299,9 +292,35 @@ namespace NexusForever.Game.Entity
             SetStat(Stat.Dash, 200F);
             // sprint
             SetStat(Stat.Resource0, 500f);
-            SetStat(Stat.Shield, 450u);
 
             PlayerManager.Instance.AddPlayer(this);
+        }
+
+        public override void BuildBaseProperties()
+        {
+            var baseProperties = CharacterManager.Instance.GetCharacterBaseProperties();
+            foreach(PropertyModifier propertyValue in baseProperties)
+            {
+                float value = propertyValue.Value; // Intentionally copying value so that the PropertyModifier does not get modified inside AssetManager
+
+                if (propertyValue.ModType == ModType.LevelScale)
+                    value *= Level;
+
+                SetBaseProperty(propertyValue.Property, value);
+            }
+
+            var classProperties = CharacterManager.Instance.GetCharacterClassBaseProperties(Class);
+            foreach (PropertyModifier propertyValue in classProperties)
+            {
+                float value = propertyValue.Value; // Intentionally copying value so that the PropertyModifier does not get modified inside AssetManager
+
+                if (propertyValue.ModType == ModType.LevelScale)
+                    value *= Level;
+
+                SetBaseProperty(propertyValue.Property, value);
+            }
+
+            base.BuildBaseProperties();
         }
 
         public override void Update(double lastTick)
@@ -1154,6 +1173,11 @@ namespace NexusForever.Game.Entity
             update.Race = (byte)Race;
             update.Sex  = (byte)Sex;
             return update;
+        }
+
+        protected override void OnPropertyUpdate(Property property, float newValue)
+        {
+            base.OnPropertyUpdate(property, newValue);
         }
     }
 }

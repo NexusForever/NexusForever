@@ -645,6 +645,9 @@ namespace NexusForever.Game.Entity
 
             bag.AddItem(item, bagIndex);
 
+            if (location == InventoryLocation.Equipped && player != null)
+                ApplyProperties(item);
+
             if (IsVisualItemSlot(item.Location, item.BagIndex) && player != null)
                 player.AddVisual((ItemSlot)item.Info.TypeEntry.ItemSlotId, item.Info.GetDisplayId());
 
@@ -668,8 +671,8 @@ namespace NexusForever.Game.Entity
             if (bag == null)
                 throw new ArgumentException();
 
-            if (IsVisualItemSlot(item.Location, item.BagIndex) && player != null)
-                player.RemoveVisual((ItemSlot)item.Info.TypeEntry.ItemSlotId);
+            if (item.Location == InventoryLocation.Equipped && player != null)
+                RemoveProperties(item);
 
             if (IsEquippableBagSlot(item.Location, item.BagIndex) && item.Info.IsEquippableBag())
                 InventoryResize(InventoryLocation.Inventory, (int)-item.Info.Entry.MaxStackCount);
@@ -677,6 +680,9 @@ namespace NexusForever.Game.Entity
                 InventoryResize(InventoryLocation.PlayerBank, (int)-item.Info.Entry.MaxStackCount);
 
             bag.RemoveItem(item);
+
+            if (IsVisualItemSlot(item.PreviousLocation, item.PreviousBagIndex) && player != null)
+                player.RemoveVisual((ItemSlot)item.Info.TypeEntry.ItemSlotId);
         }
 
         /// <summary>
@@ -783,6 +789,22 @@ namespace NexusForever.Game.Entity
         private IBag GetBag(InventoryLocation location)
         {
             return bags.TryGetValue(location, out IBag container) ? container : null;
+        }
+
+        private void ApplyProperties(IItem item)
+        {
+            foreach (KeyValuePair<Property, float> property in item.Info.Properties)
+                player.AddItemProperty(property.Key, (ItemSlot)item.Info.SlotEntry.Id, property.Value);
+
+            // TODO: Add properties from item's runes
+        }
+
+        private void RemoveProperties(IItem item)
+        {
+            foreach (KeyValuePair<Property, float> property in item.Info.Properties)
+                player.RemoveItemProperty(property.Key, (ItemSlot)item.Info.SlotEntry.Id);
+
+            // TODO: Remove properties from item's runes
         }
 
         public IEnumerator<IBag> GetEnumerator()

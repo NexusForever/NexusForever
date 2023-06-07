@@ -38,7 +38,7 @@ namespace NexusForever.Game.Abstract.Entity
         IMovementManager MovementManager { get; }
 
         uint Health { get; }
-        float Shield { get; }
+        uint Shield { get; }
         uint Level { get; set; }
         bool Sheathed { get; set; }
 
@@ -69,6 +69,25 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void OnActivateCast(IPlayer activator);
 
+        /// <summary>
+        /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="IPropertyModifier"/> instance
+        /// </summary>
+        void AddItemProperty(Property property, ItemSlot itemSlot, float value);
+
+        /// <summary>
+        /// Remove a <see cref="Property"/> modifier by a Spell that is currently affecting this <see cref="IWorldEntity"/>
+        /// </summary>
+        void RemoveItemProperty(Property property, ItemSlot itemSlot);
+
+        /// <summary>
+        /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="IPropertyModifier"/> instance
+        /// </summary>
+        void AddSpellModifierProperty(ISpellPropertyModifier modifier, uint spell4Id);
+
+        /// <summary>
+        /// Remove a <see cref="Property"/> modifier by a Spell that is currently affecting this <see cref="IWorldEntity"/>
+        /// </summary>
+        void RemoveSpellProperty(Property property, uint spell4Id);
 
         /// <summary>
         /// Return a collection of <see cref="IItemVisual"/> for <see cref="IWorldEntity"/>.
