@@ -1,3 +1,5 @@
+using NexusForever.GameTable.Static;
+
 namespace NexusForever.GameTable.Model
 {
     public class Item2CategoryEntry
@@ -5,7 +7,7 @@ namespace NexusForever.GameTable.Model
         public uint Id;
         public uint LocalizedTextId;
         public uint ItemProficiencyId;
-        public uint Flags;
+        public SecondaryItemFlags Flags;
         public uint TradeSkillId;
         public uint SoundEventIdEquip;
         public float VendorMultiplier;
