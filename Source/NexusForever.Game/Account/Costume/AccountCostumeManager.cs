@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Account.Costume;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Account.Costume;
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -89,7 +90,7 @@ namespace NexusForever.Game.Account
             if (entry == null)
                 return 1000u;
 
-            return entry.Dataint0/* + countFromEntitlements*/;
+            return entry.Dataint0 + (account.EntitlementManager.GetEntitlement(EntitlementType.AdditionalCostumeUnlocks)?.Amount ?? 0u);
         }
 
         /// <summary>
