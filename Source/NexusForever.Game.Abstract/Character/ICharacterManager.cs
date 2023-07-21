@@ -52,13 +52,13 @@ namespace NexusForever.Game.Abstract.Character
         ILocation GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart);
 
         /// <summary>
-        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="IPropertyValue"/> for any character
+        /// Returns a collection containing all base <see cref="IPropertyValue"/> for any character.
         /// </summary>
-        ImmutableList<IPropertyModifier> GetCharacterBaseProperties();
+        IEnumerable<IPropertyModifier> GetCharacterBaseProperties();
 
         /// <summary>
-        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="IPropertyValue"/> for a character class
+        /// Returns a collection containing all base <see cref="IPropertyValue"/> for a character class.
         /// </summary>
-        ImmutableList<IPropertyModifier> GetCharacterClassBaseProperties(Class @class);
+        IEnumerable<IPropertyModifier> GetCharacterClassBaseProperties(Class @class);
     }
 }

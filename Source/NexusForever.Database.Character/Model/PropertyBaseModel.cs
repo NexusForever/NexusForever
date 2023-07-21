@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace NexusForever.Database.Character.Model
+﻿namespace NexusForever.Database.Character.Model
 {
     public partial class PropertyBaseModel
     {

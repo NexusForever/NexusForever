@@ -19,7 +19,6 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared.Game;
-using NetworkPropertyValue = NexusForever.Network.World.Message.Model.Shared.PropertyValue;
 
 namespace NexusForever.Game.Entity
 {
@@ -28,16 +27,6 @@ namespace NexusForever.Game.Entity
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-
-        /// <summary>
-        /// Property related cached data
-        /// </summary>
-        public Dictionary<Property, IPropertyValue> Properties { get; } = new Dictionary<Property, IPropertyValue>();
-        private Dictionary<Property, float> BaseProperties { get; } = new Dictionary<Property, float>();
-        private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> ItemProperties { get; } = new Dictionary<Property, Dictionary<ItemSlot, float>>();
-        private Dictionary<Property, Dictionary</*spell4Id*/uint, ISpellPropertyModifier>> SpellProperties { get; } = new Dictionary<Property, Dictionary<uint, ISpellPropertyModifier>>();
-        private HashSet<Property> DirtyProperties { get; } = new HashSet<Property>();
-
         public uint EntityId { get; protected set; }
 
         public uint CreatureId
@@ -86,7 +75,7 @@ namespace NexusForever.Game.Entity
         public float LeashRange { get; protected set; } = 15f;
         public IMovementManager MovementManager { get; private set; }
 
-        public uint Health
+        public virtual uint Health
         {
             get => GetStatInteger(Stat.Health) ?? 0u;
             set
@@ -97,13 +86,6 @@ namespace NexusForever.Game.Entity
                     UnitId = Guid,
                     Health = Health
                 });
-                if (this is IPlayer player)
-                    player.Session.EnqueueMessageEncrypted(new ServerPlayerHealthUpdate
-                    {
-                        UnitId = Guid,
-                        Health = Health,
-                        Mask = (UpdateHealthMask)4
-                    });
             }
         }
 
@@ -125,15 +107,10 @@ namespace NexusForever.Game.Entity
             set => SetBaseProperty(Property.ShieldCapacityMax, value);
         }
 
-        public uint Level
+        public virtual uint Level
         {
             get => GetStatInteger(Stat.Level) ?? 1u;
-            set
-            {
-                SetStat(Stat.Level, value);
-                if (this is Player player)
-                    player.BuildBaseProperties();
-            }
+            set => SetStat(Stat.Level, value);
         }
 
         public bool Sheathed
@@ -158,6 +135,10 @@ namespace NexusForever.Game.Entity
         private UpdateTimer statUpdateTimer = new UpdateTimer(0.25); // TODO: Long-term this should be absorbed into individual timers for each Stat regeneration method
 
         protected readonly Dictionary<Stat, IStatValue> stats = new Dictionary<Stat, IStatValue>();
+
+        private readonly Dictionary<Property, IPropertyValue> properties = new ();
+        private readonly HashSet<Property> dirtyProperties = new();
+        private bool invokePropertyUpdate = false;
 
         private bool emitVisual;
         private readonly Dictionary<ItemSlot, IItemVisual> itemVisuals = new();
@@ -200,9 +181,10 @@ namespace NexusForever.Game.Entity
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
-            SetVisualEmit(false);
+            // TODO: handle this better
+            Health = MaxHealth;
 
-            BuildBaseProperties();
+            SetVisualEmit(false);
         }
 
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
@@ -239,17 +221,18 @@ namespace NexusForever.Game.Entity
                 statUpdateTimer.Reset();
             }
 
-            if (!HasPendingPropertyChanges)
-                return;
-
-            EnqueueToVisible(BuildPropertyUpdates(), true);
+            if (dirtyProperties.Count != 0)
+            {
+                EnqueueToVisible(BuildPropertyUpdates(), true);
+                dirtyProperties.Clear();
+            }
         }
 
         protected abstract IEntityModel BuildEntityModel();
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            DirtyProperties.Clear();
+            dirtyProperties.Clear();
 
             ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
             {
@@ -270,13 +253,8 @@ namespace NexusForever.Game.Entity
                 VisibleItems = itemVisuals
                     .Select(v => v.Value.Build())
                     .ToList(),
-                Properties   = Properties.Values
-                    .Select(p => new NetworkPropertyValue
-                    {
-                        Property  = p.Property,
-                        BaseValue = p.BaseValue,
-                        Value     = p.Value
-                    })
+                Properties   = properties.Values
+                    .Select(p => p.Build())
                     .ToList(),
                 Faction1     = Faction1,
                 Faction2     = Faction2,
@@ -386,248 +364,144 @@ namespace NexusForever.Game.Entity
             };
         }
 
-              /// <summary>
-        /// Used to build the <see cref="ServerEntityPropertiesUpdate"/> from all modified <see cref="Property"/>
+        /// <summary>
+        /// Return a collection of <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/>.
         /// </summary>
-        private ServerEntityPropertiesUpdate BuildPropertyUpdates()
+        public IEnumerable<IPropertyValue> GetProperties()
         {
-            if (!HasPendingPropertyChanges)
-                return null;
-            
-            ServerEntityPropertiesUpdate propertyUpdatePacket = new ServerEntityPropertiesUpdate()
-            {
-                UnitId = Guid
-            };
-            
-            foreach (Property propertyUpdate in DirtyProperties)
-            {
-                IPropertyValue propertyValue = CalculateProperty(propertyUpdate);
-                if (Properties.ContainsKey(propertyUpdate))
-                    Properties[propertyUpdate] = propertyValue;
-                else
-                    Properties.Add(propertyUpdate, propertyValue);
+            return properties.Values;
+        }
 
-                OnPropertyUpdate(propertyUpdate, propertyValue.Value);
+        protected IPropertyValue CreateProperty(Property property, float defaultValue)
+        {
+            IPropertyValue propertyValue = new PropertyValue(property, defaultValue);
+            properties.Add(property, propertyValue);
 
-                propertyUpdatePacket.Properties.Add(propertyValue.Build());
-            }
-
-            DirtyProperties.Clear();
-            return propertyUpdatePacket;
+            return propertyValue;
         }
 
         /// <summary>
-        /// Calculates and builds a <see cref="PropertyValue"/> for this Entity's <see cref="Property"/>
+        /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
         /// </summary>
-        private IPropertyValue CalculateProperty(Property property)
+        public IPropertyValue GetProperty(Property property)
         {
-            float baseValue = GetBasePropertyValue(property);
-            float value = baseValue;
-            baseValue = GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property).DefaultValue;
-            float itemValue = 0f;
+            if (!properties.TryGetValue(property, out IPropertyValue propertyValue))
+                propertyValue = CreateProperty(property, GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property)?.DefaultValue ?? 0f);
 
-            float originalValue = value;
-
-            // Run through spell adjustments first because they could adjust base properties
-            // dataBits01 appears to be some form of Priority or Math Operator
-            foreach (ISpellPropertyModifier spellModifier in GetSpellPropertyModifiers(property).OrderByDescending(s => s.Priority))
-            {
-                foreach (IPropertyModifier alteration in spellModifier.Alterations)
-                {
-                    // TODO: Add checks to ensure we're not modifying FlatValue and Percentage in the same effect?
-
-                    _ = alteration.ModType switch
-                    {
-                        ModType.FlatValue  => value += alteration.Value,
-                        ModType.Percentage => value *= alteration.Value,
-                        ModType.LevelScale => value += alteration.Value * Level,
-                    };
-                }
-            }
-
-            foreach (KeyValuePair<ItemSlot, float> itemStats in GetItemProperties(property))
-                itemValue += itemStats.Value;
-
-            value += itemValue;
-
-#if DEBUG
-            if (this is IPlayer player && !player.IsLoading)
-                player.SendSystemMessage($"Property {property} changing from {originalValue} to {value}.");
-#endif
-
-            return new PropertyValue(property, baseValue, value);
+            return propertyValue;
         }
 
         /// <summary>
-        /// Used on entering world to set the <see cref="WorldEntity"/> base <see cref="PropertyValue"/>
+        /// Returns the base value for <see cref="IWorldEntity"/> <see cref="Property"/>.
         /// </summary>
-        public virtual void BuildBaseProperties()
+        public float GetPropertyBaseValue(Property property)
         {
-            ServerEntityPropertiesUpdate propertiesUpdate = BuildPropertyUpdates();
-
-            if (this is not IPlayer player)
-                return;
-
-            if (!player.IsLoading)
-                player.EnqueueToVisible(propertiesUpdate, true);
-        }
-
-        public bool HasPendingPropertyChanges => DirtyProperties.Count != 0;
-
-        /// <summary>
-        /// Sets the base value for a <see cref="Property"/>
-        /// </summary>
-        public void SetBaseProperty(Property property, float value)
-        {
-            if (BaseProperties.ContainsKey(property))
-                BaseProperties[property] = value;
-            else
-                BaseProperties.Add(property, value);
-
-            DirtyProperties.Add(property);
+            return GetProperty(property).BaseValue;
         }
 
         /// <summary>
-        /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="PropertyModifier"/> instance
-        /// </summary>
-        public void AddItemProperty(Property property, ItemSlot itemSlot, float value)
-        {
-            if (ItemProperties.ContainsKey(property))
-            {
-                var itemDict = ItemProperties[property];
-
-                if (itemDict.ContainsKey(itemSlot))
-                    itemDict[itemSlot] = value;
-                else
-                    itemDict.Add(itemSlot, value);
-            }
-            else
-            {
-                ItemProperties.Add(property, new Dictionary<ItemSlot, float>
-                {
-                    { itemSlot, value }
-                });
-            }
-
-            DirtyProperties.Add(property);
-        }
-
-        /// <summary>
-        /// Remove a <see cref="Property"/> modifier by a Spell that is currently affecting this <see cref="WorldEntity"/>
-        /// </summary>
-        public void RemoveItemProperty(Property property, ItemSlot itemSlot)
-        {
-            if (ItemProperties.ContainsKey(property))
-            {
-                var itemDict = ItemProperties[property];
-
-                if (itemDict.ContainsKey(itemSlot))
-                    itemDict.Remove(itemSlot);
-            }
-
-            DirtyProperties.Add(property);
-        }
-
-        /// <summary>
-        /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="IPropertyModifier"/> instance
-        /// </summary>
-        public void AddSpellModifierProperty(ISpellPropertyModifier spellModifier, uint spell4Id)
-        {
-            if (SpellProperties.ContainsKey(spellModifier.Property))
-            {
-                var spellDict = SpellProperties[spellModifier.Property];
-
-                if (spellDict.ContainsKey(spell4Id))
-                    spellDict[spell4Id] = spellModifier;
-                else
-                    spellDict.Add(spell4Id, spellModifier);
-            }
-            else
-            {
-                SpellProperties.Add(spellModifier.Property, new Dictionary<uint, ISpellPropertyModifier>
-                {
-                    { spell4Id, spellModifier }
-                });
-            }
-
-            DirtyProperties.Add(spellModifier.Property);
-        }
-
-        /// <summary>
-        /// Remove a <see cref="Property"/> modifier by a Spell that is currently affecting this <see cref="WorldEntity"/>
-        /// </summary>
-        public void RemoveSpellProperty(Property property, uint spell4Id)
-        {
-            if (SpellProperties.ContainsKey(property))
-        {
-                var spellDict = SpellProperties[property];
-
-                if (spellDict.ContainsKey(spell4Id))
-                    spellDict.Remove(spell4Id);
-            }
-
-            DirtyProperties.Add(property);
-        }
-
-        /// <summary>
-        /// Remove all <see cref="Property"/> modifiers by a Spell that is currently affecting this <see cref="WorldEntity"/>
-        /// </summary>
-        public void RemoveSpellProperties(uint spell4Id)
-        {
-            List<Property> propertiesWithSpell = SpellProperties.Where(i => i.Value.Keys.Contains(spell4Id)).Select(p => p.Key).ToList();
-
-            foreach (Property property in propertiesWithSpell)
-                RemoveSpellProperty(property, spell4Id);
-        }
-
-        /// <summary>
-        /// Return the base value for this <see cref="WorldEntity"/>'s <see cref="Property"/>
-        /// </summary>
-        private float GetBasePropertyValue(Property property)
-        {
-            return BaseProperties.ContainsKey(property) ? BaseProperties[property] : GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property).DefaultValue;
-        }
-
-        /// <summary>
-        /// Return all item property values for this <see cref="WorldEntity"/>'s <see cref="Property"/>
-        /// </summary>
-        private Dictionary<ItemSlot, float> GetItemProperties(Property property)
-        {
-            return ItemProperties.TryGetValue(property, out Dictionary<ItemSlot, float> properties) ? properties : new Dictionary<ItemSlot, float>();
-        }
-
-        /// <summary>
-        /// Return all <see cref="IPropertyModifier"/> for this <see cref="WorldEntity"/>'s <see cref="Property"/>
-        /// </summary>
-        private IEnumerable<ISpellPropertyModifier> GetSpellPropertyModifiers(Property property)
-        {
-            return SpellProperties.ContainsKey(property) ? SpellProperties[property].Values : Enumerable.Empty<ISpellPropertyModifier>();
-        }
-
-        /// <summary>
-        /// Returns the current value for this <see cref="WorldEntity"/>'s <see cref="Property"/>
+        /// Returns the primary value for <see cref="IWorldEntity"/> <see cref="Property"/>.
         /// </summary>
         public float GetPropertyValue(Property property)
         {
-            return Properties.ContainsKey(property) ? Properties[property].Value : default;
+            return GetProperty(property).Value;
         }
 
         /// <summary>
-        /// Invoked when <see cref="WorldEntity"/> has a <see cref="Property"/> updated.
+        /// Sets the base value and calculate primary value for <see cref="Property"/>.
         /// </summary>
-        protected virtual void OnPropertyUpdate(Property property, float newValue)
+        public void SetBaseProperty(Property property, float value)
         {
-            switch (property)
+            IPropertyValue propertyValue = GetProperty(property);
+            propertyValue.BaseValue = value;
+
+            CalculateProperty(propertyValue);
+        }
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/>.
+        /// </summary>
+        public void CalculateProperty(Property property)
+        {
+            IPropertyValue propertyValue = GetProperty(property);
+            CalculateProperty(propertyValue);
+        }
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/> and set delayed emit.
+        /// </summary>
+        private void CalculateProperty(IPropertyValue propertyValue)
+        {
+            if (propertyValue == null)
+                throw new ArgumentNullException(nameof(propertyValue));
+
+            #if DEBUG
+            float previousValue = propertyValue.Value;
+            #endif
+
+            CalculatePropertyValue(propertyValue);
+            SetPropertyEmit(propertyValue.Property);
+
+            if (invokePropertyUpdate)
+                OnPropertyUpdate(propertyValue);
+
+            #if DEBUG
+            if (this is IPlayer player && !player.IsLoading)
+                player.SendSystemMessage($"Property {propertyValue.Property} changing, base: {propertyValue.BaseValue}, previous: {previousValue}, new: {propertyValue.Value}.");
+            #endif
+        }
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/>.
+        /// </summary>
+        protected virtual void CalculatePropertyValue(IPropertyValue propertyValue)
+        {
+            propertyValue.Value = propertyValue.BaseValue;
+        }
+
+        /// <summary>
+        /// Set <see cref="IWorldEntity"/> to broadcast <see cref="Property"/> on next world update.
+        /// </summary>
+        public void SetPropertyEmit(Property property)
+        {
+            dirtyProperties.Add(property);
+        }
+
+        protected void SetInvokePropertyUpdate(bool value)
+        {
+            invokePropertyUpdate = value;
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Property"/> updated.
+        /// </summary>
+        protected virtual void OnPropertyUpdate(IPropertyValue propertyValue)
+        {
+            switch (propertyValue.Property)
             {
                 case Property.BaseHealth:
-                    if (newValue < Health)
+                    if (propertyValue.Value < Health)
                         Health = MaxHealth;
                     break;
                 case Property.ShieldCapacityMax:
-                    if (newValue < Shield)
+                    if (propertyValue.Value < Shield)
                         Shield = MaxShieldCapacity;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Used to build the <see cref="ServerEntityPropertiesUpdate"/> from all modified <see cref="Property"/>.
+        /// </summary>
+        private IWritable BuildPropertyUpdates()
+        {
+            return new ServerEntityPropertiesUpdate()
+            {
+                UnitId     = Guid,
+                Properties = dirtyProperties
+                    .Select(p => properties[p].Build())
+                    .ToList()
+            };
         }
 
         /// <summary>

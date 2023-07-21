@@ -4,9 +4,9 @@ namespace NexusForever.Game.Abstract.Entity
 {
     public interface IPropertyModifier
     {
-        float BaseValue { get; }
-        ModType ModType { get; }
         Property Property { get; }
-        float Value { get; }
+        ModType ModType { get; }
+
+        float GetValue(uint level = 1u);
     }
 }

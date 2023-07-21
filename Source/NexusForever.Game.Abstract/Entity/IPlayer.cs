@@ -185,5 +185,15 @@ namespace NexusForever.Game.Abstract.Entity
         bool HasFlag(CharacterFlag flag);
 
         void SendCharacterFlagsUpdated();
+
+        /// <summary>
+        /// Add a <see cref="Property"/> modifier given a <see cref="ItemSlot"/> and value.
+        /// </summary>
+        void AddItemProperty(Property property, ItemSlot itemSlot, float value);
+
+        /// <summary>
+        /// Remove a <see cref="Property"/> modifier by a item that is currently affecting this <see cref="IPlayer"/>.
+        /// </summary>
+        void RemoveItemProperty(Property property, ItemSlot itemSlot);
     }
 }

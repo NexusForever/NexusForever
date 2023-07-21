@@ -81,18 +81,18 @@ namespace NexusForever.Game.Entity
                 // runes
                 formulaEntry = Entry.PowerLevel switch
                 {
-                    < 50u => GameTableManager.Instance.GameFormula.GetEntry(991),
+                    < 50u  => GameTableManager.Instance.GameFormula.GetEntry(991),
                     < 130u => GameTableManager.Instance.GameFormula.GetEntry(65),
-                    _ => GameTableManager.Instance.GameFormula.GetEntry(253)
+                    _      => GameTableManager.Instance.GameFormula.GetEntry(253)
                 };
             }
             else
             {
                 formulaEntry = Entry.PowerLevel switch
                 {
-                    < 50u => GameTableManager.Instance.GameFormula.GetEntry(1028),
+                    < 50u  => GameTableManager.Instance.GameFormula.GetEntry(1028),
                     < 130u => GameTableManager.Instance.GameFormula.GetEntry(1027),
-                    _ => GameTableManager.Instance.GameFormula.GetEntry(1255)
+                    _      => GameTableManager.Instance.GameFormula.GetEntry(1255)
                 };
             }
 
@@ -125,12 +125,12 @@ namespace NexusForever.Game.Entity
                     case ItemStatType.RandomStatGroup:
                         break;
                     case ItemStatType.Unknown4:
-                        {
-                            // this one is weird...
-                            // there is additional code if offset 0x60 in item template is set but from what I can see this is never set
-                            // due to this I'm just hard coding the else condition which sets the type to 0, basically removing it 
-                            continue;
-                        }
+                    {
+                        // this one is weird...
+                        // there is additional code if offset 0x60 in item template is set but from what I can see this is never set
+                        // due to this I'm just hard coding the else condition which sets the type to 0, basically removing it 
+                        continue;
+                    }
                 }
             }
         }
@@ -274,9 +274,9 @@ namespace NexusForever.Game.Entity
 
             GameFormulaEntry formulaEntry = Entry.PowerLevel switch
             {
-                < 50u => GameTableManager.Instance.GameFormula.GetEntry(547),
+                < 50u  => GameTableManager.Instance.GameFormula.GetEntry(547),
                 < 120u => GameTableManager.Instance.GameFormula.GetEntry(1286),
-                _ => GameTableManager.Instance.GameFormula.GetEntry(1287)
+                _      => GameTableManager.Instance.GameFormula.GetEntry(1287)
             };
 
             float armor = ((formulaEntry.Datafloat0 * formulaEntry.Datafloat03) + (formulaEntry.Datafloat02 * (Entry.PowerLevel - formulaEntry.Dataint0))) * (CategoryEntry.ArmorModifier * SlotEntry.ArmorModifier);

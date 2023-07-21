@@ -81,7 +81,7 @@ namespace NexusForever.Game.Character
             var entries = ImmutableList.CreateBuilder<IPropertyModifier>();
             foreach (PropertyBaseModel propertyModel in DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetProperties(0))
             {
-                var newPropValue = new PropertyModifier((Property)propertyModel.Property, (ModType)propertyModel.ModType, propertyModel.Value, propertyModel.Value);
+                var newPropValue = new PropertyModifier((Property)propertyModel.Property, (ModType)propertyModel.ModType, propertyModel.Value);
                 entries.Add(newPropValue);
             }
 
@@ -90,33 +90,21 @@ namespace NexusForever.Game.Character
 
         private void CacheCharacterClassBaseProperties()
         {
-            ImmutableDictionary<Class, ImmutableList<IPropertyModifier>>.Builder entries = ImmutableDictionary.CreateBuilder<Class, ImmutableList<IPropertyModifier>>();
-            var classList = GameTableManager.Instance.Class.Entries;
+            var entries = ImmutableDictionary.CreateBuilder<Class, ImmutableList<IPropertyModifier>>();
 
-            // Get all Properties that are used based on Character Class
-            List<PropertyBaseModel> classPropertyBases = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetProperties(1);
-
-            // Loop through all Character Classes in the GameTable
-            foreach (ClassEntry classEntry in classList)
+            foreach (IGrouping<uint, PropertyBaseModel> group in DatabaseManager.Instance.GetDatabase<CharacterDatabase>()
+                .GetProperties(1)
+                .GroupBy(p => p.Subtype)) // class
             {
-                Class @class = (Class)classEntry.Id;
+                var propertyEntries = ImmutableList.CreateBuilder<IPropertyModifier>();
 
-                // Ensure we haven't already processed this Class
-                if (entries.ContainsKey(@class))
-                    continue;
-
-                ImmutableList<IPropertyModifier>.Builder propertyList = ImmutableList.CreateBuilder<IPropertyModifier>();
-                foreach (PropertyBaseModel propertyModel in classPropertyBases)
+                foreach (PropertyBaseModel propertyModel in group)
                 {
-                    if (propertyModel.Subtype != (uint)@class)
-                        continue;
-
-                    var newPropValue = new PropertyModifier((Property)propertyModel.Property, (ModType)propertyModel.ModType, propertyModel.Value, propertyModel.Value);
-                    propertyList.Add(newPropValue);
+                    var newPropValue = new PropertyModifier((Property)propertyModel.Property, (ModType)propertyModel.ModType, propertyModel.Value);
+                    propertyEntries.Add(newPropValue);
                 }
-                ImmutableList<IPropertyModifier> classProperties = propertyList.ToImmutable();
 
-                entries.Add(@class, classProperties);
+                entries.Add((Class)group.Key, propertyEntries.ToImmutable());
             }
 
             characterClassBaseProperties = entries.ToImmutable();
@@ -206,19 +194,19 @@ namespace NexusForever.Game.Character
         }
 
         /// <summary>
-        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="PropertyValue"/> for any character
+        /// Returns a collection containing all base <see cref="IPropertyValue"/> for any character.
         /// </summary>
-        public ImmutableList<IPropertyModifier> GetCharacterBaseProperties()
+        public IEnumerable<IPropertyModifier> GetCharacterBaseProperties()
         {
             return characterBaseProperties;
         }
 
         /// <summary>
-        /// Returns an <see cref="ImmutableList[T]"/> containing all base <see cref="PropertyValue"/> for a character class
+        /// Returns a collection containing all base <see cref="IPropertyValue"/> for a character class.
         /// </summary>
-        public ImmutableList<IPropertyModifier> GetCharacterClassBaseProperties(Class @class)
+        public IEnumerable<IPropertyModifier> GetCharacterClassBaseProperties(Class @class)
         {
-            return characterClassBaseProperties.TryGetValue(@class, out ImmutableList<IPropertyModifier> propertyValues) ? propertyValues : null;
+            return characterClassBaseProperties.TryGetValue(@class, out ImmutableList<IPropertyModifier> propertyValues) ? propertyValues : Enumerable.Empty<IPropertyModifier>();
         }
     }
 }

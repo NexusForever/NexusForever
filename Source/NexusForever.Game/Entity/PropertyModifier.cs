@@ -5,17 +5,26 @@ namespace NexusForever.Game.Entity
 {
     public class PropertyModifier : IPropertyModifier
     {
-        public Property Property { get; protected set; }
-        public ModType ModType { get; protected set; }
-        public float BaseValue { get; protected set; }
-        public float Value { get; protected set; }
+        public Property Property { get; }
+        public ModType ModType { get; }
+        public float Value { get; }
 
-        public PropertyModifier(Property property, ModType modType, float baseValue, float value)
+        /// <summary>
+        /// Create a new <see cref="IPropertyModifier"/> from supplied parameters.
+        /// </summary>
+        public PropertyModifier(Property property, ModType modType, float value)
         {
-            Property = property;
-            ModType = modType;
-            BaseValue = baseValue;
-            Value = value;
+            Property  = property;
+            ModType   = modType;
+            Value     = value;
+        }
+
+        public float GetValue(uint level = 1u)
+        {
+            if (ModType == ModType.LevelScale)
+                return Value * level;
+
+            return Value;
         }
     }
 }
