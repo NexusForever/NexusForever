@@ -210,5 +210,12 @@ namespace NexusForever.Database.Character
 
             return context.CharacterCreate.ToList();
         }
+
+        public List<PropertyBaseModel> GetProperties(uint type)
+        {
+            using var context = new CharacterContext(config);
+                
+            return context.PropertyBase.Where(p => p.Type == type).ToList();
+        }
     }
 }

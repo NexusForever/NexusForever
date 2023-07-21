@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Map;
+using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -78,6 +79,9 @@ namespace NexusForever.Game.Spell
 
             // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464
             // FIXME: also cast 80530,Mount Sprint  - Tier 2,36122
+
+            player.CastSpell(52539, new SpellParameters());
+            player.CastSpell(80530, new SpellParameters());
         }
 
         [SpellEffectHandler(SpellEffectType.Teleport)]
@@ -206,6 +210,27 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Fluff)]
         public static void HandleEffectFluff(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
+        }
+
+        [SpellEffectHandler(SpellEffectType.UnitPropertyModifier)]
+        public static void HandleEffectPropertyModifier(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            // TODO: I suppose these could be cached somewhere instead of generating them every single effect?
+            SpellPropertyModifier modifier = 
+                new SpellPropertyModifier((Property)info.Entry.DataBits00, 
+                    info.Entry.DataBits01, 
+                    BitConverter.UInt32BitsToSingle(info.Entry.DataBits02), 
+                    BitConverter.UInt32BitsToSingle(info.Entry.DataBits03), 
+                    BitConverter.UInt32BitsToSingle(info.Entry.DataBits04));
+            target.AddSpellModifierProperty(modifier, spell.Parameters.SpellInfo.Entry.Id);
+
+            // TODO: Handle removing spell modifiers
+
+            //if (info.Entry.DurationTime > 0d)
+            //    events.EnqueueEvent(new SpellEvent(info.Entry.DurationTime / 1000d, () =>
+            //    {
+            //        player.RemoveSpellProperty((Property)info.Entry.DataBits00, parameters.SpellInfo.Entry.Id);
+            //    }));
         }
     }
 }

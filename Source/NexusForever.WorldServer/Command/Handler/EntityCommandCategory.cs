@@ -58,12 +58,13 @@ namespace NexusForever.WorldServer.Command.Handler
             var builder = new StringBuilder();
             BuildHeader(context, builder, entity);
 
-            if (entity.Properties.Count == 0)
+            var properties = entity.GetProperties().ToList();
+            if (properties.Count == 0)
                 builder.AppendLine("No properties found!");
             else
             {
-                foreach ((Property key, IPropertyValue value) in entity.Properties.OrderBy(p => p.Key))
-                    builder.AppendLine($"{key} - Base: {value.BaseValue} - Value: {value.Value}");
+                foreach (IPropertyValue value in properties.OrderBy(p => p.Property))
+                    builder.AppendLine($"{value.Property} - Base: {value.BaseValue} - Value: {value.Value}");
             }
 
             context.SendMessage(builder.ToString());

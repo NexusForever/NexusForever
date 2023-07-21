@@ -7,14 +7,17 @@ namespace NexusForever.Game.Entity
     public class PropertyValue : IPropertyValue
     {
         public Property Property { get; }
-        public float BaseValue { get; }
+        public float BaseValue { get; set; }
         public float Value { get; set; }
 
-        public PropertyValue(Property property, float baseValue, float value)
+        /// <summary>
+        /// Create a new <see cref="IPropertyValue"/> with supplied <see cref="Property"/> and base value.
+        /// </summary>
+        public PropertyValue(Property property, float baseValue)
         {
             Property  = property;
             BaseValue = baseValue;
-            Value     = value;
+            Value     = BaseValue;
         }
 
         public NetworkPropertyValue Build()
@@ -25,6 +28,7 @@ namespace NexusForever.Game.Entity
                 BaseValue = BaseValue,
                 Value     = Value
             };
+
         }
     }
 }

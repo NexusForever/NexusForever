@@ -41,6 +41,7 @@ namespace NexusForever.Database.Character
         public DbSet<GuildAchievementModel> GuildAchievement { get; set; }
         public DbSet<GuildDataModel> GuildData { get; set; }
         public DbSet<ItemModel> Item { get; set; }
+        public DbSet<PropertyBaseModel> PropertyBase { get; set; }
         public DbSet<ResidenceModel> Residence { get; set; }
         public DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public DbSet<ResidencePlotModel> ResidencePlot { get; set; }
@@ -1893,6 +1894,360 @@ namespace NexusForever.Database.Character
                     .HasForeignKey(d => d.OwnerId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK__item_ownerId__character_id");
+            });
+
+            modelBuilder.Entity<PropertyBaseModel>(entity =>
+            {
+                entity.HasKey(e => new { e.Type, e.Subtype, e.Property, })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("property_base");
+
+                entity.Property(e => e.Type)
+                    .ValueGeneratedNever()
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Property)
+                    .ValueGeneratedNever()
+                    .HasColumnName("property")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Subtype)
+                    .ValueGeneratedNever()
+                    .HasColumnName("subtype")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ModType)
+                    .HasColumnName("modType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Note)
+                    .IsRequired()
+                    .HasColumnName("note")
+                    .HasColumnType("varchar(100)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasData(
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 0,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Strength"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 1,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Dexterity"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 2,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Technology"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 3,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Magic"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 4,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Wisdom"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 7,
+                        ModType = 3,
+                        Value = 200,
+                        Note = "Player - Base HP per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 9,
+                        ModType = 0,
+                        Value = 500,
+                        Note = "Player - Base Endurance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 16,
+                        ModType = 0,
+                        Value = 0.0225f,
+                        Note = "Player - Base Endurance Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 35,
+                        ModType = 3,
+                        Value = 18,
+                        Note = "Player - Base Assault Rating per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 36,
+                        ModType = 3,
+                        Value = 18,
+                        Note = "Player - Base Support Rating per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 38,
+                        ModType = 0,
+                        Value = 200,
+                        Note = "Player - Base Dash Energy"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 39,
+                        ModType = 0,
+                        Value = 0.045f,
+                        Note = "Player - Base Dash Energy Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 41,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Shield Capacity Base"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 100,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Movement Speed"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 101,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Avoid Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 102,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Crit Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 107,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Focus Recovery In Combat"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 108,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Focus Recovery Out of Combat"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 112,
+                        ModType = 0,
+                        Value = 0.3f,
+                        Note = "Player - Base Multi-Hit Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 130,
+                        ModType = 0,
+                        Value = 0.8f,
+                        Note = "Player - Base Gravity Multiplier"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 150,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Physical"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 151,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Tech"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 152,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Magic"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 154,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Mutli-Hit Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 155,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Damage Reflect Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 191,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Mount Movement Speed"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 195,
+                        ModType = 0,
+                        Value = 0.3f,
+                        Note = "Player - Base Glance Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 1,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 1000,
+                        Note = "Class - Warrior - Base Kinetic Energy Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 17,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Warrior - Base Kinetic Energy Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 2,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 100,
+                        Note = "Class - Engineer - Base Volatile Energy Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 3,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 5,
+                        Note = "Class - Esper - Base Psi Point Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 4,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 4,
+                        Note = "Class - Medic - Base Medic Core Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 5,
+                        Property = 12,
+                        ModType = 0,
+                        Value = 100,
+                        Note = "Class - Stalker - Base Suit Power Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 5,
+                        Property = 19,
+                        ModType = 0,
+                        Value = 0.035f,
+                        Note = "Class - Stalker - Base Suit Power Regeneration Rate"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 7,
+                        Property = 13,
+                        ModType = 0,
+                        Value = 100,
+                        Note = "Class - Spellslinger - Base Spell Power Cap"
+                    });
             });
 
             modelBuilder.Entity<ResidenceModel>(entity =>

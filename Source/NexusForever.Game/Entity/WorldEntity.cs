@@ -18,7 +18,7 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using NetworkPropertyValue = NexusForever.Network.World.Message.Model.Shared.PropertyValue;
+using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity
 {
@@ -27,8 +27,6 @@ namespace NexusForever.Game.Entity
         public EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
         public Vector3 Rotation { get; set; } = Vector3.Zero;
-        public Dictionary<Property, IPropertyValue> Properties { get; } = new();
-
         public uint EntityId { get; protected set; }
 
         public uint CreatureId
@@ -77,17 +75,39 @@ namespace NexusForever.Game.Entity
         public float LeashRange { get; protected set; } = 15f;
         public IMovementManager MovementManager { get; private set; }
 
-        public uint Health
+        public virtual uint Health
         {
             get => GetStatInteger(Stat.Health) ?? 0u;
+            set
+            {
+                SetStat(Stat.Health, Math.Clamp(value, 0u, MaxHealth)); // TODO: Confirm MaxHealth is actually the maximum health would be at.
+                EnqueueToVisible(new ServerEntityHealthUpdate
+                {
+                    UnitId = Guid,
+                    Health = Health
+                });
+            }
         }
 
-        public float Shield
+        public uint MaxHealth
+        {
+            get => (uint)GetPropertyValue(Property.BaseHealth);
+            set => SetBaseProperty(Property.BaseHealth, value);
+        }
+
+        public uint Shield
         {
             get => GetStatInteger(Stat.Shield) ?? 0u;
+            set => SetStat(Stat.Shield, Math.Clamp(value, 0u, MaxShieldCapacity)); // TODO: Handle overshield
         }
 
-        public uint Level
+        public uint MaxShieldCapacity
+        {
+            get => (uint)GetPropertyValue(Property.ShieldCapacityMax);
+            set => SetBaseProperty(Property.ShieldCapacityMax, value);
+        }
+
+        public virtual uint Level
         {
             get => GetStatInteger(Stat.Level) ?? 1u;
             set => SetStat(Stat.Level, value);
@@ -109,7 +129,16 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public uint ControllerGuid { get; set; }
 
-        protected readonly Dictionary<Stat, IStatValue> stats = new();
+        /// <summary>
+        /// Initial stab at a timer to regenerate Health & Shield values.
+        /// </summary>
+        private UpdateTimer statUpdateTimer = new UpdateTimer(0.25); // TODO: Long-term this should be absorbed into individual timers for each Stat regeneration method
+
+        protected readonly Dictionary<Stat, IStatValue> stats = new Dictionary<Stat, IStatValue>();
+
+        private readonly Dictionary<Property, IPropertyValue> properties = new ();
+        private readonly HashSet<Property> dirtyProperties = new();
+        private bool invokePropertyUpdate = false;
 
         private bool emitVisual;
         private readonly Dictionary<ItemSlot, IItemVisual> itemVisuals = new();
@@ -152,6 +181,9 @@ namespace NexusForever.Game.Entity
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
+            // TODO: handle this better
+            Health = MaxHealth;
+
             SetVisualEmit(false);
         }
 
@@ -181,13 +213,28 @@ namespace NexusForever.Game.Entity
                 EnqueueToVisible(BuildVisualUpdate(), true);
                 SetVisualEmit(false);
             }
+
+            statUpdateTimer.Update(lastTick);
+            if (statUpdateTimer.HasElapsed)
+            {
+                HandleStatUpdate(lastTick);
+                statUpdateTimer.Reset();
+            }
+
+            if (dirtyProperties.Count != 0)
+            {
+                EnqueueToVisible(BuildPropertyUpdates(), true);
+                dirtyProperties.Clear();
+            }
         }
 
         protected abstract IEntityModel BuildEntityModel();
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            var entityCreatePacket = new ServerEntityCreate
+            dirtyProperties.Clear();
+
+            ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
             {
                 Guid         = Guid,
                 Type         = Type,
@@ -206,13 +253,8 @@ namespace NexusForever.Game.Entity
                 VisibleItems = itemVisuals
                     .Select(v => v.Value.Build())
                     .ToList(),
-                Properties   = Properties.Values
-                    .Select(p => new NetworkPropertyValue
-                    {
-                        Property  = p.Property,
-                        BaseValue = p.BaseValue,
-                        Value     = p.Value
-                    })
+                Properties   = properties.Values
+                    .Select(p => p.Build())
                     .ToList(),
                 Faction1     = Faction1,
                 Faction2     = Faction2,
@@ -322,17 +364,144 @@ namespace NexusForever.Game.Entity
             };
         }
 
-        protected void SetProperty(Property property, float value, float baseValue = 0.0f)
+        /// <summary>
+        /// Return a collection of <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/>.
+        /// </summary>
+        public IEnumerable<IPropertyValue> GetProperties()
         {
-            if (Properties.ContainsKey(property))
-                Properties[property].Value = value;
-            else
-                Properties.Add(property, new PropertyValue(property, baseValue, value));
+            return properties.Values;
         }
 
-        protected float? GetPropertyValue(Property property)
+        protected IPropertyValue CreateProperty(Property property, float defaultValue)
         {
-            return Properties.ContainsKey(property) ? Properties[property].Value : default;
+            IPropertyValue propertyValue = new PropertyValue(property, defaultValue);
+            properties.Add(property, propertyValue);
+
+            return propertyValue;
+        }
+
+        /// <summary>
+        /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        public IPropertyValue GetProperty(Property property)
+        {
+            if (!properties.TryGetValue(property, out IPropertyValue propertyValue))
+                propertyValue = CreateProperty(property, GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property)?.DefaultValue ?? 0f);
+
+            return propertyValue;
+        }
+
+        /// <summary>
+        /// Returns the base value for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        public float GetPropertyBaseValue(Property property)
+        {
+            return GetProperty(property).BaseValue;
+        }
+
+        /// <summary>
+        /// Returns the primary value for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        public float GetPropertyValue(Property property)
+        {
+            return GetProperty(property).Value;
+        }
+
+        /// <summary>
+        /// Sets the base value and calculate primary value for <see cref="Property"/>.
+        /// </summary>
+        public void SetBaseProperty(Property property, float value)
+        {
+            IPropertyValue propertyValue = GetProperty(property);
+            propertyValue.BaseValue = value;
+
+            CalculateProperty(propertyValue);
+        }
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/>.
+        /// </summary>
+        public void CalculateProperty(Property property)
+        {
+            IPropertyValue propertyValue = GetProperty(property);
+            CalculateProperty(propertyValue);
+        }
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/> and set delayed emit.
+        /// </summary>
+        private void CalculateProperty(IPropertyValue propertyValue)
+        {
+            if (propertyValue == null)
+                throw new ArgumentNullException(nameof(propertyValue));
+
+            #if DEBUG
+            float previousValue = propertyValue.Value;
+            #endif
+
+            CalculatePropertyValue(propertyValue);
+            SetPropertyEmit(propertyValue.Property);
+
+            if (invokePropertyUpdate)
+                OnPropertyUpdate(propertyValue);
+
+            #if DEBUG
+            if (this is IPlayer player && !player.IsLoading)
+                player.SendSystemMessage($"Property {propertyValue.Property} changing, base: {propertyValue.BaseValue}, previous: {previousValue}, new: {propertyValue.Value}.");
+            #endif
+        }
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/>.
+        /// </summary>
+        protected virtual void CalculatePropertyValue(IPropertyValue propertyValue)
+        {
+            propertyValue.Value = propertyValue.BaseValue;
+        }
+
+        /// <summary>
+        /// Set <see cref="IWorldEntity"/> to broadcast <see cref="Property"/> on next world update.
+        /// </summary>
+        public void SetPropertyEmit(Property property)
+        {
+            dirtyProperties.Add(property);
+        }
+
+        protected void SetInvokePropertyUpdate(bool value)
+        {
+            invokePropertyUpdate = value;
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Property"/> updated.
+        /// </summary>
+        protected virtual void OnPropertyUpdate(IPropertyValue propertyValue)
+        {
+            switch (propertyValue.Property)
+            {
+                case Property.BaseHealth:
+                    if (propertyValue.Value < Health)
+                        Health = MaxHealth;
+                    break;
+                case Property.ShieldCapacityMax:
+                    if (propertyValue.Value < Shield)
+                        Shield = MaxShieldCapacity;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Used to build the <see cref="ServerEntityPropertiesUpdate"/> from all modified <see cref="Property"/>.
+        /// </summary>
+        private IWritable BuildPropertyUpdates()
+        {
+            return new ServerEntityPropertiesUpdate()
+            {
+                UnitId     = Guid,
+                Properties = dirtyProperties
+                    .Select(p => properties[p].Build())
+                    .ToList()
+            };
         }
 
         /// <summary>
@@ -447,6 +616,21 @@ namespace NexusForever.Game.Entity
         protected void SetStat<T>(Stat stat, T value) where T : Enum, IConvertible
         {
             SetStat(stat, value.ToUInt32(null));
+        }
+
+        /// <summary>
+        /// Handles regeneration of Stat Values. Used to provide a hook into the Update method, for future implementation.
+        /// </summary>
+        private void HandleStatUpdate(double lastTick)
+        {
+            // TODO: This should probably get moved to a Calculation Library/Manager at some point. There will be different timers on Stat refreshes, but right now the timer is hardcoded to every 0.25s.
+            // Probably worth considering an Attribute-grouped Class that allows us to run differentt regeneration methods & calculations for each stat.
+
+            if (Health < MaxHealth)
+                Health += (uint)(MaxHealth / 200f);
+
+            if (Shield < MaxShieldCapacity)
+                Shield += (uint)(MaxShieldCapacity * GetPropertyValue(Property.ShieldRegenPct) * statUpdateTimer.Duration);
         }
 
         /// <summary>

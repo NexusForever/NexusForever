@@ -142,6 +142,8 @@ namespace NexusForever.Game.Entity
 
         private ItemSaveMask saveMask;
 
+        public Dictionary<Property, float> InnateProperties { get; private set; } = new Dictionary<Property, float>();
+
         /// <summary>
         /// Create a new <see cref="IItem"/> from an existing database model.
         /// </summary>

@@ -105,7 +105,7 @@ namespace NexusForever.GameTable
                 switch (dataType)
                 {
                     case DataType.UInt:
-                        if (modelFieldType != typeof(uint))
+                        if (modelFieldType != typeof(uint) && !modelFieldType.IsEnum)
                             throw new GameTableException($"Invalid GameTable model field type {modelFieldType}! Expected: {typeof(uint)}");
                         break;
                     case DataType.Single:
@@ -181,8 +181,13 @@ namespace NexusForever.GameTable
                                 switch (dataType)
                                 {
                                     case DataType.UInt:
-                                        array.SetValue(reader.ReadUInt32(), j);
+                                    { 
+                                        if (modelField.FieldType.GetElementType().IsEnum)
+                                            array.SetValue(Enum.ToObject(modelField.FieldType.GetElementType(), reader.ReadUInt32()), j);
+                                        else
+                                            array.SetValue(reader.ReadUInt32(), j);
                                         break;
+                                    }
                                     case DataType.Single:
                                         array.SetValue(reader.ReadSingle(), j);
                                         break;
@@ -203,8 +208,13 @@ namespace NexusForever.GameTable
                             switch (dataType)
                             {
                                 case DataType.UInt:
-                                    modelField.SetValue(entry, reader.ReadUInt32());
+                                {
+                                    if (modelField.FieldType.IsEnum)
+                                        modelField.SetValue(entry, Enum.ToObject(modelField.FieldType, reader.ReadUInt32()));
+                                    else
+                                        modelField.SetValue(entry, reader.ReadUInt32());
                                     break;
+                                }
                                 case DataType.Single:
                                     modelField.SetValue(entry, reader.ReadSingle());
                                     break;

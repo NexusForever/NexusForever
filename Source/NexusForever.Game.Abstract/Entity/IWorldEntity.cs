@@ -18,7 +18,6 @@ namespace NexusForever.Game.Abstract.Entity
         EntityType Type { get; }
         EntityCreateFlag CreateFlags { get; set; }
         Vector3 Rotation { get; set; }
-        Dictionary<Property, IPropertyValue> Properties { get; }
 
         uint EntityId { get; }
         uint CreatureId { get; set; }
@@ -38,7 +37,7 @@ namespace NexusForever.Game.Abstract.Entity
         IMovementManager MovementManager { get; }
 
         uint Health { get; }
-        float Shield { get; }
+        uint Shield { get; }
         uint Level { get; set; }
         bool Sheathed { get; set; }
 
@@ -69,7 +68,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void OnActivateCast(IPlayer activator);
 
-
         /// <summary>
         /// Return a collection of <see cref="IItemVisual"/> for <see cref="IWorldEntity"/>.
         /// </summary>
@@ -96,6 +94,41 @@ namespace NexusForever.Game.Abstract.Entity
         void RemoveVisual(ItemSlot slot);
 
         /// <summary>
+        /// Return a collection of <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/>.
+        /// </summary>
+        IEnumerable<IPropertyValue> GetProperties();
+
+        /// <summary>
+        /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        IPropertyValue GetProperty(Property property);
+
+        /// <summary>
+        /// Returns the base value for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        float GetPropertyBaseValue(Property property);
+
+        /// <summary>
+        /// Returns the primary value for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        float GetPropertyValue(Property property);
+
+        /// <summary>
+        /// Sets the base value and calculate primary value for <see cref="Property"/>.
+        /// </summary>
+        void SetBaseProperty(Property property, float value);
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/>.
+        /// </summary>
+        void CalculateProperty(Property property);
+
+        /// <summary>
+        /// Set <see cref="IWorldEntity"/> to broadcast <see cref="Property"/> on next world update.
+        /// </summary>
+        void SetPropertyEmit(Property property);
+
+        /// <summary>
         /// Return the <see cref="uint"/> value of the supplied <see cref="Stat"/> as an <see cref="Enum"/>.
         /// </summary>
         T? GetStatEnum<T>(Stat stat) where T : struct, Enum;
@@ -111,12 +144,12 @@ namespace NexusForever.Game.Abstract.Entity
         Disposition GetDispositionTo(Faction factionId, bool primary = true);
 
         /// <summary>
-        /// Broadcast NPC say chat message to to <see cref="IPlayer"/> in supplied range.
+        /// Broadcast NPC say chat message to <see cref="IPlayer"/> in supplied range.
         /// </summary>
         void NpcSay(string text, float range = 155f);
 
         /// <summary>
-        /// Broadcast NPC yell chat message to to <see cref="IPlayer"/> in supplied range.
+        /// Broadcast NPC yell chat message to <see cref="IPlayer"/> in supplied range.
         /// </summary>
         void NpcYell(string text, float range = 155f);
 

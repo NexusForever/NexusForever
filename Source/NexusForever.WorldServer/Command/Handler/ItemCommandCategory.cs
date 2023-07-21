@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;
 using NexusForever.Game.Text.Search;
+using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.WorldServer.Command.Context;
@@ -61,6 +64,41 @@ namespace NexusForever.WorldServer.Command.Handler
                 builder.AppendItem(itemEntry.Id);
                 target.Session.EnqueueMessageEncrypted(builder.Build());
             }
+        }
+
+        [Command(Permission.ItemInfo, "Lookup item information by id.", "info", "information", "i")]
+        public void HandleItemInfo(ICommandContext context,
+            [Parameter("Id of item to get information on")]
+            uint itemId)
+        {
+            IItemInfo info = ItemManager.Instance.GetItemInfo(itemId);
+            if (info == null)
+            {
+                context.SendError("Invalid item id!");
+                return;
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"Item Id: {info.Id}");
+            sb.AppendLine($"Item Flags: {info.Entry.Flags}");
+            sb.AppendLine($"Item Secondary Flags: {info.SecondaryItemFlags}");
+            sb.AppendLine($"Item Family: {info.FamilyEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Category: {info.CategoryEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Type: {info.TypeEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Slot: {info.SlotEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Budget: {info.BudgetEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Stat: {info.StatEntry?.Id ?? 0u}");
+            
+            sb.AppendLine($"Item Power: {info.ItemPower}");
+
+            sb.AppendLine("Properties:");
+            foreach ((Property property, float value) in info.Properties)
+            {
+                UnitProperty2Entry entry = GameTableManager.Instance.UnitProperty2.GetEntry((uint)property);
+                sb.AppendLine($"Property: {entry.Description}, Value: {value}");
+            }
+
+            context.SendMessage(sb.ToString());
         }
     }
 }

@@ -1,3 +1,5 @@
+using NexusForever.GameTable.Static;
+
 namespace NexusForever.GameTable.Model
 {
     public class Item2Entry
@@ -33,7 +35,7 @@ namespace NexusForever.GameTable.Model
         public uint HousingDecorInfoId;
         public uint HousingWarplotBossTokenId;
         public uint GenericUnlockSetId;
-        public uint Flags;
+        public ItemFlags Flags;
         public uint BindFlags;
         public uint BuyFromVendorStackCount;
         [GameTableFieldArray(2)]

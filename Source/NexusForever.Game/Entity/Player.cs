@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database;
@@ -13,6 +14,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
+using NexusForever.Game.Character;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -151,6 +153,32 @@ namespace NexusForever.Game.Entity
         }
         private byte innateIndex;
 
+        public override uint Health
+        {
+            get => base.Health;
+            set
+            {
+                base.Health = value;
+
+                Session.EnqueueMessageEncrypted(new ServerPlayerHealthUpdate
+                {
+                    UnitId = Guid,
+                    Health = Health,
+                    Mask   = (UpdateHealthMask)4
+                });
+            }
+        }
+
+        public override uint Level
+        {
+            get => base.Level;
+            set
+            {
+                base.Level = value;
+                SetBaseProperties();
+            }
+        }
+
         public DateTime CreateTime { get; }
         public double TimePlayedTotal { get; private set; }
         public double TimePlayedLevel { get; private set; }
@@ -219,6 +247,8 @@ namespace NexusForever.Game.Entity
         private UpdateTimer saveTimer = new(SaveDuration);
         private PlayerSaveMask saveMask;
 
+        private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> itemProperties = new();
+
         /// <summary>
         /// Create a new <see cref="IPlayer"/> from supplied <see cref="IGameSession"/> and <see cref="CharacterModel"/>.
         /// </summary>
@@ -249,6 +279,14 @@ namespace NexusForever.Game.Entity
 
             foreach (CharacterStatModel statModel in model.Stat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+
+            SetStat(Stat.Sheathed, 1u);
+            // temp
+            SetStat(Stat.Dash, 200F);
+            // sprint
+            SetStat(Stat.Resource0, 500f);
+
+            SetBaseProperties();
 
             scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(this);
 
@@ -282,26 +320,20 @@ namespace NexusForever.Game.Entity
 
             AppearanceManager       = new AppearanceManager(this, model);
 
-            // temp
-            Properties.Add(Property.BaseHealth, new PropertyValue(Property.BaseHealth, 200f, 800f));
-            Properties.Add(Property.ShieldCapacityMax, new PropertyValue(Property.ShieldCapacityMax, 0f, 450f));
-            Properties.Add(Property.MoveSpeedMultiplier, new PropertyValue(Property.MoveSpeedMultiplier, 1f, 1f));
-            Properties.Add(Property.JumpHeight, new PropertyValue(Property.JumpHeight, 2.5f, 2.5f));
-            Properties.Add(Property.GravityMultiplier, new PropertyValue(Property.GravityMultiplier, 1f, 1f));
-            // sprint
-            Properties.Add(Property.ResourceMax0, new PropertyValue(Property.ResourceMax0, 500f, 500f));
-            // dash
-            Properties.Add(Property.ResourceMax7, new PropertyValue(Property.ResourceMax7, 200f, 200f));
-
-            SetStat(Stat.Sheathed, 1u);
-
-            // temp
-            SetStat(Stat.Dash, 200F);
-            // sprint
-            SetStat(Stat.Resource0, 500f);
-            SetStat(Stat.Shield, 450u);
+            SetInvokePropertyUpdate(true);
 
             PlayerManager.Instance.AddPlayer(this);
+        }
+
+        private void SetBaseProperties()
+        {
+            var baseProperties = CharacterManager.Instance.GetCharacterBaseProperties();
+            foreach (IPropertyModifier propertyValue in baseProperties)
+                CreateProperty(propertyValue.Property, propertyValue.GetValue(Level));
+
+            var classProperties = CharacterManager.Instance.GetCharacterClassBaseProperties(Class);
+            foreach (IPropertyModifier propertyValue in classProperties)
+                CreateProperty(propertyValue.Property, propertyValue.GetValue(Level));
         }
 
         public override void Update(double lastTick)
@@ -1154,6 +1186,52 @@ namespace NexusForever.Game.Entity
             update.Race = (byte)Race;
             update.Sex  = (byte)Sex;
             return update;
+        }
+
+        /// <summary>
+        /// Add a <see cref="Property"/> modifier given a <see cref="ItemSlot"/> and value.
+        /// </summary>
+        public void AddItemProperty(Property property, ItemSlot itemSlot, float value)
+        {
+            if (itemProperties.TryGetValue(property, out Dictionary<ItemSlot, float> itemDict))
+            {
+                if (itemDict.ContainsKey(itemSlot))
+                    itemDict[itemSlot] = value;
+                else
+                    itemDict.Add(itemSlot, value);
+            }
+            else
+            {
+                itemProperties.Add(property, new Dictionary<ItemSlot, float>
+                {
+                    { itemSlot, value }
+                });
+            }
+
+            CalculateProperty(property);
+        }
+
+        /// <summary>
+        /// Remove a <see cref="Property"/> modifier by a item that is currently affecting this <see cref="IPlayer"/>.
+        /// </summary>
+        public void RemoveItemProperty(Property property, ItemSlot itemSlot)
+        {
+            if (itemProperties.TryGetValue(property, out Dictionary<ItemSlot, float> itemDict))
+                itemDict.Remove(itemSlot);
+
+            CalculateProperty(property);
+        }
+
+        /// <summary>
+        /// Calculate the primary value for <see cref="Property"/>.
+        /// </summary>
+        protected override void CalculatePropertyValue(IPropertyValue propertyValue)
+        {
+            base.CalculatePropertyValue(propertyValue);
+
+            if (itemProperties.TryGetValue(propertyValue.Property, out Dictionary<ItemSlot, float> properties))
+                foreach (float values in properties.Values)
+                    propertyValue.Value += values;
         }
     }
 }

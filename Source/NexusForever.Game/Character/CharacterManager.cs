@@ -10,6 +10,7 @@ using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 using NLog;
 
@@ -28,6 +29,9 @@ namespace NexusForever.Game.Character
 
         private ImmutableDictionary<(Race, Faction, CharacterCreationStart), ILocation> characterCreationData;
 
+        private ImmutableList<IPropertyModifier> characterBaseProperties;
+        private ImmutableDictionary<Class, ImmutableList<IPropertyModifier>> characterClassBaseProperties;
+
         private readonly Dictionary<ulong, ICharacter> characters = new();
         private readonly Dictionary<string, ulong> characterNameToId = new(StringComparer.OrdinalIgnoreCase);
 
@@ -39,6 +43,9 @@ namespace NexusForever.Game.Character
             nextCharacterId = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextCharacterId() + 1ul;
 
             CacheCharacterCreate();
+
+            CacheCharacterBaseProperties();
+            CacheCharacterClassBaseProperties();
 
             BuildCharacterInfoFromDb();
         }
@@ -67,6 +74,40 @@ namespace NexusForever.Game.Character
             }
 
             characterCreationData = entries.ToImmutable();
+        }
+
+        private void CacheCharacterBaseProperties()
+        {
+            var entries = ImmutableList.CreateBuilder<IPropertyModifier>();
+            foreach (PropertyBaseModel propertyModel in DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetProperties(0))
+            {
+                var newPropValue = new PropertyModifier((Property)propertyModel.Property, (ModType)propertyModel.ModType, propertyModel.Value);
+                entries.Add(newPropValue);
+            }
+
+            characterBaseProperties = entries.ToImmutable();
+        }
+
+        private void CacheCharacterClassBaseProperties()
+        {
+            var entries = ImmutableDictionary.CreateBuilder<Class, ImmutableList<IPropertyModifier>>();
+
+            foreach (IGrouping<uint, PropertyBaseModel> group in DatabaseManager.Instance.GetDatabase<CharacterDatabase>()
+                .GetProperties(1)
+                .GroupBy(p => p.Subtype)) // class
+            {
+                var propertyEntries = ImmutableList.CreateBuilder<IPropertyModifier>();
+
+                foreach (PropertyBaseModel propertyModel in group)
+                {
+                    var newPropValue = new PropertyModifier((Property)propertyModel.Property, (ModType)propertyModel.ModType, propertyModel.Value);
+                    propertyEntries.Add(newPropValue);
+                }
+
+                entries.Add((Class)group.Key, propertyEntries.ToImmutable());
+            }
+
+            characterClassBaseProperties = entries.ToImmutable();
         }
 
         /// <summary>
@@ -150,6 +191,22 @@ namespace NexusForever.Game.Character
         public ILocation GetStartingLocation(Race race, Faction faction, CharacterCreationStart creationStart)
         {
             return characterCreationData.TryGetValue((race, faction, creationStart), out ILocation location) ? location : null;
+        }
+
+        /// <summary>
+        /// Returns a collection containing all base <see cref="IPropertyValue"/> for any character.
+        /// </summary>
+        public IEnumerable<IPropertyModifier> GetCharacterBaseProperties()
+        {
+            return characterBaseProperties;
+        }
+
+        /// <summary>
+        /// Returns a collection containing all base <see cref="IPropertyValue"/> for a character class.
+        /// </summary>
+        public IEnumerable<IPropertyModifier> GetCharacterClassBaseProperties(Class @class)
+        {
+            return characterClassBaseProperties.TryGetValue(@class, out ImmutableList<IPropertyModifier> propertyValues) ? propertyValues : Enumerable.Empty<IPropertyModifier>();
         }
     }
 }

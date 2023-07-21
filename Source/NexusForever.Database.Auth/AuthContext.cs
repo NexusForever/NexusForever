@@ -807,6 +807,11 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 116,
+                        Name = "Command: ItemInfo"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 82,
                         Name = "Category: Realm"
                     },

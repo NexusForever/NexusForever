@@ -12,7 +12,7 @@
         BaseHealth                                  = 7,
         HealthRegenMultiplier                       = 8,
         /// <summary>
-        /// Endurance
+        /// Endurance (Sprint)
         /// </summary>
         ResourceMax0                                = 9,
         /// <summary>
@@ -51,6 +51,9 @@
         AssaultRating                               = 35,
         SupportRating                               = 36,
         RatingCriticalMitigation                    = 37,
+        /// <summary>
+        /// Dash Energy
+        /// </summary>
         ResourceMax7                                = 38,
         ResourceRegenMultiplier7                    = 39,
         Stamina                                     = 40,
