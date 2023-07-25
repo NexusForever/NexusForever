@@ -98,11 +98,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
             session.Player.IsLoading = false;
         }
-        
+
         [MessageHandler(GameMessageOpcode.ClientCinematicState)]
         public static void HandleCinematicState(IWorldSession session, ClientCinematicState cinematicState)
         {
             session.Player.CinematicManager.HandleClientCinematicState(cinematicState.State);
+        }
+
+        /// <summary>
+        /// Client sends this when the user has filled out any customer surver. 
+        /// The response object contains the type of the survey, additional parmeters and the answers of the user.
+        /// </summary>
+        [MessageHandler(GameMessageOpcode.ClientCustomerSurveySubmit)]
+        public static void HandleClientCustomerSurvey(WorldSession session, ClientCustomerSurveySubmit surveyResponse)
+        {
         }
     }
 }

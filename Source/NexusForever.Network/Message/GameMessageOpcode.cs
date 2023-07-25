@@ -149,6 +149,8 @@ namespace NexusForever.Network.Message
         ClientPacked                    = 0x025C, // the same as ClientEncrypted except the contents isn't encrypted?
         ServerPlayerCreate              = 0x025E,
         ServerEntityCreate              = 0x0262,
+        ServerNewCustomerSurveyRequest = 0x033E,
+        ClientCustomerSurveySubmit      = 0x033F,
         ClientCharacterDelete           = 0x0352,
         ServerEntityDestroy             = 0x0355,
         Server0357                      = 0x0357,
