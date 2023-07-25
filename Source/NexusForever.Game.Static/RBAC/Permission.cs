@@ -180,6 +180,12 @@
         ScriptInfo                  = 114,
         ScriptAdd                   = 115,
 
+        // ban
+        Ban                         = 117,
+        BanAccount                  = 118,
+        BanAccountPlayer            = 119,
+        BanAccountCharacter         = 120,
+
         // non command permissions
         InstantLogout               = 10000,
         Signature                   = 10001,
