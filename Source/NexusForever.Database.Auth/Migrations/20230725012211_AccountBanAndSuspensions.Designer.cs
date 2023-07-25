@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Auth;
 
@@ -10,9 +11,11 @@ using NexusForever.Database.Auth;
 namespace NexusForever.Database.Auth.Migrations
 {
     [DbContext(typeof(AuthContext))]
-    partial class AuthContextModelSnapshot : ModelSnapshot
+    [Migration("20230725012211_AccountBanAndSuspensions")]
+    partial class AccountBanAndSuspensions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -939,26 +942,6 @@ namespace NexusForever.Database.Auth.Migrations
                         {
                             Id = 115u,
                             Name = "Command: ScriptAdd"
-                        },
-                        new
-                        {
-                            Id = 117u,
-                            Name = "Category: Ban"
-                        },
-                        new
-                        {
-                            Id = 118u,
-                            Name = "Category: BanAccount"
-                        },
-                        new
-                        {
-                            Id = 119u,
-                            Name = "Command: BanAccountPlayer"
-                        },
-                        new
-                        {
-                            Id = 120u,
-                            Name = "Command: BanAccountCharacter"
                         },
                         new
                         {

@@ -12,7 +12,6 @@ namespace NexusForever.Database.Auth.Model
         public string GameToken { get; set; }
         public string SessionKey { get; set; }
         public DateTime CreateTime { get; set; }
-        public DateTime? BanTime { get; set; }
 
         public ICollection<AccountCostumeUnlockModel> AccountCostumeUnlock { get; set; } = new HashSet<AccountCostumeUnlockModel>();
         public ICollection<AccountCurrencyModel> AccountCurrency { get; set; } = new HashSet<AccountCurrencyModel>();

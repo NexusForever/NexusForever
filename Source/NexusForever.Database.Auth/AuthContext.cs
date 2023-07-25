@@ -61,11 +61,6 @@ namespace NexusForever.Database.Auth
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("current_timestamp()");
 
-                entity.Property(e => e.BanTime)
-                    .HasColumnName("banTime")
-                    .HasColumnType("datetime")
-                    .HasDefaultValue(null);
-
                 entity.Property(e => e.Email)
                     .IsRequired()
                     .HasColumnName("email")
@@ -350,13 +345,18 @@ namespace NexusForever.Database.Auth
             {
                 entity.ToTable("account_suspension");
 
-                entity.HasKey(e => e.Id)
+                entity.HasKey(e => new { e.Id, e.BanId })
                     .HasName("PRIMARY");
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
-                    .HasColumnType("int(20) unsigned")
+                    .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
+
+                entity.Property(e => e.BanId)
+                    .HasColumnName("banId")
+                    .HasColumnType("int(10) unsigned")
+                    .ValueGeneratedOnAdd();
 
                 entity.Property(e => e.StartTime)
                     .HasColumnName("startTime")
@@ -366,12 +366,12 @@ namespace NexusForever.Database.Auth
                 entity.Property(e => e.EndTime)
                     .HasColumnName("endTime")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("current_timestamp()");
+                    .HasDefaultValue(null);
 
                 entity.HasOne(e => e.Account)
                     .WithMany(f => f.AccountSuspension)
                     .HasForeignKey(e => e.Id)
-                    .HasConstraintName("FK__account_suspension_id__account_id");
+                    .HasConstraintName("FK__account_suspension_account_id__account_id");
             });
 
             modelBuilder.Entity<PermissionModel>(entity =>
@@ -958,6 +958,26 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 115,
                         Name = "Command: ScriptAdd"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 117,
+                        Name = "Category: Ban"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 118,
+                        Name = "Category: BanAccount"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 119,
+                        Name = "Command: BanAccountPlayer"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 120,
+                        Name = "Command: BanAccountCharacter"
                     },
                     new PermissionModel
                     {

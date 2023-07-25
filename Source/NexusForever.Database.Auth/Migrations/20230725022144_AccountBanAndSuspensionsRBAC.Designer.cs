@@ -11,14 +11,15 @@ using NexusForever.Database.Auth;
 namespace NexusForever.Database.Auth.Migrations
 {
     [DbContext(typeof(AuthContext))]
-    [Migration("20211202060000_AccountBanAndSuspensions")]
-    partial class AccountBanAndSuspensions
+    [Migration("20230725022144_AccountBanAndSuspensionsRBAC")]
+    partial class AccountBanAndSuspensionsRBAC
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountCostumeUnlockModel", b =>
@@ -224,10 +225,6 @@ namespace NexusForever.Database.Auth.Migrations
                         .HasColumnType("int(10) unsigned")
                         .HasColumnName("id");
 
-                    b.Property<DateTime?>("BanTime")
-                        .HasColumnType("datetime")
-                        .HasColumnName("banTime");
-
                     b.Property<DateTime>("CreateTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -329,15 +326,18 @@ namespace NexusForever.Database.Auth.Migrations
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(20) unsigned")
+                        .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<uint>("BanId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasColumnName("banId");
+
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime")
-                        .HasColumnName("endTime")
-                        .HasDefaultValueSql("current_timestamp()");
+                        .HasColumnName("endTime");
 
                     b.Property<string>("Reason")
                         .HasColumnType("longtext");
@@ -348,7 +348,7 @@ namespace NexusForever.Database.Auth.Migrations
                         .HasColumnName("startTime")
                         .HasDefaultValueSql("current_timestamp()");
 
-                    b.HasKey("Id")
+                    b.HasKey("Id", "BanId")
                         .HasName("PRIMARY");
 
                     b.ToTable("account_suspension", (string)null);
@@ -511,7 +511,7 @@ namespace NexusForever.Database.Auth.Migrations
                         new
                         {
                             Id = 41u,
-                            Name = "Command: EntitlementAccountAdd"
+                            Name = "Command: EntitlementAdd"
                         },
                         new
                         {
@@ -522,11 +522,6 @@ namespace NexusForever.Database.Auth.Migrations
                         {
                             Id = 37u,
                             Name = "Category: EntitlementCharacter"
-                        },
-                        new
-                        {
-                            Id = 38u,
-                            Name = "Command: EntitlementCharacterAdd"
                         },
                         new
                         {
@@ -830,6 +825,11 @@ namespace NexusForever.Database.Auth.Migrations
                         },
                         new
                         {
+                            Id = 116u,
+                            Name = "Command: ItemInfo"
+                        },
+                        new
+                        {
                             Id = 82u,
                             Name = "Category: Realm"
                         },
@@ -925,6 +925,46 @@ namespace NexusForever.Database.Auth.Migrations
                         },
                         new
                         {
+                            Id = 112u,
+                            Name = "Category: Script"
+                        },
+                        new
+                        {
+                            Id = 113u,
+                            Name = "Command: ScriptReload"
+                        },
+                        new
+                        {
+                            Id = 114u,
+                            Name = "Command: ScriptInfo"
+                        },
+                        new
+                        {
+                            Id = 115u,
+                            Name = "Command: ScriptAdd"
+                        },
+                        new
+                        {
+                            Id = 117u,
+                            Name = "Category: Ban"
+                        },
+                        new
+                        {
+                            Id = 118u,
+                            Name = "Category: BanAccount"
+                        },
+                        new
+                        {
+                            Id = 119u,
+                            Name = "Command: BanAccountPlayer"
+                        },
+                        new
+                        {
+                            Id = 120u,
+                            Name = "Command: BanAccountCharacter"
+                        },
+                        new
+                        {
                             Id = 10000u,
                             Name = "Other: InstantLogout"
                         },
@@ -942,6 +982,11 @@ namespace NexusForever.Database.Auth.Migrations
                         {
                             Id = 10003u,
                             Name = "Other: GMFlag"
+                        },
+                        new
+                        {
+                            Id = 10004u,
+                            Name = "Other: EntitlementGrantOther"
                         });
                 });
 
@@ -1219,7 +1264,7 @@ namespace NexusForever.Database.Auth.Migrations
                         .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK__account_suspension_id__account_id");
+                        .HasConstraintName("FK__account_suspension_account_id__account_id");
 
                     b.Navigation("Account");
                 });

@@ -192,5 +192,18 @@ namespace NexusForever.Database.Auth
                 .AsNoTracking()
                 .ToImmutableList();
         }
+
+        public void BanAccount(uint accountId, string reason, DateTime? endTime)
+        {
+            using var context = new AuthContext(config);
+            context.AccountSuspension.Add(new AccountSuspensionModel
+            {
+                Id      = accountId,
+                Reason  = reason,
+                EndTime = endTime,
+            });
+
+            context.SaveChanges();
+        }
     }
 }

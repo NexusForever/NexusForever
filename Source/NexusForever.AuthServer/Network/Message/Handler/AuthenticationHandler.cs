@@ -52,13 +52,13 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                     return;
                 }
 
-                if (account.BanTime != null)
+                if (account.AccountSuspension.Any(a => a.EndTime == null))
                 {
                     SendServerAuthDenied(NpLoginResult.ErrorAccountBanned);
                     return;
                 }
 
-                DateTime? latestSuspension = account.AccountSuspension.Max(suspension => suspension.EndTime as DateTime?);
+                DateTime? latestSuspension = account.AccountSuspension.Max(suspension => suspension.EndTime);
                 if (latestSuspension != null && latestSuspension > DateTime.Now)
                 {
                     SendServerAuthDeniedSuspended(NpLoginResult.AccountSuspended, (float)((DateTime)latestSuspension - DateTime.Now).TotalDays);
