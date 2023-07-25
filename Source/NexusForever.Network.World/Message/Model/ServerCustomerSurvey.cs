@@ -7,12 +7,12 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerNewCustomerSurveyRequest : IWritable
     {
         public SurveyType Type { get; set; }
-        public int SecParam { get; set; }
+        public uint Id { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Type, 14);
-            writer.Write(SecParam, 32);
+            writer.Write(Id, 32);
         }
     }
 }

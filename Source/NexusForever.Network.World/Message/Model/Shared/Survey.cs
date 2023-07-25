@@ -2,7 +2,9 @@
 
 namespace NexusForever.Network.World.Message.Model.Shared
 {
-    public interface ISurvey : IReadable { };
+    public interface ISurvey : IReadable
+    {
+    };
 
     public class Survey
     {
@@ -25,11 +27,11 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                Unknown = reader.ReadShort(32);
-                Fun = reader.ReadShort(8);
+                Unknown    = reader.ReadShort(32);
+                Fun        = reader.ReadShort(8);
                 Diffuculty = reader.ReadShort(8);
-                Reward = reader.ReadShort(8);
-                Unused = reader.ReadShort(8);
+                Reward     = reader.ReadShort(8);
+                Unused     = reader.ReadShort(8);
             }
         }
 
@@ -52,11 +54,11 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                Unknown = reader.ReadShort(32);
-                Fun = reader.ReadShort(8);
+                Unknown    = reader.ReadShort(32);
+                Fun        = reader.ReadShort(8);
                 Diffuculty = reader.ReadShort(8);
-                WantMore = reader.ReadShort(8);
-                Unused = reader.ReadShort(8);
+                WantMore   = reader.ReadShort(8);
+                Unused     = reader.ReadShort(8);
             }
         }
 
@@ -79,11 +81,11 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                Unknown = reader.ReadShort(32);
-                Fun = reader.ReadShort(8);
+                Unknown    = reader.ReadShort(32);
+                Fun        = reader.ReadShort(8);
                 Diffuculty = reader.ReadShort(8);
-                WantMore = reader.ReadShort(8);
-                Unused = reader.ReadShort(8);
+                WantMore   = reader.ReadShort(8);
+                Unused     = reader.ReadShort(8);
             }
         }
 
@@ -105,11 +107,11 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                Level = reader.ReadShort(32);
-                Fun = reader.ReadShort(8);
+                Level      = reader.ReadShort(32);
+                Fun        = reader.ReadShort(8);
                 Diffuculty = reader.ReadShort(8);
-                TimeSpend = reader.ReadShort(8);
-                Unused = reader.ReadShort(8);
+                TimeSpend  = reader.ReadShort(8);
+                Unused     = reader.ReadShort(8);
             }
         }
 
@@ -131,11 +133,11 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                ChallengeId = reader.ReadShort(32);
-                Fun = reader.ReadShort(8);
+                ChallengeId  = reader.ReadShort(32);
+                Fun          = reader.ReadShort(8);
                 TargetAmount = reader.ReadShort(8);
-                Reward = reader.ReadShort(8);
-                Unused = reader.ReadShort(8);
+                Reward       = reader.ReadShort(8);
+                Unused       = reader.ReadShort(8);
             }
         }
 

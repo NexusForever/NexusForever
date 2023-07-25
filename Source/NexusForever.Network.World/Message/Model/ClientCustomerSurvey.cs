@@ -8,33 +8,32 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientCustomerSurveySubmit : IReadable
     {
         public SurveyType Type { get; set; }
-        // second parameter send with the survey request
         public ISurvey Survey { get; set; }
         public string Comment { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            Type = (SurveyType) reader.ReadInt(14);
+            Type = (SurveyType)reader.ReadInt(14);
 
             switch (Type)
             {
-                case SurveyType.QuestDifficulty:
+                case SurveyType.QuestGeneric:
                     Survey = new Survey.QuestDifficultySurvey();
                     break;
-                case SurveyType.QuestTSpell:
+                case SurveyType.TSpellQuest:
                     Survey = new Survey.QuestTSpellSurvey();
                     break;
-                case SurveyType.QuestHoldout:
+                case SurveyType.HoldoutQuest:
                     Survey = new Survey.QuestHoldoutSurvey();
                     break;
-                case SurveyType.Level:
+                case SurveyType.LevelUp:
                     Survey = new Survey.LevelingSurvey();
                     break;
-                case SurveyType.Challenge:
+                case SurveyType.GenericChallenge:
                     Survey = new Survey.ChallengesSurvey();
                     break;
-                // TODO figure out Bossfight/Dungeon
             }
+
             Survey.Read(reader);
 
             Comment = reader.ReadWideString();
