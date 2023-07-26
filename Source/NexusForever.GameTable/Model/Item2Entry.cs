@@ -1,3 +1,4 @@
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Static;
 
 namespace NexusForever.GameTable.Model
@@ -39,11 +40,11 @@ namespace NexusForever.GameTable.Model
         public uint BindFlags;
         public uint BuyFromVendorStackCount;
         [GameTableFieldArray(2)]
-        public uint[] CurrencyTypeId;
+        public CurrencyType[] CurrencyTypeId;
         [GameTableFieldArray(2)]
         public uint[] CurrencyAmount;
         [GameTableFieldArray(2)]
-        public uint[] CurrencyTypeIdSellToVendor;
+        public CurrencyType[] CurrencyTypeIdSellToVendor;
         [GameTableFieldArray(2)]
         public uint[] CurrencyAmountSellToVendor;
         public uint ItemColorSetId;

@@ -17,10 +17,17 @@ namespace NexusForever.Game.Entity
         public ItemSlotEntry SlotEntry { get; }
         public ItemBudgetEntry BudgetEntry { get; }
         public ItemStatEntry StatEntry { get; }
+        public ItemQualityEntry QualityEntry { get; }
         public SecondaryItemFlags SecondaryItemFlags { get; }
 
         public float ItemPower { get; private set; }
         public ImmutableDictionary<Property, float> Properties { get; private set; }
+
+        private CurrencyType[] vendorBuyCurrency = new CurrencyType[2];
+        private uint[] vendorBuyAmount = new uint[2];
+
+        private CurrencyType[] vendorSellCurrency = new CurrencyType[2];
+        private uint[] vendorSellAmount = new uint[2];
 
         /// <summary>
         /// Create a new <see cref="IItemInfo"/> from <see cref="Item2Entry"/> entry.
@@ -34,11 +41,15 @@ namespace NexusForever.Game.Entity
             SlotEntry     = GameTableManager.Instance.ItemSlot.GetEntry(TypeEntry.ItemSlotId);
             BudgetEntry   = GameTableManager.Instance.ItemBudget.GetEntry(Entry.ItemBudgetId);
             StatEntry     = GameTableManager.Instance.ItemStat.GetEntry(Entry.ItemStatId);
+            QualityEntry  = GameTableManager.Instance.ItemQuality.GetEntry(Entry.ItemQualityId);
 
             // the client combines the flags from the family, category and type entries into a single value
             SecondaryItemFlags = FamilyEntry.Flags | CategoryEntry.Flags | TypeEntry.Flags;
 
             CalculateProperties();
+
+            CalculateVendorBuyAmount();
+            CalculateVendorSellAmount();
         }
 
         /// <summary>
@@ -323,6 +334,92 @@ namespace NexusForever.Game.Entity
 
             // TODO: research this...
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns the <see cref="CurrencyType"/> this <see cref="IItemInfo"/> can be purchased for at a vendor.
+        /// </summary>
+        public CurrencyType GetVendorBuyCurrency(byte index)
+        {
+            return vendorBuyCurrency[index];
+        }
+
+        /// <summary>
+        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="IItemInfo"/> can be purchased for at a vendor.
+        /// </summary>
+        public uint GetVendorBuyAmount(byte index)
+        {
+            return vendorBuyAmount[index];
+        }
+
+        private void CalculateVendorBuyAmount()
+        {
+            if (Entry.CurrencyTypeId[0] != CurrencyType.None
+               || Entry.CurrencyTypeId[1] != CurrencyType.None)
+            {
+                // explicit purchase price
+                vendorBuyCurrency = Entry.CurrencyTypeId;
+                vendorBuyAmount   = Entry.CurrencyAmount;
+
+                if ((Entry.Flags & ItemFlags.Unknown200) != 0)
+                    vendorBuyCurrency[0] = CurrencyType.WarCoin;
+            }
+            else
+            {
+                vendorBuyCurrency[0] = CurrencyType.Credits;
+                vendorBuyCurrency[1] = CurrencyType.Credits;
+
+                // calculated purchase price
+                vendorBuyAmount[0] = (uint)MathF.Floor(CalculateVendorAmount());
+            }
+        }
+
+        /// <summary>
+        /// Returns the <see cref="CurrencyType"/> this <see cref="IItemInfo"/> sells for at a vendor.
+        /// </summary>
+        public CurrencyType GetVendorSellCurrency(byte index)
+        {
+            return vendorSellCurrency[index];
+        }
+
+        /// <summary>
+        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="IItemInfo"/> sells for at a vendor.
+        /// </summary>
+        public uint GetVendorSellAmount(byte index)
+        {
+            return vendorSellAmount[index];
+        }
+
+        private void CalculateVendorSellAmount()
+        {
+            if (Entry.CurrencyTypeIdSellToVendor[0] != CurrencyType.None
+                || Entry.CurrencyTypeIdSellToVendor[1] != CurrencyType.None)
+            {
+                // explicit sell price
+                vendorSellCurrency = Entry.CurrencyTypeIdSellToVendor;
+                vendorSellAmount   = Entry.CurrencyAmountSellToVendor;
+            }
+            else
+            {
+                vendorSellCurrency[0] = CurrencyType.Credits;
+                vendorSellCurrency[1] = CurrencyType.Credits;
+
+                // calculated sell price
+                GameFormulaEntry formulaEntry = GameTableManager.Instance.GameFormula.GetEntry(1026);
+                vendorSellAmount[0] = (uint)MathF.Floor(CalculateVendorAmount() * formulaEntry.Datafloat0);
+            }
+        }
+
+        private float CalculateVendorAmount()
+        {
+            GameFormulaEntry formulaEntry = GameTableManager.Instance.GameFormula.GetEntry(1078);
+
+            float v15 = (Entry.PowerLevel - formulaEntry.Datafloat0);
+            float v14 = MathF.Pow(MathF.E, v15 * formulaEntry.Datafloat01);
+            float v16 = (v14 * formulaEntry.Datafloat0) + (MathF.Pow(v15, formulaEntry.Datafloat03) * formulaEntry.Datafloat02);
+
+            float vendorMultipler = CategoryEntry.VendorMultiplier * FamilyEntry.VendorMultiplier * TypeEntry.VendorMultiplier;
+            return (v16 * (Entry.ItemQualityId * vendorMultipler));
         }
 
         /// <summary>
