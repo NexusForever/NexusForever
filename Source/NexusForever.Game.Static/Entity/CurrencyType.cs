@@ -15,6 +15,7 @@
         RedEssence         = 11,
         BlueEssence        = 12,
         GreenEssence       = 13,
-        PurpleEssence      = 14
+        PurpleEssence      = 14,
+        WarCoin            = 15,
     }
 }

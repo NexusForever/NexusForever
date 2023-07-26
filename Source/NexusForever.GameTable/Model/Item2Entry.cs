@@ -40,7 +40,7 @@ namespace NexusForever.GameTable.Model
         public uint BindFlags;
         public uint BuyFromVendorStackCount;
         [GameTableFieldArray(2)]
-        public uint[] CurrencyTypeId;
+        public CurrencyType[] CurrencyTypeId;
         [GameTableFieldArray(2)]
         public uint[] CurrencyAmount;
         [GameTableFieldArray(2)]

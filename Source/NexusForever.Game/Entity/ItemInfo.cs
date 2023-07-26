@@ -23,6 +23,9 @@ namespace NexusForever.Game.Entity
         public float ItemPower { get; private set; }
         public ImmutableDictionary<Property, float> Properties { get; private set; }
 
+        private CurrencyType[] vendorBuyCurrency = new CurrencyType[2];
+        private uint[] vendorBuyAmount = new uint[2];
+
         private CurrencyType[] vendorSellCurrency = new CurrencyType[2];
         private uint[] vendorSellAmount = new uint[2];
 
@@ -45,6 +48,7 @@ namespace NexusForever.Game.Entity
 
             CalculateProperties();
 
+            CalculateVendorBuyAmount();
             CalculateVendorSellAmount();
         }
 
@@ -330,6 +334,44 @@ namespace NexusForever.Game.Entity
 
             // TODO: research this...
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns the <see cref="CurrencyType"/> this <see cref="IItemInfo"/> can be purchased for at a vendor.
+        /// </summary>
+        public CurrencyType GetVendorBuyCurrency(byte index)
+        {
+            return vendorBuyCurrency[index];
+        }
+
+        /// <summary>
+        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="IItemInfo"/> can be purchased for at a vendor.
+        /// </summary>
+        public uint GetVendorBuyAmount(byte index)
+        {
+            return vendorBuyAmount[index];
+        }
+
+        private void CalculateVendorBuyAmount()
+        {
+            if (Entry.CurrencyTypeId[0] != CurrencyType.None
+               || Entry.CurrencyTypeId[1] != CurrencyType.None)
+            {
+                // explicit purchase price
+                vendorBuyCurrency = Entry.CurrencyTypeId;
+                vendorBuyAmount   = Entry.CurrencyAmount;
+
+                if ((Entry.Flags & ItemFlags.Unknown200) != 0)
+                    vendorBuyCurrency[0] = CurrencyType.WarCoin;
+            }
+            else
+            {
+                vendorBuyCurrency[0] = CurrencyType.Credits;
+                vendorBuyCurrency[1] = CurrencyType.Credits;
+
+                // calculated purchase price
+                vendorBuyAmount[0] = (uint)MathF.Floor(CalculateVendorAmount());
+            }
         }
 
         /// <summary>

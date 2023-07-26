@@ -26,6 +26,16 @@ namespace NexusForever.Game.Abstract.Entity
         ushort GetDisplayId();
 
         /// <summary>
+        /// Returns the <see cref="CurrencyType"/> this <see cref="IItemInfo"/> can be purchased for at a vendor.
+        /// </summary>
+        CurrencyType GetVendorBuyCurrency(byte index);
+
+        /// <summary>
+        /// Returns the amount of <see cref="CurrencyType"/> this <see cref="IItemInfo"/> can be purchased for at a vendor.
+        /// </summary>
+        uint GetVendorBuyAmount(byte index);
+
+        /// <summary>
         /// Returns the <see cref="CurrencyType"/> this <see cref="IItemInfo"/> sells for at a vendor.
         /// </summary>
         CurrencyType GetVendorSellCurrency(byte index);

@@ -96,7 +96,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             // TODO Calculate values appropriately.
             // clientPurchaseMod was confirmed by in-game vendor values. Need to find GameTable it's associated with.
-            ulong amount = (ulong)Math.Ceiling(info.GetVendorSellAmount(0) * costMultiplier);
+            ulong amount = (ulong)Math.Ceiling(info.GetVendorBuyAmount(0) * costMultiplier);
             currencyChanges.Add((CurrencyType.Credits, amount));
 
             foreach ((CurrencyType currencyTypeId, ulong currencyAmount) in currencyChanges)
