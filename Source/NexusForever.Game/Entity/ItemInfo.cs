@@ -23,6 +23,9 @@ namespace NexusForever.Game.Entity
         public float ItemPower { get; private set; }
         public ImmutableDictionary<Property, float> Properties { get; private set; }
 
+        private CurrencyType[] vendorSellCurrency = new CurrencyType[2];
+        private uint[] vendorSellAmount = new uint[2];
+
         /// <summary>
         /// Create a new <see cref="IItemInfo"/> from <see cref="Item2Entry"/> entry.
         /// </summary>
@@ -41,6 +44,8 @@ namespace NexusForever.Game.Entity
             SecondaryItemFlags = FamilyEntry.Flags | CategoryEntry.Flags | TypeEntry.Flags;
 
             CalculateProperties();
+
+            CalculateVendorSellAmount();
         }
 
         /// <summary>
@@ -332,10 +337,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public CurrencyType GetVendorSellCurrency(byte index)
         {
-            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
-                return (CurrencyType)Entry.CurrencyTypeIdSellToVendor[index];
-
-            return CurrencyType.None;
+            return vendorSellCurrency[index];
         }
 
         /// <summary>
@@ -343,23 +345,39 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public uint GetVendorSellAmount(byte index)
         {
-            if (Entry.CurrencyTypeIdSellToVendor[index] != 0u)
-                return Entry.CurrencyAmountSellToVendor[index];
-
-            // most items that sell for credits have their sell amount calculated and not stored in the tbl
-            return CalculateVendorSellAmount();
+            return vendorSellAmount[index];
         }
 
-        public uint CalculateVendorSellAmount()
+        private void CalculateVendorSellAmount()
         {
-            // TODO: Rawaho was lazy and didn't finish this
-            // GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(559);
-            // uint cost = Entry.PowerLevel * entry.Dataint01;
+            if (Entry.CurrencyTypeIdSellToVendor[0] != CurrencyType.None
+                || Entry.CurrencyTypeIdSellToVendor[1] != CurrencyType.None)
+            {
+                // explicit sell price
+                vendorSellCurrency = Entry.CurrencyTypeIdSellToVendor;
+                vendorSellAmount   = Entry.CurrencyAmountSellToVendor;
+            }
+            else
+            {
+                vendorSellCurrency[0] = CurrencyType.Credits;
+                vendorSellCurrency[1] = CurrencyType.Credits;
 
-            // Kirmmin's Temporary Sell Value (Accurate for items between PowerLevel 20 and 50)
-            float baseVal = ((((Entry.PowerLevel * Entry.PowerLevel) * Entry.ItemQualityId) * TypeEntry.VendorMultiplier) * CategoryEntry.VendorMultiplier);
-            float moddedValue = MathF.Floor(baseVal * 1.125f);
-            return (uint)(moddedValue > 0f ? moddedValue : 1u);
+                // calculated sell price
+                GameFormulaEntry formulaEntry = GameTableManager.Instance.GameFormula.GetEntry(1026);
+                vendorSellAmount[0] = (uint)MathF.Floor(CalculateVendorAmount() * formulaEntry.Datafloat0);
+            }
+        }
+
+        private float CalculateVendorAmount()
+        {
+            GameFormulaEntry formulaEntry = GameTableManager.Instance.GameFormula.GetEntry(1078);
+
+            float v15 = (Entry.PowerLevel - formulaEntry.Datafloat0);
+            float v14 = MathF.Pow(MathF.E, v15 * formulaEntry.Datafloat01);
+            float v16 = (v14 * formulaEntry.Datafloat0) + (MathF.Pow(v15, formulaEntry.Datafloat03) * formulaEntry.Datafloat02);
+
+            float vendorMultipler = CategoryEntry.VendorMultiplier * FamilyEntry.VendorMultiplier * TypeEntry.VendorMultiplier;
+            return (v16 * (Entry.ItemQualityId * vendorMultipler));
         }
 
         /// <summary>

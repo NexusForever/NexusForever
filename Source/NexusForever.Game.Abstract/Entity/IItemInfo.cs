@@ -35,8 +35,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         uint GetVendorSellAmount(byte index);
 
-        uint CalculateVendorSellAmount();
-
         /// <summary>
         /// Returns if item can be equipped into an item slot.
         /// </summary>
