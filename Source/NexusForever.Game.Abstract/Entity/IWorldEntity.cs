@@ -101,7 +101,18 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
         /// </summary>
+        /// <remarks>
+        /// If <see cref="Property"/> doesn't exist it will be created with the default value specified in the GameTable.
+        /// </remarks>
         IPropertyValue GetProperty(Property property);
+
+        /// <summary>
+        /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="Property"/> doesn't exist it will be created with the default value specified.
+        /// </remarks>
+        IPropertyValue GetProperty(Property property, float defaultValue);
 
         /// <summary>
         /// Returns the base value for <see cref="IWorldEntity"/> <see cref="Property"/>.

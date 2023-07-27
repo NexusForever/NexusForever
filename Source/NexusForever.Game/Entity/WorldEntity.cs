@@ -138,7 +138,7 @@ namespace NexusForever.Game.Entity
 
         private readonly Dictionary<Property, IPropertyValue> properties = new ();
         private readonly HashSet<Property> dirtyProperties = new();
-        private bool invokePropertyUpdate = false;
+        private bool invokeStatBalance = false;
 
         private bool emitVisual;
         private readonly Dictionary<ItemSlot, IItemVisual> itemVisuals = new();
@@ -372,7 +372,7 @@ namespace NexusForever.Game.Entity
             return properties.Values;
         }
 
-        protected IPropertyValue CreateProperty(Property property, float defaultValue)
+        private IPropertyValue CreateProperty(Property property, float defaultValue)
         {
             IPropertyValue propertyValue = new PropertyValue(property, defaultValue);
             properties.Add(property, propertyValue);
@@ -383,10 +383,30 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
         /// </summary>
+        /// <remarks>
+        /// If <see cref="Property"/> doesn't exist it will be created with the default value specified in the GameTable.
+        /// </remarks>
         public IPropertyValue GetProperty(Property property)
         {
             if (!properties.TryGetValue(property, out IPropertyValue propertyValue))
-                propertyValue = CreateProperty(property, GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property)?.DefaultValue ?? 0f);
+            {
+                float defaultValue = GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property)?.DefaultValue ?? 0f;
+                propertyValue = CreateProperty(property, defaultValue);
+            }
+
+            return propertyValue;
+        }
+
+        /// <summary>
+        /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="Property"/> doesn't exist it will be created with the default value specified.
+        /// </remarks>
+        public IPropertyValue GetProperty(Property property, float defaultValue)
+        {
+            if (!properties.TryGetValue(property, out IPropertyValue propertyValue))
+                propertyValue = CreateProperty(property, defaultValue);
 
             return propertyValue;
         }
@@ -412,7 +432,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetBaseProperty(Property property, float value)
         {
-            IPropertyValue propertyValue = GetProperty(property);
+            IPropertyValue propertyValue = GetProperty(property, value);
             propertyValue.BaseValue = value;
 
             CalculateProperty(propertyValue);
@@ -442,8 +462,9 @@ namespace NexusForever.Game.Entity
             CalculatePropertyValue(propertyValue);
             SetPropertyEmit(propertyValue.Property);
 
-            if (invokePropertyUpdate)
-                OnPropertyUpdate(propertyValue);
+            DependantStatBalance(propertyValue);
+
+            OnPropertyUpdate(propertyValue);
 
             #if DEBUG
             if (this is IPlayer player && !player.IsLoading)
@@ -467,16 +488,16 @@ namespace NexusForever.Game.Entity
             dirtyProperties.Add(property);
         }
 
-        protected void SetInvokePropertyUpdate(bool value)
+        protected void SetDependantStatBalance(bool value)
         {
-            invokePropertyUpdate = value;
+            invokeStatBalance = value;
         }
 
-        /// <summary>
-        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Property"/> updated.
-        /// </summary>
-        protected virtual void OnPropertyUpdate(IPropertyValue propertyValue)
+        protected void DependantStatBalance(IPropertyValue propertyValue)
         {
+            if (!invokeStatBalance)
+                return;
+
             switch (propertyValue.Property)
             {
                 case Property.BaseHealth:
@@ -488,6 +509,14 @@ namespace NexusForever.Game.Entity
                         Shield = MaxShieldCapacity;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Property"/> updated.
+        /// </summary>
+        protected virtual void OnPropertyUpdate(IPropertyValue propertyValue)
+        {
+            // deliberately empty
         }
 
         /// <summary>

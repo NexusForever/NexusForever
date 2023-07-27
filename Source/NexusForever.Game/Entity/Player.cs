@@ -320,20 +320,21 @@ namespace NexusForever.Game.Entity
 
             AppearanceManager       = new AppearanceManager(this, model);
 
-            SetInvokePropertyUpdate(true);
+            // do dependant stat balance after all stats and properties have been set
+            SetDependantStatBalance(true);
+            foreach (IPropertyValue property in GetProperties())
+                DependantStatBalance(property);
 
             PlayerManager.Instance.AddPlayer(this);
         }
 
         private void SetBaseProperties()
         {
-            var baseProperties = CharacterManager.Instance.GetCharacterBaseProperties();
-            foreach (IPropertyModifier propertyValue in baseProperties)
-                CreateProperty(propertyValue.Property, propertyValue.GetValue(Level));
-
+            var baseProperties  = CharacterManager.Instance.GetCharacterBaseProperties();
             var classProperties = CharacterManager.Instance.GetCharacterClassBaseProperties(Class);
-            foreach (IPropertyModifier propertyValue in classProperties)
-                CreateProperty(propertyValue.Property, propertyValue.GetValue(Level));
+
+            foreach (IPropertyModifier propertyValue in baseProperties.Concat(classProperties))
+                SetBaseProperty(propertyValue.Property, propertyValue.GetValue(Level));
         }
 
         public override void Update(double lastTick)
