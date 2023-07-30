@@ -164,6 +164,16 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Initialise <see cref="IWorldEntity"/> with supplied data.
+        /// </summary>
+        public void Initialise(uint creatureId)
+        {
+            CreatureId = creatureId;
+
+            SetVisualEmit(false);
+        }
+
+        /// <summary>
         /// Initialise <see cref="IWorldEntity"/> from an existing database model.
         /// </summary>
         public virtual void Initialise(EntityModel model)
@@ -312,6 +322,15 @@ namespace NexusForever.Game.Entity
         public void SetVisualEmit(bool status)
         {
             emitVisual = status;
+        }
+
+        /// <summary>
+        /// Set visual info of <see cref="IWorldEntity"/> with supplied data.
+        /// </summary>
+        public void SetVisualInfo(uint displayInfo, ushort outfitInfo)
+        {
+            DisplayInfo = displayInfo;
+            OutfitInfo = outfitInfo;
         }
 
         /// <summary>

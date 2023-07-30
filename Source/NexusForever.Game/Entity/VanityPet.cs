@@ -28,8 +28,10 @@ namespace NexusForever.Game.Entity
             : base(EntityType.Pet)
         {
             OwnerGuid               = owner.Guid;
+            Initialise(creature);
+
             Creature2DisplayGroup   = GameTableManager.Instance.Creature2DisplayGroupEntry.Entries.SingleOrDefault(x => x.Creature2DisplayGroupId == CreatureEntry.Creature2DisplayGroupId);
-            Initialise(creature, Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u, 0);
+            SetVisualInfo(Creature2DisplayGroup?.Creature2DisplayInfoId ?? 0u, 0);
 
             SetBaseProperty(Property.BaseHealth, 800.0f);
 
