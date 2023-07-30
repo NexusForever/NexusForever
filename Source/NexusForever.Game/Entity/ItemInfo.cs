@@ -159,7 +159,7 @@ namespace NexusForever.Game.Entity
                     continue;
 
                 UnitProperty2Entry entry = GameTableManager.Instance.UnitProperty2.GetEntry((uint)property);
-                if (entry != null && (entry.Flags & 0x04) != 0)
+                if (entry != null && (entry.Flags & UnitPropertyFlags.Unknown04) != 0)
                     builder.Properties[property] = (budget * ItemPower) * entry.ValuePerPoint;
             }
         }

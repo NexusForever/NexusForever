@@ -175,7 +175,9 @@ namespace NexusForever.Game.Entity
             set
             {
                 base.Level = value;
-                SetBaseProperties();
+
+                CalculateDefaultProperties();
+                SetBaseCharacterProperties();
             }
         }
 
@@ -286,7 +288,8 @@ namespace NexusForever.Game.Entity
             // sprint
             SetStat(Stat.Resource0, 500f);
 
-            SetBaseProperties();
+            CalculateDefaultProperties();
+            SetBaseCharacterProperties();
 
             scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(this);
 
@@ -328,7 +331,7 @@ namespace NexusForever.Game.Entity
             PlayerManager.Instance.AddPlayer(this);
         }
 
-        private void SetBaseProperties()
+        private void SetBaseCharacterProperties()
         {
             var baseProperties  = CharacterManager.Instance.GetCharacterBaseProperties();
             var classProperties = CharacterManager.Instance.GetCharacterClassBaseProperties(Class);

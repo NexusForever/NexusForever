@@ -14,6 +14,7 @@ using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Social;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Static;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
@@ -159,8 +160,6 @@ namespace NexusForever.Game.Entity
             CreatureId  = creatureId;
             DisplayInfo = displayInfo;
             OutfitInfo  = outfitInfo;
-
-            SetVisualEmit(false);
         }
 
         /// <summary>
@@ -181,10 +180,11 @@ namespace NexusForever.Game.Entity
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
 
+            CalculateDefaultProperties();
+
             // TODO: handle this better
             Health = MaxHealth;
-
-            SetVisualEmit(false);
+            Shield = MaxShieldCapacity;
         }
 
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
@@ -232,8 +232,6 @@ namespace NexusForever.Game.Entity
 
         public virtual ServerEntityCreate BuildCreatePacket()
         {
-            dirtyProperties.Clear();
-
             ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
             {
                 Guid         = Guid,
@@ -311,6 +309,10 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetVisualEmit(bool status)
         {
+            // don't broadcast visual changes if not in world, visuals will be sent with creation packet.
+            if (!InWorld)
+                return;
+
             emitVisual = status;
         }
 
@@ -372,14 +374,6 @@ namespace NexusForever.Game.Entity
             return properties.Values;
         }
 
-        private IPropertyValue CreateProperty(Property property, float defaultValue)
-        {
-            IPropertyValue propertyValue = new PropertyValue(property, defaultValue);
-            properties.Add(property, propertyValue);
-
-            return propertyValue;
-        }
-
         /// <summary>
         /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
         /// </summary>
@@ -390,25 +384,60 @@ namespace NexusForever.Game.Entity
         {
             if (!properties.TryGetValue(property, out IPropertyValue propertyValue))
             {
-                float defaultValue = GameTableManager.Instance.UnitProperty2.GetEntry((ulong)property)?.DefaultValue ?? 0f;
-                propertyValue = CreateProperty(property, defaultValue);
+                propertyValue = new PropertyValue(property, CalculateDefaultProperty(property));
+                properties.Add(property, propertyValue);
             }
 
             return propertyValue;
         }
 
         /// <summary>
-        /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
+        /// Calculate default property value for supplied <see cref="Property"/>.
         /// </summary>
         /// <remarks>
-        /// If <see cref="Property"/> doesn't exist it will be created with the default value specified.
+        /// Default property values are not sent to the client, they are also calculated by the client and are replaced by any property updates.
         /// </remarks>
-        public IPropertyValue GetProperty(Property property, float defaultValue)
+        protected virtual float CalculateDefaultProperty(Property property)
         {
-            if (!properties.TryGetValue(property, out IPropertyValue propertyValue))
-                propertyValue = CreateProperty(property, defaultValue);
+            UnitProperty2Entry entry = GameTableManager.Instance.UnitProperty2.GetEntry((uint)property);
+            if (entry == null)
+                return 0f;
 
-            return propertyValue;
+            float value = entry.DefaultValue;
+            if ((entry.Flags & UnitPropertyFlags.Static) != 0)
+                return value;
+
+            if (Type == EntityType.Pet)
+                return value;
+
+            // TODO: client also includes mentor level
+            uint level = Level;
+            /*if (MentorLevel.HasValue)
+                level = MentorLevel.Value;
+            else
+                level = Level;*/
+
+            Property levelProperty = property;
+            if (property >= Property.MoveSpeedMultiplier)
+            {
+                // final row is used for anything above property 100
+                level = (uint)GameTableManager.Instance.CreatureLevel.Entries.Length;
+
+                // creature level entry only has 100 columns for properties, wrap around for higher values
+                levelProperty = (Property)(property - Property.MoveSpeedMultiplier);
+            }
+
+            CreatureLevelEntry levelEntry = GameTableManager.Instance.CreatureLevel.GetEntry(level);
+            if (levelEntry == null)
+                return entry.DefaultValue;
+
+            return levelEntry.UnitPropertyValue[(uint)levelProperty];
+        }
+
+        protected void CalculateDefaultProperties()
+        {
+            foreach (Property property in Enum.GetValues<Property>())
+                SetBaseProperty(property, CalculateDefaultProperty(property));
         }
 
         /// <summary>
@@ -432,7 +461,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetBaseProperty(Property property, float value)
         {
-            IPropertyValue propertyValue = GetProperty(property, value);
+            IPropertyValue propertyValue = GetProperty(property);
             propertyValue.BaseValue = value;
 
             CalculateProperty(propertyValue);
@@ -441,7 +470,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Calculate the primary value for <see cref="Property"/>.
         /// </summary>
-        public void CalculateProperty(Property property)
+        protected void CalculateProperty(Property property)
         {
             IPropertyValue propertyValue = GetProperty(property);
             CalculateProperty(propertyValue);
@@ -485,6 +514,10 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetPropertyEmit(Property property)
         {
+            // don't broadcast property changes if not in world, properties will be sent with creation packet.
+            if (!InWorld)
+                return;
+
             dirtyProperties.Add(property);
         }
 

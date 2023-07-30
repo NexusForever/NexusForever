@@ -23,6 +23,11 @@ namespace NexusForever.Game.Entity
         public IMapInfo PreviousMap { get; private set; }
 
         /// <summary>
+        /// Determines if the <see cref="IGridEntity"/> is on a <see cref="IBaseMap"/>.
+        /// </summary>
+        public bool InWorld => Map != null;
+
+        /// <summary>
         /// Distance between <see cref="IGridEntity"/> and a <see cref="IMapGrid"/> for activation.
         /// </summary>
         public float ActivationRange { get; protected set; }
