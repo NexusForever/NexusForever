@@ -23,7 +23,7 @@ namespace NexusForever.IO.Map
 
         protected uint[] worldZoneIds;
         protected byte[,] worldZoneBounds;
-        protected float[,] heightMap;
+        protected Half[,] heightMap;
 
         public void Read(BinaryReader reader)
         {
@@ -48,10 +48,10 @@ namespace NexusForever.IO.Map
                     }
                     case Flags.Height:
                     {
-                        heightMap = new float[17, 17];
+                        heightMap = new Half[17, 17];
                         for (int y = 0; y < 17; y++)
                             for (int x = 0; x < 17; x++)
-                                heightMap[x, y] = reader.ReadSingle();
+                                heightMap[x, y] = reader.ReadHalf();
                         break;
                     }
                     case Flags.ZoneBound:
@@ -129,8 +129,8 @@ namespace NexusForever.IO.Map
             uint vertexY = (uint)Math.Floor(trueZ / 2f);
             uint localVertexY = vertexY & 15;
 
-            float p1 = heightMap[localVertexX + 1, localVertexY];
-            float p2 = heightMap[localVertexX, localVertexY + 1];
+            float p1 = (float)heightMap[localVertexX + 1, localVertexY];
+            float p2 = (float)heightMap[localVertexX, localVertexY + 1];
 
             float sqX = (trueX / 2) - vertexX;
             float sqZ = (trueZ / 2) - vertexY;
@@ -138,14 +138,14 @@ namespace NexusForever.IO.Map
             float height;
             if ((sqX + sqZ) < 1)
             {
-                float p0 = heightMap[localVertexX, localVertexY];
+                float p0 = (float)heightMap[localVertexX, localVertexY];
                 height = p0;
                 height += (p1 - p0) * sqX;
                 height += (p2 - p0) * sqZ;
             }
             else
             {
-                float p3 = heightMap[localVertexX + 1, localVertexY + 1];
+                float p3 = (float)heightMap[localVertexX + 1, localVertexY + 1];
                 height = p3;
                 height += (p1 - p3) * (1.0f - sqZ);
                 height += (p2 - p3) * (1.0f - sqX);

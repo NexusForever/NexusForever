@@ -18,10 +18,10 @@ namespace NexusForever.IO.Map
 
             if ((cell.Flags & ChnkCellFlags.HeightMap) != 0)
             {
-                heightMap = new float[17, 17];
+                heightMap = new Half[17, 17];
                 for (int y = 0; y < 17; y++)
                     for (int x = 0; x < 17; x++)
-                        heightMap[x, y] = (cell.Heightmap[x + 1, y + 1] / 8.0f) - 2048f;
+                        heightMap[x, y] = (Half)((cell.Heightmap[x + 1, y + 1] / 8.0f) - 2048f);
 
                 flags |= Flags.Height;
             }

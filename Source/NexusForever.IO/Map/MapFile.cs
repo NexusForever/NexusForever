@@ -6,7 +6,7 @@ namespace NexusForever.IO.Map
     public class MapFile : IReadable, IEnumerable<MapFileGrid>
     {
         protected const uint Magic   = 0x504D464Eu; // NFMP
-        protected const uint Version = 3u;
+        protected const uint Version = 4u;
         protected const uint Build   = 16042u;
 
         public string Asset { get; protected set; }
