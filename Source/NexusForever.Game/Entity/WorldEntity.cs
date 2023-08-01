@@ -169,8 +169,6 @@ namespace NexusForever.Game.Entity
         public void Initialise(uint creatureId)
         {
             CreatureId = creatureId;
-
-            SetVisualEmit(false);
         }
 
         /// <summary>
