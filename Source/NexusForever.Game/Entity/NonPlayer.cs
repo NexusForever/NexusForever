@@ -29,8 +29,6 @@ namespace NexusForever.Game.Entity
                 CreateFlags |= EntityCreateFlag.Vendor;
                 VendorInfo = new VendorInfo(model);
             }
-
-            CalculateProperties();
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -42,31 +40,25 @@ namespace NexusForever.Game.Entity
             };
         }
 
-        private void CalculateProperties()
+        protected override float CalculateDefaultProperty(Property property)
         {
+            float value = base.CalculateDefaultProperty(property);
+
             Creature2Entry creatureEntry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);
 
-            // TODO: research this some more
-            /*float[] values = new float[200];
-
-            CreatureLevelEntry levelEntry = GameTableManager.Instance.CreatureLevel.GetEntry(6);
-            for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
-                values[i] = levelEntry.UnitPropertyValue[i];
-
             Creature2ArcheTypeEntry archeTypeEntry = GameTableManager.Instance.Creature2ArcheType.GetEntry(creatureEntry.Creature2ArcheTypeId);
-            for (uint i = 0u; i < archeTypeEntry.UnitPropertyMultiplier.Length; i++)
-                values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
+            if (archeTypeEntry != null)
+                value *= archeTypeEntry.UnitPropertyMultiplier[(uint)property];
 
             Creature2DifficultyEntry difficultyEntry = GameTableManager.Instance.Creature2Difficulty.GetEntry(creatureEntry.Creature2DifficultyId);
-            for (uint i = 0u; i < difficultyEntry.UnitPropertyMultiplier.Length; i++)
-                values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
+            if (difficultyEntry != null)
+                value *= difficultyEntry.UnitPropertyMultiplier[(uint)property];
 
             Creature2TierEntry tierEntry = GameTableManager.Instance.Creature2Tier.GetEntry(creatureEntry.Creature2TierId);
-            for (uint i = 0u; i < tierEntry.UnitPropertyMultiplier.Length; i++)
-                values[i] *= archeTypeEntry.UnitPropertyMultiplier[i];
+            if (tierEntry != null)
+                value *= tierEntry.UnitPropertyMultiplier[(uint)property];
 
-            for (uint i = 0u; i < levelEntry.UnitPropertyValue.Length; i++)
-                SetProperty((Property)i, values[i]);*/
+            return value;
         }
     }
 }

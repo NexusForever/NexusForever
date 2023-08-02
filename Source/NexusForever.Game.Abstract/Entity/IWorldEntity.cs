@@ -117,14 +117,6 @@ namespace NexusForever.Game.Abstract.Entity
         IPropertyValue GetProperty(Property property);
 
         /// <summary>
-        /// Get <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/> <see cref="Property"/>.
-        /// </summary>
-        /// <remarks>
-        /// If <see cref="Property"/> doesn't exist it will be created with the default value specified.
-        /// </remarks>
-        IPropertyValue GetProperty(Property property, float defaultValue);
-
-        /// <summary>
         /// Returns the base value for <see cref="IWorldEntity"/> <see cref="Property"/>.
         /// </summary>
         float GetPropertyBaseValue(Property property);
@@ -138,11 +130,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// Sets the base value and calculate primary value for <see cref="Property"/>.
         /// </summary>
         void SetBaseProperty(Property property, float value);
-
-        /// <summary>
-        /// Calculate the primary value for <see cref="Property"/>.
-        /// </summary>
-        void CalculateProperty(Property property);
 
         /// <summary>
         /// Set <see cref="IWorldEntity"/> to broadcast <see cref="Property"/> on next world update.

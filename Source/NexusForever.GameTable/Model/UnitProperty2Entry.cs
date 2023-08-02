@@ -1,3 +1,5 @@
+using NexusForever.GameTable.Static;
+
 namespace NexusForever.GameTable.Model
 {
     public class UnitProperty2Entry
@@ -8,7 +10,7 @@ namespace NexusForever.GameTable.Model
         public float DefaultValue;
         public uint LocalizedTextId;
         public float ValuePerPoint;
-        public uint Flags;
+        public UnitPropertyFlags Flags;
         public uint TooltipDisplayOrder;
         public uint ProfiencyFlagEnum;
         public uint ItemCraftingGroupFlagBitMask;
