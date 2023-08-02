@@ -158,10 +158,6 @@ namespace NexusForever.Game.Entity
         public void Initialise(uint creatureId)
         {
             CreatureId  = creatureId;
-            DisplayInfo = displayInfo;
-            OutfitInfo  = outfitInfo;
-
-            SetVisualEmit(false);
         }
 
         /// <summary>
