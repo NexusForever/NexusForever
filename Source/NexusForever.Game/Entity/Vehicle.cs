@@ -28,7 +28,7 @@ namespace NexusForever.Game.Entity
         protected Vehicle(EntityType type, uint creatureId, uint vehicleId, uint spell4Id)
             : base(type)
         {
-            Initialise(creatureId, 0, 0);
+            Initialise(creatureId);
 
             VehicleEntry  = GameTableManager.Instance.UnitVehicle.GetEntry(vehicleId != 0u ? vehicleId : CreatureEntry.UnitVehicleId);
             SpellEntry    = GameTableManager.Instance.Spell4.GetEntry(spell4Id);

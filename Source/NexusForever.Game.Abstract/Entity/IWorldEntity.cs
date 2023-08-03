@@ -52,6 +52,11 @@ namespace NexusForever.Game.Abstract.Entity
         uint ControllerGuid { get; set; }
 
         /// <summary>
+        /// Initialise <see cref="IWorldEntity"/> with supplied data.
+        /// </summary>
+        public void Initialise(uint creatureId);
+
+        /// <summary>
         /// Initialise <see cref="IWorldEntity"/> from an existing database model.
         /// </summary>
         void Initialise(EntityModel model);
@@ -77,6 +82,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Set <see cref="IWorldEntity"/> to broadcast all <see cref="IItemVisual"/> on next world update.
         /// </summary>
         void SetVisualEmit(bool status);
+
+        /// <summary>
+        /// Set visual info of <see cref="IWorldEntity"/> with supplied data.
+        /// </summary>
+        public void SetVisualInfo(uint displayInfo, ushort outfitInfo);
 
         /// <summary>
         /// Add or update <see cref="IItemVisual"/> at <see cref="ItemSlot"/> with supplied data.

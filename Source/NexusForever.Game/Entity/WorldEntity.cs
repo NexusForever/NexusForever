@@ -155,11 +155,9 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> with supplied data.
         /// </summary>
-        public void Initialise(uint creatureId, uint displayInfo, ushort outfitInfo)
+        public void Initialise(uint creatureId)
         {
             CreatureId  = creatureId;
-            DisplayInfo = displayInfo;
-            OutfitInfo  = outfitInfo;
         }
 
         /// <summary>
@@ -314,6 +312,15 @@ namespace NexusForever.Game.Entity
                 return;
 
             emitVisual = status;
+        }
+
+        /// <summary>
+        /// Set visual info of <see cref="IWorldEntity"/> with supplied data.
+        /// </summary>
+        public void SetVisualInfo(uint displayInfo, ushort outfitInfo)
+        {
+            DisplayInfo = displayInfo;
+            OutfitInfo = outfitInfo;
         }
 
         /// <summary>
