@@ -2,8 +2,11 @@
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.TextFilter;
+using NexusForever.Game.Text.Filter;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Entity
@@ -73,6 +76,32 @@ namespace NexusForever.Game.Entity
                 player.Session.EnqueueMessageEncrypted(new ServerUnlockPetFlair
                 {
                     PetFlairId = id
+                });
+            }
+        }
+
+        /// <summary>
+        /// Renames the pet name for <see cref="PetType"/> and object id.
+        /// </summary>
+        public void RenamePet(PetType type, uint objectId, String name)
+        {
+            if (!TextFilterManager.Instance.IsTextValid(name, UserText.ScientistScanbotName))
+                throw new InvalidPacketValueException();
+
+            ulong hash = PetCustomisationHash(type, objectId);
+            if (!petCustomisations.TryGetValue(hash, out IPetCustomisation customisation))
+            {
+                customisation = new PetCustomisation(player.CharacterId, type, objectId);
+                petCustomisations.Add(hash, customisation);
+            }
+
+            customisation.Name = name;
+
+            if (!player.IsLoading)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerPetCustomisation
+                {
+                    PetCustomisation = customisation.Build()
                 });
             }
         }

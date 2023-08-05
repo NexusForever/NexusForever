@@ -30,5 +30,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 petcustomisation.FlairSlotIndex,
                 petcustomisation.FlairId);
         }
+
+        [MessageHandler(GameMessageOpcode.ClientPetRename)]
+        public static void HandlePetRename(IWorldSession session, ClientPetRename petRename)
+        {
+            session.Player.PetCustomisationManager.RenamePet(petRename.PetType,
+               petRename.PetObjectId,
+               petRename.Name);
+        }
     }
 }

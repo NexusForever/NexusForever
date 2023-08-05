@@ -272,6 +272,7 @@ namespace NexusForever.Network.Message
         ServerPathUnlockResult          = 0x06BE,
         ServerPathCurrentEpisode        = 0x06BF,
         Server068B                      = 0x068B, // pet customization something
+        ClientPetRename                 = 0x068C,
         ServerUnlockPetFlair            = 0x068D,
         ServerChangePetStance           = 0x068F,
         ServerPublicEventStart          = 0x0700,
