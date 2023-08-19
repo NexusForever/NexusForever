@@ -28,6 +28,8 @@ using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.TextFilter;
+using NexusForever.Game.Text.Filter;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
@@ -266,7 +268,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             CharacterModifyResult? GetResult()
             {
-                // TODO: validate name and path
+                // TODO: validate path
+                if (!TextFilterManager.Instance.IsTextValid(characterCreate.Name)
+                    || !TextFilterManager.Instance.IsTextValid(characterCreate.Name, UserText.CharacterName))
+                    return CharacterModifyResult.CreateFailed_InvalidName;
+
+                // UserText.CharacterName checks if there is a space
+                foreach (string name in characterCreate.Name.Split(' '))
+                    if (!TextFilterManager.Instance.IsTextValid(name, UserText.CharacterNamePart))
+                        return CharacterModifyResult.CreateFailed_InvalidName;
+
                 if (DatabaseManager.Instance.GetDatabase<CharacterDatabase>().CharacterNameExists(characterCreate.Name))
                     return CharacterModifyResult.CreateFailed_UniqueName;
 

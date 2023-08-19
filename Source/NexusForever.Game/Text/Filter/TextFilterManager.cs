@@ -76,6 +76,11 @@ namespace NexusForever.Game.Text.Filter
             if ((flags & UserTextFlags.NoSpace) != 0 && text.Contains(' '))
                 return false;
 
+            // ensure there is a single space
+            int index = text.IndexOf(' ');
+            if ((flags & UserTextFlags.RequireSpace) != 0 && (index == -1 || index != text.LastIndexOf(' ')))
+                return false;
+
             return true;
         }
     }

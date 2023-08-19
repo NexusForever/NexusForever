@@ -36,7 +36,7 @@ namespace NexusForever.Game.Text.Filter
             if (!words.TryGetValue(filterClass, out ImmutableList<string> filerWords))
                 return false;
 
-            return !filerWords.Any(w => text.Equals(w, StringComparison.InvariantCultureIgnoreCase));
+            return !filerWords.Any(w => text.Contains(w, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
