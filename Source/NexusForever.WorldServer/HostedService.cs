@@ -12,6 +12,7 @@ using NexusForever.Game.Cinematic;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Entity.Movement;
+using NexusForever.Game.Group;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -130,6 +131,7 @@ namespace NexusForever.WorldServer
                 GlobalChatManager.Instance.Update(lastTick);
                 LoginQueueManager.Instance.Update(lastTick);
                 ShutdownManager.Instance.Update(lastTick);
+                GroupManager.Instance.Update(lastTick);
 
                 scriptManager.Update(lastTick);
 
