@@ -559,7 +559,10 @@ namespace NexusForever.GameTable
         [GameData]
         public GameTable<Spell4ValidTargetsEntry> Spell4ValidTargets { get; private set; }
 
+        [GameData]
         public GameTable<Spell4VisualEntry> Spell4Visual { get; private set; }
+
+        [GameData]
         public GameTable<Spell4VisualGroupEntry> Spell4VisualGroup { get; private set; }
 
         [GameData]
@@ -632,7 +635,10 @@ namespace NexusForever.GameTable
 
         public GameTable<VeteranTierEntry> VeteranTier { get; private set; }
         public GameTable<VirtualItemEntry> VirtualItem { get; private set; }
+        
+        [GameData]
         public GameTable<VisualEffectEntry> VisualEffect { get; private set; }
+
         public GameTable<VitalEntry> Vital { get; private set; }
         public GameTable<WaterSurfaceEffectEntry> WaterSurfaceEffect { get; private set; }
 

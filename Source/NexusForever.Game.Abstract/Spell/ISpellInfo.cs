@@ -18,8 +18,11 @@ namespace NexusForever.Game.Abstract.Spell
         PrerequisiteEntry CasterPersistencePrerequisites { get; }
         PrerequisiteEntry TargetPersistencePrerequisites { get; }
         List<PrerequisiteEntry> PrerequisiteRunners { get; }
+        Spell4VisualGroupEntry VisualGroup { get; }
 
         List<TelegraphDamageEntry> Telegraphs { get; }
         List<Spell4EffectsEntry> Effects { get; }
+
+        List<Spell4VisualEntry> Visuals { get; }
     }
 }
