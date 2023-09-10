@@ -9,6 +9,10 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.WorldServer.Game.Entity.Static;
+using NexusForever.WorldServer.Game.Spell.Static;
+using NLog;
+using NLog.Fluent;
 
 namespace NexusForever.Game.Spell
 {
@@ -26,6 +30,7 @@ namespace NexusForever.Game.Spell
         {
             target.CastSpell(info.Entry.DataBits00, new SpellParameters
             {
+                CharacterSpell         = spell.Parameters.CharacterSpell,
                 ParentSpellInfo        = spell.Parameters.SpellInfo,
                 RootSpellInfo          = spell.Parameters.RootSpellInfo,
                 UserInitiatedSpellCast = false
@@ -231,6 +236,67 @@ namespace NexusForever.Game.Spell
             //    {
             //        player.RemoveSpellProperty((Property)info.Entry.DataBits00, parameters.SpellInfo.Entry.Id);
             //    }));
+        }
+
+        [SpellEffectHandler(SpellEffectType.Stealth)]
+        public static void HandleEffectStealth(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            // TODO: Make it so that Stealth cannot be broken by damage after 3s.
+            // This is referenced by EffectId 95774. It checks a Prerequisite that you have http://www.jabbithole.com/spells/assassin-59389. If you do, it'll trigger this EffectHandler with DataBits02 set to 1 (instead of 0).
+            if (info.Entry.DataBits02 == 1)
+                return;
+
+            target.AddStatus(spell.CastingId, EntityStatus.Stealth);
+        }
+
+        [SpellEffectHandler(SpellEffectType.ModifySpellCooldown)]
+        public static void HandleEffectModifySpellCooldown(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            if (!(target is Player player))
+                return;
+
+            switch ((EffectModifySpellCooldownType)info.Entry.DataBits00)
+            {
+                case EffectModifySpellCooldownType.Spell4:
+                    player.SpellManager.SetSpellCooldown(info.Entry.DataBits01, BitConverter.Int32BitsToSingle((int)info.Entry.DataBits02));
+                    break;
+                case EffectModifySpellCooldownType.SpellCooldownId:
+                    player.SpellManager.SetSpellCooldownByCooldownId(info.Entry.DataBits01, BitConverter.Int32BitsToSingle((int)info.Entry.DataBits02));
+                    break;
+                default:
+                    LogManager.GetCurrentClassLogger().Warn($"Unhandled ModifySpellCooldown Type {(EffectModifySpellCooldownType)info.Entry.DataBits00}");
+                    break;
+            }
+        }
+
+        [SpellEffectHandler(SpellEffectType.SpellForceRemove)]
+        public static void HandleEffectSpellForceRemove(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            switch ((EffectForceSpellRemoveType)info.Entry.DataBits00)
+            {
+                case EffectForceSpellRemoveType.Spell4:
+                    ISpell activeSpell4 = target.GetActiveSpell(i => i.Parameters.SpellInfo.Entry.Id == info.Entry.DataBits01);
+                    if (activeSpell4 != null)
+                        activeSpell4.Finish();
+                    break;
+                case EffectForceSpellRemoveType.SpellBase:
+                    ISpell activeSpellBase = target.GetActiveSpell(i => i.Parameters.SpellInfo.Entry.Spell4BaseIdBaseSpell == info.Entry.DataBits01);
+                    if (activeSpellBase != null)
+                        activeSpellBase.Finish();
+                    break;
+                default:
+                    LogManager.GetCurrentClassLogger().Warn($"Unhandled EffectForceSpellRemoveType Type {(EffectForceSpellRemoveType)info.Entry.DataBits00}");
+                    break;
+            }
+        }
+
+        [SpellEffectHandler(SpellEffectType.RavelSignal)]
+        public static void HandleEffectRavelSignal(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            if (info.Entry.DataBits00 == 1 && info.Entry.DataBits01 == 13076) // TODO: Move to actual script system. This is used in Stalker's Stealth Ability to prevent it from executing the next Effect whcih was the Cancel Stealth proxy effect.
+                spell.Parameters.ParentSpellInfo.Effects.RemoveAll(i => i.Id == 91018);
+            else
+                LogManager.GetCurrentClassLogger().Warn($"Unhandled spell effect {SpellEffectType.RavelSignal}");
         }
     }
 }

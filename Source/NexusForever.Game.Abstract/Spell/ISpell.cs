@@ -21,5 +21,7 @@ namespace NexusForever.Game.Abstract.Spell
         void CancelCast(CastResult result);
 
         bool IsMovingInterrupted();
+
+        void Finish();
     }
 }

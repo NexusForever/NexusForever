@@ -20,6 +20,7 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared.Game;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.Game.Entity
 {
@@ -75,6 +76,8 @@ namespace NexusForever.Game.Entity
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
         public IMovementManager MovementManager { get; private set; }
+
+        public bool Stealthed => StatusEffects.Values.SelectMany(i => i).Distinct().Contains(EntityStatus.Stealth);
 
         public virtual uint Health
         {
@@ -139,6 +142,8 @@ namespace NexusForever.Game.Entity
 
         private readonly Dictionary<Property, IPropertyValue> properties = new ();
         private readonly HashSet<Property> dirtyProperties = new();
+        public Dictionary<uint, List<EntityStatus>> StatusEffects { get; } = new();
+
         private bool invokeStatBalance = false;
 
         private bool emitVisual;
@@ -371,6 +376,49 @@ namespace NexusForever.Game.Entity
                     .Select(v => v.Build())
                     .ToList()
             };
+        }
+
+        /// <summary>
+        /// Add an <see cref="EntityStatus"/> to this entity, with the provided castingId.
+        /// </summary>
+        public void AddStatus(uint castingId, EntityStatus status)
+        {
+            if (StatusEffects.TryGetValue(castingId, out List<EntityStatus> statusEffects))
+                statusEffects.Add(status);
+            else
+                StatusEffects.Add(castingId, new List<EntityStatus>
+                {
+                    status
+                });
+
+            EmitStatusChange(status);
+        }
+
+        /// <summary>
+        /// Remove an effect from this Entity with the given castingId
+        /// </summary>
+        /// <param name="castingId"></param>
+        public void RemoveEffect(uint castingId)
+        {
+            if (StatusEffects.TryGetValue(castingId, out List<EntityStatus> statusEffects))
+                foreach (EntityStatus status in statusEffects.ToArray())
+                {
+                    statusEffects.Remove(status);
+                    EmitStatusChange(status);
+                }
+        }
+
+        /// <summary>
+        /// Emit an <see cref="EntityStatus"/> related update for this entity to itself and all entities in range.
+        /// </summary>
+        private void EmitStatusChange(EntityStatus status)
+        {
+            switch (status)
+            {
+                case EntityStatus.Stealth:
+                    SendStealthUpdate();
+                    break;
+            }
         }
 
         /// <summary>
@@ -809,6 +857,18 @@ namespace NexusForever.Game.Entity
             IWritable message = builder.Build();
             foreach (IPlayer player in intersectedEntities.Cast<IPlayer>())
                 player.Session.EnqueueMessageEncrypted(message);
+        }
+
+        /// <summary>
+        /// Update this entity and all visible entities of this entity's Stealth state.
+        /// </summary>
+        private void SendStealthUpdate()
+        {
+            EnqueueToVisible(new ServerUnitStealth
+            {
+                UnitId = Guid,
+                Stealthed = Stealthed
+            }, true);
         }
     }
 }

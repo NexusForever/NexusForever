@@ -3,6 +3,8 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Prerequisite
@@ -124,6 +126,85 @@ namespace NexusForever.Game.Prerequisite
             }
         }
 
+        [PrerequisiteCheck(PrerequisiteType.Spell)]
+        private static bool PrerequisiteCheckSpell(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            if (value == 0 && objectId == 0)
+                return false;
+
+            Spell4Entry spell4 = GameTableManager.Instance.Spell4.GetEntry(value);
+
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.SpellManager.GetSpell(spell4.Spell4BaseIdBaseSpell) != null;
+                case PrerequisiteComparison.NotEqual:
+                    return player.SpellManager.GetSpell(spell4.Spell4BaseIdBaseSpell) == null;
+                default:
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.InCombat)]
+        private static bool PrerequisiteCheckInCombat(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return false; // TODO: Return true if Player is in Combat
+                case PrerequisiteComparison.NotEqual:
+                    return true; // TODO: Return ture if Player is NOT in Combat.
+                default:
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.AMP)]
+        private static bool PrerequisiteCheckAmp(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            if (value == 0 && objectId == 0)
+                return false;
+
+            Spell4Entry spell4 = GameTableManager.Instance.Spell4.GetEntry(value);
+            if (spell4 == null)
+                throw new InvalidOperationException();
+
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.SpellManager.GetSpell(spell4.Spell4BaseIdBaseSpell) != null;
+                case PrerequisiteComparison.NotEqual:
+                    return player.SpellManager.GetSpell(spell4.Spell4BaseIdBaseSpell) == null;
+                default:
+                    return false;
+            }
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.WorldReq)]
+        private static bool PrerequisiteCheckWorldReq(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            // TODO: Figure out what the objectId is. Is it a specific world? A world state? Player state?
+            // Needs research.
+
+            // Noticed in a RavelSignal spell effect. Only reference to Ravel was found here http://www.jtrebas.com/game/wildstar/. It appears to be in reference to a script. The word "ravel" threw me off a little, but googling and seeing how it's described as a noun here (https://www.dictionary.com/browse/ravel) - "a tangle or complication" - suggests that it's a way of adjusting things on the fly from a script. I wonder if the WorldReq was just a check to see if a script evaluated to true/false - Kirmmin (April 5, 2020)
+
+            return true;
+        }
+
+        [PrerequisiteCheck(PrerequisiteType.Faction2)]
+        private static bool PrerequisiteCheckFaction2(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.Faction1 == (Faction)value;
+                case PrerequisiteComparison.NotEqual:
+                    return player.Faction1 != (Faction)value;
+                default:
+                    return false;
+            }
+        }
+
         [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
         private static bool PrerequisiteCheckBaseFaction(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
@@ -177,6 +258,24 @@ namespace NexusForever.Game.Prerequisite
                     return false;
             }
         }
+
+        [PrerequisiteCheck(PrerequisiteType.Stealth)]
+        private static bool PrerequisiteCheckStealth(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            // TODO: Add value to the check. It's a spell4 Id.
+
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.Stealthed == true; // TODO: Add OR check for Spell4 Effect
+                case PrerequisiteComparison.NotEqual:
+                    return player.Stealthed == false; // TODO: Add AND check for Spell4 Effect
+                default:
+                    log.Warn($"Unhandled {comparison} for {PrerequisiteType.Stealth}!");
+                    return false;
+            }
+        }
+
 
         [PrerequisiteCheck(PrerequisiteType.SpellObj)]
         private static bool PrerequisiteCheckSpellObj(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)

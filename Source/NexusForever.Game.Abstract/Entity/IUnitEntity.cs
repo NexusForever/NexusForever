@@ -50,5 +50,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="castingId">Casting ID of the spell to cancel</param>
         void CancelSpellCast(uint castingId);
+
+        /// <summary>
+        /// Returns an active <see cref="ISpell"/> that is affecting this <see cref="UnitEntity"/>
+        /// </summary>
+        ISpell GetActiveSpell(Func<ISpell, bool> func);
     }
 }

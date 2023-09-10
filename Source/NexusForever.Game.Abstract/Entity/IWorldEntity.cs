@@ -7,6 +7,7 @@ using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -40,6 +41,7 @@ namespace NexusForever.Game.Abstract.Entity
         uint Shield { get; }
         uint Level { get; set; }
         bool Sheathed { get; set; }
+        bool Stealthed { get; }
 
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> currently targeted.
@@ -102,6 +104,17 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove <see cref="IItemVisual"/> at supplied <see cref="ItemSlot"/>.
         /// </summary>
         void RemoveVisual(ItemSlot slot);
+
+        /// <summary>
+        /// Add an <see cref="EntityStatus"/> to this entity, with the provided castingId.
+        /// </summary>
+        void AddStatus(uint castingId, EntityStatus status);
+
+        /// <summary>
+        /// Remove an effect from this Entity with the given castingId
+        /// </summary>
+        /// <param name="castingId"></param>
+        void RemoveEffect(uint castingId);
 
         /// <summary>
         /// Return a collection of <see cref="IPropertyValue"/> for <see cref="IWorldEntity"/>.
