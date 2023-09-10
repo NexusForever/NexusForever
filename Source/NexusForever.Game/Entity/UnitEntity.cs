@@ -6,6 +6,7 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.WorldServer.Game.Entity.Static;
 
 namespace NexusForever.Game.Entity
 {
@@ -189,10 +190,31 @@ namespace NexusForever.Game.Entity
                 return;
             }
 
+            // Cancel certain Spells / Buffs if required, when another ability is cast.
+            // TODO: Improve this with certain rules, as there will be abilities that can be cast while stealthed, etc.
             if (parameters.UserInitiatedSpellCast)
             {
                 if (this is IPlayer player)
                     player.Dismount();
+
+                // TODO: This "effect" of removing Stealth when abilities are cast is handled by a Proc effect in the original spell. It'll trigger the removal of this buff when a player uses an ability. Once Procs are implemented, this can be removed.
+                uint[] ignoredStealthBaseIds = new uint[]
+                   {
+                    30075,
+                    23164,
+                    30076
+                   };
+                if (Stealthed && !ignoredStealthBaseIds.Contains(parameters.SpellInfo.Entry.Spell4BaseIdBaseSpell))
+                {
+                    foreach ((uint castingId, List<EntityStatus> statuses) in StatusEffects)
+                    {
+                        if (statuses.Contains(EntityStatus.Stealth))
+                        {
+                            ISpell activeSpell = GetActiveSpell(i => i.CastingId == castingId);
+                            activeSpell.Finish();
+                        }
+                    }
+                }
             }
 
             var spell = new Spell.Spell(this, parameters);

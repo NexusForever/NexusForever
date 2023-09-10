@@ -43,6 +43,11 @@ namespace NexusForever.Game.Abstract.Entity
         double GetSpellCooldown(uint spellId);
 
         /// <summary>
+        /// Update all spell cooldowns that share a given cooldown ID
+        /// </summary>
+        public void SetSpellCooldownByCooldownId(uint spell4CooldownId, double newCooldown);
+
+        /// <summary>
         /// Set spell cooldown in seconds for supplied spell id.
         /// </summary>
         void SetSpellCooldown(uint spell4Id, double cooldown);

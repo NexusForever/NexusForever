@@ -8,6 +8,7 @@ using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Setting;
 using NexusForever.GameTable.Model;
@@ -195,5 +196,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove a <see cref="Property"/> modifier by a item that is currently affecting this <see cref="IPlayer"/>.
         /// </summary>
         void RemoveItemProperty(Property property, ItemSlot itemSlot);
+
+        /// <summary>
+        /// Returns an active <see cref="ISpell"/> that is affecting this <see cref="UnitEntity"/>
+        /// </summary>
+        public ISpell GetActiveSpell(Func<ISpell, bool> func);
     }
 }

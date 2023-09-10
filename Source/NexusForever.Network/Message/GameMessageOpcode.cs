@@ -334,6 +334,7 @@ namespace NexusForever.Network.Message
         ServerSetUnitPathType           = 0x08B8,
         ServerVehiclePassengerRemove    = 0x08C7,
         ServerUnitSetChair              = 0x08CF,
+        ServerUnitStealth               = 0x08F5,
         ServerEntityVisualUpdate        = 0x0905,
         Server0908                      = 0x0908,
         ServerVendorItemsUpdated        = 0x090B,
