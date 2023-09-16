@@ -32,7 +32,7 @@ namespace NexusForever.Game.Abstract.Entity.Movement
         /// <summary>
         /// Set platform with supplied unit id.
         /// </summary>
-        void SetPlatform(uint unitId);
+        void SetPlatform(uint? unitId);
 
         /// <summary>
         /// Launch a new single spline with supplied <see cref="SplineMode"/> and speed.

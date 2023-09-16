@@ -32,10 +32,12 @@ namespace NexusForever.Network.Message
         ServerDatacubeUpdateList        = 0x00E0,
         ServerDatacubeUpdate            = 0x00E1,
         ServerDatacubeVolumeUpdate      = 0x00E2,
+        ClientResurrectRequest          = 0x00E4,
         ServerCharacterDeleteResult     = 0x00E6,
         ServerInstanceSettings          = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
         ClientEnteredWorld              = 0x00F2,
         ServerCharacterFlagsUpdated     = 0x00FE,
+        ServerResurrectionState         = 0x0100,
         Server0104                      = 0x0104, // Galactic Archive
         ServerGenericError              = 0x0106,
         ClientGuildHolomarkUpdate       = 0x010C,
@@ -61,7 +63,8 @@ namespace NexusForever.Network.Message
         ClientItemDelete                = 0x0149,
         ClientEntityInteractChair       = 0x014E,
         ClientRequestAmpReset           = 0x0151,
-        ClientResurrectRequest          = 0x015A,
+        ClientResurrectAccept           = 0x015A,
+        ServerResurrectRequest          = 0x015B,
         ClientItemUseLootBag            = 0x015E,
         ServerCharacterSelectFail       = 0x0162,
         ClientSellItemToVendor          = 0x0166,
@@ -331,7 +334,7 @@ namespace NexusForever.Network.Message
         Server0856                      = 0x0856, // tradeskills
         ServerVehiclePassengerAdd       = 0x086F,
         ServerEntityCCStateSet          = 0x087F,
-        ServerEntityDeath               = 0x088C,
+        ServerEntityDeathState          = 0x088C,
         ServerUnitEnteredCombat         = 0x089A,
         Server089B                      = 0x089B, // mount related
         Server08B3                      = 0x08B3,

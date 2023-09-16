@@ -1,23 +1,43 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
-using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Entity
 {
     public class Ghost : WorldEntity, IGhost
     {
-        public IPlayer Owner { get; }
+        public uint OwnerGuid { get; }
 
+        public string Name { get; }
+        public Race Race { get; }
+        public Class Class { get; }
+        public Sex Sex { get; }
+        public List<ulong> GuildIds { get; } = new();
+        public string GuildName { get; }
+        public GuildType GuildType { get; }
+        public ushort Title { get; }
+
+        /// <summary>
+        /// Create a new <see cref="IGhost"/> for <see cref="IPlayer"/>.
+        /// </summary>
         public Ghost(IPlayer owner)
             : base(EntityType.Ghost)
         {
-            Owner = owner;
+            OwnerGuid = owner.Guid;
+            Name      = owner.Name;
+            Race      = owner.Race;
+            Class     = owner.Class;
+            Sex       = owner.Sex;
+            GuildIds  = owner.GuildManager
+                .Select(g => g.Id)
+                .ToList();
+            GuildName = owner.GuildManager.GuildAffiliation?.Name;
+            GuildType = owner.GuildManager.GuildAffiliation?.Type ?? GuildType.None;
+            Title     = owner.TitleManager.ActiveTitleId;
 
             foreach (IItemVisual visual in owner.GetVisuals())
                 AddVisual(visual);
@@ -27,7 +47,7 @@ namespace NexusForever.Game.Entity
             Faction1 = owner.Faction1;
             Faction2 = owner.Faction2;
 
-            CreateFlags |= EntityCreateFlag.SpawnAnimation;
+            CreateFlags |= EntityCreateFlag.NoSpawnAnimation;
 
             SetBaseProperty(Property.BaseHealth, 101.0f);
 
@@ -40,45 +60,33 @@ namespace NexusForever.Game.Entity
         {
             return new GhostEntityModel
             {
-                Name = Owner.Name,
-                Race = Owner.Race,
-                Class = Owner.Class,
-                Sex = Owner.Sex,
-                GuildIds = Owner.GuildManager
-                    .Select(g => g.Id)
-                    .ToList(),
-                GuildName = Owner.GuildManager.GuildAffiliation?.Name,
-                GuildType = Owner.GuildManager.GuildAffiliation?.Type ?? GuildType.None,
-                Title = Owner.TitleManager.ActiveTitleId
+                Name      = Name,
+                Race      = Race,
+                Class     = Class,
+                Sex       = Sex,
+                GuildIds  = GuildIds,
+                GuildName = GuildName,
+                GuildType = GuildType,
+                Title     = Title
             };
         }
 
+        /// <summary>
+        /// Invoked when <see cref="IGhost"/> is added to <see cref="IBaseMap"/>.
+        /// </summary>
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
         {
             base.OnAddToMap(map, guid, vector);
 
-            CreateFlags &= ~EntityCreateFlag.SpawnAnimation;
-            CreateFlags |= EntityCreateFlag.NoSpawnAnimation;
-
-            Owner.GhostGuid = guid;
-            Owner.SetControl(this);
-            Owner.Session.EnqueueMessageEncrypted(new ServerResurrectionShow
+            IPlayer owner = GetVisible<IPlayer>(OwnerGuid);
+            if (owner == null)
             {
-                GhostId = Guid,
-                RezCost = GetCostForRez(),
-                TimeUntilRezMs = 0,
-                ShowRezFlags = MapManager.Instance.GetRezTypeForMap(Owner),
-                Dead = true,
-                Unknown0 = false,
-                TimeUntilForceRezMs = 0,
-                TimeUntilWakeHereMs = 0
-            });
-        }
+                RemoveFromMap();
+                return;
+            }
 
-        public uint GetCostForRez()
-        {
-            // TODO: Calculate credit cost correctly. 0 for now.
-            return 0u;
+            owner.SetControl(this);
+            owner.ResurrectionManager.ShowResurrection();
         }
     }
 }

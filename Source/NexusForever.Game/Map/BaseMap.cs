@@ -469,5 +469,14 @@ namespace NexusForever.Game.Map
             // TODO: handle cases for water and props
             return File.GetTerrainHeight(new Vector3(x, 0, z));
         }
+
+        /// <summary>
+        /// Return <see cref="ResurrectionType"/> applicable to this map.
+        /// </summary>
+        public virtual ResurrectionType GetResurrectionType()
+        {
+            // TODO: add support for Holocrypts and instances
+            return ResurrectionType.None;
+        }
     }
 }

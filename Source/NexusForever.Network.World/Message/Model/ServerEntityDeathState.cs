@@ -2,11 +2,12 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEntityDeath)]
-    public class ServerEntityDeath : IWritable
+    [Message(GameMessageOpcode.ServerEntityDeathState)]
+    public class ServerEntityDeathState : IWritable
     {
         public uint UnitId { get; set; }
         public bool Dead { get; set; }
+        // doesn't seem to be used by the client
         public byte Reason { get; set; }
         public uint RezHealth { get; set; }
 

@@ -6,13 +6,13 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerResurrectionUpdate)]
     public class ServerResurrectionUpdate : IWritable
     {
-        public RezType ShowRezFlags { get; set; } // 8
-        public bool Unknown0 { get; set; }
+        public ResurrectionType ShowRezFlags { get; set; } // 8
+        public bool HasCasterRezRequest { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(ShowRezFlags, 8u);
-            writer.Write(Unknown0);
+            writer.Write(HasCasterRezRequest);
         }
     }
 }

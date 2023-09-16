@@ -13,13 +13,16 @@ namespace NexusForever.Network.World.Message.Model
         /// Set the amount of time, in milliseconds, 
         /// </summary>
         public uint TimeUntilRezMs { get; set; }
+
         public bool Dead { get; set; }
-        public RezType ShowRezFlags { get; set; } // 8
-        public bool Unknown0 { get; set; }
+        public ResurrectionType ShowRezFlags { get; set; } // 8
+        public bool HasCasterRezRequest { get; set; }
+
         /// <summary>
         /// This must be set if the player is to be given the option to use Service Tokens.
         /// </summary>
         public uint TimeUntilWakeHereMs { get; set; }
+
         public uint TimeUntilForceRezMs { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -29,7 +32,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(TimeUntilRezMs);
             writer.Write(Dead);
             writer.Write(ShowRezFlags, 8u);
-            writer.Write(Unknown0);
+            writer.Write(HasCasterRezRequest);
             writer.Write(TimeUntilWakeHereMs);
             writer.Write(TimeUntilForceRezMs);
         }

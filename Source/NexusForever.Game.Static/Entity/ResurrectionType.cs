@@ -1,7 +1,7 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
     [Flags]
-    public enum RezType
+    public enum ResurrectionType
     {
         None                    = 0,
         WakeHere                = 1,
@@ -10,10 +10,8 @@
         ExitInstance            = 32,
         WakeHereServiceToken    = 64,
 
-
         // TODO: Add Holocrypt to below masks when we support them
         OpenWorld               = WakeHere | WakeHereServiceToken,
-        Dungeon                 = ExitInstance,
-        DungeonInCombat         = ExitInstance
+        Dungeon                 = ExitInstance
     }
 }

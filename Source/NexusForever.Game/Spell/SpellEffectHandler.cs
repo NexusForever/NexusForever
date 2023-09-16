@@ -3,7 +3,6 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Map;
-using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -36,6 +35,15 @@ namespace NexusForever.Game.Spell
             
             // TODO: Deal damage
             target.TakeDamage(spell.Caster, info.Damage);
+        }
+
+        [SpellEffectHandler(SpellEffectType.Resurrect)]
+        public static void HandleEffectResurrect(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            if (target is not IPlayer player)
+                return;
+
+            player.ResurrectionManager.ResurrectRequest(spell.Caster.Guid);
         }
 
         [SpellEffectHandler(SpellEffectType.Proxy)]

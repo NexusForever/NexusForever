@@ -3,7 +3,6 @@ using System.Diagnostics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Configuration.Model;
-using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.GameTable.Model;
@@ -168,18 +167,6 @@ namespace NexusForever.Game.Map
                 return;
 
             instanceCounts.AddOrUpdate(player.CharacterId, 1, (k, v) => v + 1);
-        }
-
-        /// <summary>
-        /// Returns the <see cref="RezType"/> mask allowed for the <see cref="IPlayer"/>'s Map.
-        /// </summary>
-        public RezType GetRezTypeForMap(IPlayer player)
-        {
-            if (player.Map == null)
-                return RezType.None;
-
-            // TODO: Add support for all map type RezType's
-            return RezType.OpenWorld;
         }
     }
 }

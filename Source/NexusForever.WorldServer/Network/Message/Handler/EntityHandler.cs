@@ -1,7 +1,11 @@
 using System;
 using System.Linq;
+using System.Threading;
+using System.Timers;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Spell;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -25,8 +29,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (mover == null)
                 return;
 
-            if (session.Player.ControlGuid != session.Player.Guid)
-                mover = session.Player.GetVisible<IWorldEntity>(session.Player.ControlGuid);
+            if (session.Player.ControlGuid != null)
+                mover = session.Player.GetVisible<IWorldEntity>(session.Player.ControlGuid.Value);
 
             if (mover == null)
                 return;
@@ -86,7 +90,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientEntityInteract)]
-        public static void HandleClientEntityInteraction(WorldSession session, ClientEntityInteract entityInteraction)
+        public static void HandleClientEntityInteraction(IWorldSession session, ClientEntityInteract entityInteraction)
         {
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.Guid);
             if (entity != null)
@@ -160,22 +164,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             session.Player.Sit(chair);
         }
 
-        [MessageHandler(GameMessageOpcode.ClientResurrectRequest)]
-        public static void HandleClientResurrectRequest(WorldSession session, ClientResurrectRequest clientResurrectRequest)
+        [MessageHandler(GameMessageOpcode.ClientResurrectAccept)]
+        public static void HandleClientResurrectAccept(IWorldSession session, ClientResurrectAccept clientResurrectAccept)
         {
-            IWorldEntity entity = session.Player.Map.GetEntity<IWorldEntity>(clientResurrectRequest.UnitId);
-            if (entity != null)
-            {
-                if (entity is IPlayer player && session.Player.Guid == entity.Guid)
-                {
-                    player.DoResurrect(clientResurrectRequest.RezType);
-                    return;
-                }
-                else
-                    throw new InvalidOperationException($"Player requested resurrection of an entity that they do not own!");
-            }
+            if (clientResurrectAccept.RezType == ResurrectionType.None)
+                return;
 
-            throw new NotImplementedException($"Targeted Entity not found. Can players choose what type of resurrection other players get?");
+            session.Player.ResurrectionManager.Resurrect(clientResurrectAccept.RezType);
+        }
+
+        [MessageHandler(GameMessageOpcode.ClientResurrectRequest)]
+        public static void HandleClientResurrectRequest(IWorldSession session, ClientResurrectRequest _)
+        {
+            session.Player.ResurrectionManager.Resurrect(session.Player.TargetGuid);
         }
     }
 }

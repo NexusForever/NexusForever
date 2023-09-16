@@ -28,6 +28,7 @@ using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Setting;
 using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
@@ -152,22 +153,6 @@ namespace NexusForever.Game.Entity
         }
         private byte innateIndex;
 
-        public override uint Health
-        {
-            get => base.Health;
-            set
-            {
-                base.Health = value;
-
-                Session.EnqueueMessageEncrypted(new ServerPlayerHealthUpdate
-                {
-                    UnitId = Guid,
-                    Health = Health,
-                    Mask   = (UpdateHealthMask)4
-                });
-            }
-        }
-
         public override uint Level
         {
             get => base.Level;
@@ -188,14 +173,14 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> that currently being controlled by the <see cref="IPlayer"/>.
         /// </summary>
-        public uint ControlGuid { get; private set; }
+        public uint? ControlGuid { get; private set; }
 
         /// <summary>
         /// Guid of the <see cref="IVehicle"/> the <see cref="IPlayer"/> is a passenger on.
         /// </summary>
-        public uint VehicleGuid
+        public uint? VehicleGuid
         {
-            get => MovementManager.GetPlatform() ?? 0u;
+            get => MovementManager.GetPlatform();
             set => MovementManager.SetPlatform(value);
         }
 
@@ -203,11 +188,6 @@ namespace NexusForever.Game.Entity
         /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         public uint? VanityPetGuid { get; set; }
-
-        /// <summary>
-        /// Guid of the <see cref="IGhost"/> currently summoned by the <see cref="IPlayer"/>.
-        /// </summary>
-        public uint? GhostGuid { get; set; }
 
         public bool IsSitting => currentChairGuid != null;
         private uint? currentChairGuid;
@@ -247,6 +227,7 @@ namespace NexusForever.Game.Entity
         public ICharacterEntitlementManager EntitlementManager { get; }
         public ILogoutManager LogoutManager { get; }
         public IAppearanceManager AppearanceManager { get; }
+        public IResurrectionManager ResurrectionManager { get; }
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -326,6 +307,7 @@ namespace NexusForever.Game.Entity
             LogoutManager.OnTimerFinished += Logout;
 
             AppearanceManager       = new AppearanceManager(this, model);
+            ResurrectionManager     = new ResurrectionManager(this);
 
             // do dependant stat balance after all stats and properties have been set
             SetDependantStatBalance(true);
@@ -596,10 +578,8 @@ namespace NexusForever.Game.Entity
 
             SendPacketsAfterAddToMap();
 
-            if (Health == 0u)
-                SetDeathState(DeathState.JustDied);
-            else
-                SetDeathState(DeathState.JustSpawned);
+            if (!IsAlive)
+                OnDeath(null);
 
             if (PreviousMap == null)
                 OnLogin();
@@ -710,6 +690,7 @@ namespace NexusForever.Game.Entity
             QuestManager.SendInitialPackets();
             AchievementManager.SendInitialPackets(null);
             Account.RewardPropertyManager.SendInitialPackets();
+            ResurrectionManager.SendInitialPackets();
 
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
@@ -787,8 +768,19 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetControl(IWorldEntity entity)
         {
-            ControlGuid = entity.Guid;
-            entity.ControllerGuid = Guid;
+            if (entity.Guid == ControlGuid)
+                return;
+
+            if (ControlGuid != null)
+            {
+                IWorldEntity control = Map.GetEntity<IWorldEntity>(ControlGuid.Value);
+                if (control != null)
+                    control.ControllerGuid = null;
+            }
+
+            uint? guid = entity != this ? entity.Guid : null;
+            ControlGuid           = guid;
+            entity.ControllerGuid = guid;
 
             Session.EnqueueMessageEncrypted(new ServerMovementControl
             {
@@ -1064,7 +1056,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool CanMount()
         {
-            return VehicleGuid == 0u && pendingTeleport == null;
+            return VehicleGuid == null && pendingTeleport == null;
         }
 
         /// <summary>
@@ -1072,11 +1064,11 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void Dismount()
         {
-            if (VehicleGuid != 0u)
-            {
-                IVehicle vehicle = GetVisible<IVehicle>(VehicleGuid);
-                vehicle.PassengerRemove(this);
-            }
+            if (VehicleGuid == null)
+                return;
+
+            IVehicle vehicle = GetVisible<IVehicle>(VehicleGuid.Value);
+            vehicle.PassengerRemove(this);
         }
 
         /// <summary>
@@ -1085,8 +1077,7 @@ namespace NexusForever.Game.Entity
         private void DestroyDependents()
         {
             // vehicle will be removed if player is the last passenger
-            if (VehicleGuid != 0u)
-                Dismount();
+            Dismount();
 
             if (VanityPetGuid != null)
             {
@@ -1095,14 +1086,19 @@ namespace NexusForever.Game.Entity
                 VanityPetGuid = null;
             }
 
-            if (GhostGuid != null)
-            {
-                IGhost ghost = GetVisible<IGhost>(GhostGuid.Value);
-                ghost?.RemoveFromMap();
-                GhostGuid = null;
-            }
+            RemoveControlUnit();
 
             // TODO: Remove pets, scanbots
+        }
+
+        private void RemoveControlUnit()
+        {
+            if (ControlGuid == null)
+                return;
+
+            IWorldEntity controlled = Map.GetEntity<IWorldEntity>(ControlGuid.Value);
+            controlled?.RemoveFromMap();
+            SetControl(this);
         }
 
         /// <summary>
@@ -1256,67 +1252,72 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Used to create a <see cref="Ghost"/> for this <see cref="Player"/> to control.
+        /// Determine if this <see cref="IPlayer"/> can attack supplied <see cref="IUnitEntity"/>.
         /// </summary>
-        private void CreateGhost()
+        public override bool CanAttack(IUnitEntity target)
         {
-            IGhost ghost = new Ghost(this);
+            // TODO: Disable when PvP is available.
+            if (target is IPlayer)
+                return false;
 
-            // TODO: Replace with DelayEvent (of 2 seconds) with map updates.
-            Map.EnqueueAdd(ghost, new MapPosition
-            {
-                Info = new MapInfo {
-                    Entry = Map.Entry,
-                    InstanceId = Map is MapInstance instance ? instance.InstanceId : 0u
-                },
-                Position = Position
-            });
+            return base.CanAttack(target);
         }
 
         /// <summary>
-        /// Applies resurrection mechanics based on client selection.
+        /// Modify the health of this <see cref="IPlayer"/> by the supplied amount.
         /// </summary>
-        public void DoResurrect(RezType rezType)
+        /// <remarks>
+        /// If the <see cref="DamageType"/> is <see cref="DamageType.Heal"/> amount is added to current health otherwise subtracted.
+        /// </remarks>
+        public override void ModifyHealth(uint amount, DamageType type, IUnitEntity source)
         {
-            IWorldEntity controlEntity = GetVisible<IWorldEntity>(ControlGuid);
-            if (controlEntity is not IGhost ghost)
-                throw new InvalidOperationException($"Control Entity is not of type Ghost");
+            base.ModifyHealth(amount, type, source);
 
-            switch (rezType)
+            Session.EnqueueMessageEncrypted(new ServerPlayerHealthUpdate
             {
-                case RezType.WakeHere:
-                    uint cost = ghost.GetCostForRez();
-                    CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
-                    break;
-                default:
-                    break;
-            }
+                UnitId = Guid,
+                Health = Health,
+                Mask   = type switch
+                {
+                    DamageType.Fall      => UpdateHealthMask.FallDamage,
+                    DamageType.Suffocate => UpdateHealthMask.SuffocateDamage,
+                    _                    => UpdateHealthMask.None
+                }
+            });
 
-            ModifyHealth((uint)(MaxHealth * 0.5f));
-            Shield = 0;
-            SetControl(this);
-            Map.EnqueueRemove(ghost);
-
-            SetDeathState(DeathState.JustSpawned);
-        }
-
-        protected override void OnDeathStateChange(DeathState newState)
-        {
-            switch (newState)
-            {
-                case DeathState.JustDied:
-                    CreateGhost();
-                    break;
-                default:
-                    break;
-            }
-
-            base.OnDeathStateChange(newState);
+            if (Health > 0 && DeathState != null)
+                OnResurrection(source);
         }
 
         protected override void OnDeath(IUnitEntity killer)
         {
             base.OnDeath(killer);
+
+            Dismount();
+            RemoveControlUnit();
+
+            // TODO: Replace with DelayEvent (of 2 seconds) with map updates.
+            IGhost ghost = new Ghost(this);
+            Map.EnqueueAdd(ghost, new MapPosition
+            {
+                Info = new MapInfo
+                {
+                    Entry      = Map.Entry,
+                    InstanceId = Map is IMapInstance instance ? instance.InstanceId : 0u
+                },
+                Position = Position
+            });
+        }
+
+        protected override void RewardKiller(IPlayer player)
+        {
+            // TODO: handle PvP rewards
+        }
+
+        protected void OnResurrection(IUnitEntity resurrector)
+        {
+            DeathState = null;
+            RemoveControlUnit();
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
-    public enum DeathState
+    public enum EntityDeathState
     {
-        JustSpawned,
-        Alive,
         JustDied,
         Corpse,
         Dead

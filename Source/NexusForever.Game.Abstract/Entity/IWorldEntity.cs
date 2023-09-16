@@ -37,11 +37,11 @@ namespace NexusForever.Game.Abstract.Entity
         IMovementManager MovementManager { get; }
 
         uint Health { get; }
-        uint Shield { get; }
+        uint MaxHealth { get; set; }
+        uint Shield { get; set; }
+        uint MaxShieldCapacity { get; set; }
         uint Level { get; set; }
         bool Sheathed { get; set; }
-
-        bool IsAlive { get; }
 
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> currently targeted.
@@ -51,7 +51,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
         /// </summary>
-        uint ControllerGuid { get; set; }
+        uint? ControllerGuid { get; set; }
 
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> from an existing database model.
@@ -157,10 +157,5 @@ namespace NexusForever.Game.Abstract.Entity
         /// Broadcast chat message built from <see cref="IChatMessageBuilder"/> to <see cref="IPlayer"/> in supplied range.
         /// </summary>
         void Talk(IChatMessageBuilder builder, float range, IGridEntity exclude = null);
-
-        /// <summary>
-        /// Modify this Entity's Health by the given value (Negative for Damage, Positive for Healing).
-        /// </summary>
-        void ModifyHealth(long health);
     }
 }

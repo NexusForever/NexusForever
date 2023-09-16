@@ -228,7 +228,7 @@ namespace NexusForever.Game.Entity
 
         private void PassengerRemove(IPlayer player, IVehiclePassenger passenger)
         {
-            player.VehicleGuid = 0;
+            player.VehicleGuid = null;
             player.MovementManager.SetPosition(Position);
             player.MovementManager.SetRotation(Rotation);
             player.MovementManager.BroadcastCommands();

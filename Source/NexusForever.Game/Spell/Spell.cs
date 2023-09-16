@@ -1,9 +1,11 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
+using NexusForever.Game.Entity;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
+using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
@@ -244,6 +246,13 @@ namespace NexusForever.Game.Spell
         private void SelectTargets()
         {
             targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Caster, Caster));
+
+            if (Parameters.PrimaryTargetId != 0)
+            {
+                IUnitEntity primaryTargetEntity = Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
+                if (primaryTargetEntity != null)
+                    targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Target, primaryTargetEntity));
+            }
 
             if (Caster is IPlayer)
                 InitialiseTelegraphs();

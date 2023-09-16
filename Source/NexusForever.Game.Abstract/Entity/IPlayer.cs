@@ -39,22 +39,17 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> that currently being controlled by the <see cref="IPlayer"/>.
         /// </summary>
-        uint ControlGuid { get; }
+        uint? ControlGuid { get; }
 
         /// <summary>
         /// Guid of the <see cref="IVehicle"/> the <see cref="IPlayer"/> is a passenger on.
         /// </summary>
-        uint VehicleGuid { get; set; }
+        uint? VehicleGuid { get; set; }
 
         /// <summary>
         /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         uint? VanityPetGuid { get; set; }
-
-        /// <summary>
-        /// Guid of the <see cref="IGhost"/> currently summoned by the <see cref="IPlayer"/>.
-        /// </summary>
-        uint? GhostGuid { get; set; }
 
         bool IsSitting { get; }
 
@@ -93,6 +88,7 @@ namespace NexusForever.Game.Abstract.Entity
         ICharacterEntitlementManager EntitlementManager { get; }
         ILogoutManager LogoutManager { get; }
         IAppearanceManager AppearanceManager { get; }
+        IResurrectionManager ResurrectionManager { get; }
 
         IVendorInfo SelectedVendorInfo { get; set; }
 
@@ -200,10 +196,5 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove a <see cref="Property"/> modifier by a item that is currently affecting this <see cref="IPlayer"/>.
         /// </summary>
         void RemoveItemProperty(Property property, ItemSlot itemSlot);
-
-        /// <summary>
-        /// Applies resurrection mechanics based on client selection.
-        /// </summary>
-        void DoResurrect(RezType rezType);
     }
 }
