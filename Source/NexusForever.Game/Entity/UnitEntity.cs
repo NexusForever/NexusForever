@@ -3,15 +3,52 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Quest;
+using NexusForever.Game.Static.Reputation;
+using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity
 {
     public abstract class UnitEntity : WorldEntity, IUnitEntity
     {
         public float HitRadius { get; protected set; } = 1f;
+
+        /// <summary>
+        /// Determines whether or not this <see cref="IUnitEntity"/> is alive.
+        /// </summary>
+        public bool IsAlive => Health > 0u && deathState == null;
+
+        protected EntityDeathState? DeathState
+        {
+            get => deathState;
+            set
+            {
+                deathState = value;
+
+                if (deathState is null or EntityDeathState.JustDied)
+                {
+                    EnqueueToVisible(new ServerEntityDeathState
+                    {
+                        UnitId    = Guid,
+                        Dead      = !IsAlive,
+                        Reason    = 0, // client does nothing with this value
+                        RezHealth = IsAlive ? Health : 0u
+                    }, true);
+                }
+            }
+        }
+
+        private EntityDeathState? deathState;
+
+        /// <summary>
+        /// Initial stab at a timer to regenerate Health & Shield values.
+        /// </summary>
+        private UpdateTimer statUpdateTimer = new UpdateTimer(0.25); // TODO: Long-term this should be absorbed into individual timers for each Stat regeneration method
 
         private readonly List<ISpell> pendingSpells = new();
 
@@ -50,6 +87,13 @@ namespace NexusForever.Game.Entity
                 spell.Update(lastTick);
                 if (spell.IsFinished)
                     pendingSpells.Remove(spell);
+            }
+
+            statUpdateTimer.Update(lastTick);
+            if (statUpdateTimer.HasElapsed)
+            {
+                HandleStatUpdate(lastTick);
+                statUpdateTimer.Reset();
             }
         }
 
@@ -133,6 +177,24 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Handles regeneration of Stat Values. Used to provide a hook into the Update method, for future implementation.
+        /// </summary>
+        private void HandleStatUpdate(double lastTick)
+        {
+            if (!IsAlive)
+                return;
+
+            // TODO: This should probably get moved to a Calculation Library/Manager at some point. There will be different timers on Stat refreshes, but right now the timer is hardcoded to every 0.25s.
+            // Probably worth considering an Attribute-grouped Class that allows us to run differentt regeneration methods & calculations for each stat.
+
+            if (Health < MaxHealth)
+                ModifyHealth((uint)(MaxHealth / 200f), DamageType.Heal, null);
+
+            if (Shield < MaxShieldCapacity)
+                Shield += (uint)(MaxShieldCapacity * GetPropertyValue(Property.ShieldRegenPct) * statUpdateTimer.Duration);
+        }
+
+        /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
         public void CastSpell(uint spell4Id, ISpellParameters parameters)
@@ -172,6 +234,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CastSpell(ISpellParameters parameters)
         {
+            if (!IsAlive)
+                return;
+
             if (parameters == null)
                 throw new ArgumentNullException();
 
@@ -226,6 +291,98 @@ namespace NexusForever.Game.Entity
         public ISpell GetActiveSpell(Func<ISpell, bool> func)
         {
             return pendingSpells.FirstOrDefault(func);
+        }
+
+        /// <summary>
+        /// Determine if this <see cref="IUnitEntity"/> can attack supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        public virtual bool CanAttack(IUnitEntity target)
+        {
+            if (!IsAlive)
+                return false;
+
+            if (!target.IsValidAttackTarget() || !IsValidAttackTarget())
+                return false;
+
+            return GetDispositionTo(target.Faction1) < Disposition.Friendly;
+        }
+
+        /// <summary>
+        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target.
+        /// </summary>
+        public bool IsValidAttackTarget()
+        {
+            // TODO: Expand on this. There's bound to be flags or states that should prevent an entity from being attacked.
+            return (this is IPlayer or INonPlayer);
+        }
+
+        /// <summary>
+        /// Deal damage to this <see cref="IUnitEntity"/> from the supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        public void TakeDamage(IUnitEntity attacker, IDamageDescription damageDescription)
+        {
+            if (!IsAlive || !attacker.IsAlive)
+                return;
+
+            // TODO: Add Threat
+
+            Shield -= damageDescription.ShieldAbsorbAmount;
+            ModifyHealth(damageDescription.AdjustedDamage, damageDescription.DamageType, attacker);
+        }
+
+        /// <summary>
+        /// Modify the health of this <see cref="IUnitEntity"/> by the supplied amount.
+        /// </summary>
+        /// <remarks>
+        /// If the <see cref="DamageType"/> is <see cref="DamageType.Heal"/> amount is added to current health otherwise subtracted.
+        /// </remarks>
+        public virtual void ModifyHealth(uint amount, DamageType type, IUnitEntity source)
+        {
+            long newHealth = Health;
+            if (type == DamageType.Heal)
+                newHealth += amount;
+            else
+                newHealth -= amount;
+
+            Health = (uint)Math.Clamp(newHealth, 0u, MaxHealth);
+
+            if (Health == 0)
+                OnDeath(source);
+        }
+
+        protected virtual void OnDeath(IUnitEntity killer)
+        {
+            DeathState = EntityDeathState.JustDied;
+
+            foreach (ISpell spell in pendingSpells)
+            {
+                if (spell.IsCasting)
+                    spell.CancelCast(CastResult.CasterCannotBeDead);
+            }
+
+            GenerateRewards(killer);
+            // TODO: schedule respawn
+
+            deathState = EntityDeathState.Dead;
+        }
+
+        private void GenerateRewards(IUnitEntity killer)
+        {
+            // TODO: replace with threat targets
+            if (killer is IPlayer player)
+                RewardKiller(player);
+        }
+
+        protected virtual void RewardKiller(IPlayer player)
+        {
+            player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature, CreatureId, 1u);
+            player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature2, CreatureId, 1u);
+            player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroup, CreatureId, 1u);
+            player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroups, CreatureId, 1u);
+
+            // TODO: Reward XP
+            // TODO: Reward Loot
+            // TODO: Handle Achievements
         }
     }
 }

@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             // If player is mounted and tries to summon a different mount, the client sends this packet twice.
             // Ignore Disembark request if no vehicle.
-            if (session.Player.VehicleGuid == 0u)
+            if (session.Player.VehicleGuid == null)
                 return;
 
             session.Player.Dismount();

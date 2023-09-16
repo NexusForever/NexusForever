@@ -79,7 +79,7 @@ namespace NexusForever.Game.Entity
         public virtual uint Health
         {
             get => GetStatInteger(Stat.Health) ?? 0u;
-            set
+            protected set
             {
                 SetStat(Stat.Health, Math.Clamp(value, 0u, MaxHealth)); // TODO: Confirm MaxHealth is actually the maximum health would be at.
                 EnqueueToVisible(new ServerEntityHealthUpdate
@@ -128,12 +128,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
         /// </summary>
-        public uint ControllerGuid { get; set; }
-
-        /// <summary>
-        /// Initial stab at a timer to regenerate Health & Shield values.
-        /// </summary>
-        private UpdateTimer statUpdateTimer = new UpdateTimer(0.25); // TODO: Long-term this should be absorbed into individual timers for each Stat regeneration method
+        public uint? ControllerGuid { get; set; }
 
         protected readonly Dictionary<Stat, IStatValue> stats = new Dictionary<Stat, IStatValue>();
 
@@ -210,13 +205,6 @@ namespace NexusForever.Game.Entity
             {
                 EnqueueToVisible(BuildVisualUpdate(), true);
                 SetVisualEmit(false);
-            }
-
-            statUpdateTimer.Update(lastTick);
-            if (statUpdateTimer.HasElapsed)
-            {
-                HandleStatUpdate(lastTick);
-                statUpdateTimer.Reset();
             }
 
             if (dirtyProperties.Count != 0)
@@ -685,21 +673,6 @@ namespace NexusForever.Game.Entity
         protected void SetStat<T>(Stat stat, T value) where T : Enum, IConvertible
         {
             SetStat(stat, value.ToUInt32(null));
-        }
-
-        /// <summary>
-        /// Handles regeneration of Stat Values. Used to provide a hook into the Update method, for future implementation.
-        /// </summary>
-        private void HandleStatUpdate(double lastTick)
-        {
-            // TODO: This should probably get moved to a Calculation Library/Manager at some point. There will be different timers on Stat refreshes, but right now the timer is hardcoded to every 0.25s.
-            // Probably worth considering an Attribute-grouped Class that allows us to run differentt regeneration methods & calculations for each stat.
-
-            if (Health < MaxHealth)
-                Health += (uint)(MaxHealth / 200f);
-
-            if (Shield < MaxShieldCapacity)
-                Shield += (uint)(MaxShieldCapacity * GetPropertyValue(Property.ShieldRegenPct) * statUpdateTimer.Duration);
         }
 
         /// <summary>

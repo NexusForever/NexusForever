@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map.Search;
+using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
 using NexusForever.IO.Map;
 using NexusForever.Network.Message;
@@ -61,5 +62,10 @@ namespace NexusForever.Game.Abstract.Map
         /// Return terrain height at supplied position.
         /// </summary>
         float? GetTerrainHeight(float x, float z);
+
+        /// <summary>
+        /// Return <see cref="ResurrectionType"/> applicable to this map.
+        /// </summary>
+        ResurrectionType GetResurrectionType();
     }
 }

@@ -37,7 +37,9 @@ namespace NexusForever.Game.Abstract.Entity
         IMovementManager MovementManager { get; }
 
         uint Health { get; }
-        uint Shield { get; }
+        uint MaxHealth { get; set; }
+        uint Shield { get; set; }
+        uint MaxShieldCapacity { get; set; }
         uint Level { get; set; }
         bool Sheathed { get; set; }
 
@@ -49,7 +51,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
         /// </summary>
-        uint ControllerGuid { get; set; }
+        uint? ControllerGuid { get; set; }
 
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> with supplied data.

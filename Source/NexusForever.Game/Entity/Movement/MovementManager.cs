@@ -139,7 +139,7 @@ namespace NexusForever.Game.Entity.Movement
         /// <summary>
         /// Create a new <see cref="SetPlatformCommand"/> with the supplied platform unit id.
         /// </summary>
-        public void SetPlatform(uint unitId)
+        public void SetPlatform(uint? unitId)
         {
             StopSpline();
             AddCommand(new SetPlatformCommand

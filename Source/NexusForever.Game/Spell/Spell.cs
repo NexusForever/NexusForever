@@ -1,9 +1,11 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
+using NexusForever.Game.Entity;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
+using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
@@ -25,7 +27,8 @@ namespace NexusForever.Game.Spell
         public bool IsCasting => status == SpellStatus.Casting;
         public bool IsFinished => status == SpellStatus.Finished;
 
-        private readonly IUnitEntity caster;
+        public IUnitEntity Caster { get; }
+
         private SpellStatus status;
 
         private readonly List<ISpellTargetInfo> targets = new();
@@ -37,10 +40,10 @@ namespace NexusForever.Game.Spell
 
         public Spell(IUnitEntity caster, ISpellParameters parameters)
         {
-            this.caster = caster;
-            Parameters  = parameters;
-            CastingId   = GlobalSpellManager.Instance.NextCastingId;
-            status      = SpellStatus.Initiating;
+            Caster     = caster;
+            Parameters = parameters;
+            CastingId  = GlobalSpellManager.Instance.NextCastingId;
+            status     = SpellStatus.Initiating;
 
             parameters.RootSpellInfo ??= parameters.SpellInfo;
 
@@ -89,13 +92,13 @@ namespace NexusForever.Game.Spell
                 return;
             }
 
-            if (caster is IPlayer player)
+            if (Caster is IPlayer player)
                 if (Parameters.SpellInfo.GlobalCooldown != null)
                     player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.GlobalCooldown.CooldownTime / 1000d);
 
             // It's assumed that non-player entities will be stood still to cast (most do). 
             // TODO: There are a handful of telegraphs that are attached to moving units (specifically rotating units) which this needs to be updated to account for.
-            if (caster is not IPlayer)
+            if (Caster is not IPlayer)
                 InitialiseTelegraphs();
 
             SendSpellStart();
@@ -117,7 +120,7 @@ namespace NexusForever.Game.Spell
             if (ccResult != CastResult.Ok)
                 return ccResult;
 
-            if (caster is IPlayer player)
+            if (Caster is IPlayer player)
             {
                 if (player.SpellManager.GetSpellCooldown(Parameters.SpellInfo.Entry.Id) > 0d)
                     return CastResult.SpellCooldown;
@@ -137,7 +140,7 @@ namespace NexusForever.Game.Spell
         private CastResult CheckPrerequisites()
         {
             // TODO: Remove below line and evaluate PreReq's for Non-Player Entities
-            if (caster is not IPlayer player)
+            if (Caster is not IPlayer player)
                 return CastResult.Ok;
 
             if (Parameters.SpellInfo.CasterCastPrerequisite != null && !CheckRunnerOverride(player))
@@ -191,7 +194,7 @@ namespace NexusForever.Game.Spell
         {
             telegraphs.Clear();
             foreach (TelegraphDamageEntry telegraphDamageEntry in Parameters.SpellInfo.Telegraphs)
-                telegraphs.Add(new Telegraph(telegraphDamageEntry, caster, caster.Position, caster.Rotation));
+                telegraphs.Add(new Telegraph(telegraphDamageEntry, Caster, Caster.Position, Caster.Rotation));
         }
 
         /// <summary>
@@ -202,7 +205,7 @@ namespace NexusForever.Game.Spell
             if (status != SpellStatus.Casting)
                 throw new InvalidOperationException();
 
-            if (caster is IPlayer player && !player.IsLoading)
+            if (Caster is IPlayer player && !player.IsLoading)
             {
                 player.Session.EnqueueMessageEncrypted(new Server07F9
                 {
@@ -223,7 +226,7 @@ namespace NexusForever.Game.Spell
             status = SpellStatus.Executing;
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started executing.");
 
-            if (caster is IPlayer player)
+            if (Caster is IPlayer player)
                 if (Parameters.SpellInfo.Entry.SpellCoolDown != 0u)
                     player.SpellManager.SetSpellCooldown(Parameters.SpellInfo.Entry.Id, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
 
@@ -242,9 +245,16 @@ namespace NexusForever.Game.Spell
 
         private void SelectTargets()
         {
-            targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Caster, caster));
+            targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Caster, Caster));
 
-            if (caster is IPlayer)
+            if (Parameters.PrimaryTargetId != 0)
+            {
+                IUnitEntity primaryTargetEntity = Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
+                if (primaryTargetEntity != null)
+                    targets.Add(new SpellTargetInfo(SpellEffectTargetFlags.Target, primaryTargetEntity));
+            }
+
+            if (Caster is IPlayer)
                 InitialiseTelegraphs();
 
             foreach (ITelegraph telegraph in telegraphs)
@@ -294,7 +304,7 @@ namespace NexusForever.Game.Spell
 
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} failed to cast {castResult}.");
 
-            if (caster is IPlayer player && !player.IsLoading)
+            if (Caster is IPlayer player && !player.IsLoading)
             {
                 player.Session.EnqueueMessageEncrypted(new ServerSpellCastResult
                 {
@@ -309,13 +319,13 @@ namespace NexusForever.Game.Spell
             var spellStart = new ServerSpellStart
             {
                 CastingId              = CastingId,
-                CasterId               = caster.Guid,
-                PrimaryTargetId        = caster.Guid,
+                CasterId               = Caster.Guid,
+                PrimaryTargetId        = Caster.Guid,
                 Spell4Id               = Parameters.SpellInfo.Entry.Id,
                 RootSpell4Id           = Parameters.RootSpellInfo?.Entry.Id ?? 0,
                 ParentSpell4Id         = Parameters.ParentSpellInfo?.Entry.Id ?? 0,
-                FieldPosition          = new Position(caster.Position),
-                Yaw                    = caster.Rotation.X,
+                FieldPosition          = new Position(Caster.Position),
+                Yaw                    = Caster.Rotation.X,
                 UserInitiatedSpellCast = Parameters.UserInitiatedSpellCast,
                 InitialPositionData    = new List<ServerSpellStart.InitialPosition>(),
                 TelegraphPositionData  = new List<ServerSpellStart.TelegraphPosition>()
@@ -323,9 +333,9 @@ namespace NexusForever.Game.Spell
 
             var unitsCasting = new List<IUnitEntity>();
             if (Parameters.PrimaryTargetId > 0)
-                unitsCasting.Add(caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId));
+                unitsCasting.Add(Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId));
             else
-                unitsCasting.Add(caster);
+                unitsCasting.Add(Caster);
 
             foreach (IUnitEntity unit in unitsCasting)
             {
@@ -353,7 +363,7 @@ namespace NexusForever.Game.Spell
                 }
             }
 
-            caster.EnqueueToVisible(spellStart, true);
+            Caster.EnqueueToVisible(spellStart, true);
         }
 
         private void SendSpellFinish()
@@ -361,7 +371,7 @@ namespace NexusForever.Game.Spell
             if (status != SpellStatus.Finished)
                 return;
 
-            caster.EnqueueToVisible(new ServerSpellFinish
+            Caster.EnqueueToVisible(new ServerSpellFinish
             {
                 ServerUniqueId = CastingId,
             }, true);
@@ -372,7 +382,7 @@ namespace NexusForever.Game.Spell
             var serverSpellGo = new ServerSpellGo
             {
                 ServerUniqueId     = CastingId,
-                PrimaryDestination = new Position(caster.Position),
+                PrimaryDestination = new Position(Caster.Position),
                 Phase              = -1
             };
 
@@ -421,7 +431,7 @@ namespace NexusForever.Game.Spell
 
             var unitsCasting = new List<IUnitEntity>
             {
-                caster
+                Caster
             };
 
             foreach (IUnitEntity unit in unitsCasting)
@@ -450,7 +460,7 @@ namespace NexusForever.Game.Spell
                 }
             }
 
-            caster.EnqueueToVisible(serverSpellGo, true);
+            Caster.EnqueueToVisible(serverSpellGo, true);
         }
 
         private void SendRemoveBuff(uint unitId)
@@ -458,7 +468,7 @@ namespace NexusForever.Game.Spell
             if (!Parameters.SpellInfo.BaseInfo.HasIcon)
                 throw new InvalidOperationException();
 
-            caster.EnqueueToVisible(new ServerSpellBuffRemove
+            Caster.EnqueueToVisible(new ServerSpellBuffRemove
             {
                 CastingId = CastingId,
                 CasterId  = unitId

@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.World.Message.Static;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Spell
@@ -9,6 +10,8 @@ namespace NexusForever.Game.Abstract.Spell
         uint CastingId { get; }
         bool IsCasting { get; }
         bool IsFinished { get; }
+
+        IUnitEntity Caster { get; }
 
         /// <summary>
         /// Begin cast, checking prerequisites before initiating.

@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -9,6 +10,11 @@ namespace NexusForever.Game.Abstract.Entity
     public interface IUnitEntity : IWorldEntity
     {
         float HitRadius { get; }
+
+        /// <summary>
+        /// Determines whether or not this <see cref="IUnitEntity"/> is alive.
+        /// </summary>
+        bool IsAlive { get; }
 
         /// <summary>
         /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="ISpellPropertyModifier"/> instance.
@@ -50,5 +56,28 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="castingId">Casting ID of the spell to cancel</param>
         void CancelSpellCast(uint castingId);
+
+        /// <summary>
+        /// Determine if this <see cref="IUnitEntity"/> can attack supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        bool CanAttack(IUnitEntity target);
+
+        /// <summary>
+        /// Returns whether or not this <see cref="IUnitEntity"/> is an attackable target.
+        /// </summary>
+        bool IsValidAttackTarget();
+
+        /// <summary>
+        /// Deal damage to this <see cref="IUnitEntity"/> from the supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        void TakeDamage(IUnitEntity attacker, IDamageDescription damageDescription);
+
+        /// <summary>
+        /// Modify the health of this <see cref="IUnitEntity"/> by the supplied amount.
+        /// </summary>
+        /// <remarks>
+        /// If the <see cref="DamageType"/> is <see cref="DamageType.Heal"/> amount is added to current health otherwise subtracted.
+        /// </remarks>
+        void ModifyHealth(uint amount, DamageType type, IUnitEntity source);
     }
 }
