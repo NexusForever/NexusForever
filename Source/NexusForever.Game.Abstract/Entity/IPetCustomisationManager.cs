@@ -11,6 +11,11 @@ namespace NexusForever.Game.Abstract.Entity
         void UnlockFlair(ushort id);
 
         /// <summary>
+        /// Renames the pet name for <see cref="PetType"/> and object id.
+        /// </summary>
+        void RenamePet(PetType type, uint objectId, String name);
+
+        /// <summary>
         /// Add or update equipped pet flair at supplied index for <see cref="PetType"/> and object id.
         /// </summary>
         void AddCustomisation(PetType type, uint objectId, ushort index, ushort flairId);
