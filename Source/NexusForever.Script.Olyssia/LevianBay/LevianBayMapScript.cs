@@ -10,21 +10,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NexusForever.Script.Alizar.NorthernWilds
+namespace NexusForever.Script.Olyssia.LevianBay
 {
-    [ScriptFilterOwnerId(426)]
-    public class NorthernWildsMapScript : IMapScript, IOwnedScript<IBaseMap>
+    [ScriptFilterOwnerId(1387)]
+    public class LevianBayMapScript : IMapScript, IOwnedScript<IBaseMap>
     {
         public enum Quest : ushort
         {
-            ReportingForDuty = 3480
+            LightingTheWay = 6780
         }
 
         #region Dependency Injection
 
         private readonly ICinematicFactory cinematicFactory;
 
-        public NorthernWildsMapScript(
+        public LevianBayMapScript(
             ICinematicFactory cinematicFactory)
         {
             this.cinematicFactory = cinematicFactory;
@@ -37,12 +37,10 @@ namespace NexusForever.Script.Alizar.NorthernWilds
             if (entity is not IPlayer player)
                 return;
 
-            if (player.QuestManager.GetQuestState(Quest.ReportingForDuty) == null)
+            if (player.QuestManager.GetQuestState(Quest.LightingTheWay) == null)
             {
-                player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<INorthernWildsOnCreate>());
+                player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<ILevianBayOnCreate>());
             }
         }
-
-        // TODO: OnEnterZone work for empowered tower
     }
 }

@@ -10,21 +10,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NexusForever.Script.Alizar.NorthernWilds
+namespace NexusForever.Script.Olyssia.CrimsonIsle
 {
-    [ScriptFilterOwnerId(426)]
-    public class NorthernWildsMapScript : IMapScript, IOwnedScript<IBaseMap>
+    [ScriptFilterOwnerId(870)]
+    public class CrimsonIsleMapScript : IMapScript, IOwnedScript<IBaseMap>
     {
         public enum Quest : ushort
         {
-            ReportingForDuty = 3480
+            MindTheMinesScrapTheScrab = 5593
+        }
+
+        public enum Zones : ushort
+        {
+            CrashSite = 1611
         }
 
         #region Dependency Injection
 
         private readonly ICinematicFactory cinematicFactory;
 
-        public NorthernWildsMapScript(
+        public CrimsonIsleMapScript(
             ICinematicFactory cinematicFactory)
         {
             this.cinematicFactory = cinematicFactory;
@@ -37,12 +42,12 @@ namespace NexusForever.Script.Alizar.NorthernWilds
             if (entity is not IPlayer player)
                 return;
 
-            if (player.QuestManager.GetQuestState(Quest.ReportingForDuty) == null)
+            if (player.QuestManager.GetQuestState(Quest.MindTheMinesScrapTheScrab) == null)
             {
-                player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<INorthernWildsOnCreate>());
+                player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<ICrimsonIsleOnCreate>());
             }
         }
 
-        // TODO: OnEnterZone work for empowered tower
+        // TODO: OnEnterZone for Crash Site objective
     }
 }
