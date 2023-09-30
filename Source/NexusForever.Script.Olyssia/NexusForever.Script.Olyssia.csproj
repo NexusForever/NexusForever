@@ -12,13 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CrimsonIsle\" />
     <Folder Include="CrimsonBadlands\" />
     <Folder Include="Deradune\" />
     <Folder Include="Illium\" />
     <Folder Include="Auroria\" />
     <Folder Include="Ellevar\" />
-    <Folder Include="LevianBay\" />
     <Folder Include="Wilderrun\" />
   </ItemGroup>
 
