@@ -1,7 +1,7 @@
-﻿using NexusForever.Game.Abstract.Cinematic.Cinematics;
+﻿using System.Numerics;
 using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Game.Abstract.Cinematic.Cinematics;
 using NexusForever.Network.World.Entity;
-using System.Numerics;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Cinematic.Cinematics

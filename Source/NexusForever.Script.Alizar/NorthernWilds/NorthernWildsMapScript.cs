@@ -1,14 +1,9 @@
-﻿using NexusForever.Game.Abstract.Cinematic.Cinematics;
-using NexusForever.Game.Abstract.Cinematic;
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Game.Abstract.Cinematic.Cinematics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.Script.Template.Filter;
 using NexusForever.Script.Template;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NexusForever.Script.Template.Filter;
 
 namespace NexusForever.Script.Alizar.NorthernWilds
 {
