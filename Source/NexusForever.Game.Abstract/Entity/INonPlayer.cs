@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Abstract.Entity
 {
-    public interface INonPlayer : IUnitEntity
+    public interface INonPlayer : ICreatureEntity
     {
         IVendorInfo VendorInfo { get; }
     }

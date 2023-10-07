@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
 using NexusForever.Cryptography;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
@@ -663,7 +662,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientEntitySelect)]
         public static void HandleClientTarget(IWorldSession session, ClientEntitySelect target)
         {
-            session.Player.TargetGuid = target.Guid;
+            session.Player.SetTarget(target.Guid > 0 ? target.Guid : null);
         }
 
         [MessageHandler(GameMessageOpcode.ClientReplayLevelRequest)]
@@ -686,7 +685,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         }
 
         [MessageHandler(GameMessageOpcode.ClientRapidTransport)]
-        public static void HandleClientTarget(IWorldSession session, ClientRapidTransport rapidTransport)
+        public static void HandleRapidTransport(IWorldSession session, ClientRapidTransport rapidTransport)
         {
             //TODO: check for cooldown
             //TODO: handle payment

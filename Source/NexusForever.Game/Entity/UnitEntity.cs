@@ -1,5 +1,7 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract.Combat;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Combat;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
@@ -10,6 +12,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Script.Template;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity
@@ -17,6 +20,11 @@ namespace NexusForever.Game.Entity
     public abstract class UnitEntity : WorldEntity, IUnitEntity
     {
         public float HitRadius { get; protected set; } = 1f;
+
+        /// <summary>
+        /// Guid of the <see cref="IUnitEntity"/> currently targeted.
+        /// </summary>
+        public uint? TargetGuid { get; private set; }
 
         /// <summary>
         /// Determines whether or not this <see cref="IUnitEntity"/> is alive.
@@ -46,6 +54,31 @@ namespace NexusForever.Game.Entity
         private EntityDeathState? deathState;
 
         /// <summary>
+        /// Determines whether or not this <see cref="IUnitEntity"/> is in combat.
+        /// </summary>
+        public bool InCombat
+        {
+            get => inCombat;
+            private set
+            {
+                if (inCombat == value)
+                    return;
+
+                inCombat = value;
+
+                EnqueueToVisible(new ServerUnitEnteredCombat
+                {
+                    UnitId   = Guid,
+                    InCombat = value
+                }, true);
+            }
+        }
+
+        private bool inCombat;
+
+        public IThreatManager ThreatManager { get; private set; }
+
+        /// <summary>
         /// Initial stab at a timer to regenerate Health & Shield values.
         /// </summary>
         private UpdateTimer statUpdateTimer = new UpdateTimer(0.25); // TODO: Long-term this should be absorbed into individual timers for each Stat regeneration method
@@ -57,6 +90,8 @@ namespace NexusForever.Game.Entity
         protected UnitEntity(EntityType type)
             : base(type)
         {
+            ThreatManager = new ThreatManager(this);
+
             InitialiseHitRadius();
         }
 
@@ -95,6 +130,19 @@ namespace NexusForever.Game.Entity
                 HandleStatUpdate(lastTick);
                 statUpdateTimer.Reset();
             }
+        }
+
+        /// <summary>
+        /// Remove tracked <see cref="IUnitEntity"/> that is no longer in vision range.
+        /// </summary>
+        public override void RemoveVisible(IGridEntity entity)
+        {
+            if (entity.Guid == TargetGuid)
+                SetTarget((IWorldEntity)null);
+
+            ThreatManager.RemoveHostile(entity.Guid);
+
+            base.RemoveVisible(entity);
         }
 
         /// <summary>
@@ -324,7 +372,8 @@ namespace NexusForever.Game.Entity
             if (!IsAlive || !attacker.IsAlive)
                 return;
 
-            // TODO: Add Threat
+            // TODO: Calculate Threat properly
+            ThreatManager.UpdateThreat(attacker, (int)damageDescription.RawDamage);
 
             Shield -= damageDescription.ShieldAbsorbAmount;
             ModifyHealth(damageDescription.AdjustedDamage, damageDescription.DamageType, attacker);
@@ -347,10 +396,10 @@ namespace NexusForever.Game.Entity
             Health = (uint)Math.Clamp(newHealth, 0u, MaxHealth);
 
             if (Health == 0)
-                OnDeath(source);
+                OnDeath();
         }
 
-        protected virtual void OnDeath(IUnitEntity killer)
+        protected virtual void OnDeath()
         {
             DeathState = EntityDeathState.JustDied;
 
@@ -360,17 +409,22 @@ namespace NexusForever.Game.Entity
                     spell.CancelCast(CastResult.CasterCannotBeDead);
             }
 
-            GenerateRewards(killer);
+            GenerateRewards();
             // TODO: schedule respawn
+
+            ThreatManager.ClearThreatList();
 
             deathState = EntityDeathState.Dead;
         }
 
-        private void GenerateRewards(IUnitEntity killer)
+        private void GenerateRewards()
         {
-            // TODO: replace with threat targets
-            if (killer is IPlayer player)
-                RewardKiller(player);
+            foreach (IHostileEntity hostile in ThreatManager)
+            {
+                IUnitEntity entity = GetVisible<IUnitEntity>(hostile.HatedUnitId);
+                if (entity is IPlayer player)
+                    RewardKiller(player);
+            }
         }
 
         protected virtual void RewardKiller(IPlayer player)
@@ -383,6 +437,78 @@ namespace NexusForever.Game.Entity
             // TODO: Reward XP
             // TODO: Reward Loot
             // TODO: Handle Achievements
+        }
+
+        /// <summary>
+        /// Set target to supplied target guid.
+        /// </summary>
+        /// <remarks>
+        /// A null target will clear the current target.
+        /// </remarks>
+        public void SetTarget(uint? target, uint threat = 0u)
+        {
+            SetTarget(target != null ? GetVisible<IWorldEntity>(target.Value) : null, threat);
+        }
+
+        /// <summary>
+        /// Set target to supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        /// <remarks>
+        /// A null target will clear the current target.
+        /// </remarks>
+        public virtual void SetTarget(IWorldEntity target, uint threat = 0u)
+        {
+            // notify current target they are no longer the target
+            if (TargetGuid != null)
+                GetVisible<IWorldEntity>(TargetGuid.Value)?.OnUntargeted(this);
+
+            target?.OnTargeted(this);
+
+            EnqueueToVisible(new ServerEntityTargetUnit
+            {
+                UnitId      = Guid,
+                NewTargetId = target?.Guid ?? 0u,
+                ThreatLevel = threat
+            });
+
+            TargetGuid = target?.Guid;
+        }
+
+        /// <summary>
+        /// Invoked when a new <see cref="IHostileEntity"/> is added to the threat list.
+        /// </summary>
+        public virtual void OnThreatAddTarget(IHostileEntity hostile)
+        {
+            UpdateCombatState();
+            scriptCollection?.Invoke<IUnitScript>(s => s.OnThreatAddTarget(hostile));
+        }
+
+        /// <summary>
+        /// Invoked when an existing <see cref="IHostileEntity"/> is removed from the threat list.
+        /// </summary>
+        public virtual void OnThreatRemoveTarget(IHostileEntity hostile)
+        {
+            UpdateCombatState();
+            scriptCollection?.Invoke<IUnitScript>(s => s.OnThreatRemoveTarget(hostile));
+        }
+
+        /// <summary>
+        /// Invoked when an existing <see cref="IHostileEntity"/> is update on the threat list.
+        /// </summary>
+        public virtual void OnThreatChange(IHostileEntity hostile)
+        {
+            scriptCollection?.Invoke<IUnitScript>(s => s.OnThreatChange(hostile));
+        }
+
+        private void UpdateCombatState()
+        {
+            // ensure conditions for combat state change are met
+            if (ThreatManager.IsThreatened == InCombat)
+                return;
+
+            InCombat   = ThreatManager.IsThreatened;
+            Sheathed   = !inCombat;
+            StandState = inCombat ? StandState.Stand : StandState.State0;
         }
     }
 }

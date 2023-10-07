@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message
+namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerResurrectRequest)]
     public class ServerResurrectRequest : IWritable

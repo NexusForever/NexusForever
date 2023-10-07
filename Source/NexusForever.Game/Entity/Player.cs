@@ -579,7 +579,7 @@ namespace NexusForever.Game.Entity
             SendPacketsAfterAddToMap();
 
             if (!IsAlive)
-                OnDeath(null);
+                OnDeath();
 
             if (PreviousMap == null)
                 OnLogin();
@@ -733,6 +733,15 @@ namespace NexusForever.Game.Entity
                 {
                     Guid = entity.Guid,
                     Unknown1 = 1
+                });
+            }
+
+            if (entity is IUnitEntity unitEntity && unitEntity.InCombat)
+            {
+                Session.EnqueueMessageEncrypted(new ServerUnitEnteredCombat
+                {
+                    UnitId = unitEntity.Guid,
+                    InCombat = unitEntity.InCombat
                 });
             }
         }
@@ -1289,9 +1298,9 @@ namespace NexusForever.Game.Entity
                 OnResurrection(source);
         }
 
-        protected override void OnDeath(IUnitEntity killer)
+        protected override void OnDeath()
         {
-            base.OnDeath(killer);
+            base.OnDeath();
 
             Dismount();
             RemoveControlUnit();

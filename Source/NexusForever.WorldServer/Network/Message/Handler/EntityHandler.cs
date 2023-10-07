@@ -176,7 +176,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         [MessageHandler(GameMessageOpcode.ClientResurrectRequest)]
         public static void HandleClientResurrectRequest(IWorldSession session, ClientResurrectRequest _)
         {
-            session.Player.ResurrectionManager.Resurrect(session.Player.TargetGuid);
+            if (session.Player.TargetGuid == null)
+                return;
+
+            session.Player.ResurrectionManager.Resurrect(session.Player.TargetGuid.Value);
         }
     }
 }

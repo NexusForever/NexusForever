@@ -334,6 +334,7 @@ namespace NexusForever.Network.Message
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills
         ServerVehiclePassengerAdd       = 0x086F,
+        ServerEntityAggroSwitch         = 0x0876,
         ServerEntityCCStateSet          = 0x087F,
         ServerEntityDeathState          = 0x088C,
         ServerUnitEnteredCombat         = 0x089A,
@@ -343,7 +344,9 @@ namespace NexusForever.Network.Message
         ServerVehiclePassengerRemove    = 0x08C7,
         ServerUnitSetChair              = 0x08CF,
         ServerEntityVisualUpdate        = 0x0905,
-        Server0908                      = 0x0908,
+        ServerEntityTargetUnit          = 0x0908,
+        ServerEntityThreatListUpdate    = 0x0909,
+        ServerEntityThreatUpdate        = 0x090A,
         ServerVendorItemsUpdated        = 0x090B,
         ClientCostumeItemUnlock         = 0x090F,
         ServerSpellAbilityCharges       = 0x0914,

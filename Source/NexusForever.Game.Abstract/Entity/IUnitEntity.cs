@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Spell;
+﻿using NexusForever.Game.Abstract.Combat;
+using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 
@@ -12,9 +13,21 @@ namespace NexusForever.Game.Abstract.Entity
         float HitRadius { get; }
 
         /// <summary>
+        /// Guid of the <see cref="IWorldEntity"/> currently targeted.
+        /// </summary>
+        uint? TargetGuid { get; }
+
+        /// <summary>
         /// Determines whether or not this <see cref="IUnitEntity"/> is alive.
         /// </summary>
         bool IsAlive { get; }
+
+        /// <summary>
+        /// Determines whether or not this <see cref="IUnitEntity"/> is in combat.
+        /// </summary>
+        bool InCombat { get; }
+
+        public IThreatManager ThreatManager { get; }
 
         /// <summary>
         /// Add a <see cref="Property"/> modifier given a Spell4Id and <see cref="ISpellPropertyModifier"/> instance.
@@ -79,5 +92,36 @@ namespace NexusForever.Game.Abstract.Entity
         /// If the <see cref="DamageType"/> is <see cref="DamageType.Heal"/> amount is added to current health otherwise subtracted.
         /// </remarks>
         void ModifyHealth(uint amount, DamageType type, IUnitEntity source);
+
+        /// <summary>
+        /// Set target to supplied target guid.
+        /// </summary>
+        /// <remarks>
+        /// A null target will clear the current target.
+        /// </remarks>
+        void SetTarget(uint? target, uint threat = 0u);
+
+        /// <summary>
+        /// Set target to supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        /// <remarks>
+        /// A null target will clear the current target.
+        /// </remarks>
+        void SetTarget(IWorldEntity target, uint threat = 0u);
+
+        /// <summary>
+        /// Invoked when a new <see cref="IHostileEntity"/> is added to the threat list.
+        /// </summary>
+        void OnThreatAddTarget(IHostileEntity hostile);
+
+        /// <summary>
+        /// Invoked when an existing <see cref="IHostileEntity"/> is removed from the threat list.
+        /// </summary>
+        void OnThreatRemoveTarget(IHostileEntity hostile);
+
+        /// <summary>
+        /// Invoked when an existing <see cref="IHostileEntity"/> is update on the threat list.
+        /// </summary>
+        void OnThreatChange(IHostileEntity hostile);
     }
 }

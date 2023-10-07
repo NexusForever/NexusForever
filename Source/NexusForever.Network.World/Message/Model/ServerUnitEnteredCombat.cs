@@ -3,7 +3,7 @@
 namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerUnitEnteredCombat)]
-    class ServerUnitEnteredCombat : IWritable
+    public class ServerUnitEnteredCombat : IWritable
     {
         public uint UnitId { get; set; }
         public bool InCombat { get; set; }

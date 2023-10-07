@@ -19,7 +19,6 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity
 {
@@ -120,10 +119,27 @@ namespace NexusForever.Game.Entity
             set => SetStat(Stat.Sheathed, Convert.ToUInt32(value));
         }
 
+        public StandState StandState
+        {
+            get => (StandState)(GetStatInteger(Stat.StandState) ?? 0u);
+            set
+            {
+                SetStat(Stat.StandState, (uint)value);
+
+                EnqueueToVisible(new ServerEmote
+                {
+                    Guid       = Guid,
+                    StandState = value
+                });
+            }
+        }
+
         /// <summary>
-        /// Guid of the <see cref="IWorldEntity"/> currently targeted.
+        /// Collection of guids currently targeting this <see cref="IWorldEntity"/>.
         /// </summary>
-        public uint TargetGuid { get; set; }
+        public IEnumerable<uint> TargetingGuids => targetingGuids;
+
+        private readonly HashSet<uint> targetingGuids = new();
 
         /// <summary>
         /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
@@ -782,6 +798,25 @@ namespace NexusForever.Game.Entity
             IWritable message = builder.Build();
             foreach (IPlayer player in intersectedEntities.Cast<IPlayer>())
                 player.Session.EnqueueMessageEncrypted(message);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> is targeted by another <see cref="IUnitEntity"/>.
+        /// </summary>
+        /// <remarks>
+        /// While any entity can be targeted, only <see cref="IUnitEntity"/> can target.
+        /// </remarks>
+        public virtual void OnTargeted(IUnitEntity source)
+        {
+            targetingGuids.Add(source.Guid);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> is untargeted by another <see cref="IUnitEntity"/>.
+        /// </summary>
+        public virtual void OnUntargeted(IUnitEntity source)
+        {
+            targetingGuids.Remove(source.Guid);
         }
     }
 }
