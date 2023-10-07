@@ -2,8 +2,12 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerThreatListUpdate)]
-    public class ServerThreatListUpdate : IWritable
+    /// <summary>
+    /// Values from this packet are stored in a "global" threat list which is only used for the current target.
+    /// This is different from <see cref="ServerEntityThreatUpdate"/> where values are stored against the entity object in the client.
+    /// </summary>
+    [Message(GameMessageOpcode.ServerEntityThreatListUpdate)]
+    public class ServerEntityThreatListUpdate : IWritable
     {
         public uint SrcUnitId { get; set; }
         public uint[] ThreatUnitIds { get; set; } = new uint[5];

@@ -13,10 +13,18 @@ namespace NexusForever.Game.Abstract.Entity
         float HitRadius { get; }
 
         /// <summary>
+        /// Guid of the <see cref="IWorldEntity"/> currently targeted.
+        /// </summary>
+        uint? TargetGuid { get; }
+
+        /// <summary>
         /// Determines whether or not this <see cref="IUnitEntity"/> is alive.
         /// </summary>
         bool IsAlive { get; }
 
+        /// <summary>
+        /// Determines whether or not this <see cref="IUnitEntity"/> is in combat.
+        /// </summary>
         bool InCombat { get; }
 
         public IThreatManager ThreatManager { get; }
@@ -86,29 +94,34 @@ namespace NexusForever.Game.Abstract.Entity
         void ModifyHealth(uint amount, DamageType type, IUnitEntity source);
 
         /// <summary>
-        /// Invoked when this <see cref="IUnitEntity"/> is asked to select a target for an attack.
+        /// Set target to supplied target guid.
         /// </summary>
-        void SelectTarget(IEnumerable<IHostileEntity> hostiles = null);
+        /// <remarks>
+        /// A null target will clear the current target.
+        /// </remarks>
+        void SetTarget(uint? target, uint threat = 0u);
 
         /// <summary>
-        /// Invoked when <see cref="IThreatManager"/> adds a <see cref="IHostileEntity"/>.
+        /// Set target to supplied <see cref="IUnitEntity"/>.
+        /// </summary>
+        /// <remarks>
+        /// A null target will clear the current target.
+        /// </remarks>
+        void SetTarget(IWorldEntity target, uint threat = 0u);
+
+        /// <summary>
+        /// Invoked when a new <see cref="IHostileEntity"/> is added to the threat list.
         /// </summary>
         void OnThreatAddTarget(IHostileEntity hostile);
 
         /// <summary>
-        /// Invoked when <see cref="IThreatManager"/> removes a <see cref="IHostileEntity"/>.
+        /// Invoked when an existing <see cref="IHostileEntity"/> is removed from the threat list.
         /// </summary>
         void OnThreatRemoveTarget(IHostileEntity hostile);
 
         /// <summary>
-        /// Invoked when <see cref="IThreatManager"/> updates a <see cref="IHostileEntity"/>.
+        /// Invoked when an existing <see cref="IHostileEntity"/> is update on the threat list.
         /// </summary>
-        /// <param name="hostiles"></param>
-        void OnThreatChange(IEnumerable<IHostileEntity> hostiles);
-
-        /// <summary>
-        /// Invoked when this <see cref="IUnitEntity"/> combat state is changed.
-        /// </summary>
-        void OnCombatStateChange(bool inCombat);
+        void OnThreatChange(IHostileEntity hostile);
     }
 }

@@ -17,7 +17,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler
         {
             try
             {
-                var target  = session.Player.GetVisible<IWorldEntity>(session.Player.TargetGuid);
+                IWorldEntity target = null;
+                if (session.Player.TargetGuid != null)
+                    target = session.Player.GetVisible<IWorldEntity>(session.Player.TargetGuid.Value);
+
                 var context = new WorldSessionCommandContext(session, target);
                 CommandManager.Instance.HandleCommand(context, cheat.Message);
             }

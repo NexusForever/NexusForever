@@ -4,6 +4,7 @@ using System.Text;
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Combat;
+using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
@@ -93,7 +94,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                unit.ThreatManager.AddThreat(context.Invoker as IUnitEntity, threat);
+                unit.ThreatManager.UpdateThreat(context.Invoker as IUnitEntity, threat);
             }
 
             [Command(Permission.EntityThreatList, "Prints the target's threat list.", "l", "list")]
@@ -118,8 +119,11 @@ namespace NexusForever.WorldServer.Command.Handler
                 if (hostiles.Count == 0u)
                     builder.AppendLine("No threat targets.");
 
-                foreach (HostileEntity hostile in hostiles)
-                    builder.AppendLine($"{i++} | ({hostile.GetEntity(context.Invoker).Guid}) | {EntityUtility.GetName(hostile.GetEntity(context.Invoker), Language.English)} | {hostile.Threat}");
+                foreach (IHostileEntity hostile in hostiles)
+                {
+                    IUnitEntity hostileEntity = entity.GetVisible<IUnitEntity>(hostile.HatedUnitId);
+                    builder.AppendLine($"{i++} | ({hostileEntity.Guid}) | {EntityUtility.GetName(hostileEntity, Language.English)} | {hostile.Threat}");
+                }
 
                 context.SendMessage(builder.ToString());
             }
@@ -162,7 +166,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                unit.ThreatManager.RemoveTarget((uint)unitId);
+                unit.ThreatManager.RemoveHostile((uint)unitId);
             }
         }
     }

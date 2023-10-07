@@ -1,18 +1,15 @@
-﻿using NexusForever.Database.World.Model;
-using NexusForever.Game.Abstract.Combat;
+using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Combat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
-using NexusForever.Script;
 
 namespace NexusForever.Game.Entity
 {
     [DatabaseEntity(EntityType.NonPlayer)]
-    public class NonPlayer : UnitEntity, INonPlayer
+    public class NonPlayer : CreatureEntity, INonPlayer
     {
         public IVendorInfo VendorInfo { get; private set; }
 
@@ -24,7 +21,6 @@ namespace NexusForever.Game.Entity
         public override void Initialise(EntityModel model)
         {
             base.Initialise(model);
-            scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<INonPlayer>(this);
 
             if (model.EntityVendor != null)
             {
@@ -42,6 +38,12 @@ namespace NexusForever.Game.Entity
             };
         }
 
+        /// <summary>
+        /// Calculate default property value for supplied <see cref="Property"/>.
+        /// </summary>
+        /// <remarks>
+        /// Default property values are not sent to the client, they are also calculated by the client and are replaced by any property updates.
+        /// </remarks>
         protected override float CalculateDefaultProperty(Property property)
         {
             float value = base.CalculateDefaultProperty(property);
@@ -61,22 +63,6 @@ namespace NexusForever.Game.Entity
                 value *= tierEntry.UnitPropertyMultiplier[(uint)property];
 
             return value;
-        }
-
-        public override void SelectTarget(IEnumerable<IHostileEntity> hostiles = null)
-        {
-            base.SelectTarget(hostiles);
-
-            hostiles ??= ThreatManager.GetThreatList();
-
-            if (hostiles.Count() == 0)
-            {
-                SetTarget(0u);
-                return;
-            }
-
-            if (currentTargetUnitId != hostiles.First().HatedUnitId)
-                SetTarget(hostiles.First().HatedUnitId, hostiles.First().Threat);
         }
     }
 }

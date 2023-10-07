@@ -2,6 +2,10 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
+    /// <summary>
+    /// Values from this packet are handled in the same client function as <see cref="ServerEntityThreatUpdate"/>.
+    /// Additionally it will set the target id on the entity object in the client.
+    /// </summary>
     [Message(GameMessageOpcode.ServerEntityTargetUnit)]
     public class ServerEntityTargetUnit : IWritable
     {

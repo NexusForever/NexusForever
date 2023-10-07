@@ -665,7 +665,10 @@ namespace NexusForever.Game.Entity
             if (!quest.CanShare())
                 throw new QuestException($"Player {player.CharacterId} tried to share quest {questId} which can't be shared!");
 
-            IPlayer recipient = player.GetVisible<IPlayer>(player.TargetGuid);
+            if (player.TargetGuid == null)
+                throw new QuestException($"Player {player.CharacterId} tried to share quest {questId} without a target!");
+
+            IPlayer recipient = player.GetVisible<IPlayer>(player.TargetGuid.Value);
             if (recipient == null)
                 throw new QuestException($"Player {player.CharacterId} tried to share quest {questId} to an invalid player!");
 

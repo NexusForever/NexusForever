@@ -579,7 +579,7 @@ namespace NexusForever.Game.Entity
             SendPacketsAfterAddToMap();
 
             if (!IsAlive)
-                OnDeath(null);
+                OnDeath();
 
             if (PreviousMap == null)
                 OnLogin();
@@ -1298,9 +1298,9 @@ namespace NexusForever.Game.Entity
                 OnResurrection(source);
         }
 
-        protected override void OnDeath(IUnitEntity killer)
+        protected override void OnDeath()
         {
-            base.OnDeath(killer);
+            base.OnDeath();
 
             Dismount();
             RemoveControlUnit();

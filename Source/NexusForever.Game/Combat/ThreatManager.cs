@@ -1,18 +1,19 @@
 ﻿using System.Collections;
-using System.Collections.Concurrent;
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared.Game;
+using NLog;
 
 namespace NexusForever.Game.Combat
 {
     public class ThreatManager : IThreatManager
     {
-        private ConcurrentDictionary<uint /*unitId*/, IHostileEntity> hostiles = new ConcurrentDictionary<uint, IHostileEntity>();
+        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+
+        private Dictionary<uint /*unitId*/, IHostileEntity> hostiles = new();
 
         private IUnitEntity owner;
-        private UpdateTimer updateInterval = new UpdateTimer(1d);
 
         /// <summary>
         /// Initialise <see cref="IThreatManager"/> for a <see cref="IUnitEntity"/>.
@@ -23,66 +24,66 @@ namespace NexusForever.Game.Combat
         }
 
         /// <summary>
-        /// Invoked each world tick with the delta since the previous tick occured.
+        /// Returns if any <see cref="IHostileEntity"/> exists in the threat list.
         /// </summary>
-        public void Update(double lastTick)
-        {
-            if (hostiles.Count == 0u || owner is IPlayer)
-                return;
+        public bool IsThreatened => hostiles.Count > 0;
 
-            updateInterval.Update(lastTick);
-            if (updateInterval.HasElapsed)
-            {
-                SendThreatList();
-                updateInterval.Reset();
-            }
+        /// <summary>
+        /// Returns <see cref="IHostileEntity"/> for supplied target if it exists in the threat list.
+        /// </summary>
+        public IHostileEntity GetHostile(uint target)
+        {
+            return hostiles.TryGetValue(target, out IHostileEntity hostile) ? hostile : null;
+        }
+
+        /// <summary>
+        /// Return the <see cref="IHostileEntity"/> with the highest threat in the threat list.
+        /// </summary>
+        public IHostileEntity GetTopHostile()
+        {
+            return hostiles.Values.OrderByDescending(x => x.Threat).FirstOrDefault();
         }
 
         /// <summary>
         /// Add threat for the provided <see cref="IUnitEntity"/>.
         /// </summary>
-        public void AddThreat(IUnitEntity target, int threat)
+        public void UpdateThreat(IUnitEntity target, int threat)
         {
-            // TODO: Add way to pass in the Spell that was the source
-            IHostileEntity hostile = GetHostile(target);
-            if (hostile == null)
-                throw new InvalidOperationException($"Hostile target does not exist.");
-
-            DoAddThreat(hostile, threat);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="IHostileEntity"/> for the given <see cref="IUnitEntity"/>.
-        /// </summary>
-        private IHostileEntity GetHostile(IUnitEntity target)
-        {
-            if (hostiles.TryGetValue(target.Guid, out IHostileEntity hostileEntity))
-                return hostileEntity;
-
-            return CreateHostile(target);
+            if (hostiles.TryGetValue(target.Guid, out IHostileEntity hostile))
+                UpdateThreat(hostile, threat);
+            else
+                CreateHostile(target, threat);
         }
 
         /// <summary>
         /// Instantiates a <see cref="IHostileEntity"/> for the given <see cref="IUnitEntity"/>.
         /// </summary>
-        private IHostileEntity CreateHostile(IUnitEntity target)
+        private void CreateHostile(IUnitEntity target, int threat)
         {
-            IHostileEntity hostile = new HostileEntity(owner, target);
-            hostiles.TryAdd(hostile.HatedUnitId, hostile);
+            IHostileEntity hostile = new HostileEntity(target.Guid);
+            hostile.UpdateThreat(threat);
+            hostiles.Add(hostile.HatedUnitId, hostile);
 
             owner.OnThreatAddTarget(hostile);
-            hostile.GetEntity(owner).ThreatManager.AddThreat(owner, 0);
 
-            return hostile;
+            log.Trace($"Added {hostile.HatedUnitId} to threat list for {owner.Guid}.");
+            
+            // place owner on threat list of new hostile
+            if (target.ThreatManager.GetHostile(owner.Guid) == null)
+                target.ThreatManager.UpdateThreat(owner, 1);
         }
 
         /// <summary>
         /// Internal method to adjust threat for the given <see cref="IHostileEntity"/>.
         /// </summary>
-        private void DoAddThreat(IHostileEntity hostile, int threat)
+        private void UpdateThreat(IHostileEntity hostile, int threat)
         {
-            hostile.AdjustThreat(threat);
-            owner.OnThreatChange(GetThreatList());
+            hostile.UpdateThreat(threat);
+
+            if (hostile.Threat != 0u)
+                owner.OnThreatChange(hostile);
+            else
+                RemoveHostile(hostile.HatedUnitId);
         }
 
         /// <summary>
@@ -90,73 +91,89 @@ namespace NexusForever.Game.Combat
         /// </summary>
         public void ClearThreatList()
         {
-            foreach (HostileEntity hostile in hostiles.Values.ToList())
-                RemoveTarget(hostile.HatedUnitId);
+            log.Trace($"Clearing threat list for {owner.Guid}.");
 
-            hostiles.Clear();
-            owner.OnThreatChange(GetThreatList());
+            foreach (IHostileEntity hostile in hostiles.Values.ToList())
+                RemoveHostile(hostile.HatedUnitId);
         }
 
         /// <summary>
         /// Remove the target with the given unit id from this threat list, if they exist. This will alert the entity that they have been forgotten by this <see cref="IUnitEntity"/>.
         /// </summary>
-        public void RemoveTarget(uint unitId)
+        public void RemoveHostile(uint unitId)
         {
-            if (hostiles.TryRemove(unitId, out IHostileEntity hostileEntity))
+            if (!hostiles.Remove(unitId, out IHostileEntity hostileEntity))
+                return;
+
+            // despite being an update it looks like this is only sent on remove to set threat to 0
+            // might need more research to see if this needs to be sent on any threat change
+            owner.EnqueueToVisible(new ServerEntityThreatUpdate
             {
-                owner.OnThreatRemoveTarget(hostileEntity);
+                UnitId      = owner.Guid,
+                TargetId    = hostileEntity.HatedUnitId,
+                ThreatLevel = 0
+            });
 
-                // TODO: Handle the case of PvP where the only "end" would be death. Consider an "in-combat without threat" timer as a trigger, in PvP situations only.
-                hostileEntity.GetEntity(owner)?.ThreatManager.RemoveTarget(owner.Guid);
-            }
+            owner.OnThreatRemoveTarget(hostileEntity);
 
-            if (hostiles.Count == 0u)
-                ClearThreatList();
+            // TODO: Handle the case of PvP where the only "end" would be death. Consider an "in-combat without threat" timer as a trigger, in PvP situations only.
+            owner.GetVisible<IUnitEntity>(unitId)?.ThreatManager.RemoveHostile(owner.Guid);
+
+            log.Trace($"Removed hostile {hostileEntity.HatedUnitId} from {owner.Guid}'s threat list.");
         }
 
         /// <summary>
-        /// Sends <see cref="ServerThreatListUpdate"/> to all targets.
+        /// Broadcast threat list.
         /// </summary>
-        private void SendThreatList()
+        /// <remarks>
+        /// Threat list will be sent to all <see cref="IPlayer"/>s targeting owner <see cref="IUnitEntity"/>.
+        /// </remarks>
+        public void BroadcastThreatList()
         {
-            var threatUpdate = new ServerThreatListUpdate
+            ServerEntityThreatListUpdate message = BuildServerThreatListUpdate();
+            foreach (uint guid in owner.TargetingGuids)
             {
-                SrcUnitId = owner.Guid
+                IUnitEntity unit = owner.GetVisible<IUnitEntity>(guid);
+                if (unit is not IPlayer player)
+                    continue;
+
+                player.Session.EnqueueMessageEncrypted(message);
+            }
+        }
+
+        /// <summary>
+        /// Send threat list to supplied <see cref="IGameSession"/>.
+        /// </summary>
+        public void SendThreatList(IGameSession session)
+        {
+            session.EnqueueMessageEncrypted(BuildServerThreatListUpdate());
+        }
+
+        private ServerEntityThreatListUpdate BuildServerThreatListUpdate()
+        {
+            var threatUpdate = new ServerEntityThreatListUpdate
+            {
+                SrcUnitId = owner.Guid,
             };
 
-            IHostileEntity[] hostileEntities = hostiles.Values.ToArray();
-            int j = 0;
+            // TODO: should this be target plus top 4?
+            IHostileEntity[] hostileEntities = hostiles.Values
+                .OrderByDescending(h => h.Threat)
+                .Take(5)
+                .ToArray();
+
             for (uint i = 0u; i < hostileEntities.Length; i++)
             {
-                // There's a hard limit of 5 entities and their threat levels in the packet. We have to create enough of the same packet to send the entire threat list.
-                if (i != 0u && i % 5u == 0u)
-                {
-                    owner.EnqueueToVisible(threatUpdate);
-                    threatUpdate = new ServerThreatListUpdate();
-                    j = 0;
-                }
-
-                threatUpdate.ThreatUnitIds[j] = hostileEntities[i].HatedUnitId;
-                threatUpdate.ThreatLevels[j] = hostileEntities[i].Threat;
-
-                if (i == hostileEntities.Length - 1)
-                    owner.EnqueueToVisible(threatUpdate);
-
-                j++;
+                threatUpdate.ThreatUnitIds[i] = hostileEntities[i].HatedUnitId;
+                threatUpdate.ThreatLevels[i] = hostileEntities[i].Threat;
             }
-        }
 
-        /// <summary>
-        /// Returns an <see cref="IEnumerable{T}}"/> containing all <see cref="IHostileEntity"/> ordered in descending threat.
-        /// </summary>
-        public IEnumerable<IHostileEntity> GetThreatList()
-        {
-            return hostiles.Values.OrderByDescending(i => i.Threat).AsEnumerable();
+            return threatUpdate;
         }
 
         public IEnumerator<IHostileEntity> GetEnumerator()
         {
-            return GetThreatList().GetEnumerator();
+            return hostiles.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

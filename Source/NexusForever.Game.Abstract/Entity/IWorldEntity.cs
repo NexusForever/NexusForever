@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Social;
@@ -46,9 +46,9 @@ namespace NexusForever.Game.Abstract.Entity
         StandState StandState { get; set; }
 
         /// <summary>
-        /// Guid of the <see cref="IWorldEntity"/> currently targeted.
+        /// Collection of guids currently targeting this <see cref="IWorldEntity"/>.
         /// </summary>
-        uint TargetGuid { get; set; }
+        IEnumerable<uint> TargetingGuids { get; }
 
         /// <summary>
         /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
@@ -169,5 +169,18 @@ namespace NexusForever.Game.Abstract.Entity
         /// Broadcast chat message built from <see cref="IChatMessageBuilder"/> to <see cref="IPlayer"/> in supplied range.
         /// </summary>
         void Talk(IChatMessageBuilder builder, float range, IGridEntity exclude = null);
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> is targeted by another <see cref="IUnitEntity"/>.
+        /// </summary>
+        /// <remarks>
+        /// While any entity can be targeted, only <see cref="IUnitEntity"/> can target.
+        /// </remarks>
+        void OnTargeted(IUnitEntity source);
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> is untargeted by another <see cref="IUnitEntity"/>.
+        /// </summary>
+        void OnUntargeted(IUnitEntity source);
     }
 }
