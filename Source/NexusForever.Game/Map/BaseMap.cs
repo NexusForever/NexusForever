@@ -238,25 +238,28 @@ namespace NexusForever.Game.Map
         }
 
         /// <summary>
-        /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck"/>.
+        /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        public void Search(Vector3 vector, float radius, ISearchCheck check, out List<IGridEntity> intersectedEntities)
+        public IEnumerable<T> Search<T>(Vector3 vector, float radius, ISearchCheck<T> check) where T : IGridEntity
         {
             // negative radius is unlimited distance
             if (radius < 0)
-            {
-                intersectedEntities = entities.Values.ToList();
-                return;
-            }
+                foreach (T entity in entities.Values.OfType<T>().Where(check.CheckEntity))
+                    yield return entity;
 
-            intersectedEntities = new List<IGridEntity>();
             for (float z = vector.Z - radius; z < vector.Z + radius + MapDefines.GridCellSize; z += MapDefines.GridCellSize)
             {
                 for (float x = vector.X - radius; x < vector.X + radius + MapDefines.GridCellSize; x += MapDefines.GridCellSize)
                 {
                     var searchVector = new Vector3(x, 0f, z);
+
                     // don't activate new grids during search
-                    GetGrid(searchVector)?.Search(searchVector, check, intersectedEntities);
+                    IMapGrid grid = GetGrid(searchVector);
+                    if (grid == null)
+                        continue;
+
+                    foreach (T entity in grid.Search(searchVector, check))
+                        yield return entity;
                 }
             }
         }

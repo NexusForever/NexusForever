@@ -3,8 +3,6 @@ using System.Linq;
 using System.Text;
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Combat;
-using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;

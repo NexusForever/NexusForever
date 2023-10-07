@@ -55,8 +55,8 @@ namespace NexusForever.Game.Abstract.Map
         void RelocateEntity(IGridEntity entity, Vector3 vector);
 
         /// <summary>
-        /// Return all <see cref="IGridEntity"/>'s in grid that satisfy <see cref="ISearchCheck"/>.
+        /// Return all <see cref="IGridEntity"/>'s in grid that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        void Search(Vector3 position, ISearchCheck check, List<IGridEntity> intersectedEntities);
+        IEnumerable<T> Search<T>(Vector3 position, ISearchCheck<T> check) where T : IGridEntity;
     }
 }

@@ -207,11 +207,11 @@ namespace NexusForever.Game.Map
         }
 
         /// <summary>
-        /// Return all <see cref="IGridEntity"/>'s in grid that satisfy <see cref="ISearchCheck"/>.
+        /// Return all <see cref="IGridEntity"/>'s in grid that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        public void Search(Vector3 position, ISearchCheck check, List<IGridEntity> intersectedEntities)
+        public IEnumerable<T> Search<T>(Vector3 position, ISearchCheck<T> check) where T : IGridEntity
         {
-            GetCell(position).Search(check, intersectedEntities);
+            return GetCell(position).Search(check);
         }
 
         private IMapCell GetCell(Vector3 vector)

@@ -29,9 +29,9 @@ namespace NexusForever.Game.Abstract.Map
         void EnqueueRelocate(IGridEntity entity, Vector3 position);
 
         /// <summary>
-        /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck"/>.
+        /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        void Search(Vector3 vector, float radius, ISearchCheck check, out List<IGridEntity> intersectedEntities);
+        IEnumerable<T> Search<T>(Vector3 vector, float radius, ISearchCheck<T> check) where T : IGridEntity;
 
         /// <summary>
         /// Return all <see cref="IMapGrid"/>'s from <see cref="Vector3"/> in range.

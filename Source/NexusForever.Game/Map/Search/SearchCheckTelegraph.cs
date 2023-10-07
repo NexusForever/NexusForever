@@ -4,7 +4,7 @@ using NexusForever.Game.Abstract.Spell;
 
 namespace NexusForever.Game.Map.Search
 {
-    public class SearchCheckTelegraph : ISearchCheck
+    public class SearchCheckTelegraph : ISearchCheck<IUnitEntity>
     {
         private readonly ITelegraph telegraph;
         private readonly IUnitEntity caster;
@@ -15,15 +15,12 @@ namespace NexusForever.Game.Map.Search
             this.caster    = caster;
         }
 
-        public bool CheckEntity(IGridEntity entity)
+        public bool CheckEntity(IUnitEntity entity)
         {
-            if (entity is not IUnitEntity unit)
-                return false;
-
             if (entity == caster)
                 return false;
 
-            return telegraph.InsideTelegraph(entity.Position, unit.HitRadius);
+            return telegraph.InsideTelegraph(entity.Position, entity.HitRadius);
         }
     }
 }

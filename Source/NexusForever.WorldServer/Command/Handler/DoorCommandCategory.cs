@@ -18,15 +18,12 @@ namespace NexusForever.WorldServer.Command.Handler
             searchRange ??= 10f;
 
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
-            player.Map.Search(
+            IEnumerable<IDoor> doors = player.Map.Search(
                 player.Position,
                 searchRange.Value,
-                new SearchCheckRangeDoorOnly(player.Position, searchRange.Value, player),
-                out List<IGridEntity> intersectedEntities
-            );
+                new SearchCheckRange<IDoor>(player.Position, searchRange.Value));
 
-            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
-            foreach (IDoor door in intersectedEntities)
+            foreach (IDoor door in doors)
             {
                 context.SendMessage($"Trying to open door {door.Guid}");
                 door.OpenDoor();
@@ -41,15 +38,12 @@ namespace NexusForever.WorldServer.Command.Handler
             searchRange ??= 10f;
 
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
-            player.Map.Search(
+            IEnumerable<IDoor> doors = player.Map.Search(
                 player.Position,
                 searchRange.Value,
-                new SearchCheckRangeDoorOnly(player.Position, searchRange.Value, player),
-                out List<IGridEntity> intersectedEntities
-            );
+                new SearchCheckRange<IDoor>(player.Position, searchRange.Value));
 
-            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
-            foreach (IDoor door in intersectedEntities)
+            foreach (IDoor door in doors)
             {
                 context.SendMessage($"Trying to close door {door.Guid}");
                 door.CloseDoor();

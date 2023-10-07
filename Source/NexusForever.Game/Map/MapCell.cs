@@ -79,11 +79,11 @@ namespace NexusForever.Game.Map
         }
 
         /// <summary>
-        /// Return all <see cref="IGridEntity"/>'s in the <see cref="IMapCell"/> that satisfy <see cref="ISearchCheck"/>.
+        /// Return all <see cref="IGridEntity"/>'s in the <see cref="IMapCell"/> that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        public void Search(ISearchCheck check, List<IGridEntity> intersectedEntities)
+        public IEnumerable<T> Search<T>(ISearchCheck<T> check) where T : IGridEntity
         {
-            intersectedEntities.AddRange(entities.Where(check.CheckEntity));
+            return entities.OfType<T>().Where(check.CheckEntity);
         }
     }
 }

@@ -168,7 +168,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Broadcast chat message built from <see cref="IChatMessageBuilder"/> to <see cref="IPlayer"/> in supplied range.
         /// </summary>
-        void Talk(IChatMessageBuilder builder, float range, IGridEntity exclude = null);
+        void Talk(IChatMessageBuilder builder, float range, IPlayer exclude = null);
 
         /// <summary>
         /// Invoked when <see cref="IWorldEntity"/> is targeted by another <see cref="IUnitEntity"/>.

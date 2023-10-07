@@ -66,8 +66,7 @@ namespace NexusForever.Game.Spell
         /// </summary>
         public IEnumerable<IUnitEntity> GetTargets()
         {
-            Caster.Map.Search(Position, GridSearchSize(), new SearchCheckTelegraph(this, Caster), out List<IGridEntity> targets);
-            return targets.Select(t => t as IUnitEntity);
+            return Caster.Map.Search(Position, GridSearchSize(), new SearchCheckTelegraph(this, Caster));
         }
 
         /// <summary>

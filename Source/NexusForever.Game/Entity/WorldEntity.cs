@@ -784,19 +784,18 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Broadcast chat message built from <see cref="IChatMessageBuilder"/> to <see cref="IPlayer"/> in supplied range.
         /// </summary>
-        public void Talk(IChatMessageBuilder builder, float range, IGridEntity exclude = null)
+        public void Talk(IChatMessageBuilder builder, float range, IPlayer exclude = null)
         {
             if (Map == null)
                 throw new InvalidOperationException();
 
-            Map.Search(
+            IEnumerable<IPlayer> players = Map.Search(
                 Position,
                 range,
-                new SearchCheckRangePlayerOnly(Position, range, exclude),
-                out List<IGridEntity> intersectedEntities);
+                new SearchCheckRange<IPlayer>(Position, range, exclude));
 
             IWritable message = builder.Build();
-            foreach (IPlayer player in intersectedEntities.Cast<IPlayer>())
+            foreach (IPlayer player in players)
                 player.Session.EnqueueMessageEncrypted(message);
         }
 

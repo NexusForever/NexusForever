@@ -2,8 +2,8 @@
 
 namespace NexusForever.Game.Abstract.Map.Search
 {
-    public interface ISearchCheck
+    public interface ISearchCheck<T> where T : IGridEntity
     {
-        bool CheckEntity(IGridEntity entity);
+        bool CheckEntity(T entity);
     }
 }

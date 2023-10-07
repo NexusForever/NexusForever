@@ -30,8 +30,8 @@ namespace NexusForever.Game.Abstract.Map
         void RemoveEntity(IGridEntity entity);
 
         /// <summary>
-        /// Return all <see cref="IGridEntity"/>'s in the <see cref="IMapCell"/> that satisfy <see cref="ISearchCheck"/>.
+        /// Return all <see cref="IGridEntity"/>'s in the <see cref="IMapCell"/> that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        void Search(ISearchCheck check, List<IGridEntity> intersectedEntities);
+        IEnumerable<T> Search<T>(ISearchCheck<T> check) where T : IGridEntity;
     }
 }
