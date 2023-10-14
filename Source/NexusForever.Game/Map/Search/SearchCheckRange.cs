@@ -7,10 +7,10 @@ namespace NexusForever.Game.Map.Search
     public class SearchCheckRange<T> : ISearchCheck<T> where T : class, IGridEntity
     {
         private readonly Vector3 vector;
-        private readonly float radius;
+        private readonly float? radius;
         private readonly T exclude;
 
-        public SearchCheckRange(Vector3 vector, float radius, T exclude = null)
+        public SearchCheckRange(Vector3 vector, float? radius, T exclude = null)
         {
             this.vector  = vector;
             this.radius  = radius;
@@ -22,7 +22,7 @@ namespace NexusForever.Game.Map.Search
             if (exclude != null && entity == exclude)
                 return false;
 
-            return Vector3.Distance(vector, entity.Position) < radius;
+            return radius == null || Vector3.Distance(vector, entity.Position) < radius;
         }
     }
 }

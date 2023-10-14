@@ -21,7 +21,7 @@ namespace NexusForever.Game.Map
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         // housing maps have unlimited vision range.
-        public override float VisionRange { get; protected set; } = -1f;
+        public override float? VisionRange { get; protected set; } = null;
 
         private readonly Dictionary<ulong, IResidence> residences = new();
 

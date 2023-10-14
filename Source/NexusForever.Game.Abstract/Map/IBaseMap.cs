@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Static.Entity;
@@ -13,7 +13,7 @@ namespace NexusForever.Game.Abstract.Map
         /// <summary>
         /// Distance between a <see cref="IPlayer"/> and a <see cref="IGridEntity"/> before the entity can be seen.
         /// </summary>
-        float VisionRange { get; }
+        float? VisionRange { get; }
 
         WorldEntry Entry { get; }
         MapFile File { get; }
@@ -31,12 +31,12 @@ namespace NexusForever.Game.Abstract.Map
         /// <summary>
         /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        IEnumerable<T> Search<T>(Vector3 vector, float radius, ISearchCheck<T> check) where T : IGridEntity;
+        IEnumerable<T> Search<T>(Vector3 vector, float? radius, ISearchCheck<T> check) where T : IGridEntity;
 
         /// <summary>
         /// Return all <see cref="IMapGrid"/>'s from <see cref="Vector3"/> in range.
         /// </summary>
-        void GridSearch(Vector3 vector, float radius, out List<IMapGrid> intersectedGrids);
+        void GridSearch(Vector3 vector, float? radius, out List<IMapGrid> intersectedGrids);
 
         /// <summary>
         /// Return <see cref="IGridEntity"/> by guid.

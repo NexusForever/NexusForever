@@ -31,7 +31,7 @@ namespace NexusForever.Game.Map
         /// <summary>
         /// Distance between a <see cref="IPlayer"/> and a <see cref="IGridEntity"/> before the entity can be seen.
         /// </summary>
-        public virtual float VisionRange { get; protected set; } = DefaultVisionRange;
+        public virtual float? VisionRange { get; protected set; } = DefaultVisionRange;
 
         public WorldEntry Entry { get; private set; }
         public MapFile File { get; private set; }
@@ -240,16 +240,19 @@ namespace NexusForever.Game.Map
         /// <summary>
         /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck{T}"/>.
         /// </summary>
-        public IEnumerable<T> Search<T>(Vector3 vector, float radius, ISearchCheck<T> check) where T : IGridEntity
+        public IEnumerable<T> Search<T>(Vector3 vector, float? radius, ISearchCheck<T> check) where T : IGridEntity
         {
-            // negative radius is unlimited distance
-            if (radius < 0)
+            // no radius is unlimited distance
+            if (radius == null)
+            {
                 foreach (T entity in entities.Values.OfType<T>().Where(check.CheckEntity))
                     yield return entity;
+                yield break;
+            }
 
-            for (float z = vector.Z - radius; z < vector.Z + radius + MapDefines.GridCellSize; z += MapDefines.GridCellSize)
+            for (float z = vector.Z - radius.Value; z < vector.Z + radius.Value + MapDefines.GridCellSize; z += MapDefines.GridCellSize)
             {
-                for (float x = vector.X - radius; x < vector.X + radius + MapDefines.GridCellSize; x += MapDefines.GridCellSize)
+                for (float x = vector.X - radius.Value; x < vector.X + radius.Value + MapDefines.GridCellSize; x += MapDefines.GridCellSize)
                 {
                     var searchVector = new Vector3(x, 0f, z);
 
@@ -267,19 +270,19 @@ namespace NexusForever.Game.Map
         /// <summary>
         /// Return all <see cref="IMapGrid"/>'s from <see cref="Vector3"/> in range.
         /// </summary>
-        public void GridSearch(Vector3 vector, float radius, out List<IMapGrid> intersectedGrids)
+        public void GridSearch(Vector3 vector, float? radius, out List<IMapGrid> intersectedGrids)
         {
             // negative radius is unlimited distance
-            if (radius < 0)
+            if (radius == null)
             {
                 intersectedGrids = GetActiveGrids().ToList();
                 return;
             }
 
             intersectedGrids = new List<IMapGrid>();
-            for (float z = vector.Z - radius; z < vector.Z + radius + MapDefines.GridSize; z += MapDefines.GridSize)
+            for (float z = vector.Z - radius.Value; z < vector.Z + radius.Value + MapDefines.GridSize; z += MapDefines.GridSize)
             {
-                for (float x = vector.X - radius; x < vector.X + radius + MapDefines.GridSize; x += MapDefines.GridSize)
+                for (float x = vector.X - radius.Value; x < vector.X + radius.Value + MapDefines.GridSize; x += MapDefines.GridSize)
                 {
                     IMapGrid grid = GetGrid(new Vector3(x, 0f, z));
                     if (grid != null)
