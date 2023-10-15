@@ -326,6 +326,7 @@ namespace NexusForever.Game.Map
 
             IDecor decor = residence.DecorCreate(entry);
             decor.Type = update.DecorType;
+            decor.PlotIndex = update.PlotIndex;
 
             if (update.ColourShiftId != decor.ColourShiftId)
             {
