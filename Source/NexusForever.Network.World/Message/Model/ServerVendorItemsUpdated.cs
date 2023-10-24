@@ -19,17 +19,24 @@ namespace NexusForever.Network.World.Message.Model
 
         public class Item : IWritable
         {
-            public class UnknownItemStructure : IWritable
+            public class ItemExtraCost : IWritable
             {
-                public byte Unknown0 { get; set; }
-                public uint Unknown1 { get; set; }
-                public uint Unknown2 { get; set; }
+                public enum ItemExtraCostType : byte
+                {
+                    None = 0,
+                    Item = 1,
+                    Currency = 2
+                }
+                
+                public ItemExtraCostType ExtraCostType { get; set; }
+                public uint Quantity { get; set; }
+                public uint ItemOrCurrencyId { get; set; }
 
                 public void Write(GamePacketWriter writer)
                 {
-                    writer.Write(Unknown0, 3);
-                    writer.Write(Unknown1);
-                    writer.Write(Unknown2);
+                    writer.Write((byte)ExtraCostType, 3);
+                    writer.Write(Quantity);
+                    writer.Write(ItemOrCurrencyId);
                 }
             }
 
@@ -44,7 +51,8 @@ namespace NexusForever.Network.World.Message.Model
             public uint Unknown8 { get; set; }
             public ulong Unknown9 { get; set; }
             public uint UnknownA { get; set; }
-            public UnknownItemStructure[] UnknownB { get; set; }
+            public ItemExtraCost ExtraCost1 { get; set; }
+            public ItemExtraCost ExtraCost2 { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -59,9 +67,8 @@ namespace NexusForever.Network.World.Message.Model
                 writer.Write(Unknown8);
                 writer.Write(Unknown9);
                 writer.Write(UnknownA);
-
-                for (uint i = 0u; i < 2; i++)
-                    UnknownB[i].Write(writer);
+                ExtraCost1.Write(writer);
+                ExtraCost2.Write(writer);
             }
         }
 

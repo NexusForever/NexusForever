@@ -51,11 +51,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                     ItemId = item.ItemId,
                     CategoryIndex = item.CategoryIndex,
                     Unknown6 = 0,
-                    UnknownB = new[]
-                    {
-                        new ServerVendorItemsUpdated.Item.UnknownItemStructure(),
-                        new ServerVendorItemsUpdated.Item.UnknownItemStructure()
-                    }
+                    ExtraCost1 = new ServerVendorItemsUpdated.Item.ItemExtraCost()
+                        {
+                            ExtraCostType = (ServerVendorItemsUpdated.Item.ItemExtraCost.ItemExtraCostType)item.ExtraCost1Type,
+                            Quantity = item.ExtraCost1Quantity,
+                            ItemOrCurrencyId = item.ExtraCost1ItemOrCurrencyId
+                        },
+                    ExtraCost2 = new ServerVendorItemsUpdated.Item.ItemExtraCost()
+                        {
+                            ExtraCostType = (ServerVendorItemsUpdated.Item.ItemExtraCost.ItemExtraCostType)item.ExtraCost2Type,
+                            Quantity = item.ExtraCost2Quantity,
+                            ItemOrCurrencyId = item.ExtraCost2ItemOrCurrencyId
+                        }
                 });
             }
             session.EnqueueMessageEncrypted(serverVendor);
@@ -79,25 +86,64 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (info == null)
                 return;
 
+            var useExtraCosts = (vendorItem.ExtraCost1Type + vendorItem.ExtraCost2Type) > 0;
             // do all sanity checks before modifying currency
             var currencyChanges = new List<(CurrencyType CurrencyTypeId, ulong CurrencyAmount)>();
-            for (int i = 0; i < itemEntry.CurrencyTypeId.Length; i++)
+
+            if (!useExtraCosts)
             {
-                CurrencyType currencyId = (CurrencyType)itemEntry.CurrencyTypeId[i];
-                if (currencyId == CurrencyType.None)
-                    continue;
+                for (int i = 0; i < itemEntry.CurrencyTypeId.Length; i++)
+                {
+                    CurrencyType currencyId = (CurrencyType)itemEntry.CurrencyTypeId[i];
+                    if (currencyId == CurrencyType.None)
+                        continue;
 
-                ulong currencyAmount = (ulong)(itemEntry.CurrencyAmount[i] * costMultiplier);
-                if (!session.Player.CurrencyManager.CanAfford(currencyId, currencyAmount))
-                    return;
+                    ulong currencyAmount = (ulong)(itemEntry.CurrencyAmount[i] * costMultiplier);
+                    if (!session.Player.CurrencyManager.CanAfford(currencyId, currencyAmount))
+                        return;
 
-                currencyChanges.Add((currencyId, currencyAmount));
+                    currencyChanges.Add((currencyId, currencyAmount));
+                }
+                
+                // TODO Calculate values appropriately.
+                // clientPurchaseMod was confirmed by in-game vendor values. Need to find GameTable it's associated with.
+                ulong amount = (ulong)Math.Ceiling(info.GetVendorBuyAmount(0) * costMultiplier);
+                currencyChanges.Add((CurrencyType.Credits, amount));
             }
+            else // useExtraCosts
+            {
+                if (vendorItem.ExtraCost1Type == (byte)ServerVendorItemsUpdated.Item.ItemExtraCost.ItemExtraCostType.Currency)
+                {
+                    if (!session.Player.CurrencyManager.CanAfford((CurrencyType)vendorItem.ExtraCost1ItemOrCurrencyId,
+                            vendorItem.ExtraCost1Quantity))
+                        return;
+                    currencyChanges.Add(((CurrencyType)vendorItem.ExtraCost1ItemOrCurrencyId, vendorItem.ExtraCost1Quantity));
+                }
 
-            // TODO Calculate values appropriately.
-            // clientPurchaseMod was confirmed by in-game vendor values. Need to find GameTable it's associated with.
-            ulong amount = (ulong)Math.Ceiling(info.GetVendorBuyAmount(0) * costMultiplier);
-            currencyChanges.Add((CurrencyType.Credits, amount));
+                if (vendorItem.ExtraCost2Type == (byte)ServerVendorItemsUpdated.Item.ItemExtraCost.ItemExtraCostType.Currency)
+                {
+                    if (!session.Player.CurrencyManager.CanAfford((CurrencyType)vendorItem.ExtraCost2ItemOrCurrencyId,
+                            vendorItem.ExtraCost2Quantity))
+                        return;
+                    currencyChanges.Add(((CurrencyType)vendorItem.ExtraCost2ItemOrCurrencyId, vendorItem.ExtraCost2Quantity));
+                }
+
+                if (vendorItem.ExtraCost1Type ==
+                    (byte)ServerVendorItemsUpdated.Item.ItemExtraCost.ItemExtraCostType.Item)
+                {
+                    // TODO: Lacks a sanity check
+                    session.Player.Inventory.ItemDelete(vendorItem.ExtraCost1ItemOrCurrencyId,
+                        vendorItem.ExtraCost1Quantity, ItemUpdateReason.Vendor);
+                }
+                
+                if (vendorItem.ExtraCost2Type ==
+                    (byte)ServerVendorItemsUpdated.Item.ItemExtraCost.ItemExtraCostType.Item)
+                {
+                    // TODO: Lacks a sanity check
+                    session.Player.Inventory.ItemDelete(vendorItem.ExtraCost2ItemOrCurrencyId,
+                        vendorItem.ExtraCost2Quantity, ItemUpdateReason.Vendor);
+                }
+            }
 
             foreach ((CurrencyType currencyTypeId, ulong currencyAmount) in currencyChanges)
                 session.Player.CurrencyManager.CurrencySubtractAmount(currencyTypeId, currencyAmount);

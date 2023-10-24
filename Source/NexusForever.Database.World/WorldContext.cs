@@ -307,6 +307,36 @@ namespace NexusForever.Database.World
                     .HasColumnName("itemId")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost1Type)
+                    .HasColumnName("extraCost1Type")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost1Quantity)
+                    .HasColumnName("extraCost1Quantity")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost1ItemOrCurrencyId)
+                    .HasColumnName("extraCost1ItemOrCurrencyId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost2Type)
+                    .HasColumnName("extraCost2Type")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost2Quantity)
+                    .HasColumnName("extraCost2Quantity")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost2ItemOrCurrencyId)
+                    .HasColumnName("extraCost2ItemOrCurrencyId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
 
                 entity.HasOne(d => d.Entity)
                     .WithMany(p => p.EntityVendorItem)

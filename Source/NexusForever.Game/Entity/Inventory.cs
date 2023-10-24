@@ -557,7 +557,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Delete a supplied amount of an <see cref="IItem"/>.
         /// </summary>
-        public void ItemDelete(uint itemId, uint count = 1u)
+        public void ItemDelete(uint itemId, uint count = 1u, ItemUpdateReason reason = ItemUpdateReason.Loot)
         {
             IBag bag = GetBag(InventoryLocation.Inventory);
             foreach (IItem item in bag.Where(i => i.Id == itemId))
@@ -569,7 +569,7 @@ namespace NexusForever.Game.Entity
                 }
                 else
                 {
-                    ItemDelete(bag, item, ItemUpdateReason.Loot);
+                    ItemDelete(bag, item, reason);
                     count -= item.StackCount;
                 }
 

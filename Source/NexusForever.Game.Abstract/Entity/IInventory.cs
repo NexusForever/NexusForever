@@ -102,7 +102,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Delete a supplied amount of an item.
         /// </summary>
-        void ItemDelete(uint itemId, uint count = 1);
+        void ItemDelete(uint itemId, uint count = 1, ItemUpdateReason reason = ItemUpdateReason.Loot);
 
         /// <summary>
         /// Remove <see cref="IItem"/> from this player's inventory without deleting the item from the DB
