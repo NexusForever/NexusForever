@@ -196,7 +196,7 @@ namespace NexusForever.Game.Entity
                 throw new ArgumentOutOfRangeException();
 
             if (spells.ContainsKey(spell4BaseId))
-                throw new InvalidOperationException();
+                return;
 
             IItem item = player.Inventory.SpellCreate(spellBaseInfo.Entry, ItemUpdateReason.NoReason);
 
@@ -212,6 +212,19 @@ namespace NexusForever.Game.Entity
             }
 
             spells.Add(spellBaseInfo.Entry.Id, unlockedSpell);
+        }
+
+        public void RemoveSpell(uint spell4BaseId)
+        {
+            ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
+            if (spellBaseInfo == null)
+                throw new ArgumentOutOfRangeException();
+            // FIXME: The spells aren't added on load so sometimes this is not true!
+            // if (!spells.ContainsKey(spell4BaseId))
+            //     throw new InvalidOperationException();
+
+            spells.Remove(spell4BaseId);
+            player.RemoveSpellProperties(spellBaseInfo.GetSpellInfo(0).Entry.Id);
         }
 
         /// <summary>

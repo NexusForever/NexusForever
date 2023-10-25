@@ -2,6 +2,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Character;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -35,6 +36,7 @@ namespace NexusForever.Game.Spell
         public byte Index { get; }
         public byte TierPoints { get; private set; }
         public byte AmpPoints { get; private set; }
+        public IPlayer Player { get; set; }
 
         /// <summary>
         /// Collection of <see cref="IActionSetShortcut"/> contained in the <see cref="IActionSet"/>.
@@ -56,6 +58,7 @@ namespace NexusForever.Game.Spell
         /// </summary>
         public ActionSet(byte index, IPlayer player)
         {
+            Player     = player;
             Owner      = player.CharacterId;
             Index      = index;
             TierPoints = MaxTierPoints;
@@ -259,6 +262,13 @@ namespace NexusForever.Game.Spell
             saveMask |= ActionSetSaveMask.ActionSetAmps;
 
             log.Trace($"Added AMP {id} to action set {Index}.");
+
+            var spellEntry = GameTableManager.Instance.Spell4.GetEntry(entry.Spell4IdAugment);
+            // Get the current player
+            Player.SpellManager.AddSpell(spellEntry.Spell4BaseIdBaseSpell);
+            
+            ICharacterSpell characterSpell = Player.SpellManager.GetSpell(spellEntry.Spell4BaseIdBaseSpell);
+            characterSpell.Cast();
         }
 
         /// <summary>
@@ -329,6 +339,9 @@ namespace NexusForever.Game.Spell
             }
 
             log.Trace($"Removed AMP {amp.Entry.Id} from action set {Index}.");
+            
+            var spellEntry = GameTableManager.Instance.Spell4.GetEntry(amp.Entry.Spell4IdAugment);
+            Player.SpellManager.RemoveSpell(spellEntry.Spell4BaseIdBaseSpell);
         }
 
         /// <summary>
