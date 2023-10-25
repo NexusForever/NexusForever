@@ -264,9 +264,7 @@ namespace NexusForever.Game.Spell
             log.Trace($"Added AMP {id} to action set {Index}.");
 
             var spellEntry = GameTableManager.Instance.Spell4.GetEntry(entry.Spell4IdAugment);
-            // Get the current player
             Player.SpellManager.AddSpell(spellEntry.Spell4BaseIdBaseSpell);
-            
             ICharacterSpell characterSpell = Player.SpellManager.GetSpell(spellEntry.Spell4BaseIdBaseSpell);
             characterSpell.Cast();
         }
