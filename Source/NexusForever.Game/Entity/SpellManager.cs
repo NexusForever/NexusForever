@@ -79,8 +79,8 @@ namespace NexusForever.Game.Entity
                     actionSets[i].AddShortcut(shortcutModel);
 
                 foreach (CharacterActionSetAmpModel ampModel in model.ActionSetAmp
-                    .Where(c => c.SpecIndex == i))
-                    actionSets[i].AddAmp(ampModel);
+                             .Where(c => c.SpecIndex == i))
+                    actionSets[i].AddAmp(ampModel); 
             }
 
             activeActionSet = model.ActiveSpec;
@@ -365,10 +365,41 @@ namespace NexusForever.Game.Entity
             if (value == ActiveActionSet)
                 return SpecError.NoChange;
 
+            IActionSet oldActionSet = GetActionSet(ActiveActionSet);
+            IActionSet newActionSet = GetActionSet(value);
+            
+            // Compute a difference list between old and new. We want to find all the ones in "old" that aren't in "new"
+            var ampsToRemove = oldActionSet.Amps
+                .Where(oldAmp => newActionSet.Amps.All(newAmp => newAmp.Entry.Spell4IdAugment != oldAmp.Entry.Spell4IdAugment))
+                .ToList();
+            
+            foreach (IActionSetAmp oldAmp in ampsToRemove)
+            {
+                var spellEntry = GameTableManager.Instance.Spell4.GetEntry(oldAmp.Entry.Spell4IdAugment);
+                RemoveSpell(spellEntry.Spell4BaseIdBaseSpell);
+            }
+            
             // TODO: handle other errors
-
             ActiveActionSet = value;
+            
+            // Apply all new AMPs
+            ApplyAmps();
             return SpecError.Ok;
+        }
+
+        public void ApplyAmps()
+        {
+            IActionSet actionSet = GetActionSet(ActiveActionSet);
+            foreach (IActionSetAmp actionSetAmp in actionSet.Amps)
+            {
+                var spellEntry = GameTableManager.Instance.Spell4.GetEntry(actionSetAmp.Entry.Spell4IdAugment);
+                if (!spells.ContainsKey(spellEntry.Spell4BaseIdBaseSpell)) // We don't reapply amps we already learned
+                {
+                    AddSpell(spellEntry.Spell4BaseIdBaseSpell);
+                    ICharacterSpell characterSpell = GetSpell(spellEntry.Spell4BaseIdBaseSpell);
+                    characterSpell.Cast();
+                }
+            }
         }
 
         public void SendInitialPackets()

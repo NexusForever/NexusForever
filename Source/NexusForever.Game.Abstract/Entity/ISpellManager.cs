@@ -66,6 +66,8 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         SpecError SetActiveActionSet(byte value);
 
+        void ApplyAmps();
+
         void SendInitialPackets();
         void SendServerAbilityPoints();
     }
