@@ -5,7 +5,7 @@
 A server emulator for WildStar written in C# that supports build 16042.
 
 ### Getting Started
-[Server Setup Guide](https://github.com/Rawaho/NexusForever/wiki/Installation)
+[Server Setup Guide](https://github.com/NexusForever/NexusForever/wiki/Installation)
 
 ### Requirements
  * Visual Studio 2019 (.NET 5 and C# 9 support required)
