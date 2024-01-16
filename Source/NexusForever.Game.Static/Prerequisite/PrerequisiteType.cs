@@ -11,11 +11,13 @@
         Reputation      = 5,
         Quest           = 6,
         Achievement     = 7,
+        ItemProficiency = 8,
+        Gender          = 10,
         Prerequisite    = 11,
         Path            = 52,
         Vital           = 73,
         SpellObj        = 129,
-		    /// <summary>
+		/// <summary>
         /// Checks for an ObjectId, which is a hashed petflair id.
         /// </summary>
         HoverboardFlair = 190,
