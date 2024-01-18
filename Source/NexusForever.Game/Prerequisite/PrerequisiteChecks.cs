@@ -122,7 +122,7 @@ namespace NexusForever.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.ItemProficiency)]
-        private static bool PrerequisiteCheckItemProficiency(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckItemProficiency(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             switch (comparison)
             {
@@ -137,7 +137,7 @@ namespace NexusForever.Game.Prerequisite
         }
 
         [PrerequisiteCheck(PrerequisiteType.Gender)]
-        private static bool PrerequisiteCheckGender(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        private static bool PrerequisiteCheckGender(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             switch (comparison)
             {
@@ -151,20 +151,6 @@ namespace NexusForever.Game.Prerequisite
             }
         }
 
-        [PrerequisiteCheck(PrerequisiteType.Prerequisite)]
-        private static bool PrerequisiteCheckPrerequisite(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
-        {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.NotEqual:
-                    return Instance.Meets(player, objectId) == false;
-                case PrerequisiteComparison.Equal:
-                    return Instance.Meets(player, objectId) == true;
-                default:
-                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Prerequisite}!");
-                    return false;
-            }
-        }
 
         [PrerequisiteCheck(PrerequisiteType.SpellBaseId)]
         private static bool PrerequisiteCheckSpellBaseId(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
