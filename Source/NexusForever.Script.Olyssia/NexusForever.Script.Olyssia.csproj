@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="xcopy &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)NexusForever.WorldServer\bin\$(Configuration)\$(TargetFramework)\$(TargetName).dll&quot;" />
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)NexusForever.WorldServer\bin\$(Configuration)\$(TargetFramework)\$(TargetName).dll&quot;" />
     <Exec Condition="'$(OS)' != 'Windows_NT'" Command="mkdir -p &quot;$(SolutionDir)NexusForever.WorldServer/bin/$(Configuration)/$(TargetFramework)&quot;" /> 
     <Exec Condition="'$(OS)' != 'Windows_NT'" Command="cp &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(SolutionDir)NexusForever.WorldServer/bin/$(Configuration)/$(TargetFramework)/$(TargetName).dll&quot;" />  </Target>
 
