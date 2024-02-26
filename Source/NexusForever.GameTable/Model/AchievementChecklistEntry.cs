@@ -2,12 +2,12 @@ namespace NexusForever.GameTable.Model
 {
     public class AchievementChecklistEntry
     {
-        public uint Id;
-        public uint AchievementId;
-        public uint Bit;
-        public uint ObjectId;
-        public uint ObjectIdAlt;
-        public uint PrerequisiteId;
-        public uint PrerequisiteIdAlt;
+        public uint Id { get; set; }
+        public uint AchievementId { get; set; }
+        public uint Bit { get; set; }
+        public uint ObjectId { get; set; }
+        public uint ObjectIdAlt { get; set; }
+        public uint PrerequisiteId { get; set; }
+        public uint PrerequisiteIdAlt { get; set; }
     }
 }
