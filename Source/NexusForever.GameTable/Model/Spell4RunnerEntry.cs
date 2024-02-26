@@ -2,12 +2,12 @@ namespace NexusForever.GameTable.Model
 {
     public class Spell4RunnerEntry
     {
-        public uint Id;
-        public string SpriteName;
-        public float RedTint;
-        public float GreenTint;
-        public float BlueTint;
-        public float AlphaTint;
-        public float Rate;
+        public uint Id { get; set; }
+        public string SpriteName { get; set; }
+        public float RedTint { get; set; }
+        public float GreenTint { get; set; }
+        public float BlueTint { get; set; }
+        public float AlphaTint { get; set; }
+        public float Rate { get; set; }
     }
 }

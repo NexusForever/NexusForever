@@ -2,16 +2,16 @@ namespace NexusForever.GameTable.Model
 {
     public class GameFormulaEntry
     {
-        public uint Id;
-        public uint Dataint0;
-        public uint Dataint01;
-        public uint Dataint02;
-        public uint Dataint03;
-        public uint Dataint04;
-        public float Datafloat0;
-        public float Datafloat01;
-        public float Datafloat02;
-        public float Datafloat03;
-        public float Datafloat04;
+        public uint Id { get; set; }
+        public uint Dataint0 { get; set; }
+        public uint Dataint01 { get; set; }
+        public uint Dataint02 { get; set; }
+        public uint Dataint03 { get; set; }
+        public uint Dataint04 { get; set; }
+        public float Datafloat0 { get; set; }
+        public float Datafloat01 { get; set; }
+        public float Datafloat02 { get; set; }
+        public float Datafloat03 { get; set; }
+        public float Datafloat04 { get; set; }
     }
 }

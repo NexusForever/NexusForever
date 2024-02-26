@@ -2,10 +2,10 @@ namespace NexusForever.GameTable.Model
 {
     public class TradeskillMaterialEntry
     {
-        public uint Id;
-        public uint Item2IdStatRevolution;
-        public uint Item2Id;
-        public uint DisplayIndex;
-        public uint TradeskillMaterialCategoryId;
+        public uint Id { get; set; }
+        public uint Item2IdStatRevolution { get; set; }
+        public uint Item2Id { get; set; }
+        public uint DisplayIndex { get; set; }
+        public uint TradeskillMaterialCategoryId { get; set; }
     }
 }

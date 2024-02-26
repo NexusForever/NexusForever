@@ -2,10 +2,10 @@ namespace NexusForever.GameTable.Model
 {
     public class PvPRatingFloorEntry
     {
-        public uint Id;
-        public uint Flags;
-        public uint PvpRatingTypeEnum;
-        public uint FloorValue;
-        public uint LocalizedTextIdLabel;
+        public uint Id { get; set; }
+        public uint Flags { get; set; }
+        public uint PvpRatingTypeEnum { get; set; }
+        public uint FloorValue { get; set; }
+        public uint LocalizedTextIdLabel { get; set; }
     }
 }

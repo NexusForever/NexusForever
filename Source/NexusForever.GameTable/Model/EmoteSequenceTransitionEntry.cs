@@ -2,10 +2,10 @@ namespace NexusForever.GameTable.Model
 {
     public class EmoteSequenceTransitionEntry
     {
-        public uint Id;
-        public uint EmotesIdTo;
-        public uint StandStateFrom;
-        public uint EmotesIdFrom;
-        public uint ModelSequenceId;
+        public uint Id { get; set; }
+        public uint EmotesIdTo { get; set; }
+        public uint StandStateFrom { get; set; }
+        public uint EmotesIdFrom { get; set; }
+        public uint ModelSequenceId { get; set; }
     }
 }

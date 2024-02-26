@@ -2,28 +2,28 @@ namespace NexusForever.GameTable.Model
 {
     public class PublicEventObjectiveEntry
     {
-        public uint Id;
-        public uint PublicEventId;
-        public uint PublicEventObjectiveFlags;
-        public uint PublicEventObjectiveTypeSpecificFlags;
-        public uint WorldLocation2Id;
-        public uint PublicEventTeamId;
-        public uint LocalizedTextId;
-        public uint LocalizedTextIdOtherTeam;
-        public uint LocalizedTextIdShort;
-        public uint LocalizedTextIdOtherTeamShort;
-        public uint PublicEventObjectiveTypeEnum;
-        public uint Count;
-        public uint ObjectId;
-        public uint FailureTimeMs;
-        public uint TargetGroupIdRewardPane;
-        public uint PublicEventObjectiveCategoryEnum;
-        public uint LiveEventIdCounter;
-        public uint PublicEventObjectiveIdParent;
-        public uint QuestDirectionId;
-        public uint MedalPointValue;
-        public uint LocalizedTextIdParticipantAdd;
-        public uint LocalizedTextIdStart;
-        public uint DisplayOrder;
+        public uint Id { get; set; }
+        public uint PublicEventId { get; set; }
+        public uint PublicEventObjectiveFlags { get; set; }
+        public uint PublicEventObjectiveTypeSpecificFlags { get; set; }
+        public uint WorldLocation2Id { get; set; }
+        public uint PublicEventTeamId { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public uint LocalizedTextIdOtherTeam { get; set; }
+        public uint LocalizedTextIdShort { get; set; }
+        public uint LocalizedTextIdOtherTeamShort { get; set; }
+        public uint PublicEventObjectiveTypeEnum { get; set; }
+        public uint Count { get; set; }
+        public uint ObjectId { get; set; }
+        public uint FailureTimeMs { get; set; }
+        public uint TargetGroupIdRewardPane { get; set; }
+        public uint PublicEventObjectiveCategoryEnum { get; set; }
+        public uint LiveEventIdCounter { get; set; }
+        public uint PublicEventObjectiveIdParent { get; set; }
+        public uint QuestDirectionId { get; set; }
+        public uint MedalPointValue { get; set; }
+        public uint LocalizedTextIdParticipantAdd { get; set; }
+        public uint LocalizedTextIdStart { get; set; }
+        public uint DisplayOrder { get; set; }
     }
 }

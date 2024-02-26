@@ -2,7 +2,7 @@ namespace NexusForever.GameTable.Model
 {
     public class PeriodicQuestSetCategoryEntry
     {
-        public uint Id;
-        public uint PeriodicSetsOffered;
+        public uint Id { get; set; }
+        public uint PeriodicSetsOffered { get; set; }
     }
 }

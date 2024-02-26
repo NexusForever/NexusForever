@@ -2,12 +2,12 @@ namespace NexusForever.GameTable.Model
 {
     public class MapZonePOIEntry
     {
-        public uint Id;
-        public uint MapZoneId;
-        public uint Pos0;
-        public uint Pos1;
-        public uint Pos2;
-        public uint LocalizedTextId;
-        public uint MapZoneSpriteId;
+        public uint Id { get; set; }
+        public uint MapZoneId { get; set; }
+        public uint Pos0 { get; set; }
+        public uint Pos1 { get; set; }
+        public uint Pos2 { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public uint MapZoneSpriteId { get; set; }
     }
 }

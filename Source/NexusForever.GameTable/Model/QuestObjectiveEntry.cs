@@ -2,19 +2,19 @@ namespace NexusForever.GameTable.Model
 {
     public class QuestObjectiveEntry
     {
-        public uint Id;
-        public uint Type;
-        public uint Flags;
-        public uint Data;
-        public uint Count;
-        public uint LocalizedTextIdFull;
-        public uint WorldLocationsIdIndicator00;
-        public uint WorldLocationsIdIndicator01;
-        public uint WorldLocationsIdIndicator02;
-        public uint WorldLocationsIdIndicator03;
-        public uint MaxTimeAllowedMS;
-        public uint LocalizedTextIdShort;
-        public uint TargetGroupIdRewardPane;
-        public uint QuestDirectionId;
+        public uint Id { get; set; }
+        public uint Type { get; set; }
+        public uint Flags { get; set; }
+        public uint Data { get; set; }
+        public uint Count { get; set; }
+        public uint LocalizedTextIdFull { get; set; }
+        public uint WorldLocationsIdIndicator00 { get; set; }
+        public uint WorldLocationsIdIndicator01 { get; set; }
+        public uint WorldLocationsIdIndicator02 { get; set; }
+        public uint WorldLocationsIdIndicator03 { get; set; }
+        public uint MaxTimeAllowedMS { get; set; }
+        public uint LocalizedTextIdShort { get; set; }
+        public uint TargetGroupIdRewardPane { get; set; }
+        public uint QuestDirectionId { get; set; }
     }
 }

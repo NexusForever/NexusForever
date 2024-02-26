@@ -2,31 +2,31 @@ namespace NexusForever.GameTable.Model
 {
     public class EmotesEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdNoArgToAll;
-        public uint LocalizedTextIdNoArgToSelf;
-        public uint NoArgAnim;
-        public uint LocalizedTextIdArgToAll;
-        public uint LocalizedTextIdArgToArg;
-        public uint LocalizedTextIdArgToSelf;
-        public uint ArgAnim;
-        public uint LocalizedTextIdSelfToAll;
-        public uint LocalizedTextIdSelfToSelf;
-        public uint SelfAnim;
-        public bool SheathWeapons;
-        public bool TurnToFace;
-        public bool TextReplaceable;
-        public bool ChangesStandState;
-        public uint StandState;
-        public uint LocalizedTextIdCommand;
-        public uint LocalizedTextIdNotFoundToAll;
-        public uint LocalizedTextIdNotFoundToSelf;
-        public uint NotFoundAnim;
-        public uint TextReplaceAnim;
-        public uint ModelSequenceIdStandState;
-        public uint VisualEffectId;
-        public uint Flags;
-        public string UniversalCommand00;
-        public string UniversalCommand01;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdNoArgToAll { get; set; }
+        public uint LocalizedTextIdNoArgToSelf { get; set; }
+        public uint NoArgAnim { get; set; }
+        public uint LocalizedTextIdArgToAll { get; set; }
+        public uint LocalizedTextIdArgToArg { get; set; }
+        public uint LocalizedTextIdArgToSelf { get; set; }
+        public uint ArgAnim { get; set; }
+        public uint LocalizedTextIdSelfToAll { get; set; }
+        public uint LocalizedTextIdSelfToSelf { get; set; }
+        public uint SelfAnim { get; set; }
+        public bool SheathWeapons { get; set; }
+        public bool TurnToFace { get; set; }
+        public bool TextReplaceable { get; set; }
+        public bool ChangesStandState { get; set; }
+        public uint StandState { get; set; }
+        public uint LocalizedTextIdCommand { get; set; }
+        public uint LocalizedTextIdNotFoundToAll { get; set; }
+        public uint LocalizedTextIdNotFoundToSelf { get; set; }
+        public uint NotFoundAnim { get; set; }
+        public uint TextReplaceAnim { get; set; }
+        public uint ModelSequenceIdStandState { get; set; }
+        public uint VisualEffectId { get; set; }
+        public uint Flags { get; set; }
+        public string UniversalCommand00 { get; set; }
+        public string UniversalCommand01 { get; set; }
     }
 }

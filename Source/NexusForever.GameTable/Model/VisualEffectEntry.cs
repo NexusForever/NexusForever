@@ -2,43 +2,43 @@ namespace NexusForever.GameTable.Model
 {
     public class VisualEffectEntry
     {
-        public uint Id;
-        public uint VisualType;
-        public uint StartDelay;
-        public uint Duration;
-        public uint ModelItemSlot;
-        public uint ModelItemCostumeSide;
-        public string ModelAssetPath;
-        public uint ModelAttachmentId;
-        public uint ModelSequencePriority;
-        public uint ModelSequenceIdTarget00;
-        public uint ModelSequenceIdTarget01;
-        public uint ModelSequenceIdTarget02;
-        public float ModelScale;
-        public float ModelRotationX;
-        public float ModelRotationY;
-        public float ModelRotationZ;
-        public float Data00;
-        public float Data01;
-        public float Data02;
-        public float Data03;
-        public float Data04;
-        public uint Flags;
-        public uint SoundEventId00;
-        public uint SoundEventId01;
-        public uint SoundEventId02;
-        public uint SoundEventId03;
-        public uint SoundEventId04;
-        public uint SoundEventId05;
-        public uint SoundEventOffset00;
-        public uint SoundEventOffset01;
-        public uint SoundEventOffset02;
-        public uint SoundEventOffset03;
-        public uint SoundEventOffset04;
-        public uint SoundEventOffset05;
-        public uint SoundEventIdStop;
-        public uint SoundZoneKitId;
-        public uint PrerequisiteId;
-        public uint ParticleDiffuseColor;
+        public uint Id { get; set; }
+        public uint VisualType { get; set; }
+        public uint StartDelay { get; set; }
+        public uint Duration { get; set; }
+        public uint ModelItemSlot { get; set; }
+        public uint ModelItemCostumeSide { get; set; }
+        public string ModelAssetPath { get; set; }
+        public uint ModelAttachmentId { get; set; }
+        public uint ModelSequencePriority { get; set; }
+        public uint ModelSequenceIdTarget00 { get; set; }
+        public uint ModelSequenceIdTarget01 { get; set; }
+        public uint ModelSequenceIdTarget02 { get; set; }
+        public float ModelScale { get; set; }
+        public float ModelRotationX { get; set; }
+        public float ModelRotationY { get; set; }
+        public float ModelRotationZ { get; set; }
+        public float Data00 { get; set; }
+        public float Data01 { get; set; }
+        public float Data02 { get; set; }
+        public float Data03 { get; set; }
+        public float Data04 { get; set; }
+        public uint Flags { get; set; }
+        public uint SoundEventId00 { get; set; }
+        public uint SoundEventId01 { get; set; }
+        public uint SoundEventId02 { get; set; }
+        public uint SoundEventId03 { get; set; }
+        public uint SoundEventId04 { get; set; }
+        public uint SoundEventId05 { get; set; }
+        public uint SoundEventOffset00 { get; set; }
+        public uint SoundEventOffset01 { get; set; }
+        public uint SoundEventOffset02 { get; set; }
+        public uint SoundEventOffset03 { get; set; }
+        public uint SoundEventOffset04 { get; set; }
+        public uint SoundEventOffset05 { get; set; }
+        public uint SoundEventIdStop { get; set; }
+        public uint SoundZoneKitId { get; set; }
+        public uint PrerequisiteId { get; set; }
+        public uint ParticleDiffuseColor { get; set; }
     }
 }

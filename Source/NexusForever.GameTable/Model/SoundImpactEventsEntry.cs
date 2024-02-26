@@ -2,10 +2,10 @@ namespace NexusForever.GameTable.Model
 {
     public class SoundImpactEventsEntry
     {
-        public uint Id;
-        public uint Origin;
-        public uint Target;
-        public uint Qualifier;
-        public uint Event;
+        public uint Id { get; set; }
+        public uint Origin { get; set; }
+        public uint Target { get; set; }
+        public uint Qualifier { get; set; }
+        public uint Event { get; set; }
     }
 }

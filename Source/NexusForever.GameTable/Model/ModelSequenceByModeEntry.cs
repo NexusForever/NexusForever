@@ -2,10 +2,10 @@ namespace NexusForever.GameTable.Model
 {
     public class ModelSequenceByModeEntry
     {
-        public uint Id;
-        public uint ModelSequenceId;
-        public uint ModelSequenceIdSwim;
-        public uint ModelSequenceIdHover;
-        public uint ModelSequenceIdFly;
+        public uint Id { get; set; }
+        public uint ModelSequenceId { get; set; }
+        public uint ModelSequenceIdSwim { get; set; }
+        public uint ModelSequenceIdHover { get; set; }
+        public uint ModelSequenceIdFly { get; set; }
     }
 }

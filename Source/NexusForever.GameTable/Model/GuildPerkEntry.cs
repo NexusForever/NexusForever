@@ -2,17 +2,17 @@ namespace NexusForever.GameTable.Model
 {
     public class GuildPerkEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdTitle;
-        public uint LocalizedTextIdDescription;
-        public string LuaSprite;
-        public string LuaName;
-        public uint PurchaseInfluenceCost;
-        public uint ActivateInfluenceCost;
-        public uint Spell4IdActivate;
-        public uint GuildPerkIdRequired00;
-        public uint GuildPerkIdRequired01;
-        public uint GuildPerkIdRequired02;
-        public uint AchievementIdRequired;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdTitle { get; set; }
+        public uint LocalizedTextIdDescription { get; set; }
+        public string LuaSprite { get; set; }
+        public string LuaName { get; set; }
+        public uint PurchaseInfluenceCost { get; set; }
+        public uint ActivateInfluenceCost { get; set; }
+        public uint Spell4IdActivate { get; set; }
+        public uint GuildPerkIdRequired00 { get; set; }
+        public uint GuildPerkIdRequired01 { get; set; }
+        public uint GuildPerkIdRequired02 { get; set; }
+        public uint AchievementIdRequired { get; set; }
     }
 }

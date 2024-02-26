@@ -2,11 +2,11 @@ namespace NexusForever.GameTable.Model
 {
     public class WordFilterEntry
     {
-        public uint Id;
-        public string Filter;
-        public uint UserTextFilterClassEnum;
-        public uint DeploymentRegionEnum;
-        public uint LanguageId;
-        public uint WordFilterTypeEnum;
+        public uint Id { get; set; }
+        public string Filter { get; set; }
+        public uint UserTextFilterClassEnum { get; set; }
+        public uint DeploymentRegionEnum { get; set; }
+        public uint LanguageId { get; set; }
+        public uint WordFilterTypeEnum { get; set; }
     }
 }

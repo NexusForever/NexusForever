@@ -2,105 +2,105 @@ namespace NexusForever.GameTable.Model
 {
     public class ReplaceableMaterialInfoEntry
     {
-        public uint Id;
-        public uint Type;
-        public uint Flags;
-        public uint Op;
-        public uint Blend;
-        public uint ShaderNum00;
-        public uint ShaderNum01;
-        public uint NumLayers;
-        public uint ColorIndex01;
-        public uint ColorIndex00;
-        public uint ColorIndex02;
-        public uint ColorIndex03;
-        public uint NormalIndex00;
-        public uint NormalIndex01;
-        public uint NormalIndex02;
-        public uint NormalIndex03;
-        public uint HeightSource00;
-        public uint HeightSource01;
-        public uint HeightSource02;
-        public uint HeightSource03;
-        public uint OpacitySource00;
-        public uint OpacitySource01;
-        public uint OpacitySource02;
-        public uint OpacitySource03;
-        public uint GlossSource00;
-        public uint GlossSource01;
-        public uint GlossSource02;
-        public uint GlossSource03;
-        public uint GlowSource00;
-        public uint GlowSource01;
-        public uint GlowSource02;
-        public uint GlowSource03;
-        public uint ShaderSource00;
-        public uint ShaderSource01;
-        public uint ShaderSource02;
-        public uint ShaderSource03;
-        public float HeightValue00;
-        public float HeightValue01;
-        public float HeightValue02;
-        public float HeightValue03;
-        public float OpacityValue00;
-        public float OpacityValue01;
-        public float OpacityValue02;
-        public float OpacityValue03;
-        public float GlossValue00;
-        public float GlossValue01;
-        public float GlossValue02;
-        public float GlossValue03;
-        public float GlowValue00;
-        public float GlowValue01;
-        public float GlowValue02;
-        public float GlowValue03;
-        public float ShaderValue00;
-        public float ShaderValue01;
-        public float ShaderValue02;
-        public float ShaderValue03;
-        public float HeightScale00;
-        public float HeightScale01;
-        public float HeightScale02;
-        public float HeightScale03;
-        public float HeightOffset00;
-        public float HeightOffset01;
-        public float HeightOffset02;
-        public float HeightOffset03;
-        public float ParallaxScale00;
-        public float ParallaxScale01;
-        public float ParallaxScale02;
-        public float ParallaxScale03;
-        public float ParallaxOffset00;
-        public float ParallaxOffset01;
-        public float ParallaxOffset02;
-        public float ParallaxOffset03;
-        public uint TextureTiles00;
-        public uint TextureTiles01;
-        public uint TextureTiles02;
-        public uint TextureTiles03;
-        public float ColorModX00;
-        public float ColorModX01;
-        public float ColorModX02;
-        public float ColorModX03;
-        public float ColorModY00;
-        public float ColorModY01;
-        public float ColorModY02;
-        public float ColorModY03;
-        public float ColorModZ00;
-        public float ColorModZ01;
-        public float ColorModZ02;
-        public float ColorModZ03;
-        public uint MaterialTypeId00;
-        public uint MaterialTypeId01;
-        public uint MaterialTypeId02;
-        public uint MaterialTypeId03;
-        public string ColorTexture00;
-        public string ColorTexture01;
-        public string ColorTexture02;
-        public string ColorTexture03;
-        public string NormalTexture00;
-        public string NormalTexture01;
-        public string NormalTexture02;
-        public string NormalTexture03;
+        public uint Id { get; set; }
+        public uint Type { get; set; }
+        public uint Flags { get; set; }
+        public uint Op { get; set; }
+        public uint Blend { get; set; }
+        public uint ShaderNum00 { get; set; }
+        public uint ShaderNum01 { get; set; }
+        public uint NumLayers { get; set; }
+        public uint ColorIndex01 { get; set; }
+        public uint ColorIndex00 { get; set; }
+        public uint ColorIndex02 { get; set; }
+        public uint ColorIndex03 { get; set; }
+        public uint NormalIndex00 { get; set; }
+        public uint NormalIndex01 { get; set; }
+        public uint NormalIndex02 { get; set; }
+        public uint NormalIndex03 { get; set; }
+        public uint HeightSource00 { get; set; }
+        public uint HeightSource01 { get; set; }
+        public uint HeightSource02 { get; set; }
+        public uint HeightSource03 { get; set; }
+        public uint OpacitySource00 { get; set; }
+        public uint OpacitySource01 { get; set; }
+        public uint OpacitySource02 { get; set; }
+        public uint OpacitySource03 { get; set; }
+        public uint GlossSource00 { get; set; }
+        public uint GlossSource01 { get; set; }
+        public uint GlossSource02 { get; set; }
+        public uint GlossSource03 { get; set; }
+        public uint GlowSource00 { get; set; }
+        public uint GlowSource01 { get; set; }
+        public uint GlowSource02 { get; set; }
+        public uint GlowSource03 { get; set; }
+        public uint ShaderSource00 { get; set; }
+        public uint ShaderSource01 { get; set; }
+        public uint ShaderSource02 { get; set; }
+        public uint ShaderSource03 { get; set; }
+        public float HeightValue00 { get; set; }
+        public float HeightValue01 { get; set; }
+        public float HeightValue02 { get; set; }
+        public float HeightValue03 { get; set; }
+        public float OpacityValue00 { get; set; }
+        public float OpacityValue01 { get; set; }
+        public float OpacityValue02 { get; set; }
+        public float OpacityValue03 { get; set; }
+        public float GlossValue00 { get; set; }
+        public float GlossValue01 { get; set; }
+        public float GlossValue02 { get; set; }
+        public float GlossValue03 { get; set; }
+        public float GlowValue00 { get; set; }
+        public float GlowValue01 { get; set; }
+        public float GlowValue02 { get; set; }
+        public float GlowValue03 { get; set; }
+        public float ShaderValue00 { get; set; }
+        public float ShaderValue01 { get; set; }
+        public float ShaderValue02 { get; set; }
+        public float ShaderValue03 { get; set; }
+        public float HeightScale00 { get; set; }
+        public float HeightScale01 { get; set; }
+        public float HeightScale02 { get; set; }
+        public float HeightScale03 { get; set; }
+        public float HeightOffset00 { get; set; }
+        public float HeightOffset01 { get; set; }
+        public float HeightOffset02 { get; set; }
+        public float HeightOffset03 { get; set; }
+        public float ParallaxScale00 { get; set; }
+        public float ParallaxScale01 { get; set; }
+        public float ParallaxScale02 { get; set; }
+        public float ParallaxScale03 { get; set; }
+        public float ParallaxOffset00 { get; set; }
+        public float ParallaxOffset01 { get; set; }
+        public float ParallaxOffset02 { get; set; }
+        public float ParallaxOffset03 { get; set; }
+        public uint TextureTiles00 { get; set; }
+        public uint TextureTiles01 { get; set; }
+        public uint TextureTiles02 { get; set; }
+        public uint TextureTiles03 { get; set; }
+        public float ColorModX00 { get; set; }
+        public float ColorModX01 { get; set; }
+        public float ColorModX02 { get; set; }
+        public float ColorModX03 { get; set; }
+        public float ColorModY00 { get; set; }
+        public float ColorModY01 { get; set; }
+        public float ColorModY02 { get; set; }
+        public float ColorModY03 { get; set; }
+        public float ColorModZ00 { get; set; }
+        public float ColorModZ01 { get; set; }
+        public float ColorModZ02 { get; set; }
+        public float ColorModZ03 { get; set; }
+        public uint MaterialTypeId00 { get; set; }
+        public uint MaterialTypeId01 { get; set; }
+        public uint MaterialTypeId02 { get; set; }
+        public uint MaterialTypeId03 { get; set; }
+        public string ColorTexture00 { get; set; }
+        public string ColorTexture01 { get; set; }
+        public string ColorTexture02 { get; set; }
+        public string ColorTexture03 { get; set; }
+        public string NormalTexture00 { get; set; }
+        public string NormalTexture01 { get; set; }
+        public string NormalTexture02 { get; set; }
+        public string NormalTexture03 { get; set; }
     }
 }

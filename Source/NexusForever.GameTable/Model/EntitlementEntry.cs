@@ -2,13 +2,13 @@ namespace NexusForever.GameTable.Model
 {
     public class EntitlementEntry
     {
-        public uint Id;
-        public uint MaxCount;
-        public uint Flags;
-        public uint Spell4IdPersistentBuff;
-        public uint CharacterTitleId;
-        public uint LocalizedTextIdName;
-        public uint LocalizedTextIdDescription;
-        public string ButtonIcon;
+        public uint Id { get; set; }
+        public uint MaxCount { get; set; }
+        public uint Flags { get; set; }
+        public uint Spell4IdPersistentBuff { get; set; }
+        public uint CharacterTitleId { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint LocalizedTextIdDescription { get; set; }
+        public string ButtonIcon { get; set; }
     }
 }

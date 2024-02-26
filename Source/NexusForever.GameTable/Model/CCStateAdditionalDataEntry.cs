@@ -2,17 +2,17 @@ namespace NexusForever.GameTable.Model
 {
     public class CCStateAdditionalDataEntry
     {
-        public uint Id;
-        public uint CcStatesId;
-        public uint DataInt00;
-        public uint DataInt01;
-        public uint DataInt02;
-        public uint DataInt03;
-        public uint DataInt04;
-        public float DataFloat00;
-        public float DataFloat01;
-        public float DataFloat02;
-        public float DataFloat03;
-        public float DataFloat04;
+        public uint Id { get; set; }
+        public uint CcStatesId { get; set; }
+        public uint DataInt00 { get; set; }
+        public uint DataInt01 { get; set; }
+        public uint DataInt02 { get; set; }
+        public uint DataInt03 { get; set; }
+        public uint DataInt04 { get; set; }
+        public float DataFloat00 { get; set; }
+        public float DataFloat01 { get; set; }
+        public float DataFloat02 { get; set; }
+        public float DataFloat03 { get; set; }
+        public float DataFloat04 { get; set; }
     }
 }

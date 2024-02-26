@@ -2,11 +2,11 @@ namespace NexusForever.GameTable.Model
 {
     public class ItemSetBonusEntry
     {
-        public uint Id;
-        public uint RequiredPower;
-        public uint UnitProperty2Id;
-        public float Scalar;
-        public float Offset;
-        public uint Spell4Id;
+        public uint Id { get; set; }
+        public uint RequiredPower { get; set; }
+        public uint UnitProperty2Id { get; set; }
+        public float Scalar { get; set; }
+        public float Offset { get; set; }
+        public uint Spell4Id { get; set; }
     }
 }

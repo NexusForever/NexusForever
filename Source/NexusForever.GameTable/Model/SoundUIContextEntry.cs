@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class SoundUIContextEntry
     {
-        public uint Id;
-        public string LuaVariableName;
-        public uint SoundEventId;
+        public uint Id { get; set; }
+        public string LuaVariableName { get; set; }
+        public uint SoundEventId { get; set; }
     }
 }

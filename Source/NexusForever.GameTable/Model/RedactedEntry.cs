@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class RedactedEntry
     {
-        public uint Id;
-        public string IdString;
-        public uint LocalizedTextIdName;
-        public uint MtxCategoryIdParent;
+        public uint Id { get; set; }
+        public string IdString { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint MtxCategoryIdParent { get; set; }
     }
 }

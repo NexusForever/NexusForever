@@ -2,27 +2,27 @@ namespace NexusForever.GameTable.Model
 {
     public class HousingBuildEntry
     {
-        public uint Id;
-        public string Description;
-        public string AssetPath;
-        public uint ConstructionEffectsId;
-        public float BuildPreDelayTimeMS;
-        public float BuildPostDelayTimeMS;
-        public float BuildTime00;
-        public float BuildTime01;
-        public float BuildTime02;
-        public float BuildTime03;
-        public float BuildTime04;
-        public float BuildTime05;
-        public float BuildTime06;
-        public float BuildTime07;
-        public uint ModelSequenceId00;
-        public uint ModelSequenceId01;
-        public uint ModelSequenceId02;
-        public uint ModelSequenceId03;
-        public uint ModelSequenceId04;
-        public uint ModelSequenceId05;
-        public uint ModelSequenceId06;
-        public uint ModelSequenceId07;
+        public uint Id { get; set; }
+        public string Description { get; set; }
+        public string AssetPath { get; set; }
+        public uint ConstructionEffectsId { get; set; }
+        public float BuildPreDelayTimeMS { get; set; }
+        public float BuildPostDelayTimeMS { get; set; }
+        public float BuildTime00 { get; set; }
+        public float BuildTime01 { get; set; }
+        public float BuildTime02 { get; set; }
+        public float BuildTime03 { get; set; }
+        public float BuildTime04 { get; set; }
+        public float BuildTime05 { get; set; }
+        public float BuildTime06 { get; set; }
+        public float BuildTime07 { get; set; }
+        public uint ModelSequenceId00 { get; set; }
+        public uint ModelSequenceId01 { get; set; }
+        public uint ModelSequenceId02 { get; set; }
+        public uint ModelSequenceId03 { get; set; }
+        public uint ModelSequenceId04 { get; set; }
+        public uint ModelSequenceId05 { get; set; }
+        public uint ModelSequenceId06 { get; set; }
+        public uint ModelSequenceId07 { get; set; }
     }
 }

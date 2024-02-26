@@ -2,30 +2,30 @@ namespace NexusForever.GameTable.Model
 {
     public class ActionBarShortcutSetEntry
     {
-        public uint Id;
-        public uint ShortcutType00;
-        public uint ShortcutType01;
-        public uint ShortcutType02;
-        public uint ShortcutType03;
-        public uint ShortcutType04;
-        public uint ShortcutType05;
-        public uint ShortcutType06;
-        public uint ShortcutType07;
-        public uint ShortcutType08;
-        public uint ShortcutType09;
-        public uint ShortcutType10;
-        public uint ShortcutType11;
-        public uint ObjectId00;
-        public uint ObjectId01;
-        public uint ObjectId02;
-        public uint ObjectId03;
-        public uint ObjectId04;
-        public uint ObjectId05;
-        public uint ObjectId06;
-        public uint ObjectId07;
-        public uint ObjectId08;
-        public uint ObjectId09;
-        public uint ObjectId10;
-        public uint ObjectId11;
+        public uint Id { get; set; }
+        public uint ShortcutType00 { get; set; }
+        public uint ShortcutType01 { get; set; }
+        public uint ShortcutType02 { get; set; }
+        public uint ShortcutType03 { get; set; }
+        public uint ShortcutType04 { get; set; }
+        public uint ShortcutType05 { get; set; }
+        public uint ShortcutType06 { get; set; }
+        public uint ShortcutType07 { get; set; }
+        public uint ShortcutType08 { get; set; }
+        public uint ShortcutType09 { get; set; }
+        public uint ShortcutType10 { get; set; }
+        public uint ShortcutType11 { get; set; }
+        public uint ObjectId00 { get; set; }
+        public uint ObjectId01 { get; set; }
+        public uint ObjectId02 { get; set; }
+        public uint ObjectId03 { get; set; }
+        public uint ObjectId04 { get; set; }
+        public uint ObjectId05 { get; set; }
+        public uint ObjectId06 { get; set; }
+        public uint ObjectId07 { get; set; }
+        public uint ObjectId08 { get; set; }
+        public uint ObjectId09 { get; set; }
+        public uint ObjectId10 { get; set; }
+        public uint ObjectId11 { get; set; }
     }
 }

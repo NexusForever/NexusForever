@@ -2,23 +2,23 @@ namespace NexusForever.GameTable.Model
 {
     public class WorldWaterWakeEntry
     {
-        public uint Id;
-        public uint Flags;
-        public string ColorTexture;
-        public string NormalTexture;
-        public string DistortionTexture;
-        public uint DurationMin;
-        public uint DurationMax;
-        public float ScaleStart;
-        public float ScaleEnd;
-        public float AlphaStart;
-        public float AlphaEnd;
-        public float DistortionWeight;
-        public float DistortionScaleStart;
-        public float DistortionScaleEnd;
-        public float DistortionSpeedU;
-        public float DistortionSpeedV;
-        public float PositionOffsetX;
-        public float PositionOffsetY;
+        public uint Id { get; set; }
+        public uint Flags { get; set; }
+        public string ColorTexture { get; set; }
+        public string NormalTexture { get; set; }
+        public string DistortionTexture { get; set; }
+        public uint DurationMin { get; set; }
+        public uint DurationMax { get; set; }
+        public float ScaleStart { get; set; }
+        public float ScaleEnd { get; set; }
+        public float AlphaStart { get; set; }
+        public float AlphaEnd { get; set; }
+        public float DistortionWeight { get; set; }
+        public float DistortionScaleStart { get; set; }
+        public float DistortionScaleEnd { get; set; }
+        public float DistortionSpeedU { get; set; }
+        public float DistortionSpeedV { get; set; }
+        public float PositionOffsetX { get; set; }
+        public float PositionOffsetY { get; set; }
     }
 }

@@ -2,53 +2,53 @@ namespace NexusForever.GameTable.Model
 {
     public class HousingPlugItemEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdName;
-        public uint HousingPlotTypeId;
-        public uint LocalizedTextIdTooltip;
-        public uint WorldIdPlug00;
-        public uint WorldIdPlug01;
-        public uint WorldIdPlug02;
-        public uint WorldIdPlug03;
-        public uint Flags;
-        public uint HousingResourceIdProvided00;
-        public uint HousingResourceIdProvided01;
-        public uint HousingResourceIdProvided02;
-        public uint HousingResourceIdProvided03;
-        public uint HousingResourceIdProvided04;
-        public uint HousingResourceIdPrerequisite00;
-        public uint HousingResourceIdPrerequisite01;
-        public uint HousingResourceIdPrerequisite02;
-        public uint HousingFeatureTypeFlags;
-        public uint HousingContributionInfoId00;
-        public uint HousingContributionInfoId01;
-        public uint HousingContributionInfoId02;
-        public uint HousingContributionInfoId03;
-        public uint HousingContributionInfoId04;
-        public uint HousingPlugItemIdNextUpgrade;
-        public uint LocalizedTextIdPrereqTooltip00;
-        public uint LocalizedTextIdPrereqTooltip01;
-        public uint LocalizedTextIdPrereqTooltip02;
-        public uint PrerequisiteId00;
-        public uint PrerequisiteId01;
-        public uint PrerequisiteId02;
-        public uint PrerequisiteIdUnlock;
-        public uint HousingBuildId;
-        public uint HousingUpkeepTypeEnum;
-        public uint UpkeepCharges;
-        public float UpkeepTime;
-        public uint HousingContributionInfoIdUpkeepCost00;
-        public uint HousingContributionInfoIdUpkeepCost01;
-        public uint HousingContributionInfoIdUpkeepCost02;
-        public uint HousingContributionInfoIdUpkeepCost03;
-        public uint HousingContributionInfoIdUpkeepCost04;
-        public uint GameFormulaIdHousingBuildBonus;
-        public string ScreenshotSprite00;
-        public string ScreenshotSprite01;
-        public string ScreenshotSprite02;
-        public string ScreenshotSprite03;
-        public string ScreenshotSprite04;
-        public uint HousingPlugTypeEnum;
-        public uint AccountItemIdUpsell;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint HousingPlotTypeId { get; set; }
+        public uint LocalizedTextIdTooltip { get; set; }
+        public uint WorldIdPlug00 { get; set; }
+        public uint WorldIdPlug01 { get; set; }
+        public uint WorldIdPlug02 { get; set; }
+        public uint WorldIdPlug03 { get; set; }
+        public uint Flags { get; set; }
+        public uint HousingResourceIdProvided00 { get; set; }
+        public uint HousingResourceIdProvided01 { get; set; }
+        public uint HousingResourceIdProvided02 { get; set; }
+        public uint HousingResourceIdProvided03 { get; set; }
+        public uint HousingResourceIdProvided04 { get; set; }
+        public uint HousingResourceIdPrerequisite00 { get; set; }
+        public uint HousingResourceIdPrerequisite01 { get; set; }
+        public uint HousingResourceIdPrerequisite02 { get; set; }
+        public uint HousingFeatureTypeFlags { get; set; }
+        public uint HousingContributionInfoId00 { get; set; }
+        public uint HousingContributionInfoId01 { get; set; }
+        public uint HousingContributionInfoId02 { get; set; }
+        public uint HousingContributionInfoId03 { get; set; }
+        public uint HousingContributionInfoId04 { get; set; }
+        public uint HousingPlugItemIdNextUpgrade { get; set; }
+        public uint LocalizedTextIdPrereqTooltip00 { get; set; }
+        public uint LocalizedTextIdPrereqTooltip01 { get; set; }
+        public uint LocalizedTextIdPrereqTooltip02 { get; set; }
+        public uint PrerequisiteId00 { get; set; }
+        public uint PrerequisiteId01 { get; set; }
+        public uint PrerequisiteId02 { get; set; }
+        public uint PrerequisiteIdUnlock { get; set; }
+        public uint HousingBuildId { get; set; }
+        public uint HousingUpkeepTypeEnum { get; set; }
+        public uint UpkeepCharges { get; set; }
+        public float UpkeepTime { get; set; }
+        public uint HousingContributionInfoIdUpkeepCost00 { get; set; }
+        public uint HousingContributionInfoIdUpkeepCost01 { get; set; }
+        public uint HousingContributionInfoIdUpkeepCost02 { get; set; }
+        public uint HousingContributionInfoIdUpkeepCost03 { get; set; }
+        public uint HousingContributionInfoIdUpkeepCost04 { get; set; }
+        public uint GameFormulaIdHousingBuildBonus { get; set; }
+        public string ScreenshotSprite00 { get; set; }
+        public string ScreenshotSprite01 { get; set; }
+        public string ScreenshotSprite02 { get; set; }
+        public string ScreenshotSprite03 { get; set; }
+        public string ScreenshotSprite04 { get; set; }
+        public uint HousingPlugTypeEnum { get; set; }
+        public uint AccountItemIdUpsell { get; set; }
     }
 }

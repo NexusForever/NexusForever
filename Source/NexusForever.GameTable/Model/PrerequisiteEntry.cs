@@ -2,16 +2,16 @@ namespace NexusForever.GameTable.Model
 {
     public class PrerequisiteEntry
     {
-        public uint Id;
-        public uint Flags;
+        public uint Id { get; set; }
+        public uint Flags { get; set; }
         [GameTableFieldArray(3u)]
-        public uint[] PrerequisiteTypeId;
+        public uint[] PrerequisiteTypeId { get; set; }
         [GameTableFieldArray(3u)]
-        public uint[] PrerequisiteComparisonId;
+        public uint[] PrerequisiteComparisonId { get; set; }
         [GameTableFieldArray(3u)]
-        public uint[] ObjectId;
+        public uint[] ObjectId { get; set; }
         [GameTableFieldArray(3u)]
-        public uint[] Value;
-        public uint LocalizedTextIdFailure;
+        public uint[] Value { get; set; }
+        public uint LocalizedTextIdFailure { get; set; }
     }
 }

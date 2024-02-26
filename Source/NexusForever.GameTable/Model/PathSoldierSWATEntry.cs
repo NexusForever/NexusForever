@@ -2,10 +2,10 @@ namespace NexusForever.GameTable.Model
 {
     public class PathSoldierSWATEntry
     {
-        public uint Id;
-        public uint Creature2Id;
-        public uint TargetGroupId;
-        public uint Count;
-        public uint VirtualItemIdDisplay;
+        public uint Id { get; set; }
+        public uint Creature2Id { get; set; }
+        public uint TargetGroupId { get; set; }
+        public uint Count { get; set; }
+        public uint VirtualItemIdDisplay { get; set; }
     }
 }

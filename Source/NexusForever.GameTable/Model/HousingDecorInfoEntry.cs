@@ -2,21 +2,21 @@ namespace NexusForever.GameTable.Model
 {
     public class HousingDecorInfoEntry
     {
-        public uint Id;
-        public uint HousingDecorTypeId;
-        public uint HookTypeId;
-        public uint LocalizedTextIdName;
-        public uint Flags;
-        public uint HookAssetId;
-        public uint Cost;
-        public uint CostCurrencyTypeId;
-        public uint Creature2IdActiveProp;
-        public uint PrerequisiteIdUnlock;
-        public uint Spell4IdInteriorBuff;
-        public uint HousingDecorLimitCategoryId;
-        public string AltPreviewAsset;
-        public string AltEditAsset;
-        public float MinScale;
-        public float MaxScale;
+        public uint Id { get; set; }
+        public uint HousingDecorTypeId { get; set; }
+        public uint HookTypeId { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint Flags { get; set; }
+        public uint HookAssetId { get; set; }
+        public uint Cost { get; set; }
+        public uint CostCurrencyTypeId { get; set; }
+        public uint Creature2IdActiveProp { get; set; }
+        public uint PrerequisiteIdUnlock { get; set; }
+        public uint Spell4IdInteriorBuff { get; set; }
+        public uint HousingDecorLimitCategoryId { get; set; }
+        public string AltPreviewAsset { get; set; }
+        public string AltEditAsset { get; set; }
+        public float MinScale { get; set; }
+        public float MaxScale { get; set; }
     }
 }

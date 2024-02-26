@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class RandomTextLineEntry
     {
-        public uint Id;
-        public uint LocalizedTextId;
-        public uint RandomTextLineSetId;
+        public uint Id { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public uint RandomTextLineSetId { get; set; }
     }
 }

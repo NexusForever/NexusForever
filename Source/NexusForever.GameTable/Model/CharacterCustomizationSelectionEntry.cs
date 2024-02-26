@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class CharacterCustomizationSelectionEntry
     {
-        public uint Id;
-        public uint CharacterCustomizationLabelId;
-        public uint Value;
-        public ulong Cost;
+        public uint Id { get; set; }
+        public uint CharacterCustomizationLabelId { get; set; }
+        public uint Value { get; set; }
+        public ulong Cost { get; set; }
     }
 }

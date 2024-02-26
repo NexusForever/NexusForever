@@ -2,18 +2,18 @@ namespace NexusForever.GameTable.Model
 {
     public class TradeskillAchievementRewardEntry
     {
-        public uint Id;
-        public uint AchievementId;
-        public uint Faction2Id;
-        public uint FactionIdAmount;
-        public uint TalentPoints;
-        public uint TradeSkillSchematicId00;
-        public uint TradeSkillSchematicId01;
-        public uint TradeSkillSchematicId02;
-        public uint TradeSkillSchematicId03;
-        public uint TradeSkillSchematicId04;
-        public uint TradeSkillSchematicId05;
-        public uint TradeSkillSchematicId06;
-        public uint TradeSkillSchematicId07;
+        public uint Id { get; set; }
+        public uint AchievementId { get; set; }
+        public uint Faction2Id { get; set; }
+        public uint FactionIdAmount { get; set; }
+        public uint TalentPoints { get; set; }
+        public uint TradeSkillSchematicId00 { get; set; }
+        public uint TradeSkillSchematicId01 { get; set; }
+        public uint TradeSkillSchematicId02 { get; set; }
+        public uint TradeSkillSchematicId03 { get; set; }
+        public uint TradeSkillSchematicId04 { get; set; }
+        public uint TradeSkillSchematicId05 { get; set; }
+        public uint TradeSkillSchematicId06 { get; set; }
+        public uint TradeSkillSchematicId07 { get; set; }
     }
 }

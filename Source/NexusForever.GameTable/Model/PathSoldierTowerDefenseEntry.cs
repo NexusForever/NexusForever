@@ -2,14 +2,14 @@ namespace NexusForever.GameTable.Model
 {
     public class PathSoldierTowerDefenseEntry
     {
-        public uint Id;
-        public uint PathSoldierEventId;
-        public uint BuildCost;
-        public uint LocalizedTextIdName;
-        public uint WorldLocation2IdDisplay;
-        public uint TowerDefenseBuildType;
-        public uint Spell4Id;
-        public uint SoldierTowerDefenseFlags;
-        public uint SoldierTowerDefenseImprovementType;
+        public uint Id { get; set; }
+        public uint PathSoldierEventId { get; set; }
+        public uint BuildCost { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint WorldLocation2IdDisplay { get; set; }
+        public uint TowerDefenseBuildType { get; set; }
+        public uint Spell4Id { get; set; }
+        public uint SoldierTowerDefenseFlags { get; set; }
+        public uint SoldierTowerDefenseImprovementType { get; set; }
     }
 }

@@ -2,11 +2,11 @@ namespace NexusForever.GameTable.Model
 {
     public class PublicEventCustomStatEntry
     {
-        public uint Id;
-        public uint PublicEventTypeEnum;
-        public uint PublicEventId;
-        public uint StatIndex;
-        public uint LocalizedTextIdStatName;
-        public string IconPath;
+        public uint Id { get; set; }
+        public uint PublicEventTypeEnum { get; set; }
+        public uint PublicEventId { get; set; }
+        public uint StatIndex { get; set; }
+        public uint LocalizedTextIdStatName { get; set; }
+        public string IconPath { get; set; }
     }
 }

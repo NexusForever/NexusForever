@@ -2,132 +2,132 @@ namespace NexusForever.GameTable.Model
 {
     public class Creature2Entry
     {
-        public uint Id;
-        public uint CreationTypeEnum;
-        public string Description;
-        public uint LocalizedTextIdName;
-        public uint Creature2AoiSizeEnum;
-        public uint UnitRaceId;
-        public uint Creature2DifficultyId;
-        public uint Creature2ArcheTypeId;
-        public uint Creature2TierId;
-        public uint Creature2ModelInfoId;
-        public uint Creature2DisplayGroupId;
-        public uint Creature2OutfitGroupId;
-        public uint PrerequisiteIdVisibility;
-        public float ModelScale;
-        public uint Spell4IdActivate00;
-        public uint Spell4IdActivate01;
-        public uint Spell4IdActivate02;
-        public uint Spell4IdActivate03;
-        public uint PrerequisiteIdActivateSpell00;
-        public uint PrerequisiteIdActivateSpell01;
-        public uint PrerequisiteIdActivateSpell02;
-        public uint PrerequisiteIdActivateSpell03;
-        public uint ActivateSpellCastTime;
-        public float ActivateSpellMinRange;
-        public float ActivateSpellMaxRange;
-        public uint LocalizedTextIdActivateSpellText;
-        public uint Spell4VisualGroupIdActivateSpell;
-        public uint TrainerClassIdMask;
-        public uint TradeSkillIdTrainer;
-        public uint TradeSkillIdStation;
+        public uint Id { get; set; }
+        public uint CreationTypeEnum { get; set; }
+        public string Description { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint Creature2AoiSizeEnum { get; set; }
+        public uint UnitRaceId { get; set; }
+        public uint Creature2DifficultyId { get; set; }
+        public uint Creature2ArcheTypeId { get; set; }
+        public uint Creature2TierId { get; set; }
+        public uint Creature2ModelInfoId { get; set; }
+        public uint Creature2DisplayGroupId { get; set; }
+        public uint Creature2OutfitGroupId { get; set; }
+        public uint PrerequisiteIdVisibility { get; set; }
+        public float ModelScale { get; set; }
+        public uint Spell4IdActivate00 { get; set; }
+        public uint Spell4IdActivate01 { get; set; }
+        public uint Spell4IdActivate02 { get; set; }
+        public uint Spell4IdActivate03 { get; set; }
+        public uint PrerequisiteIdActivateSpell00 { get; set; }
+        public uint PrerequisiteIdActivateSpell01 { get; set; }
+        public uint PrerequisiteIdActivateSpell02 { get; set; }
+        public uint PrerequisiteIdActivateSpell03 { get; set; }
+        public uint ActivateSpellCastTime { get; set; }
+        public float ActivateSpellMinRange { get; set; }
+        public float ActivateSpellMaxRange { get; set; }
+        public uint LocalizedTextIdActivateSpellText { get; set; }
+        public uint Spell4VisualGroupIdActivateSpell { get; set; }
+        public uint TrainerClassIdMask { get; set; }
+        public uint TradeSkillIdTrainer { get; set; }
+        public uint TradeSkillIdStation { get; set; }
         [GameTableFieldArray(25u)]
-        public uint[] QuestIdGiven;
+        public uint[] QuestIdGiven { get; set; }
         [GameTableFieldArray(25u)]
-        public uint[] QuestIdReceive;
-        public uint QuestAnimStateId;
-        public uint PrerequisiteIdAnimState;
-        public uint QuestAnimObjectiveIndex;
-        public uint Flags;
-        public uint UiFlags;
-        public uint ActivationFlags;
-        public float AimYawConstraint;
-        public float AimPitchUpConstraint;
-        public float AimPitchDownConstraint;
-        public uint Item2IdMTXKey00;
-        public uint Item2IdMTXKey01;
-        public uint Creature2FamilyId;
-        public uint Creature2TractId;
-        public uint BindPointId;
-        public uint ResourceConversionGroupId;
-        public uint TaxiNodeId;
-        public uint PathScientistExperimentationId;
-        public uint DatacubeId;
-        public uint DatacubeVolumeId;
-        public uint FactionId;
-        public uint MinLevel;
-        public uint MaxLevel;
-        public uint RescanCooldownTypeEnum;
-        public uint RescanCooldown;
-        public uint Creature2AffiliationId;
-        public uint ItemIdDisplayItemRight;
-        public uint SoundEventIdAggro;
-        public uint SoundEventIdAware;
-        public uint SoundImpactDescriptionIdOrigin;
-        public uint SoundImpactDescriptionIdTarget;
-        public uint SoundSwitchIdModel;
-        public uint SoundCombatLoopId;
-        public uint RandomTextLineIdGoodbye00;
-        public uint RandomTextLineIdGoodbye01;
-        public uint RandomTextLineIdGoodbye02;
-        public uint RandomTextLineIdGoodbye03;
-        public uint RandomTextLineIdGoodbye04;
-        public uint RandomTextLineIdGoodbye05;
-        public uint RandomTextLineIdGoodbye06;
-        public uint RandomTextLineIdGoodbye07;
-        public uint RandomTextLineIdGoodbye08;
-        public uint RandomTextLineIdGoodbye09;
-        public uint RandomTextLineIdHello00;
-        public uint RandomTextLineIdHello01;
-        public uint RandomTextLineIdHello02;
-        public uint RandomTextLineIdHello03;
-        public uint RandomTextLineIdHello04;
-        public uint RandomTextLineIdHello05;
-        public uint RandomTextLineIdHello06;
-        public uint RandomTextLineIdHello07;
-        public uint RandomTextLineIdHello08;
-        public uint RandomTextLineIdHello09;
-        public uint RandomTextLineIdIntro;
-        public uint LocalizedTextIdDefaultGreeting;
-        public uint RandomTextLineIdReturn00;
-        public uint RandomTextLineIdReturn01;
-        public uint RandomTextLineIdReturn02;
-        public uint RandomTextLineIdReturn03;
-        public uint RandomTextLineIdReturn04;
-        public uint RandomTextLineIdReturn05;
-        public uint RandomTextLineIdReturn06;
-        public uint RandomTextLineIdReturn07;
-        public uint RandomTextLineIdReturn08;
-        public uint RandomTextLineIdReturn09;
-        public uint LocalizedTextIdReturnGreeting;
-        public uint RandomTextLineIdCompleted;
-        public uint LocalizedTextIdCompletedGreeting;
-        public uint UnitVoiceTypeId;
-        public uint GossipSetId;
-        public uint UnitVisualTypeId;
-        public uint Spell4VisualGroupIdAttached;
-        public uint GenericStringGroupsIdInteractContext;
-        public uint Creature2ActionSetId;
-        public uint Creature2ActionTextId;
-        public uint PathMissionIdSoldier;
-        public uint InstancePortalId;
-        public uint ModelSequenceIdAnimationPriority00;
-        public uint ModelSequenceIdAnimationPriority01;
-        public uint ModelSequenceIdAnimationPriority02;
-        public uint ModelSequenceIdAnimationPriority03;
-        public uint ModelSequenceIdAnimationPriority04;
-        public uint PrerequisiteIdPriority00;
-        public uint PrerequisiteIdPriority01;
-        public uint PrerequisiteIdPriority02;
-        public uint PrerequisiteIdPriority03;
-        public uint PrerequisiteIdPriority04;
-        public float DonutDrawDistance;
-        public uint ArchiveArticleIdInteractUnlock;
-        public uint TradeskillHarvestingInfoId;
-        public uint CcStateImmunitiesFlags;
-        public uint Creature2ResistId;
-        public uint UnitVehicleId;
-        public uint Creature2DisplayInfoIdPortraitOverride;
+        public uint[] QuestIdReceive { get; set; }
+        public uint QuestAnimStateId { get; set; }
+        public uint PrerequisiteIdAnimState { get; set; }
+        public uint QuestAnimObjectiveIndex { get; set; }
+        public uint Flags { get; set; }
+        public uint UiFlags { get; set; }
+        public uint ActivationFlags { get; set; }
+        public float AimYawConstraint { get; set; }
+        public float AimPitchUpConstraint { get; set; }
+        public float AimPitchDownConstraint { get; set; }
+        public uint Item2IdMTXKey00 { get; set; }
+        public uint Item2IdMTXKey01 { get; set; }
+        public uint Creature2FamilyId { get; set; }
+        public uint Creature2TractId { get; set; }
+        public uint BindPointId { get; set; }
+        public uint ResourceConversionGroupId { get; set; }
+        public uint TaxiNodeId { get; set; }
+        public uint PathScientistExperimentationId { get; set; }
+        public uint DatacubeId { get; set; }
+        public uint DatacubeVolumeId { get; set; }
+        public uint FactionId { get; set; }
+        public uint MinLevel { get; set; }
+        public uint MaxLevel { get; set; }
+        public uint RescanCooldownTypeEnum { get; set; }
+        public uint RescanCooldown { get; set; }
+        public uint Creature2AffiliationId { get; set; }
+        public uint ItemIdDisplayItemRight { get; set; }
+        public uint SoundEventIdAggro { get; set; }
+        public uint SoundEventIdAware { get; set; }
+        public uint SoundImpactDescriptionIdOrigin { get; set; }
+        public uint SoundImpactDescriptionIdTarget { get; set; }
+        public uint SoundSwitchIdModel { get; set; }
+        public uint SoundCombatLoopId { get; set; }
+        public uint RandomTextLineIdGoodbye00 { get; set; }
+        public uint RandomTextLineIdGoodbye01 { get; set; }
+        public uint RandomTextLineIdGoodbye02 { get; set; }
+        public uint RandomTextLineIdGoodbye03 { get; set; }
+        public uint RandomTextLineIdGoodbye04 { get; set; }
+        public uint RandomTextLineIdGoodbye05 { get; set; }
+        public uint RandomTextLineIdGoodbye06 { get; set; }
+        public uint RandomTextLineIdGoodbye07 { get; set; }
+        public uint RandomTextLineIdGoodbye08 { get; set; }
+        public uint RandomTextLineIdGoodbye09 { get; set; }
+        public uint RandomTextLineIdHello00 { get; set; }
+        public uint RandomTextLineIdHello01 { get; set; }
+        public uint RandomTextLineIdHello02 { get; set; }
+        public uint RandomTextLineIdHello03 { get; set; }
+        public uint RandomTextLineIdHello04 { get; set; }
+        public uint RandomTextLineIdHello05 { get; set; }
+        public uint RandomTextLineIdHello06 { get; set; }
+        public uint RandomTextLineIdHello07 { get; set; }
+        public uint RandomTextLineIdHello08 { get; set; }
+        public uint RandomTextLineIdHello09 { get; set; }
+        public uint RandomTextLineIdIntro { get; set; }
+        public uint LocalizedTextIdDefaultGreeting { get; set; }
+        public uint RandomTextLineIdReturn00 { get; set; }
+        public uint RandomTextLineIdReturn01 { get; set; }
+        public uint RandomTextLineIdReturn02 { get; set; }
+        public uint RandomTextLineIdReturn03 { get; set; }
+        public uint RandomTextLineIdReturn04 { get; set; }
+        public uint RandomTextLineIdReturn05 { get; set; }
+        public uint RandomTextLineIdReturn06 { get; set; }
+        public uint RandomTextLineIdReturn07 { get; set; }
+        public uint RandomTextLineIdReturn08 { get; set; }
+        public uint RandomTextLineIdReturn09 { get; set; }
+        public uint LocalizedTextIdReturnGreeting { get; set; }
+        public uint RandomTextLineIdCompleted { get; set; }
+        public uint LocalizedTextIdCompletedGreeting { get; set; }
+        public uint UnitVoiceTypeId { get; set; }
+        public uint GossipSetId { get; set; }
+        public uint UnitVisualTypeId { get; set; }
+        public uint Spell4VisualGroupIdAttached { get; set; }
+        public uint GenericStringGroupsIdInteractContext { get; set; }
+        public uint Creature2ActionSetId { get; set; }
+        public uint Creature2ActionTextId { get; set; }
+        public uint PathMissionIdSoldier { get; set; }
+        public uint InstancePortalId { get; set; }
+        public uint ModelSequenceIdAnimationPriority00 { get; set; }
+        public uint ModelSequenceIdAnimationPriority01 { get; set; }
+        public uint ModelSequenceIdAnimationPriority02 { get; set; }
+        public uint ModelSequenceIdAnimationPriority03 { get; set; }
+        public uint ModelSequenceIdAnimationPriority04 { get; set; }
+        public uint PrerequisiteIdPriority00 { get; set; }
+        public uint PrerequisiteIdPriority01 { get; set; }
+        public uint PrerequisiteIdPriority02 { get; set; }
+        public uint PrerequisiteIdPriority03 { get; set; }
+        public uint PrerequisiteIdPriority04 { get; set; }
+        public float DonutDrawDistance { get; set; }
+        public uint ArchiveArticleIdInteractUnlock { get; set; }
+        public uint TradeskillHarvestingInfoId { get; set; }
+        public uint CcStateImmunitiesFlags { get; set; }
+        public uint Creature2ResistId { get; set; }
+        public uint UnitVehicleId { get; set; }
+        public uint Creature2DisplayInfoIdPortraitOverride { get; set; }
     }
 }

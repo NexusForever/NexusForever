@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class PublicEventStatDisplayEntry
     {
-        public uint Id;
-        public uint PublicEventTypeEnum;
-        public uint PublicEventId;
-        public uint Flags;
+        public uint Id { get; set; }
+        public uint PublicEventTypeEnum { get; set; }
+        public uint PublicEventId { get; set; }
+        public uint Flags { get; set; }
     }
 }

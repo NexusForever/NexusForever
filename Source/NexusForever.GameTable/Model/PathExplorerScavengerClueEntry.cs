@@ -2,12 +2,12 @@ namespace NexusForever.GameTable.Model
 {
     public class PathExplorerScavengerClueEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdClue;
-        public uint ExplorerScavengerClueTypeEnum;
-        public uint Creature2Id;
-        public uint TargetGroupId;
-        public float ActiveRadius;
-        public uint WorldLocation2IdMiniMap;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdClue { get; set; }
+        public uint ExplorerScavengerClueTypeEnum { get; set; }
+        public uint Creature2Id { get; set; }
+        public uint TargetGroupId { get; set; }
+        public float ActiveRadius { get; set; }
+        public uint WorldLocation2IdMiniMap { get; set; }
     }
 }

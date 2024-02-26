@@ -2,104 +2,104 @@ namespace NexusForever.GameTable.Model
 {
     public class Quest2Entry
     {
-        public uint Id;
-        public uint LocalizedTextIdTitle;
-        public uint LocalizedTextIdText;
-        public uint Flags;
-        public uint ConLevel;
-        public uint Type;
-        public uint PrerequisiteLevel;
-        public uint PrerequisiteFlags;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdTitle { get; set; }
+        public uint LocalizedTextIdText { get; set; }
+        public uint Flags { get; set; }
+        public uint ConLevel { get; set; }
+        public uint Type { get; set; }
+        public uint PrerequisiteLevel { get; set; }
+        public uint PrerequisiteFlags { get; set; }
         [GameTableFieldArray(3u)]
-        public uint[] PrerequisiteQuests;
-        public uint PrerequisiteRace;
-        public uint PrerequisiteItem;
-        public uint QuestPlayerFactionEnum;
-        public uint WorldZoneId;
-        public uint LocalizedTextIdCompletionOverride;
-        public uint RewardXpOverride;
-        public uint RewardCashOverride;
+        public uint[] PrerequisiteQuests { get; set; }
+        public uint PrerequisiteRace { get; set; }
+        public uint PrerequisiteItem { get; set; }
+        public uint QuestPlayerFactionEnum { get; set; }
+        public uint WorldZoneId { get; set; }
+        public uint LocalizedTextIdCompletionOverride { get; set; }
+        public uint RewardXpOverride { get; set; }
+        public uint RewardCashOverride { get; set; }
         [GameTableFieldArray(6u)]
-        public uint[] PushedItemIds;
+        public uint[] PushedItemIds { get; set; }
         [GameTableFieldArray(6u)]
-        public uint[] PushedItemCounts;
+        public uint[] PushedItemCounts { get; set; }
         [GameTableFieldArray(6u)]
-        public uint[] Objectives;
-        public uint LocalizedTextIdGiverTextUnknown;
-        public uint LocalizedTextIdGiverTextAccepted;
-        public uint LocalizedTextIdReceiverTextAccepted;
-        public uint LocalizedTextIdReceiverTextAchieved;
-        public uint LocalizedTextIdGiverSayAccepted;
-        public uint LocalizedTextIdReceiverSayCompleted;
-        public uint PrerequisiteClass;
-        public uint GroupId;
-        public uint FactionIdPreq0;
-        public uint FactionIdPreq01;
-        public uint FactionIdPreq02;
-        public uint FactionLevelPreq0;
-        public uint FactionLevelPreq01;
-        public uint FactionLevelPreq02;
-        public bool FactionLevelCompPreq0;
-        public bool FactionLevelCompPreq01;
-        public bool FactionLevelCompPreq02;
-        public uint QuestIdExclusionPreq0;
-        public uint QuestIdExclusionPreq1;
-        public uint QuestIdExclusionPreq2;
-        public uint LocalizedTextIdAcceptResponse;
-        public uint LocalizedTextIdCompleteResponse;
-        public uint WorldLocation2IdReceiver;
-        public uint WorldLocation2IdAltReceiver00;
-        public uint WorldLocation2IdAltReceiver01;
-        public uint WorldLocation2IdAltReceiver02;
-        public uint PrerequisiteIdAltReceiver00;
-        public uint PrerequisiteIdAltReceiver01;
-        public uint PrerequisiteIdAltReceiver02;
-        public uint QuestDirectionIdAltReceiver00;
-        public uint QuestDirectionIdAltReceiver01;
-        public uint QuestDirectionIdAltReceiver02;
-        public uint LocalizedTextIdCompletedSummary;
-        public uint LocalizedTextIdGiverIncompleteResponse;
-        public uint LocalizedTextIdReceiverIncompleteResponse;
-        public uint Quest2DifficultyId;
-        public uint MaxTimeAllowedMS;
-        public uint PrerequisiteId;
-        public uint QuestShareEnum;
-        public uint SubMissionPathType;
-        public uint LocalizedTextIdCompletedObjectiveShort;
-        public uint Quest2SubTypeId;
-        public uint LocalizedTextIdMoreInfoSay00;
-        public uint LocalizedTextIdMoreInfoSay01;
-        public uint LocalizedTextIdMoreInfoSay02;
-        public uint LocalizedTextIdMoreInfoSay03;
-        public uint LocalizedTextIdMoreInfoSay04;
-        public uint LocalizedTextIdMoreInfoText00;
-        public uint LocalizedTextIdMoreInfoText01;
-        public uint LocalizedTextIdMoreInfoText02;
-        public uint LocalizedTextIdMoreInfoText03;
-        public uint LocalizedTextIdMoreInfoText04;
-        public uint VirtualItemIdPushed00;
-        public uint VirtualItemIdPushed01;
-        public uint VirtualItemIdPushed02;
-        public uint VirtualItemIdPushed03;
-        public uint VirtualItemPushedCount00;
-        public uint VirtualItemPushedCount01;
-        public uint VirtualItemPushedCount02;
-        public uint VirtualItemPushedCount03;
-        public uint VirtualItemPushedObjectiveFlagsEnum00;
-        public uint VirtualItemPushedObjectiveFlagsEnum01;
-        public uint VirtualItemPushedObjectiveFlagsEnum02;
-        public uint VirtualItemPushedObjectiveFlagsEnum03;
-        public uint QuestDirectionIdCompletion;
-        public uint Faction2IdRewardReputation00;
-        public uint Faction2IdRewardReputation01;
-        public float RewardReputationOverride00;
-        public float RewardReputationOverride01;
-        public uint QuestCategoryId;
-        public uint LocalizedTextIdGiverSayDecline;
-        public uint PeriodicQuestGroupId;
-        public uint PeriodicQuestWeight;
-        public uint QuestRepeatPeriodEnum;
-        public uint QuestContentFinderTypeEnum;
-        public uint GroupSize;
+        public uint[] Objectives { get; set; }
+        public uint LocalizedTextIdGiverTextUnknown { get; set; }
+        public uint LocalizedTextIdGiverTextAccepted { get; set; }
+        public uint LocalizedTextIdReceiverTextAccepted { get; set; }
+        public uint LocalizedTextIdReceiverTextAchieved { get; set; }
+        public uint LocalizedTextIdGiverSayAccepted { get; set; }
+        public uint LocalizedTextIdReceiverSayCompleted { get; set; }
+        public uint PrerequisiteClass { get; set; }
+        public uint GroupId { get; set; }
+        public uint FactionIdPreq0 { get; set; }
+        public uint FactionIdPreq01 { get; set; }
+        public uint FactionIdPreq02 { get; set; }
+        public uint FactionLevelPreq0 { get; set; }
+        public uint FactionLevelPreq01 { get; set; }
+        public uint FactionLevelPreq02 { get; set; }
+        public bool FactionLevelCompPreq0 { get; set; }
+        public bool FactionLevelCompPreq01 { get; set; }
+        public bool FactionLevelCompPreq02 { get; set; }
+        public uint QuestIdExclusionPreq0 { get; set; }
+        public uint QuestIdExclusionPreq1 { get; set; }
+        public uint QuestIdExclusionPreq2 { get; set; }
+        public uint LocalizedTextIdAcceptResponse { get; set; }
+        public uint LocalizedTextIdCompleteResponse { get; set; }
+        public uint WorldLocation2IdReceiver { get; set; }
+        public uint WorldLocation2IdAltReceiver00 { get; set; }
+        public uint WorldLocation2IdAltReceiver01 { get; set; }
+        public uint WorldLocation2IdAltReceiver02 { get; set; }
+        public uint PrerequisiteIdAltReceiver00 { get; set; }
+        public uint PrerequisiteIdAltReceiver01 { get; set; }
+        public uint PrerequisiteIdAltReceiver02 { get; set; }
+        public uint QuestDirectionIdAltReceiver00 { get; set; }
+        public uint QuestDirectionIdAltReceiver01 { get; set; }
+        public uint QuestDirectionIdAltReceiver02 { get; set; }
+        public uint LocalizedTextIdCompletedSummary { get; set; }
+        public uint LocalizedTextIdGiverIncompleteResponse { get; set; }
+        public uint LocalizedTextIdReceiverIncompleteResponse { get; set; }
+        public uint Quest2DifficultyId { get; set; }
+        public uint MaxTimeAllowedMS { get; set; }
+        public uint PrerequisiteId { get; set; }
+        public uint QuestShareEnum { get; set; }
+        public uint SubMissionPathType { get; set; }
+        public uint LocalizedTextIdCompletedObjectiveShort { get; set; }
+        public uint Quest2SubTypeId { get; set; }
+        public uint LocalizedTextIdMoreInfoSay00 { get; set; }
+        public uint LocalizedTextIdMoreInfoSay01 { get; set; }
+        public uint LocalizedTextIdMoreInfoSay02 { get; set; }
+        public uint LocalizedTextIdMoreInfoSay03 { get; set; }
+        public uint LocalizedTextIdMoreInfoSay04 { get; set; }
+        public uint LocalizedTextIdMoreInfoText00 { get; set; }
+        public uint LocalizedTextIdMoreInfoText01 { get; set; }
+        public uint LocalizedTextIdMoreInfoText02 { get; set; }
+        public uint LocalizedTextIdMoreInfoText03 { get; set; }
+        public uint LocalizedTextIdMoreInfoText04 { get; set; }
+        public uint VirtualItemIdPushed00 { get; set; }
+        public uint VirtualItemIdPushed01 { get; set; }
+        public uint VirtualItemIdPushed02 { get; set; }
+        public uint VirtualItemIdPushed03 { get; set; }
+        public uint VirtualItemPushedCount00 { get; set; }
+        public uint VirtualItemPushedCount01 { get; set; }
+        public uint VirtualItemPushedCount02 { get; set; }
+        public uint VirtualItemPushedCount03 { get; set; }
+        public uint VirtualItemPushedObjectiveFlagsEnum00 { get; set; }
+        public uint VirtualItemPushedObjectiveFlagsEnum01 { get; set; }
+        public uint VirtualItemPushedObjectiveFlagsEnum02 { get; set; }
+        public uint VirtualItemPushedObjectiveFlagsEnum03 { get; set; }
+        public uint QuestDirectionIdCompletion { get; set; }
+        public uint Faction2IdRewardReputation00 { get; set; }
+        public uint Faction2IdRewardReputation01 { get; set; }
+        public float RewardReputationOverride00 { get; set; }
+        public float RewardReputationOverride01 { get; set; }
+        public uint QuestCategoryId { get; set; }
+        public uint LocalizedTextIdGiverSayDecline { get; set; }
+        public uint PeriodicQuestGroupId { get; set; }
+        public uint PeriodicQuestWeight { get; set; }
+        public uint QuestRepeatPeriodEnum { get; set; }
+        public uint QuestContentFinderTypeEnum { get; set; }
+        public uint GroupSize { get; set; }
     }
 }

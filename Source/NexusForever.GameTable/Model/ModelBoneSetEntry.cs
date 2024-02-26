@@ -2,6 +2,6 @@ namespace NexusForever.GameTable.Model
 {
     public class ModelBoneSetEntry
     {
-        public uint Id;
+        public uint Id { get; set; }
     }
 }

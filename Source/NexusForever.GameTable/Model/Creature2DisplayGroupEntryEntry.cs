@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class Creature2DisplayGroupEntryEntry
     {
-        public uint Id;
-        public uint Creature2DisplayGroupId;
-        public uint Creature2DisplayInfoId;
-        public uint Weight;
+        public uint Id { get; set; }
+        public uint Creature2DisplayGroupId { get; set; }
+        public uint Creature2DisplayInfoId { get; set; }
+        public uint Weight { get; set; }
     }
 }

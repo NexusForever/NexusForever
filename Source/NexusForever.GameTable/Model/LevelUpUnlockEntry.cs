@@ -2,13 +2,13 @@ namespace NexusForever.GameTable.Model
 {
     public class LevelUpUnlockEntry
     {
-        public uint Id;
-        public uint LevelUpUnlockSystemEnum;
-        public uint Level;
-        public uint LevelUpUnlockTypeId;
-        public uint LocalizedTextIdDescription;
-        public string DisplayIcon;
-        public uint PrerequisiteId;
-        public uint LevelUpUnlockValue;
+        public uint Id { get; set; }
+        public uint LevelUpUnlockSystemEnum { get; set; }
+        public uint Level { get; set; }
+        public uint LevelUpUnlockTypeId { get; set; }
+        public uint LocalizedTextIdDescription { get; set; }
+        public string DisplayIcon { get; set; }
+        public uint PrerequisiteId { get; set; }
+        public uint LevelUpUnlockValue { get; set; }
     }
 }

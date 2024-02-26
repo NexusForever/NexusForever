@@ -2,22 +2,22 @@ namespace NexusForever.GameTable.Model
 {
     public class PrimalMatrixRewardEntry
     {
-        public uint Id;
-        public uint PrimalMatrixRewardTypeEnum0;
-        public uint PrimalMatrixRewardTypeEnum1;
-        public uint PrimalMatrixRewardTypeEnum2;
-        public uint PrimalMatrixRewardTypeEnum3;
-        public uint ObjectId0;
-        public uint ObjectId1;
-        public uint ObjectId2;
-        public uint ObjectId3;
-        public uint SubObjectId0;
-        public uint SubObjectId1;
-        public uint SubObjectId2;
-        public uint SubObjectId3;
-        public float Value0;
-        public float Value1;
-        public float Value2;
-        public float Value3;
+        public uint Id { get; set; }
+        public uint PrimalMatrixRewardTypeEnum0 { get; set; }
+        public uint PrimalMatrixRewardTypeEnum1 { get; set; }
+        public uint PrimalMatrixRewardTypeEnum2 { get; set; }
+        public uint PrimalMatrixRewardTypeEnum3 { get; set; }
+        public uint ObjectId0 { get; set; }
+        public uint ObjectId1 { get; set; }
+        public uint ObjectId2 { get; set; }
+        public uint ObjectId3 { get; set; }
+        public uint SubObjectId0 { get; set; }
+        public uint SubObjectId1 { get; set; }
+        public uint SubObjectId2 { get; set; }
+        public uint SubObjectId3 { get; set; }
+        public float Value0 { get; set; }
+        public float Value1 { get; set; }
+        public float Value2 { get; set; }
+        public float Value3 { get; set; }
     }
 }

@@ -2,11 +2,11 @@ namespace NexusForever.GameTable.Model
 {
     public class HousingPlotInfoEntry
     {
-        public uint Id;
-        public uint WorldSocketId;
-        public uint PlotType;
-        public uint HousingPropertyInfoId;
-        public uint HousingPropertyPlotIndex;
-        public uint HousingPlugItemIdDefault;
+        public uint Id { get; set; }
+        public uint WorldSocketId { get; set; }
+        public uint PlotType { get; set; }
+        public uint HousingPropertyInfoId { get; set; }
+        public uint HousingPropertyPlotIndex { get; set; }
+        public uint HousingPlugItemIdDefault { get; set; }
     }
 }

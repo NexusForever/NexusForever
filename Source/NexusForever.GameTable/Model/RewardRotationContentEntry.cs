@@ -2,7 +2,7 @@ namespace NexusForever.GameTable.Model
 {
     public class RewardRotationContentEntry
     {
-        public uint Id;
-        public uint ContentTypeEnum;
+        public uint Id { get; set; }
+        public uint ContentTypeEnum { get; set; }
     }
 }

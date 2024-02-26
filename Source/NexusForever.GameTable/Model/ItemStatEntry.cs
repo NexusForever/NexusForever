@@ -1,13 +1,13 @@
-using NexusForever.GameTable.Static;
+using NexusForever.GameTable.Static { get; set; }
 
 namespace NexusForever.GameTable.Model
 {
     public class ItemStatEntry
     {
-        public uint Id;
+        public uint Id { get; set; }
         [GameTableFieldArray(5u)]
-        public ItemStatType[] ItemStatTypeEnum;
+        public ItemStatType[] ItemStatTypeEnum { get; set; }
         [GameTableFieldArray(5u)]
-        public uint[] ItemStatData;
+        public uint[] ItemStatData { get; set; }
     }
 }

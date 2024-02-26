@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class PathExplorerDoorEntry
     {
-        public uint Id;
-        public uint WorldZoneIdInsideMicro;
-        public uint TargetGroupIdActivate;
-        public uint TargetGroupIdKill;
+        public uint Id { get; set; }
+        public uint WorldZoneIdInsideMicro { get; set; }
+        public uint TargetGroupIdActivate { get; set; }
+        public uint TargetGroupIdKill { get; set; }
     }
 }

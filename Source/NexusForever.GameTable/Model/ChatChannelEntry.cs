@@ -2,15 +2,15 @@ namespace NexusForever.GameTable.Model
 {
     public class ChatChannelEntry
     {
-        public uint Id;
-        public string EnumName;
-        public string UniversalCommand00;
-        public string UniversalCommand01;
-        public uint LocalizedTextIdName;
-        public uint LocalizedTextIdCommand;
-        public uint LocalizedTextIdAbbreviation;
-        public uint LocalizedTextIdAlternate00;
-        public uint LocalizedTextIdAlternate01;
-        public uint Flags;
+        public uint Id { get; set; }
+        public string EnumName { get; set; }
+        public string UniversalCommand00 { get; set; }
+        public string UniversalCommand01 { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint LocalizedTextIdCommand { get; set; }
+        public uint LocalizedTextIdAbbreviation { get; set; }
+        public uint LocalizedTextIdAlternate00 { get; set; }
+        public uint LocalizedTextIdAlternate01 { get; set; }
+        public uint Flags { get; set; }
     }
 }

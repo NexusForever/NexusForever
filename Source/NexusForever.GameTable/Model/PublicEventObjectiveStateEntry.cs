@@ -2,22 +2,22 @@ namespace NexusForever.GameTable.Model
 {
     public class PublicEventObjectiveStateEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdState00;
-        public uint LocalizedTextIdState01;
-        public uint LocalizedTextIdState02;
-        public uint LocalizedTextIdState03;
-        public uint LocalizedTextIdState04;
-        public uint LocalizedTextIdState05;
-        public uint LocalizedTextIdState06;
-        public uint LocalizedTextIdState07;
-        public uint LocalizedTextIdState08;
-        public uint LocalizedTextIdState09;
-        public uint LocalizedTextIdState10;
-        public uint LocalizedTextIdState11;
-        public uint LocalizedTextIdState12;
-        public uint LocalizedTextIdState13;
-        public uint LocalizedTextIdState14;
-        public uint LocalizedTextIdState15;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdState00 { get; set; }
+        public uint LocalizedTextIdState01 { get; set; }
+        public uint LocalizedTextIdState02 { get; set; }
+        public uint LocalizedTextIdState03 { get; set; }
+        public uint LocalizedTextIdState04 { get; set; }
+        public uint LocalizedTextIdState05 { get; set; }
+        public uint LocalizedTextIdState06 { get; set; }
+        public uint LocalizedTextIdState07 { get; set; }
+        public uint LocalizedTextIdState08 { get; set; }
+        public uint LocalizedTextIdState09 { get; set; }
+        public uint LocalizedTextIdState10 { get; set; }
+        public uint LocalizedTextIdState11 { get; set; }
+        public uint LocalizedTextIdState12 { get; set; }
+        public uint LocalizedTextIdState13 { get; set; }
+        public uint LocalizedTextIdState14 { get; set; }
+        public uint LocalizedTextIdState15 { get; set; }
     }
 }

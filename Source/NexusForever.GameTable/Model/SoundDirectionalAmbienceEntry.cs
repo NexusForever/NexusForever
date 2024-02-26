@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class SoundDirectionalAmbienceEntry
     {
-        public uint Id;
-        public uint SoundEventIdOutsideStart;
-        public uint SoundEventIdOutsideStop;
+        public uint Id { get; set; }
+        public uint SoundEventIdOutsideStart { get; set; }
+        public uint SoundEventIdOutsideStop { get; set; }
     }
 }

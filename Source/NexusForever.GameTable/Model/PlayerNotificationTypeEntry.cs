@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class PlayerNotificationTypeEntry
     {
-        public uint Id;
-        public uint Priority;
-        public uint LifetimeMs;
+        public uint Id { get; set; }
+        public uint Priority { get; set; }
+        public uint LifetimeMs { get; set; }
     }
 }

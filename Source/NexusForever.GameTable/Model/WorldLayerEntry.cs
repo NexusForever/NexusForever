@@ -2,25 +2,25 @@ namespace NexusForever.GameTable.Model
 {
     public class WorldLayerEntry
     {
-        public uint Id;
-        public string Description;
-        public float HeightScale;
-        public float HeightOffset;
-        public float ParallaxScale;
-        public float ParallaxOffset;
-        public float MetersPerTextureTile;
-        public string ColorMapPath;
-        public string NormalMapPath;
-        public uint AverageColor;
-        public uint Projection;
-        public uint MaterialType;
-        public uint WorldClutterId00;
-        public uint WorldClutterId01;
-        public uint WorldClutterId02;
-        public uint WorldClutterId03;
-        public float SpecularPower;
-        public uint EmissiveGlow;
-        public float ScrollSpeed00;
-        public float ScrollSpeed01;
+        public uint Id { get; set; }
+        public string Description { get; set; }
+        public float HeightScale { get; set; }
+        public float HeightOffset { get; set; }
+        public float ParallaxScale { get; set; }
+        public float ParallaxOffset { get; set; }
+        public float MetersPerTextureTile { get; set; }
+        public string ColorMapPath { get; set; }
+        public string NormalMapPath { get; set; }
+        public uint AverageColor { get; set; }
+        public uint Projection { get; set; }
+        public uint MaterialType { get; set; }
+        public uint WorldClutterId00 { get; set; }
+        public uint WorldClutterId01 { get; set; }
+        public uint WorldClutterId02 { get; set; }
+        public uint WorldClutterId03 { get; set; }
+        public float SpecularPower { get; set; }
+        public uint EmissiveGlow { get; set; }
+        public float ScrollSpeed00 { get; set; }
+        public float ScrollSpeed01 { get; set; }
     }
 }

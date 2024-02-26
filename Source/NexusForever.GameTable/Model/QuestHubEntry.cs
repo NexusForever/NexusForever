@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class QuestHubEntry
     {
-        public uint Id;
-        public uint WorldLocation2Id;
-        public uint LocalizedTextIdName;
+        public uint Id { get; set; }
+        public uint WorldLocation2Id { get; set; }
+        public uint LocalizedTextIdName { get; set; }
     }
 }

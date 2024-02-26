@@ -2,7 +2,7 @@ namespace NexusForever.GameTable.Model
 {
     public class PathScientistDatacubeDiscoveryEntry
     {
-        public uint Id;
-        public uint WorldZoneId;
+        public uint Id { get; set; }
+        public uint WorldZoneId { get; set; }
     }
 }

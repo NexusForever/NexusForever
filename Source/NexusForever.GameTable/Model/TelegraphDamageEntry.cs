@@ -2,30 +2,30 @@ namespace NexusForever.GameTable.Model
 {
     public class TelegraphDamageEntry
     {
-        public uint Id;
-        public uint TelegraphSubtypeEnum;
-        public uint DamageShapeEnum;
-        public float Param00;
-        public float Param01;
-        public float Param02;
-        public float Param03;
-        public float Param04;
-        public float Param05;
-        public uint TelegraphTimeStartMs;
-        public uint TelegraphTimeEndMs;
-        public uint TelegraphTimeRampInMs;
-        public uint TelegraphTimeRampOutMs;
-        public float XPositionOffset;
-        public float YPositionOffset;
-        public float ZPositionOffset;
-        public float RotationDegrees;
-        public uint TelegraphDamageFlags;
-        public uint TargetTypeFlags;
-        public uint PhaseFlags;
-        public uint PrerequisiteIdCaster;
-        public uint SpellThresholdRestrictionFlags;
-        public uint DisplayFlags;
-        public uint OpacityModifier;
-        public uint DisplayGroup;
+        public uint Id { get; set; }
+        public uint TelegraphSubtypeEnum { get; set; }
+        public uint DamageShapeEnum { get; set; }
+        public float Param00 { get; set; }
+        public float Param01 { get; set; }
+        public float Param02 { get; set; }
+        public float Param03 { get; set; }
+        public float Param04 { get; set; }
+        public float Param05 { get; set; }
+        public uint TelegraphTimeStartMs { get; set; }
+        public uint TelegraphTimeEndMs { get; set; }
+        public uint TelegraphTimeRampInMs { get; set; }
+        public uint TelegraphTimeRampOutMs { get; set; }
+        public float XPositionOffset { get; set; }
+        public float YPositionOffset { get; set; }
+        public float ZPositionOffset { get; set; }
+        public float RotationDegrees { get; set; }
+        public uint TelegraphDamageFlags { get; set; }
+        public uint TargetTypeFlags { get; set; }
+        public uint PhaseFlags { get; set; }
+        public uint PrerequisiteIdCaster { get; set; }
+        public uint SpellThresholdRestrictionFlags { get; set; }
+        public uint DisplayFlags { get; set; }
+        public uint OpacityModifier { get; set; }
+        public uint DisplayGroup { get; set; }
     }
 }

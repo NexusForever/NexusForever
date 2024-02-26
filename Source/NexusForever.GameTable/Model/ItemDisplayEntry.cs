@@ -2,49 +2,49 @@ namespace NexusForever.GameTable.Model
 {
     public class ItemDisplayEntry
     {
-        public uint Id;
-        public string Description;
-        public uint Item2TypeId;
-        public string ObjectModel;
-        public string ObjectModelL;
-        public string ObjectTexture0;
-        public string ObjectTexture1;
-        public uint ModelTextureIdObject00;
-        public uint ModelTextureIdObject01;
-        public string SkinnedModel;
-        public string SkinnedModelL;
-        public string SkinnedTexture0;
-        public string SkinnedTexture1;
-        public uint ModelTextureIdSkinned00;
-        public uint ModelTextureIdSkinned01;
-        public string AttachedModel;
-        public uint ModelAttachmentIdAttached;
-        public string AttachedTexture0;
-        public string AttachedTexture1;
-        public uint ModelTextureIdAttached00;
-        public uint ModelTextureIdAttached01;
-        public uint ComponentRegionFlags;
-        public uint ComponentPriority;
-        public string SkinMaskMap;
-        public string SkinColorMap;
-        public string SkinNormalMap;
-        public string SkinDyeMap;
-        public string ArmorMaskMap;
-        public string ArmorColorMap;
-        public string ArmorNormalMap;
-        public string ArmorDyeMap;
-        public uint ModelMeshId00;
-        public uint ModelMeshId01;
-        public uint ModelMeshId02;
-        public uint ModelMeshId03;
-        public uint SoundImpactDescriptionId;
-        public uint ItemVisualTypeId;
-        public uint SoundReplaceDescriptionId;
-        public uint ItemColorSetId;
-        public uint DyeChannelFlags;
-        public uint ModelPoseId;
-        public float ModelPoseBlend;
-        public uint ShaderPreset00;
-        public uint ShaderPreset01;
+        public uint Id { get; set; }
+        public string Description { get; set; }
+        public uint Item2TypeId { get; set; }
+        public string ObjectModel { get; set; }
+        public string ObjectModelL { get; set; }
+        public string ObjectTexture0 { get; set; }
+        public string ObjectTexture1 { get; set; }
+        public uint ModelTextureIdObject00 { get; set; }
+        public uint ModelTextureIdObject01 { get; set; }
+        public string SkinnedModel { get; set; }
+        public string SkinnedModelL { get; set; }
+        public string SkinnedTexture0 { get; set; }
+        public string SkinnedTexture1 { get; set; }
+        public uint ModelTextureIdSkinned00 { get; set; }
+        public uint ModelTextureIdSkinned01 { get; set; }
+        public string AttachedModel { get; set; }
+        public uint ModelAttachmentIdAttached { get; set; }
+        public string AttachedTexture0 { get; set; }
+        public string AttachedTexture1 { get; set; }
+        public uint ModelTextureIdAttached00 { get; set; }
+        public uint ModelTextureIdAttached01 { get; set; }
+        public uint ComponentRegionFlags { get; set; }
+        public uint ComponentPriority { get; set; }
+        public string SkinMaskMap { get; set; }
+        public string SkinColorMap { get; set; }
+        public string SkinNormalMap { get; set; }
+        public string SkinDyeMap { get; set; }
+        public string ArmorMaskMap { get; set; }
+        public string ArmorColorMap { get; set; }
+        public string ArmorNormalMap { get; set; }
+        public string ArmorDyeMap { get; set; }
+        public uint ModelMeshId00 { get; set; }
+        public uint ModelMeshId01 { get; set; }
+        public uint ModelMeshId02 { get; set; }
+        public uint ModelMeshId03 { get; set; }
+        public uint SoundImpactDescriptionId { get; set; }
+        public uint ItemVisualTypeId { get; set; }
+        public uint SoundReplaceDescriptionId { get; set; }
+        public uint ItemColorSetId { get; set; }
+        public uint DyeChannelFlags { get; set; }
+        public uint ModelPoseId { get; set; }
+        public float ModelPoseBlend { get; set; }
+        public uint ShaderPreset00 { get; set; }
+        public uint ShaderPreset01 { get; set; }
     }
 }

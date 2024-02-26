@@ -2,16 +2,16 @@ namespace NexusForever.GameTable.Model
 {
     public class DistanceDamageModifierEntry
     {
-        public uint Id;
-        public float DistancePercent00;
-        public float DistancePercent01;
-        public float DistancePercent02;
-        public float DistancePercent03;
-        public float DistancePercent04;
-        public float DamageModifier00;
-        public float DamageModifier01;
-        public float DamageModifier02;
-        public float DamageModifier03;
-        public float DamageModifier04;
+        public uint Id { get; set; }
+        public float DistancePercent00 { get; set; }
+        public float DistancePercent01 { get; set; }
+        public float DistancePercent02 { get; set; }
+        public float DistancePercent03 { get; set; }
+        public float DistancePercent04 { get; set; }
+        public float DamageModifier00 { get; set; }
+        public float DamageModifier01 { get; set; }
+        public float DamageModifier02 { get; set; }
+        public float DamageModifier03 { get; set; }
+        public float DamageModifier04 { get; set; }
     }
 }

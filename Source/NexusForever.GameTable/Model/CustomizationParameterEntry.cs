@@ -2,16 +2,16 @@ namespace NexusForever.GameTable.Model
 {
     public class CustomizationParameterEntry
     {
-        public uint Id;
-        public uint LocalizedTextId;
-        public uint SclX;
-        public uint SclY;
-        public uint SclZ;
-        public uint RotX;
-        public uint RotY;
-        public uint RotZ;
-        public uint PosX;
-        public uint PosY;
-        public uint PosZ;
+        public uint Id { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public uint SclX { get; set; }
+        public uint SclY { get; set; }
+        public uint SclZ { get; set; }
+        public uint RotX { get; set; }
+        public uint RotY { get; set; }
+        public uint RotZ { get; set; }
+        public uint PosX { get; set; }
+        public uint PosY { get; set; }
+        public uint PosZ { get; set; }
     }
 }

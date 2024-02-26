@@ -2,12 +2,12 @@ namespace NexusForever.GameTable.Model
 {
     public class ClassSecondaryStatBonusEntry
     {
-        public uint Id;
-        public uint UnitProperty2IdSecondaryStat00;
-        public uint UnitProperty2IdSecondaryStat01;
-        public uint UnitProperty2IdSecondaryStat02;
-        public float Modifier00;
-        public float Modifier01;
-        public float Modifier02;
+        public uint Id { get; set; }
+        public uint UnitProperty2IdSecondaryStat00 { get; set; }
+        public uint UnitProperty2IdSecondaryStat01 { get; set; }
+        public uint UnitProperty2IdSecondaryStat02 { get; set; }
+        public float Modifier00 { get; set; }
+        public float Modifier01 { get; set; }
+        public float Modifier02 { get; set; }
     }
 }

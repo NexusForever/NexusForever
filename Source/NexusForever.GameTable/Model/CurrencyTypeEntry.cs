@@ -2,10 +2,10 @@ namespace NexusForever.GameTable.Model
 {
     public class CurrencyTypeEntry
     {
-        public uint Id;
-        public string Description;
-        public uint LocalizedTextId;
-        public string IconName;
-        public ulong CapAmount;
+        public uint Id { get; set; }
+        public string Description { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public string IconName { get; set; }
+        public ulong CapAmount { get; set; }
     }
 }

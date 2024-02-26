@@ -2,15 +2,15 @@ namespace NexusForever.GameTable.Model
 {
     public class LootPinataInfoEntry
     {
-        public uint Id;
-        public uint Item2Id;
-        public uint Item2TypeId;
-        public uint Item2CategoryId;
-        public uint Item2FamilyId;
-        public uint VirtualItemId;
-        public uint AccountCurrencyTypeId;
-        public uint Creature2IdChest;
-        public float Mass;
-        public uint SoundEventId;
+        public uint Id { get; set; }
+        public uint Item2Id { get; set; }
+        public uint Item2TypeId { get; set; }
+        public uint Item2CategoryId { get; set; }
+        public uint Item2FamilyId { get; set; }
+        public uint VirtualItemId { get; set; }
+        public uint AccountCurrencyTypeId { get; set; }
+        public uint Creature2IdChest { get; set; }
+        public float Mass { get; set; }
+        public uint SoundEventId { get; set; }
     }
 }

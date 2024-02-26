@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class ItemProficiencyEntry
     {
-        public uint Id;
-        public uint BitMask;
-        public uint LocalizedTextIdString;
+        public uint Id { get; set; }
+        public uint BitMask { get; set; }
+        public uint LocalizedTextIdString { get; set; }
     }
 }

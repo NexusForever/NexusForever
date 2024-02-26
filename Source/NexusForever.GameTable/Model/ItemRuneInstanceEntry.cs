@@ -2,18 +2,18 @@ namespace NexusForever.GameTable.Model
 {
     public class ItemRuneInstanceEntry
     {
-        public uint Id;
-        public uint DefinedSocketCount;
-        public uint DefinedSocketType00;
-        public uint DefinedSocketType01;
-        public uint DefinedSocketType02;
-        public uint DefinedSocketType03;
-        public uint DefinedSocketType04;
-        public uint DefinedSocketType05;
-        public uint DefinedSocketType06;
-        public uint DefinedSocketType07;
-        public uint ItemSetId;
-        public uint ItemSetPower;
-        public uint SocketCountMax;
+        public uint Id { get; set; }
+        public uint DefinedSocketCount { get; set; }
+        public uint DefinedSocketType00 { get; set; }
+        public uint DefinedSocketType01 { get; set; }
+        public uint DefinedSocketType02 { get; set; }
+        public uint DefinedSocketType03 { get; set; }
+        public uint DefinedSocketType04 { get; set; }
+        public uint DefinedSocketType05 { get; set; }
+        public uint DefinedSocketType06 { get; set; }
+        public uint DefinedSocketType07 { get; set; }
+        public uint ItemSetId { get; set; }
+        public uint ItemSetPower { get; set; }
+        public uint SocketCountMax { get; set; }
     }
 }

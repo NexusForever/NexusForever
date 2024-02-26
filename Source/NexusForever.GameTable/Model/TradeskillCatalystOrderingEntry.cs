@@ -2,11 +2,11 @@ namespace NexusForever.GameTable.Model
 {
     public class TradeskillCatalystOrderingEntry
     {
-        public uint Id;
-        public uint UnlockLevel00;
-        public uint UnlockLevel01;
-        public uint UnlockLevel02;
-        public uint UnlockLevel03;
-        public uint UnlockLevel04;
+        public uint Id { get; set; }
+        public uint UnlockLevel00 { get; set; }
+        public uint UnlockLevel01 { get; set; }
+        public uint UnlockLevel02 { get; set; }
+        public uint UnlockLevel03 { get; set; }
+        public uint UnlockLevel04 { get; set; }
     }
 }

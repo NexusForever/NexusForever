@@ -2,64 +2,64 @@ namespace NexusForever.GameTable.Model
 {
     public class Creature2ModelInfoEntry
     {
-        public uint Id;
-        public string AssetPath;
-        public string AssetTexture0;
-        public string AssetTexture1;
-        public uint ModelTextureId0;
-        public uint ModelTextureId1;
-        public uint CreatureMaterialEnum;
-        public float Scale;
-        public float HitRadius;
-        public float WalkLand;
-        public float WalkAir;
-        public float WalkWater;
-        public float WalkHover;
-        public float RunLand;
-        public float RunAir;
-        public float RunWater;
-        public float RunHover;
-        public uint ItemVisualTypeIdFeet;
-        public float SwimWaterDepth;
-        public uint Race;
-        public uint Sex;
-        public uint ItemDisplayId00;
-        public uint ItemDisplayId01;
-        public uint ItemDisplayId02;
-        public uint ItemDisplayId03;
-        public uint ItemDisplayId04;
-        public uint ItemDisplayId05;
-        public uint ItemDisplayId06;
-        public uint ItemDisplayId07;
-        public uint ItemDisplayId08;
-        public uint ItemDisplayId09;
-        public uint ItemDisplayId10;
-        public uint ItemDisplayId11;
-        public uint ItemDisplayId12;
-        public uint ItemDisplayId13;
-        public uint ItemDisplayId14;
-        public uint ItemDisplayId15;
-        public uint ItemDisplayId16;
-        public uint ItemDisplayId17;
-        public uint ItemDisplayId18;
-        public uint ItemDisplayId19;
-        public uint ModelMeshId00;
-        public uint ModelMeshId01;
-        public uint ModelMeshId02;
-        public uint ModelMeshId03;
-        public uint ModelMeshId04;
-        public uint ModelMeshId05;
-        public uint ModelMeshId06;
-        public uint ModelMeshId07;
-        public uint ModelMeshId08;
-        public uint ModelMeshId09;
-        public uint ModelMeshId10;
-        public uint ModelMeshId11;
-        public uint ModelMeshId12;
-        public uint ModelMeshId13;
-        public uint ModelMeshId14;
-        public uint ModelMeshId15;
-        public float GroundOffsetHover;
-        public float GroundOffsetFly;
+        public uint Id { get; set; }
+        public string AssetPath { get; set; }
+        public string AssetTexture0 { get; set; }
+        public string AssetTexture1 { get; set; }
+        public uint ModelTextureId0 { get; set; }
+        public uint ModelTextureId1 { get; set; }
+        public uint CreatureMaterialEnum { get; set; }
+        public float Scale { get; set; }
+        public float HitRadius { get; set; }
+        public float WalkLand { get; set; }
+        public float WalkAir { get; set; }
+        public float WalkWater { get; set; }
+        public float WalkHover { get; set; }
+        public float RunLand { get; set; }
+        public float RunAir { get; set; }
+        public float RunWater { get; set; }
+        public float RunHover { get; set; }
+        public uint ItemVisualTypeIdFeet { get; set; }
+        public float SwimWaterDepth { get; set; }
+        public uint Race { get; set; }
+        public uint Sex { get; set; }
+        public uint ItemDisplayId00 { get; set; }
+        public uint ItemDisplayId01 { get; set; }
+        public uint ItemDisplayId02 { get; set; }
+        public uint ItemDisplayId03 { get; set; }
+        public uint ItemDisplayId04 { get; set; }
+        public uint ItemDisplayId05 { get; set; }
+        public uint ItemDisplayId06 { get; set; }
+        public uint ItemDisplayId07 { get; set; }
+        public uint ItemDisplayId08 { get; set; }
+        public uint ItemDisplayId09 { get; set; }
+        public uint ItemDisplayId10 { get; set; }
+        public uint ItemDisplayId11 { get; set; }
+        public uint ItemDisplayId12 { get; set; }
+        public uint ItemDisplayId13 { get; set; }
+        public uint ItemDisplayId14 { get; set; }
+        public uint ItemDisplayId15 { get; set; }
+        public uint ItemDisplayId16 { get; set; }
+        public uint ItemDisplayId17 { get; set; }
+        public uint ItemDisplayId18 { get; set; }
+        public uint ItemDisplayId19 { get; set; }
+        public uint ModelMeshId00 { get; set; }
+        public uint ModelMeshId01 { get; set; }
+        public uint ModelMeshId02 { get; set; }
+        public uint ModelMeshId03 { get; set; }
+        public uint ModelMeshId04 { get; set; }
+        public uint ModelMeshId05 { get; set; }
+        public uint ModelMeshId06 { get; set; }
+        public uint ModelMeshId07 { get; set; }
+        public uint ModelMeshId08 { get; set; }
+        public uint ModelMeshId09 { get; set; }
+        public uint ModelMeshId10 { get; set; }
+        public uint ModelMeshId11 { get; set; }
+        public uint ModelMeshId12 { get; set; }
+        public uint ModelMeshId13 { get; set; }
+        public uint ModelMeshId14 { get; set; }
+        public uint ModelMeshId15 { get; set; }
+        public float GroundOffsetHover { get; set; }
+        public float GroundOffsetFly { get; set; }
     }
 }

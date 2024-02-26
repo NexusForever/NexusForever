@@ -2,14 +2,14 @@ namespace NexusForever.GameTable.Model
 {
     public class ResourceConversionEntry
     {
-        public uint Id;
-        public uint ResourceConversionTypeEnum;
-        public uint SourceId;
-        public uint SourceCount;
-        public uint TargetId;
-        public uint TargetCount;
-        public uint SurchargeId;
-        public uint SurchargeCount;
-        public uint Flags;
+        public uint Id { get; set; }
+        public uint ResourceConversionTypeEnum { get; set; }
+        public uint SourceId { get; set; }
+        public uint SourceCount { get; set; }
+        public uint TargetId { get; set; }
+        public uint TargetCount { get; set; }
+        public uint SurchargeId { get; set; }
+        public uint SurchargeCount { get; set; }
+        public uint Flags { get; set; }
     }
 }

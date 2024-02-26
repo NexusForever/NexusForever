@@ -2,19 +2,19 @@ namespace NexusForever.GameTable.Model
 {
     public class MapZoneEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdName;
-        public uint MapContinentId;
-        public string Folder;
-        public uint HexMinX;
-        public uint HexMinY;
-        public uint HexLimX;
-        public uint HexLimY;
-        public uint Version;
-        public uint MapZoneIdParent;
-        public uint WorldZoneId;
-        public uint Flags;
-        public uint PrerequisiteIdVisibility;
-        public uint RewardTrackId;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint MapContinentId { get; set; }
+        public string Folder { get; set; }
+        public uint HexMinX { get; set; }
+        public uint HexMinY { get; set; }
+        public uint HexLimX { get; set; }
+        public uint HexLimY { get; set; }
+        public uint Version { get; set; }
+        public uint MapZoneIdParent { get; set; }
+        public uint WorldZoneId { get; set; }
+        public uint Flags { get; set; }
+        public uint PrerequisiteIdVisibility { get; set; }
+        public uint RewardTrackId { get; set; }
     }
 }

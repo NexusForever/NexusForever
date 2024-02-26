@@ -2,14 +2,14 @@ namespace NexusForever.GameTable.Model
 {
     public class HookAssetEntry
     {
-        public uint Id;
-        public string Asset;
-        public float Scale;
-        public float OffsetX;
-        public float OffsetY;
-        public float OffsetZ;
-        public float RotationX;
-        public float RotationY;
-        public float RotationZ;
+        public uint Id { get; set; }
+        public string Asset { get; set; }
+        public float Scale { get; set; }
+        public float OffsetX { get; set; }
+        public float OffsetY { get; set; }
+        public float OffsetZ { get; set; }
+        public float RotationX { get; set; }
+        public float RotationY { get; set; }
+        public float RotationZ { get; set; }
     }
 }

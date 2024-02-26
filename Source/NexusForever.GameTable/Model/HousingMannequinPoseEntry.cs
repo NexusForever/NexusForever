@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class HousingMannequinPoseEntry
     {
-        public uint Id;
-        public string EnumName;
-        public uint LocalizedTextId;
-        public uint ModelSequenceId;
+        public uint Id { get; set; }
+        public string EnumName { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public uint ModelSequenceId { get; set; }
     }
 }

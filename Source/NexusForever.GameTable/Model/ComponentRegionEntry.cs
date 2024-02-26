@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class ComponentRegionEntry
     {
-        public uint Id;
-        public string EnumName;
-        public uint ComponentMap;
+        public uint Id { get; set; }
+        public string EnumName { get; set; }
+        public uint ComponentMap { get; set; }
     }
 }

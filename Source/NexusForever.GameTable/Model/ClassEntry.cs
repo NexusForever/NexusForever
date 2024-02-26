@@ -2,72 +2,72 @@ namespace NexusForever.GameTable.Model
 {
     public class ClassEntry
     {
-        public uint Id;
-        public string EnumName;
-        public uint LocalizedTextId;
-        public uint LocalizedTextIdNameFemale;
-        public uint Mechanic;
+        public uint Id { get; set; }
+        public string EnumName { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public uint LocalizedTextIdNameFemale { get; set; }
+        public uint Mechanic { get; set; }
 
         [GameTableFieldArray(3)]
-        public uint[] Spell4IdInnateAbilityActive;
+        public uint[] Spell4IdInnateAbilityActive { get; set; }
 
         [GameTableFieldArray(3)]
-        public uint[] Spell4IdInnateAbilityPassive;
+        public uint[] Spell4IdInnateAbilityPassive { get; set; }
 
         [GameTableFieldArray(3)]
-        public uint[] PrerequisiteIdInnateAbility;
+        public uint[] PrerequisiteIdInnateAbility { get; set; }
 
-        public uint StartingItemProficiencies;
+        public uint StartingItemProficiencies { get; set; }
 
         [GameTableFieldArray(2)]
-        public uint[] Spell4IdAttackPrimary;
+        public uint[] Spell4IdAttackPrimary { get; set; }
 
         [GameTableFieldArray(2)]
-        public uint[] Spell4IdAttackUnarmed;
+        public uint[] Spell4IdAttackUnarmed { get; set; }
 
-        public uint Spell4IdResAbility;
-        public uint LocalizedTextIdDescription;
-        public uint Spell4GroupId;
-        public uint ClassIdForClassApModifier;
-        public uint VitalEnumResource00;
-        public uint VitalEnumResource01;
-        public uint VitalEnumResource02;
-        public uint VitalEnumResource03;
-        public uint VitalEnumResource04;
-        public uint VitalEnumResource05;
-        public uint VitalEnumResource06;
-        public uint VitalEnumResource07;
-        public uint LocalizedTextIdResourceAlert00;
-        public uint LocalizedTextIdResourceAlert01;
-        public uint LocalizedTextIdResourceAlert02;
-        public uint LocalizedTextIdResourceAlert03;
-        public uint LocalizedTextIdResourceAlert04;
-        public uint LocalizedTextIdResourceAlert05;
-        public uint LocalizedTextIdResourceAlert06;
-        public uint LocalizedTextIdResourceAlert07;
-        public uint AttributeMilestoneGroupId00;
-        public uint AttributeMilestoneGroupId01;
-        public uint AttributeMilestoneGroupId02;
-        public uint AttributeMilestoneGroupId03;
-        public uint AttributeMilestoneGroupId04;
-        public uint AttributeMilestoneGroupId05;
-        public uint ClassSecondaryStatBonusId00;
-        public uint ClassSecondaryStatBonusId01;
-        public uint ClassSecondaryStatBonusId02;
-        public uint ClassSecondaryStatBonusId03;
-        public uint ClassSecondaryStatBonusId04;
-        public uint ClassSecondaryStatBonusId05;
-        public uint AttributeMiniMilestoneGroupId00;
-        public uint AttributeMiniMilestoneGroupId01;
-        public uint AttributeMiniMilestoneGroupId02;
-        public uint AttributeMiniMilestoneGroupId03;
-        public uint AttributeMiniMilestoneGroupId04;
-        public uint AttributeMiniMilestoneGroupId05;
-        public uint AttributeMilestoneMaxTiers00;
-        public uint AttributeMilestoneMaxTiers01;
-        public uint AttributeMilestoneMaxTiers02;
-        public uint AttributeMilestoneMaxTiers03;
-        public uint AttributeMilestoneMaxTiers04;
-        public uint AttributeMilestoneMaxTiers05;
+        public uint Spell4IdResAbility { get; set; }
+        public uint LocalizedTextIdDescription { get; set; }
+        public uint Spell4GroupId { get; set; }
+        public uint ClassIdForClassApModifier { get; set; }
+        public uint VitalEnumResource00 { get; set; }
+        public uint VitalEnumResource01 { get; set; }
+        public uint VitalEnumResource02 { get; set; }
+        public uint VitalEnumResource03 { get; set; }
+        public uint VitalEnumResource04 { get; set; }
+        public uint VitalEnumResource05 { get; set; }
+        public uint VitalEnumResource06 { get; set; }
+        public uint VitalEnumResource07 { get; set; }
+        public uint LocalizedTextIdResourceAlert00 { get; set; }
+        public uint LocalizedTextIdResourceAlert01 { get; set; }
+        public uint LocalizedTextIdResourceAlert02 { get; set; }
+        public uint LocalizedTextIdResourceAlert03 { get; set; }
+        public uint LocalizedTextIdResourceAlert04 { get; set; }
+        public uint LocalizedTextIdResourceAlert05 { get; set; }
+        public uint LocalizedTextIdResourceAlert06 { get; set; }
+        public uint LocalizedTextIdResourceAlert07 { get; set; }
+        public uint AttributeMilestoneGroupId00 { get; set; }
+        public uint AttributeMilestoneGroupId01 { get; set; }
+        public uint AttributeMilestoneGroupId02 { get; set; }
+        public uint AttributeMilestoneGroupId03 { get; set; }
+        public uint AttributeMilestoneGroupId04 { get; set; }
+        public uint AttributeMilestoneGroupId05 { get; set; }
+        public uint ClassSecondaryStatBonusId00 { get; set; }
+        public uint ClassSecondaryStatBonusId01 { get; set; }
+        public uint ClassSecondaryStatBonusId02 { get; set; }
+        public uint ClassSecondaryStatBonusId03 { get; set; }
+        public uint ClassSecondaryStatBonusId04 { get; set; }
+        public uint ClassSecondaryStatBonusId05 { get; set; }
+        public uint AttributeMiniMilestoneGroupId00 { get; set; }
+        public uint AttributeMiniMilestoneGroupId01 { get; set; }
+        public uint AttributeMiniMilestoneGroupId02 { get; set; }
+        public uint AttributeMiniMilestoneGroupId03 { get; set; }
+        public uint AttributeMiniMilestoneGroupId04 { get; set; }
+        public uint AttributeMiniMilestoneGroupId05 { get; set; }
+        public uint AttributeMilestoneMaxTiers00 { get; set; }
+        public uint AttributeMilestoneMaxTiers01 { get; set; }
+        public uint AttributeMilestoneMaxTiers02 { get; set; }
+        public uint AttributeMilestoneMaxTiers03 { get; set; }
+        public uint AttributeMilestoneMaxTiers04 { get; set; }
+        public uint AttributeMilestoneMaxTiers05 { get; set; }
     }
 }

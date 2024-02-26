@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class Spell4ServiceTokenCostEntry
     {
-        public uint Id;
-        public uint Spell4Id;
-        public uint ServiceTokenCost;
+        public uint Id { get; set; }
+        public uint Spell4Id { get; set; }
+        public uint ServiceTokenCost { get; set; }
     }
 }

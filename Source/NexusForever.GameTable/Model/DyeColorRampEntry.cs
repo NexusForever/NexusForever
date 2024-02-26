@@ -2,12 +2,12 @@ namespace NexusForever.GameTable.Model
 {
     public class DyeColorRampEntry
     {
-        public uint Id;
-        public uint Flags;
-        public uint LocalizedTextIdName;
-        public uint RampIndex;
-        public float CostMultiplier;
-        public uint ComponentMapEnum;
-        public uint PrerequisiteId;
+        public uint Id { get; set; }
+        public uint Flags { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint RampIndex { get; set; }
+        public float CostMultiplier { get; set; }
+        public uint ComponentMapEnum { get; set; }
+        public uint PrerequisiteId { get; set; }
     }
 }

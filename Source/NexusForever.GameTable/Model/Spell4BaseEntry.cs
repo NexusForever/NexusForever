@@ -2,47 +2,47 @@ namespace NexusForever.GameTable.Model
 {
     public class Spell4BaseEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdName;
-        public uint Spell4HitResultId;
-        public uint Spell4TargetMechanicId;
-        public uint Spell4TargetAngleId;
-        public uint Spell4PrerequisiteId;
-        public uint Spell4ValidTargetId;
-        public uint TargetGroupIdCastGroup;
-        public uint Creature2IdPositionalAoe;
-        public float ParameterAEAngle;
-        public float ParameterAEMaxAngle;
-        public float ParameterAEDistance;
-        public float ParameterAEMaxDistance;
-        public uint TargetGroupIdAoeGroup;
-        public uint Spell4BaseIdPrerequisiteSpell;
-        public uint WorldZoneIdZoneRequired;
-        public uint Spell4SpellTypesIdSpellType;
-        public string Icon;
-        public uint CastMethod;
-        public uint School;
-        public uint SpellClass;
-        public uint WeaponSlot;
-        public uint CastBarType;
-        public float MechanicAggressionMagnitude;
-        public float MechanicDominationMagnitude;
-        public uint ModelSequencePriorityCaster;
-        public uint ModelSequencePriorityTarget;
-        public uint ClassIdPlayer;
-        public uint ClientSideInteractionId;
-        public uint TargetingFlags;
-        public uint TelegraphFlagsEnum;
-        public uint LocalizedTextIdLASTierPoint;
-        public float LasTierPointTooltipData00;
-        public float LasTierPointTooltipData01;
-        public float LasTierPointTooltipData02;
-        public float LasTierPointTooltipData03;
-        public float LasTierPointTooltipData04;
-        public float LasTierPointTooltipData05;
-        public float LasTierPointTooltipData06;
-        public float LasTierPointTooltipData07;
-        public float LasTierPointTooltipData08;
-        public float LasTierPointTooltipData09;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint Spell4HitResultId { get; set; }
+        public uint Spell4TargetMechanicId { get; set; }
+        public uint Spell4TargetAngleId { get; set; }
+        public uint Spell4PrerequisiteId { get; set; }
+        public uint Spell4ValidTargetId { get; set; }
+        public uint TargetGroupIdCastGroup { get; set; }
+        public uint Creature2IdPositionalAoe { get; set; }
+        public float ParameterAEAngle { get; set; }
+        public float ParameterAEMaxAngle { get; set; }
+        public float ParameterAEDistance { get; set; }
+        public float ParameterAEMaxDistance { get; set; }
+        public uint TargetGroupIdAoeGroup { get; set; }
+        public uint Spell4BaseIdPrerequisiteSpell { get; set; }
+        public uint WorldZoneIdZoneRequired { get; set; }
+        public uint Spell4SpellTypesIdSpellType { get; set; }
+        public string Icon { get; set; }
+        public uint CastMethod { get; set; }
+        public uint School { get; set; }
+        public uint SpellClass { get; set; }
+        public uint WeaponSlot { get; set; }
+        public uint CastBarType { get; set; }
+        public float MechanicAggressionMagnitude { get; set; }
+        public float MechanicDominationMagnitude { get; set; }
+        public uint ModelSequencePriorityCaster { get; set; }
+        public uint ModelSequencePriorityTarget { get; set; }
+        public uint ClassIdPlayer { get; set; }
+        public uint ClientSideInteractionId { get; set; }
+        public uint TargetingFlags { get; set; }
+        public uint TelegraphFlagsEnum { get; set; }
+        public uint LocalizedTextIdLASTierPoint { get; set; }
+        public float LasTierPointTooltipData00 { get; set; }
+        public float LasTierPointTooltipData01 { get; set; }
+        public float LasTierPointTooltipData02 { get; set; }
+        public float LasTierPointTooltipData03 { get; set; }
+        public float LasTierPointTooltipData04 { get; set; }
+        public float LasTierPointTooltipData05 { get; set; }
+        public float LasTierPointTooltipData06 { get; set; }
+        public float LasTierPointTooltipData07 { get; set; }
+        public float LasTierPointTooltipData08 { get; set; }
+        public float LasTierPointTooltipData09 { get; set; }
     }
 }

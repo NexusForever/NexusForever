@@ -2,7 +2,7 @@ namespace NexusForever.GameTable.Model
 {
     public class TradeskillMaterialCategoryEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdName;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdName { get; set; }
     }
 }

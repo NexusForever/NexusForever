@@ -2,8 +2,8 @@ namespace NexusForever.GameTable.Model
 {
     public class HousingContributionTypeEntry
     {
-        public uint Id;
-        public string Description;
-        public string EnumName;
+        public uint Id { get; set; }
+        public string Description { get; set; }
+        public string EnumName { get; set; }
     }
 }

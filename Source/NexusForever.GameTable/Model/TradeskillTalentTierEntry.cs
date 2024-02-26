@@ -2,14 +2,14 @@ namespace NexusForever.GameTable.Model
 {
     public class TradeskillTalentTierEntry
     {
-        public uint Id;
-        public uint TradeSkillId;
-        public uint PointsToUnlock;
-        public uint RespecCost;
-        public uint TradeSkillBonusId00;
-        public uint TradeSkillBonusId01;
-        public uint TradeSkillBonusId02;
-        public uint TradeSkillBonusId03;
-        public uint TradeSkillBonusId04;
+        public uint Id { get; set; }
+        public uint TradeSkillId { get; set; }
+        public uint PointsToUnlock { get; set; }
+        public uint RespecCost { get; set; }
+        public uint TradeSkillBonusId00 { get; set; }
+        public uint TradeSkillBonusId01 { get; set; }
+        public uint TradeSkillBonusId02 { get; set; }
+        public uint TradeSkillBonusId03 { get; set; }
+        public uint TradeSkillBonusId04 { get; set; }
     }
 }

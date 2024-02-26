@@ -2,33 +2,33 @@ namespace NexusForever.GameTable.Model
 {
     public class PathScientistFieldStudyEntry
     {
-        public uint Id;
-        public uint Creature2Id;
-        public uint TargetGroupId;
-        public uint PathScientistFieldStudyFlags;
-        public uint LocalizedTextIdChecklist00;
-        public uint LocalizedTextIdChecklist01;
-        public uint LocalizedTextIdChecklist02;
-        public uint LocalizedTextIdChecklist03;
-        public uint LocalizedTextIdChecklist04;
-        public uint LocalizedTextIdChecklist05;
-        public uint LocalizedTextIdChecklist06;
-        public uint LocalizedTextIdChecklist07;
-        public uint WorldLocation2IdIndicator00;
-        public uint WorldLocation2IdIndicator01;
-        public uint WorldLocation2IdIndicator02;
-        public uint WorldLocation2IdIndicator03;
-        public uint WorldLocation2IdIndicator04;
-        public uint WorldLocation2IdIndicator05;
-        public uint WorldLocation2IdIndicator06;
-        public uint WorldLocation2IdIndicator07;
-        public uint BehaviorType00;
-        public uint BehaviorType01;
-        public uint BehaviorType02;
-        public uint BehaviorType03;
-        public uint BehaviorType04;
-        public uint BehaviorType05;
-        public uint BehaviorType06;
-        public uint BehaviorType07;
+        public uint Id { get; set; }
+        public uint Creature2Id { get; set; }
+        public uint TargetGroupId { get; set; }
+        public uint PathScientistFieldStudyFlags { get; set; }
+        public uint LocalizedTextIdChecklist00 { get; set; }
+        public uint LocalizedTextIdChecklist01 { get; set; }
+        public uint LocalizedTextIdChecklist02 { get; set; }
+        public uint LocalizedTextIdChecklist03 { get; set; }
+        public uint LocalizedTextIdChecklist04 { get; set; }
+        public uint LocalizedTextIdChecklist05 { get; set; }
+        public uint LocalizedTextIdChecklist06 { get; set; }
+        public uint LocalizedTextIdChecklist07 { get; set; }
+        public uint WorldLocation2IdIndicator00 { get; set; }
+        public uint WorldLocation2IdIndicator01 { get; set; }
+        public uint WorldLocation2IdIndicator02 { get; set; }
+        public uint WorldLocation2IdIndicator03 { get; set; }
+        public uint WorldLocation2IdIndicator04 { get; set; }
+        public uint WorldLocation2IdIndicator05 { get; set; }
+        public uint WorldLocation2IdIndicator06 { get; set; }
+        public uint WorldLocation2IdIndicator07 { get; set; }
+        public uint BehaviorType00 { get; set; }
+        public uint BehaviorType01 { get; set; }
+        public uint BehaviorType02 { get; set; }
+        public uint BehaviorType03 { get; set; }
+        public uint BehaviorType04 { get; set; }
+        public uint BehaviorType05 { get; set; }
+        public uint BehaviorType06 { get; set; }
+        public uint BehaviorType07 { get; set; }
     }
 }

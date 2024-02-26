@@ -2,37 +2,37 @@ namespace NexusForever.GameTable.Model
 {
     public class TradeskillSchematic2Entry
     {
-        public uint Id;
-        public uint LocalizedTextIdName;
-        public uint TradeSkillId;
-        public uint Item2IdOutput;
-        public uint Item2IdOutputFail;
-        public uint OutputCount;
-        public uint LootId;
-        public uint Tier;
-        public uint Flags;
-        public uint Item2IdMaterial00;
-        public uint Item2IdMaterial01;
-        public uint Item2IdMaterial02;
-        public uint Item2IdMaterial03;
-        public uint Item2IdMaterial04;
-        public uint MaterialCost00;
-        public uint MaterialCost01;
-        public uint MaterialCost02;
-        public uint MaterialCost03;
-        public uint MaterialCost04;
-        public uint TradeskillSchematic2IdParent;
-        public float VectorX;
-        public float VectorY;
-        public float Radius;
-        public float CritRadius;
-        public uint Item2IdOutputCrit;
-        public uint OutputCountCritBonus;
-        public uint Priority;
-        public uint MaxAdditives;
-        public uint DiscoverableQuadrant;
-        public float DiscoverableRadius;
-        public float DiscoverableAngle;
-        public uint TradeskillCatalystOrderingId;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint TradeSkillId { get; set; }
+        public uint Item2IdOutput { get; set; }
+        public uint Item2IdOutputFail { get; set; }
+        public uint OutputCount { get; set; }
+        public uint LootId { get; set; }
+        public uint Tier { get; set; }
+        public uint Flags { get; set; }
+        public uint Item2IdMaterial00 { get; set; }
+        public uint Item2IdMaterial01 { get; set; }
+        public uint Item2IdMaterial02 { get; set; }
+        public uint Item2IdMaterial03 { get; set; }
+        public uint Item2IdMaterial04 { get; set; }
+        public uint MaterialCost00 { get; set; }
+        public uint MaterialCost01 { get; set; }
+        public uint MaterialCost02 { get; set; }
+        public uint MaterialCost03 { get; set; }
+        public uint MaterialCost04 { get; set; }
+        public uint TradeskillSchematic2IdParent { get; set; }
+        public float VectorX { get; set; }
+        public float VectorY { get; set; }
+        public float Radius { get; set; }
+        public float CritRadius { get; set; }
+        public uint Item2IdOutputCrit { get; set; }
+        public uint OutputCountCritBonus { get; set; }
+        public uint Priority { get; set; }
+        public uint MaxAdditives { get; set; }
+        public uint DiscoverableQuadrant { get; set; }
+        public float DiscoverableRadius { get; set; }
+        public float DiscoverableAngle { get; set; }
+        public uint TradeskillCatalystOrderingId { get; set; }
     }
 }

@@ -2,12 +2,12 @@ namespace NexusForever.GameTable.Model
 {
     public class GuildPermissionEntry
     {
-        public uint Id;
-        public uint LocalizedTextIdName;
-        public uint LocalizedTextIdDescription;
-        public string LuaVariable;
-        public uint LocalizedTextIdCommand;
-        public uint GuildTypeEnumFlags;
-        public uint DisplayIndex;
+        public uint Id { get; set; }
+        public uint LocalizedTextIdName { get; set; }
+        public uint LocalizedTextIdDescription { get; set; }
+        public string LuaVariable { get; set; }
+        public uint LocalizedTextIdCommand { get; set; }
+        public uint GuildTypeEnumFlags { get; set; }
+        public uint DisplayIndex { get; set; }
     }
 }

@@ -2,19 +2,19 @@ namespace NexusForever.GameTable.Model
 {
     public class Spline2NodeEntry
     {
-        public uint Id;
-        public uint SplineId;
-        public uint Ordinal;
-        public float Position0;
-        public float Position1;
-        public float Position2;
-        public float Facing0;
-        public float Facing1;
-        public float Facing2;
-        public float Facing3;
-        public uint EventId;
-        public float FrameTime;
-        public float Delay;
-        public float Fovy;
+        public uint Id { get; set; }
+        public uint SplineId { get; set; }
+        public uint Ordinal { get; set; }
+        public float Position0 { get; set; }
+        public float Position1 { get; set; }
+        public float Position2 { get; set; }
+        public float Facing0 { get; set; }
+        public float Facing1 { get; set; }
+        public float Facing2 { get; set; }
+        public float Facing3 { get; set; }
+        public uint EventId { get; set; }
+        public float FrameTime { get; set; }
+        public float Delay { get; set; }
+        public float Fovy { get; set; }
     }
 }

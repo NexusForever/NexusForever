@@ -2,15 +2,15 @@ namespace NexusForever.GameTable.Model
 {
     public class Spell4EffectModificationEntry
     {
-        public uint Id;
-        public uint Spell4EffectsId;
-        public uint EffectTypeEnum;
-        public uint ModificationParameterEnum;
-        public uint Priority;
-        public uint ModificationTypeEnum;
-        public float Data00;
-        public float Data01;
-        public float Data02;
-        public float Data03;
+        public uint Id { get; set; }
+        public uint Spell4EffectsId { get; set; }
+        public uint EffectTypeEnum { get; set; }
+        public uint ModificationParameterEnum { get; set; }
+        public uint Priority { get; set; }
+        public uint ModificationTypeEnum { get; set; }
+        public float Data00 { get; set; }
+        public float Data01 { get; set; }
+        public float Data02 { get; set; }
+        public float Data03 { get; set; }
     }
 }

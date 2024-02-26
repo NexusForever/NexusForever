@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class SoundCombatLoopEntry
     {
-        public uint Id;
-        public uint SoundEventIdStart;
-        public uint SoundEventIdStop;
-        public uint SoundParameterIdUnitsInCombat;
+        public uint Id { get; set; }
+        public uint SoundEventIdStart { get; set; }
+        public uint SoundEventIdStop { get; set; }
+        public uint SoundParameterIdUnitsInCombat { get; set; }
     }
 }
