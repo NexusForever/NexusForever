@@ -2,9 +2,9 @@ namespace NexusForever.GameTable.Model
 {
     public class AccountCurrencyTypeEntry
     {
-        public uint Id;
-        public uint LocalizedTextId;
-        public string IconName;
-        public uint AccountItemId;
+        public uint Id { get; set; }
+        public uint LocalizedTextId { get; set; }
+        public string IconName { get; set; }
+        public uint AccountItemId { get; set; }
     }
 }
