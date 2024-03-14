@@ -35,6 +35,11 @@ namespace NexusForever.Game.Abstract.Entity
         uint GetInventorySlotsRemaining(InventoryLocation location);
 
         /// <summary>
+        /// Returns if the count of items with id exists in <see cref="InventoryLocation.Inventory"/>.
+        /// </summary>
+        bool HasItemCount(uint itemId, uint count);
+
+        /// <summary>
         /// Return <see cref="IItem"/> at supplied <see cref="ItemLocation"/>.
         /// </summary>
         IItem GetItem(ItemLocation itemLocation);

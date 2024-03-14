@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Entity;
+using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -21,20 +22,13 @@ namespace NexusForever.Network.World.Message.Model
         {
             public class ItemExtraCost : IWritable
             {
-                public enum ItemExtraCostType : byte
-                {
-                    None = 0,
-                    Item = 1,
-                    Currency = 2
-                }
-                
                 public ItemExtraCostType ExtraCostType { get; set; }
                 public uint Quantity { get; set; }
                 public uint ItemOrCurrencyId { get; set; }
 
                 public void Write(GamePacketWriter writer)
                 {
-                    writer.Write((byte)ExtraCostType, 3);
+                    writer.Write(ExtraCostType, 3);
                     writer.Write(Quantity);
                     writer.Write(ItemOrCurrencyId);
                 }
