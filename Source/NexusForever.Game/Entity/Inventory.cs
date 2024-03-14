@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
@@ -133,6 +134,25 @@ namespace NexusForever.Game.Entity
                 throw new ArgumentException();
 
             return bag.SlotsRemaining;
+        }
+
+        /// <summary>
+        /// Returns if the count of items with id exists in <see cref="InventoryLocation.Inventory"/>.
+        /// </summary>
+        public bool HasItemCount(uint itemId, uint count)
+        {
+            IBag bag = GetBag(InventoryLocation.Inventory);
+            if (bag == null)
+                throw new ArgumentException();
+
+            foreach (IItem item in bag.Where(i => i.Id == itemId))
+            {
+                count -= Math.Min(count, item.StackCount);
+                if (count == 0)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -557,7 +577,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Delete a supplied amount of an <see cref="IItem"/>.
         /// </summary>
-        public void ItemDelete(uint itemId, uint count = 1u)
+        public void ItemDelete(uint itemId, uint count = 1u, ItemUpdateReason reason = ItemUpdateReason.Loot)
         {
             IBag bag = GetBag(InventoryLocation.Inventory);
             foreach (IItem item in bag.Where(i => i.Id == itemId))
@@ -569,7 +589,7 @@ namespace NexusForever.Game.Entity
                 }
                 else
                 {
-                    ItemDelete(bag, item, ItemUpdateReason.Loot);
+                    ItemDelete(bag, item, reason);
                     count -= item.StackCount;
                 }
 

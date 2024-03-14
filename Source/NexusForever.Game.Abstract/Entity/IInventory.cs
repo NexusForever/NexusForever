@@ -35,6 +35,11 @@ namespace NexusForever.Game.Abstract.Entity
         uint GetInventorySlotsRemaining(InventoryLocation location);
 
         /// <summary>
+        /// Returns if the count of items with id exists in <see cref="InventoryLocation.Inventory"/>.
+        /// </summary>
+        bool HasItemCount(uint itemId, uint count);
+
+        /// <summary>
         /// Return <see cref="IItem"/> at supplied <see cref="ItemLocation"/>.
         /// </summary>
         IItem GetItem(ItemLocation itemLocation);
@@ -102,7 +107,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Delete a supplied amount of an item.
         /// </summary>
-        void ItemDelete(uint itemId, uint count = 1);
+        void ItemDelete(uint itemId, uint count = 1, ItemUpdateReason reason = ItemUpdateReason.Loot);
 
         /// <summary>
         /// Remove <see cref="IItem"/> from this player's inventory without deleting the item from the DB

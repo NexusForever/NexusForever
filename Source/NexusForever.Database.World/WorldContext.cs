@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Database.World
 {
@@ -305,6 +307,38 @@ namespace NexusForever.Database.World
 
                 entity.Property(e => e.ItemId)
                     .HasColumnName("itemId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ExtraCost1Type)
+                    .HasColumnName("extraCost1Type")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(ItemExtraCostType.None)
+                    .HasConversion<EnumToNumberConverter<ItemExtraCostType, byte>>();
+                
+                entity.Property(e => e.ExtraCost1Quantity)
+                    .HasColumnName("extraCost1Quantity")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost1ItemOrCurrencyId)
+                    .HasColumnName("extraCost1ItemOrCurrencyId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost2Type)
+                    .HasColumnName("extraCost2Type")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(ItemExtraCostType.None)
+                    .HasConversion<EnumToNumberConverter<ItemExtraCostType, byte>>();
+
+                entity.Property(e => e.ExtraCost2Quantity)
+                    .HasColumnName("extraCost2Quantity")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost2ItemOrCurrencyId)
+                    .HasColumnName("extraCost2ItemOrCurrencyId")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
