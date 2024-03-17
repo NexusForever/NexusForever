@@ -559,6 +559,8 @@ namespace NexusForever.Game.Entity
             SendCharacterFlagsUpdated();
 
             base.OnAddToMap(map, guid, vector);
+            
+            SpellManager.ApplyAmps();
 
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
