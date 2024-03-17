@@ -165,16 +165,6 @@ namespace NexusForever.Game.Entity
             {
             });
 
-            // sets vehicle guid, seat type and seat position to local self entity at client
-            // might not be correct as ServerVehiclePassengerAdd does this too, used for changing seats instead?
-            player.Session.EnqueueMessageEncrypted(new Server089B
-            {
-                Self         = passenger.Guid,
-                Vehicle      = Guid,
-                SeatType     = passenger.SeatType,
-                SeatPosition = passenger.SeatPosition
-            });
-
             EnqueueToVisible(new ServerVehiclePassengerAdd
             {
                 Self         = Guid,

@@ -721,11 +721,33 @@ namespace NexusForever.Game.Entity
                 Session.EnqueueMessageEncrypted(worldEntity.BuildCreatePacket());
 
             if (entity is IPlayer playerEntity)
+            {
+                // Inform this player of visible player's path. This appears to be just used by the tooltip system.
                 Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
                 {
                     Guid = playerEntity.Guid,
                     Path = playerEntity.Path
                 });
+
+                // Send a packet to "connect" the player to their vehicle.
+                // This is more prevalent of a problem when we use 0x08B3 after every non-player entity's ServerEntityCreate packet like live packets did.
+                if (playerEntity.VehicleGuid > 0)
+                {
+                    IVehicle vehicle = Map.GetEntity<IVehicle>(playerEntity.VehicleGuid);
+                    if (vehicle != null)
+                    {
+                        IVehiclePassenger passenger = vehicle.ToList().SingleOrDefault(p => p.Guid == playerEntity.Guid);
+                        if (passenger != null)
+                            Session.EnqueueMessageEncrypted(new ServerVehiclePassengerSet
+                            {
+                                Self = passenger.Guid,
+                                Vehicle = vehicle.Guid,
+                                SeatType = passenger.SeatType,
+                                SeatPosition = passenger.SeatPosition
+                            });
+                    }
+                }
+            }
 
             if (entity == this)
             {
