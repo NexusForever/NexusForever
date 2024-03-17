@@ -32,6 +32,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (session.Player.ControlGuid != null)
                 mover = session.Player.GetVisible<IWorldEntity>(session.Player.ControlGuid.Value);
 
+            if (session.Player.IsEmoting)
+                session.Player.IsEmoting = false;
+
             if (mover == null)
                 return;
 

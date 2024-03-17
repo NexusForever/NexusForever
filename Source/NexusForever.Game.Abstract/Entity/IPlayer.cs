@@ -52,6 +52,7 @@ namespace NexusForever.Game.Abstract.Entity
         uint? VanityPetGuid { get; set; }
 
         bool IsSitting { get; }
+        bool IsEmoting { get; set; }
 
         /// <summary>
         /// Returns if <see cref="IPlayer"/> has premium signature subscription.

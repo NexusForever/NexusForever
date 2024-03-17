@@ -155,7 +155,8 @@ namespace NexusForever.Network.Message
         ClientPacked                    = 0x025C, // the same as ClientEncrypted except the contents isn't encrypted?
         ServerPlayerCreate              = 0x025E,
         ServerEntityCreate              = 0x0262,
-        ServerNewCustomerSurveyRequest = 0x033E,
+        ServerEntityVisualEffect        = 0x0263,
+        ServerNewCustomerSurveyRequest  = 0x033E,
         ClientCustomerSurveySubmit      = 0x033F,
         ClientCharacterDelete           = 0x0352,
         ServerEntityDestroy             = 0x0355,
@@ -171,6 +172,7 @@ namespace NexusForever.Network.Message
         ClientQuestRetry                = 0x0365,
         ServerForceKick                 = 0x036A,
         ClientEmote                     = 0x037E,
+        ServerEntityEmote               = 0x037F,
         ClientCostumeItemForget         = 0x038B,
         ClientPackedWorld               = 0x038C,
         Server03AA                      = 0x03AA, // friendship account related
