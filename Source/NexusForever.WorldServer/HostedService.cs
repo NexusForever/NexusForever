@@ -9,6 +9,7 @@ using NexusForever.Game;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
+using NexusForever.Game.Combat;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Entity.Movement;
@@ -99,6 +100,8 @@ namespace NexusForever.WorldServer
             CharacterManager.Instance.Initialise(); // must be initialised before residences
             GlobalResidenceManager.Instance.Initialise();
             GlobalGuildManager.Instance.ValidateCommunityResidences();
+            
+            DamageCalculator.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
             ItemManager.Instance.Initialise();

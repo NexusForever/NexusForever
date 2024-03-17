@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
+using NexusForever.Game.Combat;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Guild;
@@ -32,6 +33,7 @@ namespace NexusForever.Game
             sc.AddSingletonLegacy<IRealmContext, RealmContext>();
             sc.AddSingletonLegacy<IShutdownManager, ShutdownManager>();
             sc.AddSingletonLegacy<IStoryBuilder, StoryBuilder>();
+            sc.AddSingletonLegacy<IDamageCalculator, DamageCalculator>();
 
             sc.AddGameAchievement();
             sc.AddGameCharacter();
