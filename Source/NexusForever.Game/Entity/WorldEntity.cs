@@ -274,9 +274,11 @@ namespace NexusForever.Game.Entity
             if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
             {
                 Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId.Value);
-                OnZoneUpdate();
-
-                scriptCollection?.Invoke<IWorldEntityScript>(s => s.OnEnterZone(this, Zone.Id));
+                if (Zone != null)
+                {
+                    OnZoneUpdate();
+                    scriptCollection?.Invoke<IWorldEntityScript>(s => s.OnEnterZone(this, Zone.Id));
+                }
             }
         }
 
