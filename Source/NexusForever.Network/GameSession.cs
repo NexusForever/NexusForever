@@ -157,8 +157,7 @@ namespace NexusForever.Network
                 HandlePacket(packet);
 
             // flush pending packet queue
-            while (CanProcessOutgoingPackets && outgoingPackets.TryDequeue(out ServerGamePacket packet))
-                FlushPacket(packet);
+            FlushPackets();
         }
 
         protected void HandlePacket(ClientGamePacket packet)
@@ -210,6 +209,28 @@ namespace NexusForever.Network
             }
         }
 
+        /// <summary>
+        /// Flush all pending packets to the client.
+        /// </summary>
+        public void FlushPackets()
+        {
+            while (CanProcessOutgoingPackets && outgoingPackets.TryDequeue(out ServerGamePacket packet))
+                FlushPacket(packet);
+        }
+
+        private void FlushPacket(ServerGamePacket packet)
+        {
+            using (var stream = new MemoryStream())
+            using (var writer = new GamePacketWriter(stream))
+            {
+                writer.Write(packet.Size);
+                writer.Write(packet.Opcode, 16);
+                writer.WriteBytes(packet.Data);
+
+                SendRaw(stream.ToArray());
+            }
+        }
+
         [MessageHandler(GameMessageOpcode.ClientEncrypted)]
         private void HandleEncryptedPacket(ClientEncrypted encrypted)
         {
@@ -224,19 +245,6 @@ namespace NexusForever.Network
         {
             var packet = new ClientGamePacket(packed.Data);
             HandlePacket(packet);
-        }
-
-        private void FlushPacket(ServerGamePacket packet)
-        {
-            using (var stream = new MemoryStream())
-            using (var writer = new GamePacketWriter(stream))
-            {
-                writer.Write(packet.Size);
-                writer.Write(packet.Opcode, 16);
-                writer.WriteBytes(packet.Data);
-
-                SendRaw(stream.ToArray());
-            }
         }
     }
 }

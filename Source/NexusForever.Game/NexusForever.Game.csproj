@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Entity\Movement\Spline\Type\SplineTypeCatmullRom.cs~RF91b9243.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NexusForever.Database.Auth\NexusForever.Database.Auth.csproj" />
     <ProjectReference Include="..\NexusForever.Database.Character\NexusForever.Database.Character.csproj" />
     <ProjectReference Include="..\NexusForever.Database.World\NexusForever.Database.World.csproj" />

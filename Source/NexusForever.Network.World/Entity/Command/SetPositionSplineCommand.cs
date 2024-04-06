@@ -1,3 +1,5 @@
+using System.Numerics;
+using NexusForever.Game.Static.Entity.Movement.Command;
 using NexusForever.Game.Static.Entity.Movement.Spline;
 
 namespace NexusForever.Network.World.Entity.Command
@@ -8,7 +10,7 @@ namespace NexusForever.Network.World.Entity.Command
         public uint SplineId { get; set; }
         public float Speed { get; set; }
         public float Position { get; set; }
-        public Formation FormationData { get; set; } = new();
+        public Vector3 FormationData { get; set; }
         public SplineMode Mode { get; set; }
         public uint Offset { get; set; }
         public bool Blend { get; set; }
@@ -17,14 +19,14 @@ namespace NexusForever.Network.World.Entity.Command
 
         public void Read(GamePacketReader reader)
         {
-            SplineId = reader.ReadUInt();
-            Speed = reader.ReadUInt();
-            Position = reader.ReadUInt();
-            FormationData.Read(reader);
-            Mode = reader.ReadEnum<SplineMode>(4u);
-            Offset = reader.ReadUInt();
-            Blend = reader.ReadBit();
-            IsContinuing = reader.ReadBit();
+            SplineId            = reader.ReadUInt();
+            Speed               = reader.ReadSingle();
+            Position            = reader.ReadSingle();
+            FormationData       = reader.ReadPackedVector3();
+            Mode                = reader.ReadEnum<SplineMode>(4u);
+            Offset              = reader.ReadUInt();
+            Blend               = reader.ReadBit();
+            IsContinuing        = reader.ReadBit();
             AdjustSpeedToLength = reader.ReadBit();
         }
 
@@ -33,7 +35,7 @@ namespace NexusForever.Network.World.Entity.Command
             writer.Write(SplineId);
             writer.Write(Speed);
             writer.Write(Position);
-            FormationData.Write(writer);
+            writer.WritePackedVector3(FormationData);
             writer.Write(Mode, 4u);
             writer.Write(Offset);
             writer.Write(Blend);

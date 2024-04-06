@@ -1,42 +1,43 @@
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetScaleKeys)]
     public class SetScaleKeysCommand : IEntityCommandModel
     {
-        public List<uint> Times = new();
+        public List<uint> Times { get; set; } = new();
+        public List<float> Scales { get; set; } = new();
         public byte Type { get; set; }
         public uint Offset { get; set; }
         public bool Blend { get; set; }
-        public List<ushort> Scales = new();
 
         public void Read(GamePacketReader reader)
         {
-            byte Count = reader.ReadByte();
+            byte count = reader.ReadByte();
 
-            for (int i = 0; i < Count; i++)
+            for (int i = 0; i < count; i++)
                 Times.Add(reader.ReadUInt());
 
-            Type = reader.ReadByte(2u);
+            for (int i = 0; i < count; i++)
+                Scales.Add(reader.ReadPackedFloat());
+
+            Type   = reader.ReadByte(2u);
             Offset = reader.ReadUInt();
-            Blend = reader.ReadBit();
-
-            for (int i = 0; i < Count; i++)
-                Scales.Add(reader.ReadUShort());
-
+            Blend  = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Times.Count, 8u);
-            foreach (var time in Times)
+            foreach (uint time in Times)
                 writer.Write(time);
+
+            foreach (float scale in Scales)
+                writer.WritePackedFloat(scale);
 
             writer.Write(Type, 2u);
             writer.Write(Offset);
             writer.Write(Blend);
-
-            foreach (var scale in Scales)
-                writer.Write(scale);
         }
     }
 }

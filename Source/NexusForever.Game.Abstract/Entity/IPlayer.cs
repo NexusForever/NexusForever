@@ -42,11 +42,6 @@ namespace NexusForever.Game.Abstract.Entity
         uint? ControlGuid { get; }
 
         /// <summary>
-        /// Guid of the <see cref="IVehicle"/> the <see cref="IPlayer"/> is a passenger on.
-        /// </summary>
-        uint? VehicleGuid { get; set; }
-
-        /// <summary>
         /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         uint? VanityPetGuid { get; set; }
@@ -141,6 +136,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Invoked when <see cref="IPlayer"/> teleport fails.
         /// </summary>
         void OnTeleportToFailed(GenericError error);
+
+        /// <summary>
+        /// Invoked when <see cref="IPlayer"/> has finished loading and is ready to enter world.
+        /// </summary>
+        void OnEnteredWorld();
 
         /// <summary>
         /// Make <see cref="IPlayer"/> sit on provided <see cref="IWorldEntity"/>.

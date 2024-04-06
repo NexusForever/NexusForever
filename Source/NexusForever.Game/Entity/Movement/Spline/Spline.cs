@@ -1,112 +1,254 @@
-﻿using System.Collections;
-using System.Numerics;
+﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity.Movement.Spline;
+using NexusForever.Game.Abstract.Entity.Movement.Spline.Mode;
+using NexusForever.Game.Abstract.Entity.Movement.Spline.Template;
 using NexusForever.Game.Abstract.Entity.Movement.Spline.Type;
 using NexusForever.Game.Static.Entity.Movement.Spline;
-using NexusForever.GameTable;
-using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Entity.Movement.Spline
 {
     public class Spline : ISpline
     {
-        public float Length { get; private set; }
+        /// <summary>
+        /// Returns if the spline has been finalised.
+        /// </summary>
+        public bool IsFinialised { get; private set; }
 
-        protected readonly List<ISplinePoint> points = new();
-
-        private ISplineType type;
-        private ISplineMode mode;
+        public List<ISplinePoint> Points { get; } = new();
+        public ISplineType Type { get; private set; }
+        public ISplineMode Mode { get; private set; }
+        public float Speed { get; private set; }
+        public SplineDirection Direction { get; private set; }
 
         /// <summary>
-        /// Initialise a new single spline with supplied <see cref="ISplineType"/> and <see cref="ISplineMode"/>.
+        /// Position on the spline.
         /// </summary>
-        public void Initialise(ushort splineId, ISplineType splineType, ISplineMode splineMode)
+        /// <remarks>
+        /// Value will be between 0 and the total length of the spline.
+        /// </remarks>
+        public float Position { get; private set; }
+
+        /// <summary>
+        /// Offset on the spline.
+        /// </summary>
+        /// <remarks>
+        /// Value will be between 0 and t max (usually 1).
+        /// </remarks>
+        public float Offset => Position / (Type.Length + (Type.DelayLength * Speed));
+
+        public float Unknown30 { get; private set; }
+
+        private Vector3? formation;
+
+        #region Dependency Injection
+
+        private readonly ISplineTypeFactory splineTypeFactory;
+        private readonly ISplineModeFactory splineModeFactory;
+
+        public Spline(
+            ISplineTypeFactory splineTypeFactory,
+            ISplineModeFactory splineModeFactory)
         {
-            type = splineType;
-            mode = splineMode;
+            this.splineTypeFactory = splineTypeFactory;
+            this.splineModeFactory = splineModeFactory;
+        }
 
-            Spline2Entry splineEntry = GameTableManager.Instance.Spline2.GetEntry(splineId);
-            if (splineEntry == null)
-                throw new ArgumentException();
+        #endregion
 
-            foreach (Spline2NodeEntry node in GameTableManager.Instance.Spline2Node.Entries
-                .Where(s => s.SplineId == splineId)
-                .OrderBy(s => s.Ordinal))
+        /// <summary>
+        /// Initialise the spline with the supplied <see cref="ISplineTemplate"/>, <see cref="SplineMode"/> and speed.
+        /// </summary>
+        public void Initialise(ISplineTemplate template, SplineMode mode, float speed)
+        {
+            if (speed < float.Epsilon)
+                throw new ArgumentOutOfRangeException();
+
+            Speed = speed;
+
+            for (int i = 0; i < template.Points.Count; i++)
             {
-                // TODO
-                if (node.Delay > 0f)
-                    throw new NotImplementedException();
-
-                var position = new Vector3(node.Position0, node.Position1, node.Position2);
-                points.Add(new SplinePoint(position)
+                Points.Add(new SplinePoint
                 {
-                    Length = node.FrameTime
+                    Index         = i,
+                    TemplatePoint = template.Points[i]
                 });
             }
 
-            splineType.Initialise((uint)points.Count);
+            Type = splineTypeFactory.Create(template.Type);
+            Type.Initialise(Points);
 
-            Length = splineType.CalculateLengths(points);
+            Mode = splineModeFactory.Create(mode);
+
+            CalculateFrameTimes();
+            CalculateOffsets();
         }
 
         /// <summary>
-        /// Initialise a new custom spline with supplied <see cref="ISplineType"/> and <see cref="ISplineMode"/>.
+        /// Calculate frame times for each point without delay.
         /// </summary>
-        public void Initialise(List<Vector3> nodes, ISplineType splineType, ISplineMode splineMode)
+        private void CalculateFrameTimes()
         {
-            type = splineType;
-            mode = splineMode;
-
-            foreach (Vector3 position in nodes)
-                points.Add(new SplinePoint(position));
-
-            splineType.Initialise((uint)points.Count);
-
-            Length = splineType.CalculateLengths(points);
+            float totalDelay = 0f;
+            for (int i = 1; i < Points.Count - 1; i++)
+            {
+                ISplinePoint point = Points[i];
+                point.FrameTime = (point.TemplatePoint.FrameTime ?? point.Lengths[0].Distance) - totalDelay;
+                totalDelay += point.TemplatePoint.Delay ?? 0f;
+            }
         }
 
         /// <summary>
-        /// Get the final point position in the supplied <see cref="SplineDirection"/>.
+        /// Calculate the offsets for each point based on speed.
         /// </summary>
-        public Vector3 GetFinalPoint(SplineDirection direction)
+        /// <remarks>
+        /// This is based on client code, blame Rawaho if these calculations are wrong :)
+        /// </remarks>
+        private void CalculateOffsets()
         {
-            ISplinePoint p = points[(int)(direction == SplineDirection.Forward ? type.TopIndex + 1 : type.TopReverseIndex - 1)];
-            return p.Position;
+            float v12 = Type.Length / Speed;
+            float v12WithDelay = v12 + Type.DelayLength;
+            float v14 = v12 / Points[^2].FrameTime;
+            float v15 = 1f / v12WithDelay;
+            float totalDelay = 0f;
+
+            for (int i = 1; i < Points.Count - 2; i++)
+            {
+                ISplinePoint point = Points[i];
+
+                point.Offsets.Add(Math.Clamp(((point.FrameTime * v14) + totalDelay) * v15, 0.0f, 1.0f));
+
+                float delay = point.TemplatePoint.Delay ?? 0.0f;
+                totalDelay += delay;
+
+                // if this segment has more than one length, calculate the offsets for the rest of the lengths
+                if (point.Lengths.Count > 1)
+                {
+                    ISplinePoint point2 = Points[i + 1];
+
+                    float v23 = (delay * v15) + point.Offsets[0];
+                    float v25 = ((point2.FrameTime * v14) + totalDelay) * v15;
+                    float v28 = point2.Lengths[0].Distance - point.Lengths[0].Distance;
+                    float v29 = v28 <= 0.0000099999997f ? 0.0f : (v25 - v23) / v28;
+
+                    for (int j = 1; j < point.Lengths.Count; j++)
+                    {
+                        float v31 = point.Lengths[j].Distance;
+                        point.Offsets.Add(Math.Clamp(((v31 - point.Lengths[0].Distance) * v29) + v23, 0.0f, 1.0f));
+                    }
+                }
+            }
+
+            Points[^2].Offsets.Add(1.0f);
+
+            // not really sure what this is... but it's used in the calculation of t
+            Unknown30 = v15;
         }
 
         /// <summary>
-        /// Get the <see cref="SplineDirection"/> and index of the next point from the specified <see cref="SplineDirection"/> and index.
+        /// Invoked each world tick with the delta since the previous tick occurred.
         /// </summary>
-        public (SplineDirection Direction, uint Point)? GetNextPoint(SplineDirection direction, uint point)
+        public void Update(double lastTick)
         {
-            return mode.GetNextPoint(type, direction, point);
+            if (IsFinialised)
+                return;
+
+            float delta = (float)(lastTick * Speed);
+            Position += delta;
+
+            ISplineModeInterpolatedOffset result = Mode.GetInterpolatedOffset(Offset);
+            IsFinialised = result.Finalised;
+            Direction    = result.Direction;
         }
 
         /// <summary>
-        /// Get the length of the next segment from the specified <see cref="SplineDirection"/> and index.
+        /// Calculate the two points the current offset is between.
         /// </summary>
-        public float GetNextLength(SplineDirection direction, uint point)
+        private void CalculatePoints(float offset, out ISplinePoint point, out int index, out ISplinePoint point2, out int index2)
         {
-            ISplinePoint p = points[(int)(direction == SplineDirection.Forward ? point : point - 1)];
-            return p.Length;
+            point  = Points[1];
+            point2 = Points[^2];
+            index  = index2 = 0;
+
+            for (int i = 1; i < Points.Count - 2; i++)
+            {
+                ISplinePoint item = Points[i];
+                for (int j = 0; j < item.Offsets.Count; j++)
+                {
+                    if (item.Offsets[j] <= offset)
+                    {
+                        point = item;
+                        index = j;
+                    }
+                    else
+                    {
+                        point2 = item;
+                        index2 = j;
+                        return;
+                    }
+                }
+            }
         }
 
         /// <summary>
-        /// Get the interpolated <see cref="Vector3"/> position in the specified <see cref="SplineDirection"/> at p.
+        /// Calculate the current t value between two points.
         /// </summary>
-        public Vector3 GetPosition(SplineDirection direction, float p)
+        /// <remarks>
+        /// This is based on client code, blame Rawaho if these calculations are wrong :)
+        /// </remarks>
+        private float CalculateT(float offset, ISplinePoint point, int index, ISplinePoint point2, int index2)
         {
-            return type.GetInterpolatedPoint(direction, p, points);
+            float tLength = point.Index == point2.Index ? point2.Lengths[index2].T : 1.0f;
+            tLength -= point.Lengths[index].T;
+
+            float v25 = 0f;
+            if (point2 == Points[^2] && index2 == point2.Offsets.Count - 1)
+                v25 = point2.Lengths[index2].Delay * Unknown30;
+
+            float v26 = (point.Lengths[index].Delay * Unknown30) + point.Offsets[index];
+            float v54 = (offset - v26) * (1.0f / (point2.Offsets[index2] - v25 - v26));
+
+            return (tLength * Math.Clamp(v54, 0.0f, 1.0f)) + point.Lengths[index].T;
         }
 
-        public IEnumerator<ISplinePoint> GetEnumerator()
+        /// <summary>
+        /// Get current position on the spline.
+        /// </summary>
+        public Vector3 GetPosition()
         {
-            return points.GetEnumerator();
+            ISplineModeInterpolatedOffset result = Mode.GetInterpolatedOffset(Offset);
+            CalculatePoints(result.Offset, out ISplinePoint point, out int index, out ISplinePoint point2, out int index2);
+
+            float t = CalculateT(result.Offset, point, index, point2, index2);
+            Vector3 position = Type.GetInterpolatedPosition(point, Points[point.Index + 1], t);
+            if (formation != null)
+                return GetFormationPosition(position);
+
+            return position;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        private Vector3 GetFormationPosition(Vector3 position)
         {
-            return GetEnumerator();
+            // TODO
+            return position;
+        }
+
+        /// <summary>
+        /// Get current rotation on the spline.
+        /// </summary>
+        public Vector3 GetRotation()
+        {
+            ISplineModeInterpolatedOffset result = Mode.GetInterpolatedOffset(Offset);
+            CalculatePoints(result.Offset, out ISplinePoint point, out int index, out ISplinePoint point2, out int index2);
+
+            float t = CalculateT(result.Offset, point, index, point2, index2);
+            Vector3 rotation = Type.GetInterpolatedRotation(point, Points[point.Index + 1], t);
+
+            Vector3 vector = Vector3.Normalize(rotation);
+            if (Direction == SplineDirection.Backward)
+                vector = -vector;
+
+            float yaw = (float)Math.Atan2(-vector.X, -vector.Z);
+            return new Vector3(yaw, 0.0f, 0.0f);
         }
     }
 }

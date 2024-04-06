@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetRotationDefaults)]

@@ -1,21 +1,23 @@
+using System.Numerics;
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetRotationFacePosition)]
     public class SetRotationFacePositionCommand : IEntityCommandModel
     {
-        public Position Position { get; set; }
+        public Vector3 Position { get; set; }
         public bool Blend { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            Position = new Position();
-            Position.Read(reader);
-            Blend = reader.ReadBit();
+            Position = reader.ReadVector3();
+            Blend    = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
-            Position.Write(writer);
+            writer.WriteVector3(Position);
             writer.Write(Blend);
         }
     }

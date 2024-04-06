@@ -25,5 +25,10 @@ namespace NexusForever.Network
         void EnqueueMessageEncrypted(IWritable message);
 
         void EnqueueMessageEncrypted(uint opcode, string hex);
+
+        /// <summary>
+        /// Flush all queued packets to the client.
+        /// </summary>
+        public void FlushPackets();
     }
 }

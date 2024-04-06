@@ -1,20 +1,23 @@
+using System.Numerics;
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetMove)]
     public class SetMoveCommand : IEntityCommandModel
     {
-        public Move MoveData { get; set; } = new();
+        public Vector3 Move { get; set; }
         public bool Blend { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            MoveData.Read(reader);
+            Move  = reader.ReadPackedVector3();
             Blend = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
-            MoveData.Write(writer);
+            writer.WritePackedVector3(Move);
             writer.Write(Blend);
         }
     }

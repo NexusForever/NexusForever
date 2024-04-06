@@ -1,18 +1,12 @@
-using System;
 using System.Linq;
-using System.Threading;
-using System.Timers;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Entity;
-using NexusForever.Network.World.Entity.Command;
 using NexusForever.Network.World.Message.Model;
 using NLog;
 
@@ -32,33 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (session.Player.ControlGuid != null)
                 mover = session.Player.GetVisible<IWorldEntity>(session.Player.ControlGuid.Value);
 
-            if (mover == null)
-                return;
-
-            foreach ((EntityCommand id, IEntityCommandModel command) in entityCommand.Commands)
-            {
-                switch (command)
-                {
-                    case SetPositionCommand setPosition:
-                    {
-                        // this is causing issues after moving to soon after mounting:
-                        // session.Player.CancelSpellsOnMove();
-                        mover.Relocate(setPosition.Position.Vector);
-                        break;
-                    }
-                    case SetRotationCommand setRotation:
-                        mover.Rotation = setRotation.Position.Vector;
-                        break;
-                }
-            }
-
-            mover.EnqueueToVisible(new ServerEntityCommand
-            {
-                Guid     = mover.Guid,
-                Time     = entityCommand.Time,
-                ServerControlled = false,
-                Commands = entityCommand.Commands
-            });
+            mover?.MovementManager.HandleClientEntityCommands(entityCommand.Commands, entityCommand.Time);
         }
 
         [MessageHandler(GameMessageOpcode.ClientActivateUnit)]

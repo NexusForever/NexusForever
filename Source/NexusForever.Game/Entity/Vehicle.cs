@@ -159,12 +159,6 @@ namespace NexusForever.Game.Entity
             {
             });
 
-            // TODO: research this...
-            // Kirmmin: This is used on both mounting up and dismounting
-            player.Session.EnqueueMessageEncrypted(new Server0639
-            {
-            });
-
             // sets vehicle guid, seat type and seat position to local self entity at client
             // might not be correct as ServerVehiclePassengerAdd does this too, used for changing seats instead?
             player.Session.EnqueueMessageEncrypted(new Server089B
@@ -197,10 +191,7 @@ namespace NexusForever.Game.Entity
                 Faction2 = player.Faction2;
             }
 
-            player.VehicleGuid = Guid;
-            player.MovementManager.SetPosition(Vector3.Zero);
-            player.MovementManager.SetRotation(Vector3.Zero);
-            player.MovementManager.BroadcastCommands();
+            player.SetPlatform(this);
 
             passengers.Add(passenger);
             OnPassengerAdd(player, passenger.SeatType, passenger.SeatPosition);
@@ -228,11 +219,8 @@ namespace NexusForever.Game.Entity
 
         private void PassengerRemove(IPlayer player, IVehiclePassenger passenger)
         {
-            player.VehicleGuid = null;
-            player.MovementManager.SetPosition(Position);
-            player.MovementManager.SetRotation(Rotation);
-            player.MovementManager.BroadcastCommands();
-
+            player.SetPlatform(null);
+           
             if (passenger.SeatType == VehicleSeatType.Pilot)
                 player.SetControl(player);
 

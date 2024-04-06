@@ -2,6 +2,7 @@ using System;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Character;
+using NexusForever.Game.Entity;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
@@ -95,8 +96,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (!session.Player.IsLoading)
                 throw new InvalidPacketValueException();
 
-            session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
-            session.Player.IsLoading = false;
+            session.Player.OnEnteredWorld();
         }
 
         [MessageHandler(GameMessageOpcode.ClientCinematicState)]

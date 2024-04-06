@@ -55,13 +55,6 @@ namespace NexusForever.Game.Entity
             };
         }
 
-        public override ServerEntityCreate BuildCreatePacket()
-        {
-            ServerEntityCreate entityCreate = base.BuildCreatePacket();
-            entityCreate.Time = 904575;
-            return entityCreate;
-        }
-
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
         {
             base.OnAddToMap(map, guid, vector);

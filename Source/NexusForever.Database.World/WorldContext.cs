@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement.Spline;
 
 namespace NexusForever.Database.World
 {
@@ -184,7 +185,8 @@ namespace NexusForever.Database.World
                 entity.Property(e => e.Mode)
                     .HasColumnName("mode")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(SplineMode.OneShot)
+                    .HasConversion<EnumToNumberConverter<SplineMode, byte>>();
 
                 entity.Property(e => e.Speed)
                     .HasColumnName("speed")

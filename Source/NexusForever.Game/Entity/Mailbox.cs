@@ -22,9 +22,9 @@ namespace NexusForever.Game.Entity
             };
         }
 
-        public override ServerEntityCreate BuildCreatePacket()
+        public override ServerEntityCreate BuildCreatePacket(bool initialCommands)
         {
-            ServerEntityCreate entityCreate = base.BuildCreatePacket();
+            ServerEntityCreate entityCreate = base.BuildCreatePacket(initialCommands);
             entityCreate.CreateFlags = 0;
             return entityCreate;
         }

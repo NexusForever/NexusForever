@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Text;
 using NexusForever.Shared;
 
@@ -181,6 +182,16 @@ namespace NexusForever.Network
             }
 
             return UnpackFloat(ReadUShort());
+        }
+
+        public Vector3 ReadVector3()
+        {
+            return new Vector3(ReadSingle(), ReadSingle(), ReadSingle());
+        }
+
+        public Vector3 ReadPackedVector3()
+        {
+            return new Vector3(ReadPackedFloat(), ReadPackedFloat(), ReadPackedFloat());
         }
     }
 }

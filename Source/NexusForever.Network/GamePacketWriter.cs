@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Text;
 
 namespace NexusForever.Network
@@ -172,6 +173,20 @@ namespace NexusForever.Network
             }
 
             Write(PackFloat(value));
+        }
+
+        public void WriteVector3(Vector3 value)
+        {
+            Write(value.X);
+            Write(value.Y);
+            Write(value.Z);
+        }
+
+        public void WritePackedVector3(Vector3 value)
+        {
+            WritePackedFloat(value.X);
+            WritePackedFloat(value.Y);
+            WritePackedFloat(value.Z);
         }
     }
 }

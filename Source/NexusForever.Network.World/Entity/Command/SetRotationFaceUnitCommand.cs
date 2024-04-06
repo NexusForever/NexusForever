@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetRotationFaceUnit)]
@@ -9,7 +11,7 @@ namespace NexusForever.Network.World.Entity.Command
         public void Read(GamePacketReader reader)
         {
             UnitId = reader.ReadUInt();
-            Blend = reader.ReadBit();
+            Blend  = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)

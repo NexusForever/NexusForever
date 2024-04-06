@@ -4,8 +4,6 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Map;
 using NexusForever.Game.Map.Search;
-using NexusForever.GameTable;
-using NexusForever.GameTable.Model;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
@@ -17,7 +15,6 @@ namespace NexusForever.Game.Entity
     {
         public uint Guid { get; protected set; }
         public IBaseMap Map { get; private set; }
-        public WorldZoneEntry Zone { get; private set; }
         public Vector3 Position { get; protected set; }
 
         public IMapInfo PreviousMap { get; private set; }
@@ -141,15 +138,6 @@ namespace NexusForever.Game.Entity
             Position = vector;
             UpdateVision();
             UpdateGridVision();
-
-            uint? worldAreaId = Map.File.GetWorldAreaId(vector);
-            if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
-            {
-                Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId.Value);
-                OnZoneUpdate();
-
-                scriptCollection?.Invoke<IGridEntityScript>(s => s.OnEnterZone(this, Zone.Id));
-            }
         }
 
         /// <summary>

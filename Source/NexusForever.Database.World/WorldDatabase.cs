@@ -40,6 +40,7 @@ namespace NexusForever.Database.World
         {
             using var context = new WorldContext(config);
             return context.Entity.Where(e => e.World == world)
+                .Include(e => e.EntitySpline)
                 .Include(e => e.EntityVendor)
                 .Include(e => e.EntityVendorCategory)
                 .Include(e => e.EntityVendorItem)

@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -12,7 +11,6 @@ namespace NexusForever.Game.Abstract.Entity
     {
         uint Guid { get; }
         IBaseMap Map { get; }
-        WorldZoneEntry Zone { get; }
         Vector3 Position { get; }
 
         IMapInfo PreviousMap { get; }

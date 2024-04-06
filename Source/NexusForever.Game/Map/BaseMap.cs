@@ -429,7 +429,7 @@ namespace NexusForever.Game.Map
             entity.OnAddToMap(this, guid, vector);
             scriptCollection?.Invoke<IMapScript>(s => s.OnAddToMap(entity));
 
-            log.Trace($"Added entity {entity.Guid} to map {Entry.Id}.");
+            log.Trace($"Added entity {entity.Guid} to map {Entry.Id} at {vector.X},{vector.Y},{vector.Z}.");
         }
 
         protected virtual void RemoveEntity(IGridEntity entity)

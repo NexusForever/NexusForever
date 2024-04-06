@@ -40,23 +40,36 @@ namespace NexusForever.Game
         /// <summary>
         /// Normalise radians between PI and -PI.
         /// </summary>
-        public static float NormaliseRadians(this float radians)
+        public static float NormaliseRotationRadians(this float radians)
         {
-            return radians % MathF.PI;
-        }
+            // normalize between 0 and 2*PI
+            float r = radians % (2 * MathF.PI); 
 
-        /// <summary>
-        /// Normalise radians between 180 and -180.
-        /// </summary>
-        public static float NormaliseDegrees(this float degrees)
-        {
-            return degrees % 180f;
+            // normalize between PI and -PI
+            if (r > MathF.PI)
+                r -= 2 * MathF.PI;
+            else if (radians < -Math.PI)
+                r += 2 * MathF.PI;
+
+            return r;
         }
 
         /// <summary>
         /// Convert <see cref="Quaternion"/> to <see cref="Vector3"/> in degrees.
         /// </summary>
         public static Vector3 ToEulerDegrees(this Quaternion q)
+        {
+            Vector3 vector = ToEuler(q);
+            vector.X = vector.X.ToDegrees();
+            vector.Y = vector.Y.ToDegrees();
+            vector.Z = vector.Z.ToDegrees();
+            return vector;
+        }
+
+        /// <summary>
+        /// Convert <see cref="Quaternion"/> to <see cref="Vector3"/> in degrees.
+        /// </summary>
+        public static Vector3 ToEuler(this Quaternion q)
         {
             float xx = q.X * q.X;
             float xy = q.X * q.Y;
@@ -71,7 +84,7 @@ namespace NexusForever.Game
             float p = MathF.Asin(-2f * (yz - xw));
             float y = MathF.Atan2(2f * (xz + yw), 1f - 2f * (xx + yy));
             float r = MathF.Atan2(2f * (xy + zw), 1f - 2f * (xx + zz));
-            return new Vector3(y.ToDegrees(), p.ToDegrees(), r.ToDegrees());
+            return new Vector3(y, p, r);
         }
 
         /// <summary>
@@ -117,17 +130,11 @@ namespace NexusForever.Game
         }
 
         /// <summary>
-        /// Returns a value, in radians, that repesents rotation between PI & -PI
+        /// Linearly interpolate between two values.
         /// </summary>
-        public static float CondenseRadianIntoRotationRadian(this float radians)
+        public static float Lerp(float a, float b, float t)
         {
-            if (radians > MathF.PI)
-                return -MathF.PI + (radians.NormaliseRadians());
-
-            if (radians < -MathF.PI)
-                return MathF.PI + (radians.NormaliseRadians());
-
-            return radians.NormaliseRadians();
+            return a + (b - a) * t;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace NexusForever.Game.Abstract.Entity
         EntityType Type { get; }
         EntityCreateFlag CreateFlags { get; set; }
         Vector3 Rotation { get; set; }
+        public WorldZoneEntry Zone { get; }
 
         uint EntityId { get; }
         uint CreatureId { get; set; }
@@ -31,6 +32,8 @@ namespace NexusForever.Game.Abstract.Entity
 
         ushort WorldSocketId { get; }
         ulong ActivePropId { get; }
+
+        EntitySplineModel Spline { get; }
 
         Vector3 LeashPosition { get; }
         float LeashRange { get; }
@@ -56,6 +59,11 @@ namespace NexusForever.Game.Abstract.Entity
         uint? ControllerGuid { get; set; }
 
         /// <summary>
+        /// Guid of the <see cref="IWorldEntity"/> the <see cref="IWorldEntity"/> is a passenger on.
+        /// </summary>
+        uint? PlatformGuid { get; }
+
+        /// <summary>
         /// Initialise <see cref="IWorldEntity"/> with supplied data.
         /// </summary>
         public void Initialise(uint creatureId);
@@ -65,7 +73,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void Initialise(EntityModel model);
 
-        ServerEntityCreate BuildCreatePacket();
+        ServerEntityCreate BuildCreatePacket(bool initialCommands);
 
         /// <summary>
         /// Invoked when <see cref="IWorldEntity"/> is activated.
@@ -182,5 +190,20 @@ namespace NexusForever.Game.Abstract.Entity
         /// Invoked when <see cref="IWorldEntity"/> is untargeted by another <see cref="IUnitEntity"/>.
         /// </summary>
         void OnUntargeted(IUnitEntity source);
+
+        /// <summary>
+        /// Set platform to suppled <see cref="IWorldEntity"/> with optional position and rotation offsets.
+        /// </summary>
+        void SetPlatform(IWorldEntity entity, Vector3 position = default, Vector3 rotation = default);
+
+        /// <summary>
+        /// Add <see cref="IWorldEntity"/> as a passenger on this <see cref="IWorldEntity"/>.
+        /// </summary>
+        void AddPlatformPassenger(IWorldEntity passenger);
+
+        /// <summary>
+        /// Remove <see cref="IWorldEntity"/> as a passenger on this <see cref="IWorldEntity"/>.
+        /// </summary>
+        void RemovePlatformPassenger(IWorldEntity passenger);
     }
 }

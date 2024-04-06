@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Entity.Movement.Command;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 
 namespace NexusForever.Network.World.Message.Model
@@ -7,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientEntityCommand : IReadable
     {
         public uint Time { get; set; }
-        public List<(EntityCommand, IEntityCommandModel)> Commands { get; } = new();
+        public List<INetworkEntityCommand> Commands { get; } = new();
 
         public void Read(GamePacketReader reader)
         {
@@ -16,13 +17,17 @@ namespace NexusForever.Network.World.Message.Model
             uint commandCount = reader.ReadUInt();
             for (uint i = 0u; i < commandCount; i++)
             {
-                EntityCommand command = reader.ReadEnum<EntityCommand>(5);
-                IEntityCommandModel entityCommand = EntityCommandManager.Instance.NewEntityCommand(command);
-                if (entityCommand == null)
+                EntityCommand command     = reader.ReadEnum<EntityCommand>(5);
+                IEntityCommandModel model = EntityCommandManager.Instance.NewEntityCommand(command);
+                if (model == null)
                     return;
 
-                entityCommand.Read(reader);
-                Commands.Add((command, entityCommand));
+                model.Read(reader);
+                Commands.Add(new NetworkEntityCommand
+                {
+                    Command = command,
+                    Model   = model
+                });
             }
         }
     }

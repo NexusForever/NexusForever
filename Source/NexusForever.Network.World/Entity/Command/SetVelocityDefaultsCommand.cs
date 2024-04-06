@@ -1,4 +1,6 @@
-﻿namespace NexusForever.Network.World.Entity.Command
+﻿using NexusForever.Game.Static.Entity.Movement.Command;
+
+namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetVelocityDefaults)]
     public class SetVelocityDefaultsCommand : IEntityCommandModel

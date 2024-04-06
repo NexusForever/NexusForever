@@ -1,41 +1,54 @@
 ﻿using System.Numerics;
+using NexusForever.Game.Abstract.Entity.Movement.Spline.Mode;
+using NexusForever.Game.Abstract.Entity.Movement.Spline.Template;
 using NexusForever.Game.Abstract.Entity.Movement.Spline.Type;
 using NexusForever.Game.Static.Entity.Movement.Spline;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Entity.Movement.Spline
 {
-    public interface ISpline : IEnumerable<ISplinePoint>
+    public interface ISpline : IUpdate
     {
-        float Length { get; }
+        /// <summary>
+        /// Returns if the spline has been finalised.
+        /// </summary>
+        bool IsFinialised { get; }
+
+        List<ISplinePoint> Points { get; }
+        ISplineType Type { get; }
+        ISplineMode Mode { get; }
+        float Speed { get; }
+        SplineDirection Direction { get; }
 
         /// <summary>
-        /// Initialise a new single spline with supplied <see cref="ISplineType"/> and <see cref="ISplineMode"/>.
+        /// Position on the spline.
         /// </summary>
-        void Initialise(ushort splineId, ISplineType splineType, ISplineMode splineMode);
+        /// <remarks>
+        /// Value will be between 0 and the total length of the spline.
+        /// </remarks>
+        float Position { get; }
 
         /// <summary>
-        /// Initialise a new custom spline with supplied <see cref="ISplineType"/> and <see cref="ISplineMode"/>.
+        /// Offset on the spline.
         /// </summary>
-        void Initialise(List<Vector3> nodes, ISplineType splineType, ISplineMode splineMode);
+        /// <remarks>
+        /// Value will be between 0 and t max (usually 1).
+        /// </remarks>
+        float Offset { get; }
 
         /// <summary>
-        /// Get the final point position in the supplied <see cref="SplineDirection"/>.
+        /// Initialise the spline with the supplied <see cref="ISplineTemplate"/>, <see cref="SplineMode"/> and speed.
         /// </summary>
-        Vector3 GetFinalPoint(SplineDirection direction);
+        void Initialise(ISplineTemplate template, SplineMode mode, float speed);
 
         /// <summary>
-        /// Get the <see cref="SplineDirection"/> and index of the next point from the specified <see cref="SplineDirection"/> and index.
+        /// Get current position on the spline.
         /// </summary>
-        (SplineDirection Direction, uint Point)? GetNextPoint(SplineDirection direction, uint point);
+        Vector3 GetPosition();
 
         /// <summary>
-        /// Get the length of the next segment from the specified <see cref="SplineDirection"/> and index.
+        /// Get current rotation on the spline.
         /// </summary>
-        float GetNextLength(SplineDirection direction, uint point);
-
-        /// <summary>
-        /// Get the interpolated <see cref="Vector3"/> position in the specified <see cref="SplineDirection"/> at p.
-        /// </summary>
-        Vector3 GetPosition(SplineDirection direction, float p);
+        Vector3 GetRotation();
     }
 }
