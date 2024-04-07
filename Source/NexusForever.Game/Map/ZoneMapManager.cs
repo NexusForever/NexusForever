@@ -70,7 +70,7 @@ namespace NexusForever.Game.Map
                 return;
 
             // rate limit for e.g. micro movement when idle swimming in a current
-            if (Vector3.Distance(lastPosition, vector) < RateLimit)
+            if (Vector3.DistanceSquared(lastPosition, vector) < RateLimit * RateLimit) // Checking squared distance avoids a slow sqrt operation.
                 return;
 
             lastPosition = vector;
