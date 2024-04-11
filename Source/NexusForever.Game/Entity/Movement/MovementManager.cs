@@ -287,6 +287,9 @@ namespace NexusForever.Game.Entity.Movement
                         SetMode(setMode.Mode);
                         break;
                     }
+                    case SetPlatformCommand setPlatform:
+                        SetPlatform(setPlatform.UnitId != 0u ? setPlatform.UnitId : null);
+                        break;
                     default:
                         break;
                 }
