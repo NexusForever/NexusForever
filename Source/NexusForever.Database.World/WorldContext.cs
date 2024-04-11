@@ -130,7 +130,8 @@ namespace NexusForever.Database.World
                 entity.Property(e => e.Type)
                     .HasColumnName("type")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(EntityType.NonPlayer)
+                    .HasConversion<EnumToNumberConverter<EntityType, byte>>();
 
                 entity.Property(e => e.World)
                     .HasColumnName("world")

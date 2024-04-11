@@ -518,7 +518,7 @@ namespace NexusForever.Game.Entity
                 throw new InvalidOperationException();
 
             var entity = player.GetVisible<IWorldEntity>(unitId);
-            return entity is IMailbox && Vector3.Distance(player.Position, entity.Position) < entry.Datafloat0;
+            return entity is IMailboxEntity && Vector3.Distance(player.Position, entity.Position) < entry.Datafloat0;
         }
     }
 }

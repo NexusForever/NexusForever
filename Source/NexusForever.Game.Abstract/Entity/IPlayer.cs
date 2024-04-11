@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Guild;
@@ -36,13 +37,15 @@ namespace NexusForever.Game.Abstract.Entity
         double TimePlayedLevel { get; }
         double TimePlayedSession { get; }
 
+        void Initialise(IGameSession session, IAccount account, CharacterModel model);
+
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> that currently being controlled by the <see cref="IPlayer"/>.
         /// </summary>
         uint? ControlGuid { get; }
 
         /// <summary>
-        /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
+        /// Guid of the <see cref="IPetEntity"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         uint? VanityPetGuid { get; set; }
 

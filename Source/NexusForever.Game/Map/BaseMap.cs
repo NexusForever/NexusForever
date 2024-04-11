@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
@@ -46,6 +47,18 @@ namespace NexusForever.Game.Map
         private IEntityCache entityCache;
 
         protected IScriptCollection scriptCollection;
+
+        #region Dependency Injection
+
+        private readonly IEntityFactory entityFactory;
+
+        public BaseMap()
+        {
+            // TODO: replace once maps are added to DI container
+            entityFactory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
+        }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IBaseMap"/> with <see cref="WorldEntry"/>.
@@ -385,8 +398,7 @@ namespace NexusForever.Game.Map
         {
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
-                // non issue once all entities types are handled
-                IWorldEntity entity = EntityManager.Instance.NewEntity((EntityType)model.Type) ?? EntityManager.Instance.NewEntity(EntityType.Simple);
+                IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
                 entity.Initialise(model);
 
                 var position = new MapPosition

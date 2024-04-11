@@ -32,7 +32,7 @@
         ScannerUnit        = 27,
         Camera             = 28,
         Trap               = 29,
-        Destructibledoor   = 30,
+        DestructibleDoor   = 30,
         Pickup             = 31,
         SimpleCollidable   = 32,
         HousingMannequin   = 33,

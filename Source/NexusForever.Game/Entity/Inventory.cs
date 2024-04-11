@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Diagnostics;
-using Microsoft.CodeAnalysis;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;

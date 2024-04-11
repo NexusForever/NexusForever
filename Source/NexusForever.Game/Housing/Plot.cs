@@ -78,7 +78,7 @@ namespace NexusForever.Game.Housing
 
         private PlotSaveMask saveMask;
 
-        public IPlug PlugEntity { get; set; }
+        public IPlugEntity PlugEntity { get; set; }
 
         /// <summary>
         /// Create a new <see cref="IPlot"/> from an existing database model.

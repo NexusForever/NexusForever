@@ -1,5 +1,4 @@
 using System.Numerics;
-using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
@@ -20,13 +19,12 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Script.Template;
-using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
 {
     public abstract class WorldEntity : GridEntity, IWorldEntity
     {
-        public EntityType Type { get; }
+        public abstract EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
 
         public Vector3 Rotation
@@ -191,16 +189,17 @@ namespace NexusForever.Game.Entity
         private bool emitVisual;
         private readonly Dictionary<ItemSlot, IItemVisual> itemVisuals = new();
 
-        /// <summary>
-        /// Create a new <see cref="IWorldEntity"/> with supplied <see cref="EntityType"/>.
-        /// </summary>
-        protected WorldEntity(EntityType type)
-        {
-            Type = type;
 
-            MovementManager = LegacyServiceProvider.Provider.GetRequiredService<IMovementManager>();
+        #region Dependency Injection
+
+        public WorldEntity(
+            IMovementManager movementManager)
+        {
+            MovementManager = movementManager;
             MovementManager.Initialise(this);
         }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> with supplied data.
@@ -338,7 +337,7 @@ namespace NexusForever.Game.Entity
 
             // Plugs should not have this portion of the packet set by this Class. The Plug Class should set it itself.
             // This is in large part due to the way Plugs are tied either to a DecorId OR Guid. Other entities do not have the same issue.
-            if (!(this is IPlug))
+            if (!(this is IPlugEntity))
             {
                 if (ActivePropId > 0 || WorldSocketId > 0)
                 {

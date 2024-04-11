@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
     {
         public static void HandleClientVendor(IWorldSession session, ClientEntityInteract vendor)
         {
-            var vendorEntity = session.Player.Map.GetEntity<INonPlayer>(vendor.Guid);
+            var vendorEntity = session.Player.Map.GetEntity<INonPlayerEntity>(vendor.Guid);
             if (vendorEntity == null)
                 throw new InvalidOperationException();
 

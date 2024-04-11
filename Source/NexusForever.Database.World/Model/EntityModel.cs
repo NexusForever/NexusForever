@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Database.World.Model
 {
     public class EntityModel
     {
         public uint Id { get; set; }
-        public byte Type { get; set; }
+        public EntityType Type { get; set; }
         public uint Creature { get; set; }
         public ushort World { get; set; }
         public ushort Area { get; set; }

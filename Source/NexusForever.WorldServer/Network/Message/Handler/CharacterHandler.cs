@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Cryptography;
 using NexusForever.Database;
 using NexusForever.Database.Auth;
@@ -35,6 +36,7 @@ using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Shared;
 using NexusForever.Shared.Game.Events;
 using NLog;
 using NetworkMessage = NexusForever.Network.Message.Model.Shared.Message;
@@ -590,7 +592,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 return;
             }
 
-            session.Player = new Player(session, session.Account, character);
+            // TODO: needs to be replaced once network handlers aren't static
+            var factory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
+
+            session.Player = factory.CreateEntity<IPlayer>();
+            session.Player.Initialise(session, session.Account, character);
 
             WorldEntry entry = GameTableManager.Instance.World.GetEntry(character.WorldId);
             if (entry == null)

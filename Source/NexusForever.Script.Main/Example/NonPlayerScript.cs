@@ -10,7 +10,7 @@ namespace NexusForever.Script.Example
 {
     [ScriptFilterCreatureId(25592)]
     [ScriptFilterIgnore]
-    public class NonPlayerScript : INonPlayerScript, IOwnedScript<INonPlayer>
+    public class NonPlayerScript : INonPlayerScript, IOwnedScript<INonPlayerEntity>
     {
         private static readonly string[] Sayings = new string[]
         {
@@ -19,7 +19,7 @@ namespace NexusForever.Script.Example
             "Buy from Lopp, deals never flop!"
         };
 
-        private INonPlayer owner;
+        private INonPlayerEntity owner;
 
         #region Dependency Injection
 
@@ -40,7 +40,7 @@ namespace NexusForever.Script.Example
         /// <summary>
         /// Invoked when <see cref="IScript"/> is loaded.
         /// </summary>
-        public void OnLoad(INonPlayer owner)
+        public void OnLoad(INonPlayerEntity owner)
         {
             this.owner = owner;
         }

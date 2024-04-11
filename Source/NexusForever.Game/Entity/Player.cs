@@ -7,6 +7,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -71,10 +72,12 @@ namespace NexusForever.Game.Entity
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
-        public IAccount Account { get; }
+        public override EntityType Type => EntityType.Player;
 
-        public ulong CharacterId { get; }
-        public string Name { get; }
+        public IAccount Account { get; private set; }
+
+        public ulong CharacterId { get; private set; }
+        public string Name { get; private set; }
 
         public Sex Sex
         {
@@ -104,7 +107,7 @@ namespace NexusForever.Game.Entity
 
         private Race race;
 
-        public Class Class { get; }
+        public Class Class { get; private set; }
 
         public CharacterFlag Flags
         {
@@ -165,7 +168,7 @@ namespace NexusForever.Game.Entity
             }
         }
 
-        public DateTime CreateTime { get; }
+        public DateTime CreateTime { get; private set; }
         public double TimePlayedTotal { get; private set; }
         public double TimePlayedLevel { get; private set; }
         public double TimePlayedSession { get; private set; }
@@ -176,7 +179,7 @@ namespace NexusForever.Game.Entity
         public uint? ControlGuid { get; private set; }
 
         /// <summary>
-        /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
+        /// Guid of the <see cref="IPetEntity"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         public uint? VanityPetGuid { get; set; }
 
@@ -188,37 +191,37 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool SignatureEnabled => Account.RbacManager.HasPermission(Permission.Signature);
 
-        public IGameSession Session { get; }
+        public IGameSession Session { get; private set; }
 
         /// <summary>
         /// Returns if <see cref="IPlayer"/>'s client is currently in a loading screen.
         /// </summary>
         public bool IsLoading { get; set; } = true;
 
-        public IInventory Inventory { get; }
-        public ICurrencyManager CurrencyManager { get; }
-        public IPathManager PathManager { get; }
-        public ITitleManager TitleManager { get; }
-        public ISpellManager SpellManager { get; }
-        public ICostumeManager CostumeManager { get; }
-        public IPetCustomisationManager PetCustomisationManager { get; }
-        public ICharacterKeybindingManager KeybindingManager { get; }
-        public IDatacubeManager DatacubeManager { get; }
-        public IMailManager MailManager { get; }
-        public IZoneMapManager ZoneMapManager { get; }
-        public IQuestManager QuestManager { get; }
-        public ICharacterAchievementManager AchievementManager { get; }
-        public ISupplySatchelManager SupplySatchelManager { get; }
-        public IXpManager XpManager { get; }
-        public IReputationManager ReputationManager { get; }
-        public IGuildManager GuildManager { get; }
-        public IChatManager ChatManager { get; }
-        public IResidenceManager ResidenceManager { get; }
-        public ICinematicManager CinematicManager { get; }
-        public ICharacterEntitlementManager EntitlementManager { get; }
-        public ILogoutManager LogoutManager { get; }
-        public IAppearanceManager AppearanceManager { get; }
-        public IResurrectionManager ResurrectionManager { get; }
+        public IInventory Inventory { get; private set; }
+        public ICurrencyManager CurrencyManager { get; private set; }
+        public IPathManager PathManager { get; private set; }
+        public ITitleManager TitleManager { get; private set; }
+        public ISpellManager SpellManager { get; private set; }
+        public ICostumeManager CostumeManager { get; private set; }
+        public IPetCustomisationManager PetCustomisationManager { get; private set; }
+        public ICharacterKeybindingManager KeybindingManager { get; private set; }
+        public IDatacubeManager DatacubeManager { get; private set; }
+        public IMailManager MailManager { get; private set; }
+        public IZoneMapManager ZoneMapManager { get; private set; }
+        public IQuestManager QuestManager { get; private set; }
+        public ICharacterAchievementManager AchievementManager { get; private set; }
+        public ISupplySatchelManager SupplySatchelManager { get; private set; }
+        public IXpManager XpManager { get; private set; }
+        public IReputationManager ReputationManager { get; private set; }
+        public IGuildManager GuildManager { get; private set; }
+        public IChatManager ChatManager { get; private set; }
+        public IResidenceManager ResidenceManager { get; private set; }
+        public ICinematicManager CinematicManager { get; private set; }
+        public ICharacterEntitlementManager EntitlementManager { get; private set; }
+        public ILogoutManager LogoutManager { get; private set; }
+        public IAppearanceManager AppearanceManager { get; private set; }
+        public IResurrectionManager ResurrectionManager { get; private set; }
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -227,11 +230,24 @@ namespace NexusForever.Game.Entity
 
         private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> itemProperties = new();
 
+        #region Dependency Injection
+
+        private readonly IEntityFactory entityFactory;
+
+        public Player(
+            IMovementManager movementManager,
+            IEntityFactory entityFactory)
+            : base(movementManager)
+        {
+            this.entityFactory = entityFactory;
+        }
+
+        #endregion
+
         /// <summary>
-        /// Create a new <see cref="IPlayer"/> from supplied <see cref="IGameSession"/> and <see cref="CharacterModel"/>.
+        /// Initialise <see cref="IPlayer"/> from supplied <see cref="IGameSession"/> and <see cref="CharacterModel"/>.
         /// </summary>
-        public Player(IGameSession session, IAccount account, CharacterModel model)
-            : base(EntityType.Player)
+        public void Initialise(IGameSession session, IAccount account, CharacterModel model)
         {
             ActivationRange   = BaseMap.DefaultVisionRange;
 
@@ -319,7 +335,7 @@ namespace NexusForever.Game.Entity
 
         public override void Update(double lastTick)
         {
-             LogoutManager.Update(lastTick);
+            LogoutManager.Update(lastTick);
 
             // don't process world updates while logout is finalising
             if (LogoutManager.State is LogoutState.Logout or LogoutState.Finished)
@@ -554,15 +570,16 @@ namespace NexusForever.Game.Entity
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
             {
-                var vanityPet = new VanityPet(this, pendingTeleport.VanityPetId.Value);
+                var pet = entityFactory.CreateEntity<IPetEntity>();
+                pet.Initialise(this, pendingTeleport.VanityPetId.Value);
 
                 var position = new MapPosition
                 {
                     Position = Position
                 };
 
-                if (map.CanEnter(vanityPet, position))
-                    map.EnqueueAdd(vanityPet, position);
+                if (map.CanEnter(pet, position))
+                    map.EnqueueAdd(pet, position);
             }
 
             SendPacketsAfterAddToMap();
@@ -914,7 +931,7 @@ namespace NexusForever.Game.Entity
             uint? vanityPetId = null;
             if (VanityPetGuid != null)
             {
-                IVanityPet pet = GetVisible<IVanityPet>(VanityPetGuid.Value);
+                IPetEntity pet = GetVisible<IPetEntity>(VanityPetGuid.Value);
                 vanityPetId = pet?.CreatureId;
             }
 
@@ -1084,7 +1101,7 @@ namespace NexusForever.Game.Entity
             if (PlatformGuid == null)
                 return;
 
-            IVehicle vehicle = GetVisible<IVehicle>(PlatformGuid.Value);
+            IVehicleEntity vehicle = GetVisible<IVehicleEntity>(PlatformGuid.Value);
             vehicle?.PassengerRemove(this);
         }
 
@@ -1098,7 +1115,7 @@ namespace NexusForever.Game.Entity
 
             if (VanityPetGuid != null)
             {
-                IVanityPet pet = GetVisible<IVanityPet>(VanityPetGuid.Value);
+                IPetEntity pet = GetVisible<IPetEntity>(VanityPetGuid.Value);
                 pet?.RemoveFromMap();
                 VanityPetGuid = null;
             }
@@ -1314,7 +1331,10 @@ namespace NexusForever.Game.Entity
             RemoveControlUnit();
 
             // TODO: Replace with DelayEvent (of 2 seconds) with map updates.
-            IGhost ghost = new Ghost(this);
+
+            IGhostEntity ghost = entityFactory.CreateEntity<IGhostEntity>();
+            ghost.Initialise(this);
+
             Map.EnqueueAdd(ghost, new MapPosition
             {
                 Info = new MapInfo

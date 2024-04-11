@@ -14,7 +14,7 @@ namespace NexusForever.Game.Abstract.Housing
         HousingPlugFacing PlugFacing { get; set; }
         byte BuildState { get; set; }
         
-        IPlug PlugEntity { get; set; }
+        IPlugEntity PlugEntity { get; set; }
         
         void SetPlug(ushort plugItemId);
     }
