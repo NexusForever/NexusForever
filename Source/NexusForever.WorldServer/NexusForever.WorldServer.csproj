@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
@@ -17,13 +17,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
   </ItemGroup>
 
   <ItemGroup>

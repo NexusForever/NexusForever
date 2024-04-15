@@ -20,7 +20,7 @@ using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Network;
 using NLog;
-using NLog.Web;
+using NLog.Extensions.Logging;
 
 namespace NexusForever.WorldServer
 {
@@ -41,6 +41,10 @@ namespace NexusForever.WorldServer
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
             IHostBuilder builder = new HostBuilder()
+                .ConfigureLogging(lb =>
+                {
+                    lb.AddNLog();
+                })
                 .ConfigureAppConfiguration(cb =>
                 {
                     cb.AddJsonFile("WorldServer.json", false);
@@ -66,7 +70,6 @@ namespace NexusForever.WorldServer
                 {
                     WorldServerEmbeddedWebServer.Build(wb);
                 })
-                .UseNLog()
                 .UseWindowsService()
                 .UseSystemd();
 
