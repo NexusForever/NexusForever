@@ -1,5 +1,6 @@
 ﻿using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
+using NexusForever.Game.Abstract.Account.Costume;
 using NexusForever.Game.Abstract.Account.Currency;
 using NexusForever.Game.Abstract.Account.Entitlement;
 using NexusForever.Game.Abstract.Account.Reward;

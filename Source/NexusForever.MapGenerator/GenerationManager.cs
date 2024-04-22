@@ -21,10 +21,6 @@ namespace NexusForever.MapGenerator
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         private string outputDir;
 
-        public GenerationManager()
-        {
-        }
-
         public void Initialise(string outputDir)
         {
             log.Info("Generatring base map files...");

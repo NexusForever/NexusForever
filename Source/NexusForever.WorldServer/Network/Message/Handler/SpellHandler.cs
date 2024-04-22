@@ -118,7 +118,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
                 foreach (ushort id in newAmps)
                     actionSet.AddAmp(id);
 
-               session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
+                session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
             }
         }
 

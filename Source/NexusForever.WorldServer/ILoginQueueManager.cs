@@ -2,7 +2,7 @@
 using NexusForever.Shared;
 using NexusForever.WorldServer.Network;
 
-namespace NexusForever.Game
+namespace NexusForever.WorldServer
 {
     public interface ILoginQueueManager : IUpdate
     {

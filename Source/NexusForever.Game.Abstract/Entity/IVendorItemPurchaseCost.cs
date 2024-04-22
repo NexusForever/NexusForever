@@ -1,8 +1,7 @@
-﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Account;
+﻿using NexusForever.Game.Static.Account;
 using NexusForever.Game.Static.Entity;
 
-namespace NexusForever.Game.Entity
+namespace NexusForever.Game.Abstract.Entity
 {
     /// <summary>
     /// Represents the purchase cost of an item from a vendor.

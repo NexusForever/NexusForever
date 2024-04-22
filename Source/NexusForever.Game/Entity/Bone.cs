@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract.Entity;
 
 namespace NexusForever.Game.Entity
 {

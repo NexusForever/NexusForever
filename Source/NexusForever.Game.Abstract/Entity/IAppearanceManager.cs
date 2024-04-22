@@ -1,6 +1,5 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Customisation;
-using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 

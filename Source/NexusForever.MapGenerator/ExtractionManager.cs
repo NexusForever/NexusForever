@@ -20,10 +20,6 @@ namespace NexusForever.MapGenerator
 
         private string outputDir;
 
-        public ExtractionManager()
-        {
-        }
-
         public void Initialise(string outputDir)
         {
             log.Info("Extracting GameTables...");

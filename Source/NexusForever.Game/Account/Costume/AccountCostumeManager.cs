@@ -10,7 +10,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
 
-namespace NexusForever.Game.Account
+namespace NexusForever.Game.Account.Costume
 {
     public class AccountCostumeManager : IAccountCostumeManager
     {

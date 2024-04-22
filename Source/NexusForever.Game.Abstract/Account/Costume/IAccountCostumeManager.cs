@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Auth;
 using NexusForever.Game.Abstract.Entity;
 
-namespace NexusForever.Game.Abstract.Account
+namespace NexusForever.Game.Abstract.Account.Costume
 {
     public interface IAccountCostumeManager : IDatabaseAuth
     {

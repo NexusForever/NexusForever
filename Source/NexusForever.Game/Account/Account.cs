@@ -1,12 +1,14 @@
 ﻿using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Account;
+using NexusForever.Game.Abstract.Account.Costume;
 using NexusForever.Game.Abstract.Account.Currency;
 using NexusForever.Game.Abstract.Account.Entitlement;
 using NexusForever.Game.Abstract.Account.Reward;
 using NexusForever.Game.Abstract.Account.Setting;
 using NexusForever.Game.Abstract.Account.Unlock;
 using NexusForever.Game.Abstract.RBAC;
+using NexusForever.Game.Account.Costume;
 using NexusForever.Game.Account.Currency;
 using NexusForever.Game.Account.Entitlement;
 using NexusForever.Game.Account.Reward;
