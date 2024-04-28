@@ -5,7 +5,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Alizar.Map
+namespace NexusForever.Script.Alizar.EverstarGrove
 {
     [ScriptFilterOwnerId(990)]
     public class EverstarGroveMapScript : IMapScript, IOwnedScript<IBaseMap>

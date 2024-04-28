@@ -319,7 +319,7 @@ namespace NexusForever.Game.Guild
                 GuildType  = guild.Type,
                 PlayerName = invitee.Name,
                 Flags      = (uint)guild.Flags
-            });;
+            });
 
             log.Trace($"Invited character {owner.CharacterId} to guild {id}.");
         }

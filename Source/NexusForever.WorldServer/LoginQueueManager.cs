@@ -10,7 +10,7 @@ using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Network;
 using NLog;
 
-namespace NexusForever.Game
+namespace NexusForever.WorldServer
 {
     public sealed class LoginQueueManager : Singleton<LoginQueueManager>, ILoginQueueManager
     {

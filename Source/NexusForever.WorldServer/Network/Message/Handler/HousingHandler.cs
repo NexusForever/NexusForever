@@ -341,7 +341,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler
             if (community == null)
                 throw new InvalidPacketValueException();
 
-           if (!community.GetMember(session.Player.CharacterId).Rank.HasPermission(GuildRankPermission.ChangeCommunityRemodelOptions))
+            if (!community.GetMember(session.Player.CharacterId).Rank.HasPermission(GuildRankPermission.ChangeCommunityRemodelOptions))
                 throw new InvalidPacketValueException();
 
             if (housingCommunityPrivacyLevel.PrivacyLevel == CommunityPrivacyLevel.Public)

@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Example
+namespace NexusForever.Script.Main.Example
 {
     [ScriptFilterOwnerId(870)]
     [ScriptFilterIgnore]

@@ -6,7 +6,7 @@ using NexusForever.Script.Template;
 using NexusForever.Script.Template.Event;
 using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Example
+namespace NexusForever.Script.Main.Example
 {
     [ScriptFilterCreatureId(25592)]
     [ScriptFilterIgnore]
