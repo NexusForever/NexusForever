@@ -35,6 +35,8 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         byte GetSpellTier(uint spell4BaseId);
 
+        public bool IsAmpEnabled(ushort ampId);
+
         List<ICharacterSpell> GetPets();
 
         /// <summary>

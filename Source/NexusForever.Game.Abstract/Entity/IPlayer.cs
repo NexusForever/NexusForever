@@ -7,10 +7,12 @@ using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Setting;
+using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.World.Message.Static;
@@ -37,7 +39,7 @@ namespace NexusForever.Game.Abstract.Entity
         double TimePlayedLevel { get; }
         double TimePlayedSession { get; }
 
-        void Initialise(IGameSession session, IAccount account, CharacterModel model);
+        void Initialise(IGameSession session, IAccount account, CharacterModel model, IGameTableManager gameTableManager, IPrerequisiteManager prerequisiteManager);
 
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> that currently being controlled by the <see cref="IPlayer"/>.

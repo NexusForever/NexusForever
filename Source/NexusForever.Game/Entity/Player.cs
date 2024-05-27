@@ -11,6 +11,7 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
@@ -247,7 +248,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Initialise <see cref="IPlayer"/> from supplied <see cref="IGameSession"/> and <see cref="CharacterModel"/>.
         /// </summary>
-        public void Initialise(IGameSession session, IAccount account, CharacterModel model)
+        public void Initialise(IGameSession session, IAccount account, CharacterModel model, IGameTableManager gameTableManager, IPrerequisiteManager prerequisiteManager)
         {
             ActivationRange   = BaseMap.DefaultVisionRange;
 
@@ -294,7 +295,7 @@ namespace NexusForever.Game.Entity
             CurrencyManager         = new CurrencyManager(this, model);
             PathManager             = new PathManager(this, model);
             TitleManager            = new TitleManager(this, model);
-            SpellManager            = new SpellManager(this, model);
+            SpellManager            = new SpellManager(this, model, gameTableManager, prerequisiteManager);
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new CharacterKeybindingManager(this, model);
             DatacubeManager         = new DatacubeManager(this, model);
