@@ -28,6 +28,7 @@
         /// </summary>
         Unknown195      = 195,
         SpellBaseId     = 214,
+        Amp             = 227,
         Plane           = 232,
         BaseFaction     = 250,
         PurchasedTitle  = 288

@@ -213,6 +213,19 @@ namespace NexusForever.Game.Prerequisite
             return true;
         }
 
+        [PrerequisiteCheck(PrerequisiteType.Amp)]
+        private static bool PrerequisiteCheckAmp(Player player, PrerequisiteComparison comparison, uint value, uint objectId)
+        {
+            switch (comparison)
+            {
+                case PrerequisiteComparison.Equal:
+                    return player.SpellManager.IsAmpEnabled((ushort)objectId);
+                default:
+                    log.Warn($"Unhandled {comparison} for {PrerequisiteType.Vital}!");
+                    return false;
+            }
+        }
+
         [PrerequisiteCheck(PrerequisiteType.Plane)]
         private static bool PrerequisiteCheckPlane(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
