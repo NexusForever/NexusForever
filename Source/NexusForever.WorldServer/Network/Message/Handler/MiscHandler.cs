@@ -7,7 +7,6 @@ using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using NLog;
 
 namespace NexusForever.WorldServer.Network.Message.Handler
 {
