@@ -634,7 +634,7 @@ namespace NexusForever.Game.Entity
 
             ResidenceManager.SendHousingBasics();
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
-            Session.EnqueueMessageEncrypted(new ServerInstanceSettings() { Unknown3 = 69 });
+            Session.EnqueueMessageEncrypted(new ServerInstanceSettings() { ClientEntityMaxSendUpdateInterval = 125 });
 
             SetControl(this);
 
