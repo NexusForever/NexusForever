@@ -7,6 +7,7 @@ namespace NexusForever.Network.Message
         ServerHello                     = 0x0003,
         ServerMaxCharacterLevelAchieved = 0x0036,
         ServerPlayerEnteredWorld        = 0x0061,
+        ServerClientEntityUpdateInterval = 0x0070,
         ServerAuthEncrypted             = 0x0076,
         ServerLogoutUpdate              = 0x0092,
         ClientActivateUnitCast          = 0x0097, // not sure about the name - almost the same as 0x00B3, but also initiates 0x07FD
