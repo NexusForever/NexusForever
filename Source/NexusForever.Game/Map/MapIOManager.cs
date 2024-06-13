@@ -70,7 +70,10 @@ namespace NexusForever.Game.Map
         private MapFile LoadBaseMap(string assetPath)
         {
             string mapPath  = SharedConfiguration.Instance.Get<MapConfig>().MapPath;
-            string asset    = Path.Combine(mapPath, Path.GetFileName(assetPath));
+
+            // replace backslashes with OS specific directory separator, for Linux it will replace backslashes with forward slashes
+            // this will allow GetFileName to work correctly on Linux
+            string asset    = Path.Combine(mapPath, Path.GetFileName(assetPath.Replace('\\', Path.DirectorySeparatorChar)));
             string filePath = Path.ChangeExtension(asset, ".nfmap");
 
             using FileStream stream = File.OpenRead(filePath);
