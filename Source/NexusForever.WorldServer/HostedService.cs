@@ -114,6 +114,8 @@ namespace NexusForever.WorldServer
             ShutdownManager.Instance.Initialise(WorldServer.Shutdown);
             LoginQueueManager.Instance.Initialise(CharacterHandler.SendCharacterListPackets);
 
+            MessageManager.Instance.Initialise();
+
             // initialise world after all assets have loaded but before any network or command handlers might be invoked
             worldManager.Initialise(lastTick =>
             {
@@ -136,7 +138,6 @@ namespace NexusForever.WorldServer
             });
 
             // initialise network and command managers last to make sure the rest of the server is ready for invoked handlers
-            MessageManager.Instance.Initialise();
             NetworkManager<WorldSession>.Instance.Initialise(SharedConfiguration.Instance.Get<NetworkConfig>());
 
             CommandManager.Instance.Initialise();

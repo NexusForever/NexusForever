@@ -171,8 +171,11 @@ namespace NexusForever.Script
 
             log.LogInformation("Starting unload for script assembly {Name}.", Name);
 
-            assemblyWatcher?.Stop();
-            sourceWatcher?.Stop();
+            if (assemblyWatcher?.IsWatching == true)
+                assemblyWatcher.Stop();
+
+            if (sourceWatcher?.IsWatching == true)
+                sourceWatcher.Stop();
 
             foreach (IScriptInfo scriptInfo in scripts)
                 scriptInfo.Unload();
