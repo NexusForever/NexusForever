@@ -2,15 +2,19 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
+
 using NLog;
 
 namespace NexusForever.Game.Entity
@@ -45,6 +49,8 @@ namespace NexusForever.Game.Entity
         private byte activeActionSet;
 
         private readonly IPlayer player;
+        private readonly IGameTableManager gameTableManager;
+        private readonly IPrerequisiteManager prerequisiteManager;
 
         private readonly Dictionary<uint /*spell4BaseId*/, ICharacterSpell> spells = new();
         private readonly Dictionary<uint /*spell4Id*/, double /*cooldown*/> spellCooldowns = new();
@@ -57,9 +63,11 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Create a new <see cref="ISpellManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public SpellManager(IPlayer owner, CharacterModel model)
+        public SpellManager(IPlayer owner, CharacterModel model, IGameTableManager gameTableManager, IPrerequisiteManager prerequisiteManager)
         {
             player = owner;
+            this.gameTableManager = gameTableManager;
+            this.prerequisiteManager = prerequisiteManager;
 
             foreach (CharacterSpellModel spellModel in model.Spell)
             {
@@ -68,19 +76,23 @@ namespace NexusForever.Game.Entity
                 spells.Add(spellModel.Spell4BaseId, new CharacterSpell(owner, spellModel, spellBaseInfo, item));
             }
 
-            GrantSpells();
-
             for (byte i = 0; i < ActionSet.MaxActionSets; i++)
             {
                 actionSets[i] = new ActionSet(i, player);
 
-                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
-                    .Where(c => c.SpecIndex == i))
-                    actionSets[i].AddShortcut(shortcutModel);
-
                 foreach (CharacterActionSetAmpModel ampModel in model.ActionSetAmp
                     .Where(c => c.SpecIndex == i))
                     actionSets[i].AddAmp(ampModel);
+
+            }
+
+            GrantSpells();
+
+            for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+            {
+                foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
+                    .Where(c => c.SpecIndex == i))
+                    actionSets[i].AddShortcut(shortcutModel);
             }
 
             activeActionSet = model.ActiveSpec;
@@ -89,15 +101,24 @@ namespace NexusForever.Game.Entity
         public void GrantSpells()
         {
             // TODO: TEMPORARY, this should eventually be used on level up
-            foreach (SpellLevelEntry spellLevel in GameTableManager.Instance.SpellLevel.Entries
+            foreach (SpellLevelEntry spellLevel in gameTableManager.SpellLevel.Entries
                 .Where(s => s.ClassId == (byte)player.Class && s.CharacterLevel <= player.Level)
                 .OrderBy(s => s.CharacterLevel))
             {
-                //FIXME
                 if (spellLevel.PrerequisiteId > 0)
-                    continue;
+                {
+                    PrerequisiteEntry entry = gameTableManager.Prerequisite.GetEntry(spellLevel.PrerequisiteId);
+                    // Override PrerequisiteManager as it relies on SpellManager, which we are still initializing
+                    if (entry.PrerequisiteTypeId[0] == (uint)PrerequisiteType.Amp)
+                    {
+                        if (!IsAmpEnabled((ushort)entry.ObjectId[0]))
+                            continue;
+                    }
+                    else if (!prerequisiteManager.Meets(player, spellLevel.PrerequisiteId))
+                        continue;
+                }
 
-                Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevel.Spell4Id);
+                Spell4Entry spell4Entry = gameTableManager.Spell4.GetEntry(spellLevel.Spell4Id);
                 if (spell4Entry == null)
                     continue;
 
@@ -105,13 +126,13 @@ namespace NexusForever.Game.Entity
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
             }
 
-            ClassEntry classEntry = GameTableManager.Instance.Class.GetEntry((byte)player.Class);
+            ClassEntry classEntry = gameTableManager.Class.GetEntry((byte)player.Class);
             foreach (uint classSpell in classEntry.Spell4IdInnateAbilityActive
                 .Concat(classEntry.Spell4IdInnateAbilityPassive)
                 .Concat(classEntry.Spell4IdAttackPrimary)
                 .Concat(classEntry.Spell4IdAttackUnarmed))
             {
-                Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(classSpell);
+                Spell4Entry spell4Entry = gameTableManager.Spell4.GetEntry(classSpell);
                 if (spell4Entry == null)
                     continue;
 
@@ -264,6 +285,11 @@ namespace NexusForever.Game.Entity
             IActionSet actionSet = GetActionSet(ActiveActionSet);
             IActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.Spell, spell4BaseId);
             return shortcut?.Tier ?? spell.Tier;
+        }
+
+        public bool IsAmpEnabled(ushort ampId)
+        {
+            return GetActionSet(ActiveActionSet).GetAmp(ampId) != null;
         }
 
         public List<ICharacterSpell> GetPets()

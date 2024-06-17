@@ -12,6 +12,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Housing;
+using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Abstract.Server;
 using NexusForever.Game.Character;
 using NexusForever.Game.Customisation;
@@ -594,9 +595,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler
 
             // TODO: needs to be replaced once network handlers aren't static
             var factory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
+            var gameTableManager = LegacyServiceProvider.Provider.GetService<IGameTableManager>();
+            var prerequisiteManager = LegacyServiceProvider.Provider.GetService<IPrerequisiteManager>();
 
             session.Player = factory.CreateEntity<IPlayer>();
-            session.Player.Initialise(session, session.Account, character);
+            session.Player.Initialise(session, session.Account, character, gameTableManager, prerequisiteManager);
 
             WorldEntry entry = GameTableManager.Instance.World.GetEntry(character.WorldId);
             if (entry == null)
