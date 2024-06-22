@@ -12,7 +12,6 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.Message.Model;
-using NexusForever.Network.Packet;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network
@@ -104,13 +103,6 @@ namespace NexusForever.WorldServer.Network
             encryption = new PacketCrypt(key);
 
             log.Trace($"Set encryption key {Convert.ToHexString(sessionKey)} for session {Id}.");
-        }
-
-        [MessageHandler(GameMessageOpcode.ClientPackedWorld)]
-        public void HandlePackedWorld(ClientPackedWorld packedWorld)
-        {
-            var packet = new ClientGamePacket(packedWorld.Data);
-            HandlePacket(packet);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NexusForever.Database;
@@ -29,13 +30,14 @@ using NexusForever.Network;
 using NexusForever.Network.Configuration.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
+using NexusForever.Network.World.Message;
 using NexusForever.Network.World.Social;
 using NexusForever.Script;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Network;
-using NexusForever.WorldServer.Network.Message.Handler;
+using NexusForever.WorldServer.Network.Message.Handler.Character;
 
 namespace NexusForever.WorldServer
 {
@@ -45,19 +47,22 @@ namespace NexusForever.WorldServer
 
         private readonly IScriptManager scriptManager;
         private readonly IWorldManager worldManager;
+        private readonly IMessageManager messageManager;
 
         public HostedService(
-            IServiceProvider serviceProvider,
             ILogger<IHostedService> log,
+            IServiceProvider serviceProvider,
             IScriptManager scriptManager,
-            IWorldManager worldManager)
+            IWorldManager worldManager,
+            IMessageManager messageManager)
         {
+            this.log             = log;
+
             LegacyServiceProvider.Provider = serviceProvider;
 
-            this.log           = log;
-
-            this.scriptManager = scriptManager;
-            this.worldManager  = worldManager;
+            this.scriptManager   = scriptManager;
+            this.worldManager    = worldManager;
+            this.messageManager  = messageManager;
         }
 
         /// <summary>
@@ -112,9 +117,14 @@ namespace NexusForever.WorldServer
             CustomisationManager.Instance.Initialise();
 
             ShutdownManager.Instance.Initialise(WorldServer.Shutdown);
-            LoginQueueManager.Instance.Initialise(CharacterHandler.SendCharacterListPackets);
 
-            MessageManager.Instance.Initialise();
+            // TODO: fix this, really need to move the character packet generation to a manager and not a packet handler...
+            CharacterListHandler handler = LegacyServiceProvider.Provider.GetService<CharacterListHandler>();
+            LoginQueueManager.Instance.Initialise(handler.SendCharacterListPackets);
+
+            messageManager.RegisterNetworkManagerMessagesAndHandlers();
+            messageManager.RegisterNetworkManagerWorldMessages();
+            messageManager.RegisterNetworkManagerWorldHandlers();
 
             // initialise world after all assets have loaded but before any network or command handlers might be invoked
             worldManager.Initialise(lastTick =>

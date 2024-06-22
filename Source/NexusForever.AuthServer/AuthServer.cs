@@ -49,6 +49,7 @@ namespace NexusForever.AuthServer
                     sc.AddDatabase();
                     sc.AddGame();
                     sc.AddNetwork<AuthSession>();
+                    sc.AddAuthNetwork();
                     sc.AddShared();
                 })
                 .UseWindowsService()

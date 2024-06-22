@@ -12,7 +12,6 @@ using NexusForever.Database;
 using NexusForever.Game;
 using NexusForever.GameTable;
 using NexusForever.Network;
-using NexusForever.Network.World;
 using NexusForever.Script;
 using NexusForever.Script.Configuration.Model;
 using NexusForever.Shared;
@@ -60,7 +59,7 @@ namespace NexusForever.WorldServer
                     sc.AddGame();
                     sc.AddGameTable();
                     sc.AddNetwork<WorldSession>();
-                    sc.AddNetworkWorld();
+                    sc.AddWorldNetwork();
                     sc.AddScript();
                     sc.AddShared();
                     sc.AddWorld();

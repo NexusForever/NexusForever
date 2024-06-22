@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 using NexusForever.Network;
-using NexusForever.Network.Auth.Model;
+using NexusForever.Network.Auth.Message.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.Message.Model;
 

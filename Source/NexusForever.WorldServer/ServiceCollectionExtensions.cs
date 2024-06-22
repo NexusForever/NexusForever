@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using NexusForever.Game;
 using NexusForever.Shared;
 using NexusForever.WorldServer.Command;
 

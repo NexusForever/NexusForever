@@ -8,6 +8,8 @@ namespace NexusForever.Network
     {
         public static void AddNetwork<T>(this IServiceCollection sc) where T : INetworkSession, new()
         {
+            sc.AddNetworkMessage();
+
             sc.AddSingletonLegacy<IMessageManager, MessageManager>();
             sc.AddSingletonLegacy<INetworkManager<T>, NetworkManager<T>>();
         }

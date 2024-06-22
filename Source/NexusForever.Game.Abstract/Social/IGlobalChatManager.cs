@@ -59,6 +59,11 @@ namespace NexusForever.Game.Abstract.Social
         void HandleClientChat(IPlayer player, ClientChat chat);
 
         /// <summary>
+        /// Handle's whisper messages between 2 clients
+        /// </summary>
+        void HandleWhisperChat(IPlayer player, ClientChatWhisper whisper);
+
+        /// <summary>
         /// Add the <see cref="IPlayer"/> to the chat channels sessions list for appropriate chat channels.
         /// </summary>
         void JoinDefaultChatChannels(IPlayer player);

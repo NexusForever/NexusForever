@@ -33,12 +33,12 @@ namespace NexusForever.WorldServer
         private readonly Dictionary<string, QueueData> queueData = new();
         private readonly Queue<string> queue = new();
 
-        private Action<WorldSession> admitCallback;
+        private Action<IWorldSession> admitCallback;
 
         private uint maximumPlayers = SharedConfiguration.Instance.Get<RealmConfig>().MaxPlayers;
         private UpdateTimer queueCheck = new(TimeSpan.FromSeconds(5));
 
-        public void Initialise(Action<WorldSession> callback)
+        public void Initialise(Action<IWorldSession> callback)
         {
             if (admitCallback != null)
                 throw new InvalidOperationException();
@@ -75,7 +75,7 @@ namespace NexusForever.WorldServer
         /// <remarks>
         /// Returns <see cref="true"/> if the session was admited to the realm.
         /// </remarks>
-        public bool OnNewSession(WorldSession session)
+        public bool OnNewSession(IWorldSession session)
         {
             // check if session is already in queue
             // this allows the account to rejoin the queue after a disconnect
@@ -113,7 +113,7 @@ namespace NexusForever.WorldServer
         /// <summary>
         /// Remove session from realm queue.
         /// </summary>
-        public void OnDisconnect(WorldSession session)
+        public void OnDisconnect(IWorldSession session)
         {
             // current admited session count will be reduced if session isn't queued
             if (session.IsQueued != false)
@@ -137,7 +137,7 @@ namespace NexusForever.WorldServer
         private void AdmitSession(string id)
         {
             // there is a possibility the session will not exist if the player has disconnected during the queue
-            WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(id);
+            IWorldSession session = NetworkManager<WorldSession>.Instance.GetSession(id);
             if (session == null)
                 return;
 
@@ -147,7 +147,7 @@ namespace NexusForever.WorldServer
             admitCallback.Invoke(session);
         }
 
-        private void AdmitSession(WorldSession session)
+        private void AdmitSession(IWorldSession session)
         {
             log.Trace($"Admitting session {session.Id} into the realm.");
 
@@ -159,7 +159,7 @@ namespace NexusForever.WorldServer
             }
         }
 
-        private bool CanEnterWorld(WorldSession session)
+        private bool CanEnterWorld(IWorldSession session)
         {
             // accounts with GM permission are exempt from queue (lucky you!)
             if (session.Account.RbacManager.HasPermission(Permission.GMFlag))
@@ -186,13 +186,13 @@ namespace NexusForever.WorldServer
                 data.Position = position++;
 
                 // there is a possibility the session will not exist if the player has disconnected during the queue
-                WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(data.Id);
+                IWorldSession session = NetworkManager<WorldSession>.Instance.GetSession(data.Id);
                 if (session != null)
                     SendQueueStatus(session, data.Position);
             }
         }
 
-        private static void SendQueueStatus(WorldSession session, uint queuePosition)
+        private static void SendQueueStatus(IWorldSession session, uint queuePosition)
         {
             session.EnqueueMessageEncrypted(new ServerQueueStatus
             {

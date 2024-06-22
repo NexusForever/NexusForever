@@ -1,4 +1,5 @@
 ﻿using NexusForever.Network.Message;
+using NexusForever.Network.Packet;
 
 namespace NexusForever.Network
 {
@@ -25,6 +26,8 @@ namespace NexusForever.Network
         void EnqueueMessageEncrypted(IWritable message);
 
         void EnqueueMessageEncrypted(uint opcode, string hex);
+
+        void HandlePacket(ClientGamePacket packet);
 
         /// <summary>
         /// Flush all queued packets to the client.

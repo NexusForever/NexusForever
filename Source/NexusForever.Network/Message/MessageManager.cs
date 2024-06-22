@@ -1,151 +1,121 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 using NexusForever.Shared;
-using NLog;
 
 namespace NexusForever.Network.Message
 {
-    public delegate void MessageHandlerDelegate(INetworkSession session, IReadable message);
+    public delegate void MessageHandlerDelegate(object handler, INetworkSession session, IReadable message);
 
     public sealed class MessageManager : Singleton<MessageManager>, IMessageManager
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private readonly Dictionary<GameMessageOpcode, Type> clientMessageTypes = [];
+        private readonly Dictionary<Type, GameMessageOpcode> serverMessageTypes = [];
+        private readonly Dictionary<GameMessageOpcode, Type> clientMessageHandlerTypes = [];
+        private readonly Dictionary<GameMessageOpcode, MessageHandlerDelegate> clientMessageHandlerDelegates = [];
 
-        private delegate IReadable MessageFactoryDelegate();
+        #region Dependency Injection
 
-        private ImmutableDictionary<GameMessageOpcode, MessageFactoryDelegate> clientMessageFactories;
-        private ImmutableDictionary<Type, GameMessageOpcode> serverMessageOpcodes;
+        private readonly ILogger<MessageManager> log;
 
-        private ImmutableDictionary<GameMessageOpcode, MessageHandlerDelegate> clientMessageHandlers;
-
-        /// <summary>
-        /// Initialise <see cref="IMessageManager"/> and any related resources.
-        /// </summary>
-        public void Initialise()
+        public MessageManager(
+            ILogger<MessageManager> log)
         {
-            if (clientMessageFactories != null)
-                throw new InvalidOperationException();
-
-            log.Info("Initialisng message manager...");
-
-            InitialiseMessages();
-            InitialiseMessageHandlers();
+            this.log = log;
         }
 
-        private void InitialiseMessages()
-        {
-            var messageFactories = new Dictionary<GameMessageOpcode, MessageFactoryDelegate>();
-            var messageOpcodes   = new Dictionary<Type, GameMessageOpcode>();
+        #endregion
 
-            foreach (Type type in NexusForeverAssemblyHelper.GetAssemblies().SelectMany(a => a.GetTypes()))
+        /// <summary>
+        /// Register message of <see cref="Type"/>.
+        /// </summary>
+        public void RegisterMessage(Type type)
+        {
+            MessageAttribute attribute = type.GetCustomAttribute<MessageAttribute>();
+            if (attribute == null)
+                return;
+
+            if (typeof(IReadable).IsAssignableFrom(type))
             {
-                MessageAttribute attribute = type.GetCustomAttribute<MessageAttribute>();
+                clientMessageTypes.Add(attribute.Opcode, type);
+                log.LogTrace($"Registered client message {type.Name} with opcode {attribute.Opcode}");
+            }
+            if (typeof(IWritable).IsAssignableFrom(type))
+            {
+                serverMessageTypes.Add(type, attribute.Opcode);
+                log.LogTrace($"Registered server message {type.Name} with opcode {attribute.Opcode}");
+            }
+        }
+
+        /// <summary>
+        /// Register message handler of <see cref="Type"/>.
+        /// </summary>
+        public void RegisterMessageHandler(Type type)
+        {
+            foreach (Type interfaceType in type.GetInterfaces()
+                .Where(i => i.IsGenericType
+                    && i.GetGenericTypeDefinition() == typeof(IMessageHandler<,>)))
+            {
+                InterfaceMapping map = type.GetInterfaceMap(interfaceType);
+                MethodInfo methodInfo = map.TargetMethods[0];
+
+                Type[] types = interfaceType.GetGenericArguments();
+                Type sessionParameterType = types[0];
+                Type messageParameterType = types[1];
+
+                MessageAttribute attribute = messageParameterType.GetCustomAttribute<MessageAttribute>();
                 if (attribute == null)
                     continue;
 
-                if (typeof(IReadable).IsAssignableFrom(type))
-                {
-                    NewExpression @new = Expression.New(type.GetConstructor(Type.EmptyTypes));
-                    messageFactories.Add(attribute.Opcode, Expression.Lambda<MessageFactoryDelegate>(@new).Compile());
-                }
-                if (typeof(IWritable).IsAssignableFrom(type))
-                    messageOpcodes.Add(type, attribute.Opcode);
+                ParameterExpression handlerParameter = Expression.Parameter(typeof(object));
+                ParameterExpression sessionParameter = Expression.Parameter(typeof(INetworkSession));
+                ParameterExpression messageParameter = Expression.Parameter(typeof(IReadable));
+
+                MethodCallExpression call = Expression.Call(
+                    Expression.Convert(handlerParameter, type),
+                    methodInfo,
+                    Expression.Convert(sessionParameter, sessionParameterType),
+                    Expression.Convert(messageParameter, messageParameterType));
+
+                Expression<MessageHandlerDelegate> lambda =
+                    Expression.Lambda<MessageHandlerDelegate>(call, handlerParameter, sessionParameter, messageParameter);
+
+                clientMessageHandlerTypes.Add(attribute.Opcode, type);
+                clientMessageHandlerDelegates.Add(attribute.Opcode, lambda.Compile());
+                log.LogTrace($"Registered message handler {type.Name} with opcode {attribute.Opcode}");
             }
-
-            clientMessageFactories = messageFactories.ToImmutableDictionary();
-            serverMessageOpcodes   = messageOpcodes.ToImmutableDictionary();
-            log.Info($"Initialised {clientMessageFactories.Count} message {(clientMessageFactories.Count == 1 ? "factory" : "factories")}.");
-            log.Info($"Initialised {serverMessageOpcodes.Count} message(s).");
-        }
-
-        private void InitialiseMessageHandlers()
-        {
-            var messageHandlers = new Dictionary<GameMessageOpcode, MessageHandlerDelegate>();
-
-            foreach (Type type in NexusForeverAssemblyHelper.GetAssemblies().SelectMany(a => a.GetTypes()))
-            {
-                foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
-                {
-                    if (method.DeclaringType != type)
-                        continue;
-
-                    MessageHandlerAttribute attribute = method.GetCustomAttribute<MessageHandlerAttribute>();
-                    if (attribute == null)
-                        continue;
-
-                    ParameterExpression sessionParameter = Expression.Parameter(typeof(INetworkSession));
-                    ParameterExpression messageParameter = Expression.Parameter(typeof(IReadable));
-
-                    ParameterInfo[] parameterInfo = method.GetParameters();
-
-                    if (method.IsStatic)
-                    {
-                        #region Debug
-                        Debug.Assert(parameterInfo.Length == 2);
-                        Debug.Assert(typeof(INetworkSession).IsAssignableFrom(parameterInfo[0].ParameterType));
-                        Debug.Assert(typeof(IReadable).IsAssignableFrom(parameterInfo[1].ParameterType));
-                        #endregion
-
-                        MethodCallExpression call = Expression.Call(method,
-                            Expression.Convert(sessionParameter, parameterInfo[0].ParameterType),
-                            Expression.Convert(messageParameter, parameterInfo[1].ParameterType));
-
-                        Expression<MessageHandlerDelegate> lambda =
-                            Expression.Lambda<MessageHandlerDelegate>(call, sessionParameter, messageParameter);
-
-                        messageHandlers.Add(attribute.Opcode, lambda.Compile());
-                    }
-                    else
-                    {
-                        #region Debug
-                        Debug.Assert(parameterInfo.Length == 1);
-                        Debug.Assert(typeof(NetworkSession).IsAssignableFrom(type));
-                        Debug.Assert(typeof(IReadable).IsAssignableFrom(parameterInfo[0].ParameterType));
-                        #endregion
-
-                        MethodCallExpression call = Expression.Call(
-                            Expression.Convert(sessionParameter, type),
-                            method,
-                            Expression.Convert(messageParameter, parameterInfo[0].ParameterType));
-
-                        Expression<MessageHandlerDelegate> lambda =
-                            Expression.Lambda<MessageHandlerDelegate>(call, sessionParameter, messageParameter);
-
-                        messageHandlers.Add(attribute.Opcode, lambda.Compile());
-                    }
-                }
-            }
-
-            clientMessageHandlers = messageHandlers.ToImmutableDictionary();
-            log.Info($"Initialised {clientMessageHandlers.Count} message handler(s).");
         }
 
         /// <summary>
-        /// Return <see cref="IReadable"/> model for incoming packet with <see cref="GameMessageOpcode"/>.
+        /// Get message <see cref="Type"/> for supplied <see cref="GameMessageOpcode"/>.
         /// </summary>
-        public IReadable GetMessage(GameMessageOpcode opcode)
+        public Type GetMessageType(GameMessageOpcode opcode)
         {
-            return clientMessageFactories.TryGetValue(opcode, out MessageFactoryDelegate factory)
-                ? factory.Invoke() : null;
+            return clientMessageTypes.TryGetValue(opcode, out Type type) ? type : null;
         }
 
         /// <summary>
-        /// Return <see cref="GameMessageOpcode"/> for outgoing <see cref="IWritable"/> model.
+        /// Get message <see cref="GameMessageOpcode"/> for supplied <see cref="IWritable"/>.
         /// </summary>
-        public bool GetOpcode(IWritable message, out GameMessageOpcode opcode)
+        public GameMessageOpcode? GetOpcode(IWritable message)
         {
-            return serverMessageOpcodes.TryGetValue(message.GetType(), out opcode);
+            return serverMessageTypes.TryGetValue(message.GetType(), out GameMessageOpcode opcode) ? opcode : null;
         }
 
         /// <summary>
-        /// Return <see cref="MessageHandlerDelegate"/> delegate for incoming packet with <see cref="GameMessageOpcode"/>.
+        /// Get message handler <see cref="Type"/> for supplied <see cref="GameMessageOpcode"/>.
         /// </summary>
-        public MessageHandlerDelegate GetMessageHandler(GameMessageOpcode opcode)
+        public Type GetMessageHandlerType(GameMessageOpcode opcode)
         {
-            return clientMessageHandlers.TryGetValue(opcode, out MessageHandlerDelegate handler)
-                ? handler : null;
+            return clientMessageHandlerTypes.TryGetValue(opcode, out Type type) ? type : null;
+        }
+
+        /// <summary>
+        /// Get message handler delegate for supplied <see cref="GameMessageOpcode"/>.
+        /// </summary>
+        public MessageHandlerDelegate GetMessageHandlerDelegate(GameMessageOpcode opcode)
+        {
+            return clientMessageHandlerDelegates.TryGetValue(opcode, out MessageHandlerDelegate handler) ? handler : null;
         }
     }
 }

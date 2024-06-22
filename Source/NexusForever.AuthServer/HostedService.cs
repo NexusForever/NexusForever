@@ -8,6 +8,7 @@ using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Game.Server;
 using NexusForever.Network;
+using NexusForever.Network.Auth.Message;
 using NexusForever.Network.Configuration.Model;
 using NexusForever.Network.Message;
 using NexusForever.Shared;
@@ -19,16 +20,20 @@ namespace NexusForever.AuthServer
     {
         private readonly ILogger log;
         private readonly IWorldManager worldManager;
+        private readonly IMessageManager messageManager;
 
         public HostedService(
             IServiceProvider serviceProvider,
             ILogger<IHostedService> log,
-            IWorldManager worldManager)
+            IWorldManager worldManager,
+            IMessageManager messageManager)
         {
             LegacyServiceProvider.Provider = serviceProvider;
 
-            this.log          = log;
-            this.worldManager = worldManager;
+            this.log            = log;
+
+            this.worldManager   = worldManager;
+            this.messageManager = messageManager;
         }
 
         /// <summary>
@@ -51,7 +56,10 @@ namespace NexusForever.AuthServer
             });
 
             // initialise network and command managers last to make sure the rest of the server is ready for invoked handlers
-            MessageManager.Instance.Initialise();
+            messageManager.RegisterNetworkManagerMessagesAndHandlers();
+            messageManager.RegisterNetworkManagerAuthMessages();
+            messageManager.RegisterNetworkManagerAuthHandlers();
+
             NetworkManager<AuthSession>.Instance.Initialise(SharedConfiguration.Instance.Get<NetworkConfig>());
 
             log.LogInformation("Started!");

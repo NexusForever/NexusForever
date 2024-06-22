@@ -1,10 +1,12 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Net.Sockets;
+using System.Reflection.Emit;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Cryptography;
 using NexusForever.Network.Message;
-using NexusForever.Network.Message.Model;
 using NexusForever.Network.Packet;
 using NexusForever.Shared;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace NexusForever.Network
 {
@@ -31,7 +33,8 @@ namespace NexusForever.Network
         /// </summary>
         public void EnqueueMessage(IWritable message)
         {
-            if (!MessageManager.Instance.GetOpcode(message, out GameMessageOpcode opcode))
+            GameMessageOpcode? opcode = MessageManager.Instance.GetOpcode(message);
+            if (opcode == null)
             {
                 log.Warn("Failed to send message with no attribute!");
                 return;
@@ -41,7 +44,7 @@ namespace NexusForever.Network
                 && opcode != GameMessageOpcode.ServerRealmEncrypted)
                 log.Trace($"Sent packet {opcode}(0x{opcode:X}).");
 
-            var packet = new ServerGamePacket(opcode, message);
+            var packet = new ServerGamePacket(opcode.Value, message);
             outgoingPackets.Enqueue(packet);
         }
 
@@ -50,7 +53,8 @@ namespace NexusForever.Network
         /// </summary>
         public void EnqueueMessageEncrypted(IWritable message)
         {
-            if (!MessageManager.Instance.GetOpcode(message, out GameMessageOpcode opcode))
+            GameMessageOpcode? opcode = MessageManager.Instance.GetOpcode(message);
+            if (opcode == null)
             {
                 log.Warn("Failed to send message with no attribute!");
                 return;
@@ -59,7 +63,7 @@ namespace NexusForever.Network
             using (var stream = new MemoryStream())
             using (var writer = new GamePacketWriter(stream))
             {
-                writer.Write(opcode, 16);
+                writer.Write(opcode.Value, 16);
                 message.Write(writer);
                 writer.FlushBits();
 
@@ -126,9 +130,11 @@ namespace NexusForever.Network
                     onDeck.Populate(reader);
                     if (onDeck.IsComplete)
                     {
-                        var packet = new ClientGamePacket(onDeck.Data);
-
-                        incomingPackets.Enqueue(packet);
+                        incomingPackets.Enqueue(new ClientGamePacket
+                        {
+                            Data        = onDeck.Data,
+                            IsEncrypted = false
+                        });
                         onDeck = null;
                     }
                 }
@@ -160,53 +166,74 @@ namespace NexusForever.Network
             FlushPackets();
         }
 
-        protected void HandlePacket(ClientGamePacket packet)
+        public void HandlePacket(ClientGamePacket packet)
         {
-            IReadable message = MessageManager.Instance.GetMessage(packet.Opcode);
-            if (message == null)
+            try
             {
-                log.Warn($"Received unknown packet {packet.Opcode:X}");
-                return;
-            }
+                using IServiceScope serviceScope = CreateHandlePacketScope();
 
-            MessageHandlerDelegate handlerInfo = MessageManager.Instance.GetMessageHandler(packet.Opcode);
-            if (handlerInfo == null)
+                using var reader = new ClientGamePacketReader();
+                reader.Initialise(packet, encryption);
+                GameMessageOpcode opcode = reader.ReadHeader();
+
+                IReadable message = serviceScope.ServiceProvider.GetKeyedService<IReadable>(opcode);
+                if (message == null)
+                {
+                    log.Warn($"Received unknown packet {opcode}(0x{opcode:X}.");
+                    return;
+                }
+
+                Type handlerType = MessageManager.Instance.GetMessageHandlerType(opcode);
+                if (handlerType == null)
+                {
+                    log.Warn($"Received unhandled packet {opcode}(0x{opcode:X}).");
+                    return;
+                }
+
+                object handler = serviceScope.ServiceProvider.GetService(handlerType);
+                if (handler == null)
+                {
+                    log.Warn($"Received unhandled packet {opcode}(0x{opcode:X}).");
+                    return;
+                }
+
+                MessageHandlerDelegate handlerDelegate = MessageManager.Instance.GetMessageHandlerDelegate(opcode);
+                if (handlerDelegate == null)
+                {
+                    log.Warn($"Received unhandled packet {opcode}(0x{opcode:X}).");
+                    return;
+                }
+
+                if (opcode != GameMessageOpcode.ClientEncrypted
+                    && opcode != GameMessageOpcode.ClientPacked
+                    && opcode != GameMessageOpcode.ClientPackedWorld
+                    && opcode != GameMessageOpcode.ClientEntityCommand)
+                    log.Trace($"Received packet {opcode}(0x{opcode:X}).");
+
+                // FIXME workaround for now. possible performance impact. 
+                // ClientPing does not currently work and the session times out after 300s -> this keeps the session alive if -any- client packet is received
+                Heartbeat.OnHeartbeat();
+
+                uint remaining = reader.ReadBody(message);
+                if (remaining > 0)
+                    log.Warn($"Failed to read entire contents of packet {opcode}");
+
+                handlerDelegate.Invoke(handler, this, message);
+            }
+            catch (InvalidPacketValueException exception)
             {
-                log.Warn($"Received unhandled packet {packet.Opcode}(0x{packet.Opcode:X}).");
-                return;
+                log.Error(exception);
+                ForceDisconnect();
             }
-
-            if (packet.Opcode != GameMessageOpcode.ClientEncrypted
-                && packet.Opcode != GameMessageOpcode.ClientPacked
-                && packet.Opcode != GameMessageOpcode.ClientPackedWorld
-                && packet.Opcode != GameMessageOpcode.ClientEntityCommand)
-                log.Trace($"Received packet {packet.Opcode}(0x{packet.Opcode:X}).");
-
-            // FIXME workaround for now. possible performance impact. 
-            // ClientPing does not currently work and the session times out after 300s -> this keeps the session alive if -any- client packet is received
-            Heartbeat.OnHeartbeat();
-
-            using (var stream = new MemoryStream(packet.Data))
-            using (var reader = new GamePacketReader(stream))
+            catch (Exception exception)
             {
-                message.Read(reader);
-                if (reader.BytesRemaining > 0)
-                    log.Warn($"Failed to read entire contents of packet {packet.Opcode}");
-
-                try
-                {
-                    handlerInfo.Invoke(this, message);
-                }
-                catch (InvalidPacketValueException exception)
-                {
-                    log.Error(exception);
-                    ForceDisconnect();
-                }
-                catch (Exception exception)
-                {
-                    log.Error(exception);
-                }
+                log.Error(exception);
             }
+        }
+
+        protected virtual IServiceScope CreateHandlePacketScope()
+        {
+            return LegacyServiceProvider.Provider.CreateScope();
         }
 
         /// <summary>
@@ -229,22 +256,6 @@ namespace NexusForever.Network
 
                 SendRaw(stream.ToArray());
             }
-        }
-
-        [MessageHandler(GameMessageOpcode.ClientEncrypted)]
-        private void HandleEncryptedPacket(ClientEncrypted encrypted)
-        {
-            byte[] data = encryption.Decrypt(encrypted.Data, encrypted.Data.Length);
-
-            var packet = new ClientGamePacket(data);
-            HandlePacket(packet);
-        }
-
-        [MessageHandler(GameMessageOpcode.ClientPacked)]
-        private void HandlePacked(ClientPacked packed)
-        {
-            var packet = new ClientGamePacket(packed.Data);
-            HandlePacket(packet);
         }
     }
 }
