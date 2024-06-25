@@ -1,4 +1,4 @@
-﻿using NexusForever.Network;
+﻿using NexusForever.Network.Session;
 
 namespace NexusForever.Game.Abstract.Cinematic
 {

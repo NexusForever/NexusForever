@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting.WindowsServices;
 using NexusForever.AuthServer.Network;
 using NexusForever.Database;
 using NexusForever.Game;
-using NexusForever.Network;
+using NexusForever.Network.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NLog;
@@ -40,15 +40,17 @@ namespace NexusForever.AuthServer
                 {
                     cb.AddJsonFile("AuthServer.json", false);
                 })
-                .ConfigureServices(sc =>
+                .ConfigureServices((hb, sc) =>
                 {
                     sc.AddHostedService<HostedService>();
+
+                    sc.AddOptions<NetworkConfig>()
+                        .Bind(hb.Configuration.GetSection("Network"));
 
                     sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
 
                     sc.AddDatabase();
                     sc.AddGame();
-                    sc.AddNetwork<AuthSession>();
                     sc.AddAuthNetwork();
                     sc.AddShared();
                 })

@@ -5,7 +5,7 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Quest

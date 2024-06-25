@@ -1,13 +1,13 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-using NexusForever.Shared;
+using NexusForever.Network.Session;
 
 namespace NexusForever.Network.Message
 {
     public delegate void MessageHandlerDelegate(object handler, INetworkSession session, IReadable message);
 
-    public sealed class MessageManager : Singleton<MessageManager>, IMessageManager
+    public sealed class MessageManager : IMessageManager
     {
         private readonly Dictionary<GameMessageOpcode, Type> clientMessageTypes = [];
         private readonly Dictionary<Type, GameMessageOpcode> serverMessageTypes = [];

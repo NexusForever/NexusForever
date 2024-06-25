@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace NexusForever.Network.Static
+namespace NexusForever.Network.Session.Static
 {
     public enum DisconnectState
     {

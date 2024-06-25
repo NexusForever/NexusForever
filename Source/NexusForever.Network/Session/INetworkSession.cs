@@ -2,7 +2,7 @@
 using NexusForever.Shared;
 using NexusForever.Shared.Game.Events;
 
-namespace NexusForever.Network
+namespace NexusForever.Network.Session
 {
     public interface INetworkSession : IUpdate
     {

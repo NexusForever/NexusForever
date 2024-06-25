@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.Packet;
 
-namespace NexusForever.Network
+namespace NexusForever.Network.Session
 {
     public interface IGameSession : INetworkSession
     {

@@ -1,7 +1,9 @@
-﻿using NexusForever.Game.Static.RBAC;
-using NexusForever.Network;
+﻿using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
@@ -19,7 +21,9 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Message to broadcast.")]
             string message)
         {
-            foreach (WorldSession session in NetworkManager<WorldSession>.Instance)
+            // TODO: move commands to dependency injection...
+            var networkManager = LegacyServiceProvider.Provider.GetService<INetworkManager<IWorldSession>>();
+            foreach (IWorldSession session in networkManager)
             {
                 session.EnqueueMessageEncrypted(new ServerRealmBroadcast
                 {

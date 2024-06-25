@@ -17,7 +17,7 @@ using NexusForever.Game.Entity.Movement.Generator;
 using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Game.Static.Entity.Movement.Command.State;
 using NexusForever.Game.Static.Entity.Movement.Spline;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Command;
 using NexusForever.Network.World.Message.Model;

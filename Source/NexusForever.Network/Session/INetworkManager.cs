@@ -1,14 +1,18 @@
-﻿using NexusForever.Network.Configuration.Model;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 
-namespace NexusForever.Network
+namespace NexusForever.Network.Session
 {
-    public interface INetworkManager<T> : IEnumerable<T>, IUpdate where T : INetworkSession, new()
+    public interface INetworkManager<T> : IEnumerable<T>, IUpdate where T : class, INetworkSession
     {
         /// <summary>
         /// Initialise <see cref="INetworkManager{T}"/> and any related resources.
         /// </summary>
-        void Initialise(NetworkConfig config);
+        void Initialise();
+
+        /// <summary>
+        /// Start <see cref="INetworkManager{T}"/> and any related resources.
+        /// </summary>
+        void Start();
 
         /// <summary>
         /// Shutdown <see cref="INetworkManager{T}"/> and any related resources.

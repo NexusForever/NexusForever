@@ -23,15 +23,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
 
         private readonly IDatabaseManager databaseManager;
         private readonly IRealmContext realmContext;
+        private readonly ILoginQueueManager loginQueueManager;
 
         public CharacterListHandler(
             ILogger<CharacterListHandler> log,
             IDatabaseManager databaseManager,
-            IRealmContext realmContext)
+            IRealmContext realmContext,
+            ILoginQueueManager loginQueueManager)
         {
-            this.log             = log;
-            this.databaseManager = databaseManager;
-            this.realmContext    = realmContext;
+            this.log               = log;
+            this.databaseManager   = databaseManager;
+            this.realmContext      = realmContext;
+            this.loginQueueManager = loginQueueManager;
         }
 
         #endregion
@@ -41,7 +44,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
             // only handle session in queue once
             // TODO: might need to move this as HandleCharacterList is called multiple times
             if (!session.IsQueued.HasValue)
-                LoginQueueManager.Instance.OnNewSession(session);
+                loginQueueManager.OnNewSession(session);
 
             if (session.IsQueued == false)
                 SendCharacterListPackets(session);

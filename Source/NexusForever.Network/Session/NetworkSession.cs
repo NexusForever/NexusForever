@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using NexusForever.Network.Static;
+using NexusForever.Network.Session.Static;
 using NexusForever.Shared.Game.Events;
 using NLog;
 
-namespace NexusForever.Network
+namespace NexusForever.Network.Session
 {
     public abstract class NetworkSession : INetworkSession
     {

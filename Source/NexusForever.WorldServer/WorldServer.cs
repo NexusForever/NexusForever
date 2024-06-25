@@ -10,8 +10,9 @@ using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using NexusForever.Database;
 using NexusForever.Game;
+using NexusForever.Game.Configuration.Model;
 using NexusForever.GameTable;
-using NexusForever.Network;
+using NexusForever.Network.Configuration.Model;
 using NexusForever.Script;
 using NexusForever.Script.Configuration.Model;
 using NexusForever.Shared;
@@ -52,13 +53,17 @@ namespace NexusForever.WorldServer
                     // register world server service first since it needs to execute before the web host
                     sc.AddHostedService<HostedService>();
 
-                    sc.AddOptions<ScriptConfig>().Bind(hb.Configuration.GetSection("Script"));
+                    sc.AddOptions<NetworkConfig>()
+                        .Bind(hb.Configuration.GetSection("Network"));
+                    sc.AddOptions<RealmConfig>()
+                        .Bind(hb.Configuration.GetSection("Realm"));
+                    sc.AddOptions<ScriptConfig>()
+                        .Bind(hb.Configuration.GetSection("Script"));
 
                     sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
                     sc.AddDatabase();
                     sc.AddGame();
                     sc.AddGameTable();
-                    sc.AddNetwork<WorldSession>();
                     sc.AddWorldNetwork();
                     sc.AddScript();
                     sc.AddShared();

@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.Sts;
 using NexusForever.Shared;
 using NLog;
@@ -14,7 +14,7 @@ namespace NexusForever.StsServer.Network.Message
 {
     public delegate void MessageHandlerDelegate(NetworkSession session, IReadable message);
 
-    public sealed class MessageManager : Singleton<MessageManager>, IMessageManager
+    public sealed class MessageManager : IMessageManager
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 

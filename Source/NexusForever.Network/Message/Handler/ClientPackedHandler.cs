@@ -1,5 +1,6 @@
 ﻿using NexusForever.Network.Message.Model;
 using NexusForever.Network.Packet;
+using NexusForever.Network.Session;
 
 namespace NexusForever.Network.Message.Handler
 {

@@ -26,9 +26,8 @@ using NexusForever.Game.Storefront;
 using NexusForever.Game.Text.Filter;
 using NexusForever.Game.Text.Search;
 using NexusForever.GameTable;
-using NexusForever.Network;
-using NexusForever.Network.Configuration.Model;
 using NexusForever.Network.Message;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message;
 using NexusForever.Network.World.Social;
@@ -43,27 +42,37 @@ namespace NexusForever.WorldServer
 {
     public class HostedService : IHostedService
     {
+        #region Dependency Injection
+
         private readonly ILogger log;
 
         private readonly IScriptManager scriptManager;
-        private readonly IWorldManager worldManager;
+        private readonly ILoginQueueManager loginQueueManager;
+        private readonly INetworkManager<IWorldSession> networkManager;
         private readonly IMessageManager messageManager;
+        private readonly IWorldManager worldManager;
 
         public HostedService(
             ILogger<IHostedService> log,
             IServiceProvider serviceProvider,
             IScriptManager scriptManager,
-            IWorldManager worldManager,
-            IMessageManager messageManager)
+            ILoginQueueManager loginQueueManager,
+            INetworkManager<IWorldSession> networkManager,
+            IMessageManager messageManager,
+            IWorldManager worldManager)
         {
-            this.log             = log;
+            this.log               = log;
 
             LegacyServiceProvider.Provider = serviceProvider;
 
-            this.scriptManager   = scriptManager;
-            this.worldManager    = worldManager;
-            this.messageManager  = messageManager;
+            this.scriptManager     = scriptManager;
+            this.loginQueueManager = loginQueueManager;
+            this.networkManager    = networkManager;
+            this.messageManager    = messageManager;
+            this.worldManager      = worldManager;
         }
+
+        #endregion
 
         /// <summary>
         /// Start <see cref="WorldServer"/> and any related resources.
@@ -120,7 +129,7 @@ namespace NexusForever.WorldServer
 
             // TODO: fix this, really need to move the character packet generation to a manager and not a packet handler...
             CharacterListHandler handler = LegacyServiceProvider.Provider.GetService<CharacterListHandler>();
-            LoginQueueManager.Instance.Initialise(handler.SendCharacterListPackets);
+            loginQueueManager.Initialise(handler.SendCharacterListPackets);
 
             messageManager.RegisterNetworkManagerMessagesAndHandlers();
             messageManager.RegisterNetworkManagerWorldMessages();
@@ -130,7 +139,7 @@ namespace NexusForever.WorldServer
             worldManager.Initialise(lastTick =>
             {
                 // NetworkManager must be first and MapManager must come before everything else
-                NetworkManager<WorldSession>.Instance.Update(lastTick);
+                networkManager.Update(lastTick);
                 MapManager.Instance.Update(lastTick);
 
                 BuybackManager.Instance.Update(lastTick);
@@ -138,7 +147,7 @@ namespace NexusForever.WorldServer
                 GlobalGuildManager.Instance.Update(lastTick);
                 GlobalResidenceManager.Instance.Update(lastTick); // must be after guild update
                 GlobalChatManager.Instance.Update(lastTick);
-                LoginQueueManager.Instance.Update(lastTick);
+                loginQueueManager.Update(lastTick);
                 ShutdownManager.Instance.Update(lastTick);
 
                 scriptManager.Update(lastTick);
@@ -148,7 +157,8 @@ namespace NexusForever.WorldServer
             });
 
             // initialise network and command managers last to make sure the rest of the server is ready for invoked handlers
-            NetworkManager<WorldSession>.Instance.Initialise(SharedConfiguration.Instance.Get<NetworkConfig>());
+            networkManager.Initialise();
+            networkManager.Start();
 
             CommandManager.Instance.Initialise();
 
@@ -165,7 +175,7 @@ namespace NexusForever.WorldServer
 
             // stop network manager listening for incoming connections
             // it is still possible for incoming packets to be parsed though won't be handled once the world thread is stopped
-            NetworkManager<WorldSession>.Instance.Shutdown();
+            networkManager.Shutdown();
 
             // stop command manager listening for commands
             CommandManager.Instance.Shutdown();
@@ -181,7 +191,7 @@ namespace NexusForever.WorldServer
             GlobalResidenceManager.Instance.Shutdown();
             GlobalGuildManager.Instance.Shutdown();
 
-            foreach (WorldSession worldSession in NetworkManager<WorldSession>.Instance)
+            foreach (IWorldSession worldSession in networkManager)
                 worldSession.Player?.SaveDirect();
 
             log.LogInformation("Stopped!");

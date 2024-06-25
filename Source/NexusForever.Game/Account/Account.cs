@@ -17,7 +17,7 @@ using NexusForever.Game.Account.Unlock;
 using NexusForever.Game.RBAC;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 
 namespace NexusForever.Game.Account
 {

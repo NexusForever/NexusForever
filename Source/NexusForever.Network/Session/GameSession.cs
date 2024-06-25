@@ -1,14 +1,12 @@
 using System.Collections.Concurrent;
 using System.Net.Sockets;
-using System.Reflection.Emit;
 using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Cryptography;
 using NexusForever.Network.Message;
 using NexusForever.Network.Packet;
 using NexusForever.Shared;
-using static System.Formats.Asn1.AsnWriter;
 
-namespace NexusForever.Network
+namespace NexusForever.Network.Session
 {
     public abstract class GameSession : NetworkSession, IGameSession
     {
@@ -28,12 +26,24 @@ namespace NexusForever.Network
         private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new();
         private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new();
 
+        #region Dependency Injection
+
+        private readonly IMessageManager messageManager;
+
+        public GameSession(
+            IMessageManager messageManager)
+        {
+            this.messageManager = messageManager;
+        }
+
+        #endregion
+
         /// <summary>
         /// Enqueue <see cref="IWritable"/> to be sent to the client.
         /// </summary>
         public void EnqueueMessage(IWritable message)
         {
-            GameMessageOpcode? opcode = MessageManager.Instance.GetOpcode(message);
+            GameMessageOpcode? opcode = messageManager.GetOpcode(message);
             if (opcode == null)
             {
                 log.Warn("Failed to send message with no attribute!");
@@ -53,7 +63,7 @@ namespace NexusForever.Network
         /// </summary>
         public void EnqueueMessageEncrypted(IWritable message)
         {
-            GameMessageOpcode? opcode = MessageManager.Instance.GetOpcode(message);
+            GameMessageOpcode? opcode = messageManager.GetOpcode(message);
             if (opcode == null)
             {
                 log.Warn("Failed to send message with no attribute!");
@@ -67,7 +77,7 @@ namespace NexusForever.Network
                 message.Write(writer);
                 writer.FlushBits();
 
-                byte[] data      = stream.ToArray();
+                byte[] data = stream.ToArray();
                 byte[] encrypted = encryption.Encrypt(data, data.Length);
                 EnqueueMessage(BuildEncryptedMessage(encrypted));
             }
@@ -81,16 +91,16 @@ namespace NexusForever.Network
             using (var writer = new GamePacketWriter(stream))
             {
                 writer.Write(opcode, 16);
-                
+
                 byte[] body = Enumerable.Range(0, hex.Length)
                     .Where(x => x % 2 == 0)
                     .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
                     .ToArray();
                 writer.WriteBytes(body);
-                
+
                 writer.FlushBits();
 
-                byte[] data      = stream.ToArray();
+                byte[] data = stream.ToArray();
                 byte[] encrypted = encryption.Encrypt(data, data.Length);
                 EnqueueMessage(BuildEncryptedMessage(encrypted));
             }
@@ -132,7 +142,7 @@ namespace NexusForever.Network
                     {
                         incomingPackets.Enqueue(new ClientGamePacket
                         {
-                            Data        = onDeck.Data,
+                            Data = onDeck.Data,
                             IsEncrypted = false
                         });
                         onDeck = null;
@@ -183,7 +193,7 @@ namespace NexusForever.Network
                     return;
                 }
 
-                Type handlerType = MessageManager.Instance.GetMessageHandlerType(opcode);
+                Type handlerType = messageManager.GetMessageHandlerType(opcode);
                 if (handlerType == null)
                 {
                     log.Warn($"Received unhandled packet {opcode}(0x{opcode:X}).");
@@ -197,7 +207,7 @@ namespace NexusForever.Network
                     return;
                 }
 
-                MessageHandlerDelegate handlerDelegate = MessageManager.Instance.GetMessageHandlerDelegate(opcode);
+                MessageHandlerDelegate handlerDelegate = messageManager.GetMessageHandlerDelegate(opcode);
                 if (handlerDelegate == null)
                 {
                     log.Warn($"Received unhandled packet {opcode}(0x{opcode:X}).");

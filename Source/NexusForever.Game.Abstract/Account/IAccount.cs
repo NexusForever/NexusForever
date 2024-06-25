@@ -8,7 +8,7 @@ using NexusForever.Game.Abstract.Account.Setting;
 using NexusForever.Game.Abstract.Account.Unlock;
 using NexusForever.Game.Abstract.RBAC;
 using NexusForever.Game.Static;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 
 namespace NexusForever.Game.Abstract.Account
 {

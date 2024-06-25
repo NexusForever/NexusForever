@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Social;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Abstract.Social

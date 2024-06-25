@@ -1,36 +1,59 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Net;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NexusForever.Network.Configuration.Model;
-using NexusForever.Shared;
-using NLog;
 
-namespace NexusForever.Network
+namespace NexusForever.Network.Session
 {
-    public sealed class NetworkManager<T> : Singleton<NetworkManager<T>>, INetworkManager<T> where T : INetworkSession, new()
+    public sealed class NetworkManager<T> : INetworkManager<T> where T : class, INetworkSession
     {
-        private static readonly ILogger log = LogManager.GetLogger($"NetworkManager<{typeof(T).Name}>");
-
-        private ConnectionListener<T> connectionListener;
-
         private readonly ConcurrentQueue<T> pendingAdd = new();
         private readonly Queue<T> pendingRemove = new();
         private readonly Queue<(T, string)> pendingUpdate = new();
 
         private readonly Dictionary<string, T> sessions = new();
 
+        #region Depedency Injection
+
+        private readonly ILogger<NetworkManager<T>> log;
+        private readonly IOptions<NetworkConfig> networkOptions;
+
+        private readonly IConnectionListener<T> connectionListener;
+
+        public NetworkManager(
+            ILogger<NetworkManager<T>> log,
+            IOptions<NetworkConfig> networkOptions,
+            IConnectionListener<T> connectionListener)
+        {
+            this.log                = log;
+            this.networkOptions     = networkOptions;
+
+            this.connectionListener = connectionListener;
+        }
+
+        #endregion
+
         /// <summary>
         /// Initialise <see cref="INetworkManager{T}"/> and any related resources.
         /// </summary>
-        public void Initialise(NetworkConfig config)
+        public void Initialise()
         {
-            if (connectionListener != null)
-                throw new InvalidOperationException();
+            log.LogInformation("Initialising network manager...");
 
-            log.Info("Initialising network manager...");
+            connectionListener.Initialise(IPAddress.Parse(networkOptions.Value.Host), networkOptions.Value.Port);
+            connectionListener.OnNewSession += pendingAdd.Enqueue;
+        }
 
-            connectionListener = new ConnectionListener<T>(IPAddress.Parse(config.Host), config.Port);
-            connectionListener.OnNewSession += session => pendingAdd.Enqueue(session);
+        /// <summary>
+        /// Start <see cref="INetworkManager{T}"/> and any related resources.
+        /// </summary>
+        public void Start()
+        {
+            log.LogInformation("Starting network manager...");
+
+            connectionListener.Start();
         }
 
         /// <summary>
@@ -38,13 +61,9 @@ namespace NexusForever.Network
         /// </summary>
         public void Shutdown()
         {
-            if (connectionListener == null)
-                throw new InvalidOperationException();
-
-            log.Info("Shutting down network manager...");
+            log.LogInformation("Shutting down network manager...");
 
             connectionListener.Shutdown();
-            connectionListener = null;
         }
 
         /// <summary>
@@ -79,7 +98,7 @@ namespace NexusForever.Network
             while (pendingRemove.TryDequeue(out T session))
             {
                 sessions.Remove(session.Id);
-                log.Trace($"Removed session {session.Id}.");
+                log.LogTrace($"Removed session {session.Id}.");
             }
         }
 
@@ -88,14 +107,14 @@ namespace NexusForever.Network
             if (sessions.TryGetValue(session.Id, out T existingSession))
             {
                 // there is already an existing session with this key, disconnect it
-                log.Trace($"New session with id {session.Id} conflicts with existing session.");
+                log.LogTrace($"New session with id {session.Id} conflicts with existing session.");
 
                 existingSession.ForceDisconnect();
                 UpdateSession(existingSession, Guid.NewGuid().ToString());
             }
 
             sessions.Add(session.Id, session);
-            log.Trace($"Added session {session.Id}.");
+            log.LogTrace($"Added session {session.Id}.");
         }
 
         private void UpdateSession(T session, string id)

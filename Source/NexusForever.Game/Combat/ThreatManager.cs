@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 using NLog;
 

@@ -4,7 +4,7 @@ using NexusForever.Database.World;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Storefront;
 using NexusForever.Game.Static.Storefront;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared;
 using NLog;

@@ -12,7 +12,7 @@ using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Setting;
 using NexusForever.GameTable.Model;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Abstract.Entity

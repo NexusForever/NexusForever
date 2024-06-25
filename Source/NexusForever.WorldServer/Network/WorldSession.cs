@@ -9,9 +9,9 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Account;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.Message.Model;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network
@@ -31,6 +31,23 @@ namespace NexusForever.WorldServer.Network
         /// This occurs when the world has reached the maximum number of allowed players.
         /// </remarks>
         public bool? IsQueued { get; set; }
+
+        #region Dependency Injection
+
+        private readonly INetworkManager<IWorldSession> networkManager;
+        private readonly ILoginQueueManager loginQueueManager;
+
+        public WorldSession(
+            IMessageManager messageManager,
+            INetworkManager<IWorldSession> networkManager,
+            ILoginQueueManager loginQueueManager)
+            : base(messageManager)
+        {
+            this.networkManager    = networkManager;
+            this.loginQueueManager = loginQueueManager;
+        }
+
+        #endregion
 
         public override void OnAccept(Socket newSocket)
         {
@@ -61,7 +78,7 @@ namespace NexusForever.WorldServer.Network
 
             // We check that Account isn't null because AuthServer pings World to check if online
             if (Account != null)
-                LoginQueueManager.Instance.OnDisconnect(this);
+                loginQueueManager.OnDisconnect(this);
         }
 
         public override void Update(double lastTick)
@@ -94,7 +111,7 @@ namespace NexusForever.WorldServer.Network
             Account = new Account();
             Account.Initialise(account, this);
 
-            NetworkManager<WorldSession>.Instance.UpdateSessionId(this, account.Id.ToString());
+            networkManager.UpdateSessionId(this, account.Id.ToString());
         }
 
         public void SetEncryptionKey(byte[] sessionKey)
