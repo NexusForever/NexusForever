@@ -26,7 +26,7 @@ namespace NexusForever.Game.Abstract.Housing
         /// <summary>
         /// Move <see cref="IDecor"/> to supplied position.
         /// </summary>
-        void Move(DecorType type, Vector3 position, Quaternion rotation, float scale);
+        void Move(DecorType type, Vector3 position, Quaternion rotation, float scale, uint plotIndex);
 
         /// <summary>
         /// Move <see cref="IDecor"/> to the crate.
