@@ -11,7 +11,7 @@ namespace NexusForever.Network.Message.Handler
             session.HandlePacket(new ClientGamePacket
             {
                 Data        = packed.Data,
-                IsEncrypted = true
+                IsEncrypted = false
             });
         }
     }
