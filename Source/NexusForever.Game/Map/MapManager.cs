@@ -3,7 +3,6 @@ using System.Diagnostics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Configuration.Model;
-using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
@@ -30,6 +29,19 @@ namespace NexusForever.Game.Map
         private readonly ConcurrentDictionary<ulong, uint> instanceCounts = new();
         // reset instance limit counts every hour
         private readonly UpdateTimer instanceCountReset = new(TimeSpan.FromMinutes(60));
+
+
+        #region Dependency Injection
+
+        private readonly IMapFactory mapFactory;
+
+        public MapManager(
+            IMapFactory mapFactory)
+        {
+            this.mapFactory = mapFactory;
+        }
+
+        #endregion
 
         /// <summary>
         /// Invoked each world tick with the delta since the previous tick occurred.
@@ -126,17 +138,7 @@ namespace NexusForever.Game.Map
             if (maps.TryGetValue((ushort)entry.Id, out IMap map))
                 return map;
 
-            switch ((MapType)entry.Type)
-            {
-                case MapType.Residence:
-                case MapType.Community:
-                    map = new ResidenceInstancedMap();
-                    break;
-                default:
-                    map = new BaseMap();
-                    break;
-            }
-
+            map = mapFactory.CreateMap(entry.Type);
             map.Initialise(entry);
             maps.Add((ushort)entry.Id, map);
 

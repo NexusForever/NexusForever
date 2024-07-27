@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Housing;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
 using NexusForever.Network.Message;

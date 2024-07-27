@@ -16,6 +16,7 @@ namespace NexusForever.Database.World
         public DbSet<EntityVendorModel> EntityVendor { get; set; }
         public DbSet<EntityVendorCategoryModel> EntityVendorCategory { get; set; }
         public DbSet<EntityVendorItemModel> EntityVendorItem { get; set; }
+        public DbSet<MapEntranceModel> MapEntrance { get; set; }
         public DbSet<StoreCategoryModel> StoreCategory { get; set; }
         public DbSet<StoreOfferGroupModel> StoreOfferGroup { get; set; }
         public DbSet<StoreOfferGroupCategoryModel> StoreOfferGroupCategory { get; set; }
@@ -349,6 +350,26 @@ namespace NexusForever.Database.World
                     .WithMany(p => p.EntityVendorItem)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__entity_vendor_item_id__entity_id");
+            });
+
+            modelBuilder.Entity<MapEntranceModel>(entity =>
+            {
+                entity.ToTable("map_entrance");
+
+                entity.HasKey(e => new { e.MapId, e.Team })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.MapId)
+                    .HasColumnName("mapId")
+                    .HasColumnType("int(10) unsigned");
+
+                entity.Property(e => e.Team)
+                    .HasColumnName("team")
+                    .HasColumnType("tinyint(3) unsigned");
+
+                entity.Property(e => e.WorldLocationId)
+                    .HasColumnName("worldLocationId")
+                    .HasColumnType("int(10) unsigned");
             });
 
             modelBuilder.Entity<StoreCategoryModel>(entity =>

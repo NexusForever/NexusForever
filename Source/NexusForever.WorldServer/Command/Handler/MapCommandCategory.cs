@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Map;
+using NexusForever.Game.Map.Instance;
 using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.WorldServer.Command.Context;

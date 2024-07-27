@@ -347,9 +347,16 @@ namespace NexusForever.GameTable
         [GameData]
         public GameTable<MapZoneWorldJoinEntry> MapZoneWorldJoin { get; private set; }
         public GameTable<MatchTypeRewardRotationContentEntry> MatchTypeRewardRotationContent { get; private set; }
+
+        [GameData]
         public GameTable<MatchingGameMapEntry> MatchingGameMap { get; private set; }
+
+        [GameData]
         public GameTable<MatchingGameTypeEntry> MatchingGameType { get; private set; }
+
+        [GameData]
         public GameTable<MatchingRandomRewardEntry> MatchingRandomReward { get; private set; }
+
         public GameTable<MaterialDataEntry> MaterialData { get; private set; }
         public GameTable<MaterialRemapEntry> MaterialRemap { get; private set; }
         public GameTable<MaterialSetEntry> MaterialSet { get; private set; }

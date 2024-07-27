@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract.Map;
+﻿using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Text.Filter;
 using NexusForever.Game.Static.TextFilter;
 using NexusForever.Network;

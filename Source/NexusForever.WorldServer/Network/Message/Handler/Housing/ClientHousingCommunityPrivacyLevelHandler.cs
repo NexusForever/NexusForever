@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;

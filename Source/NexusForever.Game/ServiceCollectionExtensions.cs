@@ -8,6 +8,7 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
+using NexusForever.Game.Matching;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
 using NexusForever.Game.RBAC;
@@ -41,6 +42,7 @@ namespace NexusForever.Game
             sc.AddGameGuild();
             sc.AddGameHousing();
             sc.AddGameMap();
+            sc.AddGameMatching();
             sc.AddGamePrerequisite();
             sc.AddGameQuest();
             sc.AddGameRbac();

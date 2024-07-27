@@ -1,6 +1,7 @@
 ﻿using NexusForever.Game;
 using NexusForever.Game.Abstract.Housing;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Map;
 using NexusForever.Network;
 using NexusForever.Network.Message;
@@ -13,11 +14,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
         #region Dependency Injection
 
         private readonly IGlobalResidenceManager globalResidenceManager;
+        private readonly IMapLockManager mapLockManager;
 
         public ClientHousingReturnHandler(
-            IGlobalResidenceManager globalResidenceManager)
+            IGlobalResidenceManager globalResidenceManager,
+            IMapLockManager mapLockManager)
         {
             this.globalResidenceManager = globalResidenceManager;
+            this.mapLockManager         = mapLockManager;
         }
 
         #endregion
@@ -30,6 +34,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                 || session.Player.Map == residence?.Map)
                 throw new InvalidPacketValueException();
 
+            IMapLock mapLock = mapLockManager.GetResidenceLock(residence.Parent ?? residence);
+
             // return player to correct residence instance
             IResidenceEntrance entrance = globalResidenceManager.GetResidenceEntrance(residence.PropertyInfoId);
             session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
@@ -37,8 +43,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             {
                 Info = new MapInfo
                 {
-                    Entry      = entrance.Entry,
-                    InstanceId = residence.Parent?.Id ?? residence.Id
+                    Entry   = entrance.Entry,
+                    MapLock = mapLock
                 },
                 Position = entrance.Position
             });

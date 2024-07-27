@@ -2,7 +2,9 @@
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Housing;
+using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Housing;
+using NexusForever.Game.Map.Lock;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Text.Search;
 using NexusForever.GameTable;
@@ -82,9 +84,11 @@ namespace NexusForever.WorldServer.Command.Handler
                 }
             }
 
+            IMapLock mapLock = MapLockManager.Instance.GetResidenceLock(residence.Parent ?? residence);
+
             IResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(residence.PropertyInfoId);
             target.Rotation = entrance.Rotation.ToEulerDegrees();
-            target.TeleportTo(entrance.Entry, entrance.Position, residence.Parent?.Id ?? residence.Id);
+            target.TeleportTo(entrance.Entry, entrance.Position, mapLock);
         }
     }
 }

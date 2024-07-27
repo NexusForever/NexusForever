@@ -11,6 +11,9 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Abstract.Map.Lock;
+using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
@@ -233,13 +236,16 @@ namespace NexusForever.Game.Entity
         #region Dependency Injection
 
         private readonly IEntityFactory entityFactory;
+        private readonly IMatchingManager matchingManager;
 
         public Player(
             IMovementManager movementManager,
-            IEntityFactory entityFactory)
+            IEntityFactory entityFactory,
+            IMatchingManager matchingManager)
             : base(movementManager)
         {
-            this.entityFactory = entityFactory;
+            this.entityFactory   = entityFactory;
+            this.matchingManager = matchingManager;
         }
 
         #endregion
@@ -873,6 +879,8 @@ namespace NexusForever.Game.Entity
             ChatManager.OnLogout();
             GlobalChatManager.Instance.LeaveDefaultChatChannels(this);
 
+            matchingManager.OnLogout(this);
+
             scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }
 
@@ -885,26 +893,26 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        public void TeleportTo(ushort worldId, float x, float y, float z, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate)
+        public void TeleportTo(ushort worldId, float x, float y, float z, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate)
         {
             WorldEntry entry = GameTableManager.Instance.World.GetEntry(worldId);
             if (entry == null)
                 throw new ArgumentException($"{worldId} is not a valid world id!");
 
-            TeleportTo(entry, new Vector3(x, y, z), instanceId, reason);
+            TeleportTo(entry, new Vector3(x, y, z), mapLock, reason);
         }
 
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        public void TeleportTo(WorldEntry entry, Vector3 position, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate)
+        public void TeleportTo(WorldEntry entry, Vector3 position, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate)
         {
             TeleportTo(new MapPosition
             {
                 Info = new MapInfo
                 {
-                    Entry      = entry,
-                    InstanceId = instanceId
+                    Entry   = entry,
+                    MapLock = mapLock
                 },
                 Position = position
             }, reason);
@@ -943,7 +951,7 @@ namespace NexusForever.Game.Entity
             };
 
             MapManager.Instance.AddToMap(this, mapPosition);
-            log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.InstanceId ?? 0ul}.");
+            log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.MapLock?.InstanceId ?? null}.");
         }
 
         /// <summary>
@@ -1339,8 +1347,8 @@ namespace NexusForever.Game.Entity
             {
                 Info = new MapInfo
                 {
-                    Entry      = Map.Entry,
-                    InstanceId = Map is IMapInstance instance ? instance.InstanceId : 0u
+                    Entry   = Map.Entry,
+                    MapLock = Map is IMapInstance instance ? instance.MapLock : null
                 },
                 Position = Position
             });

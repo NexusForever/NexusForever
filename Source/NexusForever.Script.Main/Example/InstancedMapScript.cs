@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract.Map;
+﻿using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 

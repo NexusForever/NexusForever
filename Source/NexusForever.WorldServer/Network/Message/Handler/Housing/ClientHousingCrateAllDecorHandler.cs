@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract.Map;
+﻿using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;

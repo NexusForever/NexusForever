@@ -2,7 +2,8 @@
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
@@ -16,11 +17,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
         #region Dependency Injection
 
         private readonly IGlobalResidenceManager globalResidenceManager;
+        private readonly IMapLockManager mapLockManager;
 
         public ClientHousingCommunityRemovalHandler(
-            IGlobalResidenceManager globalResidenceManager)
+            IGlobalResidenceManager globalResidenceManager,
+            IMapLockManager mapLockManager)
         {
             this.globalResidenceManager = globalResidenceManager;
+            this.mapLockManager         = mapLockManager;
         }
 
         #endregion
@@ -51,11 +55,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
             child.Residence.PropertyInfoId = PropertyInfoId.Residence;
 
+            IMapLock mapLock = mapLockManager.GetResidenceLock(child.Residence);
+
             // shouldn't need to check for existing instance
             // individual residence instances are unloaded when transfered to a community
             // if for some reason the instance is still unloading the residence will be initalised again after
             session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
-            session.Player.TeleportTo(entrance.Entry, entrance.Position, child.Residence.Id);
+            session.Player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
         }
     }
 }

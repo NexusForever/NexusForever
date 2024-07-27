@@ -180,13 +180,15 @@ namespace NexusForever.Network.Session
         {
             try
             {
-                using IServiceScope serviceScope = CreateHandlePacketScope();
+                //using IServiceScope serviceScope = CreateHandlePacketScope();
+                var serviceProvider = LegacyServiceProvider.Provider;
 
                 using var reader = new ClientGamePacketReader();
                 reader.Initialise(packet, encryption);
                 GameMessageOpcode opcode = reader.ReadHeader();
 
-                IReadable message = serviceScope.ServiceProvider.GetKeyedService<IReadable>(opcode);
+                //IReadable message = serviceScope.ServiceProvider.GetKeyedService<IReadable>(opcode);
+                IReadable message = serviceProvider.GetKeyedService<IReadable>(opcode);
                 if (message == null)
                 {
                     log.Warn($"Received unknown packet {opcode}(0x{opcode:X}.");
@@ -200,7 +202,8 @@ namespace NexusForever.Network.Session
                     return;
                 }
 
-                object handler = serviceScope.ServiceProvider.GetService(handlerType);
+                //object handler = serviceScope.ServiceProvider.GetService(handlerType);
+                object handler = serviceProvider.GetService(handlerType);
                 if (handler == null)
                 {
                     log.Warn($"Received unhandled packet {opcode}(0x{opcode:X}).");

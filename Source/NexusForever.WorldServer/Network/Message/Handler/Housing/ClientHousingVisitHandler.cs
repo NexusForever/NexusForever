@@ -2,7 +2,8 @@
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
@@ -17,13 +18,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
         private readonly IGlobalResidenceManager globalResidenceManager;
         private readonly IGlobalGuildManager globalGuildManager;
+        private readonly IMapLockManager mapLockManager;
 
         public ClientHousingVisitHandler(
             IGlobalResidenceManager globalResidenceManager,
-            IGlobalGuildManager globalGuildManager)
+            IGlobalGuildManager globalGuildManager,
+            IMapLockManager mapLockManager)
         {
             this.globalResidenceManager = globalResidenceManager;
             this.globalGuildManager     = globalGuildManager;
+            this.mapLockManager         = mapLockManager;
         }
 
         #endregion
@@ -72,6 +76,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                     break;
             }
 
+            IMapLock mapLock = mapLockManager.GetResidenceLock(residence.Parent ?? residence);
+
             // teleport player to correct residence instance
             IResidenceEntrance entrance = globalResidenceManager.GetResidenceEntrance(residence.PropertyInfoId);
             session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
@@ -79,8 +85,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             {
                 Info = new MapInfo
                 {
-                    Entry      = entrance.Entry,
-                    InstanceId = residence.Parent?.Id ?? residence.Id
+                    Entry   = entrance.Entry,
+                    MapLock = mapLock
                 },
                 Position = entrance.Position
             });

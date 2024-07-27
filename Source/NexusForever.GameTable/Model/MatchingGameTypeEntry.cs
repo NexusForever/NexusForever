@@ -5,7 +5,7 @@ namespace NexusForever.GameTable.Model
         public uint Id;
         public uint LocalizedTextIdName;
         public uint LocalizedTextIdDescription;
-        public uint MatchTypeEnum;
+        public Game.Static.Matching.MatchType MatchTypeEnum;
         public uint MatchingGameTypeEnumFlags;
         public uint TeamSize;
         public uint MinLevel;

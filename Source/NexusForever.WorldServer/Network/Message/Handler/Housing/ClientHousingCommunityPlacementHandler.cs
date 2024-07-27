@@ -1,8 +1,10 @@
 ﻿using NexusForever.Game;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Map;
+using NexusForever.Game.Map.Lock;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
@@ -54,17 +56,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                 else
                     residence.Parent.RemoveChild(residence);
 
+                IMapLock mapLock = MapLockManager.Instance.GetResidenceLock(community.Residence);
+
                 session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
-                session.Player.TeleportTo(entrance.Entry, entrance.Position, community.Residence.Id);
+                session.Player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
             }
             else
             {
+                IMapLock mapLock = MapLockManager.Instance.GetResidenceLock(community.Residence);
+
                 // move owner to new instance only if not on the same instance as the residence
                 // otherwise they will be moved to the new instance during the unload
                 if (residence.Map != session.Player.Map)
                 {
                     session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
-                    session.Player.TeleportTo(entrance.Entry, entrance.Position, community.Residence.Id);
+                    session.Player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
                 }
 
                 // for individual residences remove the entire instance
@@ -73,8 +79,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                 {
                     Info = new MapInfo
                     {
-                        Entry      = entrance.Entry,
-                        InstanceId = community.Residence.Id,
+                        Entry   = entrance.Entry,
+                        MapLock = mapLock,
                     },
                     Position = entrance.Position
                 });

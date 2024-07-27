@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Guild;
-using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Text.Filter;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;

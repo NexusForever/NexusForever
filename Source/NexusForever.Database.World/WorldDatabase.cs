@@ -110,5 +110,13 @@ namespace NexusForever.Database.World
                 .AsNoTracking()
                 .ToImmutableList();
         }
+
+        public ImmutableList<MapEntranceModel> GetMapEntrances()
+        {
+            using var context = new WorldContext(config);
+            return context.MapEntrance
+                .AsNoTracking()
+                .ToImmutableList();
+        }
     }
 }

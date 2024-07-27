@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Game;
+using NexusForever.Game.Abstract.Matching.Match;
+using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
@@ -15,6 +17,7 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
+using NexusForever.Game.Matching.Match;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
 using NexusForever.Game.RBAC;
@@ -50,6 +53,8 @@ namespace NexusForever.WorldServer
         private readonly ILoginQueueManager loginQueueManager;
         private readonly INetworkManager<IWorldSession> networkManager;
         private readonly IMessageManager messageManager;
+        private readonly IMatchingManager matchingManager;
+        private readonly IMatchManager matchManager;
         private readonly IWorldManager worldManager;
 
         public HostedService(
@@ -59,6 +64,8 @@ namespace NexusForever.WorldServer
             ILoginQueueManager loginQueueManager,
             INetworkManager<IWorldSession> networkManager,
             IMessageManager messageManager,
+            IMatchingManager matchingManager,
+            IMatchManager matchManager,
             IWorldManager worldManager)
         {
             this.log               = log;
@@ -69,6 +76,8 @@ namespace NexusForever.WorldServer
             this.loginQueueManager = loginQueueManager;
             this.networkManager    = networkManager;
             this.messageManager    = messageManager;
+            this.matchingManager   = matchingManager;
+            this.matchManager      = matchManager;
             this.worldManager      = worldManager;
         }
 
@@ -127,6 +136,8 @@ namespace NexusForever.WorldServer
 
             ShutdownManager.Instance.Initialise(WorldServer.Shutdown);
 
+            matchingManager.Initialise();
+
             // TODO: fix this, really need to move the character packet generation to a manager and not a packet handler...
             CharacterListHandler handler = LegacyServiceProvider.Provider.GetService<CharacterListHandler>();
             loginQueueManager.Initialise(handler.SendCharacterListPackets);
@@ -148,9 +159,11 @@ namespace NexusForever.WorldServer
                 GlobalResidenceManager.Instance.Update(lastTick); // must be after guild update
                 GlobalChatManager.Instance.Update(lastTick);
                 loginQueueManager.Update(lastTick);
-                ShutdownManager.Instance.Update(lastTick);
-
+                matchingManager.Update(lastTick);
+                matchManager.Update(lastTick);
                 scriptManager.Update(lastTick);
+
+                ShutdownManager.Instance.Update(lastTick);
 
                 // process commands after everything else in the tick has processed
                 CommandManager.Instance.Update(lastTick);
