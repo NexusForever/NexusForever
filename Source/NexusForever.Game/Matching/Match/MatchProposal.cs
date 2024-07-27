@@ -101,7 +101,7 @@ namespace NexusForever.Game.Matching.Match
                 teams.TryGetValue(Faction.Dominion, out IMatchProposalTeam t1);
                 teams.TryGetValue(Faction.Dominion, out IMatchProposalTeam t2);
 
-                if (t1.TeamReady && t2.TeamReady)
+                if ((t1?.TeamReady ?? true) && (t2?.TeamReady ?? true))
                 {
                     Status = MatchProposalStatus.Success;
                     log.LogTrace($"Match proposal {Guid} was successful.");
