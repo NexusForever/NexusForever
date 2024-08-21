@@ -379,13 +379,11 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
-                    .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue(0);
+                    .HasColumnType("bigint(20) unsigned");
 
                 entity.Property(e => e.BoneIndex)
                     .HasColumnName("boneIndex")
-                    .HasColumnType("tinyint(4) unsigned")
-                    .HasDefaultValue(0);
+                    .HasColumnType("tinyint(4) unsigned");
 
                 entity.Property(e => e.Bone)
                     .HasColumnName("bone")
