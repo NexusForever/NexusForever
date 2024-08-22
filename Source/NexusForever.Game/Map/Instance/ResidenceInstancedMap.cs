@@ -66,7 +66,7 @@ namespace NexusForever.Game.Map.Instance
 
             IResidenceEntrance entrance = globalResidenceManager.GetResidenceEntrance(residence.PropertyInfoId);
             mapPosition.Position = entrance.Position;
-            player.Rotation = entrance.Rotation.ToEulerDegrees();
+            player.Rotation = entrance.Rotation.ToEuler();
         }
 
         protected override IResidenceMapInstance CreateInstance(IPlayer player, IMapLock mapLock)

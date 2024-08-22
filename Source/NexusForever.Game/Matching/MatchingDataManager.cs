@@ -98,7 +98,7 @@ namespace NexusForever.Game.Matching
                     MapId    = mapEntranceModel.MapId,
                     Team     = mapEntranceModel.Team,
                     Position = new Vector3(entry.Position0, entry.Position1, entry.Position2),
-                    Rotation = quaternion.ToEulerDegrees(),
+                    Rotation = quaternion.ToEuler(),
                 });
             }
 

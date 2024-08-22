@@ -80,7 +80,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
             // teleport player to correct residence instance
             IResidenceEntrance entrance = globalResidenceManager.GetResidenceEntrance(residence.PropertyInfoId);
-            session.Player.Rotation = entrance.Rotation.ToEulerDegrees();
+            session.Player.Rotation = entrance.Rotation.ToEuler();
             session.Player.TeleportTo(new MapPosition
             {
                 Info = new MapInfo
