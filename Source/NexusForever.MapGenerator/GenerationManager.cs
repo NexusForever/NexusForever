@@ -69,7 +69,7 @@ namespace NexusForever.MapGenerator
         /// </summary>
         private void ProcessWorld(WorldEntry entry, byte? gridX = null, byte? gridY = null)
         {
-            var mapFile = new WritableMapFile(Path.GetFileName(entry.AssetPath));
+            var mapFile = new WritableMapFile(Path.GetFileName(entry.AssetPath.Replace('\\', Path.DirectorySeparatorChar)));
 
             log.Info($"Processing {mapFile.Asset}...");
 
