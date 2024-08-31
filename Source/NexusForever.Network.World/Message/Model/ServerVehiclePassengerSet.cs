@@ -3,8 +3,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.Server089B)]
-    public class Server089B : IWritable
+    [Message(GameMessageOpcode.ServerVehiclePassengerSet)]
+    public class ServerVehiclePassengerSet : IWritable
     {
         public uint Self { get; set; }
         public uint Vehicle { get; set; }

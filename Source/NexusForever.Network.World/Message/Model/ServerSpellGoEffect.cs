@@ -2,8 +2,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.Server07F8)]
-    public class Server07F8 : IWritable
+    [Message(GameMessageOpcode.ServerSpellGoEffect)]
+    public class ServerSpellGoEffect : IWritable
     {
         public class UnknownStructure0 : IWritable
         {
