@@ -8,6 +8,7 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -19,6 +20,7 @@ using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Configuration.Model;
+using NexusForever.Game.Group;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -47,6 +49,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
+using NetworkGroupMember = NexusForever.Network.World.Message.Model.Shared.GroupMember;
 using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Entity
@@ -226,6 +229,10 @@ namespace NexusForever.Game.Entity
         public IAppearanceManager AppearanceManager { get; private set; }
         public IResurrectionManager ResurrectionManager { get; private set; }
 
+        public IGroupMember GroupMembership1 { get; private set; }
+        public IGroupMember GroupMembership2 { get; private set; }
+        public IGroupInvite GroupInvite { get; set; }
+
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
         private UpdateTimer saveTimer = new(SaveDuration);
@@ -404,7 +411,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         /// <remarks>
         /// This is an instant save, <see cref="AuthContext"/> changes are saved first followed by <see cref="CharacterContext"/> changes.
-        /// This will block the calling thread until the database save is complete. 
+        /// This will block the calling thread until the database save is complete.
         /// </remarks>
         public async void SaveDirect()
         {
@@ -552,7 +559,10 @@ namespace NexusForever.Game.Entity
                     .ToList(),
                 GuildName = GuildManager.GuildAffiliation?.Name,
                 GuildType = GuildManager.GuildAffiliation?.Type ?? GuildType.None,
-                PvPFlag   = PvPFlag.Disabled
+                PvPFlag   = PvPFlag.Disabled,
+
+                // We use Group 1 as the "dominant group"
+                GroupId   = GroupMembership1 == null ? 0 : GroupMembership1.Group.Id
             };
         }
 
@@ -704,10 +714,14 @@ namespace NexusForever.Game.Entity
             Account.RewardPropertyManager.SendInitialPackets();
             ResurrectionManager.SendInitialPackets();
 
+            GroupManager.Instance.RestoreGroupsForPlayer(this);
+
             Session.EnqueueMessageEncrypted(new ServerPlayerInnate
             {
                 InnateIndex = InnateIndex
             });
+
+            Session.EnqueueMessage(new ServerUpdatePhase());
 
             log.Trace($"Player {Name} took {(DateTime.UtcNow - start).TotalMilliseconds}ms to send packets after add to map.");
         }
@@ -1363,6 +1377,76 @@ namespace NexusForever.Game.Entity
         {
             DeathState = null;
             RemoveControlUnit();
+        }
+
+        /// </summary>
+        /// <param name="membership"></param>
+        /// <returns></returns>
+        public void AddToGroup(IGroupMember membership)
+        {
+            if (GroupMembership2 != null)
+                throw new InvalidOperationException("Player cannot be a member of more than two groups.");
+
+            if (GroupMembership1 != null)
+                GroupMembership2 = GroupMembership1;
+
+            GroupMembership1 = membership;
+            EnqueueToVisible(membership.BuildGroupAssociation());
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="membership"></param>
+        public void RemoveFromGroup(IGroupMember membership)
+        {
+            if (GroupMembership2 != null && membership.Group.Id == GroupMembership2.Group.Id)
+            {
+                // We are being removed from group 2
+                // No need to send a ServerEntityGroupAssociation packet, we already know we are a member of group 1 over this.
+                GroupMembership2 = null;
+            }
+            else if (membership.Group.Id == GroupMembership1.Group.Id)
+            {
+                // We are being removed from Group 1
+                if (GroupMembership2 != null)
+                {
+                    GroupMembership1 = GroupMembership2;
+                    GroupMembership2 = null;
+                    EnqueueToVisible(membership.BuildGroupAssociation());
+                }
+                else
+                {
+                    GroupMembership1 = null;
+                    EnqueueToVisible(new ServerEntityGroupAssociation { UnitId = Guid, GroupId = 0 });
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Player is not a member of the group you want to remove them from.");
+            }
+        }
+
+        /// <summary>
+        /// Build the <see cref="GroupMember"/> instance for the <see cref="Player"/>
+        /// </summary>
+        public NetworkGroupMember BuildGroupMember()
+        {
+            return new NetworkGroupMember
+            {
+                Name            = Name,
+                Faction         = Faction1,
+                Race            = Race,
+                Class           = Class,
+                Sex             = Sex,
+                Level           = (byte)Level,
+                EffectiveLevel  = (byte)Level,
+                Path            = Path,
+                Realm           = RealmContext.Instance.RealmId,
+                WorldZoneId     = (ushort)Zone.Id,
+                MapId           = Map.Entry.Id,
+                SyncedToGroup   = true
+            };
         }
     }
 }

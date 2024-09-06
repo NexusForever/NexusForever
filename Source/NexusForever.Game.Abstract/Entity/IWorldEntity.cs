@@ -44,6 +44,7 @@ namespace NexusForever.Game.Abstract.Entity
         uint Shield { get; set; }
         uint MaxShieldCapacity { get; set; }
         uint Level { get; set; }
+        uint InterruptArmor { get; set; }
         bool Sheathed { get; set; }
 
         StandState StandState { get; set; }
