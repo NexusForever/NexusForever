@@ -11,6 +11,11 @@ namespace NexusForever.Game.Abstract.Map
         void AddToMap(IPlayer player, IMapPosition mapPosition);
 
         /// <summary>
+        /// Return <see cref="IMap"/> for supplied worldId.
+        /// </summary>
+        IMap GetMap(uint worldId);
+
+        /// <summary>
         /// Returns if <see cref="IPlayer"/> can create a new instance.
         /// </summary>
         bool CanCreateInstance(IPlayer player);

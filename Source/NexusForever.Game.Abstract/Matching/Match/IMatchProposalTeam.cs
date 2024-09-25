@@ -5,6 +5,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
 {
     public interface IMatchProposalTeam
     {
+        public Guid Guid { get; }
         uint MemberCount { get; }
         bool TeamReady { get; }
 

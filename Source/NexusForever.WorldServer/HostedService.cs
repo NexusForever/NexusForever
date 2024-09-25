@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Game;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Achievement;
@@ -14,6 +15,7 @@ using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
+using NexusForever.Game.Event;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -55,6 +57,7 @@ namespace NexusForever.WorldServer
         private readonly IMessageManager messageManager;
         private readonly IMatchingManager matchingManager;
         private readonly IMatchManager matchManager;
+        private readonly IPublicEventTemplateManager publicEventManager;
         private readonly IWorldManager worldManager;
 
         public HostedService(
@@ -66,19 +69,21 @@ namespace NexusForever.WorldServer
             IMessageManager messageManager,
             IMatchingManager matchingManager,
             IMatchManager matchManager,
+            IPublicEventTemplateManager publicEventManager,
             IWorldManager worldManager)
         {
             this.log               = log;
 
             LegacyServiceProvider.Provider = serviceProvider;
 
-            this.scriptManager     = scriptManager;
-            this.loginQueueManager = loginQueueManager;
-            this.networkManager    = networkManager;
-            this.messageManager    = messageManager;
-            this.matchingManager   = matchingManager;
-            this.matchManager      = matchManager;
-            this.worldManager      = worldManager;
+            this.scriptManager      = scriptManager;
+            this.loginQueueManager  = loginQueueManager;
+            this.networkManager     = networkManager;
+            this.messageManager     = messageManager;
+            this.matchingManager    = matchingManager;
+            this.matchManager       = matchManager;
+            this.publicEventManager = publicEventManager;
+            this.worldManager       = worldManager;
         }
 
         #endregion
@@ -105,6 +110,7 @@ namespace NexusForever.WorldServer
             scriptManager.Initialise();
 
             GameTableManager.Instance.Initialise();
+            publicEventManager.Initialise();
             MapIOManager.Instance.Initialise();
             SearchManager.Instance.Initialise();
             EntityManager.Instance.Initialise();

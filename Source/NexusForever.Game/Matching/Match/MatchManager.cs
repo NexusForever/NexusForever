@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Matching;
@@ -10,29 +11,31 @@ namespace NexusForever.Game.Matching.Match
     public class MatchManager : IMatchManager
     {
         private readonly HashSet<IMatchProposal> matchProposals = [];
-        private readonly Dictionary<ulong, IMatchProposal> characterMatchProposals = [];
-
         private readonly Dictionary<Guid, IMatch> matches = [];
-        private readonly Dictionary<ulong, IMatch> characterMatches = [];
+
+        private readonly Dictionary<ulong, IMatchCharacter> characters = [];
 
         #region Dependency Injection
 
         private readonly ILogger<MatchManager> log;
 
+        private readonly IFactory<IMatchCharacter> matchCharacterFactory;
         private readonly IFactory<IMatchProposal> matchProposalFactory;
-        private readonly IFactory<IMatch> matchFactory;
+        private readonly IMatchFactory matchFactory;
         private readonly IMatchingManager matchingManager;
         private readonly IMatchingQueueTimeManager matchingQueueTimeManager;
 
         public MatchManager(
             ILogger<MatchManager> log,
+            IFactory<IMatchCharacter> matchCharacterFactory,
             IFactory<IMatchProposal> matchProposalFactory,
-            IFactory<IMatch> matchFactory,
+            IMatchFactory matchFactory,
             IMatchingManager matchingManager,
             IMatchingQueueTimeManager matchingQueueTimeManager)
         {
             this.log                      = log;
 
+            this.matchCharacterFactory    = matchCharacterFactory;
             this.matchProposalFactory     = matchProposalFactory;
             this.matchFactory             = matchFactory;
             this.matchingManager          = matchingManager;
@@ -81,7 +84,7 @@ namespace NexusForever.Game.Matching.Match
                     matchProposals.Remove(matchProposal);
                     foreach (IMatchProposalTeam matchProposalTeam in matchProposal.GetTeams())
                         foreach (IMatchProposalTeamMember matchProposalTeamMember in matchProposalTeam.GetMembers())
-                            characterMatchProposals.Remove(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId);
+                            GetMatchCharacter(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId).RemoveMatchProposal();
 
                     log.LogTrace($"MatchProposal {matchProposal.Guid} removed from store.");
                 }
@@ -95,9 +98,11 @@ namespace NexusForever.Game.Matching.Match
                 var matchesToRemove = new List<IMatch>();
                 foreach (IMatch match in matches.Values)
                 {
+                    match.Update(lastTick);
+
                     switch (match.Status)
                     {
-                        case MatchStatus.Complete:
+                        case MatchStatus.Finalised:
                         {
                             matchesToRemove.Add(match);
                             break;
@@ -108,10 +113,6 @@ namespace NexusForever.Game.Matching.Match
                 foreach (IMatch match in matchesToRemove)
                 {
                     matches.Remove(match.Guid);
-                    foreach (IMatchTeam matchTeam in match.GetTeams())
-                        foreach (IMatchTeamMember matchTeamMember in matchTeam.GetMembers())
-                            characterMatches.Remove(matchTeamMember.CharacterId);
-
                     log.LogTrace($"Match {match.Guid} removed from store.");
                 }
             }
@@ -144,7 +145,7 @@ namespace NexusForever.Game.Matching.Match
 
             // TODO: create party
 
-            IMatch match = matchFactory.Resolve();
+            IMatch match = matchFactory.CreateMatch(matchProposal.MatchingQueueGroup.MatchType);
             match.Initialise(matchProposal);
             matches.Add(match.Guid, match);
 
@@ -152,16 +153,31 @@ namespace NexusForever.Game.Matching.Match
             // this is required since multiple characters can be in the same matching queue proposal
             var matchingQueueProposalsToRemove = new HashSet<IMatchingQueueProposal>();
             foreach (IMatchProposalTeam matchProposalTeam in matchProposal.GetTeams())
-            {
                 foreach (IMatchProposalTeamMember matchProposalTeamMember in matchProposalTeam.GetMembers())
-                {
-                    characterMatches.Add(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId, match);
                     matchingQueueProposalsToRemove.Add(matchProposalTeamMember.MatchingQueueProposalMember.MatchingQueueProposal);
-                }
-            }
 
             foreach (IMatchingQueueProposal matchingQueueProposal in matchingQueueProposalsToRemove)
                 matchProposal.MatchingQueueGroup.RemoveMatchingQueueProposal(matchingQueueProposal, null);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IPlayer"/> logs in.
+        /// </summary>
+        public void OnLogin(IPlayer player)
+        {
+            // update client with match information
+            IMatchCharacter matchCharacter = GetMatchCharacter(player.CharacterId);
+            matchCharacter.Match?.OnLogin(player);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IPlayer"/> logs out.
+        /// </summary>
+        public void OnLogout(IPlayer player)
+        {
+            // decline match proposal on logout
+            IMatchCharacter matchCharacter = GetMatchCharacter(player.CharacterId);
+            matchCharacter.MatchProposal?.Respond(player, false);
         }
 
         /// <summary>
@@ -180,10 +196,11 @@ namespace NexusForever.Game.Matching.Match
             {
                 foreach (IMatchProposalTeamMember matchProposalTeamMember in matchProposalTeam.GetMembers())
                 {
-                    characterMatchProposals.Add(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId, matchProposal);
+                    GetMatchCharacter(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId).AddMatchProposal(matchProposal);
+                    //characterMatchProposals.Add(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId, matchProposal);
 
-                    IMatchingCharacter ss = matchingManager.GetMatchingCharacter(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId);
-                    foreach (IMatchingCharacterQueue matchingCharacterQueue in ss.GetMatchingCharacterQueues())
+                    IMatchingCharacter matchingCharacter = matchingManager.GetMatchingCharacter(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId);
+                    foreach (IMatchingCharacterQueue matchingCharacterQueue in matchingCharacter.GetMatchingCharacterQueues())
                         matchingQueueGroupsToPause.Add(matchingCharacterQueue.MatchingQueueGroup);
                 }
             }
@@ -193,19 +210,21 @@ namespace NexusForever.Game.Matching.Match
         }
 
         /// <summary>
-        /// Return <see cref="IMatchProposal"/> the supplied character is currently responding to.
+        /// Return <see cref="IMatchCharacter"/> for supplied character id.
         /// </summary>
-        public IMatchProposal GetMatchProposal(ulong characterId)
+        /// <remarks>
+        /// Will return a new <see cref="IMatchCharacter"/> if one does not exist.
+        /// </remarks>
+        public IMatchCharacter GetMatchCharacter(ulong characterId)
         {
-            return characterMatchProposals.TryGetValue(characterId, out IMatchProposal matchProposal) ? matchProposal : null;
-        }
+            if (!characters.TryGetValue(characterId, out IMatchCharacter characterInfo))
+            {
+                characterInfo = matchCharacterFactory.Resolve();
+                characterInfo.Initialise(characterId);
+                characters.Add(characterId, characterInfo);
+            }
 
-        /// <summary>
-        /// Return <see cref="IMatch"/> the supplied character is currently in.
-        /// </summary>
-        public IMatch GetMatch(ulong characterId)
-        {
-            return characterMatches.TryGetValue(characterId, out IMatch match) ? match : null;
+            return characterInfo;
         }
     }
 }

@@ -30,5 +30,10 @@ namespace NexusForever.Game.Abstract.Matching.Queue
         /// An optional <see cref="MatchingQueueResult"/> can be supplied to indicate the reason for leaving the queue.
         /// </remarks>
         void RemoveMatchingQueueProposal(Static.Matching.MatchType matchType, MatchingQueueResult? leaveReason = MatchingQueueResult.Left);
+
+        /// <summary>
+        /// Send match and queue status for character.
+        /// </summary>
+        void SendMatchingStatus();
     }
 }

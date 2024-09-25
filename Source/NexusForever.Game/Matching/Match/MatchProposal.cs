@@ -18,7 +18,9 @@ namespace NexusForever.Game.Matching.Match
         public IMatchingQueueGroup MatchingQueueGroup { get; private set; }
         public IMatchingMapSelectorResult MatchingMapSelectorResult { get; private set; }
 
-        private readonly Dictionary<Faction, IMatchProposalTeam> teams = [];
+        private readonly List<IMatchProposalTeam> teams = [];
+        private readonly Dictionary<ulong, IMatchProposalTeam> characterTeams = [];
+
         private UpdateTimer expiryTimer;
 
         #region Dependency Injection
@@ -52,11 +54,14 @@ namespace NexusForever.Game.Matching.Match
             {
                 IMatchProposalTeam matchingProposalTeam = matchProposalTeamFactory.Resolve();
                 matchingProposalTeam.Initialise(matchingQueueGroupTeam);
-                teams.Add(matchingQueueGroupTeam.Faction, matchingProposalTeam);
+
+                teams.Add(matchingProposalTeam);
+                foreach (IMatchingQueueProposalMember matchingQueueProposalMember in matchingQueueGroupTeam.GetMembers())
+                    characterTeams.Add(matchingQueueProposalMember.CharacterId, matchingProposalTeam);
             }
 
-            SendMatchReady(matchingQueueGroup.InProgress, Faction.Dominion);
-            SendMatchReady(matchingQueueGroup.InProgress, Faction.Exile);
+            foreach (IMatchProposalTeam matchProposalTeam in teams)
+                SendMatchReady(matchingQueueGroup.InProgress, matchProposalTeam);
 
             expiryTimer = new UpdateTimer(TimeSpan.FromSeconds(30d));
 
@@ -78,7 +83,17 @@ namespace NexusForever.Game.Matching.Match
         
         public IEnumerable<IMatchProposalTeam> GetTeams()
         {
-            return teams.Values;
+            return teams;
+        }
+
+        private IMatchProposalTeam GetTeam(IPlayer player)
+        {
+            return characterTeams.TryGetValue(player.CharacterId, out IMatchProposalTeam team) ? team : null;
+        }
+
+        private IMatchProposalTeam GetOpposingTeam(IMatchProposalTeam matchProposalTeam)
+        {
+            return teams.SingleOrDefault(t => t.Guid != matchProposalTeam.Guid);
         }
 
         /// <summary>
@@ -86,7 +101,8 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public void Respond(IPlayer player, bool response)
         {
-            if (!teams.TryGetValue(player.Faction1, out IMatchProposalTeam team))
+            IMatchProposalTeam team = GetTeam(player);
+            if (team == null)
                 throw new InvalidOperationException();
 
             team.Respond(player.CharacterId, response);
@@ -98,26 +114,22 @@ namespace NexusForever.Game.Matching.Match
             }
             else
             {
-                teams.TryGetValue(Faction.Dominion, out IMatchProposalTeam t1);
-                teams.TryGetValue(Faction.Dominion, out IMatchProposalTeam t2);
-
-                if ((t1?.TeamReady ?? true) && (t2?.TeamReady ?? true))
+                // in debug mode it is possible for a team to have no members
+                // just auto accept in this scenario
+                if (teams.All(t => t.TeamReady || t.MemberCount == 0))
                 {
                     Status = MatchProposalStatus.Success;
                     log.LogTrace($"Match proposal {Guid} was successful.");
                 }
             }
 
-            SendMatchPendingUpdate(player.Faction1, Faction.Dominion);
-            SendMatchPendingUpdate(player.Faction1, Faction.Exile);
+            foreach (IMatchProposalTeam matchProposalTeam in teams)
+                SendMatchPendingUpdate(team, matchProposalTeam);
         }
 
-        private void SendMatchReady(bool inProgress, Faction faction)
+        private void SendMatchReady(bool inProgress, IMatchProposalTeam allyTeam)
         {
-            if (!teams.TryGetValue(faction, out IMatchProposalTeam allyTeam))
-                return;
-
-            teams.TryGetValue(faction == Faction.Dominion ? Faction.Exile : Faction.Dominion, out IMatchProposalTeam enemyTeam);
+            IMatchProposalTeam enemyTeam = GetOpposingTeam(allyTeam);
 
             IWritable message;
             if (inProgress)
@@ -142,14 +154,11 @@ namespace NexusForever.Game.Matching.Match
             allyTeam.Broadcast(message);
         }
 
-        private void SendMatchPendingUpdate(Faction responseFaction, Faction teamFaction)
+        private void SendMatchPendingUpdate(IMatchProposalTeam responseTeam, IMatchProposalTeam team)
         {
-            if (!teams.TryGetValue(teamFaction, out IMatchProposalTeam team))
-                return;
-
             var test = new ServerMatchingMatchPendingUpdate()
             {
-                Ally = responseFaction == teamFaction
+                Ally = responseTeam.Guid == team.Guid
             };
 
             team.Broadcast(test);

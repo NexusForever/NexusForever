@@ -8,6 +8,6 @@
         /// <remarks>
         /// A matched <see cref="IMatchingQueueGroup"/> can be an incomplete group.
         /// </remarks>
-        IMatchingQueueGroup Match(List<IMatchingQueueGroup> matchingQueueGroups, IMatchingQueueProposal matchingQueueProposal);
+        (IMatchingQueueGroup, IMatchingQueueGroupTeam)? Match(List<IMatchingQueueGroup> matchingQueueGroups, IMatchingQueueProposal matchingQueueProposal);
     }
 }

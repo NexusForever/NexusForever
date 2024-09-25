@@ -189,7 +189,7 @@ namespace NexusForever.Game.Entity
                 EnqueueToVisible(new ServerEntityFaction
                 {
                     UnitId  = Guid,
-                    Faction = (ushort)player.Faction1
+                    Faction = player.Faction1
                 }, true);
 
                 Faction1 = player.Faction1;

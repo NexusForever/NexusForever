@@ -37,7 +37,7 @@ namespace NexusForever.Game.Matching.Queue
         }
 
         /// <summary>
-        /// 
+        /// Invoked each world tick with the delta since the previous tick occurred.
         /// </summary>
         public void Update(double lastTick)
         {

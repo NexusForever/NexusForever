@@ -109,6 +109,9 @@ namespace NexusForever.Script
                     if (!type.IsAssignableTo(typeof(IScript)))
                         continue;
 
+                    if (type.IsAbstract)
+                        continue;
+
                     if (type.GetCustomAttribute<ScriptFilterIgnoreAttribute>() != null)
                     {
                         log.LogTrace("Script type {type} was ignoed due to attribute.", type.Name);

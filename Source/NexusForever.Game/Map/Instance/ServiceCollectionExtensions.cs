@@ -8,10 +8,12 @@ namespace NexusForever.Game.Map.Instance
     {
         public static void AddGameMapInstance(this IServiceCollection sc)
         {
-            sc.AddTransient<ContentInstancedMap>();
+            sc.AddTransient<ContentInstancedMap<IContentMapInstance>>();
+            sc.AddTransient<ContentInstancedMap<IContentPvpMapInstance>>();
             sc.AddTransient<ResidenceInstancedMap>();
 
             sc.AddTransientFactory<IContentMapInstance, ContentMapInstance>();
+            sc.AddTransientFactory<IContentPvpMapInstance, ContentPvpMapInstance>();
             sc.AddTransientFactory<IResidenceMapInstance, ResidenceMapInstance>();
         }
     }

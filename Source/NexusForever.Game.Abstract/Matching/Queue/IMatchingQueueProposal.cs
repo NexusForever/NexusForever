@@ -12,6 +12,8 @@ namespace NexusForever.Game.Abstract.Matching.Queue
         MatchingQueueFlags MatchingQueueFlags { get; }
         DateTime QueueTime { get; }
 
+        bool InstantQueue { get; }
+
         /// <summary>
         /// Determines if the <see cref="IMatchingQueueProposal"/> was formed from a party.
         /// </summary>

@@ -159,6 +159,21 @@ namespace NexusForever.Game.Abstract.Entity
         void EnqueueToVisible(IWritable message, bool includeSelf = false);
 
         /// <summary>
+        /// Set primary faction to supplied <see cref="Faction"/>.
+        /// </summary>
+        void SetFaction(Faction factionId);
+
+        /// <summary>
+        /// Set temporary faction to supplied <see cref="Faction"/>.
+        /// </summary>
+        void SetTemporaryFaction(Faction factionId);
+
+        /// <summary>
+        /// Remove temporary faction and revert to primary faction.
+        /// </summary>
+        void RemoveTemporaryFaction();
+
+        /// <summary>
         /// Return <see cref="Disposition"/> between <see cref="IWorldEntity"/> and <see cref="Faction"/>.
         /// </summary>
         Disposition GetDispositionTo(Faction factionId, bool primary = true);

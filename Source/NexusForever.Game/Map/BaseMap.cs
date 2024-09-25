@@ -1,13 +1,13 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
-using Microsoft.Extensions.DependencyInjection;
+using System.Text;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Configuration.Model;
-using NexusForever.Game.Entity;
 using NexusForever.Game.Map.Instance;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Map;
@@ -38,6 +38,8 @@ namespace NexusForever.Game.Map
         public WorldEntry Entry { get; private set; }
         public MapFile File { get; private set; }
 
+        public IPublicEventManager PublicEventManager { get; }
+
         private readonly IMapGrid[] grids = new MapGrid[MapDefines.WorldGridCount * MapDefines.WorldGridCount];
         private readonly HashSet<(uint GridX, uint GridZ)> activeGrids = new();
 
@@ -53,10 +55,12 @@ namespace NexusForever.Game.Map
 
         private readonly IEntityFactory entityFactory;
 
-        public BaseMap()
+        public BaseMap(
+            IEntityFactory entityFactory,
+            IPublicEventManager publicEventManager)
         {
-            // TODO: replace once maps are added to DI container
-            entityFactory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
+            this.entityFactory = entityFactory;
+            PublicEventManager = publicEventManager;
         }
 
         #endregion
@@ -66,10 +70,17 @@ namespace NexusForever.Game.Map
         /// </summary>
         public virtual void Initialise(WorldEntry entry)
         {
-            Entry            = entry;
-            File             = MapIOManager.Instance.GetBaseMap(Entry.AssetPath);
-            entityCache      = EntityCacheManager.Instance.GetEntityCache((ushort)Entry.Id);
+            Entry       = entry;
+            File        = MapIOManager.Instance.GetBaseMap(Entry.AssetPath);
+            entityCache = EntityCacheManager.Instance.GetEntityCache((ushort)Entry.Id);
 
+            PublicEventManager.Initialise(this);
+
+            InitialiseScriptCollection();
+        }
+
+        protected virtual void InitialiseScriptCollection()
+        {
             scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IBaseMap>(this, Entry.Id);
         }
 
@@ -82,6 +93,8 @@ namespace NexusForever.Game.Map
             UpdateGrids(lastTick);
 
             scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
+
+            PublicEventManager.Update(lastTick);
         }
 
         private void ProcessGridActions()
@@ -440,6 +453,8 @@ namespace NexusForever.Game.Map
             entities.Add(guid, entity);
 
             entity.OnAddToMap(this, guid, vector);
+
+            PublicEventManager.OnAddToMap(entity);
             scriptCollection?.Invoke<IMapScript>(s => s.OnAddToMap(entity));
 
             log.Trace($"Added entity {entity.Guid} to map {Entry.Id} at {vector.X},{vector.Y},{vector.Z}.");
@@ -457,6 +472,8 @@ namespace NexusForever.Game.Map
             entities.Remove(entity.Guid);
 
             scriptCollection?.Invoke<IMapScript>(s => s.OnRemoveFromMap(entity));
+            PublicEventManager.OnRemoveFromMap(entity);
+
             entity.OnRemoveFromMap();
         }
 
@@ -497,5 +514,25 @@ namespace NexusForever.Game.Map
             // TODO: add support for Holocrypts and instances
             return ResurrectionType.None;
         }
+
+        /// <summary>
+        /// Invoked when <see cref="IPublicEvent"/> finishes with the winning <see cref="IPublicEventTeam"/>.
+        /// </summary>
+        public virtual void OnPublicEventFinish(IPublicEvent publicEvent, IPublicEventTeam publicEventTeam)
+        {
+            scriptCollection.Invoke<IMapScript>(s => s.OnPublicEventFinish(publicEvent, publicEventTeam));
+        }
+
+        /// <summary>
+        /// Return a string containing debug information about the map.
+        /// </summary>
+        public virtual string WriteDebugInformation()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"World Id: {Entry.Id}");
+            sb.AppendLine($"Grid Count: {activeGrids.Count}");
+            sb.Append($"Entity Count: {entities.Count}");
+            return sb.ToString();
+        }        
     }
 }

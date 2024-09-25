@@ -11,7 +11,15 @@ namespace NexusForever.Game.Matching.Queue
     /// </summary>
     public class MatchingQueueGroupTeam : IMatchingQueueGroupTeam
     {
-        public Faction Faction { get; set; }
+        public Guid Guid { get; private set; }
+
+        /// <summary>
+        /// <see cref="Static.Reputation.Faction"/> of the <see cref="IMatchingQueueGroupTeam"/>.
+        /// </summary>
+        /// <remarks>
+        /// Faction is optional and will only be set when <see cref="IMatchingDataManager.IsSingleFactionEnforced"/> is true for <see cref="MatchType"/>, otherwise team will be made up of members from both factions.
+        /// </remarks>
+        public Faction? Faction { get; private set; }
 
         private readonly HashSet<IMatchingQueueProposal> matchingQueueProposals = [];
 
@@ -26,6 +34,21 @@ namespace NexusForever.Game.Matching.Queue
         }
 
         #endregion
+
+        /// <summary>
+        /// Initialise <see cref="IMatchingQueueGroupTeam"/> with optional <see cref="Static.Reputation.Faction"/>.
+        /// </summary>
+        public void Initialise(Faction? faction)
+        {
+            if (Guid != Guid.Empty)
+                throw new InvalidOperationException();
+
+            Guid = Guid.NewGuid();
+            if (faction != null)
+                Faction = faction;
+
+            log.LogTrace($"Initialising matching queue group team {Guid}.");
+        }
 
         /// <summary>
         /// Add <see cref="IMatchingQueueProposal"/> to the team.

@@ -7,6 +7,7 @@ namespace NexusForever.Game.Matching.Match
 {
     public class MatchProposalTeam : IMatchProposalTeam
     {
+        public Guid Guid { get; private set; }
         public uint MemberCount => (uint)members.Count;
         public bool TeamReady { get; private set; }
 
@@ -30,6 +31,10 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public void Initialise(IMatchingQueueGroupTeam team)
         {
+            if (Guid != Guid.Empty)
+                throw new InvalidOperationException();
+
+            Guid = Guid.NewGuid();
             this.team = team;
 
             foreach (IMatchingQueueProposalMember matchingQueueProposalMember in team.GetMembers())

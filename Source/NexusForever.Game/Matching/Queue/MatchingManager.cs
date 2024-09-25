@@ -5,7 +5,6 @@ using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.Matching;
-using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared;
 
@@ -13,7 +12,7 @@ namespace NexusForever.Game.Matching.Queue
 {
     public class MatchingManager : IMatchingManager
     {
-        private readonly Dictionary<Faction, IMatchingQueueManager> pveMatchingQueueManagers = [];
+        private IMatchingQueueManager pveMatchingQueueManager;
         private IMatchingQueueManager pvpMatchingQueueManager;
 
         private readonly ConcurrentQueue<IMatchingQueueProposal> incomingMatchingQueueProposals = [];
@@ -59,33 +58,21 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void Initialise()
         {
-            if (pveMatchingQueueManagers.Count > 0)
+            if (pveMatchingQueueManager != null)
                 throw new InvalidOperationException();
 
             matchingDataManager.Initialise();
             matchingQueueTimeManager.Initialise();
 
-            InitialisePvEQueueManagers();
-            InitialisePvPQueueManagers();
+            pveMatchingQueueManager = CreateMatchingQueueManager();
+            pvpMatchingQueueManager = CreateMatchingQueueManager();
         }
 
-        private void InitialisePvEQueueManagers()
+        private IMatchingQueueManager CreateMatchingQueueManager()
         {
-            void CreatePvEQueueManager(Faction faction)
-            {
-                IMatchingQueueManager pveMatchingQueueManager = matchingQueueManagerFactory.Resolve();
-                pveMatchingQueueManager.Initialise();
-                pveMatchingQueueManagers.Add(faction, pveMatchingQueueManager);
-            }
-
-            CreatePvEQueueManager(Faction.Dominion);
-            CreatePvEQueueManager(Faction.Exile);
-        }
-
-        private void InitialisePvPQueueManagers()
-        {
-            pvpMatchingQueueManager = matchingQueueManagerFactory.Resolve();
-            pvpMatchingQueueManager.Initialise();
+            IMatchingQueueManager matchingQueueManager = matchingQueueManagerFactory.Resolve();
+            matchingQueueManager.Initialise();
+            return matchingQueueManager;
         }
 
         /// <summary>
@@ -93,9 +80,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void Update(double lastTick)
         {
-            foreach (IMatchingQueueManager matchingQueueManager in pveMatchingQueueManagers.Values)
-                matchingQueueManager.Update(lastTick);
-
+            pveMatchingQueueManager.Update(lastTick);
             pvpMatchingQueueManager.Update(lastTick);
 
             UpdateIncomingProposals();
@@ -173,6 +158,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         /// <remarks>
         /// Will return a new <see cref="IMatchingCharacter"/> if one does not exist.
+        /// </remarks>
         public IMatchingCharacter GetMatchingCharacter(ulong characterId)
         {
             if (!characters.TryGetValue(characterId, out IMatchingCharacter characterInfo))
@@ -260,7 +246,7 @@ namespace NexusForever.Game.Matching.Queue
 
         private void JoinQueue(IMatchingQueueProposal matchingQueueProposal)
         {
-            IMatchingQueueManager matchingQueueManager = GetMatchingQueueManager(matchingQueueProposal.Faction, matchingQueueProposal.MatchType);
+            IMatchingQueueManager matchingQueueManager = GetMatchingQueueManager(matchingQueueProposal.MatchType);
 
             MatchingQueueResult? matchingResult = matchingQueueManager.CanQueue(matchingQueueProposal);
             if (matchingResult != null)
@@ -277,12 +263,12 @@ namespace NexusForever.Game.Matching.Queue
             matchingQueueManager.JoinQueue(matchingQueueProposal);
         }
 
-        private IMatchingQueueManager GetMatchingQueueManager(Faction faction, Static.Matching.MatchType matchType)
+        private IMatchingQueueManager GetMatchingQueueManager(Static.Matching.MatchType matchType)
         {
             if (matchingDataManager.IsPvPMatchType(matchType))
                 return pvpMatchingQueueManager;
 
-            return pveMatchingQueueManagers[faction];
+            return pveMatchingQueueManager;
         }
 
         /// <summary>
@@ -329,6 +315,15 @@ namespace NexusForever.Game.Matching.Queue
             IMatchingCharacter character = GetMatchingCharacter(player.CharacterId);
             foreach (IMatchingCharacterQueue matchingCharacterQueue in character.GetMatchingCharacterQueues())
                 matchingCharacterQueue.MatchingQueueGroup.RemoveMatchingQueueProposal(matchingCharacterQueue.MatchingQueueProposal);
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IPlayer"/> logs in.
+        /// </summary>
+        public void OnLogin(IPlayer player)
+        {
+            IMatchingCharacter matchingCharacter = GetMatchingCharacter(player.CharacterId);
+            matchingCharacter.SendMatchingStatus();
         }
 
         /// <summary>

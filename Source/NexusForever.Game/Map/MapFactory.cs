@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Map.Instance;
 using NexusForever.Game.Static.Map;
 using NexusForever.Shared;
@@ -26,8 +27,9 @@ namespace NexusForever.Game.Map
                 case MapType.MiniDungeon:
                 case MapType.Adventure:
                 case MapType.Dungeon:
+                    return factory.Resolve<ContentInstancedMap<IContentMapInstance>>();
                 case MapType.Pvp:
-                    return factory.Resolve<ContentInstancedMap>();
+                    return factory.Resolve<ContentInstancedMap<IContentPvpMapInstance>>();
                 case MapType.Residence:
                 case MapType.Community:
                     return factory.Resolve<ResidenceInstancedMap>();

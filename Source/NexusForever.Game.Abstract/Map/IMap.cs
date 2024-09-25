@@ -8,6 +8,8 @@ namespace NexusForever.Game.Abstract.Map
 {
     public interface IMap : IUpdate
     {
+        WorldEntry Entry { get; }
+
         /// <summary>
         /// Initialise <see cref="IMap"/> with <see cref="WorldEntry"/>.
         /// </summary>
@@ -31,5 +33,10 @@ namespace NexusForever.Game.Abstract.Map
         /// Returns if <see cref="Player"/> can be added to <see cref="IMap"/>.
         /// </summary>
         GenericError? CanEnter(IPlayer entity, IMapPosition position);
+
+        /// <summary>
+        /// Return a string containing debug information about the map.
+        /// </summary>
+        string WriteDebugInformation();
     }
 }

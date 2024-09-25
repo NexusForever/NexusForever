@@ -5,8 +5,23 @@ namespace NexusForever.Game.Abstract.Map.Instance
     public interface IContentMapInstance : IMapInstance
     {
         /// <summary>
-        /// Initialise <see cref="IContentMapInstance"/> with supplied <see cref="IMatch"/>.
+        /// Active <see cref="IMatch"/> for map.
         /// </summary>
-        void Initialise(IMatch match);
+        IMatch Match { get; }
+
+        /// <summary>
+        /// Add <see cref="IMatch"/> for map.
+        /// </summary>
+        void SetMatch(IMatch match);
+
+        /// <summary>
+        /// Remove <see cref="IMatch"/> for map.
+        /// </summary>
+        void RemoveMatch();
+
+        /// <summary>
+        /// Invoked when the <see cref="IMatch"/> for the map finishes.
+        /// </summary>
+        void OnMatchFinish();
     }
 }

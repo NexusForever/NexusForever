@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
@@ -179,6 +180,24 @@ namespace NexusForever.Game.Map.Instance
         public virtual T GetInstance(Guid instanceId)
         {
             return instances.TryGetValue(instanceId, out T map) ? map : default;
+        }
+
+        /// <summary>
+        /// Return a string containing debug information about the map.
+        /// </summary>
+        public string WriteDebugInformation()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"World Id: {Entry.Id}");
+            sb.AppendLine($"Instance Count: {instances.Count}");
+
+            foreach (T instance in instances.Values)
+            {
+                sb.AppendLine("=====================================");
+                sb.AppendLine(instance.WriteDebugInformation());
+            }
+
+            return sb.ToString();
         }
     }
 }

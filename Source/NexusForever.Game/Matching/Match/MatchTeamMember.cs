@@ -3,7 +3,6 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Match;
-using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Map;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
@@ -30,14 +29,33 @@ namespace NexusForever.Game.Matching.Match
         #endregion
 
         /// <summary>
-        /// Initialise new <see cref="IMatchTeamMember"/> with supplied <see cref="IMatchingQueueProposalMember"/>.
+        /// Initialise new <see cref="IMatchTeamMember"/> with supplied character id.
         /// </summary>
-        public void Initialise(IMatchingQueueProposalMember matchingQueueProposalMember)
+        public void Initialise(ulong characterId)
         {
             if (CharacterId != 0)
                 throw new InvalidOperationException();
 
-            CharacterId = matchingQueueProposalMember.CharacterId;
+            CharacterId = characterId;
+
+            GetReturnPosition();
+        }
+
+        private void GetReturnPosition()
+        {
+            IPlayer player = playerManager.GetPlayer(CharacterId);
+            if (player == null)
+                throw new InvalidOperationException();
+
+            ReturnRotation = player.Rotation;
+            ReturnPosition = new MapPosition
+            {
+                Info = new MapInfo
+                {
+                    Entry = player.Map.Entry
+                },
+                Position = player.Position
+            };
         }
 
         /// <summary>
@@ -58,13 +76,16 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Invoked when member exits the match.
         /// </summary>
-        public void MatchExit()
+        public void MatchExit(bool teleport)
         {
             if (!InMatch)
                 throw new InvalidOperationException();
 
             InMatch = false;
             Send(new ServerMatchingMatchExited());
+
+            if (teleport)
+                TeleportToReturn();
         }
 
         /// <summary>
@@ -75,16 +96,6 @@ namespace NexusForever.Game.Matching.Match
             IPlayer player = playerManager.GetPlayer(CharacterId);
             if (player == null)
                 return;
-
-            ReturnRotation = player.Rotation;
-            ReturnPosition = new MapPosition
-            {
-                Info = new MapInfo
-                {
-                    Entry = player.Map.Entry
-                },
-                Position = player.Position
-            };
 
             player.Rotation = mapEntrance.Rotation;
             player.TeleportTo(mapEntrance.MapId, mapEntrance.Position.X, mapEntrance.Position.Y, mapEntrance.Position.Z);

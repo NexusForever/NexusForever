@@ -13,10 +13,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Adventure\" />
-    <Folder Include="Dungeon\" />
-    <Folder Include="Expedition\" />
-    <Folder Include="Raid\" />
+    <Folder Include="Adventure\CrimelordsOfWhitevale\" />
+    <Folder Include="Adventure\BayOfBetrayal\" />
+    <Folder Include="Adventure\TheMalgraveTrail\" />
+    <Folder Include="Adventure\TheSiegeOfTempestRefuge\" />
+    <Folder Include="Adventure\WarOfTheWilds\" />
+    <Folder Include="Adventure\RiotInTheVoid\" />
+    <Folder Include="Adventure\TheHycrestInsurrection\" />
+    <Folder Include="Arena\TheCryoPlex\" />
+    <Folder Include="Battleground\DaggerstonePass\" />
+    <Folder Include="Battleground\HallsOfTheBloodsworn\" />
+    <Folder Include="Dungeon\ColdbloodCitadel\" />
+    <Folder Include="Dungeon\UltimateProtogames\" />
+    <Folder Include="Dungeon\SanctuaryOfTheSwordmaiden\" />
+    <Folder Include="Dungeon\Skullcano\" />
+    <Folder Include="Dungeon\RuinsOfKelVoreth\" />
+    <Folder Include="Dungeon\StormtalonsLair\" />
+    <Folder Include="Dungeon\ProtogamesAcademy\" />
+    <Folder Include="Raid\GeneticArchives\" />
+    <Folder Include="Raid\Datascape\" />
+    <Folder Include="Raid\InitializationCoreY83\" />
+    <Folder Include="Raid\RedmoonTerror\" />
   </ItemGroup>
 
 </Project>

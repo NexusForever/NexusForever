@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Event;
+
 namespace NexusForever.GameTable.Model
 {
     public class PublicEventEntry
@@ -8,7 +10,7 @@ namespace NexusForever.GameTable.Model
         public uint LocalizedTextIdName;
         public uint FailureTimeMs;
         public uint WorldLocation2Id;
-        public uint PublicEventTypeEnum;
+        public PublicEventType PublicEventTypeEnum;
         public uint PublicEventIdParent;
         public uint MinPlayerLevel;
         public uint LiveEventIdLifetime;

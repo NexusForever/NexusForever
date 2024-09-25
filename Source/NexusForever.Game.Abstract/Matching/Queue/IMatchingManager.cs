@@ -55,6 +55,11 @@ namespace NexusForever.Game.Abstract.Matching.Queue
         void LeaveQueue(IPlayer player);
 
         /// <summary>
+        /// Invoked when <see cref="IPlayer"/> logs in.
+        /// </summary>
+        void OnLogin(IPlayer player);
+
+        /// <summary>
         /// Invoked when <see cref="IPlayer"/> goes offline.
         /// </summary>
         void OnLogout(IPlayer player);

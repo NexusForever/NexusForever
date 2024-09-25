@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
+using System.Text;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Map.Lock;
@@ -57,6 +59,17 @@ namespace NexusForever.Game.Map.Instance
 
         private readonly HashSet<uint> playerEntities = new();
         private readonly Dictionary<uint, IMapInstanceRemoval> instanceRemovals = new();
+
+        #region Dependency Injection
+
+        public MapInstance(
+            IEntityFactory entityFactory,
+            IPublicEventManager publicEventManager)
+            : base(entityFactory, publicEventManager)
+        {
+        }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IMapInstance"/> with supplied <see cref="WorldEntry"/> and <see cref="IMapLock"/>.
@@ -295,6 +308,28 @@ namespace NexusForever.Game.Map.Instance
                 return;
 
             player.Session.EnqueueMessageEncrypted(new ServerPendingWorldRemovalCancel());
+        }
+
+        /// <summary>
+        /// Return a string containing debug information about the map.
+        /// </summary>
+        public override string WriteDebugInformation()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(base.WriteDebugInformation());
+            sb.AppendLine($"Instance ID: {InstanceId}");
+            sb.AppendLine($"MapLock Type: {MapLock.Type}");
+
+            if (unloadStatus.HasValue)
+                sb.AppendLine($"Unload Status: {unloadStatus.Value}");
+
+            sb.AppendLine($"Unload Ticking: {unloadTimer.IsTicking}");
+            
+            if (unloadTimer.IsTicking)
+                sb.AppendLine($"Unload Timer: {TimeSpan.FromSeconds(unloadTimer.Time)}");
+
+            sb.Append($"Player Count: {playerEntities.Count}");
+            return sb.ToString();
         }
     }
 }

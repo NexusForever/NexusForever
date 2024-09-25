@@ -3,6 +3,8 @@
     public enum MatchStatus
     {
         InProgress,
-        Complete
+        Finished,
+        Cleanup,
+        Finalised
     }
 }

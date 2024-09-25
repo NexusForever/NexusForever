@@ -8,11 +8,13 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Map.Lock;
+using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
@@ -237,15 +239,18 @@ namespace NexusForever.Game.Entity
 
         private readonly IEntityFactory entityFactory;
         private readonly IMatchingManager matchingManager;
+        private readonly IMatchManager matchManager;
 
         public Player(
             IMovementManager movementManager,
             IEntityFactory entityFactory,
-            IMatchingManager matchingManager)
+            IMatchingManager matchingManager,
+            IMatchManager matchManager)
             : base(movementManager)
         {
             this.entityFactory   = entityFactory;
             this.matchingManager = matchingManager;
+            this.matchManager    = matchManager;
         }
 
         #endregion
@@ -871,6 +876,9 @@ namespace NexusForever.Game.Entity
             GlobalChatManager.Instance.JoinDefaultChatChannels(this);
 
             ShutdownManager.Instance.OnLogin(this);
+
+            matchingManager.OnLogin(this);
+            matchManager.OnLogin(this);
         }
 
         private void OnLogout()
@@ -880,6 +888,7 @@ namespace NexusForever.Game.Entity
             GlobalChatManager.Instance.LeaveDefaultChatChannels(this);
 
             matchingManager.OnLogout(this);
+            matchManager.OnLogout(this);
 
             scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }

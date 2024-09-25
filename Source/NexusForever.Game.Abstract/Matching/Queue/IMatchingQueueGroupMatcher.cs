@@ -5,6 +5,6 @@
         /// <summary>
         /// Attempt to match <see cref="IMatchingQueueProposal"/> against <see cref="IMatchingQueueGroup"/>.
         /// </summary>
-        bool Match(IMatchingQueueGroup matchingQueueGroup, IMatchingQueueProposal matchingParty);
+        IMatchingQueueGroupTeam Match(IMatchingQueueGroup matchingQueueGroup, IMatchingQueueProposal matchingParty);
     }
 }

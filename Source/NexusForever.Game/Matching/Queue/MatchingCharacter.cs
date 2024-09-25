@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Matching;
 using NexusForever.Network.Message;
@@ -17,13 +18,16 @@ namespace NexusForever.Game.Matching.Queue
 
         private readonly ILogger<MatchingCharacter> log;
         private readonly IPlayerManager playerManager;
+        private readonly IMatchManager matchManager;
 
         public MatchingCharacter(
             ILogger<MatchingCharacter> log,
-            IPlayerManager playerManager)
+            IPlayerManager playerManager,
+            IMatchManager matchManager)
         {
             this.log           = log;
             this.playerManager = playerManager;
+            this.matchManager  = matchManager;
         }
 
         #endregion
@@ -92,11 +96,24 @@ namespace NexusForever.Game.Matching.Queue
                 });
             }
 
-            var matchingQueueLeave = new ServerMatchingQueueLeave()
+            SendMatchingStatus();
+
+            log.LogTrace($"Removed matching queue proposal for {matchType} from matching character {CharacterId}.");
+        }
+
+        /// <summary>
+        /// Send match and queue status for character.
+        /// </summary>
+        public void SendMatchingStatus()
+        {
+            Static.Matching.MatchType currentMatchType = matchManager.GetMatchCharacter(CharacterId).Match?.MatchingMap.GameTypeEntry.MatchTypeEnum
+                ?? Static.Matching.MatchType.None;
+
+            var matchingQueueLeave = new ServerMatchingStatus()
             {
-                Unknown  = 0,
-                Unknown4 = Static.Matching.MatchType.None,
-                Unknown8 = Static.Matching.MatchType.None,
+                Unknown   = 0,
+                MatchType = currentMatchType,
+                Unknown8  = Static.Matching.MatchType.None,
             };
 
             // bit mask of all match types this character is queued for
@@ -104,8 +121,6 @@ namespace NexusForever.Game.Matching.Queue
                 matchingQueueLeave.Mask.SetBit((uint)existingMatchType, true);
 
             Send(matchingQueueLeave);
-
-            log.LogTrace($"Removed matching queue proposal for {matchType} from matching character {CharacterId}.");
         }
 
         private void Send(IWritable message)

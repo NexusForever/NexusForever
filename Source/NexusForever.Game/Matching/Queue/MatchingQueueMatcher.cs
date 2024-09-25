@@ -26,22 +26,23 @@ namespace NexusForever.Game.Matching.Queue
         /// <remarks>
         /// A matched <see cref="IMatchingQueueGroup"/> can be an incomplete group.
         /// </remarks>
-        public IMatchingQueueGroup Match(List<IMatchingQueueGroup> matchingQueueGroups, IMatchingQueueProposal matchingQueueProposal)
+        public (IMatchingQueueGroup, IMatchingQueueGroupTeam)? Match(List<IMatchingQueueGroup> matchingQueueGroups, IMatchingQueueProposal matchingQueueProposal)
         {
             log.LogTrace($"Matching queue proposal {matchingQueueProposal.Guid} against {matchingQueueGroups.Count} matching queue groups...");
 
             // TODO: how smart should this be?
             // currently we just match with the first matching queue group with valid criteria
-            // might be able to take into queue times, priorty, etc...
+            // might be able to take into account queue times, priorty, etc...
             foreach (IMatchingQueueGroup matchingQueueGroup in matchingQueueGroups)
             {
                 if (matchingQueueGroup.IsPaused)
                     continue;
 
-                if (matchingQueueGroupMatcher.Match(matchingQueueGroup, matchingQueueProposal))
+                IMatchingQueueGroupTeam matchingQueueGroupTeam = matchingQueueGroupMatcher.Match(matchingQueueGroup, matchingQueueProposal);
+                if (matchingQueueGroupTeam != null)
                 {
-                    log.LogTrace($"Successfully matched matching queue proposal {matchingQueueProposal.Guid} to matching queue group {matchingQueueGroup.Guid}.");
-                    return matchingQueueGroup;
+                    log.LogTrace($"Successfully matched matching queue proposal {matchingQueueProposal.Guid} and team {matchingQueueGroupTeam.Guid} to matching queue group {matchingQueueGroup.Guid}.");
+                    return (matchingQueueGroup, matchingQueueGroupTeam);
                 }
             }
 

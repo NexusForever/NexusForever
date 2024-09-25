@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Game.Abstract.Matching.Match
@@ -13,9 +12,9 @@ namespace NexusForever.Game.Abstract.Matching.Match
         Vector3 ReturnRotation { get; }
 
         /// <summary>
-        /// Initialise new <see cref="IMatchTeamMember"/> with supplied <see cref="IMatchingQueueProposalMember"/>.
+        /// Initialise new <see cref="IMatchTeamMember"/> with supplied character id.
         /// </summary>
-        void Initialise(IMatchingQueueProposalMember matchingQueueProposalMember);
+        void Initialise(ulong characterId);
 
         /// <summary>
         /// Invoked when member enters the match.
@@ -25,7 +24,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Invoked when member exits the match.
         /// </summary>
-        void MatchExit();
+        void MatchExit(bool teleport);
 
         /// <summary>
         /// Teleport member to match.

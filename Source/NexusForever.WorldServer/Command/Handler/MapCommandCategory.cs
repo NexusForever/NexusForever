@@ -1,7 +1,7 @@
-﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
-using NexusForever.Game.Entity;
-using NexusForever.Game.Map.Instance;
+using NexusForever.Game.Map;
 using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.WorldServer.Command.Context;
@@ -17,7 +17,7 @@ namespace NexusForever.WorldServer.Command.Handler
         public void HandleMapUnload(ICommandContext context)
         {
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
-            if (player.Map is not MapInstance instance)
+            if (player.Map is not IMapInstance instance)
             {
                 context.SendError("Current map is not an instance!");
                 return;
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Command.Handler
             WorldRemovalReason removalReason)
         {
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
-            if (player.Map is not MapInstance instance)
+            if (player.Map is not IMapInstance instance)
             {
                 context.SendError("Current map is not an instance!");
                 return;

@@ -179,11 +179,11 @@ namespace NexusForever.Game.Housing
             communitySearchCache.Add(community.Name, residence.Id);
 
             // community residences store the privacy level in the community it self as a guild flag
-            if ((community.Flags & GuildFlag.CommunityPrivate) == 0)
+            /*if ((community.Flags & GuildFlag.CommunityPrivate) == 0)
             {
                 ICharacter character = CharacterManager.Instance.GetCharacter(community.LeaderId.Value);
                 RegisterCommunityVisits(residence, community, character.Name);
-            }
+            }*/
         }
 
         /// <summary>

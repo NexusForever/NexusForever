@@ -13,7 +13,7 @@ namespace NexusForever.Game.Matching
         {
             sc.AddGameMatchingMatch();
 
-            sc.AddSingleton<IMatchingDataManager, MatchingDataManager>();
+            sc.AddSingletonLegacy<IMatchingDataManager, MatchingDataManager>();
             sc.AddSingleton<IMatchingManager, MatchingManager>();
 
             sc.AddTransientFactory<IMatchingCharacter, MatchingCharacter>();

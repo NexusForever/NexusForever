@@ -1,6 +1,7 @@
 ﻿using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Matching;
+using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Matching;
@@ -16,19 +17,22 @@ namespace NexusForever.Game.Matching.Queue
         private readonly IMatchingManager matchingManager;
         private readonly IMatchingDataManager matchingDataManager;
         private readonly IMatchingRoleEnforcer matchingRoleEnforcer;
+        private readonly IMatchManager matchManager;
 
         public MatchingQueueValidator(
             IPlayerManager playerManager,
             IDisableManager disableManager,
             IMatchingManager matchingManager,
             IMatchingDataManager matchingDataManager,
-            IMatchingRoleEnforcer matchingRoleEnforcer)
+            IMatchingRoleEnforcer matchingRoleEnforcer,
+            IMatchManager matchManager)
         {
             this.playerManager        = playerManager;
             this.disableManager       = disableManager;
             this.matchingManager      = matchingManager;
             this.matchingDataManager  = matchingDataManager;
             this.matchingRoleEnforcer = matchingRoleEnforcer;
+            this.matchManager         = matchManager;
         }
 
         #endregion
@@ -44,8 +48,12 @@ namespace NexusForever.Game.Matching.Queue
 
             foreach (IMatchingQueueProposalMember matachingQueueProposalMember in members)
             {
+                IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(matachingQueueProposalMember.CharacterId);
+                if (matchCharacter.Match != null)
+                    return MatchingQueueResult.InGame;
+
                 IMatchingCharacter matchingCharacter = matchingManager.GetMatchingCharacter(matachingQueueProposalMember.CharacterId);
-                if (matchingCharacter?.GetMatchingCharacterQueue(matchingQueueProposal.MatchType) != null)
+                if (matchingCharacter.GetMatchingCharacterQueue(matchingQueueProposal.MatchType) != null)
                     return MatchingQueueResult.InQueue;
 
                 foreach (IMatchingQueueProposal memberMatchingQueueProposal in matchingCharacter.GetMatchingCharacterQueues())

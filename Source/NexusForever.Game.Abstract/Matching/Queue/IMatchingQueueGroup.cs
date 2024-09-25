@@ -32,14 +32,9 @@ namespace NexusForever.Game.Abstract.Matching.Queue
         bool IsSolo { get; }
 
         /// <summary>
-        /// Initialise <see cref="IMatchingQueueGroup"/> with supplied <see cref="Static.Matching.MatchType"/> and <see cref="Faction"/>.
+        /// Initialise <see cref="IMatchingQueueGroup"/> with supplied <see cref="IMatchingQueueProposal"/>.
         /// </summary>
-        void Initialise(Static.Matching.MatchType matchType, Faction faction);
-
-        /// <summary>
-        /// Return <see cref="IMatchingQueueGroupTeam"/> for the supplied <see cref="Faction"/>.
-        /// </summary>
-        IMatchingQueueGroupTeam GetTeam(Faction faction);
+        void Initialise(IMatchingQueueProposal matchingQueueProposal);
 
         IEnumerable<IMatchingQueueGroupTeam> GetTeams();
 
@@ -54,7 +49,7 @@ namespace NexusForever.Game.Abstract.Matching.Queue
         /// <summary>
         /// Add <see cref="IMatchingQueueProposal"/> to <see cref="IMatchingQueueGroup"/>.
         /// </summary>
-        void AddMatchingQueueProposal(IMatchingQueueProposal matchingQueueProposal);
+        void AddMatchingQueueProposal(IMatchingQueueProposal matchingQueueProposal, IMatchingQueueGroupTeam matchingQueueGroupTeam);
 
         /// <summary>
         /// Remove <see cref="IMatchingQueueProposal"/> from <see cref="IMatchingQueueGroup"/>, optionally with a <see cref="MatchingQueueResult"/>.

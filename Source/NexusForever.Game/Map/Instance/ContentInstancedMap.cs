@@ -7,18 +7,18 @@ using NexusForever.Shared;
 
 namespace NexusForever.Game.Map.Instance
 {
-    public class ContentInstancedMap : InstancedMap<IContentMapInstance>
+    public class ContentInstancedMap<T> : InstancedMap<T> where T : class, IContentMapInstance
     {
         #region Dependency Injection
 
         private readonly IMapLockManager mapLockManager;
         private readonly IMatchManager matchManager;
-        private readonly IFactory<IContentMapInstance> instanceFactory;
+        private readonly IFactory<T> instanceFactory;
 
         public ContentInstancedMap(
             IMapLockManager mapLockManager,
             IMatchManager matchManager,
-            IFactory<IContentMapInstance> instanceFactory)
+            IFactory<T> instanceFactory)
         {
             this.mapLockManager = mapLockManager;
             this.matchManager = matchManager;
@@ -29,7 +29,7 @@ namespace NexusForever.Game.Map.Instance
 
         protected override IMapLock GetMapLock(IPlayer player)
         {
-            IMatch match = matchManager.GetMatch(player.CharacterId);
+            IMatch match = matchManager.GetMatchCharacter(player.CharacterId).Match;
             if (match != null)
             {
                 IMapLock matchMapLock = mapLockManager.GetMatchLock(match.Guid, Entry.Id);
@@ -42,18 +42,18 @@ namespace NexusForever.Game.Map.Instance
             return soloMapLock ?? mapLockManager.CreateSoloLock(player.CharacterId, Entry.Id);
         }
 
-        protected override IContentMapInstance CreateInstance(IPlayer player, IMapLock mapLock)
+        protected override T CreateInstance(IPlayer player, IMapLock mapLock)
         {
-            IContentMapInstance instance = instanceFactory.Resolve();
+            T instance = instanceFactory.Resolve();
             instance.Initialise(Entry, mapLock);
 
             // it is possible for a content map lock to not be a match lock
             // this could occur if a player or party enters a map via the instance portal
             if (mapLock.Type == MapLockType.Match)
             {
-                IMatch match = matchManager.GetMatch(player.CharacterId);
+                IMatch match = matchManager.GetMatchCharacter(player.CharacterId).Match;
                 if (match != null)
-                    instance.Initialise(match);
+                    instance.SetMatch(match);
             }
 
             return instance;

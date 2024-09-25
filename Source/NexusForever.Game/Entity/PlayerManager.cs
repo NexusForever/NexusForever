@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Concurrent;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Character;
@@ -11,14 +12,14 @@ namespace NexusForever.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<ulong, IPlayer> players = new();
+        private readonly ConcurrentDictionary<ulong, IPlayer> players = new();
 
         /// <summary>
         /// Add new <see cref="IPlayer"/>.
         /// </summary>
         public void AddPlayer(IPlayer player)
         {
-            players.Add(player.CharacterId, player);
+            players.TryAdd(player.CharacterId, player);
             log.Trace($"Added player {player.CharacterId}.");
         }
 
@@ -27,7 +28,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void RemovePlayer(IPlayer player)
         {
-            players.Remove(player.CharacterId);
+            players.TryRemove(player.CharacterId, out _);
             log.Trace($"Removed player {player.CharacterId}.");
         }
 

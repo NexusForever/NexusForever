@@ -1,8 +1,8 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Static.Entity;
-using NexusForever.GameTable.Model;
 using NexusForever.IO.Map;
 using NexusForever.Network.Message;
 
@@ -15,8 +15,9 @@ namespace NexusForever.Game.Abstract.Map
         /// </summary>
         float? VisionRange { get; }
 
-        WorldEntry Entry { get; }
         MapFile File { get; }
+
+        IPublicEventManager PublicEventManager { get; }
 
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> to be removed from <see cref="IBaseMap"/>.
@@ -67,5 +68,10 @@ namespace NexusForever.Game.Abstract.Map
         /// Return <see cref="ResurrectionType"/> applicable to this map.
         /// </summary>
         ResurrectionType GetResurrectionType();
+
+        /// <summary>
+        /// Invoked when <see cref="IPublicEvent"/> finishes with the winning <see cref="IPublicEventTeam"/>.
+        /// </summary>
+        void OnPublicEventFinish(IPublicEvent publicEvent, IPublicEventTeam publicEventTeam);
     }
 }

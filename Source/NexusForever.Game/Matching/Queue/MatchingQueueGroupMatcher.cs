@@ -29,7 +29,7 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Attempt to match <see cref="IMatchingQueueProposal"/> against <see cref="IMatchingQueueGroup"/>.
         /// </summary>
-        public bool Match(IMatchingQueueGroup matchingQueueGroup, IMatchingQueueProposal matchingQueueProposal)
+        public IMatchingQueueGroupTeam Match(IMatchingQueueGroup matchingQueueGroup, IMatchingQueueProposal matchingQueueProposal)
         {
             log.LogTrace($"Attempting to match matching queue proposal {matchingQueueProposal.Guid} against matching queue group {matchingQueueGroup.Guid}.");
 
@@ -37,14 +37,21 @@ namespace NexusForever.Game.Matching.Queue
                 .Intersect(matchingQueueProposal.GetMatchingMaps());
 
             if (!commonMatchingMaps.Any())
-                return false;
+                return null;
 
-            IMatchingQueueGroupTeam matchingQueueGroupTeam = matchingQueueGroup.GetTeam(matchingQueueProposal.Faction);
-            return Match(commonMatchingMaps, matchingQueueGroupTeam, matchingQueueProposal);
+            foreach (IMatchingQueueGroupTeam matchingQueueGroupTeam in matchingQueueGroup.GetTeams())
+                if (Match(commonMatchingMaps, matchingQueueGroupTeam, matchingQueueProposal))
+                    return matchingQueueGroupTeam;
+
+            return null;
         }
 
         private bool Match(IEnumerable<IMatchingMap> commonMatchingMaps, IMatchingQueueGroupTeam matchingQueueGroupTeam, IMatchingQueueProposal matchingQueueProposal)
         {
+            if (matchingDataManager.IsSingleFactionEnforced(matchingQueueProposal.MatchType))
+                if (matchingQueueGroupTeam.Faction != matchingQueueProposal.Faction)
+                    return false;
+
             List<IMatchingQueueProposalMember> matchingQueueProposalMembers = matchingQueueGroupTeam
                 .GetMembers()
                 .Concat(matchingQueueProposal.GetMembers())

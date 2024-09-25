@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Reputation;
+using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -6,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerEntityFaction : IWritable
     {
         public uint UnitId { get; set; }
-        public ushort Faction { get; set; }
+        public Faction Faction { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

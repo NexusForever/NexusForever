@@ -5,7 +5,20 @@ namespace NexusForever.Game.Abstract.Matching.Queue
 {
     public interface IMatchingQueueGroupTeam
     {
-        Faction Faction { get; set; }
+        Guid Guid { get; }
+
+        /// <summary>
+        /// <see cref="Static.Reputation.Faction"/> of the <see cref="IMatchingQueueGroupTeam"/>.
+        /// </summary>
+        /// <remarks>
+        /// Faction is optional and will only be set when <see cref="IMatchingDataManager.IsSingleFactionEnforced"/> is true for <see cref="MatchType"/>, otherwise team will be made up of members from both factions.
+        /// </remarks>
+        Faction? Faction { get; }
+
+        /// <summary>
+        /// Initialise <see cref="IMatchingQueueGroupTeam"/> with optional <see cref="Static.Reputation.Faction"/>.
+        /// </summary>
+        void Initialise(Faction? faction);
 
         /// <summary>
         /// Add <see cref="IMatchingQueueProposal"/> to the team.

@@ -45,7 +45,7 @@ namespace NexusForever.WorldServer.Command.Handler
             builder.AppendLine($"HP: {entity.Health}/(MAX) | Shield: {entity.Shield}/(MAX)");
 
             Disposition faction1Disposition = context.Invoker.GetDispositionTo(entity.Faction1);
-            Disposition faction2Disposition = context.Invoker.GetDispositionTo(entity.Faction1);
+            Disposition faction2Disposition = context.Invoker.GetDispositionTo(entity.Faction2);
             builder.AppendLine($"Disposition To Me: {entity.Faction1},{faction1Disposition}, {entity.Faction2},{faction2Disposition}");
 
             context.SendMessage(builder.ToString());

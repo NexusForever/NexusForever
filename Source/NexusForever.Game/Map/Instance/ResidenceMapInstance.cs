@@ -1,11 +1,11 @@
 using System.Numerics;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Map.Lock;
-using NexusForever.Game.Housing;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -14,6 +14,7 @@ using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Script;
 using NLog;
 
 namespace NexusForever.Game.Map.Instance
@@ -34,22 +35,32 @@ namespace NexusForever.Game.Map.Instance
         private readonly IGlobalResidenceManager globalResidenceManager;
         private readonly IGameTableManager gameTableManager;
         private readonly IRealmContext realmContext;
+        private readonly IScriptManager scriptManager;
 
         public ResidenceMapInstance(
             IEntityFactory entityFactory,
+            IPublicEventManager publicEventManager,
             IMapLockManager mapLockManager,
             IGlobalResidenceManager globalResidenceManager,
             IGameTableManager gameTableManager,
-            IRealmContext realmContext)
+            IRealmContext realmContext,
+            IScriptManager scriptManager)
+            : base(entityFactory, publicEventManager)
         {
-            this.entityFactory = entityFactory;
-            this.mapLockManager = mapLockManager;
+            this.entityFactory          = entityFactory;
+            this.mapLockManager         = mapLockManager;
             this.globalResidenceManager = globalResidenceManager;
-            this.gameTableManager = gameTableManager;
-            this.realmContext = realmContext;
+            this.gameTableManager       = gameTableManager;
+            this.realmContext           = realmContext;
+            this.scriptManager          = scriptManager;
         }
 
         #endregion
+
+        protected override void InitialiseScriptCollection()
+        {
+            scriptCollection = scriptManager.InitialiseOwnedScripts<IResidenceMapInstance>(this, Entry.Id);
+        }
 
         /// <summary>
         /// Initialise <see cref="IResidenceMapInstance"/> with <see cref="IResidence"/>.

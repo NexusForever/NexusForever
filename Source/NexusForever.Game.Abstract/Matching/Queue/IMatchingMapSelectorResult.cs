@@ -1,10 +1,8 @@
-﻿using NexusForever.Game.Static.Reputation;
-
-namespace NexusForever.Game.Abstract.Matching.Queue
+﻿namespace NexusForever.Game.Abstract.Matching.Queue
 {
     public interface IMatchingMapSelectorResult
     {
         IMatchingMap MatchingMap { get; init; }
-        Dictionary<Faction, IMatchingRoleEnforcerResult> MatchingRoleEnforcerResults { get; }
+        Dictionary<Guid, IMatchingRoleEnforcerResult> MatchingRoleEnforcerResults { get; }
     }
 }

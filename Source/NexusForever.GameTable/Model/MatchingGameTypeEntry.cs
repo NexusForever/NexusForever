@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Matching;
+
 namespace NexusForever.GameTable.Model
 {
     public class MatchingGameTypeEntry
@@ -12,7 +14,7 @@ namespace NexusForever.GameTable.Model
         public uint MaxLevel;
         public uint PreparationTimeMS;
         public uint MatchTimeMS;
-        public uint MatchingRulesEnum;
+        public MatchRules MatchingRulesEnum;
         public uint MatchingRulesData00;
         public uint MatchingRulesData01;
         public uint TargetItemLevel;

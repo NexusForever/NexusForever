@@ -5,6 +5,8 @@ namespace NexusForever.Game.Abstract.Matching
 {
     public interface IMatchingDataManager
     {
+        public bool DebugInstantQueue { get; set; }
+
         /// <summary>
         /// Initialise <see cref="IMatchingDataManager"/> with data from the game tables.
         /// </summary>
@@ -36,6 +38,11 @@ namespace NexusForever.Game.Abstract.Matching
         bool IsCompositionEnforced(Static.Matching.MatchType matchType);
 
         /// <summary>
+        /// Return if <see cref="Static.Matching.MatchType"/> enforces a single faction queue.
+        /// </summary>
+        bool IsSingleFactionEnforced(Static.Matching.MatchType matchType);
+
+        /// <summary>
         /// Return default <see cref="Role"/>s for the supplied <see cref="Class"/>.
         /// </summary>
         Role GetDefaultRole(Class @class);
@@ -47,5 +54,13 @@ namespace NexusForever.Game.Abstract.Matching
         /// Teams can have different entrances to the same map, for example in PvP.
         /// </remarks>
         IMapEntrance GetMapEntrance(uint worldId, byte team);
+
+        /// <summary>
+        /// Return if a player can re-enter a match for the supplied <see cref="Static.Matching.MatchType"/>.
+        /// </summary>
+        /// <remarks>
+        /// The client uses this to determine if the "Teleport to Instance" button should be enabled.
+        /// </remarks>
+        bool CanReEnterMatch(Static.Matching.MatchType matchType);
     }
 }

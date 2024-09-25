@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Matching
 
         public void HandleMessage(IWorldSession session, ClientMatchingGameReadyResponse matchingGameReadyResponse)
         {
-            IMatchProposal matchProposal = matchManager.GetMatchProposal(session.Player.CharacterId);
+            IMatchProposal matchProposal = matchManager.GetMatchCharacter(session.Player.CharacterId).MatchProposal;
             matchProposal?.Respond(session.Player, matchingGameReadyResponse.Response);
         }
     }

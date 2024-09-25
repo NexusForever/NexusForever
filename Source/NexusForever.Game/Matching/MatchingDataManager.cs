@@ -8,11 +8,14 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Matching;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Matching
 {
-    public class MatchingDataManager : IMatchingDataManager
+    public class MatchingDataManager : Singleton<MatchingDataManager>, IMatchingDataManager
     {
+        public bool DebugInstantQueue { get; set; }
+
         #region Dependency Injection
 
         private readonly IGameTableManager gameTableManager;
@@ -33,6 +36,30 @@ namespace NexusForever.Game.Matching
         private ImmutableDictionary<Static.Matching.MatchType, ImmutableList<IMatchingMap>> matchingMapXMatchType;
 
         private ImmutableDictionary<(uint, byte), MapEntrance> mapEntrance;
+
+        // the client seems to have hardcoded structures for each match type with a size of 16 bytes
+        // offset 12 is some flags which we are storing here
+        // needs more research, see MatchingGameLib.TransferIntoMatch for example of data
+        private readonly ImmutableDictionary<Static.Matching.MatchType, uint> matchTypeFlags 
+            = new Dictionary<Static.Matching.MatchType, uint>
+            {
+                { Static.Matching.MatchType.BattleGround,               0x0030 },
+                { Static.Matching.MatchType.Dungeon,                    0x000B },
+                { Static.Matching.MatchType.Adventure,                  0x000B },
+                { Static.Matching.MatchType.Arena,                      0x000C },
+                { Static.Matching.MatchType.Warplot,                    0x0074 },
+                { Static.Matching.MatchType.RatedBattleground,          0x0030 },
+                { Static.Matching.MatchType.OpenArena,                  0x0028 },
+                { Static.Matching.MatchType.Event,                      0x0030 },
+                { Static.Matching.MatchType.Shiphand,                   0x0101 },
+                { Static.Matching.MatchType.WorldStory,                 0x0001 },
+                { Static.Matching.MatchType.PrimeLevelDungeon,          0x0521 },
+                { Static.Matching.MatchType.PrimeLevelExpedition,       0x0001 },
+                { Static.Matching.MatchType.PrimeLevelAdventure,        0x0521 },
+                { Static.Matching.MatchType.ScaledPrimeLevelAdventure,  0x000B },
+                { Static.Matching.MatchType.ScaledPrimeLevelDungeon,    0x010B },
+                { Static.Matching.MatchType.ScaledPrimeLevelExpedition, 0x0101 }
+            }.ToImmutableDictionary();
 
         /// <summary>
         /// Initialise <see cref="IMatchingDataManager"/> with data from the game tables.
@@ -134,7 +161,8 @@ namespace NexusForever.Game.Matching
         /// </summary>
         public bool IsPvPMatchType(Static.Matching.MatchType matchType)
         {
-            return matchType is Static.Matching.MatchType.BattleGround
+            return matchType
+                is Static.Matching.MatchType.BattleGround
                 or Static.Matching.MatchType.Arena
                 or Static.Matching.MatchType.Warplot
                 or Static.Matching.MatchType.RatedBattleground
@@ -146,8 +174,19 @@ namespace NexusForever.Game.Matching
         /// </summary>
         public bool IsCompositionEnforced(Static.Matching.MatchType matchType)
         {
-            return matchType is Static.Matching.MatchType.Dungeon
+            return matchType
+                is Static.Matching.MatchType.Dungeon
                 or Static.Matching.MatchType.Adventure;
+        }
+
+        /// <summary>
+        /// Return if <see cref="Static.Matching.MatchType"/> enforces a single faction queue.
+        /// </summary>
+        public bool IsSingleFactionEnforced(Static.Matching.MatchType matchType)
+        {
+            return matchType
+                is Static.Matching.MatchType.Adventure
+                or Static.Matching.MatchType.OpenArena;
         }
 
         /// <summary>
@@ -180,6 +219,17 @@ namespace NexusForever.Game.Matching
         public IMapEntrance GetMapEntrance(uint worldId, byte team)
         {
             return mapEntrance.TryGetValue((worldId, team), out MapEntrance entrance) ? entrance : null;
+        }
+
+        /// <summary>
+        /// Return if a player can re-enter a match for the supplied <see cref="Static.Matching.MatchType"/>.
+        /// </summary>
+        /// <remarks>
+        /// The client uses this to determine if the "Teleport to Instance" button should be enabled.
+        /// </remarks>
+        public bool CanReEnterMatch(Static.Matching.MatchType matchType)
+        {
+            return (matchTypeFlags[matchType] & 0x01) != 0;
         }
     }
 }

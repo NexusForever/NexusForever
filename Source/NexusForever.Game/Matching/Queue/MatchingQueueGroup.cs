@@ -9,7 +9,7 @@ namespace NexusForever.Game.Matching.Queue
 {
     public class MatchingQueueGroup : IMatchingQueueGroup
     {
-        public Guid Guid { get; } = Guid.NewGuid();
+        public Guid Guid { get; private set; }
         public Static.Matching.MatchType MatchType { get; private set; }
 
         public bool IsFinalised { get; private set; }
@@ -45,7 +45,9 @@ namespace NexusForever.Game.Matching.Queue
         /// </remarks>
         public bool IsSolo { get; private set; }
 
-        private readonly Dictionary<Faction, IMatchingQueueGroupTeam> teams = [];
+        private readonly Dictionary<Guid, IMatchingQueueGroupTeam> teams = [];
+        private readonly Dictionary<Faction, IMatchingQueueGroupTeam> factionTeams = [];
+
         private List<IMatchingMap> maps = [];
 
         #region Dependency Injection
@@ -71,32 +73,53 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Initialise <see cref="IMatchingQueueGroup"/> with supplied <see cref="Static.Matching.MatchType"/> and <see cref="Faction"/>.
         /// </summary>
-        public void Initialise(Static.Matching.MatchType matchType, Faction faction)
+        public void Initialise(IMatchingQueueProposal matchingQueueProposal)
         {
-            MatchType = matchType;
+            if (Guid != Guid.Empty)
+                throw new InvalidOperationException();
 
-            AddTeam(faction);
-            if (matchingDataManager.IsPvPMatchType(matchType))
-                AddTeam(faction == Faction.Dominion ? Faction.Exile : Faction.Dominion);
+            Guid      = Guid.NewGuid();
+            MatchType = matchingQueueProposal.MatchType;
 
-            log.LogTrace($"Initialised new matching queue group, Guid: {Guid}, MatchType: {matchType}, Teams: {teams.Count}");
+            if (matchingDataManager.IsSingleFactionEnforced(MatchType))
+            {
+                IMatchingQueueGroupTeam matchingQueueGroupTeam = AddTeam(matchingQueueProposal.Faction);
+                AddMatchingQueueProposal(matchingQueueProposal, matchingQueueGroupTeam);
+
+                if (matchingDataManager.IsPvPMatchType(MatchType))
+                    AddTeam(matchingQueueGroupTeam.Faction == Faction.Dominion ? Faction.Exile : Faction.Dominion);
+            }
+            else
+            {
+                IMatchingQueueGroupTeam matchingQueueGroupTeam = AddTeam(null);
+                AddMatchingQueueProposal(matchingQueueProposal, matchingQueueGroupTeam);
+
+                if (matchingDataManager.IsPvPMatchType(MatchType))
+                    AddTeam(null);
+            }
+
+            IsSolo = matchingQueueProposal.MatchingQueueFlags.HasFlag(MatchingQueueFlags.SoloMatch);
+
+            log.LogTrace($"Initialised new matching queue group, Guid: {Guid}, MatchType: {MatchType}, Teams: {teams.Count}");
         }
 
-        private void AddTeam(Faction faction)
+        private IMatchingQueueGroupTeam AddTeam(Faction? faction)
         {
             IMatchingQueueGroupTeam matchingQueueGroupTeam = matchingQueueGroupTeamFactory.Resolve();
-            matchingQueueGroupTeam.Faction = faction;
-            teams.Add(faction, matchingQueueGroupTeam);
+            matchingQueueGroupTeam.Initialise(faction);
 
+            if (faction != null)
+                factionTeams.Add(faction.Value, matchingQueueGroupTeam);
+
+            teams.Add(matchingQueueGroupTeam.Guid, matchingQueueGroupTeam);
             log.LogTrace($"Added new team to matching queue group {Guid}, Faction: {faction}");
+
+            return matchingQueueGroupTeam;
         }
 
-        /// <summary>
-        /// Return <see cref="IMatchingQueueGroupTeam"/> for the supplied <see cref="Faction"/>.
-        /// </summary>
-        public IMatchingQueueGroupTeam GetTeam(Faction faction)
+        private IMatchingQueueGroupTeam GetTeam(Guid guid)
         {
-            return teams.TryGetValue(faction, out IMatchingQueueGroupTeam team) ? team : null;
+            return teams.TryGetValue(guid, out IMatchingQueueGroupTeam team) ? team : null;
         }
 
         public IEnumerable<IMatchingQueueGroupTeam> GetTeams()
@@ -118,15 +141,14 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Add <see cref="IMatchingQueueProposal"/> to <see cref="IMatchingQueueGroup"/>.
         /// </summary>
-        public void AddMatchingQueueProposal(IMatchingQueueProposal matchingQueueProposal)
+        public void AddMatchingQueueProposal(IMatchingQueueProposal matchingQueueProposal, IMatchingQueueGroupTeam matchingQueueGroupTeam)
         {
             if (IsSolo)
                 throw new InvalidOperationException();
 
-            if (matchingQueueProposal.MatchingQueueFlags.HasFlag(MatchingQueueFlags.SoloMatch))
-                IsSolo = true;
+            if (GetTeam(matchingQueueGroupTeam.Guid) == null)
+                throw new InvalidOperationException();
 
-            IMatchingQueueGroupTeam matchingQueueGroupTeam = GetTeam(matchingQueueProposal.Faction);
             matchingQueueGroupTeam.AddMatchingQueueProposal(matchingQueueProposal);
             matchingQueueProposal.SetMatchingQueueGroup(this);
 
@@ -144,8 +166,9 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void RemoveMatchingQueueProposal(IMatchingQueueProposal matchingQueueProposal, MatchingQueueResult? leaveReason = MatchingQueueResult.Left)
         {
-            IMatchingQueueGroupTeam matchingQueueGroupTeam = GetTeam(matchingQueueProposal.Faction);
-            matchingQueueGroupTeam.RemoveMatchingQueueProposal(matchingQueueProposal);
+            foreach (IMatchingQueueGroupTeam matchingQueueGroupTeam in GetTeams())
+                matchingQueueGroupTeam.RemoveMatchingQueueProposal(matchingQueueProposal);
+
             matchingQueueProposal.RemoveMatchingQueueGroup(leaveReason);
 
             log.LogTrace($"Removed matching queue proposal {matchingQueueProposal.Guid} from matching queue group {Guid}.");

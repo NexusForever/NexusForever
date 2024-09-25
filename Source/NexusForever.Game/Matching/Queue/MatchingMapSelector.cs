@@ -61,7 +61,7 @@ namespace NexusForever.Game.Matching.Queue
                 foreach (IMatchingQueueGroupTeam matchingQueueGroupTeam in matchingQueueGroup.GetTeams())
                 {
                     IMatchingRoleEnforcerResult matchingRoleEnforcerResult = matchingRoleEnforcer.Check(matchingQueueGroupTeam.GetMembers());
-                    matchingMapSelectorResult.MatchingRoleEnforcerResults.Add(matchingQueueGroupTeam.Faction, matchingRoleEnforcerResult);
+                    matchingMapSelectorResult.MatchingRoleEnforcerResults.Add(matchingQueueGroupTeam.Guid, matchingRoleEnforcerResult);
                 }
             }
 

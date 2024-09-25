@@ -14,9 +14,15 @@ namespace NexusForever.Game.Matching.Match
             sc.AddTransientFactory<IMatchProposalTeam, MatchProposalTeam>();
             sc.AddTransientFactory<IMatchProposalTeamMember, MatchProposalTeamMember>();
 
-            sc.AddTransientFactory<IMatch, Match>();
+            sc.AddSingleton<IMatchFactory, MatchFactory>();
+            sc.AddSingleton<IFactoryInterface<IMatch>, FactoryInterface<IMatch>>();
+            sc.AddTransient<IMatch, Match>();
+            sc.AddTransient<IPvpMatch, PvpMatch>();
+
             sc.AddTransientFactory<IMatchTeam, MatchTeam>();
             sc.AddTransientFactory<IMatchTeamMember, MatchTeamMember>();
+
+            sc.AddTransientFactory<IMatchCharacter, MatchCharacter>();
         }
     }
 }

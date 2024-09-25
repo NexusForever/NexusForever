@@ -17,6 +17,8 @@ namespace NexusForever.Game.Matching.Queue
         public MatchingQueueFlags MatchingQueueFlags { get; private set; }
         public DateTime QueueTime { get; private set; }
 
+        public bool InstantQueue { get; private set; }
+
         /// <summary>
         /// Determines if the <see cref="IMatchingQueueProposal"/> was formed from a party.
         /// </summary>
@@ -34,18 +36,21 @@ namespace NexusForever.Game.Matching.Queue
         private readonly IMatchingManager matchingManager;
         private readonly IMatchingQueueTimeManager matchingQueueTime;
         private readonly IFactory<IMatchingQueueProposalMember> memberFactory;
+        private readonly IMatchingDataManager matchingDataManager;
 
         public MatchingQueueProposal(
             ILogger<MatchingQueueProposal> log,
             IMatchingManager matchingManager,
             IMatchingQueueTimeManager matchingQueueTime,
-            IFactory<IMatchingQueueProposalMember> memberFactory)
+            IFactory<IMatchingQueueProposalMember> memberFactory,
+            IMatchingDataManager matchingDataManager)
         {
-            this.log               = log;
+            this.log                 = log;
 
-            this.matchingManager   = matchingManager;
-            this.matchingQueueTime = matchingQueueTime;
-            this.memberFactory     = memberFactory;
+            this.matchingManager     = matchingManager;
+            this.matchingQueueTime   = matchingQueueTime;
+            this.memberFactory       = memberFactory;
+            this.matchingDataManager = matchingDataManager;
         }
 
         #endregion
@@ -66,9 +71,21 @@ namespace NexusForever.Game.Matching.Queue
             foreach (IMatchingMap map in matchingMaps)
                 maps.Add(map.Id, map);
 
-            QueueTime = DateTime.UtcNow;
+            QueueTime    = DateTime.UtcNow;
+            InstantQueue = CanInstantQueue();
 
             log.LogTrace($"Initialised matching queue proposal {Guid}, Faction: {Faction}, MatchType: {MatchType}, Maps: {string.Join(", ", maps)}, Flags: {matchingQueueFlags}.");
+        }
+
+        private bool CanInstantQueue()
+        {
+            if (MatchingQueueFlags.HasFlag(MatchingQueueFlags.SoloMatch))
+                return true;
+
+            if (matchingDataManager.DebugInstantQueue)
+                return true;
+
+            return false;
         }
 
         /// <summary>
