@@ -6,7 +6,7 @@ using NexusForever.Game.Abstract.Entity;
 
 namespace NexusForever.Game.Entity
 {
-    public class CollectableUnitEntity : WorldEntity, ICollectableUnitEntity
+    public class CollectableUnitEntity : UnitEntity, ICollectableUnitEntity
     {
         public override EntityType Type => EntityType.CollectableUnit;
 

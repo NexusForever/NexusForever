@@ -4,24 +4,19 @@ using NexusForever.Game.Abstract.Map.Search;
 
 namespace NexusForever.Game.Map.Search
 {
-    public class SearchCheckRange<T> : ISearchCheck<T> where T : class, IGridEntity
+    public class SearchCheckRange<T> : ISearchCheckRange<T> where T : IGridEntity
     {
-        private readonly Vector3 vector;
-        private readonly float? radius;
-        private readonly T exclude;
+        private Vector3 vector;
+        private float? radius;
 
-        public SearchCheckRange(Vector3 vector, float? radius, T exclude = null)
+        public void Initialise(Vector3 vector, float? radius)
         {
             this.vector  = vector;
-            this.radius  = radius;
-            this.exclude = exclude;
+            this.radius   = radius;
         }
 
         public virtual bool CheckEntity(T entity)
         {
-            if (exclude != null && entity == exclude)
-                return false;
-
             return radius == null || Vector3.Distance(vector, entity.Position) < radius;
         }
     }

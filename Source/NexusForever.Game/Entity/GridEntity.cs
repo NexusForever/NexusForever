@@ -2,12 +2,14 @@ using System.Diagnostics;
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Map;
 using NexusForever.Game.Map.Search;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
+using NexusForever.Shared.Game.Events;
 
 namespace NexusForever.Game.Entity
 {
@@ -34,6 +36,8 @@ namespace NexusForever.Game.Entity
 
         protected IScriptCollection scriptCollection;
 
+        protected readonly EventQueue eventQueue = new();
+
         public virtual void Dispose()
         {
             if (scriptCollection != null)
@@ -45,6 +49,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void Update(double lastTick)
         {
+            eventQueue.Update(lastTick);
             scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
         }
 
@@ -71,7 +76,9 @@ namespace NexusForever.Game.Entity
         public void Relocate(Vector3 position)
         {
             Debug.Assert(Map != null);
-            Map.EnqueueRelocate(this, position);
+
+            Task<Vector3> task = Map.EnqueueRelocateAsync(this, position);
+            eventQueue.EnqueueEvent(new TaskGenericEvent<Vector3>(task, OnRelocate));
         }
 
         /// <summary>
@@ -133,7 +140,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Invoked when <see cref="IGridEntity"/> is relocated.
         /// </summary>
-        public virtual void OnRelocate(Vector3 vector)
+        protected virtual void OnRelocate(Vector3 vector)
         {
             Position = vector;
             UpdateVision();
@@ -204,7 +211,10 @@ namespace NexusForever.Game.Entity
         /// </summary>
         private void UpdateVision()
         {
-            List<IGridEntity> entities = Map.Search(Position, Map.VisionRange, new SearchCheckRange<IGridEntity>(Position, Map.VisionRange)).ToList();
+            var check = new SearchCheckRange<IGridEntity>();
+            check.Initialise(Position, Map.VisionRange);
+
+            List<IGridEntity> entities = Map.Search(Position, Map.VisionRange, check).ToList();
 
             // new entities now in vision range
             foreach (IGridEntity entity in entities.Except(visibleEntities.Values))

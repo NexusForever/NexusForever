@@ -49,6 +49,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
+using static NexusForever.Network.World.Message.Model.ServerVendorItemsUpdated;
 using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Entity
@@ -584,7 +585,10 @@ namespace NexusForever.Game.Entity
                 OnLogin();
         }
 
-        public override void OnRelocate(Vector3 vector)
+        /// <summary>
+        /// Invoked when <see cref="IPlayer"/> is relocated.
+        /// </summary>
+        protected override void OnRelocate(Vector3 vector)
         {
             base.OnRelocate(vector);
             saveMask |= PlayerSaveMask.Location;
@@ -873,8 +877,10 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Returns if <see cref="IPlayer"/> can teleport.
         /// </summary>
-        public bool CanTeleport() => pendingTeleport == null;
+        public bool CanTeleport() => pendingTeleport == null && !pendingLocalTeleport;
+
         private PendingTeleport pendingTeleport;
+        private bool pendingLocalTeleport;
 
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
@@ -938,6 +944,44 @@ namespace NexusForever.Game.Entity
 
             MapManager.Instance.AddToMap(this, mapPosition);
             log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.MapLock?.InstanceId ?? null}.");
+        }
+
+        /// <summary>
+        /// Teleport <see cref="IPlayer"/> to supplied location.
+        /// </summary>
+        public void TeleportToLocal(Vector3 position)
+        {
+            if (!CanTeleport())
+            {
+                SendGenericError(GenericError.InstanceTransferPending);
+                return;
+            }
+
+            pendingLocalTeleport = true;
+
+            Session.EnqueueMessageEncrypted(new ServerTeleportLocal());
+
+            SetControl(null);
+            MovementManager.SetPosition(position, false);
+
+            Task<Vector3> task = Map.EnqueueRelocateAsync(this, position);
+            eventQueue.EnqueueEvent(new TaskGenericEvent<Vector3>(task, OnTeleportToLocal));
+
+            log.Trace($"Teleporting {Name}({CharacterId}) to location {position.X}, {position.Y}, {position.Z}.");
+        }
+
+        private void OnTeleportToLocal(Vector3 position)
+        {
+            OnRelocate(position);
+            SetControl(this);
+
+            if (VanityPetGuid != null)
+            {
+                IPetEntity pet = Map.GetEntity<IPetEntity>(VanityPetGuid.Value);
+                pet?.Relocate(position);
+            }
+
+            pendingLocalTeleport = false;
         }
 
         /// <summary>

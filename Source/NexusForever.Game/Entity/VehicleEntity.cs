@@ -74,12 +74,15 @@ namespace NexusForever.Game.Entity
             base.OnRemoveFromMap();
         }
 
-        public override void OnRelocate(Vector3 vector)
+        /// <summary>
+        /// Invoked when <see cref="IVehicleEntity"/> is relocated.
+        /// </summary>
+        protected override void OnRelocate(Vector3 vector)
         {
             foreach (IVehiclePassenger passenger in passengers)
             {
                 IPlayer entity = GetVisible<IPlayer>(passenger.Guid);
-                Map.EnqueueRelocate(entity, vector);
+                entity.Relocate(vector);
             }
 
             base.OnRelocate(vector);

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Trigger;
 using NexusForever.Game.Entity.Movement;
+using NexusForever.Game.Entity.Trigger;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
@@ -49,6 +51,8 @@ namespace NexusForever.Game.Entity
             sc.AddTransient<IHousingHarvestPlugEntity, HousingHarvestPlugEntity>();
             sc.AddTransient<IHousingPlantEntity, HousingPlantEntity>();
             sc.AddTransient<ILockboxEntity, LockboxEntity>();
+
+            sc.AddTransient<IWorldLocationTriggerEntity, WorldLocationTriggerEntity>();
 
             sc.AddSingletonLegacy<IBuybackManager, BuybackManager>();
             sc.AddSingletonLegacy<IEntityManager, EntityManager>();

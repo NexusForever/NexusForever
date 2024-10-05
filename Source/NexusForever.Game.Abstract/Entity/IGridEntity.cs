@@ -61,11 +61,6 @@ namespace NexusForever.Game.Abstract.Entity
         void OnRemoveFromMap();
 
         /// <summary>
-        /// Invoked when <see cref="IGridEntity"/> is relocated.
-        /// </summary>
-        void OnRelocate(Vector3 vector);
-
-        /// <summary>
         /// Returns if <see cref="IGridEntity"/> can see supplied <see cref="IGridEntity"/>.
         /// </summary>
         bool CanSeeEntity(IGridEntity entity);

@@ -378,6 +378,7 @@ namespace NexusForever.Network.Message
         ClientStorefrontPurchaseCharacter = 0x082A,
         ClientStorefrontRequestCatalog  = 0x082D,
         ClientSummonVanityPet           = 0x082F,
+        ServerTeleportLocal             = 0x083C,
         ServerTimeOfDay                 = 0x0845,
         Server0854                      = 0x0854, // crafting schematic
         Server0856                      = 0x0856, // tradeskills

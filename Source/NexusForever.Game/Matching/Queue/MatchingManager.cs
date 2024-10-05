@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.Matching;
+using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared;
 
@@ -229,8 +230,11 @@ namespace NexusForever.Game.Matching.Queue
 
             // blame Max for this...
             // since we don't have party support yet, just do a sneaky grid search for players
+            var check = new SearchCheckRange<IPlayer>();
+            check.Initialise(player.Position, 10f);
+
             List<ulong> characterIds = player.Map
-                .Search(player.Position, 10f, new SearchCheckRange<IPlayer>(player.Position, 10f))
+                .Search(player.Position, 10f, check)
                 .Select(p => p.CharacterId)
                 .ToList();
 

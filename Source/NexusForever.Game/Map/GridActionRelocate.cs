@@ -8,5 +8,6 @@ namespace NexusForever.Game.Map
     {
         public IGridEntity Entity { get; init; }
         public Vector3 Vector { get; init; }
+        public TaskCompletionSource<Vector3> Source { get; init; }
     }
 }

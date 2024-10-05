@@ -13,6 +13,7 @@ using NexusForever.Game.Reputation;
 using NexusForever.Game.Social;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Event;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Social;
@@ -270,7 +271,10 @@ namespace NexusForever.Game.Entity
             base.OnRemoveFromMap();
         }
 
-        public override void OnRelocate(Vector3 vector)
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> is relocated.
+        /// </summary>
+        protected override void OnRelocate(Vector3 vector)
         {
             base.OnRelocate(vector);
 
@@ -409,7 +413,11 @@ namespace NexusForever.Game.Entity
         {
             activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
             foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId) ?? Enumerable.Empty<uint>())
+            {
                 activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroup, targetGroupId, 1u); // Updates the objective, but seems to disable all the other targets. TODO: Investigate
+
+                Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroup, targetGroupId, 1);
+            }
 
             // TODO: Fire Scripts
         }
@@ -951,10 +959,11 @@ namespace NexusForever.Game.Entity
             if (Map == null)
                 throw new InvalidOperationException();
 
-            IEnumerable<IPlayer> players = Map.Search(
-                Position,
-                range,
-                new SearchCheckRange<IPlayer>(Position, range, exclude));
+            var check = new SearchCheckRange<IPlayer>();
+            check.Initialise(Position, range);
+
+            IEnumerable<IPlayer> players = Map.Search(Position, range, check)
+                .Where(e => e != exclude);
 
             IWritable message = builder.Build();
             foreach (IPlayer player in players)

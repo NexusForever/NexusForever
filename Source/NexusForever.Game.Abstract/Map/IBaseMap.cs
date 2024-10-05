@@ -27,7 +27,7 @@ namespace NexusForever.Game.Abstract.Map
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> to be relocated in <see cref="IBaseMap"/> to <see cref="Vector3"/>.
         /// </summary>
-        void EnqueueRelocate(IGridEntity entity, Vector3 position);
+        Task<Vector3> EnqueueRelocateAsync(IGridEntity entity, Vector3 position);
 
         /// <summary>
         /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck{T}"/>.

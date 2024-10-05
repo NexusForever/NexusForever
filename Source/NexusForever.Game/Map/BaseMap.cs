@@ -139,8 +139,18 @@ namespace NexusForever.Game.Map
                         break;
                     }
                     case GridActionRelocate actionRelocate:
-                        RelocateEntity(actionRelocate.Entity, actionRelocate.Vector);
+                    {
+                        try
+                        {
+                            RelocateEntity(actionRelocate.Entity, actionRelocate.Vector);
+                            actionRelocate.Source.SetResult(actionRelocate.Vector);
+                        }
+                        catch (Exception ex)
+                        {
+                            actionRelocate.Source.SetException(ex);
+                        }
                         break;
+                    }
                     case GridActionRemove actionRemove:
                         RemoveEntity(actionRemove.Entity);
                         break;
@@ -255,13 +265,18 @@ namespace NexusForever.Game.Map
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> to be relocated in <see cref="IBaseMap"/> to <see cref="Vector3"/>.
         /// </summary>
-        public void EnqueueRelocate(IGridEntity entity, Vector3 position)
+        public Task<Vector3> EnqueueRelocateAsync(IGridEntity entity, Vector3 position)
         {
+            var source = new TaskCompletionSource<Vector3>();
+
             pendingActions.Enqueue(new GridActionRelocate
             {
                 Entity = entity,
-                Vector = position
+                Vector = position,
+                Source = source
             });
+
+            return source.Task;
         }
 
         /// <summary>
@@ -493,8 +508,6 @@ namespace NexusForever.Game.Map
             }
             else
                 oldGrid.RelocateEntity(entity, vector);
-
-            entity.OnRelocate(vector);
         }
 
         /// <summary>

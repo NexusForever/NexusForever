@@ -73,6 +73,8 @@ namespace NexusForever.Game.Entity
 
         public override void OnActivateSuccess(IPlayer activator)
         {
+            base.OnActivateSuccess(activator);
+
             uint progress = (uint)(1 << QuestChecklistIdx);
 
             Creature2Entry entry = GameTableManager.Instance.Creature2.GetEntry(CreatureId);

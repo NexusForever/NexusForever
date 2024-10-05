@@ -18,10 +18,14 @@ namespace NexusForever.WorldServer.Command.Handler
             searchRange ??= 10f;
 
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
+
+            var check = new SearchCheckRange<IDoorEntity>();
+            check.Initialise(player.Position, searchRange.Value);
+
             IEnumerable<IDoorEntity> doors = player.Map.Search(
                 player.Position,
                 searchRange.Value,
-                new SearchCheckRange<IDoorEntity>(player.Position, searchRange.Value));
+                check);
 
             foreach (IDoorEntity door in doors)
             {
@@ -38,10 +42,14 @@ namespace NexusForever.WorldServer.Command.Handler
             searchRange ??= 10f;
 
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
+
+            var check = new SearchCheckRange<IDoorEntity>();
+            check.Initialise(player.Position, searchRange.Value);
+
             IEnumerable<IDoorEntity> doors = player.Map.Search(
                 player.Position,
                 searchRange.Value,
-                new SearchCheckRange<IDoorEntity>(player.Position, searchRange.Value));
+                check);
 
             foreach (IDoorEntity door in doors)
             {

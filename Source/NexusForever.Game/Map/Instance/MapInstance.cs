@@ -52,12 +52,18 @@ namespace NexusForever.Game.Map.Instance
 
         private IMapPosition unloadPosition;
 
+        /// <summary>
+        /// Count of players in map instance.
+        /// </summary>
+        public uint PlayerCount => (uint)playerEntities.Count;
+
+        private readonly HashSet<uint> playerEntities = [];
+
         private uint instanceLimit;
 
         private readonly UpdateTimer unloadTimer
             = new(SharedConfiguration.Instance.Get<MapConfig>().GridUnloadTimer ?? 600d);
 
-        private readonly HashSet<uint> playerEntities = new();
         private readonly Dictionary<uint, IMapInstanceRemoval> instanceRemovals = new();
 
         #region Dependency Injection
@@ -308,6 +314,35 @@ namespace NexusForever.Game.Map.Instance
                 return;
 
             player.Session.EnqueueMessageEncrypted(new ServerPendingWorldRemovalCancel());
+        }
+
+        /// <summary>
+        /// Returns all <see cref="IPlayer"/>'s in map instance.
+        /// </summary>
+        public IEnumerable<IPlayer> GetPlayers()
+        {
+            foreach (uint guid in playerEntities)
+            {
+                IPlayer player = GetEntity<IPlayer>(guid);
+                if (player != null)
+                    yield return player;
+            }
+        }
+
+        /// <summary>
+        /// Enqueue <see cref="IGridEntity"/> to be added to <see cref="IMapInstance"/>.
+        /// </summary>
+        public void EnqueueAdd(IGridEntity entity, Vector3 position)
+        {
+            EnqueueAdd(entity, new MapPosition
+            {
+                Info = new MapInfo
+                {
+                    Entry   = Entry,
+                    MapLock = MapLock
+                },
+                Position = position
+            });
         }
 
         /// <summary>

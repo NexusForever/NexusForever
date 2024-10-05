@@ -25,7 +25,7 @@ namespace NexusForever.Script.Instance
         /// <summary>
         /// Invoked when <see cref="IGridEntity"/> is added to map.
         /// </summary>
-        public void OnAddToMap(IGridEntity entity)
+        public virtual void OnAddToMap(IGridEntity entity)
         {
             if (entity is not IPlayer player)
                 return;
