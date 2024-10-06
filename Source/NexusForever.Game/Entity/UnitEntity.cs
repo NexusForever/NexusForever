@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Combat;
+﻿using System.Numerics;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Spell;
@@ -139,7 +140,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Remove tracked <see cref="IUnitEntity"/> that is no longer in vision range.
+        /// Remove tracked <see cref="IGridEntity"/> that is no longer in vision range.
         /// </summary>
         public override void RemoveVisible(IGridEntity entity)
         {
