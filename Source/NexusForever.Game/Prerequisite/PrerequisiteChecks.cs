@@ -50,8 +50,8 @@ namespace NexusForever.Game.Prerequisite
             }
         }
 
-        [PrerequisiteCheck(PrerequisiteType.Quest)]
-        private static bool PrerequisiteCheckQuest(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        [PrerequisiteCheck(PrerequisiteType.QuestState)]
+        private static bool PrerequisiteCheckQuestState(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             switch (comparison)
             {
@@ -60,12 +60,12 @@ namespace NexusForever.Game.Prerequisite
                 case PrerequisiteComparison.NotEqual:
                     return player.QuestManager.GetQuestState((ushort)objectId) != (QuestState)value;
                 default:
-                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Quest}!");
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.QuestState}!");
                     return false;
             }
         }
 
-        [PrerequisiteCheck(PrerequisiteType.Prerequisite)]
+        [PrerequisiteCheck(PrerequisiteType.OtherPrerequisite)]
         private static bool PrerequisiteCheckPrerequisite(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             switch (comparison)
@@ -75,7 +75,7 @@ namespace NexusForever.Game.Prerequisite
                 case PrerequisiteComparison.Equal:
                     return Instance.Meets(player, objectId);
                 default:
-                    log.Warn($"Unhandled {comparison} for {PrerequisiteType.Prerequisite}!");
+                    log.Warn($"Unhandled {comparison} for {PrerequisiteType.OtherPrerequisite}!");
                     return false;
             }
         }
@@ -94,7 +94,7 @@ namespace NexusForever.Game.Prerequisite
             }
         }
 
-        [PrerequisiteCheck(PrerequisiteType.Achievement)]
+        [PrerequisiteCheck(PrerequisiteType.AchievementState)]
         private static bool PrerequisiteCheckAchievement(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             switch (comparison)
@@ -104,7 +104,7 @@ namespace NexusForever.Game.Prerequisite
                 case PrerequisiteComparison.Equal:
                     return player.AchievementManager.HasCompletedAchievement((ushort)objectId);
                 default:
-                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Achievement}!");
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.AchievementState}!");
                     return false;
             }
         }
@@ -119,7 +119,7 @@ namespace NexusForever.Game.Prerequisite
                 case PrerequisiteComparison.Equal:
                     return player.SpellManager.GetSpell(objectId) != null;
                 default:
-                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Achievement}!");
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.SpellBaseId}!");
                     return false;
             }
         }
@@ -138,8 +138,8 @@ namespace NexusForever.Game.Prerequisite
             }
         }
 
-        [PrerequisiteCheck(PrerequisiteType.HoverboardFlair)]
-        private static bool PrerequestCheckHoverboardFlair(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
+        [PrerequisiteCheck(PrerequisiteType.PetFlair)]
+        private static bool PrerequestCheckPetFlair(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             switch (comparison)
             {
@@ -148,7 +148,7 @@ namespace NexusForever.Game.Prerequisite
                 case PrerequisiteComparison.NotEqual:
                     return player.PetCustomisationManager.GetCustomisation(PetType.HoverBoard, objectId) == null;
                 default:
-                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.HoverboardFlair}!");
+                    log.Warn($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.PetFlair}!");
                     return false;
             }
         }
@@ -197,7 +197,7 @@ namespace NexusForever.Game.Prerequisite
             }
         }
 
-        [PrerequisiteCheck(PrerequisiteType.Unknown194)]
+        [PrerequisiteCheck(PrerequisiteType.MountUsage)]
         private static bool PrerequisiteCheckUnknown194(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             // TODO: Only used in Mount check prerequisites. Its use is unknown.
@@ -205,7 +205,7 @@ namespace NexusForever.Game.Prerequisite
             return true;
         }
 
-        [PrerequisiteCheck(PrerequisiteType.Unknown195)]
+        [PrerequisiteCheck(PrerequisiteType.HoverboardUsage)]
         private static bool PrerequisiteCheckUnknown195(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId)
         {
             // TODO: Only used in Mount check prerequisites. Its use is unknown.
