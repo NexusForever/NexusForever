@@ -40,5 +40,19 @@ namespace NexusForever.Script.Template
         void OnRemoveVisibleEntity(IGridEntity entity)
         {
         }
+
+        /// <summary>
+        /// Invoked when <see cref="IGridEntity"/> is added to range check range.
+        /// </summary>
+        void OnEnterRange(IGridEntity entity)
+        {
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IGridEntity"/> is removed from range check range.
+        /// </summary>
+        void OnExitRange(IGridEntity entity)
+        {
+        }
     }
 }

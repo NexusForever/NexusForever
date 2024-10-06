@@ -180,9 +180,6 @@ namespace NexusForever.Game.Entity
         public IEnumerable<uint> PlatformPassengerGuids => platformPassengerGuids;
         private readonly HashSet<uint> platformPassengerGuids = new();
 
-        public float RangeCheck { get; private set; } = 15f;
-        protected readonly Dictionary<uint, IWorldEntity> inRangeEntities = [];
-
         protected readonly Dictionary<Stat, IStatValue> stats = new Dictionary<Stat, IStatValue>();
 
         private readonly Dictionary<Property, IPropertyValue> properties = new ();
@@ -263,8 +260,6 @@ namespace NexusForever.Game.Entity
                 worldEntity.MovementManager.SetPosition(Position, false);
                 worldEntity.MovementManager.SetRotation(Rotation, false);
             }
-
-            inRangeEntities.Clear();
 
             base.OnRemoveFromMap();
         }
@@ -972,64 +967,6 @@ namespace NexusForever.Game.Entity
         public void RemovePlatformPassenger(IWorldEntity passenger)
         {
             platformPassengerGuids.Remove(passenger.Guid);
-        }
-
-        /// <summary>
-        /// Invoked when <see cref="IWorldEntity"/> enters the range of this <see cref="IWorldEntity"/>.
-        /// </summary>
-        public virtual void OnEnterRange(IWorldEntity entity)
-        {
-            // deliberately empty
-        }
-
-        /// <summary>
-        /// Invoked when <see cref="IWorldEntity"/> leaves the range of this <see cref="IWorldEntity"/>.
-        /// </summary>
-        public virtual void OnExitRange(IWorldEntity entity)
-        {
-            // deliberately empty
-        }
-
-        /// <summary>
-        /// Checks if the provided <see cref="IWorldEntity"/> is at a range to trigger an event on this <see cref="IWorldEntity"/>.
-        /// </summary>
-        public virtual void ApplyRangeTriggers(IWorldEntity target)
-        {
-            if (!HasEnteredRange(target) && IsInRange(target))
-            {
-                inRangeEntities.TryAdd(target.Guid, target);
-                OnEnterRange(target);
-            }
-            else if (!IsInRange(target))
-                RemoveFromRange(target);
-        }
-
-        /// <summary>
-        /// Removes the provided <see cref="IWorldEntity"/> from range and notifies this <see cref="IWorldEntity"/>.
-        /// </summary>
-        public void RemoveFromRange(IWorldEntity target)
-        {
-            if (!HasEnteredRange(target))
-                return;
-
-            inRangeEntities.Remove(target.Guid);
-            OnExitRange(target);
-        }
-
-        /// <summary>
-        /// Returns whether the provided <see cref="IWorldEntity"/> is within this <see cref="IWorldEntity"/>'s range.
-        /// </summary>
-        public bool IsInRange(IWorldEntity target)
-        {
-            return Position.GetDistance(target.Position) < RangeCheck;
-        }
-
-        /// <summary>
-        /// Returns whether the provided <see cref="IWorldEntity"/> has entered this <see cref="IWorldEntity"/>'s range.
-        /// </summary>
-        protected bool HasEnteredRange(IWorldEntity target)
-        {
-            return inRangeEntities.ContainsKey(target.Guid);
         }
     }
 }

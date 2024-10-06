@@ -29,6 +29,10 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public float ActivationRange { get; protected set; }
 
+        public float? RangeCheck { get; private set; }
+
+        private readonly Dictionary<uint, IGridEntity> inRangeEntities = [];
+
         protected readonly Dictionary<uint, IGridEntity> visibleEntities = new();
         private readonly HashSet<(uint GridX, uint GridZ)> visibleGrids = new();
 
@@ -93,6 +97,7 @@ namespace NexusForever.Game.Entity
 
             UpdateVision();
             UpdateGridVision();
+            UpdateRangeChecks();
 
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnAddToMap(map));
         }
@@ -122,6 +127,8 @@ namespace NexusForever.Game.Entity
 
             visibleGrids.Clear();
 
+            inRangeEntities.Clear();
+
             Guid        = 0;
             PreviousMap = new MapInfo
             {
@@ -136,8 +143,10 @@ namespace NexusForever.Game.Entity
         public virtual void OnRelocate(Vector3 vector)
         {
             Position = vector;
+
             UpdateVision();
             UpdateGridVision();
+            UpdateRangeChecks();
         }
 
         /// <summary>
@@ -167,6 +176,8 @@ namespace NexusForever.Game.Entity
             visibleEntities.Add(entity.Guid, entity);
 
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnAddVisibleEntity(entity));
+
+            CheckEntityInRange(entity);
         }
 
         /// <summary>
@@ -177,10 +188,12 @@ namespace NexusForever.Game.Entity
             visibleEntities.Remove(entity.Guid);
 
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnRemoveVisibleEntity(entity));
+
+            CheckEntityInRange(entity);
         }
 
         /// <summary>
-        /// Return visible <see cref="IWorldEntity"/> by supplied guid.
+        /// Return visible <see cref="IGridEntity"/> by supplied guid.
         /// </summary>
         public T GetVisible<T>(uint guid) where T : IGridEntity
         {
@@ -249,6 +262,69 @@ namespace NexusForever.Game.Entity
         protected virtual void RemoveVisible(uint gridX, uint gridZ)
         {
             visibleGrids.Remove((gridX, gridZ));
+        }
+
+        private void UpdateRangeChecks()
+        {
+            foreach (IGridEntity entity in visibleEntities.Values)
+                entity.CheckEntityInRange(this);
+        }
+
+        /// <summary>
+        /// Set range check for <see cref="IGridEntity"/>.
+        /// </summary>
+        public void SetInRangeCheck(float range)
+        {
+            if (Map?.VisionRange < range)
+                throw new ArgumentOutOfRangeException();
+
+            RangeCheck = range;
+        }
+
+        /// <summary>
+        /// Checks if the provided <see cref="IGridEntity"/> is at a range to trigger an event on this <see cref="IGridEntity"/>.
+        /// </summary>
+        public virtual void CheckEntityInRange(IGridEntity target)
+        {
+            if (!RangeCheck.HasValue)
+                return;
+
+            if (!HasEnteredRange(target) && IsInRange(target))
+                AddToRange(target);
+            else if (HasEnteredRange(target) && !IsInRange(target))
+                RemoveFromRange(target);
+        }
+
+        private bool IsInRange(IGridEntity target)
+        {
+            return Position.GetDistance(target.Position) < RangeCheck;
+        }
+
+        private bool HasEnteredRange(IGridEntity target)
+        {
+            return inRangeEntities.ContainsKey(target.Guid);
+        }
+
+        private void AddToRange(IGridEntity entity)
+        {
+            inRangeEntities.Add(entity.Guid, entity);
+
+            scriptCollection?.Invoke<IGridEntityScript>(s => s.OnEnterRange(entity));
+        }
+
+        private void RemoveFromRange(IGridEntity entity)
+        {
+            scriptCollection?.Invoke<IGridEntityScript>(s => s.OnExitRange(entity));
+
+            inRangeEntities.Remove(entity.Guid);
+        }
+
+        /// <summary>
+        /// Returns all <see cref="IGridEntity"/> in range of this <see cref="IGridEntity"/>.
+        /// </summary>
+        public IEnumerable<T> GetInRange<T>(uint guid) where T : IGridEntity
+        {
+            return visibleEntities.Values.Cast<T>();
         }
     }
 }
