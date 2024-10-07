@@ -24,7 +24,9 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Script;
 using NexusForever.Script.Template;
+using NexusForever.Script.Template.Collection;
 
 namespace NexusForever.Game.Entity
 {
@@ -212,6 +214,14 @@ namespace NexusForever.Game.Entity
         public void Initialise(uint creatureId)
         {
             CreatureId = creatureId;
+
+            CalculateDefaultProperties();
+
+            // TODO: handle this better
+            Health = MaxHealth;
+            Shield = MaxShieldCapacity;
+
+            scriptCollection = InitialiseScriptCollection();
         }
 
         /// <summary>
@@ -238,6 +248,16 @@ namespace NexusForever.Game.Entity
             // TODO: handle this better
             Health = MaxHealth;
             Shield = MaxShieldCapacity;
+
+            scriptCollection = InitialiseScriptCollection();
+        }
+
+        /// <summary>
+        /// Initialise <see cref="IScriptCollection"/> for <see cref="IWorldEntity"/>.
+        /// </summary>
+        protected virtual IScriptCollection InitialiseScriptCollection()
+        {
+            return ScriptManager.Instance.InitialiseEntityScripts<IWorldEntity>(this);
         }
 
         /// <summary>

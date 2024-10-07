@@ -19,6 +19,10 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
         private uint medbayDoorControlGuid;
 
+        private uint medbayDoorGuid;
+        private uint securityChiefKondovichDoorGuid;
+        private uint primaryPowerPlantDoorGuid;
+
         #region Dependency Injection
 
         private readonly ICinematicFactory cinematicFactory;
@@ -55,6 +59,26 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                 case PublicEventCreature.MedbayDoorControl:
                     medbayDoorControlGuid = worldEntity.Guid;
                     break;
+                case PublicEventCreature.Door:
+                    OnAddToMapDoor(worldEntity);
+                    break;
+            }
+        }
+
+        private void OnAddToMapDoor(IWorldEntity entity)
+        {
+            // multiple doors with the same creature id are used, so we need to differentiate them by their active prop id
+            switch (entity.ActivePropId)
+            {
+                case 7024518:
+                    primaryPowerPlantDoorGuid = entity.Guid;
+                    break;
+                case 7059788:
+                    securityChiefKondovichDoorGuid = entity.Guid;
+                    break;
+                case 7059789:
+                    medbayDoorGuid = entity.Guid;
+                    break;
             }
         }
 
@@ -77,13 +101,33 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                 case PublicEventPhase.RepairDoor:
                     OnPhaseRepairDoor();
                     break;
+                case PublicEventPhase.ActivateMedbayGenerator:
+                    OnPhaseActivateMedbayGenerator();
+                    break;
+                case PublicEventPhase.GoToPrimaryPowerPlant:
+                    OnPhaseGoToPrimaryPowerPlant();
+                    break;
+                case PublicEventPhase.KillSecurityChiefKondovich:
+                    OnPhaseKillSecurityChiefKondovich();
+                    break;
+                case PublicEventPhase.GoToPrimaryPowerPlant2:
+                    OnPhaseGoToPrimaryPowerPlant2();
+                    break;
+                case PublicEventPhase.RestartMainGenerators:
+                    OnPhaseRestartMainGenerators();
+                    break;
+                case PublicEventPhase.EnterCrewQuarters:
+                    OnPhaseEnterCrewQuarters();
+                    break;
+                case PublicEventPhase.DefeatEthericOrganisms:
+                    OnPhaseDefeatEthericOrganisms();
+                    break;
             }
         }
 
         private void OnPhaseGoToAirlock()
         {
-            uint playerCount = mapInstance.PlayerCount;
-            publicEvent.ActivateObjective(PublicEventObjective.GoToAirlock, playerCount);
+            publicEvent.ActivateObjective(PublicEventObjective.GoToAirlock, mapInstance.PlayerCount);
 
             var triggerEntity = publicEvent.CreateEntity<IWorldLocationTriggerEntity>();
             triggerEntity.Initialise(50278);
@@ -112,7 +156,55 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             publicEvent.ActivateObjective(PublicEventObjective.RepairDoor);
 
             IWorldEntity medbayDoorControl = mapInstance.GetEntity<IWorldEntity>(medbayDoorControlGuid);
-            medbayDoorControl.RemoveFromMap();
+            medbayDoorControl?.RemoveFromMap();
+        }
+
+        private void OnPhaseActivateMedbayGenerator()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.ActivateMedbayGenerator);
+
+            IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(medbayDoorGuid);
+            door?.OpenDoor();
+        }
+
+        private void OnPhaseGoToPrimaryPowerPlant()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.GoToPrimaryPowerPlant, mapInstance.PlayerCount);
+        }
+
+        private void OnPhaseKillSecurityChiefKondovich()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.KillSecurityChiefKondovich);
+
+            IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(securityChiefKondovichDoorGuid);
+            door?.OpenDoor();
+        }
+
+        private void OnPhaseGoToPrimaryPowerPlant2()
+        {
+            publicEvent.ResetObjective(PublicEventObjective.GoToPrimaryPowerPlant);
+            publicEvent.ActivateObjective(PublicEventObjective.GoToPrimaryPowerPlant);
+        }
+
+        private void OnPhaseRestartMainGenerators()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.RestartMainGenerators);
+
+            IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(primaryPowerPlantDoorGuid);
+            door?.OpenDoor();
+        }
+
+        private void OnPhaseEnterCrewQuarters()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.EnterCrewQuarters);
+        }
+
+        private void OnPhaseDefeatEthericOrganisms()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.DefeatEthericOrganisms);
+
+            foreach (IPlayer player in mapInstance.GetPlayers())
+                player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<IEvilFromTheEtherOnEthericOrganisms>());
         }
 
         /// <summary>
@@ -136,6 +228,32 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                     break;
                 case PublicEventObjective.ScavengeSpareParts:
                     publicEvent.SetPhase(PublicEventPhase.RepairDoor);
+                    break;
+                case PublicEventObjective.RepairDoor:
+                    publicEvent.SetPhase(PublicEventPhase.ActivateMedbayGenerator);
+                    break;
+                case PublicEventObjective.ActivateMedbayGenerator:
+                    publicEvent.SetPhase(PublicEventPhase.GoToPrimaryPowerPlant);
+                    break;
+                case PublicEventObjective.GoToPrimaryPowerPlant:
+                {
+                    // special case, seems this objective is used twice
+                    // once to open the door to Security Chief Kondovich and once to open the door to the primary Power Plant
+                    if (publicEvent.Phase == (uint)PublicEventPhase.GoToPrimaryPowerPlant)
+                        publicEvent.SetPhase(PublicEventPhase.KillSecurityChiefKondovich);
+                    else
+                        publicEvent.SetPhase(PublicEventPhase.RestartMainGenerators);
+
+                    break;
+                }
+                case PublicEventObjective.KillSecurityChiefKondovich:
+                    publicEvent.SetPhase(PublicEventPhase.GoToPrimaryPowerPlant2);
+                    break;
+                case PublicEventObjective.RestartMainGenerators:
+                    publicEvent.SetPhase(PublicEventPhase.EnterCrewQuarters);
+                    break;
+                case PublicEventObjective.EnterCrewQuarters:
+                    publicEvent.SetPhase(PublicEventPhase.DefeatEthericOrganisms);
                     break;
             }
         }

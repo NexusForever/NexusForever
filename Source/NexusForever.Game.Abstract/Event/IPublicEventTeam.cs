@@ -62,6 +62,11 @@ namespace NexusForever.Game.Abstract.Event
         void ActivateObjective(uint objectiveId, uint max);
 
         /// <summary>
+        /// Reset specific objective for the team.
+        /// </summary>
+        void ResetObjective(uint objectiveId);
+
+        /// <summary>
         /// Update stat character with the supplied <see cref="PublicEventStat"/> and value.
         /// </summary>
         void UpdateStat(ulong characterId, PublicEventStat stat, uint value);

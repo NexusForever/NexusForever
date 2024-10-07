@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Map;
 using NexusForever.Game.Map.Search;
 using NexusForever.Script;

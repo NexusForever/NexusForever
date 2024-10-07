@@ -12,7 +12,8 @@ namespace NexusForever.Game.Abstract.Event
         PublicEventObjectiveEntry Entry { get; }
         PublicEventStatus Status { get; }
         uint Count { get; }
-        uint DynamicMax { get; set; }
+        uint DynamicMax { get; }
+        uint Checklist { get; }
 
         bool IsBusy { get; }
 
@@ -40,6 +41,14 @@ namespace NexusForever.Game.Abstract.Event
         /// <remarks>
         /// This shows the objective to members and allows it to be updated.
         /// </remarks>
-        void ActivateObjective();
+        void ActivateObjective(uint max);
+
+        /// <summary>
+        /// Reset the objective.
+        /// </summary>
+        /// <remarks>
+        /// This will reset the objective to its initial state allowing it to be activated again.
+        /// </remarks>
+        void ResetObjective();
     }
 }

@@ -14,7 +14,8 @@ namespace NexusForever.Game.Event
         public PublicEventObjectiveEntry Entry { get; private set; }
         public PublicEventStatus Status { get; private set; }
         public uint Count { get; private set; }
-        public uint DynamicMax { get; set; }
+        public uint DynamicMax { get; private set; }
+        public uint Checklist { get; private set; }
 
         public bool IsBusy { get; private set; }
 
@@ -116,7 +117,18 @@ namespace NexusForever.Game.Event
                 return;
 
             uint oldCount = Count;
-            Count = (uint)Math.Max(0, (int)Count + count);
+
+            if (Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.ActivateTargetGroupChecklist)
+            {
+                uint flag = (uint)(1 << count);
+                if ((Checklist & flag) == 0)
+                {
+                    Checklist |= flag;
+                    Count++;
+                }
+            }
+            else
+                Count = (uint)Math.Max(0, (int)Count + count);
 
             if (oldCount != Count)
                 BroadcastObjectiveUpdate();
@@ -139,12 +151,31 @@ namespace NexusForever.Game.Event
         /// <remarks>
         /// This shows the objective to members and allows it to be updated.
         /// </remarks>
-        public void ActivateObjective()
+        public void ActivateObjective(uint max)
         {
             if (Status != PublicEventStatus.Inactive)
                 return;
 
+            DynamicMax = max;
             SetStatus(PublicEventStatus.Active);
+        }
+
+        /// <summary>
+        /// Reset the objective.
+        /// </summary>
+        /// <remarks>
+        /// This will reset the objective to its initial state allowing it to be activated again.
+        /// </remarks>
+        public void ResetObjective()
+        {
+            if (Status != PublicEventStatus.Succeeded)
+                return;
+
+            Count      = 0;
+            DynamicMax = 0;
+            Checklist  = 0;
+
+            SetStatus(PublicEventStatus.Inactive);
         }
 
         public Network.World.Message.Model.Shared.PublicEventObjective Build()

@@ -1,9 +1,7 @@
-﻿using NexusForever.Database.World.Model;
-using NexusForever.Game.Abstract.Combat;
+﻿using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Script;
 
 namespace NexusForever.Game.Entity
 {
@@ -20,13 +18,6 @@ namespace NexusForever.Game.Entity
         }
 
         #endregion
-
-        public override void Initialise(EntityModel model)
-        {
-            base.Initialise(model);
-
-            scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<ICreatureEntity>(this);
-        }
 
         /// <summary>
         /// Set target to supplied <see cref="IUnitEntity"/>.

@@ -5,6 +5,8 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Script.Template.Collection;
+using NexusForever.Script;
 
 namespace NexusForever.Game.Entity
 {
@@ -16,9 +18,14 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public DoorEntity(IMovementManager movementManager)
+        private readonly IScriptManager scriptManager;
+
+        public DoorEntity(
+            IScriptManager scriptManager,
+            IMovementManager movementManager)
             : base(movementManager)
         {
+            this.scriptManager = scriptManager;
         }
 
         #endregion
@@ -29,6 +36,14 @@ namespace NexusForever.Game.Entity
 
             SetStat(Stat.StandState, StandState.State0); // Closed on spawn
             SetBaseProperty(Property.BaseHealth, 101f); // Sniffs showed all doors had 101hp for me.
+        }
+
+        /// <summary>
+        /// Initialise <see cref="IScriptCollection"/> for <see cref="IDoorEntity"/>.
+        /// </summary>
+        protected override IScriptCollection InitialiseScriptCollection()
+        {
+            return scriptManager.InitialiseEntityScripts<IDoorEntity>(this);
         }
 
         protected override IEntityModel BuildEntityModel()

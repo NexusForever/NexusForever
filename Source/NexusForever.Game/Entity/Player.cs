@@ -8,7 +8,6 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
-using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -49,7 +48,6 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
-using static NexusForever.Network.World.Message.Model.ServerVendorItemsUpdated;
 using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Entity
@@ -961,9 +959,6 @@ namespace NexusForever.Game.Entity
 
             Session.EnqueueMessageEncrypted(new ServerTeleportLocal());
 
-            SetControl(null);
-            MovementManager.SetPosition(position, false);
-
             Task<Vector3> task = Map.EnqueueRelocateAsync(this, position);
             eventQueue.EnqueueEvent(new TaskGenericEvent<Vector3>(task, OnTeleportToLocal));
 
@@ -973,6 +968,12 @@ namespace NexusForever.Game.Entity
         private void OnTeleportToLocal(Vector3 position)
         {
             OnRelocate(position);
+
+            SetControl(null);
+
+            MovementManager.SetPosition(position, false);
+            MovementManager.BroadcastNetworkEntityCommands();
+
             SetControl(this);
 
             if (VanityPetGuid != null)

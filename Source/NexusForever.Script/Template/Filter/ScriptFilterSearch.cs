@@ -6,6 +6,7 @@
         public uint? Id { get; private set; }
         public uint? CreatureId { get; private set; }
         public uint? TargetGroupId { get; private set; }
+        public ulong? ActivePropId { get; private set; }
 
         public IScriptFilterSearch FilterByScriptType<T>() where T : IScript
         {
@@ -15,19 +16,29 @@
 
         public IScriptFilterSearch FilterById(uint id)
         {
-            Id = id;
+            if (id > 0)
+                Id = id;
             return this;
         }
 
         public IScriptFilterSearch FilterByCreatureId(uint id)
         {
-            CreatureId = id;
+            if (id > 0)
+                CreatureId = id;
             return this;
         }
 
         public IScriptFilterSearch FilterByTargetGroupId(uint id)
         {
-            TargetGroupId = id;
+            if (id > 0)
+                TargetGroupId = id;
+            return this;
+        }
+
+        public IScriptFilterSearch FilterByActivePropId(ulong id)
+        {
+            if (id > 0)
+                ActivePropId = id;
             return this;
         }
     }

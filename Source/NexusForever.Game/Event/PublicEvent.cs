@@ -14,6 +14,7 @@ using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
+using static NexusForever.Network.World.Message.Model.ServerMatchingQueueJoin;
 
 namespace NexusForever.Game.Event
 {
@@ -288,6 +289,20 @@ namespace NexusForever.Game.Event
             if (!memberTeams.TryGetValue(player.CharacterId, out IPublicEventTeam publicEventTeam))
                 return;
 
+            UpdateObjective(publicEventTeam, type, objectId, count);
+        }
+
+        /// <summary>
+        /// Update any objective for any team that meets the supplied <see cref="PublicEventObjectiveType"/>, objectId and count.
+        /// </summary>
+        public void UpdateObjective(PublicEventObjectiveType type, uint objectId, int count)
+        {
+            foreach (IPublicEventTeam publicEventTeam in teams.Values)
+                UpdateObjective(publicEventTeam, type, objectId, count);
+        }
+
+        private void UpdateObjective(IPublicEventTeam publicEventTeam, PublicEventObjectiveType type, uint objectId, int count)
+        {
             publicEventTeam.UpdateObjective(type, objectId, count);
             if (publicEventTeam.IsFinialised)
                 Finish(publicEventTeam.Team);
@@ -341,6 +356,28 @@ namespace NexusForever.Game.Event
                 return;
 
             publicEventTeam.ActivateObjective(entry.Id, max);
+        }
+
+        /// <summary>
+        /// Reset objective with supplied objectiveId.
+        /// </summary>
+        public void ResetObjective<T>(T objectiveId) where T : Enum
+        {
+            ResetObjective(objectiveId.As<T, uint>());
+        }
+
+        /// <summary>
+        /// Reset objective with supplied objectiveId.
+        /// </summary>
+        public void ResetObjective(uint objectiveId)
+        {
+            if (!template.Objectives.TryGetValue(objectiveId, out PublicEventObjectiveEntry entry))
+                return;
+
+            if (!teams.TryGetValue(entry.PublicEventTeamId, out IPublicEventTeam publicEventTeam))
+                return;
+
+            publicEventTeam.ResetObjective(objectiveId);
         }
 
         /// <summary>

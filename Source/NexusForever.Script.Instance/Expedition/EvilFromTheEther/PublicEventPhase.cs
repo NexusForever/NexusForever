@@ -6,6 +6,13 @@
         GoToAirlock,
         OpenMedbay,
         ScavengeSpareParts,
-        RepairDoor
+        RepairDoor,
+        ActivateMedbayGenerator,
+        GoToPrimaryPowerPlant,
+        KillSecurityChiefKondovich,
+        GoToPrimaryPowerPlant2,
+        RestartMainGenerators,
+        EnterCrewQuarters,
+        DefeatEthericOrganisms
     }
 }

@@ -33,8 +33,10 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            worldId ??= (ushort)target.Map.Entry.Id;
-            target.TeleportTo(worldId.Value, x, y, z);
+            if (worldId.HasValue)
+                target.TeleportTo(worldId.Value, x, y, z);
+            else
+                target.TeleportToLocal(new Vector3(x, y, z));
         }
 
         [Command(Permission.TeleportLocation, "Teleport to the specified world location.", "location")]

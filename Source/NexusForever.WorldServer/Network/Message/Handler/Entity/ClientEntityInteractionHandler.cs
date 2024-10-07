@@ -35,10 +35,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             {
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.TalkTo, entity.CreatureId, 1u);
-                foreach (uint targetGroupId in assetManager.GetTargetGroupsForCreatureId(entity.CreatureId) ?? Enumerable.Empty<uint>())
-                    session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.TalkToTargetGroup, targetGroupId, 1u);
 
-                entity.Map.PublicEventManager.UpdateObjective(session.Player, PublicEventObjectiveType.TalkTo, entity.CreatureId, 1);
+                foreach (uint targetGroupId in assetManager.GetTargetGroupsForCreatureId(entity.CreatureId) ?? Enumerable.Empty<uint>())
+                {
+                    session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.TalkToTargetGroup, targetGroupId, 1u);
+                    entity.Map.PublicEventManager.UpdateObjective(session.Player, PublicEventObjectiveType.TalkTo, targetGroupId, 1);
+                }
             }
 
             switch (entityInteraction.Event)

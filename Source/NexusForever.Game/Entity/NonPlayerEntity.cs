@@ -6,6 +6,8 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
+using NexusForever.Script.Template.Collection;
+using NexusForever.Script;
 
 namespace NexusForever.Game.Entity
 {
@@ -42,6 +44,14 @@ namespace NexusForever.Game.Entity
                 CreatureId = CreatureId,
                 QuestChecklistIdx = 0
             };
+        }
+
+        /// <summary>
+        /// Initialise <see cref="IScriptCollection"/> for <see cref="INonPlayerEntity"/>.
+        /// </summary>
+        protected override IScriptCollection InitialiseScriptCollection()
+        {
+            return ScriptManager.Instance.InitialiseEntityScripts<INonPlayerEntity>(this);
         }
 
         /// <summary>

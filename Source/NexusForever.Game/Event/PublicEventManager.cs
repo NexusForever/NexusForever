@@ -204,6 +204,33 @@ namespace NexusForever.Game.Event
         }
 
         /// <summary>
+        /// Update any objective for any public event that meets the supplied <see cref="PublicEventObjectiveType"/>, objectId and count.
+        /// </summary>
+        public void UpdateObjective(PublicEventObjectiveType type, uint objectId, int count)
+        {
+            foreach (IPublicEvent publicEvent in publicEvents.Values)
+                publicEvent.UpdateObjective(type, objectId, count);
+        }
+
+        /// <summary>
+        /// Update a specific objective with the supplied objectiveId and count.
+        /// </summary>
+        public void UpdateObjective<T>(T objectiveId, int count) where T : Enum
+        {
+            foreach (IPublicEvent publicEvent in publicEvents.Values)
+                publicEvent.UpdateObjective(objectiveId, count);
+        }
+
+        /// <summary>
+        /// Update a specific objective with the supplied objectiveId and count.
+        /// </summary>
+        public void UpdateObjective(uint objectiveId, int count)
+        {
+            foreach (IPublicEvent publicEvent in publicEvents.Values)
+                publicEvent.UpdateObjective(objectiveId, count);
+        }
+
+        /// <summary>
         /// Update stat for any public event <see cref="IPlayer"/> is part of with the supplied <see cref="PublicEventStat"/> and value.
         /// </summary>
         public void UpdateStat(IPlayer player, PublicEventStat stat, uint value)

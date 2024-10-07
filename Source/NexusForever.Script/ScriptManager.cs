@@ -239,7 +239,8 @@ namespace NexusForever.Script
             InitialiseScriptCollection(collection, new ScriptFilterSearch()
                 .FilterByScriptType<IOwnedScript<T>>()
                 .FilterById(entity.EntityId)
-                .FilterByCreatureId(entity.CreatureId));
+                .FilterByCreatureId(entity.CreatureId)
+                .FilterByActivePropId(entity.ActivePropId));
                 //.FilterByTargetGroupId());
 
             return collection;

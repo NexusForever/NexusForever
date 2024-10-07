@@ -9,6 +9,7 @@ namespace NexusForever.Script.Template.Filter
         public Type ScriptType { get; private set; }
         public HashSet<uint> Id { get; set; }
         public HashSet<uint> CreatureId { get; set; }
+        public HashSet<ulong> ActivePropId { get; set; }
 
         #region Dependency Injection
 
@@ -33,6 +34,10 @@ namespace NexusForever.Script.Template.Filter
             ScriptFilterCreatureIdAttribute creatureIdAttribute = ScriptType.GetCustomAttribute<ScriptFilterCreatureIdAttribute>();
             if (creatureIdAttribute != null)
                 CreatureId = new HashSet<uint>(creatureIdAttribute.CreatureId);
+
+            ScriptFilterActivePropIdAttribute activePropIdAttribute = ScriptType.GetCustomAttribute<ScriptFilterActivePropIdAttribute>();
+            if (activePropIdAttribute != null)
+                ActivePropId = new HashSet<ulong>(activePropIdAttribute.ActivePropId);
 
             Attribute dynamicAttribute = ScriptType.GetCustomAttribute(typeof(ScriptFilterDynamicAttribute<>));
             if (dynamicAttribute != null)

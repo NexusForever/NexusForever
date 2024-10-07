@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using NexusForever.Game.Abstract.Combat;
+﻿using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Spell;
@@ -14,7 +13,9 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Static;
+using NexusForever.Script;
 using NexusForever.Script.Template;
+using NexusForever.Script.Template.Collection;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Entity
@@ -137,6 +138,14 @@ namespace NexusForever.Game.Entity
                 HandleStatUpdate(lastTick);
                 statUpdateTimer.Reset();
             }
+        }
+
+        /// <summary>
+        /// Initialise <see cref="IScriptCollection"/> for <see cref="IUnitEntity"/>.
+        /// </summary>
+        protected override IScriptCollection InitialiseScriptCollection()
+        {
+            return ScriptManager.Instance.InitialiseEntityScripts<IUnitEntity>(this);
         }
 
         /// <summary>
@@ -472,6 +481,8 @@ namespace NexusForever.Game.Entity
             // TODO: schedule respawn
 
             ThreatManager.ClearThreatList();
+
+            scriptCollection?.Invoke<IUnitScript>(s => s.OnDeath());
 
             deathState = EntityDeathState.Dead;
         }

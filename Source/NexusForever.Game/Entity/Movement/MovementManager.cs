@@ -136,26 +136,15 @@ namespace NexusForever.Game.Entity.Movement
             if (Owner.Map == null)
                 return;
 
-            void UpdateEntityCommandGroup(IEntityCommandGroup commandGroup)
-            {
-                commandGroup.Update(lastTick);
-
-                if (commandGroup.IsDirty)
-                {
-                    commandGroup.IsDirty = false;
-                    IsDirty = true;
-                }
-            }
-
-            UpdateEntityCommandGroup(timeCommandGroup);
-            UpdateEntityCommandGroup(platformCommandGroup);
-            UpdateEntityCommandGroup(positionCommandGroup);
-            UpdateEntityCommandGroup(velocityCommandGroup);
-            UpdateEntityCommandGroup(moveCommandGroup);
-            UpdateEntityCommandGroup(rotationCommandGroup);
-            UpdateEntityCommandGroup(scaleCommandGroup);
-            UpdateEntityCommandGroup(stateCommandGroup);
-            UpdateEntityCommandGroup(modeCommandGroup);
+            timeCommandGroup.Update(lastTick);
+            platformCommandGroup.Update(lastTick);
+            positionCommandGroup.Update(lastTick);
+            velocityCommandGroup.Update(lastTick);
+            moveCommandGroup.Update(lastTick);
+            rotationCommandGroup.Update(lastTick);
+            scaleCommandGroup.Update(lastTick);
+            stateCommandGroup.Update(lastTick);
+            modeCommandGroup.Update(lastTick);
 
             BroadcastNetworkEntityCommands();
         }
@@ -235,6 +224,25 @@ namespace NexusForever.Game.Entity.Movement
         /// </summary>
         public void BroadcastNetworkEntityCommands()
         {
+            void EntityCommandGroupRequiresBroadcast(IEntityCommandGroup commandGroup)
+            {
+                if (commandGroup.IsDirty)
+                {
+                    commandGroup.IsDirty = false;
+                    IsDirty = true;
+                }
+            }
+
+            EntityCommandGroupRequiresBroadcast(timeCommandGroup);
+            EntityCommandGroupRequiresBroadcast(platformCommandGroup);
+            EntityCommandGroupRequiresBroadcast(positionCommandGroup);
+            EntityCommandGroupRequiresBroadcast(velocityCommandGroup);
+            EntityCommandGroupRequiresBroadcast(moveCommandGroup);
+            EntityCommandGroupRequiresBroadcast(rotationCommandGroup);
+            EntityCommandGroupRequiresBroadcast(scaleCommandGroup);
+            EntityCommandGroupRequiresBroadcast(stateCommandGroup);
+            EntityCommandGroupRequiresBroadcast(modeCommandGroup);
+
             if (!IsDirty)
                 return;
 
