@@ -64,9 +64,22 @@ namespace NexusForever.Game.Abstract.Entity
         uint? PlatformGuid { get; }
 
         /// <summary>
+        /// Guid of the <see cref="IWorldEntity"/> that summoned this <see cref="IWorldEntity"/>.
+        /// </summary>
+        uint? SummonerGuid { get; set; }
+
+        /// <summary>
+        /// An entity factory to summon child entities.
+        /// </summary>
+        /// <remarks>
+        /// Any entities summoned by this <see cref="IWorldEntity"/> will be removed when this <see cref="IWorldEntity"/> is removed.
+        /// </remarks>
+        IEntitySummonFactory SummonFactory { get; }
+
+        /// <summary>
         /// Initialise <see cref="IWorldEntity"/> with supplied data.
         /// </summary>
-        public void Initialise(uint creatureId);
+        void Initialise(uint creatureId);
 
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> from an existing database model.

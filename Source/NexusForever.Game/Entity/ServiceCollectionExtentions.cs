@@ -52,11 +52,17 @@ namespace NexusForever.Game.Entity
             sc.AddTransient<IHousingPlantEntity, HousingPlantEntity>();
             sc.AddTransient<ILockboxEntity, LockboxEntity>();
 
-            sc.AddTransient<IWorldLocationTriggerEntity, WorldLocationTriggerEntity>();
+            sc.AddTransient<IGridTriggerEntity, GridTriggerEntity>();
+            sc.AddTransient<ITurnstileGridTriggerEntity, TurnstileTriggerEntity>();
+            sc.AddTransient<IVolumeGridTriggerEntity, VolumeGridTriggerEntity>();
+            sc.AddTransient<IWorldLocationVolumeGridTriggerEntity, WorldLocationVolumeGridTriggerEntity>();
 
             sc.AddSingletonLegacy<IBuybackManager, BuybackManager>();
             sc.AddSingletonLegacy<IEntityManager, EntityManager>();
             sc.AddSingletonLegacy<IPlayerManager, PlayerManager>();
+
+            sc.AddTransient<IEntitySummonFactory, EntitySummonFactory>();
+            sc.AddTransientFactory<IEntitySummonTemplate, EntitySummonTemplate>();
         }
     }
 }

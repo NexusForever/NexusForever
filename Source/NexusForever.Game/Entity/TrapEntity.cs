@@ -11,8 +11,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public TrapEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public TrapEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

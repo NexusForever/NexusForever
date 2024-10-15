@@ -19,8 +19,10 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public NonPlayerEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public NonPlayerEntity(
+            IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 
@@ -41,17 +43,18 @@ namespace NexusForever.Game.Entity
         {
             return new NonPlayerEntityModel
             {
-                CreatureId = CreatureId,
-                QuestChecklistIdx = 0
+                CreatureId        = CreatureId,
+                QuestChecklistIdx = QuestChecklistIdx
             };
         }
 
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="INonPlayerEntity"/>.
         /// </summary>
-        protected override IScriptCollection InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection()
         {
-            return ScriptManager.Instance.InitialiseEntityScripts<INonPlayerEntity>(this);
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<INonPlayerEntity>(this);
+            ScriptManager.Instance.InitialiseEntityScripts<INonPlayerEntity>(scriptCollection, this);
         }
 
         /// <summary>

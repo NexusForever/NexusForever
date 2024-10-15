@@ -9,6 +9,7 @@ using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Guild
 {

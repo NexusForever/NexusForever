@@ -12,8 +12,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public PlatformEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public PlatformEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

@@ -8,6 +8,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Shared;
 using NexusForever.Shared.Game;
 using NLog;
 
@@ -29,8 +30,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public PetEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public PetEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

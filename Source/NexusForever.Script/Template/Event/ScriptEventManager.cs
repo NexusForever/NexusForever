@@ -8,7 +8,7 @@ namespace NexusForever.Script.Template.Event
         /// <summary>
         /// Invoked when a <see cref="IScriptEvent"/> is invoked, the id of the event is returned if it has one.
         /// </summary>
-        public event Action<uint?> OnScriptEvent;
+        public event Action<IScriptEvent, uint?> OnScriptEvent;
 
         private readonly List<IPendingScriptEvent> events = new();
 
@@ -90,7 +90,7 @@ namespace NexusForever.Script.Template.Event
                     continue;
 
                 @event.Event.Invoke();
-                OnScriptEvent?.Invoke(@event.Id);
+                OnScriptEvent?.Invoke(@event.Event, @event.Id);
 
                 events.Remove(@event);
             }

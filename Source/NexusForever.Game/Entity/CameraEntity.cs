@@ -12,8 +12,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public CameraEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public CameraEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

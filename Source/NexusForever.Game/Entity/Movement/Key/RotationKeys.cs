@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity.Movement.Key
 {

@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Static.Map;
 using NexusForever.GameTable.Model;
@@ -59,10 +58,5 @@ namespace NexusForever.Game.Abstract.Map.Instance
         /// Returns all <see cref="IPlayer"/>'s in map instance.
         /// </summary>
         IEnumerable<IPlayer> GetPlayers();
-
-        /// <summary>
-        /// Enqueue <see cref="IGridEntity"/> to be added to <see cref="IMapInstance"/>.
-        /// </summary>
-        void EnqueueAdd(IGridEntity entity, Vector3 position);
     }
 }

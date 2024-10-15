@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
+namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
 {
     [ScriptFilterCreatureId(71266)]
     [ScriptFilterActivePropId(7024519)]

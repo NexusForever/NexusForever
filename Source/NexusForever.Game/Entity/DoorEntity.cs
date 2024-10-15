@@ -7,6 +7,7 @@ using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Script;
+using NexusForever.Game.Abstract.Entity.Trigger;
 
 namespace NexusForever.Game.Entity
 {
@@ -22,8 +23,9 @@ namespace NexusForever.Game.Entity
 
         public DoorEntity(
             IScriptManager scriptManager,
-            IMovementManager movementManager)
-            : base(movementManager)
+            IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
             this.scriptManager = scriptManager;
         }
@@ -41,9 +43,10 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="IDoorEntity"/>.
         /// </summary>
-        protected override IScriptCollection InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection()
         {
-            return scriptManager.InitialiseEntityScripts<IDoorEntity>(this);
+            scriptCollection = scriptManager.InitialiseOwnedCollection<IDoorEntity>(this);
+            scriptManager.InitialiseEntityScripts<IDoorEntity>(scriptCollection, this);
         }
 
         protected override IEntityModel BuildEntityModel()

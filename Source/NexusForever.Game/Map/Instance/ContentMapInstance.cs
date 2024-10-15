@@ -35,7 +35,8 @@ namespace NexusForever.Game.Map.Instance
 
         protected override void InitialiseScriptCollection()
         {
-            scriptCollection = scriptManager.InitialiseOwnedScripts<IContentMapInstance>(this, Entry.Id);
+            scriptCollection = scriptManager.InitialiseOwnedCollection<IContentMapInstance>(this);
+            scriptManager.InitialiseOwnedScripts<IContentMapInstance>(scriptCollection, Entry.Id);
         }
 
         protected override void OnUnload()
@@ -68,17 +69,17 @@ namespace NexusForever.Game.Map.Instance
             return null;
         }
 
-        protected override void AddEntity(IGridEntity entity, Vector3 vector)
+        protected override void AddEntity(IGridEntity entity, Vector3 vector, OnAddDelegate add = null)
         {
-            base.AddEntity(entity, vector);
+            base.AddEntity(entity, vector, add);
 
             if (entity is IPlayer player)
                 Match?.MatchEnter(player);
         }
 
-        protected override void RemoveEntity(IGridEntity entity)
+        protected override void RemoveEntity(IGridEntity entity, OnRemoveDelegate remove = null)
         {
-            base.RemoveEntity(entity);
+            base.RemoveEntity(entity, remove);
 
             if (entity is IPlayer player)
                 Match?.MatchExit(player, false);

@@ -70,7 +70,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 throw new ArgumentOutOfRangeException();
 
             session.Player.Rotation = new Vector3(character.RotationX, character.RotationY, character.RotationZ);
-            mapManager.AddToMap(session.Player, new MapPosition
+            session.Player.TeleportTo(new MapPosition
             {
                 Info = new MapInfo
                 {

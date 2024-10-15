@@ -6,6 +6,7 @@ using NexusForever.Game.Combat;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Event;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Spell;
@@ -92,8 +93,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public UnitEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public UnitEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
             ThreatManager = new ThreatManager(this);
 
@@ -143,9 +145,10 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="IUnitEntity"/>.
         /// </summary>
-        protected override IScriptCollection InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection()
         {
-            return ScriptManager.Instance.InitialiseEntityScripts<IUnitEntity>(this);
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IUnitEntity>(this);
+            ScriptManager.Instance.InitialiseEntityScripts<IUnitEntity>(scriptCollection, this);
         }
 
         /// <summary>
@@ -489,6 +492,9 @@ namespace NexusForever.Game.Entity
 
         private void GenerateRewards()
         {
+            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId))
+                Map.PublicEventManager.UpdateObjective(PublicEventObjectiveType.KillTargetGroup, targetGroupId, 1);
+
             foreach (IHostileEntity hostile in ThreatManager)
             {
                 IUnitEntity entity = GetVisible<IUnitEntity>(hostile.HatedUnitId);

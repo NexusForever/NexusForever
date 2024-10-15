@@ -25,7 +25,8 @@ namespace NexusForever.Game.Map.Instance
 
         protected override void InitialiseScriptCollection()
         {
-            scriptCollection = scriptManager.InitialiseOwnedScripts<IContentPvpMapInstance>(this, Entry.Id);
+            scriptCollection = scriptManager.InitialiseOwnedCollection<IContentPvpMapInstance>(this);
+            scriptManager.InitialiseOwnedScripts<IContentPvpMapInstance>(scriptCollection, Entry.Id);
         }
 
         /// <summary>

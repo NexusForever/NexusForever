@@ -13,8 +13,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public MailboxEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public MailboxEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

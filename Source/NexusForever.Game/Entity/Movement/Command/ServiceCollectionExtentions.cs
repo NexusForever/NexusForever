@@ -47,6 +47,7 @@ namespace NexusForever.Game.Entity.Movement.Command
             sc.AddTransient<PositionKeysCommand>();
             sc.AddTransient<PositionPathCommand>();
             sc.AddTransient<PositionSplineCommand>();
+            sc.AddTransient<PositionProjectileCommand>();
 
             sc.AddTransient<IRotationCommandGroup, RotationCommandGroup>();
             sc.AddSingleton<IFactoryInterface<IRotationCommand>, FactoryInterface<IRotationCommand>>();

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Text.Search;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 
 namespace NexusForever.WorldServer.Command.Handler
@@ -60,7 +60,11 @@ namespace NexusForever.WorldServer.Command.Handler
 
             var rotation = new Quaternion(entry.Facing0, entry.Facing1, entry.Facing2, entry.Facing3);
             target.Rotation = rotation.ToEuler();
-            target.TeleportTo((ushort)entry.WorldId, entry.Position0, entry.Position1, entry.Position2);
+
+            if (target.Map.Entry.Id == entry.WorldId)
+                target.TeleportToLocal(new Vector3(entry.Position0, entry.Position1, entry.Position2));
+            else
+                target.TeleportTo((ushort)entry.WorldId, entry.Position0, entry.Position1, entry.Position2);
         }
 
         [Command(Permission.TeleportName, "Teleport to the specified zone name.", "name")]
@@ -81,7 +85,11 @@ namespace NexusForever.WorldServer.Command.Handler
                 context.SendMessage($"Unknown zone: {name}");
             else
             {
-                target.TeleportTo((ushort)zone.WorldId, zone.Position0, zone.Position1, zone.Position2);
+                if (target.Map.Entry.Id == zone.WorldId)
+                    target.TeleportToLocal(new Vector3(zone.Position0, zone.Position1, zone.Position2));
+                else
+                    target.TeleportTo((ushort)zone.WorldId, zone.Position0, zone.Position1, zone.Position2);
+
                 context.SendMessage($"{name}: {zone.WorldId} {zone.Position0} {zone.Position1} {zone.Position2}");
             }
         }

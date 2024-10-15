@@ -81,7 +81,7 @@ namespace NexusForever.Script.Main.Example
             ScheduleRandomMovement();
         }
 
-        private void OnEvent(uint? id)
+        private void OnEvent(IScriptEvent @event, uint? id)
         {
             switch (id)
             {

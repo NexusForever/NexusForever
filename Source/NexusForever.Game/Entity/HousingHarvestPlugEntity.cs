@@ -11,8 +11,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public HousingHarvestPlugEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public HousingHarvestPlugEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

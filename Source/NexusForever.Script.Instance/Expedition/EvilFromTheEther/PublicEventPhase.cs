@@ -2,7 +2,7 @@
 {
     public enum PublicEventPhase
     {
-        Initial,
+        TalkToCaptainWeir,
         GoToAirlock,
         OpenMedbay,
         ScavengeSpareParts,
@@ -13,6 +13,20 @@
         GoToPrimaryPowerPlant2,
         RestartMainGenerators,
         EnterCrewQuarters,
-        DefeatEthericOrganisms
+        DefeatEthericOrganisms,
+        RestoreTeleporter,
+        FindTeleporter,
+        DefeatEthericOrganisms2,
+        TeleportToUpperDeck,
+        GatherInBridgeAccessHall,
+        DefeatTetheredOrganisms,
+        GatherOnTheShadesBridge,
+        DefeatTetheredOrganisms2,
+        ActivateSelfDestruct,
+        DefeatKatjaZarkhov,
+        DefeatKatjaZarkhovFight,
+        PickUpDriveSchematics,
+        EscapeToTheTeleporter,
+        TalkToCaptainWeir2,
     }
 }

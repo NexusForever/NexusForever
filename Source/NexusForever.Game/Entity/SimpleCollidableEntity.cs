@@ -6,14 +6,15 @@ using NexusForever.Network.World.Entity.Model;
 
 namespace NexusForever.Game.Entity
 {
-    internal class SimpleCollidableEntity : WorldEntity, ISimpleCollidableEntity
+    internal class SimpleCollidableEntity : UnitEntity, ISimpleCollidableEntity
     {
         public override EntityType Type => EntityType.SimpleCollidable;
 
         #region Dependency Injection
 
-        public SimpleCollidableEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public SimpleCollidableEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

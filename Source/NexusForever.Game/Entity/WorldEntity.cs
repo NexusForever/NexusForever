@@ -6,7 +6,6 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.CSI;
-using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Reputation;
@@ -82,6 +81,8 @@ namespace NexusForever.Game.Entity
 
         public Faction Faction1 { get; set; }
         public Faction Faction2 { get; set; }
+
+        public byte QuestChecklistIdx { get; private set; }
 
         public ulong ActivePropId { get; private set; }
         public ushort WorldSocketId { get; private set; }
@@ -183,6 +184,19 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Guid of the <see cref="IWorldEntity"/> that summoned this <see cref="IWorldEntity"/>.
+        /// </summary>
+        public uint? SummonerGuid { get; set; }
+
+        /// <summary>
+        /// An entity factory to summon child entities.
+        /// </summary>
+        /// <remarks>
+        /// Any entities summoned by this <see cref="IWorldEntity"/> will be removed when this <see cref="IWorldEntity"/> is removed.
+        /// </remarks>
+        public IEntitySummonFactory SummonFactory { get; private set; }
+
+        /// <summary>
         /// Collection of guids currently passengers on this <see cref="IWorldEntity"/>.
         /// </summary>
         public IEnumerable<uint> PlatformPassengerGuids => platformPassengerGuids;
@@ -200,10 +214,14 @@ namespace NexusForever.Game.Entity
         #region Dependency Injection
 
         public WorldEntity(
-            IMovementManager movementManager)
+            IMovementManager movementManager,
+            IEntitySummonFactory summonFactory)
         {
             MovementManager = movementManager;
             MovementManager.Initialise(this);
+
+            SummonFactory = summonFactory;
+            SummonFactory.Initialise(this);
         }
 
         #endregion
@@ -221,7 +239,7 @@ namespace NexusForever.Game.Entity
             Health = MaxHealth;
             Shield = MaxShieldCapacity;
 
-            scriptCollection = InitialiseScriptCollection();
+            InitialiseScriptCollection();
         }
 
         /// <summary>
@@ -229,16 +247,17 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void Initialise(EntityModel model)
         {
-            EntityId      = model.Id;
-            CreatureId    = model.Creature;
-            Rotation      = new Vector3(model.Rx, model.Ry, model.Rz);
-            DisplayInfo   = model.DisplayInfo;
-            OutfitInfo    = model.OutfitInfo;
-            Faction1      = (Faction)model.Faction1;
-            Faction2      = (Faction)model.Faction2;
-            ActivePropId  = model.ActivePropId;
-            WorldSocketId = model.WorldSocketId;
-            Spline        = model.EntitySpline;
+            EntityId          = model.Id;
+            CreatureId        = model.Creature;
+            Rotation          = new Vector3(model.Rx, model.Ry, model.Rz);
+            DisplayInfo       = model.DisplayInfo;
+            OutfitInfo        = model.OutfitInfo;
+            Faction1          = (Faction)model.Faction1;
+            Faction2          = (Faction)model.Faction2;
+            QuestChecklistIdx = model.QuestChecklistIdx;
+            ActivePropId      = model.ActivePropId;
+            WorldSocketId     = model.WorldSocketId;
+            Spline            = model.EntitySpline;
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
@@ -249,15 +268,16 @@ namespace NexusForever.Game.Entity
             Health = MaxHealth;
             Shield = MaxShieldCapacity;
 
-            scriptCollection = InitialiseScriptCollection();
+            InitialiseScriptCollection();
         }
 
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="IWorldEntity"/>.
         /// </summary>
-        protected virtual IScriptCollection InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection()
         {
-            return ScriptManager.Instance.InitialiseEntityScripts<IWorldEntity>(this);
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IWorldEntity>(this);
+            ScriptManager.Instance.InitialiseEntityScripts<IWorldEntity>(scriptCollection, this);
         }
 
         /// <summary>
@@ -274,7 +294,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Invoked when <see cref="IWorldEntity"/> is removed from <see cref="IBaseMap"/>.
         /// </summary>
-        public override void OnRemoveFromMap()
+        protected override void OnRemoveFromMap()
         {
             foreach (uint platformPassengerGuid in platformPassengerGuids.ToList())
             {
@@ -285,6 +305,13 @@ namespace NexusForever.Game.Entity
                 worldEntity.SetPlatform(null);
                 worldEntity.MovementManager.SetPosition(Position, false);
                 worldEntity.MovementManager.SetRotation(Rotation, false);
+            }
+
+            SummonFactory.Unsummon();
+            if (SummonerGuid.HasValue)
+            {
+                IWorldEntity summoner = Map.GetEntity<IWorldEntity>(SummonerGuid.Value);
+                summoner?.SummonFactory.UntrackSummon(Guid);
             }
 
             base.OnRemoveFromMap();
@@ -431,11 +458,15 @@ namespace NexusForever.Game.Entity
         public virtual void OnActivateSuccess(IPlayer activator)
         {
             activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
-            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId) ?? Enumerable.Empty<uint>())
+            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroupChecklist, CreatureId, QuestChecklistIdx);
+            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, CreatureId, 1u);
+
+            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId))
             {
                 activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroup, targetGroupId, 1u); // Updates the objective, but seems to disable all the other targets. TODO: Investigate
 
                 Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroup, targetGroupId, 1);
+                Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroupChecklist, targetGroupId, QuestChecklistIdx);
             }
 
             // TODO: Fire Scripts

@@ -129,9 +129,9 @@ namespace NexusForever.Game.Abstract.Entity.Movement
         void SetPositionMultiSpline(List<ushort> splineIds, SplineMode mode, float speed);
 
         /// <summary>
-        /// NYI
+        /// Launch a new projectile with the supplied flight time, gravity and position.
         /// </summary>
-        void SetPositionProjectile();
+        void SetPositionProjectile(uint flightTime, float gravity, Vector3 position);
 
         /// <summary>
         /// Return the current velocity.

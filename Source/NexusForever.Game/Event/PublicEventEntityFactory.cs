@@ -64,17 +64,9 @@ namespace NexusForever.Game.Event
                 IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
                 entity.Initialise(model);
                 entity.Rotation = new Vector3(model.Rx, model.Ry, model.Rz);
+                entity.AddToMap(publicEvent.Map, new Vector3(model.X, model.Y, model.Z));
 
                 entities.Add(entity);
-
-                publicEvent.Map.EnqueueAdd(entity, new MapPosition
-                {
-                    Info = new MapInfo
-                    {
-                        Entry = publicEvent.Map.Entry
-                    },
-                    Position = new Vector3(model.X, model.Y, model.Z)
-                });
             }
 
             log.LogTrace($"Spawned entities for public event {publicEvent.Id} phase {phase}.");
@@ -87,7 +79,7 @@ namespace NexusForever.Game.Event
         {
             foreach (IGridEntity entity in entities)
                 if (entity.InWorld)
-                    publicEvent.Map.EnqueueRemove(entity);
+                    entity.RemoveFromMap();
 
             entities.Clear();
 

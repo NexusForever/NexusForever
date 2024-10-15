@@ -11,8 +11,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public PinataLootEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public PinataLootEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

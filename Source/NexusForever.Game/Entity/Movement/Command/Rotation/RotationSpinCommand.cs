@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Entity.Movement.Command.Rotation;
 using NexusForever.Game.Static.Entity.Movement.Command;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Command;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity.Movement.Command.Rotation
 {

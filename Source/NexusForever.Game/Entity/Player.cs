@@ -231,10 +231,11 @@ namespace NexusForever.Game.Entity
 
         public Player(
             IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory,
             IEntityFactory entityFactory,
             IMatchingManager matchingManager,
             IMatchManager matchManager)
-            : base(movementManager)
+            : base(movementManager, entitySummonFactory)
         {
             this.entityFactory   = entityFactory;
             this.matchingManager = matchingManager;
@@ -281,7 +282,8 @@ namespace NexusForever.Game.Entity
             CalculateDefaultProperties();
             SetBaseCharacterProperties();
 
-            scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(this);
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IPlayer>(this);
+            ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(scriptCollection, this);
 
             // managers
             EntitlementManager      = new CharacterEntitlementManager(this, model);
@@ -544,15 +546,6 @@ namespace NexusForever.Game.Entity
 
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
         {
-            IsLoading = true;
-
-            Session.EnqueueMessageEncrypted(new ServerChangeWorld
-            {
-                WorldId  = (ushort)map.Entry.Id,
-                Position = new Position(vector),
-                Yaw      = Rotation.X
-            });
-
             // this must come before OnAddToMap
             // the client UI initialises the Holomark checkboxes during OnDocumentReady
             SendCharacterFlagsUpdated();
@@ -564,14 +557,7 @@ namespace NexusForever.Game.Entity
             {
                 var pet = entityFactory.CreateEntity<IPetEntity>();
                 pet.Initialise(this, pendingTeleport.VanityPetId.Value);
-
-                var position = new MapPosition
-                {
-                    Position = Position
-                };
-
-                if (map.CanEnter(pet, position))
-                    map.EnqueueAdd(pet, position);
+                pet.AddToMap(map, Position);
             }
 
             SendPacketsAfterAddToMap();
@@ -636,50 +622,53 @@ namespace NexusForever.Game.Entity
             CostumeManager.SendInitialPackets();
             Account.CostumeManager.SendInitialPackets();
 
-            var playerCreate = new ServerPlayerCreate
+            if (PreviousMap == null)
             {
-                ItemProficiencies = GetItemProficiencies(),
-                FactionData       = new ServerPlayerCreate.Faction
+                var playerCreate = new ServerPlayerCreate
                 {
-                    FactionId          = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
-                    FactionReputations = ReputationManager
-                        .Select(r => new ServerPlayerCreate.Faction.FactionReputation
-                        {
-                            FactionId = r.Id,
-                            Value     = r.Amount
-                        })
-                        .ToList()
-                },
-                ActiveCostumeIndex    = CostumeManager.CostumeIndex ?? -1,
-                InputKeySet           = (uint)InputKeySet,
-                CharacterEntitlements = EntitlementManager
-                    .Select(e => new ServerPlayerCreate.CharacterEntitlement
+                    ItemProficiencies = GetItemProficiencies(),
+                    FactionData       = new ServerPlayerCreate.Faction
                     {
-                        Entitlement = e.Type,
-                        Count       = e.Amount
-                    })
-                    .ToList(),
-                TradeskillMaterials   = SupplySatchelManager.BuildNetworkPacket(),
-                Xp                    = XpManager.TotalXp,
-                RestBonusXp           = XpManager.RestBonusXp
-            };
+                        FactionId          = Faction1, // This does not do anything for the player's "main" faction. Exiles/Dominion
+                        FactionReputations = ReputationManager
+                            .Select(r => new ServerPlayerCreate.Faction.FactionReputation
+                            {
+                                FactionId = r.Id,
+                                Value     = r.Amount
+                            })
+                            .ToList()
+                    },
+                    ActiveCostumeIndex    = CostumeManager.CostumeIndex ?? -1,
+                    InputKeySet           = (uint)InputKeySet,
+                    CharacterEntitlements = EntitlementManager
+                        .Select(e => new ServerPlayerCreate.CharacterEntitlement
+                        {
+                            Entitlement = e.Type,
+                            Count       = e.Amount
+                        })
+                        .ToList(),
+                    TradeskillMaterials   = SupplySatchelManager.BuildNetworkPacket(),
+                    Xp                    = XpManager.TotalXp,
+                    RestBonusXp           = XpManager.RestBonusXp
+                };
 
-            foreach (ICurrency currency in CurrencyManager)
-                playerCreate.Money[(byte)currency.Id - 1] = currency.Amount;
+                foreach (ICurrency currency in CurrencyManager)
+                    playerCreate.Money[(byte)currency.Id - 1] = currency.Amount;
 
-            foreach (IItem item in Inventory
-                .Where(b => b.Location != InventoryLocation.Ability)
-                .SelectMany(i => i))
-            {
-                playerCreate.Inventory.Add(new InventoryItem
+                foreach (IItem item in Inventory
+                    .Where(b => b.Location != InventoryLocation.Ability)
+                    .SelectMany(i => i))
                 {
-                    Item   = item.Build(),
-                    Reason = ItemUpdateReason.NoReason
-                });
-            }
+                    playerCreate.Inventory.Add(new InventoryItem
+                    {
+                        Item   = item.Build(),
+                        Reason = ItemUpdateReason.NoReason
+                    });
+                }
 
-            playerCreate.SpecIndex = SpellManager.ActiveActionSet;
-            Session.EnqueueMessageEncrypted(playerCreate);
+                playerCreate.SpecIndex = SpellManager.ActiveActionSet;
+                Session.EnqueueMessageEncrypted(playerCreate);
+            }
 
             TitleManager.SendTitles();
             SpellManager.SendInitialPackets();
@@ -703,7 +692,7 @@ namespace NexusForever.Game.Entity
             return (ItemProficiency)classEntry.StartingItemProficiencies;
         }
 
-        public override void OnRemoveFromMap()
+        protected override void OnRemoveFromMap()
         {
             DestroyDependents();
             base.OnRemoveFromMap();
@@ -940,8 +929,37 @@ namespace NexusForever.Game.Entity
                 VanityPetId = vanityPetId
             };
 
-            MapManager.Instance.AddToMap(this, mapPosition);
+            IMapPosition source = null;
+            if (Map != null)
+            {
+                source = new MapPosition
+                {
+                    Info = new MapInfo
+                    {
+                        Entry   = Map.Entry,
+                        MapLock = (Map as IMapInstance)?.MapLock
+                    },
+                    Position = Position
+                };
+            }
+
+            MapManager.Instance.AddToMap(this, source, mapPosition, OnAddToMap, OnTeleportToFailed, OnTeleportToFailed);
+
             log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.MapLock?.InstanceId ?? null}.");
+        }
+
+        /// <summary>
+        /// Show loading screen for supplied <see cref="IMapPosition"/>.
+        /// </summary>
+        public void ShowLoadingScreen(IMapPosition position)
+        {
+            IsLoading = true;
+
+            Session.EnqueueMessageEncrypted(new ServerChangeWorld
+            {
+                WorldId  = (ushort)position.Info.Entry.Id,
+                Position = new Position(position.Position)
+            });
         }
 
         /// <summary>
@@ -959,16 +977,13 @@ namespace NexusForever.Game.Entity
 
             Session.EnqueueMessageEncrypted(new ServerTeleportLocal());
 
-            Task<Vector3> task = Map.EnqueueRelocateAsync(this, position);
-            eventQueue.EnqueueEvent(new TaskGenericEvent<Vector3>(task, OnTeleportToLocal));
+            RelocateOnMap(position, OnTeleportToLocal);
 
             log.Trace($"Teleporting {Name}({CharacterId}) to location {position.X}, {position.Y}, {position.Z}.");
         }
 
         private void OnTeleportToLocal(Vector3 position)
         {
-            OnRelocate(position);
-
             SetControl(null);
 
             MovementManager.SetPosition(position, false);
@@ -979,7 +994,7 @@ namespace NexusForever.Game.Entity
             if (VanityPetGuid != null)
             {
                 IPetEntity pet = Map.GetEntity<IPetEntity>(VanityPetGuid.Value);
-                pet?.Relocate(position);
+                pet?.RelocateOnMap(position);
             }
 
             pendingLocalTeleport = false;
@@ -988,7 +1003,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Invoked when <see cref="IPlayer"/> teleport fails.
         /// </summary>
-        public void OnTeleportToFailed(GenericError error)
+        private void OnTeleportToFailed(GenericError error)
         {
             if (Map != null)
             {
@@ -1008,6 +1023,16 @@ namespace NexusForever.Game.Entity
 
                 log.Trace($"Error {error} occured during teleport for {Name}({CharacterId}), client will be disconnected!");
             }
+        }
+
+        private void OnTeleportToFailed(Exception ex)
+        {
+            Session.EnqueueMessageEncrypted(new ServerForceKick
+            {
+                Reason = ForceKickReason.WorldDisconnect
+            });
+
+            log.Trace(ex, $"Exception occured during teleport for {Name}({CharacterId}), client will be disconnected!");
         }
 
         /// <summary>
@@ -1373,16 +1398,7 @@ namespace NexusForever.Game.Entity
 
             IGhostEntity ghost = entityFactory.CreateEntity<IGhostEntity>();
             ghost.Initialise(this);
-
-            Map.EnqueueAdd(ghost, new MapPosition
-            {
-                Info = new MapInfo
-                {
-                    Entry   = Map.Entry,
-                    MapLock = Map is IMapInstance instance ? instance.MapLock : null
-                },
-                Position = Position
-            });
+            ghost.AddToMap(Map, Position);
         }
 
         protected override void RewardKiller(IPlayer player)

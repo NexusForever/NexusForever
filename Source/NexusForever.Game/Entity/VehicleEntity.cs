@@ -24,8 +24,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public VehicleEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public VehicleEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 
@@ -63,7 +64,7 @@ namespace NexusForever.Game.Entity
             };
         }
 
-        public override void OnRemoveFromMap()
+        protected override void OnRemoveFromMap()
         {
             foreach (IVehiclePassenger passenger in passengers)
             {
@@ -82,7 +83,7 @@ namespace NexusForever.Game.Entity
             foreach (IVehiclePassenger passenger in passengers)
             {
                 IPlayer entity = GetVisible<IPlayer>(passenger.Guid);
-                entity.Relocate(vector);
+                entity.RelocateOnMap(vector);
             }
 
             base.OnRelocate(vector);
@@ -188,15 +189,7 @@ namespace NexusForever.Game.Entity
             if (passenger.SeatType == VehicleSeatType.Pilot)
             {
                 player.SetControl(this);
-
-                EnqueueToVisible(new ServerEntityFaction
-                {
-                    UnitId  = Guid,
-                    Faction = player.Faction1
-                }, true);
-
-                Faction1 = player.Faction1;
-                Faction2 = player.Faction2;
+                SetTemporaryFaction(player.Faction1);
             }
 
             player.SetPlatform(this);
@@ -230,7 +223,10 @@ namespace NexusForever.Game.Entity
             player.SetPlatform(null);
            
             if (passenger.SeatType == VehicleSeatType.Pilot)
+            {
                 player.SetControl(player);
+                RemoveTemporaryFaction();
+            }
 
             passengers.Remove(passenger);
             OnPassengerRemove(player, passenger.SeatType, passenger.SeatPosition);

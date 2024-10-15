@@ -11,8 +11,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public LockboxEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public LockboxEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

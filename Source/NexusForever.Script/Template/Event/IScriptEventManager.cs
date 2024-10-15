@@ -7,7 +7,7 @@ namespace NexusForever.Script.Template.Event
         /// <summary>
         /// Invoked when a <see cref="IScriptEvent"/> is invoked, the id of the event is returned if it has one.
         /// </summary>
-        event Action<uint?> OnScriptEvent;
+        event Action<IScriptEvent, uint?> OnScriptEvent;
 
         /// <summary>
         /// Enqueue a new <see cref="IScriptEvent"/> which will be invoked after <see cref="TimeSpan"/>.

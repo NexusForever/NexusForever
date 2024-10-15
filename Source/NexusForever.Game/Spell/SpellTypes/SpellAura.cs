@@ -105,14 +105,7 @@ namespace NexusForever.Game.Spell
                     log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
                 });
 
-                caster.Map.EnqueueAdd(positionalEntity, new Map.MapPosition
-                {
-                    Info = new Map.MapInfo
-                    {
-                        Entry = caster.Map.Entry
-                    },
-                    Position = caster.Position
-                });
+                positionalEntity.AddToMap(caster.Map, caster.Position);
             }
             else
             {

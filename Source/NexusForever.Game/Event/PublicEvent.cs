@@ -14,7 +14,6 @@ using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
-using static NexusForever.Network.World.Message.Model.ServerMatchingQueueJoin;
 
 namespace NexusForever.Game.Event
 {
@@ -137,7 +136,8 @@ namespace NexusForever.Game.Event
 
             entityFactory.Initialise(this);
 
-            scriptCollection = scriptManager.InitialiseOwnedScripts<IPublicEvent>(this, Id);
+            scriptCollection = scriptManager.InitialiseOwnedCollection<IPublicEvent>(this);
+            scriptManager.InitialiseOwnedScripts<IPublicEvent>(scriptCollection, Id);
 
             if (template.HasLiveStats())
                 liveStatsTimer = new(TimeSpan.FromSeconds(5));

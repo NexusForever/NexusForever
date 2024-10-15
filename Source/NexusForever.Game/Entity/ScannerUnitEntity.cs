@@ -11,8 +11,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public ScannerUnitEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public ScannerUnitEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

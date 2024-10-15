@@ -82,7 +82,8 @@ namespace NexusForever.Game.Spell
             if (this is not SpellThreshold && parameters.SpellInfo.Thresholds.Count > 0)
                 throw new NotImplementedException();
 
-            scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<ISpell>(this, parameters.SpellInfo.Entry.Id);
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<ISpell>(this);
+            ScriptManager.Instance.InitialiseOwnedScripts<ISpell>(scriptCollection, parameters.SpellInfo.Entry.Id);
         }
 
         public void Dispose()

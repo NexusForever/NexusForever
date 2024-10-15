@@ -26,6 +26,11 @@ namespace NexusForever.Game.Entity
         public bool InWorld => Map != null;
 
         /// <summary>
+        /// Determines if the <see cref="IGridEntity"/> is pending removal from the <see cref="IBaseMap"/>.
+        /// </summary>
+        public bool PendingRemoval { get; private set; }
+
+        /// <summary>
         /// Distance between <see cref="IGridEntity"/> and a <see cref="IMapGrid"/> for activation.
         /// </summary>
         public float ActivationRange { get; protected set; }
@@ -40,6 +45,19 @@ namespace NexusForever.Game.Entity
         protected IScriptCollection scriptCollection;
 
         protected readonly EventQueue eventQueue = new();
+
+        /// <summary>
+        /// Initialise <see cref="IGridEntity"/>
+        /// </summary>
+        public void Initialise()
+        {
+            InitialiseScriptCollection();
+        }
+
+        /// <summary>
+        /// Initialise <see cref="IScriptCollection"/> for <see cref="IGridEntity"/>.
+        /// </summary>
+        protected abstract void InitialiseScriptCollection();
 
         public virtual void Dispose()
         {
@@ -65,23 +83,65 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Enqueue <see cref="IGridEntity"/> for addition to the <see cref="IBaseMap"/>.
+        /// </summary>
+        public void AddToMap(IBaseMap map, Vector3 position, OnAddDelegate callback = null)
+        {
+            Debug.Assert(Map == null);
+
+            if (callback != null)
+            {
+                map.EnqueueAdd(this, position, (map, guid, vector) =>
+                {
+                    OnAddToMap(map, guid, vector);
+                    callback(map, guid, vector);
+                });
+            }
+            else
+                map.EnqueueAdd(this, position, OnAddToMap);
+        }
+
+        /// <summary>
         /// Enqueue <see cref="IGridEntity"/> for removal from the <see cref="IBaseMap"/>.
         /// </summary>
-        public void RemoveFromMap()
+        public void RemoveFromMap(OnRemoveDelegate callback = null)
         {
             Debug.Assert(Map != null);
-            Map.EnqueueRemove(this);
+
+            if (PendingRemoval)
+                return;
+
+            PendingRemoval = true;
+
+            if (callback != null)
+            {
+                Map.EnqueueRemove(this, () =>
+                {
+                    OnRemoveFromMap();
+                    callback();
+                });
+            }
+            else
+                Map.EnqueueRemove(this, OnRemoveFromMap);
         }
 
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> for relocation on the <see cref="IBaseMap"/>.
         /// </summary>
-        public void Relocate(Vector3 position)
+        public void RelocateOnMap(Vector3 position, OnRelocateDelegate callback = null)
         {
             Debug.Assert(Map != null);
 
-            Task<Vector3> task = Map.EnqueueRelocateAsync(this, position);
-            eventQueue.EnqueueEvent(new TaskGenericEvent<Vector3>(task, OnRelocate));
+            if (callback != null)
+            {
+                Map.EnqueueRelocate(this, position, (vector) =>
+                {
+                    OnRelocate(vector);
+                    callback(vector);
+                });
+            }
+            else
+                Map.EnqueueRelocate(this, position, OnRelocate);
         }
 
         /// <summary>
@@ -119,7 +179,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Invoked when <see cref="IGridEntity"/> is removed from <see cref="IBaseMap"/>.
         /// </summary>
-        public virtual void OnRemoveFromMap()
+        protected virtual void OnRemoveFromMap()
         {
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnRemoveFromMap(Map));
 
@@ -135,12 +195,14 @@ namespace NexusForever.Game.Entity
 
             inRangeEntities.Clear();
 
-            Guid        = 0;
             PreviousMap = new MapInfo
             {
                 Entry = Map.Entry
             };
-            Map         = null;
+
+            Guid           = 0;
+            Map            = null;
+            PendingRemoval = false;
         }
 
         /// <summary>
@@ -314,14 +376,14 @@ namespace NexusForever.Game.Entity
             return inRangeEntities.ContainsKey(target.Guid);
         }
 
-        private void AddToRange(IGridEntity entity)
+        protected virtual void AddToRange(IGridEntity entity)
         {
             inRangeEntities.Add(entity.Guid, entity);
 
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnEnterRange(entity));
         }
 
-        private void RemoveFromRange(IGridEntity entity)
+        protected virtual void RemoveFromRange(IGridEntity entity)
         {
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnExitRange(entity));
 

@@ -187,7 +187,10 @@ namespace NexusForever.Script
                 InitialiseScriptCollection(collection, collection.Search);
         }
 
-        private IScriptCollection InitialiseOwnedCollection<T>(T owner)
+        /// <summary>
+        /// Create a new <see cref="IScriptCollection"/> for supplied owner.
+        /// </summary>
+        public IScriptCollection InitialiseOwnedCollection<T>(T owner)
         {
             IOwnedScriptCollection<T> collection = collectionFactory.CreateOwnedCollection<T>();
             collection.Initialise(owner);
@@ -220,30 +223,24 @@ namespace NexusForever.Script
         /// <summary>
         /// Initialise a new <see cref="IOwnedScriptCollection{T}"/> for supplied <typeparamref name="T"/> owner and id.
         /// </summary>
-        public IScriptCollection InitialiseOwnedScripts<T>(T owner, uint id)
+        public void InitialiseOwnedScripts<T>(IScriptCollection collection, uint id)
         {
-            IScriptCollection collection = InitialiseOwnedCollection(owner);
             InitialiseScriptCollection(collection, new ScriptFilterSearch()
                 .FilterByScriptType<IOwnedScript<T>>()
                 .FilterById(id));
-
-            return collection;
         }
 
         /// <summary>
         /// Initialise a new <see cref="IOwnedScriptCollection{T}"/> for supplied <typeparamref name="T"/> <see cref="IWorldEntity"/>.
         /// </summary>
-        public IScriptCollection InitialiseEntityScripts<T>(T entity) where T : IWorldEntity
+        public void InitialiseEntityScripts<T>(IScriptCollection collection, T entity) where T : IWorldEntity
         {
-            IScriptCollection collection = InitialiseOwnedCollection(entity);
             InitialiseScriptCollection(collection, new ScriptFilterSearch()
                 .FilterByScriptType<IOwnedScript<T>>()
                 .FilterById(entity.EntityId)
                 .FilterByCreatureId(entity.CreatureId)
                 .FilterByActivePropId(entity.ActivePropId));
                 //.FilterByTargetGroupId());
-
-            return collection;
         }
 
         /// <summary>

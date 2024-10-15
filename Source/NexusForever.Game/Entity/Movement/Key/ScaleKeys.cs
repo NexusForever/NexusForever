@@ -1,4 +1,6 @@
-﻿namespace NexusForever.Game.Entity.Movement.Key
+﻿using NexusForever.Shared;
+
+namespace NexusForever.Game.Entity.Movement.Key
 {
     public class ScaleKeys : Keys<float>
     {

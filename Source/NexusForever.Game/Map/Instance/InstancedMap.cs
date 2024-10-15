@@ -1,34 +1,55 @@
 using System.Collections.Concurrent;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Map.Lock;
+using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Map;
+using NexusForever.Game.Static.RBAC;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
-using NLog;
+using NexusForever.Shared.Configuration;
+using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Map.Instance
 {
-    public abstract class InstancedMap<T> : IMap, IInstancedMap<T> where T : IMapInstance
+    public abstract class InstancedMap<T> : IMap, IInstancedMap where T : IMapInstance
     {
         private class PendingAdd
         {
             public IPlayer Player { get; init; }
             public IMapPosition MapPosition { get; init; }
+            public OnAddDelegate Callback { get; init; }
+            public OnGenericErrorDelegate Error { get; init; }
+            public OnExceptionDelegate Exception { get; init; }
+
             // see comment further down
             public bool ExplictRemove { get; set; }
         }
-
-        // ReSharper disable once StaticMemberInGenericType
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         public WorldEntry Entry { get; private set; }
 
         private readonly ConcurrentQueue<PendingAdd> pendingAdds = new();
         private readonly Dictionary</*instanceId*/ Guid, T> instances = new();
+
+        private readonly Dictionary<ulong, uint> instanceCounts = new();
+        // reset instance limit counts every hour
+        private readonly UpdateTimer instanceCountReset = new(TimeSpan.FromMinutes(60));
+
+        #region Dependency Injection
+
+        private readonly ILogger log;
+
+        public InstancedMap(
+            ILogger log)
+        {
+            this.log = log;
+        }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IInstancedMap{T}"/> with <see cref="WorldEntry"/>.
@@ -39,40 +60,30 @@ namespace NexusForever.Game.Map.Instance
         }
 
         /// <summary>
-        /// Enqueue <see cref="IGridEntity"/> to be added to <see cref="IInstancedMap{T}"/>.
+        /// Enqueue <see cref="IPlayer"/> to be added to <see cref="IInstancedMap{T}"/>.
         /// </summary>
         /// <remarks>
         /// Characters should not be added directly through this method.
         /// Use <see cref="IPlayer.TeleportTo(IMapPosition,TeleportReason)"/> instead.
         /// </remarks>
-        public void EnqueueAdd(IGridEntity entity, IMapPosition position)
+        public void EnqueueAdd(IPlayer player, IMapPosition position, OnAddDelegate callback = null, OnGenericErrorDelegate error = null, OnExceptionDelegate exception = null)
         {
-            if (entity is not IPlayer player)
-                // entities can't be added directly to an instance map
-                // they need to be added to the map instance instead
-                throw new InvalidOperationException();
-
             pendingAdds.Enqueue(new PendingAdd
             {
-                Player = player,
-                MapPosition = position
+                Player      = player,
+                MapPosition = position,
+                Callback    = callback,
+                Error       = error,
+                Exception   = exception
             });
-        }
-
-        /// <summary>
-        /// Returns if <see cref="IGridEntity"/> can be added to <see cref="IInstancedMap{T}"/>.
-        /// </summary>
-        public virtual bool CanEnter(IGridEntity entity, IMapPosition position)
-        {
-            return false;
         }
 
         /// <summary>
         /// Returns if <see cref="IPlayer"/> can be added to <see cref="IInstancedMap{T}"/>.
         /// </summary>
-        public virtual GenericError? CanEnter(IPlayer player, IMapPosition position)
+        protected virtual GenericError? CanEnter(IPlayer player, IMapPosition position)
         {
-            if (!MapManager.Instance.CanCreateInstance(player))
+            if (!CanCreateInstance(player))
                 return GenericError.InstanceLimitExceeded;
 
             return null;
@@ -83,6 +94,13 @@ namespace NexusForever.Game.Map.Instance
         /// </summary>
         public void Update(double lastTick)
         {
+            instanceCountReset.Update(lastTick);
+            if (instanceCountReset.HasElapsed)
+            {
+                instanceCounts.Clear();
+                instanceCountReset.Reset();
+            }
+
             ProcessPending();
             UpdateInstances(lastTick);
         }
@@ -92,59 +110,73 @@ namespace NexusForever.Game.Map.Instance
             var newActions = new List<PendingAdd>();
             while (pendingAdds.TryDequeue(out PendingAdd pending))
             {
-                IMapLock mapLock = pending.MapPosition.Info.MapLock;
-
-                // find implicit map lock if explicit not specified
-                mapLock ??= GetMapLock(pending.Player);
-                if (mapLock == null)
-                    throw new InvalidOperationException();
-
-                T instance = GetInstance(mapLock.InstanceId);
-
-                // specified instance doesn't have an instance yet, create it
-                if (instance == null)
+                try
                 {
-                    instance = CreateInstance(pending.Player, mapLock);
-                    instances.Add(instance.InstanceId, instance);
-
-                    log.Trace($"Created new instance {instance.InstanceId} for map {instance.Entry.Id}.");
-
-                    MapManager.Instance.IncreaseInstanceCount(pending.Player);
+                    if (!ProcessPendingAdd(pending))
+                        newActions.Add(pending);
                 }
-
-                // existing instance is unloading
-                if (instance.UnloadStatus.HasValue)
+                catch (Exception ex)
                 {
-                    // this is a special rare case when a player is removed from an instance during unload but the return position is the same instance
-                    // in this case we must explicitly remove the player from the instance and wait for the instance to unload before recreating
-                    // you can replicate this functionality by invoking the instance unload command while on your own residence
-                    if (instance.UnloadStatus == MapUnloadStatus.UnloadingPlayers
-                        && pending.Player.Map == (IBaseMap)instance
-                        && !pending.ExplictRemove)
-                    {
-                        pending.Player.RemoveFromMap();
-                        pending.ExplictRemove = true;
-                    }
-
-                    // wait for instance to completely unload before recreating and adding
-                    newActions.Add(pending);
-                    continue;
+                    pending.Exception?.Invoke(ex);
                 }
-
-                GenericError? result = instance.CanEnter(pending.Player, pending.MapPosition);
-                if (result.HasValue)
-                {
-                    pending.Player.OnTeleportToFailed(result.Value);
-                    return;
-                }
-
-                UpdatePosition(pending.Player, pending.MapPosition);
-                instance.EnqueueAdd(pending.Player, pending.MapPosition);
             }
 
             // new actions are added to the queue after processing so they are processed starting next update
             foreach (PendingAdd action in newActions)
                 pendingAdds.Enqueue(action);
+        }
+
+        private bool ProcessPendingAdd(PendingAdd pending)
+        {
+            GenericError? error = CanEnter(pending.Player, pending.MapPosition);
+            if (error.HasValue)
+            {
+                pending.Error?.Invoke(error.Value);
+                return true;
+            }
+
+            IMapLock mapLock = pending.MapPosition.Info.MapLock;
+
+            // find implicit map lock if explicit not specified
+            mapLock ??= GetMapLock(pending.Player);
+            if (mapLock == null)
+                throw new InvalidOperationException();
+
+            T instance = GetInstance(mapLock.InstanceId);
+
+            // specified instance doesn't have an instance yet, create it
+            if (instance == null)
+            {
+                instance = CreateInstance(pending.Player, mapLock);
+                instances.Add(instance.InstanceId, instance);
+
+                log.LogTrace($"Created new instance {instance.InstanceId} for map {instance.Entry.Id}.");
+
+                IncreaseInstanceCount(pending.Player);
+            }
+
+            // existing instance is unloading
+            if (instance.UnloadStatus.HasValue)
+            {
+                // this is a special rare case when a player is removed from an instance during unload but the return position is the same instance
+                // in this case we must explicitly remove the player from the instance and wait for the instance to unload before recreating
+                // you can replicate this functionality by invoking the instance unload command while on your own residence
+                if (instance.UnloadStatus == MapUnloadStatus.UnloadingPlayers
+                    && pending.Player.Map == (IBaseMap)instance
+                    && !pending.ExplictRemove)
+                {
+                    pending.Player.RemoveFromMap();
+                    pending.ExplictRemove = true;
+                }
+
+                // wait for instance to completely unload before recreating and adding
+                return false;
+            }
+
+            UpdatePosition(pending.Player, pending.MapPosition);
+            instance.EnqueueAdd(pending.Player, pending.MapPosition.Position, pending.Callback, pending.Error, pending.Exception);
+
+            return true;
         }
 
         private void UpdateInstances(double lastTick)
@@ -161,7 +193,7 @@ namespace NexusForever.Game.Map.Instance
             foreach (IMapInstance instance in unloadedInstances)
             {
                 instances.Remove(instance.InstanceId);
-                log.Trace($"Unloaded existing instance {instance.InstanceId} for map {instance.Entry.Id}.");
+                log.LogTrace($"Unloaded existing instance {instance.InstanceId} for map {instance.Entry.Id}.");
             }
         }
 
@@ -180,6 +212,33 @@ namespace NexusForever.Game.Map.Instance
         public virtual T GetInstance(Guid instanceId)
         {
             return instances.TryGetValue(instanceId, out T map) ? map : default;
+        }
+
+        /// <summary>
+        /// Returns if <see cref="IPlayer"/> can create a new instance.
+        /// </summary>
+        private bool CanCreateInstance(IPlayer player)
+        {
+            if (instanceCounts.TryGetValue(player.CharacterId, out uint instanceCount)
+                && instanceCount > (SharedConfiguration.Instance.Get<MapConfig>().MaxInstances ?? 10u))
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Increase instance count for <see cref="IPlayer"/>.
+        /// </summary>
+        private void IncreaseInstanceCount(IPlayer player)
+        {
+            // players with bypass RBAC have no limit to instances in an hour
+            if (player.Account.RbacManager.HasPermission(Permission.BypassInstanceLimits))
+                return;
+
+            if (instanceCounts.TryGetValue(player.CharacterId, out uint count))
+                instanceCounts[player.CharacterId] = count + 1;
+            else
+                instanceCounts.Add(player.CharacterId, 1);
         }
 
         /// <summary>

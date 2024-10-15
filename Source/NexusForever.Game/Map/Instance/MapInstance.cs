@@ -207,7 +207,7 @@ namespace NexusForever.Game.Map.Instance
         /// <summary>
         /// Returns if <see cref="IGridEntity"/> can be added to <see cref="IBaseMap"/>.
         /// </summary>
-        public override GenericError? CanEnter(IPlayer player, IMapPosition position)
+        protected override GenericError? CanEnter(IPlayer player, Vector3 position)
         {
             // elevated users bypass instance player limits
             if (!player.Account.RbacManager.HasPermission(Permission.BypassInstanceLimits))
@@ -217,7 +217,7 @@ namespace NexusForever.Game.Map.Instance
                     .Select(GetEntity<IPlayer>)
                     .Count(p => !p.Account.RbacManager.HasPermission(Permission.BypassInstanceLimits))
                     // include players pending add to instance
-                    + pendingActions.Count(a => a is IGridActionAdd or IGridActionPending);
+                    + pendingActions.Count(a => a is IGridActionAdd);
 
                 if (count >= instanceLimit)
                     return GenericError.InstanceFull;
@@ -226,9 +226,10 @@ namespace NexusForever.Game.Map.Instance
             return base.CanEnter(player, position);
         }
 
-        protected override void AddEntity(IGridEntity entity, Vector3 vector)
+        protected override void AddEntity(IGridEntity entity, Vector3 vector, OnAddDelegate add = null)
         {
-            base.AddEntity(entity, vector);
+            base.AddEntity(entity, vector, add);
+
             if (entity is IPlayer player)
             {
                 playerEntities.Add(player.Guid);
@@ -239,7 +240,7 @@ namespace NexusForever.Game.Map.Instance
             }
         }
 
-        protected override void RemoveEntity(IGridEntity entity)
+        protected override void RemoveEntity(IGridEntity entity, OnRemoveDelegate remove = null)
         {
             if (entity is IPlayer player)
             {
@@ -252,7 +253,7 @@ namespace NexusForever.Game.Map.Instance
                     unloadTimer.Reset();
             }
 
-            base.RemoveEntity(entity);
+            base.RemoveEntity(entity, remove);
         }
 
         /// <summary>
@@ -327,22 +328,6 @@ namespace NexusForever.Game.Map.Instance
                 if (player != null)
                     yield return player;
             }
-        }
-
-        /// <summary>
-        /// Enqueue <see cref="IGridEntity"/> to be added to <see cref="IMapInstance"/>.
-        /// </summary>
-        public void EnqueueAdd(IGridEntity entity, Vector3 position)
-        {
-            EnqueueAdd(entity, new MapPosition
-            {
-                Info = new MapInfo
-                {
-                    Entry   = Entry,
-                    MapLock = MapLock
-                },
-                Position = position
-            });
         }
 
         /// <summary>

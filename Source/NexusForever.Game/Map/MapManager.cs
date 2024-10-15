@@ -1,43 +1,36 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Numerics;
+using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Configuration.Model;
-using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Map;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
-using NexusForever.Shared.Game;
-using NLog;
 
 namespace NexusForever.Game.Map
 {
     public sealed class MapManager : Singleton<MapManager>, IMapManager
     {
-        private class PendingAdd
-        {
-            public IPlayer Player { get; init; }
-            public IMapPosition MapPosition { get; init; }
-        }
+        private readonly ConcurrentQueue<IPlayerAddToMapContext> pending = [];
+        private readonly List<IPlayerAddToMapContext> processing = [];
 
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
-
-        private readonly ConcurrentQueue<PendingAdd> pendingAdds = new();
-        private readonly Dictionary</*worldId*/ uint, IMap> maps = new();
-
-        private readonly ConcurrentDictionary<ulong, uint> instanceCounts = new();
-        // reset instance limit counts every hour
-        private readonly UpdateTimer instanceCountReset = new(TimeSpan.FromMinutes(60));
-
+        private readonly Dictionary</*worldId*/ uint, IMap> maps = [];
 
         #region Dependency Injection
 
+        private readonly ILogger<MapManager> log;
         private readonly IMapFactory mapFactory;
 
         public MapManager(
+            ILogger<MapManager> log,
             IMapFactory mapFactory)
         {
+            this.log        = log;
             this.mapFactory = mapFactory;
         }
 
@@ -48,41 +41,124 @@ namespace NexusForever.Game.Map
         /// </summary>
         public void Update(double lastTick)
         {
-            instanceCountReset.Update(lastTick);
-            if (instanceCountReset.HasElapsed)
-            {
-                instanceCounts.Clear();
-                instanceCountReset.Reset();
-            }
+            HandlePendingPlayerAddToMap();
+            HandleProcessingPlayerAddToMap();
 
-            ProcessPending();
             UpdateMaps(lastTick);
         }
 
-        private void ProcessPending()
+        private void HandlePendingPlayerAddToMap()
         {
-            if (pendingAdds.Count == 0)
+            if (pending.IsEmpty)
                 return;
 
-            var sw = Stopwatch.StartNew();
-
-            while (pendingAdds.TryDequeue(out PendingAdd pending))
+            while (pending.TryDequeue(out IPlayerAddToMapContext context))
             {
-                IMap map = CreateMap(pending.MapPosition.Info.Entry);
+                log.LogTrace($"Processing player {context.Player.CharacterId} add to map {context.DestinationPosition.Info.Entry.Id} reuqest.");
 
-                GenericError? result = map.CanEnter(pending.Player, pending.MapPosition);
-                if (result.HasValue)
+                context.Player.ShowLoadingScreen(context.DestinationPosition);
+
+                context.Status = context.Player.Map != null ? PlayerAddToMapStatus.RemoveFromMap : PlayerAddToMapStatus.AddToMap;
+                processing.Add(context);
+            }
+        }
+
+        private void HandleProcessingPlayerAddToMap()
+        {
+            var toRemove = new List<IPlayerAddToMapContext>();
+            foreach (IPlayerAddToMapContext context in processing)
+            {
+                switch (context.Status)
                 {
-                    pending.Player.OnTeleportToFailed(result.Value);
-                    return;
-                }
+                    case PlayerAddToMapStatus.RemoveFromMap:
+                        RemoveFromMap(context);
+                        break;
+                    case PlayerAddToMapStatus.AddToMap:
+                        AddToMap(context, true);
+                        break;
+                    case PlayerAddToMapStatus.Complete:
+                    {
+                        if (context.Error != null)
+                            context.OnError?.Invoke(context.Error.Value);
 
-                map.EnqueueAdd(pending.Player, pending.MapPosition);
+                        log.LogTrace($"Processed player {context.Player.CharacterId} add to map in {(DateTime.Now - context.Time).TotalMilliseconds} ms.");
+
+                        toRemove.Add(context);
+                        break;
+                    }
+                }
             }
 
-            sw.Stop();
-            if (sw.ElapsedMilliseconds > 10)
-                log.Warn($"{pendingAdds.Count} pending add(s) took {sw.ElapsedMilliseconds}ms to process!");
+            foreach (IPlayerAddToMapContext context in toRemove)
+                processing.Remove(context);
+        }
+
+        private void RemoveFromMap(IPlayerAddToMapContext context)
+        {
+            log.LogTrace($"Removing character {context.Player.CharacterId} from map {context.SourcePosition.Info.Entry.Id}.");
+
+            void OnRemoveCallback()
+            {
+                context.Status = PlayerAddToMapStatus.AddToMap;
+            }
+
+            context.Player.RemoveFromMap(OnRemoveCallback);
+        }
+
+        private void AddToMap(IPlayerAddToMapContext context, bool destination)
+        {
+            IMapPosition position = destination ? context.DestinationPosition : context.SourcePosition;
+
+            log.LogTrace($"Adding character {context.Player.CharacterId} to map {position.Info.Entry.Id}.");
+
+            void OnAddCallback(IBaseMap map, uint guid, Vector3 vector)
+            {
+                context.OnAdd?.Invoke(map, guid, vector);
+                context.Status = PlayerAddToMapStatus.Complete;
+            }
+
+            void OnErrorCallback(GenericError error)
+            {
+                log.LogTrace($"An error {error} occured adding player {context.Player.CharacterId} to map!");
+
+                context.Error = error;
+
+                // attempt to add back to previous map
+                if (context.Status == PlayerAddToMapStatus.PendingAddToDestinationMap && context.SourcePosition != null)
+                    AddToMap(context, false);
+                else
+                    context.Status = PlayerAddToMapStatus.Complete;
+            }
+
+            void OnExceptionCallback(Exception ex)
+            {
+                log.LogTrace(ex, $"An exception occured adding player {context.Player.CharacterId} to map!");
+
+                context.OnException?.Invoke(ex);
+                context.Status = PlayerAddToMapStatus.Complete;
+            }
+
+            IMap map = CreateMap(position.Info.Entry);
+            switch (map)
+            {
+                case IBaseMap baseMap:
+                    baseMap.EnqueueAdd(context.Player, position.Position, OnAddCallback, OnErrorCallback, OnExceptionCallback);
+                    break;
+                case IInstancedMap instancedMap:
+                    instancedMap.EnqueueAdd(context.Player, position, OnAddCallback, OnErrorCallback, OnExceptionCallback);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            if (destination)
+                context.Status = PlayerAddToMapStatus.PendingAddToDestinationMap;
+            else
+            {
+                // show the loading screen again for the source map if we failed to add to destination map
+                context.Player.ShowLoadingScreen(position);
+                context.Status = PlayerAddToMapStatus.PendingAddToSourceMap;
+            }
         }
 
         private void UpdateMaps(double lastTick)
@@ -108,37 +184,31 @@ namespace NexusForever.Game.Map
                     Task.WaitAll(tasks.ToArray());
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // ignored.
+                log.LogError(ex, "An exception occured during map updates!");
             }
 
             sw.Stop();
             if (sw.ElapsedMilliseconds > 10)
-                log.Warn($"{maps.Count} map(s) took {sw.ElapsedMilliseconds}ms to update!");
+                log.LogWarning($"{maps.Count} map(s) took {sw.ElapsedMilliseconds}ms to update!");
         }
 
         /// <summary>
         /// Enqueue <see cref="IPlayer"/> to be added to a map. 
         /// </summary>
-        public void AddToMap(IPlayer player, IMapPosition mapPosition)
+        public void AddToMap(IPlayer player, IMapPosition source, IMapPosition destination, OnAddDelegate callback = null, OnGenericErrorDelegate error = null, OnExceptionDelegate exception = null)
         {
-            pendingAdds.Enqueue(new PendingAdd
+            pending.Enqueue(new PlayerAddToMapContext
             {
-                Player      = player,
-                MapPosition = mapPosition
+                Time                = DateTime.Now,
+                Player              = player,
+                SourcePosition      = source,
+                DestinationPosition = destination,
+                OnAdd               = callback,
+                OnError             = error,
+                OnException         = exception
             });
-        }
-
-        /// <summary>
-        /// Return <see cref="IMap"/> for supplied worldId.
-        /// </summary>
-        public IMap GetMap(uint worldId)
-        {
-            if (maps.TryGetValue(worldId, out IMap map))
-                return map;
-
-            return null;
         }
 
         /// <summary>
@@ -153,33 +223,9 @@ namespace NexusForever.Game.Map
             map.Initialise(entry);
             maps.Add(entry.Id, map);
 
-            log.Trace($"Created new base map for world {entry.Id}.");
+            log.LogTrace($"Created new base map for world {entry.Id}.");
 
             return map;
-        }
-
-        /// <summary>
-        /// Returns if <see cref="IPlayer"/> can create a new instance.
-        /// </summary>
-        public bool CanCreateInstance(IPlayer player)
-        {
-            if (instanceCounts.TryGetValue(player.CharacterId, out uint instanceCount)
-                && instanceCount > (SharedConfiguration.Instance.Get<MapConfig>().MaxInstances ?? 10u))
-                return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Increase instance count for <see cref="IPlayer"/>.
-        /// </summary>
-        public void IncreaseInstanceCount(IPlayer player)
-        {
-            // players with bypass RBAC have no limit to instances in an hour
-            if (player.Account.RbacManager.HasPermission(Permission.BypassInstanceLimits))
-                return;
-
-            instanceCounts.AddOrUpdate(player.CharacterId, 1, (k, v) => v + 1);
         }
     }
 }

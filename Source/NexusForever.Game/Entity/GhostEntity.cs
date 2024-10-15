@@ -25,8 +25,9 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public GhostEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public GhostEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

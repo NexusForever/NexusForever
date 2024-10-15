@@ -2,5 +2,6 @@
 {
     public interface IGridActionRemove : IGridAction
     {
+        OnRemoveDelegate Callback { get; }
     }
 }

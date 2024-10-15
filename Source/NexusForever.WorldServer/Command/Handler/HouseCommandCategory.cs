@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map.Lock;
@@ -9,6 +8,7 @@ using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Text.Search;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Static;
 

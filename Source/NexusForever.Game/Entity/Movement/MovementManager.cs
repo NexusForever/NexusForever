@@ -21,6 +21,7 @@ using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Command;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity.Movement
 {
@@ -418,11 +419,19 @@ namespace NexusForever.Game.Entity.Movement
         }
 
         /// <summary>
-        /// NYI
+        /// Launch a new projectile with the supplied flight time, gravity and position.
         /// </summary>
-        public void SetPositionProjectile()
+        public void SetPositionProjectile(uint flightTime, float gravity, Vector3 position)
         {
-            throw new NotImplementedException();
+            if (!ServerControl)
+                return;
+
+            SetModeDefault();
+            SetStateDefault();
+            SetVelocityDefaults();
+            //SetMove(Vector3.Zero, false);
+
+            positionCommandGroup.SetPositionProjectile(flightTime, gravity, position);
         }
 
         /// <summary>

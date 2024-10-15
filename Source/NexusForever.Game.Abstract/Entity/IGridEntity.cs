@@ -21,6 +21,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool InWorld { get; }
 
         /// <summary>
+        /// Determines if the <see cref="IGridEntity"/> is pending removal from the <see cref="IBaseMap"/>.
+        /// </summary>
+        bool PendingRemoval { get; }
+
+        /// <summary>
         /// Distance between <see cref="IGridEntity"/> and a <see cref="IMapGrid"/> for activation.
         /// </summary>
         float ActivationRange { get; }
@@ -28,19 +33,29 @@ namespace NexusForever.Game.Abstract.Entity
         float? RangeCheck { get; }
 
         /// <summary>
+        /// Initialise <see cref="IGridEntity"/>
+        /// </summary>
+        void Initialise();
+
+        /// <summary>
         /// Invoke <see cref="Action{T}"/> against <see cref="IGridEntity"/> script collection.
         /// </summary>
         void InvokeScriptCollection<T>(Action<T> action);
 
         /// <summary>
+        /// Enqueue <see cref="IGridEntity"/> for addition to the <see cref="IBaseMap"/>.
+        /// </summary>
+        void AddToMap(IBaseMap map, Vector3 position, OnAddDelegate callback = null);
+
+        /// <summary>
         /// Enqueue <see cref="IGridEntity"/> for removal from the <see cref="IBaseMap"/>.
         /// </summary>
-        void RemoveFromMap();
+        void RemoveFromMap(OnRemoveDelegate callback = null);
 
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> for relocation on the <see cref="IBaseMap"/>.
         /// </summary>
-        void Relocate(Vector3 position);
+        void RelocateOnMap(Vector3 position, OnRelocateDelegate callback = null);
 
         /// <summary>
         /// Invoked when <see cref="IGridEntity"/> is enqueued to be added to <see cref="IBaseMap"/>.
@@ -48,19 +63,9 @@ namespace NexusForever.Game.Abstract.Entity
         void OnEnqueueAddToMap();
 
         /// <summary>
-        /// Invoked when <see cref="IGridEntity"/> is added to <see cref="IBaseMap"/>.
-        /// </summary>
-        void OnAddToMap(IBaseMap map, uint guid, Vector3 vector);
-
-        /// <summary>
         /// Invoked when <see cref="IGridEntity"/> is enqueued to be removed from <see cref="IBaseMap"/>.
         /// </summary>
         void OnEnqueueRemoveFromMap();
-
-        /// <summary>
-        /// Invoked when <see cref="IGridEntity"/> is removed from <see cref="IBaseMap"/>.
-        /// </summary>
-        void OnRemoveFromMap();
 
         /// <summary>
         /// Returns if <see cref="IGridEntity"/> can see supplied <see cref="IGridEntity"/>.

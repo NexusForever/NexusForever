@@ -107,13 +107,7 @@ namespace NexusForever.Game.Spell
                 });
             }*/
 
-            var position = new MapPosition
-            {
-                Position = player.Position
-            };
-
-            if (player.Map.CanEnter(mount, position))
-                player.Map.EnqueueAdd(mount, position);
+            mount.AddToMap(player.Map, player.Position);
 
             // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464
             // FIXME: also cast 80530,Mount Sprint  - Tier 2,36122
@@ -253,14 +247,7 @@ namespace NexusForever.Game.Spell
 
             var pet = factory.CreateEntity<IPetEntity>();
             pet.Initialise(player, info.Entry.DataBits00);
-
-            var position = new MapPosition
-            {
-                Position = player.Position
-            };
-
-            if (player.Map.CanEnter(pet, position))
-                player.Map.EnqueueAdd(pet, position);
+            pet.AddToMap(player.Map, player.Position);
         }
 
         [SpellEffectHandler(SpellEffectType.TitleGrant)]

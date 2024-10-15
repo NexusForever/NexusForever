@@ -6,6 +6,7 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
+using NexusForever.Shared;
 using NLog;
 
 namespace NexusForever.Game.Spell

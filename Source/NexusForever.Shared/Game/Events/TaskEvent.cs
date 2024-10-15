@@ -30,7 +30,7 @@ namespace NexusForever.Shared.Game.Events
         /// </summary>
         public void Execute()
         {
-            callback.Invoke();
+            callback?.Invoke();
         }
     }
 }

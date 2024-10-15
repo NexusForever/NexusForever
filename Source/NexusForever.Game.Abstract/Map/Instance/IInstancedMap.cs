@@ -1,10 +1,16 @@
-﻿namespace NexusForever.Game.Abstract.Map.Instance
+﻿using NexusForever.Game.Abstract.Entity;
+
+namespace NexusForever.Game.Abstract.Map.Instance
 {
-    public interface IInstancedMap<T> where T : IMapInstance
+    public interface IInstancedMap : IMap
     {
         /// <summary>
-        /// Get an existing instance with supplied id.
+        /// Enqueue <see cref="IPlayer"/> to be added to <see cref="IInstancedMap{T}"/>.
         /// </summary>
-        T GetInstance(Guid instanceId);
+        /// <remarks>
+        /// Characters should not be added directly through this method.
+        /// Use <see cref="IPlayer.TeleportTo(IMapPosition,TeleportReason)"/> instead.
+        /// </remarks>
+        void EnqueueAdd(IPlayer player, IMapPosition position, OnAddDelegate callback = null, OnGenericErrorDelegate error = null, OnExceptionDelegate exception = null);
     }
 }

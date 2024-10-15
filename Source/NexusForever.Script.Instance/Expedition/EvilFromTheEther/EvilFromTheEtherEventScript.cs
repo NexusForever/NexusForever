@@ -6,6 +6,7 @@ using NexusForever.Game.Abstract.Entity.Trigger;
 using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Event;
+using NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 
@@ -17,11 +18,22 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         private IPublicEvent publicEvent;
         private IMapInstance mapInstance;
 
+        private uint gatherRingGuid;
+        private uint gatherRingTriggerGuid;
+
         private uint medbayDoorControlGuid;
 
         private uint medbayDoorGuid;
         private uint securityChiefKondovichDoorGuid;
         private uint primaryPowerPlantDoorGuid;
+        private uint upperDeckDoor1Guid;
+        private uint upperDeckDoor2Guid;
+        private uint upperDeckDoor3Guid;
+
+        private uint gatherMarker1Guid;
+        private uint gatherMarker2Guid;
+
+        private uint floatingKatjaGuid;
 
         #region Dependency Injection
 
@@ -41,7 +53,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         public void OnLoad(IPublicEvent owner)
         {
             publicEvent = owner;
-            publicEvent.SetPhase(PublicEventPhase.Initial);
+            publicEvent.SetPhase(PublicEventPhase.TalkToCaptainWeir);
 
             mapInstance = publicEvent.Map as IMapInstance;
         }
@@ -51,11 +63,42 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         /// </summary>
         public void OnAddToMap(IGridEntity entity)
         {
-            if (entity is not IWorldEntity worldEntity)
-                return;
+            switch (entity)
+            {
+                case IWorldEntity worldEntity:
+                    OnAddToMapWorldEntity(worldEntity);
+                    break;
+                case IWorldLocationVolumeGridTriggerEntity worldLocationEntity:
+                    OnAddToMapWorldLocationEntity(worldLocationEntity);
+                    break;
+            }
+        }
 
+        private void OnAddToMapWorldEntity(IWorldEntity worldEntity)
+        {
             switch ((PublicEventCreature)worldEntity.CreatureId)
             {
+                case PublicEventCreature.GatherRing:
+                    gatherRingGuid = worldEntity.Guid;
+                    break;
+                case PublicEventCreature.FloatingKatja:
+                    floatingKatjaGuid = worldEntity.Guid;
+                    break;
+                case PublicEventCreature.UpperDeckDoor1:
+                    upperDeckDoor1Guid = worldEntity.Guid;
+                    break;
+                case PublicEventCreature.UpperDeckDoor2:
+                    upperDeckDoor2Guid = worldEntity.Guid;
+                    break;
+                case PublicEventCreature.UpperDeckDoor3:
+                    upperDeckDoor3Guid = worldEntity.Guid;
+                    break;
+                case PublicEventCreature.GatherMarker1:
+                    gatherMarker1Guid = worldEntity.Guid;
+                    break;
+                case PublicEventCreature.GatherMarker2:
+                    gatherMarker2Guid = worldEntity.Guid;
+                    break;
                 case PublicEventCreature.MedbayDoorControl:
                     medbayDoorControlGuid = worldEntity.Guid;
                     break;
@@ -78,6 +121,64 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                     break;
                 case 7059789:
                     medbayDoorGuid = entity.Guid;
+                    break;
+            }
+        }
+
+        private void OnAddToMapWorldLocationEntity(IWorldLocationVolumeGridTriggerEntity worldLocationEntity)
+        {
+            switch (worldLocationEntity.Entry.Id)
+            {
+                case 50278:
+                    gatherRingTriggerGuid = worldLocationEntity.Guid;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Invoked when a <see cref="IGridEntity"/> is removed from the map the public event is on.
+        /// </summary>
+        public void OnRemoveFromMap(IGridEntity entity)
+        {
+            switch (entity)
+            {
+                case IWorldEntity worldEntity:
+                    OnRemoveFromMapWorldEntity(worldEntity);
+                    break;
+                case IWorldLocationVolumeGridTriggerEntity worldLocationEntity:
+                    OnRemoveFromMapWorldLocationEntity(worldLocationEntity);
+                    break;
+            }
+        }
+
+        private void OnRemoveFromMapWorldEntity(IWorldEntity worldEntity)
+        {
+            switch ((PublicEventCreature)worldEntity.CreatureId)
+            {
+                case PublicEventCreature.GatherRing:
+                    gatherRingGuid = 0;
+                    break;
+                case PublicEventCreature.FloatingKatja:
+                {
+                    floatingKatjaGuid = 0;
+                    publicEvent.SetPhase(PublicEventPhase.DefeatKatjaZarkhovFight);
+                    break;
+                }
+                case PublicEventCreature.GatherMarker1:
+                    gatherMarker1Guid = 0;
+                    break;
+                case PublicEventCreature.GatherMarker2:
+                    gatherMarker2Guid = 0;
+                    break;
+            }
+        }
+
+        private void OnRemoveFromMapWorldLocationEntity(IWorldLocationVolumeGridTriggerEntity worldLocationEntity)
+        {
+            switch (worldLocationEntity.Entry.Id)
+            {
+                case 50278:
+                    gatherRingTriggerGuid = 0;
                     break;
             }
         }
@@ -122,6 +223,45 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                 case PublicEventPhase.DefeatEthericOrganisms:
                     OnPhaseDefeatEthericOrganisms();
                     break;
+                case PublicEventPhase.RestoreTeleporter:
+                    OnPhaseRestoreTeleporter();
+                    break;
+                case PublicEventPhase.FindTeleporter:
+                    OnPhaseFindTeleporter();
+                    break;
+                case PublicEventPhase.DefeatEthericOrganisms2:
+                    OnPhaseDefeatEthericOrganisms2();
+                    break;
+                case PublicEventPhase.TeleportToUpperDeck:
+                    OnPhaseTeleportToUpperDeck();
+                    break;
+                case PublicEventPhase.GatherInBridgeAccessHall:
+                    OnPhaseGatherInBridgeAccessHall();
+                    break;
+                case PublicEventPhase.DefeatTetheredOrganisms:
+                    OnPhaseDefeatTetheredOrganisms();
+                    break;
+                case PublicEventPhase.GatherOnTheShadesBridge:
+                    OnPhaseGatherOnTheShadesBridge();
+                    break;
+                case PublicEventPhase.DefeatTetheredOrganisms2:
+                    OnPhaseDefeatTetheredOrganisms2();
+                    break;
+                case PublicEventPhase.ActivateSelfDestruct:
+                    OnPhaseActivateSelfDestruct();
+                    break;
+                case PublicEventPhase.DefeatKatjaZarkhov:
+                    OnPhaseDefeatKatjaZarkhov();
+                    break;
+                case PublicEventPhase.PickUpDriveSchematics:
+                    OnPhasePickUpDriveSchematics();
+                    break;
+                case PublicEventPhase.EscapeToTheTeleporter:
+                    OnPhaseEscapeToTheTeleporter();
+                    break;
+                case PublicEventPhase.TalkToCaptainWeir2:
+                    OnPhaseTalkToCaptainWeir2();
+                    break;
             }
         }
 
@@ -129,9 +269,9 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         {
             publicEvent.ActivateObjective(PublicEventObjective.GoToAirlock, mapInstance.PlayerCount);
 
-            var triggerEntity = publicEvent.CreateEntity<IWorldLocationTriggerEntity>();
-            triggerEntity.Initialise(50278);
-            mapInstance.EnqueueAdd(triggerEntity, new Vector3(-396.43555f, -840.7188f, 119.74138f));
+            var triggerEntity = publicEvent.CreateEntity<IWorldLocationVolumeGridTriggerEntity>();
+            triggerEntity.Initialise(50278, 8242);
+            triggerEntity.AddToMap(mapInstance, new Vector3(-396.43555f, -840.7188f, 119.74138f));
         }
 
         private void OnPhaseOpenMedbay()
@@ -141,6 +281,12 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
             foreach (IPlayer player in mapInstance.GetPlayers())
                 player.TeleportToLocal(new Vector3(53.180374f, -852.86273f, -91.41684f));
+
+            var triggerEntity = mapInstance.GetEntity<IWorldLocationVolumeGridTriggerEntity>(gatherRingTriggerGuid);
+            triggerEntity?.RemoveFromMap();
+
+            var gatherRing = mapInstance.GetEntity<IWorldEntity>(gatherRingGuid);
+            gatherRing?.RemoveFromMap();
         }
 
         private void OnPhaseScavengeSpareParts()
@@ -207,6 +353,111 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                 player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<IEvilFromTheEtherOnEthericOrganisms>());
         }
 
+        private void OnPhaseRestoreTeleporter()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.RestoreTeleporter);
+        }
+
+        private void OnPhaseFindTeleporter()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.FindTeleporter);
+
+            var triggerEntity = publicEvent.CreateEntity<ITurnstileGridTriggerEntity>();
+            triggerEntity.Initialise(8307, 15f, 8307);
+            triggerEntity.AddToMap(mapInstance, new Vector3(-15.32f, -840.73f, 150.96f));
+        }
+
+        private void OnPhaseDefeatEthericOrganisms2()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.DefeatEthericOrganisms2);
+        }
+
+        private void OnPhaseTeleportToUpperDeck()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.TeleportToUpperDeck, mapInstance.PlayerCount);
+
+            var triggerEntity = publicEvent.CreateEntity<IGridTriggerEntity>();
+            triggerEntity.Initialise(8242, 3f);
+            triggerEntity.AddToMap(mapInstance, new Vector3(37.27052f, -840.065f, 173.36299f));
+        }
+
+        private void OnPhaseGatherInBridgeAccessHall()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.GatherInBridgeAccessHall, mapInstance.PlayerCount);
+
+            IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(upperDeckDoor1Guid);
+            door?.OpenDoor();
+
+            var triggerEntity = publicEvent.CreateEntity<IWorldLocationVolumeGridTriggerEntity>();
+            triggerEntity.Initialise(50348, 8260);
+            triggerEntity.AddToMap(mapInstance, new Vector3(-53.3373f, -845.091f, 215.584f));
+        }
+
+        private void OnPhaseDefeatTetheredOrganisms()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.DefeatTetheredOrganisms);
+
+            IWorldEntity marker = mapInstance.GetEntity<IWorldEntity>(gatherMarker1Guid);
+            marker?.RemoveFromMap();
+        }
+
+        private void OnPhaseGatherOnTheShadesBridge()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.GatherOnTheShadesBridge, mapInstance.PlayerCount);
+
+            IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(upperDeckDoor2Guid);
+            door?.OpenDoor();
+            IDoorEntity door2 = mapInstance.GetEntity<IDoorEntity>(upperDeckDoor3Guid);
+            door2?.OpenDoor();
+
+            var triggerEntity = publicEvent.CreateEntity<IWorldLocationVolumeGridTriggerEntity>();
+            triggerEntity.Initialise(50349, 8261);
+            triggerEntity.AddToMap(mapInstance, new Vector3(-53.3725f, -842.341f, 282.618f));
+        }
+
+        private void OnPhaseDefeatTetheredOrganisms2()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.DefeatTetheredOrganisms2, 3);
+
+            IWorldEntity marker = mapInstance.GetEntity<IWorldEntity>(gatherMarker2Guid);
+            marker?.RemoveFromMap();
+
+            var floatingKatja = mapInstance.GetEntity<INonPlayerEntity>(floatingKatjaGuid);
+            floatingKatja?.InvokeScriptCollection<KatjaZarkhovFloatingEntityScript>(s => s.StartMoveToPortal());
+        }
+
+        private void OnPhaseActivateSelfDestruct()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.ActivateSelfDestruct);
+        }
+
+        private void OnPhaseDefeatKatjaZarkhov()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.DefeatKatjaZarkhov);
+
+            var floatingKatja = mapInstance.GetEntity<INonPlayerEntity>(floatingKatjaGuid);
+            floatingKatja?.InvokeScriptCollection<KatjaZarkhovFloatingEntityScript>(s => s.KnockbackToFloor());
+        }
+
+        private void OnPhasePickUpDriveSchematics()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.PickUpDriveSchematics);
+        }
+
+        private void OnPhaseEscapeToTheTeleporter()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.EscapeToTheTeleporter);
+
+            var triggerEntity = publicEvent.CreateEntity<IGridTriggerEntity>();
+            triggerEntity.Initialise(8243, 3f);
+            triggerEntity.AddToMap(mapInstance, new Vector3(-53.353714f, -845.00726f, 164.51099f));
+        }
+
+        private void OnPhaseTalkToCaptainWeir2()
+        {
+            publicEvent.ActivateObjective(PublicEventObjective.TalkToCaptainWeir2);
+        }
+
         /// <summary>
         /// Invoked when the <see cref="IPublicEventObjective"/> status changes.
         /// </summary>
@@ -254,6 +505,48 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                     break;
                 case PublicEventObjective.EnterCrewQuarters:
                     publicEvent.SetPhase(PublicEventPhase.DefeatEthericOrganisms);
+                    break;
+                case PublicEventObjective.DefeatEthericOrganisms:
+                    publicEvent.SetPhase(PublicEventPhase.RestoreTeleporter);
+                    break;
+                case PublicEventObjective.RestoreTeleporter:
+                    publicEvent.SetPhase(PublicEventPhase.FindTeleporter);
+                    break;
+                case PublicEventObjective.FindTeleporter:
+                    publicEvent.SetPhase(PublicEventPhase.DefeatEthericOrganisms2);
+                    break;
+                case PublicEventObjective.DefeatEthericOrganisms2:
+                    publicEvent.SetPhase(PublicEventPhase.TeleportToUpperDeck);
+                    break;
+                case PublicEventObjective.TeleportToUpperDeck:
+                    publicEvent.SetPhase(PublicEventPhase.GatherInBridgeAccessHall);
+                    break;
+                case PublicEventObjective.GatherInBridgeAccessHall:
+                    publicEvent.SetPhase(PublicEventPhase.DefeatTetheredOrganisms);
+                    break;
+                case PublicEventObjective.DefeatTetheredOrganisms:
+                    publicEvent.SetPhase(PublicEventPhase.GatherOnTheShadesBridge);
+                    break;
+                case PublicEventObjective.GatherOnTheShadesBridge:
+                    publicEvent.SetPhase(PublicEventPhase.DefeatTetheredOrganisms2);
+                    break;
+                case PublicEventObjective.DefeatTetheredOrganisms2:
+                    publicEvent.SetPhase(PublicEventPhase.ActivateSelfDestruct);
+                    break;
+                case PublicEventObjective.ActivateSelfDestruct:
+                    publicEvent.SetPhase(PublicEventPhase.DefeatKatjaZarkhov);
+                    break;
+                case PublicEventObjective.DefeatKatjaZarkhov:
+                    publicEvent.SetPhase(PublicEventPhase.PickUpDriveSchematics);
+                    break;
+                case PublicEventObjective.PickUpDriveSchematics:
+                    publicEvent.SetPhase(PublicEventPhase.EscapeToTheTeleporter);
+                    break;
+                case PublicEventObjective.EscapeToTheTeleporter:
+                    publicEvent.SetPhase(PublicEventPhase.TalkToCaptainWeir2);
+                    break;
+                case PublicEventObjective.TalkToCaptainWeir2:
+                    publicEvent.Finish(PublicEventTeam.PublicTeam);
                     break;
             }
         }

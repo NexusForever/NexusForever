@@ -46,8 +46,8 @@ namespace NexusForever.Game.Abstract.Entity.Movement.Command.Position
         void SetPositionMultiSpline();
 
         /// <summary>
-        /// NYI
+        /// Set the position based on the supplied flight time, gravity and position.
         /// </summary>
-        void SetPositionProjectile();
+        void SetPositionProjectile(uint flightTime, float gravity, Vector3 position);
     }
 }

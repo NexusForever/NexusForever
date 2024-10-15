@@ -3,7 +3,7 @@ using NexusForever.Game.Static.Event;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
+namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
 {
     [ScriptFilterCreatureId(71287)]
     public class SecurityChiefKondovichEntityScript : INonPlayerScript, IOwnedScript<INonPlayerEntity>

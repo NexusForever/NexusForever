@@ -26,7 +26,8 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
             is EntityCommand.SetPositionKeys
             or EntityCommand.SetPositionPath
             or EntityCommand.SetPositionSpline
-            or EntityCommand.SetPositionMultiSpline;
+            or EntityCommand.SetPositionMultiSpline
+            or EntityCommand.SetPositionProjectile;
 
         /// <summary>
         /// Current position entity command.
@@ -79,8 +80,10 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
 
             if (Command.IsFinalised)
             {
-                movementManager.Owner.InvokeScriptCollection<IWorldEntityScript>(s => s.OnPositionEntityCommandFinalise(Command));
+                var command = Command;
                 Finalise();
+
+                movementManager.Owner.InvokeScriptCollection<IWorldEntityScript>(s => s.OnPositionEntityCommandFinalise(command));
             }
         }
 
@@ -100,7 +103,7 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
                 return;
 
             lastPosition = position;
-            movementManager.Owner.Relocate(position);
+            movementManager.Owner.RelocateOnMap(position);
         }
 
         /// <summary>
@@ -217,11 +220,17 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
         }
 
         /// <summary>
-        /// NYI
+        /// Set the position based on the supplied flight time, gravity and position.
         /// </summary>
-        public void SetPositionProjectile()
+        public void SetPositionProjectile(uint flightTime, float gravity, Vector3 position)
         {
-            throw new NotImplementedException();
+            Finalise();
+
+            var command = factory.Resolve<PositionProjectileCommand>();
+            command.Initialise(flightTime, gravity, position, GetPosition());
+            Command = command;
+
+            IsDirty = true;
         }
     }
 }

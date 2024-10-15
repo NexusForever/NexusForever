@@ -9,8 +9,9 @@ namespace NexusForever.Game.Entity
     {
         public override EntityType Type => EntityType.Trigger;
 
-        public TriggerEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public TriggerEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

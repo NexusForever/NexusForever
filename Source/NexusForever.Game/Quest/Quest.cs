@@ -121,7 +121,8 @@ namespace NexusForever.Game.Quest
             foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
 
-            scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IQuest>(this);
+            ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(scriptCollection, info.Entry.Id);
         }
 
         /// <summary>
@@ -141,7 +142,8 @@ namespace NexusForever.Game.Quest
 
             saveMask = QuestSaveMask.Create;
 
-            scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IQuest>(this);
+            ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(scriptCollection, info.Entry.Id);
         }
 
         public void Dispose()

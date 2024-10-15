@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity.Movement.Generator;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity.Movement.Generator
 {

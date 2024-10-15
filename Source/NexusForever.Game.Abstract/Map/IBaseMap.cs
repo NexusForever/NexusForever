@@ -20,14 +20,28 @@ namespace NexusForever.Game.Abstract.Map
         IPublicEventManager PublicEventManager { get; }
 
         /// <summary>
+        /// Enqueue <see cref="IGridEntity"/> to be added to <see cref="IBaseMap"/>.
+        /// </summary>
+        void EnqueueAdd(IGridEntity entity, Vector3 position, OnAddDelegate callback = null, OnExceptionDelegate exception = null);
+
+        /// <summary>
+        /// Enqueue <see cref="IPlayer"/> to be added to <see cref="IBaseMap"/>.
+        /// </summary>
+        /// <remarks>
+        /// Characters should not be added directly through this method.
+        /// Use <see cref="IPlayer.TeleportTo(IMapPosition, TeleportReason)"/> instead.
+        /// </remarks>
+        void EnqueueAdd(IPlayer player, Vector3 position, OnAddDelegate callback = null, OnGenericErrorDelegate error = null, OnExceptionDelegate exception = null);
+
+        /// <summary>
         /// Enqueue <see cref="IGridEntity"/> to be removed from <see cref="IBaseMap"/>.
         /// </summary>
-        void EnqueueRemove(IGridEntity entity);
+        void EnqueueRemove(IGridEntity entity, OnRemoveDelegate callback = null);
 
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> to be relocated in <see cref="IBaseMap"/> to <see cref="Vector3"/>.
         /// </summary>
-        Task<Vector3> EnqueueRelocateAsync(IGridEntity entity, Vector3 position);
+        void EnqueueRelocate(IGridEntity entity, Vector3 position, OnRelocateDelegate callback = null);
 
         /// <summary>
         /// Return all <see cref="IGridEntity"/>'s from <see cref="Vector3"/> in range that satisfy <see cref="ISearchCheck{T}"/>.

@@ -1,10 +1,8 @@
 using System.Numerics;
-using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
@@ -16,13 +14,14 @@ namespace NexusForever.Game.Entity
     {
         public override EntityType Type => EntityType.Simple;
 
-        public byte QuestChecklistIdx { get; private set; }
         public Action<ISimpleEntity> afterAddToMap;
 
         #region Dependency Injection
 
-        public SimpleEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public SimpleEntity(
+            IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 
@@ -48,12 +47,6 @@ namespace NexusForever.Game.Entity
                 FirstOrDefault(d => d.Creature2DisplayGroupId == entry.Creature2DisplayGroupId);
             if (displayGroupEntry != null)
                 DisplayInfo = displayGroupEntry.Creature2DisplayInfoId;
-        }
-
-        public override void Initialise(EntityModel model)
-        {
-            base.Initialise(model);
-            QuestChecklistIdx = model.QuestChecklistIdx;
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -101,10 +94,6 @@ namespace NexusForever.Game.Entity
                     activator.DatacubeManager.SendDatacubeVolume(datacube);
                 }
             }
-
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, CreatureId, 1u);
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, CreatureId, 1u);
-            activator.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateTargetGroupChecklist, CreatureId, QuestChecklistIdx);
         }
 
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)

@@ -38,14 +38,19 @@ namespace NexusForever.Script
         void Reload(string assemblyName, ReloadType reloadType);
 
         /// <summary>
+        /// Create a new <see cref="IScriptCollection"/> for supplied owner.
+        /// </summary>
+        IScriptCollection InitialiseOwnedCollection<T>(T owner);
+
+        /// <summary>
         /// Initialise a new <see cref="IOwnedScriptCollection{T}"/> for supplied <typeparamref name="T"/> owner and id.
         /// </summary>
-        IScriptCollection InitialiseOwnedScripts<T>(T owner, uint id);
+        void InitialiseOwnedScripts<T>(IScriptCollection collection, uint id);
 
         /// <summary>
         /// Initialise a new <see cref="IOwnedScriptCollection{T}"/> for supplied <typeparamref name="T"/> <see cref="IWorldEntity"/>.
         /// </summary>
-        IScriptCollection InitialiseEntityScripts<T>(T entity) where T : IWorldEntity;
+        void InitialiseEntityScripts<T>(IScriptCollection collection, T entity) where T : IWorldEntity;
 
         string Information();
     }

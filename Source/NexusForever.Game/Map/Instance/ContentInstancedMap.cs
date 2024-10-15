@@ -1,6 +1,8 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Map.Lock;
+using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Static.Map.Lock;
 using NexusForever.Shared;
@@ -9,20 +11,25 @@ namespace NexusForever.Game.Map.Instance
 {
     public class ContentInstancedMap<T> : InstancedMap<T> where T : class, IContentMapInstance
     {
-        #region Dependency Injection
+        #region Dependency Injection;
 
         private readonly IMapLockManager mapLockManager;
         private readonly IMatchManager matchManager;
         private readonly IFactory<T> instanceFactory;
+        private readonly IMatchingDataManager matchingDataManager;
 
         public ContentInstancedMap(
+            ILogger<ContentInstancedMap<T>> log,
             IMapLockManager mapLockManager,
             IMatchManager matchManager,
-            IFactory<T> instanceFactory)
+            IFactory<T> instanceFactory,
+            IMatchingDataManager matchingDataManager)
+            : base(log)
         {
-            this.mapLockManager = mapLockManager;
-            this.matchManager = matchManager;
-            this.instanceFactory = instanceFactory;
+            this.mapLockManager      = mapLockManager;
+            this.matchManager        = matchManager;
+            this.instanceFactory     = instanceFactory;
+            this.matchingDataManager = matchingDataManager;
         }
 
         #endregion

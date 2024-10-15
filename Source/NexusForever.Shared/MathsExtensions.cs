@@ -1,6 +1,7 @@
+using System;
 using System.Numerics;
 
-namespace NexusForever.Game
+namespace NexusForever.Shared
 {
     public static class MathsExtensions
     {
@@ -43,7 +44,7 @@ namespace NexusForever.Game
         public static float NormaliseRotationRadians(this float radians)
         {
             // normalize between 0 and 2*PI
-            float r = radians % (2 * MathF.PI); 
+            float r = radians % (2 * MathF.PI);
 
             // normalize between PI and -PI
             if (r > MathF.PI)
@@ -59,7 +60,7 @@ namespace NexusForever.Game
         /// </summary>
         public static Vector3 ToEulerDegrees(this Quaternion q)
         {
-            Vector3 vector = ToEuler(q);
+            Vector3 vector = q.ToEuler();
             vector.X = vector.X.ToDegrees();
             vector.Y = vector.Y.ToDegrees();
             vector.Z = vector.Z.ToDegrees();

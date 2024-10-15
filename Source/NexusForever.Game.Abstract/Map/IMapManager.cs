@@ -8,21 +8,6 @@ namespace NexusForever.Game.Abstract.Map
         /// <summary>
         /// Enqueue <see cref="IPlayer"/> to be added to a map. 
         /// </summary>
-        void AddToMap(IPlayer player, IMapPosition mapPosition);
-
-        /// <summary>
-        /// Return <see cref="IMap"/> for supplied worldId.
-        /// </summary>
-        IMap GetMap(uint worldId);
-
-        /// <summary>
-        /// Returns if <see cref="IPlayer"/> can create a new instance.
-        /// </summary>
-        bool CanCreateInstance(IPlayer player);
-
-        /// <summary>
-        /// Increase instance count for <see cref="IPlayer"/>.
-        /// </summary>
-        void IncreaseInstanceCount(IPlayer player);
+        void AddToMap(IPlayer player, IMapPosition source, IMapPosition destination, OnAddDelegate callback = null, OnGenericErrorDelegate error = null, OnExceptionDelegate exception = null);
     }
 }

@@ -9,8 +9,9 @@ namespace NexusForever.Game.Entity
     {
         public override EntityType Type => EntityType.Pickup;
 
-        public PickupEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public PickupEntity(IMovementManager movementManager,
+            IEntitySummonFactory entitySummonFactory)
+            : base(movementManager, entitySummonFactory)
         {
         }
 

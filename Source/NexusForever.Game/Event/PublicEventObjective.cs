@@ -139,7 +139,7 @@ namespace NexusForever.Game.Event
 
         private bool IsComplete()
         {
-            if (Entry.PublicEventObjectiveFlags.HasFlag(PublicEventObjectiveFlag.Unknown80))
+            if (Entry.PublicEventObjectiveFlags.HasFlag(PublicEventObjectiveFlag.DynamicObjective))
                 return Count >= DynamicMax;
 
             return Count >= Entry.Count;

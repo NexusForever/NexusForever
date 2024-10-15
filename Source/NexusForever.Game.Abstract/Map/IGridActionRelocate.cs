@@ -5,5 +5,6 @@ namespace NexusForever.Game.Abstract.Map
     public interface IGridActionRelocate : IGridAction
     {
         Vector3 Vector { get; init; }
+        OnRelocateDelegate Callback { get; init; }
     }
 }

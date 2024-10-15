@@ -14,8 +14,6 @@ namespace NexusForever.Game.Map.Instance
     {
         #region Dependency Injection
 
-        private readonly ILogger<ResidenceInstancedMap> log;
-
         private readonly IMapLockManager mapLockManager;
         private readonly IFactory<IResidenceMapInstance> instanceFactory;
         private readonly IGlobalResidenceManager globalResidenceManager;
@@ -25,11 +23,10 @@ namespace NexusForever.Game.Map.Instance
             IMapLockManager mapLockManager,
             IFactory<IResidenceMapInstance> instanceFactory,
             IGlobalResidenceManager globalResidenceManager)
+            : base(log)
         {
-            this.log = log;
-
-            this.mapLockManager = mapLockManager;
-            this.instanceFactory = instanceFactory;
+            this.mapLockManager         = mapLockManager;
+            this.instanceFactory        = instanceFactory;
             this.globalResidenceManager = globalResidenceManager;
         }
 
@@ -38,7 +35,7 @@ namespace NexusForever.Game.Map.Instance
         /// <summary>
         /// Returns if <see cref="IPlayer"/> can be added to <see cref="ResidenceInstancedMap"/>.
         /// </summary>
-        public override GenericError? CanEnter(IPlayer entity, IMapPosition position)
+        protected override GenericError? CanEnter(IPlayer entity, IMapPosition position)
         {
             if (position.Info.MapLock is IResidenceMapLock residenceMapLock
                 && globalResidenceManager.GetResidence(residenceMapLock.ResidenceId) == null)
