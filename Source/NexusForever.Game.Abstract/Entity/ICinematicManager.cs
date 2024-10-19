@@ -11,11 +11,6 @@ namespace NexusForever.Game.Abstract.Entity
         void QueueCinematic(ICinematicBase cinematic);
 
         /// <summary>
-        /// Play the next queued <see cref="ICinematicBase"/>.
-        /// </summary>
-        void PlayQueuedCinematic();
-
-        /// <summary>
         /// Handle the <see cref="CinematicState"/> the Client sent back. Only to be called from Client Handlers.
         /// </summary>
         void HandleClientCinematicState(CinematicState cinematicState);

@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Script.Template
 {
-    public interface IOwnedScript<T> : IScript
+    public interface IOwnedScript<in T> : IScript
     {
         /// <summary>
         /// Invoked when <see cref="IOwnedScript{T}"/> is loaded with <typeparamref name="T"/> owner.

@@ -12,6 +12,7 @@ namespace NexusForever.Database.World
         public DbSet<DisableModel> Disable { get; set; }
         public DbSet<EntityModel> Entity { get; set; }
         public DbSet<EntityEventModel> EventEntity { get; set; }
+        public DbSet<EntityScriptModel> EntityScript { get; set; }
         public DbSet<EntitySplineModel> EntitySpline { get; set; }
         public DbSet<EntityStatModel> EntityStat { get; set; }
         public DbSet<EntityVendorModel> EntityVendor { get; set; }
@@ -189,6 +190,29 @@ namespace NexusForever.Database.World
                     .HasColumnName("z")
                     .HasColumnType("float")
                     .HasDefaultValue(0);
+            });
+
+            modelBuilder.Entity<EntityScriptModel>(entity =>
+            {
+                entity.ToTable("entity_script");
+
+                entity.HasKey(e => new { e.Id, e.ScriptName })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ScriptName)
+                    .HasColumnName("scriptName")
+                    .HasColumnType("varchar(150)")
+                    .HasDefaultValue("");
+
+                entity.HasOne(d => d.Entity)
+                    .WithMany(p => p.EntityScript)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__entity_script_id__entity_id");
             });
 
             modelBuilder.Entity<EntitySplineModel>(entity =>

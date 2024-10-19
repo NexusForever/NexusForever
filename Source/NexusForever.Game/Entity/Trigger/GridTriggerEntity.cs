@@ -41,7 +41,7 @@ namespace NexusForever.Game.Entity.Trigger
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="IGridEntity"/>.
         /// </summary>
-        protected override void InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection(List<string> names)
         {
             scriptCollection = scriptManager.InitialiseOwnedCollection<IGridTriggerEntity>(this);
             scriptManager.InitialiseOwnedScripts<IGridTriggerEntity>(scriptCollection, id);

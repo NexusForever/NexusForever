@@ -28,7 +28,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
             if (entity is not IPlayer player)
                 return;
 
-            player.TeleportToLocal(new Vector3(-53.353714f, -841.44684f, 164.51099f));
+            player.TeleportToLocal(new Vector3(-53.353714f, -841.44684f, 164.51099f), false);
             trigger.Map.PublicEventManager.UpdateObjective(PublicEventObjectiveType.Script, 8242, 1);
         }
     }

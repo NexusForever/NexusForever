@@ -3,7 +3,7 @@ using NexusForever.Script.Template;
 
 namespace NexusForever.Script.Instance.Expedition
 {
-    public abstract class AutomaticDoorEntityScript : IWorldEntityScript, IOwnedScript<IDoorEntity>
+    public abstract class AutomaticDoorEntityScript : IDoorEntityScript, IOwnedScript<IDoorEntity>
     {
         protected IDoorEntity door;
 
@@ -28,6 +28,22 @@ namespace NexusForever.Script.Instance.Expedition
                 return;
 
             door.OpenDoor();
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IDoorEntity"/> is opened.
+        /// </summary>
+        public virtual void OnOpenDoor()
+        {
+            // deliberately empty
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IDoorEntity"/> is closed.
+        /// </summary>
+        public virtual void OnDoorClose()
+        {
+            // deliberately empty
         }
     }
 }

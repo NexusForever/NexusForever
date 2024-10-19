@@ -143,7 +143,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        void TeleportToLocal(Vector3 position);
+        void TeleportToLocal(Vector3 position, bool showLoadingScreen = true);
 
         /// <summary>
         /// Invoked when <see cref="IPlayer"/> has finished loading and is ready to enter world.

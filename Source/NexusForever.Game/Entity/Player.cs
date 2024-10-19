@@ -283,7 +283,7 @@ namespace NexusForever.Game.Entity
             SetBaseCharacterProperties();
 
             scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IPlayer>(this);
-            ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(scriptCollection, this);
+            ScriptManager.Instance.InitialiseEntityScripts<IPlayer>(scriptCollection, this, null);
 
             // managers
             EntitlementManager      = new CharacterEntitlementManager(this, model);
@@ -965,7 +965,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        public void TeleportToLocal(Vector3 position)
+        public void TeleportToLocal(Vector3 position, bool showLoadingScreen = true)
         {
             if (!CanTeleport())
             {
@@ -975,7 +975,8 @@ namespace NexusForever.Game.Entity
 
             pendingLocalTeleport = true;
 
-            Session.EnqueueMessageEncrypted(new ServerTeleportLocal());
+            if (showLoadingScreen)
+                Session.EnqueueMessageEncrypted(new ServerTeleportLocal());
 
             RelocateOnMap(position, OnTeleportToLocal);
 

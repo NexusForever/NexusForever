@@ -186,6 +186,22 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
+        /// Return <see cref="ICommunicatorMessage"/> for supplied id.
+        /// </summary>
+        public ICommunicatorMessage GetCommunicatorMessage(uint id)
+        {
+            return communicatorStore.TryGetValue(id, out ICommunicatorMessage communicator) ? communicator : null;
+        }
+
+        /// <summary>
+        /// Return <see cref="ICommunicatorMessage"/> for supplied id.
+        /// </summary>
+        public ICommunicatorMessage GetCommunicatorMessage<T>(T id) where T : Enum
+        {
+            return GetCommunicatorMessage(id.As<T, uint>());
+        }
+
+        /// <summary>
         /// Return a collection of <see cref="ICommunicatorMessage"/>'s that start the supplied quest.
         /// </summary>
         public IEnumerable<ICommunicatorMessage> GetQuestCommunicatorMessages(ushort questId)

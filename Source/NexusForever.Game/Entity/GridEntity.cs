@@ -51,13 +51,13 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void Initialise()
         {
-            InitialiseScriptCollection();
+            InitialiseScriptCollection(null);
         }
 
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="IGridEntity"/>.
         /// </summary>
-        protected abstract void InitialiseScriptCollection();
+        protected abstract void InitialiseScriptCollection(List<string> names);
 
         public virtual void Dispose()
         {

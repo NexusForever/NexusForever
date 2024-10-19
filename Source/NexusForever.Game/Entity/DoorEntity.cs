@@ -5,9 +5,9 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Script.Template.Collection;
 using NexusForever.Script;
-using NexusForever.Game.Abstract.Entity.Trigger;
+using NexusForever.Script.Template;
+using NexusForever.Script.Template.Collection;
 
 namespace NexusForever.Game.Entity
 {
@@ -43,10 +43,10 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="IDoorEntity"/>.
         /// </summary>
-        protected override void InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection(List<string> names)
         {
             scriptCollection = scriptManager.InitialiseOwnedCollection<IDoorEntity>(this);
-            scriptManager.InitialiseEntityScripts<IDoorEntity>(scriptCollection, this);
+            scriptManager.InitialiseEntityScripts<IDoorEntity>(scriptCollection, this, names);
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -68,6 +68,8 @@ namespace NexusForever.Game.Entity
                 Guid       = Guid,
                 StandState = StandState.State1
             });
+
+            scriptCollection.Invoke<IDoorEntityScript>(script => script.OnOpenDoor());
         }
 
         /// <summary>
@@ -81,6 +83,8 @@ namespace NexusForever.Game.Entity
                 Guid       = Guid,
                 StandState = StandState.State0
             });
+
+            scriptCollection.Invoke<IDoorEntityScript>(script => script.OnDoorClose());
         }
     }
 }

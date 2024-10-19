@@ -6,6 +6,7 @@
         HashSet<uint> Id { get; set; }
         HashSet<uint> CreatureId { get; set; }
         HashSet<ulong> ActivePropId { get; set; }
+        string ScriptName { get; set; }
 
         void Initialise(Type type);
     }

@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Static.Event;
+using NexusForever.Script.Template;
 
 namespace NexusForever.Game.Event
 {
@@ -103,6 +104,15 @@ namespace NexusForever.Game.Event
                 return;
 
             @event.RespondVote(player, choice);
+        }
+
+        /// <summary>
+        /// Invoked when a cinematic finishes for <see cref="IPlayer"/>.
+        /// </summary>
+        public void OnCinematicFinish(IPlayer player, uint cinematicId)
+        {
+            foreach (IPublicEvent @event in events.Values)
+                @event.InvokeScriptCollection<IPublicEventScript>(s => s.OnCinematicFinish(player, cinematicId));
         }
     }
 }

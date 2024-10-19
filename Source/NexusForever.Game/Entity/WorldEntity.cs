@@ -239,7 +239,7 @@ namespace NexusForever.Game.Entity
             Health = MaxHealth;
             Shield = MaxShieldCapacity;
 
-            InitialiseScriptCollection();
+            InitialiseScriptCollection(null);
         }
 
         /// <summary>
@@ -268,16 +268,19 @@ namespace NexusForever.Game.Entity
             Health = MaxHealth;
             Shield = MaxShieldCapacity;
 
-            InitialiseScriptCollection();
+            List<string> scriptNames = model.EntityScript
+                .Select(e => e.ScriptName)
+                .ToList();
+            InitialiseScriptCollection(scriptNames);
         }
 
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="IWorldEntity"/>.
         /// </summary>
-        protected override void InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection(List<string> names)
         {
             scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IWorldEntity>(this);
-            ScriptManager.Instance.InitialiseEntityScripts<IWorldEntity>(scriptCollection, this);
+            ScriptManager.Instance.InitialiseEntityScripts<IWorldEntity>(scriptCollection, this, names);
         }
 
         /// <summary>
@@ -469,7 +472,7 @@ namespace NexusForever.Game.Entity
                 Map.PublicEventManager.UpdateObjective(activator, PublicEventObjectiveType.ActivateTargetGroupChecklist, targetGroupId, QuestChecklistIdx);
             }
 
-            // TODO: Fire Scripts
+            scriptCollection?.Invoke<IWorldEntityScript>(s => s.OnActivateSuccess(activator));
         }
 
         /// <summary>
@@ -477,7 +480,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void OnActivateFail(IPlayer activator)
         {
-            // TODO: Fire Scripts
+            scriptCollection?.Invoke<IWorldEntityScript>(s => s.OnActivateFail(activator));
         }
 
         /// <summary>

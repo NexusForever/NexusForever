@@ -263,6 +263,17 @@ namespace NexusForever.Game.Event
             character.RespondVote(player, eventId, choice);
         }
 
+        /// <summary>
+        /// Invoked when a cinematic finishes for <see cref="IPlayer"/>.
+        /// </summary>
+        public void OnCinematicFinish(IPlayer player, uint cinematicId)
+        {
+            if (!characters.TryGetValue(player.CharacterId, out IPublicEventCharacter character))
+                return;
+
+            character.OnCinematicFinish(player, cinematicId);
+        }
+
         private void InvokeScriptCollection<T>(Action<T> action)
         {
             foreach (IPublicEvent @event in publicEvents.Values)

@@ -35,7 +35,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Play the next queued <see cref="ICinematicBase"/>.
         /// </summary>
-        public void PlayQueuedCinematic()
+        private void PlayQueuedCinematic()
         {
             if (queuedCinematics.Count == 0)
                 return;
@@ -61,10 +61,14 @@ namespace NexusForever.Game.Entity
                     // Make the Player visible/remove immunity
                     break;
                 case CinematicState.Ended:
+                {
                     // Player is back in the world. Continue any scripts that may've been paused.
+                    owner.Map.PublicEventManager.OnCinematicFinish(owner, currentCinematic.CinematicId);
+
                     currentCinematic = null;
                     PlayQueuedCinematic();
                     break;
+                }
             }
         }
     }

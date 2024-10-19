@@ -233,13 +233,14 @@ namespace NexusForever.Script
         /// <summary>
         /// Initialise a new <see cref="IOwnedScriptCollection{T}"/> for supplied <typeparamref name="T"/> <see cref="IWorldEntity"/>.
         /// </summary>
-        public void InitialiseEntityScripts<T>(IScriptCollection collection, T entity) where T : IWorldEntity
+        public void InitialiseEntityScripts<T>(IScriptCollection collection, T entity, List<string> names) where T : IWorldEntity
         {
             InitialiseScriptCollection(collection, new ScriptFilterSearch()
                 .FilterByScriptType<IOwnedScript<T>>()
                 .FilterById(entity.EntityId)
                 .FilterByCreatureId(entity.CreatureId)
-                .FilterByActivePropId(entity.ActivePropId));
+                .FilterByActivePropId(entity.ActivePropId)
+                .FilterByScriptNames(names));
                 //.FilterByTargetGroupId());
         }
 

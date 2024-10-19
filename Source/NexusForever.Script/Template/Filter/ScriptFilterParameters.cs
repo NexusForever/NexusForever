@@ -10,6 +10,7 @@ namespace NexusForever.Script.Template.Filter
         public HashSet<uint> Id { get; set; }
         public HashSet<uint> CreatureId { get; set; }
         public HashSet<ulong> ActivePropId { get; set; }
+        public string ScriptName { get; set; }
 
         #region Dependency Injection
 
@@ -46,6 +47,10 @@ namespace NexusForever.Script.Template.Filter
                 IScriptFilterDynamic dynamicFilter = (IScriptFilterDynamic)serviceProvider.GetRequiredService(dynamicFilterType);
                 dynamicFilter.Filter(this);
             }
+
+            ScriptFilterScriptNameAttribute scriptNameAttribute = ScriptType.GetCustomAttribute<ScriptFilterScriptNameAttribute>();
+            if (scriptNameAttribute != null)
+                ScriptName = scriptNameAttribute.ScriptName;
         }
     }
 }

@@ -51,10 +51,10 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Initialise <see cref="IScriptCollection"/> for <see cref="INonPlayerEntity"/>.
         /// </summary>
-        protected override void InitialiseScriptCollection()
+        protected override void InitialiseScriptCollection(List<string> names)
         {
             scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<INonPlayerEntity>(this);
-            ScriptManager.Instance.InitialiseEntityScripts<INonPlayerEntity>(scriptCollection, this);
+            ScriptManager.Instance.InitialiseEntityScripts<INonPlayerEntity>(scriptCollection, this, names);
         }
 
         /// <summary>

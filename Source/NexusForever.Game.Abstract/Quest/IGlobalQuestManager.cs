@@ -33,6 +33,16 @@ namespace NexusForever.Game.Abstract.Quest
         IEnumerable<uint> GetQuestReceivers(ushort questId);
 
         /// <summary>
+        /// Return <see cref="ICommunicatorMessage"/> for supplied id.
+        /// </summary>
+        ICommunicatorMessage GetCommunicatorMessage(uint id);
+
+        /// <summary>
+        /// Return <see cref="ICommunicatorMessage"/> for supplied id.
+        /// </summary>
+        ICommunicatorMessage GetCommunicatorMessage<T>(T id) where T : Enum;
+
+        /// <summary>
         /// Return a collection of <see cref="ICommunicatorMessage"/>'s that start the supplied quest.
         /// </summary>
         IEnumerable<ICommunicatorMessage> GetQuestCommunicatorMessages(ushort questId);

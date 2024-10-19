@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Trigger;
 using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Event;
 using NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script;
 using NexusForever.Script.Template;
@@ -38,11 +39,14 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         #region Dependency Injection
 
         private readonly ICinematicFactory cinematicFactory;
+        private readonly IGlobalQuestManager globalQuestManager;
 
         public EvilFromTheEtherEventScript(
-            ICinematicFactory cinematicFactory)
+            ICinematicFactory cinematicFactory,
+            IGlobalQuestManager globalQuestManager)
         {
-            this.cinematicFactory = cinematicFactory;
+            this.cinematicFactory   = cinematicFactory;
+            this.globalQuestManager = globalQuestManager;
         }
 
         #endregion
@@ -287,11 +291,15 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
             var gatherRing = mapInstance.GetEntity<IWorldEntity>(gatherRingGuid);
             gatherRing?.RemoveFromMap();
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir2);
         }
 
         private void OnPhaseScavengeSpareParts()
         {
             publicEvent.ActivateObjective(PublicEventObjective.ScavengeSpareParts);
+            
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir3);
 
             foreach (IPlayer player in mapInstance.GetPlayers())
                 player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<IEvilFromTheEtherOnOpenMedbay>());
@@ -303,6 +311,8 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
             IWorldEntity medbayDoorControl = mapInstance.GetEntity<IWorldEntity>(medbayDoorControlGuid);
             medbayDoorControl?.RemoveFromMap();
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir5);
         }
 
         private void OnPhaseActivateMedbayGenerator()
@@ -330,6 +340,8 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         {
             publicEvent.ResetObjective(PublicEventObjective.GoToPrimaryPowerPlant);
             publicEvent.ActivateObjective(PublicEventObjective.GoToPrimaryPowerPlant);
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir8);
         }
 
         private void OnPhaseRestartMainGenerators()
@@ -338,11 +350,16 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
             IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(primaryPowerPlantDoorGuid);
             door?.OpenDoor();
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.InsaneCrewChief);
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir10);
         }
 
         private void OnPhaseEnterCrewQuarters()
         {
             publicEvent.ActivateObjective(PublicEventObjective.EnterCrewQuarters);
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir11);
         }
 
         private void OnPhaseDefeatEthericOrganisms()
@@ -356,6 +373,8 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         private void OnPhaseRestoreTeleporter()
         {
             publicEvent.ActivateObjective(PublicEventObjective.RestoreTeleporter);
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir13);
         }
 
         private void OnPhaseFindTeleporter()
@@ -365,6 +384,8 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             var triggerEntity = publicEvent.CreateEntity<ITurnstileGridTriggerEntity>();
             triggerEntity.Initialise(8307, 15f, 8307);
             triggerEntity.AddToMap(mapInstance, new Vector3(-15.32f, -840.73f, 150.96f));
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir14);
         }
 
         private void OnPhaseDefeatEthericOrganisms2()
@@ -379,6 +400,8 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             var triggerEntity = publicEvent.CreateEntity<IGridTriggerEntity>();
             triggerEntity.Initialise(8242, 3f);
             triggerEntity.AddToMap(mapInstance, new Vector3(37.27052f, -840.065f, 173.36299f));
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir15);
         }
 
         private void OnPhaseGatherInBridgeAccessHall()
@@ -391,6 +414,9 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             var triggerEntity = publicEvent.CreateEntity<IWorldLocationVolumeGridTriggerEntity>();
             triggerEntity.Initialise(50348, 8260);
             triggerEntity.AddToMap(mapInstance, new Vector3(-53.3373f, -845.091f, 215.584f));
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.KatjaZarkov2);
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir16);
         }
 
         private void OnPhaseDefeatTetheredOrganisms()
@@ -424,11 +450,16 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
             var floatingKatja = mapInstance.GetEntity<INonPlayerEntity>(floatingKatjaGuid);
             floatingKatja?.InvokeScriptCollection<KatjaZarkhovFloatingEntityScript>(s => s.StartMoveToPortal());
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.KatjaZarkov3);
         }
 
         private void OnPhaseActivateSelfDestruct()
         {
             publicEvent.ActivateObjective(PublicEventObjective.ActivateSelfDestruct);
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.KatjaZarkov4);
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir17);
         }
 
         private void OnPhaseDefeatKatjaZarkhov()
@@ -437,6 +468,8 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
             var floatingKatja = mapInstance.GetEntity<INonPlayerEntity>(floatingKatjaGuid);
             floatingKatja?.InvokeScriptCollection<KatjaZarkhovFloatingEntityScript>(s => s.KnockbackToFloor());
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.KatjaZarkov5);
         }
 
         private void OnPhasePickUpDriveSchematics()
@@ -451,11 +484,26 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             var triggerEntity = publicEvent.CreateEntity<IGridTriggerEntity>();
             triggerEntity.Initialise(8243, 3f);
             triggerEntity.AddToMap(mapInstance, new Vector3(-53.353714f, -845.00726f, 164.51099f));
+
+            BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir18);
         }
 
         private void OnPhaseTalkToCaptainWeir2()
         {
             publicEvent.ActivateObjective(PublicEventObjective.TalkToCaptainWeir2);
+        }
+
+        private void BroadcastCommunicatorMessage(CommunicatorMessage message)
+        {
+            ICommunicatorMessage communicatorMessage = globalQuestManager.GetCommunicatorMessage(message);
+            foreach (IPlayer player in mapInstance.GetPlayers())
+                communicatorMessage?.Send(player.Session);
+        }
+
+        private void SendCommunicatorMessage(IPlayer player, CommunicatorMessage message)
+        {
+            ICommunicatorMessage communicatorMessage = globalQuestManager.GetCommunicatorMessage(message);
+            communicatorMessage?.Send(player.Session);
         }
 
         /// <summary>
@@ -547,6 +595,26 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
                     break;
                 case PublicEventObjective.TalkToCaptainWeir2:
                     publicEvent.Finish(PublicEventTeam.PublicTeam);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Invoked when a cinematic for <see cref="IPlayer"/> has finished.
+        /// </summary>
+        public void OnCinematicFinish(IPlayer player, uint cinematicId)
+        {
+            // cinematics for Evil from the Ether have no cinematic ids, use the phase instead
+            switch ((PublicEventPhase)publicEvent.Phase)
+            {
+                case PublicEventPhase.TalkToCaptainWeir:
+                    SendCommunicatorMessage(player, CommunicatorMessage.CaptainWeir1);
+                    break;
+                case PublicEventPhase.ScavengeSpareParts:
+                    SendCommunicatorMessage(player, CommunicatorMessage.CaptainWeir4);
+                    break;
+                case PublicEventPhase.DefeatEthericOrganisms:
+                    SendCommunicatorMessage(player, CommunicatorMessage.CaptainWeir12);
                     break;
             }
         }

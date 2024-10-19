@@ -50,7 +50,7 @@ namespace NexusForever.Script
         /// <summary>
         /// Initialise a new <see cref="IOwnedScriptCollection{T}"/> for supplied <typeparamref name="T"/> <see cref="IWorldEntity"/>.
         /// </summary>
-        void InitialiseEntityScripts<T>(IScriptCollection collection, T entity) where T : IWorldEntity;
+        void InitialiseEntityScripts<T>(IScriptCollection collection, T entity, List<string> names) where T : IWorldEntity;
 
         string Information();
     }

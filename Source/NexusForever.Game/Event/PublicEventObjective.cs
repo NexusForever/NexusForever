@@ -22,6 +22,10 @@ namespace NexusForever.Game.Event
         private double elapsedTimer;
         private UpdateTimer failureTimer;
 
+        private bool IsChecklist => Entry.PublicEventObjectiveTypeEnum
+            is PublicEventObjectiveType.ActivateTargetGroupChecklist
+            or PublicEventObjectiveType.TalkToChecklist;
+
         /// <summary>
         /// Initialise <see cref="PublicEventObjective"/> with suppled <see cref="IPublicEventTeam"/> and <see cref="PublicEventObjectiveEntry"/>.
         /// </summary>
@@ -118,7 +122,7 @@ namespace NexusForever.Game.Event
 
             uint oldCount = Count;
 
-            if (Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.ActivateTargetGroupChecklist)
+            if (IsChecklist)
             {
                 uint flag = (uint)(1 << count);
                 if ((Checklist & flag) == 0)
@@ -194,7 +198,7 @@ namespace NexusForever.Game.Event
             return new Network.World.Message.Model.Shared.PublicEventObjectiveStatus
             {
                 Status     = Status,
-                Count      = Count,
+                Count      = IsChecklist ? Checklist : Count,
                 DynamicMax = DynamicMax
             };
         }

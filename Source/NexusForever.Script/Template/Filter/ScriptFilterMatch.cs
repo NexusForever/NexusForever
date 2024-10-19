@@ -22,6 +22,10 @@
                 && !script.ActivePropId.Contains(search.ActivePropId.Value))
                 return false;
 
+            if (search.ScriptNames != null && script.ScriptName != null
+                && !search.ScriptNames.Contains(script.ScriptName))
+                return false;
+
             return true;
         }
     }

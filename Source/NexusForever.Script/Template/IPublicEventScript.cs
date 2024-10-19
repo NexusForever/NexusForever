@@ -67,5 +67,12 @@ namespace NexusForever.Script.Template
         void OnVoteFinished(uint voteId, uint winner)
         {
         }
+
+        /// <summary>
+        /// Invoked when a cinematic for <see cref="IPlayer"/> has finished.
+        /// </summary>
+        void OnCinematicFinish(IPlayer player, uint cinematicId)
+        {
+        }
     }
 }

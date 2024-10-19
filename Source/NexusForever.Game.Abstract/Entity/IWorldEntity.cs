@@ -30,6 +30,8 @@ namespace NexusForever.Game.Abstract.Entity
         Faction Faction1 { get; set; }
         Faction Faction2 { get; set; }
 
+        byte QuestChecklistIdx { get; }
+
         ushort WorldSocketId { get; }
         ulong ActivePropId { get; }
 
