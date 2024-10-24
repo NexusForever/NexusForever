@@ -82,8 +82,16 @@ namespace NexusForever.Game.Combat
             }
 
             uint shieldedAmount = CalculateShieldAmount(damage, victim);
-            damage -= shieldedAmount;
-            damageDescription.ShieldAbsorbAmount = shieldedAmount;
+            if (shieldedAmount > damage)
+            {
+                damageDescription.ShieldAbsorbAmount = damage;
+                damage = 0;
+            }
+            else
+            {
+                damageDescription.ShieldAbsorbAmount = shieldedAmount;
+                damage -= shieldedAmount;
+            }
 
             // TODO: Add in other defensive modifiers
 

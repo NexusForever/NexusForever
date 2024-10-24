@@ -248,7 +248,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         private void HandleStatUpdate(double lastTick)
         {
-            if (!IsAlive)
+            if (!IsAlive || InCombat)
                 return;
 
             // TODO: This should probably get moved to a Calculation Library/Manager at some point. There will be different timers on Stat refreshes, but right now the timer is hardcoded to every 0.25s.
@@ -466,6 +466,8 @@ namespace NexusForever.Game.Entity
 
             Health = (uint)Math.Clamp(newHealth, 0u, MaxHealth);
 
+            scriptCollection?.Invoke<IUnitScript>(s => s.OnHealthChange(source, amount, type));
+
             if (Health == 0)
                 OnDeath();
         }
@@ -484,6 +486,7 @@ namespace NexusForever.Game.Entity
             // TODO: schedule respawn
 
             ThreatManager.ClearThreatList();
+            MovementManager.Finalise();
 
             scriptCollection?.Invoke<IUnitScript>(s => s.OnDeath());
 

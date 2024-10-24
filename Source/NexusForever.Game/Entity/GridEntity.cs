@@ -335,7 +335,7 @@ namespace NexusForever.Game.Entity
             visibleGrids.Remove((gridX, gridZ));
         }
 
-        private void UpdateRangeChecks()
+        protected void UpdateRangeChecks()
         {
             foreach (IGridEntity entity in visibleEntities.Values)
                 entity.CheckEntityInRange(this);
@@ -368,6 +368,10 @@ namespace NexusForever.Game.Entity
 
         private bool IsInRange(IGridEntity target)
         {
+            if (target is IUnitEntity unitEntity)
+                if (!unitEntity.IsAlive)
+                    return false;
+
             return Position.GetDistance(target.Position) < RangeCheck;
         }
 

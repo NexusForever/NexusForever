@@ -264,6 +264,9 @@ namespace NexusForever.Game.Entity
 
             CalculateDefaultProperties();
 
+            foreach (EntityPropertyModel propertyModel in model.EntityProperty)
+                SetBaseProperty(propertyModel.Property, propertyModel.Value);
+
             // TODO: handle this better
             Health = MaxHealth;
             Shield = MaxShieldCapacity;

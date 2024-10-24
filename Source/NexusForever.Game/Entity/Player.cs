@@ -1395,6 +1395,8 @@ namespace NexusForever.Game.Entity
             Dismount();
             RemoveControlUnit();
 
+            UpdateRangeChecks();
+
             // TODO: Replace with DelayEvent (of 2 seconds) with map updates.
 
             IGhostEntity ghost = entityFactory.CreateEntity<IGhostEntity>();
@@ -1411,6 +1413,8 @@ namespace NexusForever.Game.Entity
         {
             DeathState = null;
             RemoveControlUnit();
+
+            UpdateRangeChecks();
         }
     }
 }

@@ -14,6 +14,7 @@ using NexusForever.Game.Abstract.Entity.Movement.Command.Time;
 using NexusForever.Game.Abstract.Entity.Movement.Command.Velocity;
 using NexusForever.Game.Abstract.Entity.Movement.Generator;
 using NexusForever.Game.Entity.Movement.Generator;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Game.Static.Entity.Movement.Command.State;
 using NexusForever.Game.Static.Entity.Movement.Spline;
@@ -394,6 +395,10 @@ namespace NexusForever.Game.Entity.Movement
         public void SetPositionPath(List<Vector3> nodes, SplineType type, SplineMode mode, float speed)
         {
             if (!ServerControl)
+                return;
+
+            // ensure first and last nodes aren't the same
+            if (nodes[0] == nodes[^1])
                 return;
 
             positionCommandGroup.SetPositionPath(nodes, type, mode, speed);
@@ -786,6 +791,27 @@ namespace NexusForever.Game.Entity.Movement
             // TODO: calculate speed based on entity being followed.
             List<Vector3> nodes = generator.CalculatePath();
             SetPositionPath(nodes, SplineType.Linear, SplineMode.OneShot, 8f);
+        }
+
+        /// <summary>
+        /// Launch a new chase spline, chasing the supplied <see cref="IWorldEntity"/> at distance.
+        /// </summary>
+        public void Chase(IWorldEntity entity, float distance)
+        {
+            if (!ServerControl)
+                return;
+
+            SetState(StateFlags.Move);
+            SetMoveDefaults(false);
+            SetRotationFaceUnit(entity.Guid);
+
+            Vector3 destination = entity.Position.GetPoint2D(GetRotation().X, distance);
+            // due to most content maps not having terrain data, movement generators will fail
+            // TODO: replace this once movement maps are implemented
+            List<Vector3> nodes = [positionCommandGroup.GetPosition(), destination];
+
+            float speed = Owner.GetPropertyValue(Property.MoveSpeedMultiplier) * 8f;
+            LaunchSpline(nodes, SplineType.Linear, SplineMode.OneShot, speed);
         }
     }
 }
