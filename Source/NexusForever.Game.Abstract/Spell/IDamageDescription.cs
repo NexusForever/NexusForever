@@ -12,5 +12,6 @@ namespace NexusForever.Game.Abstract.Spell
         uint AdjustedDamage { get; set; }
         uint OverkillAmount { get; set; }
         bool KilledTarget { get; set; }
+        CombatResult CombatResult { get; set; }
     }
 }
