@@ -12,6 +12,7 @@ namespace NexusForever.Database.World
         public DbSet<DisableModel> Disable { get; set; }
         public DbSet<EntityModel> Entity { get; set; }
         public DbSet<EntityEventModel> EventEntity { get; set; }
+        public DbSet<EntityPropertyModel> EntityProperty { get; set; }
         public DbSet<EntityScriptModel> EntityScript { get; set; }
         public DbSet<EntitySplineModel> EntitySpline { get; set; }
         public DbSet<EntityStatModel> EntityStat { get; set; }
@@ -190,6 +191,34 @@ namespace NexusForever.Database.World
                     .HasColumnName("z")
                     .HasColumnType("float")
                     .HasDefaultValue(0);
+            });
+
+            modelBuilder.Entity<EntityPropertyModel>(entity =>
+            {
+                entity.ToTable("entity_property");
+
+                entity.HasKey(e => new { e.Id, e.Property })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Property)
+                    .HasColumnName("property")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasConversion<EnumToNumberConverter<Property, byte>>();
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Entity)
+                    .WithMany(p => p.EntityProperty)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__entity_property_id__entity_id");
             });
 
             modelBuilder.Entity<EntityScriptModel>(entity =>
