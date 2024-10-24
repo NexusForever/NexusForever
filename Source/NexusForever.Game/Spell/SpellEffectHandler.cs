@@ -1,9 +1,11 @@
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Combat;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -25,22 +27,13 @@ namespace NexusForever.Game.Spell
             if (!target.CanAttack(spell.Caster))
                 return;
 
-            // TODO: Merge DamageCalculator, uncomment below lines, and delete the hardcoded values before target takes damage.
+            // TODO: once spell effect handlers aren't static, this should be injected without the factory
+            var factory = LegacyServiceProvider.Provider.GetService<IFactory<IDamageCalculator>>();
+            var damageCalculator = factory.Resolve();
+            damageCalculator.CalculateDamage(spell.Caster, target, spell, info);
 
-            // uint damage = 0;
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType00, info.Entry.ParameterValue00);
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType01, info.Entry.ParameterValue01);
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType02, info.Entry.ParameterValue02);
-            // damage += DamageCalculator.Instance.GetBaseDamageForSpell(caster, info.Entry.ParameterType03, info.Entry.ParameterValue03);
-
-            // DamageCalculator.Instance.CalculateDamage(caster, target, this, info, (DamageType)info.Entry.DamageType, damage);
-
-            info.AddDamage((DamageType)info.Entry.DamageType, 50);
-            info.Damage.ShieldAbsorbAmount = 25;
-            info.Damage.AdjustedDamage = 50;
-            
-            // TODO: Deal damage
-            target.TakeDamage(spell.Caster, info.Damage);
+            if (info.Damage != null)
+                target.TakeDamage(spell.Caster, info.Damage);
         }
 
         [SpellEffectHandler(SpellEffectType.Resurrect)]

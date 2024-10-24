@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Spell;
+
 namespace NexusForever.GameTable.Model
 {
     public class Spell4EffectsEntry
@@ -5,8 +7,8 @@ namespace NexusForever.GameTable.Model
         public uint Id;
         public uint SpellId;
         public uint TargetFlags;
-        public uint EffectType;
-        public uint DamageType;
+        public SpellEffectType EffectType;
+        public DamageType DamageType;
         public uint DelayTime;
         public uint TickTime;
         public uint DurationTime;
@@ -34,14 +36,10 @@ namespace NexusForever.GameTable.Model
         public uint PrerequisiteIdCasterPersistence;
         public uint PrerequisiteIdTargetPersistence;
         public uint PrerequisiteIdTargetSuspend;
-        public uint ParameterType00;
-        public uint ParameterType01;
-        public uint ParameterType02;
-        public uint ParameterType03;
-        public float ParameterValue00;
-        public float ParameterValue01;
-        public float ParameterValue02;
-        public float ParameterValue03;
+        [GameTableFieldArray(4)]
+        public uint[] ParameterType;
+        [GameTableFieldArray(4)]
+        public float[] ParameterValue;
         public uint PhaseFlags;
         public uint OrderIndex;
     }

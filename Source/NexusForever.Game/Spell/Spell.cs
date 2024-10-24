@@ -2,11 +2,11 @@ using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
-using NexusForever.Game.Entity;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -118,7 +118,7 @@ namespace NexusForever.Game.Spell
                 status = SpellStatus.Finished;
 
                 if (Parameters.PositionalUnitId > 0)
-                    caster.GetVisible<WorldEntity>(Parameters.PositionalUnitId)?.RemoveFromMap();
+                    caster.GetVisible<IWorldEntity>(Parameters.PositionalUnitId)?.RemoveFromMap();
 
                 foreach (ISpellTargetInfo target in targets)
                     RemoveEffects(target);
@@ -298,7 +298,7 @@ namespace NexusForever.Game.Spell
 
         protected CastResult CheckResourceConditions()
         {
-            if (!(caster is Player player))
+            if (!(caster is IPlayer player))
                 return CastResult.Ok;
 
             bool runnerOveride = CheckRunnerOverride(player);
@@ -463,7 +463,7 @@ namespace NexusForever.Game.Spell
             // Re-initiailise Telegraphs at Execute time, so that position and rotation is calculated appropriately.
             // This is optimised to only happen on player-cast spells.
             // TODO: Add support for this for Server Controlled entities. It is presumed most will stand still when casting.
-            if (caster is Player)
+            if (caster is IPlayer)
                 InitialiseTelegraphs();
 
             if (telegraphs.Count > 0)
@@ -808,6 +808,8 @@ namespace NexusForever.Game.Spell
             if (CastMethod == CastMethod.Aura && targets.FirstOrDefault(x => x.TargetSelectionState == TargetSelectionState.New) == null)
                 return;
 
+            List<ICombatLog> combatLogs = [];
+
             var serverSpellGo = new ServerSpellGo
             {
                 ServerUniqueId     = CastingId,
@@ -819,6 +821,12 @@ namespace NexusForever.Game.Spell
             foreach (ISpellTargetInfo targetInfo in targets
                 .Where(t => t.Effects.Count > 0 && t.TargetSelectionState == TargetSelectionState.New))
             {
+                if (!targetInfo.Effects.Any(x => x.DropEffect == false))
+                {
+                    combatLogs.AddRange(targetInfo.Effects.SelectMany(i => i.CombatLogs));
+                    continue;
+                }
+
                 var networkTargetInfo = new TargetInfo
                 {
                     UnitId        = targetInfo.Entity.Guid,
@@ -830,16 +838,21 @@ namespace NexusForever.Game.Spell
 
                 foreach (ISpellTargetEffectInfo targetEffectInfo in targetInfo.Effects)
                 {
+                    if (targetEffectInfo.DropEffect)
+                    {
+                        combatLogs.AddRange(targetEffectInfo.CombatLogs);
+                        continue;
+                    }
 
-                    if ((SpellEffectType)targetEffectInfo.Entry.EffectType == SpellEffectType.Proxy)
+                    if (targetEffectInfo.Entry.EffectType == SpellEffectType.Proxy)
                         continue;
 
                     var networkTargetEffectInfo = new EffectInfo
                     {
                         Spell4EffectId = targetEffectInfo.Entry.Id,
                         EffectUniqueId = targetEffectInfo.EffectId,
-                        DelayTime = targetEffectInfo.Entry.DelayTime,
-                        TimeRemaining = duration > 0 ? (int)duration : -1
+                        DelayTime      = targetEffectInfo.Entry.DelayTime,
+                        TimeRemaining  = duration > 0 ? (int)duration : -1
                     };
 
                     if (targetEffectInfo.Damage != null)
@@ -847,19 +860,21 @@ namespace NexusForever.Game.Spell
                         networkTargetEffectInfo.InfoType = 1;
                         networkTargetEffectInfo.DamageDescriptionData = new DamageDescription
                         {
-                            RawDamage = targetEffectInfo.Damage.RawDamage,
-                            RawScaledDamage = targetEffectInfo.Damage.RawScaledDamage,
-                            AbsorbedAmount = targetEffectInfo.Damage.AbsorbedAmount,
+                            RawDamage          = targetEffectInfo.Damage.RawDamage,
+                            RawScaledDamage    = targetEffectInfo.Damage.RawScaledDamage,
+                            AbsorbedAmount     = targetEffectInfo.Damage.AbsorbedAmount,
                             ShieldAbsorbAmount = targetEffectInfo.Damage.ShieldAbsorbAmount,
-                            AdjustedDamage = targetEffectInfo.Damage.AdjustedDamage,
-                            OverkillAmount = targetEffectInfo.Damage.OverkillAmount,
-                            KilledTarget = targetEffectInfo.Damage.KilledTarget,
-                            CombatResult = CombatResult.Hit,
-                            DamageType = targetEffectInfo.Damage.DamageType
+                            AdjustedDamage     = targetEffectInfo.Damage.AdjustedDamage,
+                            OverkillAmount     = targetEffectInfo.Damage.OverkillAmount,
+                            KilledTarget       = targetEffectInfo.Damage.KilledTarget,
+                            CombatResult       = targetEffectInfo.Damage.CombatResult,
+                            DamageType         = targetEffectInfo.Damage.DamageType
                         };
                     }
 
                     networkTargetInfo.EffectInfoData.Add(networkTargetEffectInfo);
+
+                    combatLogs.AddRange(targetEffectInfo.CombatLogs);
                 }
 
                 serverSpellGo.TargetInfoData.Add(networkTargetInfo);
@@ -890,7 +905,15 @@ namespace NexusForever.Game.Spell
                         Yaw            = telegraph.Rotation.X
                     });
 
-            caster.EnqueueToVisible(serverSpellGo, true);
+            foreach (ICombatLog combatLog in combatLogs)
+            {
+                Caster.EnqueueToVisible(new ServerCombatLog
+                {
+                    CombatLog = combatLog
+                }, true);
+            }
+
+            Caster.EnqueueToVisible(serverSpellGo, true);
         }
 
         private void SendBuffsApplied(List<uint> unitIds)
