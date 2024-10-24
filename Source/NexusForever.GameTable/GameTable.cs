@@ -225,19 +225,18 @@ namespace NexusForever.GameTable
                                     modelField.SetValue(entry, reader.ReadUInt64());
                                     break;
                                 case DataType.String:
-                                    {
-                                        uint offset1 = reader.ReadUInt32();
-                                        uint offset2 = reader.ReadUInt32();
-                                        uint offset3 = Math.Max(offset1, offset2);
+                                {
+                                    if (reader.BaseStream.Position % 8 != 0)
+                                        reader.BaseStream.Position += 8 - reader.BaseStream.Position % 8;
 
-                                        string @string = stringTable.GetEntry(offset3 - recordSize);
-                                        modelField.SetValue(entry, @string);
+                                    uint offset = reader.ReadUInt32();
+                                    string @string = stringTable.GetEntry(offset - recordSize);
+                                    modelField.SetValue(entry, @string);
 
-                                        if (fieldIndex < typeFields.Length - 1)
-                                            if (offset1 == 0 && fields[fieldIndex].Type != DataType.String)
-                                                reader.BaseStream.Position += 4;
-                                        break;
-                                    }
+                                    if (reader.BaseStream.Position % 8 != 0)
+                                        reader.BaseStream.Position += 8 - reader.BaseStream.Position % 8;
+                                    break;
+                                }
                             }
                         }
                     }
