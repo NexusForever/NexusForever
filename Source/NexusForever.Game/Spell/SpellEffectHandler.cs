@@ -1,5 +1,6 @@
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Combat;
@@ -22,13 +23,10 @@ namespace NexusForever.Game.Spell
             if (!target.CanAttack(spell.Caster))
                 return;
 
-            uint damage = 0;
-            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType00, info.Entry.ParameterValue00);
-            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType01, info.Entry.ParameterValue01);
-            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType02, info.Entry.ParameterValue02);
-            damage += DamageCalculator.Instance.GetBaseDamageForSpell(spell.Caster, info.Entry.ParameterType03, info.Entry.ParameterValue03);
-
-            DamageCalculator.Instance.CalculateDamage(spell.Caster, target, spell, ref info, (DamageType)info.Entry.DamageType, damage);
+            // TODO: once spell effect handlers aren't static, this should be injected without the factory
+            var factory = LegacyServiceProvider.Provider.GetService<IFactory<IDamageCalculator>>();
+            var damageCalculator = factory.Resolve();
+            damageCalculator.CalculateDamage(spell.Caster, target, spell, info);
 
             target.TakeDamage(spell.Caster, info.Damage);
         }

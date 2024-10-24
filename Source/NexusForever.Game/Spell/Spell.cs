@@ -5,6 +5,7 @@ using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -377,7 +378,7 @@ namespace NexusForever.Game.Spell
 
         private void SendSpellGo()
         {
-            List<ServerCombatLog> combatLogs = new List<ServerCombatLog>();
+            List<ICombatLog> combatLogs = [];
 
             var serverSpellGo = new ServerSpellGo
             {
@@ -411,7 +412,7 @@ namespace NexusForever.Game.Spell
                         continue;
                     }
 
-                    if ((SpellEffectType)targetEffectInfo.Entry.EffectType == SpellEffectType.Proxy)
+                    if (targetEffectInfo.Entry.EffectType == SpellEffectType.Proxy)
                         continue;
 
                     var networkTargetEffectInfo = new TargetInfo.EffectInfo
@@ -477,8 +478,13 @@ namespace NexusForever.Game.Spell
                 }
             }
 
-            foreach (ServerCombatLog combatLog in combatLogs)
-                Caster.EnqueueToVisible(combatLog, true);
+            foreach (ICombatLog combatLog in combatLogs)
+            {
+                Caster.EnqueueToVisible(new ServerCombatLog
+                {
+                    CombatLog = combatLog
+                }, true);
+            }
 
             Caster.EnqueueToVisible(serverSpellGo, true);
 

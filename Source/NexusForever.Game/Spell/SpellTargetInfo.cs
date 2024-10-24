@@ -2,7 +2,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Combat;
 
 namespace NexusForever.Game.Spell
 {
@@ -27,7 +27,7 @@ namespace NexusForever.Game.Spell
             public bool DropEffect { get; set; } = false;
             public Spell4EffectsEntry Entry { get; }
             public IDamageDescription Damage { get; private set; }
-            public List<ServerCombatLog> CombatLogs { get; private set; } = new List<ServerCombatLog>();
+            public List<ICombatLog> CombatLogs { get; private set; } = [];
 
             public SpellTargetEffectInfo(uint effectId, Spell4EffectsEntry entry)
             {
@@ -52,7 +52,7 @@ namespace NexusForever.Game.Spell
                 Damage = damage;
             }
 
-            public void AddCombatLog(ServerCombatLog combatLog)
+            public void AddCombatLog(ICombatLog combatLog)
             {
                 CombatLogs.Add(combatLog);
             }

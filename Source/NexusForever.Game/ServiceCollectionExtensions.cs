@@ -40,6 +40,7 @@ namespace NexusForever.Game
             sc.AddGameAchievement();
             sc.AddGameCharacter();
             sc.AddGameCinematic();
+            sc.AddGameCombat();
             sc.AddGameCustomisation();
             sc.AddGameEntity();
             sc.AddGameEvent();

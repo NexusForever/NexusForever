@@ -1,64 +1,53 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared;
-using NLog;
-using NexusForever.Game.Abstract;
+using NexusForever.Network.World.Combat;
 
 namespace NexusForever.Game.Combat
 {
-    public sealed class DamageCalculator : Singleton<DamageCalculator>, IDamageCalculator
+    public sealed class DamageCalculator : IDamageCalculator
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        #region Dependency Injection
 
-        private float assaultRatingToPowerFormula = GameTableManager.Instance.GameFormula.GetEntry(1266).Datafloat0;
-        private float supportRatingToPowerFormula = GameTableManager.Instance.GameFormula.GetEntry(1266).Datafloat01;
+        private readonly ILogger<DamageCalculator> log;
+        private readonly IGameTableManager gameTableManager;
 
-        public DamageCalculator()
+        public DamageCalculator(
+            ILogger<DamageCalculator> log,
+            IGameTableManager gameTableManager)
         {
+            this.log              = log;
+            this.gameTableManager = gameTableManager;
         }
 
-        public void Initialise()
-        {
-            // Intentionally empty, but this could be a place to allow for setting of values from configuration, if allowing for damage/health modifications in config.
-        }
+        #endregion
 
         /// <summary>
         /// Returns the calculated damage and updates the referenced <see cref="SpellTargetInfo.SpellTargetEffectInfo"/> appropriately.
         /// </summary>
-        /// <remarks>TODO: This should probably return an instance of a Class which describes all the damage done to both entities. Attackers can have reflected damage from this, etc.</remarks>
-        public void CalculateDamage(
-            IUnitEntity attacker, 
-            IUnitEntity victim,
-            ISpell spell,
-            ref ISpellTargetEffectInfo info,
-            DamageType damageType, 
-            uint damage)
+        /// <remarks>
+        /// TODO: This should probably return an instance of a Class which describes all the damage done to both entities. Attackers can have reflected damage from this, etc.
+        /// </remarks>
+        public void CalculateDamage(IUnitEntity attacker, IUnitEntity victim, ISpell spell, ISpellTargetEffectInfo info)
         {
-            if (damage < 0)
-                return;
-
-            if (victim == null || !victim.IsAlive)
-                return;
-
             IDamageDescription damageDescription = new SpellTargetInfo.SpellTargetEffectInfo.DamageDescription
             {
-                DamageType   = damageType,
-                CombatResult = CombatResult.Hit,
-                RawDamage    = damage,
-                RawScaledDamage = damage
+                DamageType   = info.Entry.DamageType,
+                CombatResult = CombatResult.Hit
             };
-            CombatLogCastData castData = new CombatLogCastData
+
+            var castData = new CombatLogCastData
             {
-                SpellId = spell.Parameters.SpellInfo.Entry.Id, // TODO: This was updated in order to use ISpell, check if correct
-                CasterId = attacker.Guid,
-                CombatResult = 0,
-                TargetId = victim.Guid
+                CasterId     = attacker.Guid,
+                TargetId     = victim.Guid,
+                SpellId      = spell.Parameters.SpellInfo.Entry.Id, // TODO: This was updated in order to use ISpell, check if correct
+                CombatResult = CombatResult.Hit
             };
 
             if (CalculateDeflect(attacker, victim))
@@ -67,13 +56,18 @@ namespace NexusForever.Game.Combat
                 info.AddCombatLog(new CombatLogDeflect
                     {
                         BMultiHit = false,
-                        CastData = castData
+                        CastData  = castData
                     });
                 return;
             }
 
-            damage = GetBaseDamage(damage);
-            damage = GetDamageAfterArmorMitigation(victim, damageType, damage);
+            uint damage = CalculateBaseDamage(attacker, victim, info.Entry);
+            damageDescription.RawDamage       = damage;
+            damageDescription.RawScaledDamage = damage;
+
+            damage = CalculateBaseDamageVariance(damage);
+
+            damage = GetDamageAfterArmorMitigation(victim, info.Entry.DamageType, damage);
 
             // TODO: Add in other attacking modifiers like Armor Pierce, Strikethrough, Multi-Hit, etc.
 
@@ -97,45 +91,141 @@ namespace NexusForever.Game.Combat
 
             info.AddDamage(damageDescription);
 
-            // TODO: Queue Proc Events
+            // TODO: Queue Proc Events*/
         }
 
         /// <summary>
-        /// Get base damage value for the given <see cref="UnitEntity"/> with the provided parameter data from the <see cref="Spell4EffectsEntry"/>.
+        /// Get base damage value for the given <see cref="IUnitEntity"/> with the provided parameter data from the <see cref="Spell4EffectsEntry"/>.
         /// </summary>
-        public uint GetBaseDamageForSpell(IUnitEntity attacker, float parameterType, float parameterValue)
+        private uint CalculateBaseDamage(IUnitEntity caster, IUnitEntity target, Spell4EffectsEntry entry)
         {
-            switch (parameterType)
+            float basePropertyDamage = CalculateBasePropertyDamage(caster, entry);
+            float baseEntityDamage   = CalculateBaseEntityDamage(caster, target, entry);
+
+            float typeMultiplier = 1f;
+            float typeBaseDamage = 0;
+            switch (entry.EffectType)
             {
-                case 10:
-                    return (uint)Math.Round(attacker.Level * parameterValue);
-                case 12:
-                    return (uint)Math.Round(GetAssaultPower(attacker) * parameterValue);
-                case 13:
-                    return (uint)Math.Round(GetSupportPower(attacker) * parameterValue);
+                case SpellEffectType.Transference:
+                {
+                    typeMultiplier = BitConverter.UInt32BitsToSingle(entry.DataBits02);
+                    typeBaseDamage = entry.DataBits03;
+                    break;
+                }
+                case SpellEffectType.Damage:
+                case SpellEffectType.Heal:
+                case SpellEffectType.DistanceDependentDamage:
+                case SpellEffectType.DistributedDamage:
+                case SpellEffectType.HealShields:
+                case SpellEffectType.DamageShields:
+                {
+                    typeMultiplier = BitConverter.UInt32BitsToSingle(entry.DataBits00);
+                    typeBaseDamage = entry.DataBits01;
+                    break;
+                }
             }
 
-            return 0u;
+            if (caster.Type is not EntityType.Player and not EntityType.Ghost)
+            {
+                // TODO: some client code specific to non player entities
+            }
+
+            float baseDamage = basePropertyDamage + ((typeBaseDamage + baseEntityDamage) * typeMultiplier);
+
+            float propertyMultiplier = caster.GetProperty((Property)(entry.DamageType + 140)).Value;
+
+            return (uint)(propertyMultiplier * baseDamage);
         }
 
-        private uint GetAssaultPower(IUnitEntity attacker)
+        private float CalculateBasePropertyDamage(IUnitEntity caster, Spell4EffectsEntry entry)
         {
-            return (uint)Math.Round((float)attacker.GetPropertyValue(Property.AssaultRating) * assaultRatingToPowerFormula);
+            float GetProperty(Property property)
+            {
+                return caster.GetProperty(property)?.Value ?? 0f;
+            }
+
+            GameFormulaEntry forumulaEntry = gameTableManager.GameFormula.GetEntry(1266);
+
+            float value = 0f;
+            for (int i = 0; i < 4; i++)
+            {
+                switch (entry.ParameterType[i])
+                {
+                    case 1:
+                        value += GetProperty(Property.Strength) * entry.ParameterValue[i];
+                        break;
+                    case 2:
+                        value += GetProperty(Property.Dexterity) * entry.ParameterValue[i];
+                        break;
+                    case 3:
+                        value += GetProperty(Property.Technology) * entry.ParameterValue[i];
+                        break;
+                    case 4:
+                        value += GetProperty(Property.Magic) * entry.ParameterValue[i];
+                        break;
+                    case 5:
+                        value += GetProperty(Property.Wisdom) * entry.ParameterValue[i];
+                        break;
+                    case 11:
+                        value += GetProperty(Property.Stamina) * entry.ParameterValue[i];
+                        break;
+                    // client defaults to a value of 0.25f if the game table entry is missing
+                    case 12:
+                        value += GetProperty(Property.AssaultRating) * entry.ParameterValue[i] * forumulaEntry?.Datafloat0 ?? 0.25f;
+                        break;
+                    case 13:
+                        value += GetProperty(Property.SupportRating) * entry.ParameterValue[i] * forumulaEntry?.Datafloat01 ?? 0.25f;
+                        break;
+                }
+            }
+
+            if (value >= 0f)
+                return MathF.Ceiling(value);
+            else
+                return MathF.Floor(value);
         }
 
-        private uint GetSupportPower(IUnitEntity attacker)
+        private float CalculateBaseEntityDamage(IUnitEntity caster, IUnitEntity target, Spell4EffectsEntry entry)
         {
-            return (uint)Math.Round((float)attacker.GetPropertyValue(Property.SupportRating) * supportRatingToPowerFormula);
+            float value = 0f;
+            for (int i = 0; i < 4; i++)
+            {
+                switch (entry.ParameterType[i])
+                {
+                    // cases in the client not implemented
+                    case 7:
+                    case 8:
+                    case 14:
+                    case 15:
+                    case 16:
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 25:
+                    case 26:
+                        break;
+                    case 10:
+                    {
+                        value += caster.Level * entry.ParameterValue[i];
+                        break;
+                    }
+                }
+            }
+
+            return value;
         }
 
-        private uint GetBaseDamage(uint damage)
+        private uint CalculateBaseDamageVariance(uint damage)
         {
-            return (uint)(damage * (new Random().Next(95, 103) / 100f));
+            return (uint)(damage * (Random.Shared.Next(95, 103) / 100f));
         }
 
         private uint GetDamageAfterArmorMitigation(IUnitEntity victim, DamageType damageType, uint damage)
         {
-            GameFormulaEntry armorFormulaEntry = GameTableManager.Instance.GameFormula.GetEntry(1234);
+            GameFormulaEntry armorFormulaEntry = gameTableManager.GameFormula.GetEntry(1234);
             float maximumArmorMitigation = (float)(armorFormulaEntry.Dataint01 * 0.01);
             float mitigationPct = (armorFormulaEntry.Datafloat0 / victim.Level * armorFormulaEntry.Datafloat01) * victim.GetPropertyValue(Property.Armor) / 100;
 
@@ -221,79 +311,79 @@ namespace NexusForever.Game.Combat
             switch (property)
             {
                 case Property.Armor:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1234);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1234);
                     break;
                 case Property.RatingArmorPierce:
                 case Property.IgnoreArmorBase:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1269);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1269);
                     break;
                 case Property.RatingAvoidReduce: // Strikethrough
                 case Property.BaseAvoidReduceChance:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1230);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1230);
                     break;
                 case Property.RatingAvoidIncrease: // Deflect
                 case Property.BaseAvoidChance:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1235);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1235);
                     break;
                 case Property.RatingCriticalMitigation:
                 case Property.BaseCriticalMitigation:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1236);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1236);
                     break;
                 case Property.RatingCritChanceDecrease: // Deflect Crit Chance
                 case Property.BaseAvoidCritChance:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1236);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1236);
                     break;
                 case Property.RatingCritChanceIncrease:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1231);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1231);
                     break;
                 case Property.RatingCritSeverityIncrease:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1232);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1232);
                     break;
                 case Property.CCDurationModifier:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1274);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1274);
                     break;
                 case Property.RatingDamageReflectAmount:
                 case Property.BaseDamageReflectAmount:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1272);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1272);
                     break;
                 case Property.RatingDamageReflectChance:
                 case Property.BaseDamageReflectChance:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1241);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1241);
                     break;
                 case Property.RatingFocusRecovery:
                 case Property.BaseFocusRecoveryInCombat:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1237);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1237);
                     break;
                 case Property.RatingGlanceAmount:
                 case Property.BaseGlanceAmount:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1271);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1271);
                     break;
                 case Property.RatingGlanceChance:
                 case Property.BaseGlanceChance:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1245);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1245);
                     break;
                 case Property.RatingIntensity:
                 case Property.BaseIntensity:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1243);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1243);
                     break;
                 case Property.RatingLifesteal:
                 case Property.BaseLifesteal:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1233);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1233);
                     break;
                 case Property.RatingMultiHitAmount:
                 case Property.BaseMultiHitAmount:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1270);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1270);
                     break;
                 case Property.RatingMultiHitChance:
                 case Property.BaseMultiHitChance:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1240);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1240);
                     break;
                 case Property.RatingVigor:
                 case Property.BaseVigor:
-                    gameFormula = GameTableManager.Instance.GameFormula.GetEntry(1244);
+                    gameFormula = gameTableManager.GameFormula.GetEntry(1244);
                     break;
                 default:
-                    log.Warn($"Unhandled Property in calculating Percentage from Rating: {property}");
+                    log.LogWarning($"Unhandled Property in calculating Percentage from Rating: {property}");
                     break;
             }
 
@@ -376,7 +466,7 @@ namespace NexusForever.Game.Combat
                     baseValue = entity.GetPropertyValue(Property.BaseVigor);
                     break;
                 default:
-                    log.Warn($"Unhandled Property in calculating Percentage from Base: {property}");
+                    log.LogWarning($"Unhandled Property in calculating Percentage from Base: {property}");
                     break;
             }
 

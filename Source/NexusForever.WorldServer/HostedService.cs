@@ -127,8 +127,6 @@ namespace NexusForever.WorldServer
             CharacterManager.Instance.Initialise(); // must be initialised before residences
             GlobalResidenceManager.Instance.Initialise();
             GlobalGuildManager.Instance.ValidateCommunityResidences();
-            
-            DamageCalculator.Instance.Initialise();
 
             AssetManager.Instance.Initialise();
             ItemManager.Instance.Initialise();
