@@ -176,7 +176,7 @@ namespace NexusForever.Game.Group
             {
                 // If the player is not online - can't give them the message.
                 IPlayer player = PlayerManager.Instance.GetPlayer(member.CharacterId);
-                player?.Session.EnqueueMessage(message);
+                player?.Session.EnqueueMessageEncrypted(message);
             }
         }
 
