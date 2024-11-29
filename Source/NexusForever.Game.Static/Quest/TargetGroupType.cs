@@ -10,7 +10,7 @@
         Unknown7            = 7,
         Unknown9            = 9,
         OtherTargetGroup    = 10, // This is used to target other TargetGroup(s) data
-        Unknown11           = 11,
+        OtherTargetGroup2   = 11, // Target other TargetGroup(s) - Used in kill quest.
         CreatureRaceIdGroup = 12, // This targets the Creature2Entry.RaceId
         Unknown13           = 13
     }
