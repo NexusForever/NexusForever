@@ -1,13 +1,15 @@
+using NexusForever.Game.Static.Prerequisite;
+
 namespace NexusForever.GameTable.Model
 {
     public class PrerequisiteEntry
     {
         public uint Id;
-        public uint Flags;
+        public EvaluationMode Flags;
         [GameTableFieldArray(3u)]
-        public uint[] PrerequisiteTypeId;
+        public PrerequisiteType[] PrerequisiteTypeId;
         [GameTableFieldArray(3u)]
-        public uint[] PrerequisiteComparisonId;
+        public PrerequisiteComparison[] PrerequisiteComparisonId;
         [GameTableFieldArray(3u)]
         public uint[] ObjectId;
         [GameTableFieldArray(3u)]

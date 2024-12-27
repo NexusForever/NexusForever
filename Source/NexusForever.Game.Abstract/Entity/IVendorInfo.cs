@@ -1,9 +1,11 @@
 ﻿using System.Collections.Immutable;
 using NexusForever.Database.World.Model;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Abstract.Entity
 {
-    public interface IVendorInfo
+    public interface IVendorInfo : INetworkBuildable<ServerVendorItemsUpdated>
     {
         uint Id { get; }
         float SellPriceMultiplier { get; }

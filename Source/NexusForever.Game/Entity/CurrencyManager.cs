@@ -11,14 +11,29 @@ namespace NexusForever.Game.Entity
 {
     public class CurrencyManager : ICurrencyManager
     {
-        private readonly IPlayer player;
-        private readonly Dictionary<CurrencyType, ICurrency> currencies = new();
+        private IPlayer player;
+        private readonly Dictionary<CurrencyType, ICurrency> currencies = [];
+
+        #region Depenedency Injection
+
+        private readonly IGameTableManager gameTableManager;
+
+        public CurrencyManager(
+            IGameTableManager gameTableManager)
+        {
+            this.gameTableManager = gameTableManager;
+        }
+
+        #endregion
 
         /// <summary>
-        /// Create a new <see cref="ICurrencyManager"/> from <see cref="CharacterModel"/> database model.
+        /// Initialise <see cref="ICurrencyManager"/> from <see cref="CharacterModel"/> database model.
         /// </summary>
-        public CurrencyManager(IPlayer owner, CharacterModel model)
+        public void Initialise(IPlayer owner, CharacterModel model)
         {
+            if (player != null)
+                throw new InvalidOperationException("CurrencyManager has already been initialised!");
+
             player = owner;
 
             foreach (CharacterCurrencyModel currencyModel in model.Currency)
@@ -37,7 +52,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Returns total amount of acquired <see cref="CurrencyType"/>.
         /// </summary>
-        public ulong? GetCurrency(CurrencyType currencyId)
+        private ulong? GetCurrency(CurrencyType currencyId)
         {
             if (!currencies.TryGetValue(currencyId, out ICurrency currency))
                 return null;
@@ -49,6 +64,15 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool CanAfford(CurrencyType currencyId, ulong amount)
         {
+            CurrencyTypeEntry currencyEntry = gameTableManager.CurrencyType.GetEntry((ulong)currencyId);
+            if (currencyEntry == null)
+                throw new ArgumentNullException();
+
+            // it is possible to check for a currency amount of 0 without having the currency in the store
+            // in this scenario we should allow the check to pass
+            if (amount == 0)
+                return true;
+
             return GetCurrency(currencyId) >= amount;
         }
 
@@ -57,7 +81,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CurrencyAddAmount(CurrencyType currencyId, ulong amount, bool isLoot = false)
         {
-            CurrencyTypeEntry currencyEntry = GameTableManager.Instance.CurrencyType.GetEntry((ulong)currencyId);
+            CurrencyTypeEntry currencyEntry = gameTableManager.CurrencyType.GetEntry((ulong)currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
@@ -97,7 +121,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CurrencySubtractAmount(CurrencyType currencyId, ulong amount, bool isLoot = false)
         {
-            CurrencyTypeEntry currencyEntry = GameTableManager.Instance.CurrencyType.GetEntry((ulong)currencyId);
+            CurrencyTypeEntry currencyEntry = gameTableManager.CurrencyType.GetEntry((ulong)currencyId);
             if (currencyEntry == null)
                 throw new ArgumentNullException();
 
@@ -108,6 +132,11 @@ namespace NexusForever.Game.Entity
         {
             if (currencyEntry == null)
                 throw new ArgumentNullException();
+
+            // it is possible to subtract a currency amount of 0 without having the currency in the store
+            // in this scenario we should allow this to pass
+            if (amount == 0)
+                return;
 
             if (!currencies.TryGetValue((CurrencyType)currencyEntry.Id, out ICurrency currency))
                 throw new ArgumentException($"Cannot create currency {currencyEntry.Id} with a negative amount!");

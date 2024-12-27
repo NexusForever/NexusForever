@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Entity;
+
 namespace NexusForever.GameTable.Model
 {
     public class EmotesEntry
@@ -17,7 +19,7 @@ namespace NexusForever.GameTable.Model
         public bool TurnToFace;
         public bool TextReplaceable;
         public bool ChangesStandState;
-        public uint StandState;
+        public StandState StandState;
         public uint LocalizedTextIdCommand;
         public uint LocalizedTextIdNotFoundToAll;
         public uint LocalizedTextIdNotFoundToSelf;

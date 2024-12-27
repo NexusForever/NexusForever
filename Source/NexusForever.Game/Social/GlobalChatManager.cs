@@ -7,7 +7,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;

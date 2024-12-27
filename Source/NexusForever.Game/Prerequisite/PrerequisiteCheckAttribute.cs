@@ -2,7 +2,7 @@
 
 namespace NexusForever.Game.Prerequisite
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class PrerequisiteCheckAttribute : Attribute
     {
         public PrerequisiteType Type { get; }

@@ -1,9 +1,11 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game;
 using NexusForever.Game.Social;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;
-using NexusForever.Network;
+using NexusForever.Network.Session;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Network;
 
@@ -48,7 +50,10 @@ namespace NexusForever.WorldServer.Command.Handler
             string message)
         {
             RealmContext.Instance.Motd = message;
-            foreach (WorldSession session in NetworkManager<WorldSession>.Instance)
+
+            // TODO: move commands to dependency injection...
+            var networkManager = LegacyServiceProvider.Provider.GetService<INetworkManager<IWorldSession>>();
+            foreach (IWorldSession session in networkManager)
                 GlobalChatManager.Instance.SendMessage(session, RealmContext.Instance.Motd, "MOTD", ChatChannelType.Realm);
         }
 
@@ -57,7 +62,9 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("Max players allowed.")]
             uint maxPlayers)
         {
-            LoginQueueManager.Instance.SetMaxPlayers(maxPlayers);
+            // TODO: move commands to dependency injection...
+            var queueManager = LegacyServiceProvider.Provider.GetService<ILoginQueueManager>();
+            queueManager.SetMaxPlayers(maxPlayers);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
+using NexusForever.Game.Static.Entity.Movement.Command;
 using NexusForever.Shared;
 
 namespace NexusForever.Network.World.Entity
@@ -9,12 +10,10 @@ namespace NexusForever.Network.World.Entity
     {
         private delegate IEntityCommandModel EntityCommandFactoryDelegate();
         private ImmutableDictionary<EntityCommand, EntityCommandFactoryDelegate> entityCommandFactories;
-        private ImmutableDictionary<Type, EntityCommand> entityCommands;
 
         public void Initialise()
         {
             var factoryBuilder = ImmutableDictionary.CreateBuilder<EntityCommand, EntityCommandFactoryDelegate>();
-            var commandBuilder = ImmutableDictionary.CreateBuilder<Type, EntityCommand>();
 
             foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
             {
@@ -28,11 +27,9 @@ namespace NexusForever.Network.World.Entity
 
                 NewExpression @new = Expression.New(constructor);
                 factoryBuilder.Add(attribute.Command, Expression.Lambda<EntityCommandFactoryDelegate>(@new).Compile());
-                commandBuilder.Add(type, attribute.Command);
             }
 
             entityCommandFactories = factoryBuilder.ToImmutable();
-            entityCommands = commandBuilder.ToImmutable();
         }
 
         /// <summary>
@@ -41,17 +38,6 @@ namespace NexusForever.Network.World.Entity
         public IEntityCommandModel NewEntityCommand(EntityCommand command)
         {
             return entityCommandFactories.TryGetValue(command, out EntityCommandFactoryDelegate factory) ? factory.Invoke() : null;
-        }
-
-        /// <summary>
-        /// Returns the <see cref="EntityCommand"/> for supplied <see cref="Type"/>.
-        /// </summary>
-        public EntityCommand? GetCommand(Type type)
-        {
-            if (entityCommands.TryGetValue(type, out EntityCommand command))
-                return command;
-
-            return null;
         }
     }
 }

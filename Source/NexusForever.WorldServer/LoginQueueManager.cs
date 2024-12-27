@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Shared;
-using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Network;
-using NLog;
 
-namespace NexusForever.Game
+namespace NexusForever.WorldServer
 {
-    public sealed class LoginQueueManager : Singleton<LoginQueueManager>, ILoginQueueManager
+    public sealed class LoginQueueManager : ILoginQueueManager
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         public class QueueData
         {
             public string Id { get; init; }
@@ -33,17 +30,38 @@ namespace NexusForever.Game
         private readonly Dictionary<string, QueueData> queueData = new();
         private readonly Queue<string> queue = new();
 
-        private Action<WorldSession> admitCallback;
+        private Action<IWorldSession> admitCallback;
 
-        private uint maximumPlayers = SharedConfiguration.Instance.Get<RealmConfig>().MaxPlayers;
-        private UpdateTimer queueCheck = new(TimeSpan.FromSeconds(5));
+        private uint maximumPlayers;
+        private readonly UpdateTimer queueCheck = new(TimeSpan.FromSeconds(5));
 
-        public void Initialise(Action<WorldSession> callback)
+        #region Dependency Injection
+
+        private readonly ILogger<LoginQueueManager> log;
+        private readonly IOptions<RealmConfig> realmOptions;
+
+        private readonly INetworkManager<IWorldSession> networkManager;
+
+        public LoginQueueManager(
+            ILogger<LoginQueueManager> log,
+            IOptions<RealmConfig> realmOptions,
+            INetworkManager<IWorldSession> networkManager)
+        {
+            this.log            = log;
+            this.realmOptions   = realmOptions;
+
+            this.networkManager = networkManager;
+        }
+
+        #endregion
+
+        public void Initialise(Action<IWorldSession> callback)
         {
             if (admitCallback != null)
                 throw new InvalidOperationException();
 
-            admitCallback = callback;
+            admitCallback  = callback;
+            maximumPlayers = realmOptions.Value.MaxPlayers;
         }
 
         public void Update(double lastTick)
@@ -75,13 +93,13 @@ namespace NexusForever.Game
         /// <remarks>
         /// Returns <see cref="true"/> if the session was admited to the realm.
         /// </remarks>
-        public bool OnNewSession(WorldSession session)
+        public bool OnNewSession(IWorldSession session)
         {
             // check if session is already in queue
             // this allows the account to rejoin the queue after a disconnect
             if (queueData.TryGetValue(session.Id, out QueueData data))
             {
-                log.Trace($"Session {session.Id} has rejoined the queue.");
+                log.LogTrace($"Session {session.Id} has rejoined the queue.");
 
                 SendQueueStatus(session, data.Position);
                 return false;
@@ -91,7 +109,7 @@ namespace NexusForever.Game
             // check if the realm is currently accepting new sessions
             if (!CanEnterWorld(session))
             {
-                log.Trace($"Session {session.Id} has joined the queue.");
+                log.LogTrace($"Session {session.Id} has joined the queue.");
 
                 uint position = (uint)queue.Count + 1u;
 
@@ -113,7 +131,7 @@ namespace NexusForever.Game
         /// <summary>
         /// Remove session from realm queue.
         /// </summary>
-        public void OnDisconnect(WorldSession session)
+        public void OnDisconnect(IWorldSession session)
         {
             // current admited session count will be reduced if session isn't queued
             if (session.IsQueued != false)
@@ -131,13 +149,13 @@ namespace NexusForever.Game
         public void SetMaxPlayers(uint newMaximumPlayers)
         {
             maximumPlayers = newMaximumPlayers;
-            log.Info($"Updated realm session limit to {maximumPlayers}.");
+            log.LogInformation($"Updated realm session limit to {maximumPlayers}.");
         }
 
         private void AdmitSession(string id)
         {
             // there is a possibility the session will not exist if the player has disconnected during the queue
-            WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(id);
+            IWorldSession session = networkManager.GetSession(id);
             if (session == null)
                 return;
 
@@ -147,9 +165,9 @@ namespace NexusForever.Game
             admitCallback.Invoke(session);
         }
 
-        private void AdmitSession(WorldSession session)
+        private void AdmitSession(IWorldSession session)
         {
-            log.Trace($"Admitting session {session.Id} into the realm.");
+            log.LogTrace($"Admitting session {session.Id} into the realm.");
 
             session.IsQueued = false;
 
@@ -159,7 +177,7 @@ namespace NexusForever.Game
             }
         }
 
-        private bool CanEnterWorld(WorldSession session)
+        private bool CanEnterWorld(IWorldSession session)
         {
             // accounts with GM permission are exempt from queue (lucky you!)
             if (session.Account.RbacManager.HasPermission(Permission.GMFlag))
@@ -186,13 +204,13 @@ namespace NexusForever.Game
                 data.Position = position++;
 
                 // there is a possibility the session will not exist if the player has disconnected during the queue
-                WorldSession session = NetworkManager<WorldSession>.Instance.GetSession(data.Id);
+                IWorldSession session = networkManager.GetSession(data.Id);
                 if (session != null)
                     SendQueueStatus(session, data.Position);
             }
         }
 
-        private static void SendQueueStatus(WorldSession session, uint queuePosition)
+        private static void SendQueueStatus(IWorldSession session, uint queuePosition)
         {
             session.EnqueueMessageEncrypted(new ServerQueueStatus
             {

@@ -5,26 +5,31 @@ namespace NexusForever.Game.Abstract.Entity.Movement.Spline.Type
 {
     public interface ISplineType
     {
-        uint BottomIndex { get; }
-        uint TopIndex { get; }
-        uint BottomReverseIndex { get; }
-        uint TopReverseIndex { get; }
-
-        void Initialise(uint points);
+        SplineType Type { get; }
 
         /// <summary>
-        /// Get the interpolated <see cref="Vector3"/> between supplied points in <see cref="SplineDirection"/> at normalised (0 - totalLength) position p.
+        /// Total length of the spline.
         /// </summary>
-        Vector3 GetInterpolatedPoint(SplineDirection direction, float p, List<ISplinePoint> points);
+        float Length { get; }
 
         /// <summary>
-        /// Get the interpolated <see cref="Vector3"/> between supplied points at normalised (0-1) distance t.
+        /// Total length of delays in the spline.
         /// </summary>
-        Vector3 GetInterpolatedPoint(float t, params ISplinePoint[] points);
+        float DelayLength { get; }
 
         /// <summary>
-        /// Calculate the length of each segment and returns the total length.
+        /// Initialise the spline with a collection of <see cref="ISplinePoint"/>.
         /// </summary>
-        float CalculateLengths(List<ISplinePoint> points);
+        void Initialise(List<ISplinePoint> points);
+
+        /// <summary>
+        /// Get the interpolated position between two points.
+        /// </summary>
+        Vector3 GetInterpolatedPosition(ISplinePoint point, ISplinePoint point2, float t);
+
+        /// <summary>
+        /// Get the interpolated rotation between two points.
+        /// </summary>
+        Vector3 GetInterpolatedRotation(ISplinePoint point, ISplinePoint point2, float t);
     }
 }

@@ -93,11 +93,11 @@ namespace NexusForever.Network.World.Message.Model
 
         public uint Guid { get; set; }
         public EntityType Type { get; set; }
-        public byte CreateFlags { get; set; }
+        public EntityCreateFlag CreateFlags { get; set; }
         public IEntityModel EntityModel { get; set; }
         public List<StatValueInitial> Stats { get; set; } = new();
         public uint Time { get; set; }
-        public List<(EntityCommand, IEntityCommandModel)> Commands { get; set; } = new();
+        public List<INetworkEntityCommand> Commands { get; set; } = new();
         public List<PropertyValue> Properties { get; set; } = new();
         public List<ItemVisual> VisibleItems { get; set; } = new();
         public List<SpellInit> SpellInitData { get; } = new();
@@ -118,7 +118,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(Guid);
             writer.Write(Type, 6);
             EntityModel.Write(writer);
-            writer.Write(CreateFlags);
+            writer.Write(CreateFlags, 8);
 
             writer.Write((byte)Stats.Count, 5);
             Stats.ForEach(o => o.Write(writer));
@@ -126,10 +126,10 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(Time);
 
             writer.Write((byte)Commands.Count, 5);
-            foreach ((EntityCommand command, IEntityCommandModel entityCommand) in Commands)
+            foreach (INetworkEntityCommand command in Commands)
             {
-                writer.Write(command, 5);
-                entityCommand.Write(writer);
+                writer.Write(command.Command, 5);
+                command.Model.Write(writer);
             }
 
             writer.Write((byte)Properties.Count);

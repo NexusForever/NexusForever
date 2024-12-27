@@ -2,7 +2,7 @@
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Example
+namespace NexusForever.Script.Main.Example
 {
     [ScriptFilterIgnore]
     public class PlayerScript : IPlayerScript, IOwnedScript<IPlayer>

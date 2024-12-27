@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Auth;
 
@@ -16,8 +17,10 @@ namespace NexusForever.Database.Auth.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountCostumeUnlockModel", b =>
                 {
@@ -95,6 +98,26 @@ namespace NexusForever.Database.Auth.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("account_entitlement", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountExternalReferenceModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .HasColumnType("int(10) unsigned")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("type");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("varchar(512)")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id", "Type")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("account_external_reference", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountGenericUnlockModel", b =>
@@ -222,6 +245,8 @@ namespace NexusForever.Database.Auth.Migrations
                         .HasColumnType("int(10) unsigned")
                         .HasColumnName("id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
+
                     b.Property<DateTime>("CreateTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -331,6 +356,8 @@ namespace NexusForever.Database.Auth.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasColumnName("banId");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("BanId"));
 
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime")
@@ -1136,6 +1163,8 @@ namespace NexusForever.Database.Auth.Migrations
                         .HasColumnType("tinyint(3) unsigned")
                         .HasColumnName("id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<byte>("Id"));
+
                     b.Property<string>("Host")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -1209,6 +1238,18 @@ namespace NexusForever.Database.Auth.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK__account_entitlement_id__account_id");
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Auth.Model.AccountExternalReferenceModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Auth.Model.AccountModel", "Account")
+                        .WithMany("AccountExternalReference")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__account_external_reference_id__account_id");
 
                     b.Navigation("Account");
                 });
@@ -1319,6 +1360,8 @@ namespace NexusForever.Database.Auth.Migrations
                     b.Navigation("AccountCurrency");
 
                     b.Navigation("AccountEntitlement");
+
+                    b.Navigation("AccountExternalReference");
 
                     b.Navigation("AccountGenericUnlock");
 

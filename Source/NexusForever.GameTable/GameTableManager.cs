@@ -347,9 +347,16 @@ namespace NexusForever.GameTable
         [GameData]
         public GameTable<MapZoneWorldJoinEntry> MapZoneWorldJoin { get; private set; }
         public GameTable<MatchTypeRewardRotationContentEntry> MatchTypeRewardRotationContent { get; private set; }
+
+        [GameData]
         public GameTable<MatchingGameMapEntry> MatchingGameMap { get; private set; }
+
+        [GameData]
         public GameTable<MatchingGameTypeEntry> MatchingGameType { get; private set; }
+
+        [GameData]
         public GameTable<MatchingRandomRewardEntry> MatchingRandomReward { get; private set; }
+
         public GameTable<MaterialDataEntry> MaterialData { get; private set; }
         public GameTable<MaterialRemapEntry> MaterialRemap { get; private set; }
         public GameTable<MaterialSetEntry> MaterialSet { get; private set; }
@@ -416,6 +423,8 @@ namespace NexusForever.GameTable
         [GameData]
         public GameTable<PetFlairEntry> PetFlair { get; private set; }
         public GameTable<PlayerNotificationTypeEntry> PlayerNotificationType { get; private set; }
+
+        [GameData]
         public GameTable<PositionalRequirementEntry> PositionalRequirement { get; private set; }
 
         [GameData]
@@ -425,18 +434,32 @@ namespace NexusForever.GameTable
         public GameTable<PrimalMatrixNodeEntry> PrimalMatrixNode { get; private set; }
         public GameTable<PrimalMatrixRewardEntry> PrimalMatrixReward { get; private set; }
         public GameTable<PropAdditionalDetailEntry> PropAdditionalDetail { get; private set; }
+
+        [GameData]
         public GameTable<PublicEventEntry> PublicEvent { get; private set; }
+
+        [GameData]
         public GameTable<PublicEventCustomStatEntry> PublicEventCustomStat { get; private set; }
+
         public GameTable<PublicEventDepotEntry> PublicEventDepot { get; private set; }
+
+        [GameData]
         public GameTable<PublicEventObjectiveEntry> PublicEventObjective { get; private set; }
+
         public GameTable<PublicEventObjectiveBombDeploymentEntry> PublicEventObjectiveBombDeployment { get; private set; }
         public GameTable<PublicEventObjectiveGatherResourceEntry> PublicEventObjectiveGatherResource { get; private set; }
         public GameTable<PublicEventObjectiveStateEntry> PublicEventObjectiveState { get; private set; }
         public GameTable<PublicEventRewardModifierEntry> PublicEventRewardModifier { get; private set; }
         public GameTable<PublicEventStatDisplayEntry> PublicEventStatDisplay { get; private set; }
+
+        [GameData]
         public GameTable<PublicEventTeamEntry> PublicEventTeam { get; private set; }
+
         public GameTable<PublicEventVirtualItemDepotEntry> PublicEventVirtualItemDepot { get; private set; }
+
+        [GameData]
         public GameTable<PublicEventVoteEntry> PublicEventVote { get; private set; }
+
         public GameTable<PvPRatingFloorEntry> PvPRatingFloor { get; private set; }
 
         [GameData]

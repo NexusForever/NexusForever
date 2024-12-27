@@ -1,5 +1,4 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Entity;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Map
@@ -10,6 +9,11 @@ namespace NexusForever.Game.Abstract.Map
         /// Enqueue <see cref="IPlayer"/> to be added to a map. 
         /// </summary>
         void AddToMap(IPlayer player, IMapPosition mapPosition);
+
+        /// <summary>
+        /// Return <see cref="IMap"/> for supplied worldId.
+        /// </summary>
+        IMap GetMap(uint worldId);
 
         /// <summary>
         /// Returns if <see cref="IPlayer"/> can create a new instance.

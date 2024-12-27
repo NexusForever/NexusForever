@@ -1,6 +1,6 @@
 ﻿using NexusForever.Database.Character;
 
-namespace NexusForever.Game.Entity
+namespace NexusForever.Game.Abstract.Entity
 {
     public interface ICustomisation : IDatabaseCharacter
     {

@@ -28,13 +28,6 @@ namespace NexusForever.Script.Template
         }
 
         /// <summary>
-        /// Invoked when <see cref="IGridEntity"/> enters a zone.
-        /// </summary>
-        void OnEnterZone(IGridEntity entity, uint zone)
-        {
-        }
-
-        /// <summary>
         /// Invoked when <see cref="IGridEntity"/> is added to vision range.
         /// </summary>
         void OnAddVisibleEntity(IGridEntity entity)
@@ -45,6 +38,20 @@ namespace NexusForever.Script.Template
         /// Invoked when <see cref="IGridEntity"/> is removed from vision range.
         /// </summary>
         void OnRemoveVisibleEntity(IGridEntity entity)
+        {
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IGridEntity"/> is added to range check range.
+        /// </summary>
+        void OnEnterRange(IGridEntity entity)
+        {
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IGridEntity"/> is removed from range check range.
+        /// </summary>
+        void OnExitRange(IGridEntity entity)
         {
         }
     }

@@ -1,4 +1,6 @@
-﻿namespace NexusForever.Network.World.Entity
+﻿using NexusForever.Game.Static.Entity.Movement.Command;
+
+namespace NexusForever.Network.World.Entity
 {
     public interface IEntityCommandManager
     {
@@ -7,11 +9,6 @@
         /// <summary>
         /// Return a new <see cref="IEntityCommandModel"/> of supplied <see cref="EntityCommand"/>.
         /// </summary>
-        IEntityCommandModel NewEntityCommand(EntityCommand command);
-
-        /// <summary>
-        /// Returns the <see cref="EntityCommand"/> for supplied <see cref="Type"/>.
-        /// </summary>
-        EntityCommand? GetCommand(Type type);
+        IEntityCommandModel NewEntityCommand(EntityCommand id);
     }
 }

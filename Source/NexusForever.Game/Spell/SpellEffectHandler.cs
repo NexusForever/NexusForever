@@ -1,4 +1,5 @@
 using System.Numerics;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Entity;
@@ -8,6 +9,7 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell
 {
@@ -81,7 +83,11 @@ namespace NexusForever.Game.Spell
             if (!player.CanMount())
                 return;
 
-            var mount = new Mount(player, spell.Parameters.SpellInfo.Entry.Id, info.Entry.DataBits00, info.Entry.DataBits01, info.Entry.DataBits04);
+            // TODO: needs to be replaced once spell effect handlers aren't static
+            var factory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
+
+            var mount = factory.CreateEntity<IMountEntity>();
+            mount.Initialise(player, spell.Parameters.SpellInfo.Entry.Id, info.Entry.DataBits00, info.Entry.DataBits01, info.Entry.DataBits04);
             mount.EnqueuePassengerAdd(player, VehicleSeatType.Pilot, 0);
 
             // usually for hover boards
@@ -146,7 +152,7 @@ namespace NexusForever.Game.Spell
                 return;
 
             var rotation = new Quaternion(worldLocation.Facing0, worldLocation.Facing0, worldLocation.Facing2, worldLocation.Facing3);
-            player.Rotation = rotation.ToEulerDegrees();
+            player.Rotation = rotation.ToEuler();
             player.TeleportTo((ushort)worldLocation.WorldId, worldLocation.Position0, worldLocation.Position1, worldLocation.Position2);
         }
 
@@ -207,20 +213,24 @@ namespace NexusForever.Game.Spell
             // enqueue removal of existing vanity pet if summoned
             if (player.VanityPetGuid != null)
             {
-                IVanityPet oldVanityPet = player.GetVisible<IVanityPet>(player.VanityPetGuid.Value);
+                IPetEntity oldVanityPet = player.GetVisible<IPetEntity>(player.VanityPetGuid.Value);
                 oldVanityPet?.RemoveFromMap();
                 player.VanityPetGuid = 0u;
             }
 
-            var vanityPet = new VanityPet(player, info.Entry.DataBits00);
+            // TODO: needs to be replaced once spell effect handlers aren't static
+            var factory = LegacyServiceProvider.Provider.GetService<IEntityFactory>();
+
+            var pet = factory.CreateEntity<IPetEntity>();
+            pet.Initialise(player, info.Entry.DataBits00);
 
             var position = new MapPosition
             {
                 Position = player.Position
             };
 
-            if (player.Map.CanEnter(vanityPet, position))
-                player.Map.EnqueueAdd(vanityPet, position);
+            if (player.Map.CanEnter(pet, position))
+                player.Map.EnqueueAdd(pet, position);
         }
 
         [SpellEffectHandler(SpellEffectType.TitleGrant)]

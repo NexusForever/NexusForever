@@ -7,11 +7,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using NexusForever.Database;
-using NexusForever.Network;
+using NexusForever.Network.Configuration.Model;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.StsServer.Network;
-using NexusForever.StsServer.Network.Message;
 using NLog;
 using NLog.Extensions.Logging;
 
@@ -40,15 +39,17 @@ namespace NexusForever.StsServer
                 {
                     cb.AddJsonFile("StsServer.json", false);
                 })
-                .ConfigureServices(sc =>
+                .ConfigureServices((hb, sc) =>
                 {
                     sc.AddHostedService<HostedService>();
+
+                    sc.AddOptions<NetworkConfig>()
+                        .Bind(hb.Configuration.GetSection("Network"));
 
                     sc.AddSingletonLegacy<ISharedConfiguration, SharedConfiguration>();
 
                     sc.AddDatabase();
-                    sc.AddSingletonLegacy<IMessageManager, MessageManager>();
-                    sc.AddSingletonLegacy<INetworkManager<StsSession>, NetworkManager<StsSession>>();
+                    sc.AddStsNetwork();
                     sc.AddShared();
                 })
                 .UseWindowsService()

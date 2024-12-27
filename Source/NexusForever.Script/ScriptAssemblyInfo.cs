@@ -109,6 +109,9 @@ namespace NexusForever.Script
                     if (!type.IsAssignableTo(typeof(IScript)))
                         continue;
 
+                    if (type.IsAbstract)
+                        continue;
+
                     if (type.GetCustomAttribute<ScriptFilterIgnoreAttribute>() != null)
                     {
                         log.LogTrace("Script type {type} was ignoed due to attribute.", type.Name);
@@ -171,8 +174,11 @@ namespace NexusForever.Script
 
             log.LogInformation("Starting unload for script assembly {Name}.", Name);
 
-            assemblyWatcher?.Stop();
-            sourceWatcher?.Stop();
+            if (assemblyWatcher?.IsWatching == true)
+                assemblyWatcher.Stop();
+
+            if (sourceWatcher?.IsWatching == true)
+                sourceWatcher.Stop();
 
             foreach (IScriptInfo scriptInfo in scripts)
                 scriptInfo.Unload();

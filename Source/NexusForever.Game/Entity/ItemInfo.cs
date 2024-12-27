@@ -367,7 +367,7 @@ namespace NexusForever.Game.Entity
             else
             {
                 vendorBuyCurrency[0] = CurrencyType.Credits;
-                vendorBuyCurrency[1] = CurrencyType.Credits;
+                vendorBuyCurrency[1] = CurrencyType.None;
 
                 // calculated purchase price
                 vendorBuyAmount[0] = (uint)MathF.Floor(CalculateVendorAmount());

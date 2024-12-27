@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
-using NexusForever.Database.World;
 using NexusForever.Database;
+using NexusForever.Database.World;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
@@ -13,7 +13,6 @@ using NexusForever.GameTable.Model;
 using NexusForever.IO.Map;
 using NexusForever.Shared;
 using NLog;
-using NexusForever.Game.Abstract.Entity;
 
 namespace NexusForever.Game.Entity
 {
@@ -21,36 +20,13 @@ namespace NexusForever.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private delegate WorldEntity EntityFactoryDelegate();
-        private ImmutableDictionary<EntityType, EntityFactoryDelegate> entityFactories;
-
         private ImmutableDictionary<Stat, StatAttribute> statAttributes;
 
         public void Initialise()
         {
-            InitialiseEntityFactories();
             InitialiseEntityStats();
 
             CalculateEntityAreaData();
-        }
-
-        private void InitialiseEntityFactories()
-        {
-            var builder = ImmutableDictionary.CreateBuilder<EntityType, EntityFactoryDelegate>();
-
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
-            {
-                DatabaseEntityAttribute attribute = type.GetCustomAttribute<DatabaseEntityAttribute>();
-                if (attribute == null)
-                    continue;
-
-                ConstructorInfo constructor = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
-
-                NewExpression @new = Expression.New(constructor);
-                builder.Add(attribute.EntityType, Expression.Lambda<EntityFactoryDelegate>(@new).Compile());
-            }
-
-            entityFactories = builder.ToImmutable();
         }
 
         private void InitialiseEntityStats()
@@ -101,14 +77,6 @@ namespace NexusForever.Game.Entity
             DatabaseManager.Instance.GetDatabase<WorldDatabase>().UpdateEntities(entities);
 
             log.Info($"Calculated area information for {entities.Count} {(entities.Count == 1 ? "entity" : "entities")}.");
-        }
-
-        /// <summary>
-        /// Return a new <see cref="IWorldEntity"/> of supplied <see cref="EntityType"/>.
-        /// </summary>
-        public IWorldEntity NewEntity(EntityType type)
-        {
-            return entityFactories.TryGetValue(type, out EntityFactoryDelegate factory) ? factory.Invoke() : null;
         }
 
         /// <summary>

@@ -63,7 +63,7 @@ namespace NexusForever.Game.Account.Unlock
         public void UnlockAll(GenericUnlockType type)
         {
             foreach (GenericUnlockEntryEntry entry in GameTableManager.Instance.GenericUnlockEntry.Entries
-                .Where(e => e.GenericUnlockTypeEnum == (uint)type))
+                .Where(e => e.GenericUnlockTypeEnum == type))
             {
                 if (unlocks.ContainsKey(entry.Id))
                     continue;

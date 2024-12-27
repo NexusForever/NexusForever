@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Map;
+
 namespace NexusForever.GameTable.Model
 {
     public class WorldEntry
@@ -5,7 +7,7 @@ namespace NexusForever.GameTable.Model
         public uint Id;
         public string AssetPath;
         public uint Flags;
-        public uint Type;
+        public MapType Type;
         public string ScreenPath;
         public string ScreenModelPath;
         public uint ChunkBounds00;

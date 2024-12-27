@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
 
@@ -12,10 +12,14 @@ namespace NexusForever.Game.Entity
     /// </summary>
     public abstract class CreatureEntity : UnitEntity, ICreatureEntity
     {
-        protected CreatureEntity(EntityType type)
-            : base(type)
+        #region Dependency Injection
+
+        public CreatureEntity(IMovementManager movementManager)
+            : base(movementManager)
         {
         }
+
+        #endregion
 
         public override void Initialise(EntityModel model)
         {

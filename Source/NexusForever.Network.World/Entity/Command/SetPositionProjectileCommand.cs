@@ -1,11 +1,13 @@
+using System.Numerics;
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetPositionProjectile)]
     public class SetPositionProjectileCommand : IEntityCommandModel
     {
-        public Position Position { get; set; }
-        public Position Rotation { get; set; }
-
+        public Vector3 Position { get; set; }
+        public Vector3 Rotation { get; set; }
         public uint FlightTime { get; set; }
         public float Gravity { get; set; }
         public uint Offset { get; set; }
@@ -13,21 +15,18 @@ namespace NexusForever.Network.World.Entity.Command
 
         public void Read(GamePacketReader reader)
         {
-            Position = new Position();
-            Rotation = new Position();
-
-            Position.Read(reader);
-            Rotation.Read(reader);
+            Position   = reader.ReadVector3();
+            Rotation   = reader.ReadVector3();
             FlightTime = reader.ReadUInt();
-            Gravity = reader.ReadUInt();
-            Offset = reader.ReadUInt();
-            Blend = reader.ReadBit();
+            Gravity    = reader.ReadUInt();
+            Offset     = reader.ReadUInt();
+            Blend      = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
-            Position.Write(writer);
-            Rotation.Write(writer);
+            writer.WriteVector3(Position);
+            writer.WriteVector3(Rotation);
             writer.Write(FlightTime);
             writer.Write(Gravity);
             writer.Write(Offset);

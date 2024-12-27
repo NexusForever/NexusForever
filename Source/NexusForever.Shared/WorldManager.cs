@@ -45,7 +45,14 @@ namespace NexusForever.Shared
             {
                 stopwatch.Restart();
 
-                updateAction(lastTick);
+                try
+                {
+                    updateAction(lastTick);
+                }
+                catch (Exception ex)
+                {
+                    log.Error(ex, "Error during world update.");
+                }
 
                 Thread.Sleep(1);
                 lastTick = (double)stopwatch.ElapsedTicks / Stopwatch.Frequency;

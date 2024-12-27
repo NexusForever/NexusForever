@@ -21,10 +21,6 @@ namespace NexusForever.MapGenerator
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
         private string outputDir;
 
-        public GenerationManager()
-        {
-        }
-
         public void Initialise(string outputDir)
         {
             log.Info("Generatring base map files...");
@@ -73,7 +69,7 @@ namespace NexusForever.MapGenerator
         /// </summary>
         private void ProcessWorld(WorldEntry entry, byte? gridX = null, byte? gridY = null)
         {
-            var mapFile = new WritableMapFile(Path.GetFileName(entry.AssetPath));
+            var mapFile = new WritableMapFile(Path.GetFileName(entry.AssetPath.Replace('\\', Path.DirectorySeparatorChar)));
 
             log.Info($"Processing {mapFile.Asset}...");
 

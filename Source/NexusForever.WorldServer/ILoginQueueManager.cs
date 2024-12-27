@@ -2,7 +2,7 @@
 using NexusForever.Shared;
 using NexusForever.WorldServer.Network;
 
-namespace NexusForever.Game
+namespace NexusForever.WorldServer
 {
     public interface ILoginQueueManager : IUpdate
     {
@@ -14,7 +14,7 @@ namespace NexusForever.Game
         /// </remarks>
         uint ConnectedPlayers { get; }
 
-        void Initialise(Action<WorldSession> callback);
+        void Initialise(Action<IWorldSession> callback);
 
         /// <summary>
         /// Attempt to admit session to realm, if the world is full the session will be queued.
@@ -22,12 +22,12 @@ namespace NexusForever.Game
         /// <remarks>
         /// Returns <see cref="true"/> if the session was admited to the realm.
         /// </remarks>
-        bool OnNewSession(WorldSession session);
+        bool OnNewSession(IWorldSession session);
 
         /// <summary>
         /// Remove session from realm queue.
         /// </summary>
-        void OnDisconnect(WorldSession session);
+        void OnDisconnect(IWorldSession session);
 
         /// <summary>
         /// Set the maximum number of admitted sessions allowed in the realm.

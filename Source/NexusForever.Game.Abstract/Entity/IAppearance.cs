@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Static.Entity;
 
-namespace NexusForever.Game.Entity
+namespace NexusForever.Game.Abstract.Entity
 {
     public interface IAppearance : IDatabaseCharacter
     {

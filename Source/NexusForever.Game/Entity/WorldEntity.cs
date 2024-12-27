@@ -5,7 +5,6 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
-using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Social;
@@ -19,14 +18,22 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Script.Template;
 
 namespace NexusForever.Game.Entity
 {
     public abstract class WorldEntity : GridEntity, IWorldEntity
     {
-        public EntityType Type { get; }
+        public abstract EntityType Type { get; }
         public EntityCreateFlag CreateFlags { get; set; }
-        public Vector3 Rotation { get; set; } = Vector3.Zero;
+
+        public Vector3 Rotation
+        {
+            get => MovementManager.GetRotation();
+            set => MovementManager.SetRotation(value, false);
+        }
+
+        public WorldZoneEntry Zone { get; private set; }
         public uint EntityId { get; protected set; }
 
         public uint CreatureId
@@ -70,6 +77,8 @@ namespace NexusForever.Game.Entity
 
         public ulong ActivePropId { get; private set; }
         public ushort WorldSocketId { get; private set; }
+
+        public EntitySplineModel Spline { get; private set; }
 
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
@@ -144,7 +153,32 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Guid of the <see cref="IPlayer"/> currently controlling this <see cref="IWorldEntity"/>.
         /// </summary>
-        public uint? ControllerGuid { get; set; }
+        public uint? ControllerGuid
+        {
+            get => controllerGuid;
+            set
+            {
+                controllerGuid = value;
+                MovementManager.ServerControl = value == null;
+            }
+        }
+
+        private uint? controllerGuid;
+
+        /// <summary>
+        /// Guid of the <see cref="IWorldEntity"/> the <see cref="IWorldEntity"/> is a passenger on.
+        /// </summary>
+        public uint? PlatformGuid
+        {
+            get => MovementManager.GetPlatform();
+            private set => MovementManager.SetPlatform(value);
+        }
+
+        /// <summary>
+        /// Collection of guids currently passengers on this <see cref="IWorldEntity"/>.
+        /// </summary>
+        public IEnumerable<uint> PlatformPassengerGuids => platformPassengerGuids;
+        private readonly HashSet<uint> platformPassengerGuids = new();
 
         protected readonly Dictionary<Stat, IStatValue> stats = new Dictionary<Stat, IStatValue>();
 
@@ -155,20 +189,23 @@ namespace NexusForever.Game.Entity
         private bool emitVisual;
         private readonly Dictionary<ItemSlot, IItemVisual> itemVisuals = new();
 
-        /// <summary>
-        /// Create a new <see cref="IWorldEntity"/> with supplied <see cref="EntityType"/>.
-        /// </summary>
-        protected WorldEntity(EntityType type)
+        #region Dependency Injection
+
+        public WorldEntity(
+            IMovementManager movementManager)
         {
-            Type = type;
+            MovementManager = movementManager;
+            MovementManager.Initialise(this);
         }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IWorldEntity"/> with supplied data.
         /// </summary>
         public void Initialise(uint creatureId)
         {
-            CreatureId  = creatureId;
+            CreatureId = creatureId;
         }
 
         /// <summary>
@@ -185,6 +222,7 @@ namespace NexusForever.Game.Entity
             Faction2      = (Faction)model.Faction2;
             ActivePropId  = model.ActivePropId;
             WorldSocketId = model.WorldSocketId;
+            Spline        = model.EntitySpline;
 
             foreach (EntityStatModel statModel in model.EntityStat)
                 stats.Add((Stat)statModel.Stat, new StatValue(statModel));
@@ -196,17 +234,50 @@ namespace NexusForever.Game.Entity
             Shield = MaxShieldCapacity;
         }
 
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> is added to <see cref="IBaseMap"/>.
+        /// </summary>
         public override void OnAddToMap(IBaseMap map, uint guid, Vector3 vector)
         {
-            LeashPosition   = vector;
-            MovementManager = new MovementManager(this, vector, Rotation);
+            LeashPosition = vector;
+            MovementManager.SetPosition(vector, false);
+
             base.OnAddToMap(map, guid, vector);
         }
 
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> is removed from <see cref="IBaseMap"/>.
+        /// </summary>
         public override void OnRemoveFromMap()
         {
+            foreach (uint platformPassengerGuid in platformPassengerGuids.ToList())
+            {
+                IWorldEntity worldEntity = Map.GetEntity<IWorldEntity>(platformPassengerGuid);
+                if (worldEntity == null)
+                    continue;
+
+                worldEntity.SetPlatform(null);
+                worldEntity.MovementManager.SetPosition(Position, false);
+                worldEntity.MovementManager.SetRotation(Rotation, false);
+            }
+
             base.OnRemoveFromMap();
-            MovementManager = null;
+        }
+
+        public override void OnRelocate(Vector3 vector)
+        {
+            base.OnRelocate(vector);
+
+            uint? worldAreaId = Map.File.GetWorldAreaId(vector);
+            if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
+            {
+                Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId.Value);
+                if (Zone != null)
+                {
+                    OnZoneUpdate();
+                    scriptCollection?.Invoke<IWorldEntityScript>(s => s.OnEnterZone(this, Zone.Id));
+                }
+            }
         }
 
         /// <summary>
@@ -232,14 +303,14 @@ namespace NexusForever.Game.Entity
 
         protected abstract IEntityModel BuildEntityModel();
 
-        public virtual ServerEntityCreate BuildCreatePacket()
+        public virtual ServerEntityCreate BuildCreatePacket(bool isLoading)
         {
-            ServerEntityCreate entityCreatePacket =  new ServerEntityCreate
+            var entityCreatePacket = new ServerEntityCreate
             {
                 Guid         = Guid,
                 Type         = Type,
                 EntityModel  = BuildEntityModel(),
-                CreateFlags  = (byte)CreateFlags,
+                CreateFlags  = CreateFlags,
                 Stats        = stats.Values
                     .Select(s => new StatValueInitial
                     {
@@ -249,7 +320,8 @@ namespace NexusForever.Game.Entity
                         Data  = s.Data
                     })
                     .ToList(),
-                Commands     = MovementManager.ToList(),
+                Time         = MovementManager.GetTime(),
+                Commands     = (isLoading && MovementManager.RequiresSynchronisation ? MovementManager.GetInitialNetworkEntityCommands() : MovementManager.GetNetworkEntityCommands()).ToList(),
                 VisibleItems = itemVisuals
                     .Select(v => v.Value.Build())
                     .ToList(),
@@ -264,7 +336,7 @@ namespace NexusForever.Game.Entity
 
             // Plugs should not have this portion of the packet set by this Class. The Plug Class should set it itself.
             // This is in large part due to the way Plugs are tied either to a DecorId OR Guid. Other entities do not have the same issue.
-            if (!(this is IPlug))
+            if (!(this is IPlugEntity))
             {
                 if (ActivePropId > 0 || WorldSocketId > 0)
                 {
@@ -709,6 +781,44 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Set primary faction to supplied <see cref="Faction"/>.
+        /// </summary>
+        public void SetFaction(Faction factionId)
+        {
+            Faction1 = factionId;
+
+            EnqueueToVisible(new ServerEntityFaction
+            {
+                UnitId  = Guid,
+                Faction = factionId
+            });
+        }
+
+        /// <summary>
+        /// Set temporary faction to supplied <see cref="Faction"/>.
+        /// </summary>
+        public void SetTemporaryFaction(Faction factionId)
+        {
+            if (Faction1 != Faction2)
+                throw new InvalidOperationException();
+
+            Faction2 = Faction1;
+            SetFaction(factionId);
+        }
+
+        /// <summary>
+        /// Remove temporary faction and revert to primary faction.
+        /// </summary>
+        public void RemoveTemporaryFaction()
+        {
+            if (Faction1 == Faction2)
+                throw new InvalidOperationException();
+
+            SetFaction(Faction2);
+            Faction2 = Faction1;
+        }
+
+        /// <summary>
         /// Return <see cref="Disposition"/> between <see cref="IWorldEntity"/> and <see cref="Faction"/>.
         /// </summary>
         public virtual Disposition GetDispositionTo(Faction factionId, bool primary = true)
@@ -816,6 +926,47 @@ namespace NexusForever.Game.Entity
         public virtual void OnUntargeted(IUnitEntity source)
         {
             targetingGuids.Remove(source.Guid);
+        }
+
+        /// <summary>
+        /// Set platform to suppled <see cref="IWorldEntity"/> with optional position and rotation offsets.
+        /// </summary>
+        public void SetPlatform(IWorldEntity entity, Vector3 position = default, Vector3 rotation = default)
+        {
+            if (PlatformGuid != null)
+            {
+                IWorldEntity platform = Map.GetEntity<IWorldEntity>(PlatformGuid.Value);
+                platform?.RemovePlatformPassenger(this);
+
+                MovementManager.SetPosition(Position, false);
+                MovementManager.SetRotation(Rotation, false);
+            }
+
+            PlatformGuid = entity?.Guid;
+
+            if (entity != null)
+            {
+                entity.AddPlatformPassenger(this);
+
+                MovementManager.SetPosition(position, false);
+                MovementManager.SetRotation(rotation, false);
+            }
+        }
+
+        /// <summary>
+        /// Add <see cref="IWorldEntity"/> as a passenger on this <see cref="IWorldEntity"/>.
+        /// </summary>
+        public void AddPlatformPassenger(IWorldEntity passenger)
+        {
+            platformPassengerGuids.Add(passenger.Guid);
+        }
+
+        /// <summary>
+        /// Remove <see cref="IWorldEntity"/> as a passenger on this <see cref="IWorldEntity"/>.
+        /// </summary>
+        public void RemovePlatformPassenger(IWorldEntity passenger)
+        {
+            platformPassengerGuids.Remove(passenger.Guid);
         }
     }
 }

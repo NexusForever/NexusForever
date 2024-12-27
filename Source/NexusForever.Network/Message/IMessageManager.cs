@@ -3,23 +3,33 @@
     public interface IMessageManager
     {
         /// <summary>
-        /// Initialise <see cref="IMessageManager"/> and any related resources.
+        /// Register message of <see cref="Type"/>.
         /// </summary>
-        void Initialise();
+        void RegisterMessage(Type type);
 
         /// <summary>
-        /// Return <see cref="IReadable"/> model for incoming packet with <see cref="GameMessageOpcode"/>.
+        /// Register message handler of <see cref="Type"/>.
         /// </summary>
-        IReadable GetMessage(GameMessageOpcode opcode);
+        void RegisterMessageHandler(Type type);
 
         /// <summary>
-        /// Return <see cref="GameMessageOpcode"/> for outgoing <see cref="IWritable"/> model.
+        /// Get message <see cref="Type"/> for supplied <see cref="GameMessageOpcode"/>.
         /// </summary>
-        bool GetOpcode(IWritable message, out GameMessageOpcode opcode);
+        Type GetMessageType(GameMessageOpcode opcode);
 
         /// <summary>
-        /// Return <see cref="MessageHandlerDelegate"/> delegate for incoming packet with <see cref="GameMessageOpcode"/>.
+        /// Get message <see cref="GameMessageOpcode"/> for supplied <see cref="IWritable"/>.
         /// </summary>
-        MessageHandlerDelegate GetMessageHandler(GameMessageOpcode opcode);
+        GameMessageOpcode? GetOpcode(IWritable message);
+
+        /// <summary>
+        /// Get message handler <see cref="Type"/> for supplied <see cref="GameMessageOpcode"/>.
+        /// </summary>
+        Type GetMessageHandlerType(GameMessageOpcode opcode);
+
+        /// <summary>
+        /// Get message handler delegate for supplied <see cref="GameMessageOpcode"/>.
+        /// </summary>
+        MessageHandlerDelegate GetMessageHandlerDelegate(GameMessageOpcode opcode);
     }
 }

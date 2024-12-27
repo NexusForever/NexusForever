@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Configuration.Model;
 
@@ -11,6 +10,7 @@ namespace NexusForever.Database.Auth
         public DbSet<AccountCostumeUnlockModel> AccountCostumeUnlock { get; set; }
         public DbSet<AccountCurrencyModel> AccountCurrency { get; set; }
         public DbSet<AccountEntitlementModel> AccountEntitlement { get; set; }
+        public DbSet<AccountExternalReferenceModel> AccountExternalReference { get; set; }
         public DbSet<AccountGenericUnlockModel> AccountGenericUnlock { get; set; }
         public DbSet<AccountKeybindingModel> AccountKeybinding { get; set; }
         public DbSet<AccountPermissionModel> AccountPermission { get; set; }
@@ -175,6 +175,31 @@ namespace NexusForever.Database.Auth
                     .WithMany(p => p.AccountEntitlement)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__account_entitlement_id__account_id");
+            });
+
+            modelBuilder.Entity<AccountExternalReferenceModel>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Type })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_external_reference");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasColumnType("varchar(64)");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasColumnType("varchar(512)");
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.AccountExternalReference)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_external_reference_id__account_id");
             });
 
             modelBuilder.Entity<AccountGenericUnlockModel>(entity =>

@@ -7,6 +7,13 @@
         Cyclic,
         OneShotReverse,
         BackAndForthReverse,
-        CyclicReverse
+        CyclicReverse,
+
+        // TODO: implement the rest of the spline modes
+        SplineMode6,
+        SplineMode7,
+        SplineMode8,
+        SplineMode9,
+        SplineMode10,
     }
 }

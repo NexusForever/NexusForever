@@ -1,18 +1,8 @@
-﻿using NexusForever.Network.Message;
-
-namespace NexusForever.Network.Packet
+﻿namespace NexusForever.Network.Packet
 {
-    public class ClientGamePacket : GamePacket
+    public class ClientGamePacket
     {
-        public ClientGamePacket(byte[] data)
-        {
-            using (var stream = new MemoryStream(data))
-            using (var reader = new GamePacketReader(stream))
-            {
-                Opcode = (GameMessageOpcode)reader.ReadUShort();
-                Data   = reader.ReadBytes(reader.BytesRemaining);
-                Size   = (uint)Data.Length + HeaderSize;
-            }
-        }
+        public bool IsEncrypted { get; init; }
+        public byte[] Data { get; init; }
     }
 }

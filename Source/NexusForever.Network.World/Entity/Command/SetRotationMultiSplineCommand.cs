@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetRotationMultiSpline)]
@@ -21,14 +23,14 @@ namespace NexusForever.Network.World.Entity.Command
             for (int i = 0; i < count; i++)
                 SplineIds.Add(reader.ReadUInt());
 
-            Speed = reader.ReadPackedFloat();
-            Position = reader.ReadUInt();
+            Speed                 = reader.ReadPackedFloat();
+            Position              = reader.ReadUInt();
             TakeoffLocationHeight = reader.ReadUInt();
             LandingLocationHeight = reader.ReadUInt();
-            Mode = reader.ReadByte(4u);
-            Offset = reader.ReadUInt();
-            MultiSplineFlags = reader.ReadUInt();
-            Blend = reader.ReadBit();
+            Mode                  = reader.ReadByte(4u);
+            Offset                = reader.ReadUInt();
+            MultiSplineFlags      = reader.ReadUInt();
+            Blend                 = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)

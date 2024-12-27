@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Character;
 
@@ -16,8 +17,10 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterAchievementModel", b =>
                 {
@@ -151,15 +154,11 @@ namespace NexusForever.Database.Character.Migrations
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterBoneModel", b =>
                 {
                     b.Property<ulong>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
-                        .HasDefaultValue(0ul)
                         .HasColumnName("id");
 
                     b.Property<byte>("BoneIndex")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(4) unsigned")
-                        .HasDefaultValue((byte)0)
                         .HasColumnName("boneIndex");
 
                     b.Property<float>("Bone")
@@ -234,6 +233,8 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("timestamp")
                         .HasDefaultValueSql("current_timestamp()");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlComputedColumn(b.Property<DateTime>("Timestamp"));
 
                     b.HasKey("Id", "Index")
                         .HasName("PRIMARY");

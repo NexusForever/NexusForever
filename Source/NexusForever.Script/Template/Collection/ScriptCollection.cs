@@ -82,8 +82,19 @@ namespace NexusForever.Script.Template.Collection
         public void Invoke<T>(Action<T> p)
         {
             foreach (IScriptInstanceInfo instanceInfo in scripts.Values)
+            {
                 if (instanceInfo.ScriptInfo.Type.IsAssignableTo(typeof(T)))
-                    p.Invoke((T)instanceInfo.Script);
+                {
+                    try
+                    {
+                        p.Invoke((T)instanceInfo.Script);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.LogError(ex, "An exception occured during invoke for script {Name} in collection {Id}!", instanceInfo.ScriptInfo.Name, Id);
+                    }
+                }
+            }
         }
 
         public IEnumerator<IScriptInstanceInfo> GetEnumerator()

@@ -62,17 +62,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script", "Nexu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script.Main", "NexusForever.Script.Main\NexusForever.Script.Main.csproj", "{93700550-5EAB-41BA-8075-FCA301F10793}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Script.Alizar", "NexusForever.Script.Alizar\NexusForever.Script.Alizar.csproj", "{805C761C-4ED2-453F-A7A9-11180197F7AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script.Alizar", "NexusForever.Script.Alizar\NexusForever.Script.Alizar.csproj", "{805C761C-4ED2-453F-A7A9-11180197F7AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Script.Olyssia", "NexusForever.Script.Olyssia\NexusForever.Script.Olyssia.csproj", "{704C6D26-E66B-42CA-88CA-FF80F8077C3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script.Olyssia", "NexusForever.Script.Olyssia\NexusForever.Script.Olyssia.csproj", "{704C6D26-E66B-42CA-88CA-FF80F8077C3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Script.Isigrol", "NexusForever.Script.Isigrol\NexusForever.Script.Isigrol.csproj", "{2F20173C-684A-4857-AC30-BF9E4DDEBBB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script.Isigrol", "NexusForever.Script.Isigrol\NexusForever.Script.Isigrol.csproj", "{2F20173C-684A-4857-AC30-BF9E4DDEBBB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Script.Instance", "NexusForever.Script.Instance\NexusForever.Script.Instance.csproj", "{437ED8C4-379B-4EE4-879B-CDD512FF2868}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script.Instance", "NexusForever.Script.Instance\NexusForever.Script.Instance.csproj", "{437ED8C4-379B-4EE4-879B-CDD512FF2868}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Script.Arcterra", "NexusForever.Script.Arcterra\NexusForever.Script.Arcterra.csproj", "{7AD4C674-95D7-4188-B48E-A557E0127B04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script.Arcterra", "NexusForever.Script.Arcterra\NexusForever.Script.Arcterra.csproj", "{7AD4C674-95D7-4188-B48E-A557E0127B04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusForever.Script.Farside", "NexusForever.Script.Farside\NexusForever.Script.Farside.csproj", "{C0403F91-7C3F-49DC-9DDF-49F1101C125A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexusForever.Script.Farside", "NexusForever.Script.Farside\NexusForever.Script.Farside.csproj", "{C0403F91-7C3F-49DC-9DDF-49F1101C125A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

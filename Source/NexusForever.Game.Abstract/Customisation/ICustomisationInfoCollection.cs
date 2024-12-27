@@ -1,7 +1,6 @@
-﻿using NexusForever.Game.Abstract.Customisation;
-using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Static.Entity;
 
-namespace NexusForever.Game.Customisation
+namespace NexusForever.Game.Abstract.Customisation
 {
     public interface ICustomisationInfoCollection
     {

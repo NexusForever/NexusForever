@@ -1,3 +1,5 @@
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetRotationSpline)]
@@ -13,12 +15,12 @@ namespace NexusForever.Network.World.Entity.Command
 
         public void Read(GamePacketReader reader)
         {
-            SplineId = reader.ReadUInt();
-            Speed = reader.ReadUShort();
-            Position = reader.ReadUInt();
-            Mode = reader.ReadByte(4u);
-            Offset = reader.ReadUInt();
-            Blend = reader.ReadBit();
+            SplineId            = reader.ReadUInt();
+            Speed               = reader.ReadUShort();
+            Position            = reader.ReadUInt();
+            Mode                = reader.ReadByte(4u);
+            Offset              = reader.ReadUInt();
+            Blend               = reader.ReadBit();
             AdjustSpeedToLength = reader.ReadBit();
         }
 

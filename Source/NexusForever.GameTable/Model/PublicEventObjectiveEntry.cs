@@ -1,23 +1,25 @@
+using NexusForever.Game.Static.Event;
+
 namespace NexusForever.GameTable.Model
 {
     public class PublicEventObjectiveEntry
     {
         public uint Id;
         public uint PublicEventId;
-        public uint PublicEventObjectiveFlags;
+        public PublicEventObjectiveFlag PublicEventObjectiveFlags;
         public uint PublicEventObjectiveTypeSpecificFlags;
         public uint WorldLocation2Id;
-        public uint PublicEventTeamId;
+        public PublicEventTeam PublicEventTeamId;
         public uint LocalizedTextId;
         public uint LocalizedTextIdOtherTeam;
         public uint LocalizedTextIdShort;
         public uint LocalizedTextIdOtherTeamShort;
-        public uint PublicEventObjectiveTypeEnum;
+        public PublicEventObjectiveType PublicEventObjectiveTypeEnum;
         public uint Count;
         public uint ObjectId;
         public uint FailureTimeMs;
         public uint TargetGroupIdRewardPane;
-        public uint PublicEventObjectiveCategoryEnum;
+        public PublicEventObjectiveCategory PublicEventObjectiveCategoryEnum;
         public uint LiveEventIdCounter;
         public uint PublicEventObjectiveIdParent;
         public uint QuestDirectionId;

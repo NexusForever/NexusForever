@@ -6,6 +6,6 @@ namespace NexusForever.Game.Map
     public class MapPosition : IMapPosition
     {
         public IMapInfo Info { get; init; }
-        public Vector3 Position { get; init; }
+        public Vector3 Position { get; set; }
     }
 }

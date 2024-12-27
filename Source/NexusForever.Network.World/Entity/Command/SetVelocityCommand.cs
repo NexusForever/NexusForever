@@ -1,20 +1,23 @@
+using System.Numerics;
+using NexusForever.Game.Static.Entity.Movement.Command;
+
 namespace NexusForever.Network.World.Entity.Command
 {
     [EntityCommand(EntityCommand.SetVelocity)]
     public class SetVelocityCommand : IEntityCommandModel
     {
-        public Velocity VelocityData { get; set; } = new();
+        public Vector3 Velocity { get; set; }
         public bool Blend { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            VelocityData.Read(reader);
-            Blend = reader.ReadBit();
+            Velocity = reader.ReadPackedVector3();
+            Blend    = reader.ReadBit();
         }
 
         public void Write(GamePacketWriter writer)
         {
-            VelocityData.Write(writer);
+            writer.WritePackedVector3(Velocity);
             writer.Write(Blend);
         }
     }

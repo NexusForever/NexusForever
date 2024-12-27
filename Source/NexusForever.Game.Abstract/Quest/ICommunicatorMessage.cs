@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 
 namespace NexusForever.Game.Abstract.Quest
 {

@@ -1,15 +1,16 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement.Command.Position;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.Entity.Movement.Spline;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Event;
 using NexusForever.Script.Template.Filter;
 
-namespace NexusForever.Script.Example
+namespace NexusForever.Script.Main.Example
 {
     [ScriptFilterCreatureId(25592)]
     [ScriptFilterIgnore]
-    public class NonPlayerScript : INonPlayerScript, IOwnedScript<INonPlayer>
+    public class NonPlayerScript : INonPlayerScript, IOwnedScript<INonPlayerEntity>
     {
         private static readonly string[] Sayings = new string[]
         {
@@ -18,7 +19,7 @@ namespace NexusForever.Script.Example
             "Buy from Lopp, deals never flop!"
         };
 
-        private INonPlayer owner;
+        private INonPlayerEntity owner;
 
         #region Dependency Injection
 
@@ -39,7 +40,7 @@ namespace NexusForever.Script.Example
         /// <summary>
         /// Invoked when <see cref="IScript"/> is loaded.
         /// </summary>
-        public void OnLoad(INonPlayer owner)
+        public void OnLoad(INonPlayerEntity owner)
         {
             this.owner = owner;
         }
@@ -72,9 +73,9 @@ namespace NexusForever.Script.Example
         }
 
         /// <summary>
-        /// Invoked when <see cref="ISplinePath"/> is stopped.
+        /// Invoked when <see cref="IPositionCommand"/> is finalised.
         /// </summary>
-        public void OnSplineStop()
+        public void OnPositionEntityCommandFinalise(IPositionCommand command)
         {
             // previous movement has finished, schedule a new one
             ScheduleRandomMovement();

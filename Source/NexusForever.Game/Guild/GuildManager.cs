@@ -226,10 +226,10 @@ namespace NexusForever.Game.Guild
             if (GlobalGuildManager.Instance.GetGuild(type, name) != null)
                 return new GuildResultInfo(GuildResult.GuildNameUnavailable, referenceString: name);
 
-            var rankNames = new List<string> { leaderRankName, councilRankName, memberRankName };
+            /*var rankNames = new List<string> { leaderRankName, councilRankName, memberRankName };
             foreach (string rankName in rankNames) 
                 if (!TextFilterManager.Instance.IsTextValid(rankName) || !TextFilterManager.Instance.IsTextValid(rankName, UserText.GuildRankName))
-                    return new GuildResultInfo(GuildResult.InvalidGuildName, referenceString: rankName);
+                    return new GuildResultInfo(GuildResult.InvalidGuildName, referenceString: rankName);*/
 
             if (standard != null && !standard.Validate())
                 return new GuildResultInfo(GuildResult.InvalidStandard);
@@ -319,7 +319,7 @@ namespace NexusForever.Game.Guild
                 GuildType  = guild.Type,
                 PlayerName = invitee.Name,
                 Flags      = (uint)guild.Flags
-            });;
+            });
 
             log.Trace($"Invited character {owner.CharacterId} to guild {id}.");
         }

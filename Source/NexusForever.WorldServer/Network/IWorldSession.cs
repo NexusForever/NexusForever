@@ -3,7 +3,7 @@ using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 
 namespace NexusForever.WorldServer.Network
 {

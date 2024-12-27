@@ -6,11 +6,6 @@ namespace NexusForever.Game.Abstract.Entity
     {
         void Initialise();
 
-        /// <summary>
-        /// Return a new <see cref="IWorldEntity"/> of supplied <see cref="EntityType"/>.
-        /// </summary>
-        IWorldEntity NewEntity(EntityType type);
-
         StatAttribute GetStatAttribute(Stat stat);
     }
 }

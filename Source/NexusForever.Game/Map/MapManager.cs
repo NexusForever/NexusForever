@@ -3,7 +3,6 @@ using System.Diagnostics;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Configuration.Model;
-using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
@@ -25,11 +24,24 @@ namespace NexusForever.Game.Map
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         private readonly ConcurrentQueue<PendingAdd> pendingAdds = new();
-        private readonly Dictionary</*worldId*/ ushort, IMap> maps = new();
+        private readonly Dictionary</*worldId*/ uint, IMap> maps = new();
 
         private readonly ConcurrentDictionary<ulong, uint> instanceCounts = new();
         // reset instance limit counts every hour
         private readonly UpdateTimer instanceCountReset = new(TimeSpan.FromMinutes(60));
+
+
+        #region Dependency Injection
+
+        private readonly IMapFactory mapFactory;
+
+        public MapManager(
+            IMapFactory mapFactory)
+        {
+            this.mapFactory = mapFactory;
+        }
+
+        #endregion
 
         /// <summary>
         /// Invoked each world tick with the delta since the previous tick occurred.
@@ -119,26 +131,27 @@ namespace NexusForever.Game.Map
         }
 
         /// <summary>
+        /// Return <see cref="IMap"/> for supplied worldId.
+        /// </summary>
+        public IMap GetMap(uint worldId)
+        {
+            if (maps.TryGetValue(worldId, out IMap map))
+                return map;
+
+            return null;
+        }
+
+        /// <summary>
         /// Create base <see cref="IMap"/> for <see cref="WorldEntry"/>.
         /// </summary>
         private IMap CreateMap(WorldEntry entry)
         {
-            if (maps.TryGetValue((ushort)entry.Id, out IMap map))
+            if (maps.TryGetValue(entry.Id, out IMap map))
                 return map;
 
-            switch ((MapType)entry.Type)
-            {
-                case MapType.Residence:
-                case MapType.Community:
-                    map = new ResidenceInstancedMap();
-                    break;
-                default:
-                    map = new BaseMap();
-                    break;
-            }
-
+            map = mapFactory.CreateMap(entry.Type);
             map.Initialise(entry);
-            maps.Add((ushort)entry.Id, map);
+            maps.Add(entry.Id, map);
 
             log.Trace($"Created new base map for world {entry.Id}.");
 

@@ -18,12 +18,12 @@ namespace NexusForever.WorldServer.Command.Handler
             searchRange ??= 10f;
 
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
-            IEnumerable<IDoor> doors = player.Map.Search(
+            IEnumerable<IDoorEntity> doors = player.Map.Search(
                 player.Position,
                 searchRange.Value,
-                new SearchCheckRange<IDoor>(player.Position, searchRange.Value));
+                new SearchCheckRange<IDoorEntity>(player.Position, searchRange.Value));
 
-            foreach (IDoor door in doors)
+            foreach (IDoorEntity door in doors)
             {
                 context.SendMessage($"Trying to open door {door.Guid}");
                 door.OpenDoor();
@@ -38,12 +38,12 @@ namespace NexusForever.WorldServer.Command.Handler
             searchRange ??= 10f;
 
             IPlayer player = context.GetTargetOrInvoker<IPlayer>();
-            IEnumerable<IDoor> doors = player.Map.Search(
+            IEnumerable<IDoorEntity> doors = player.Map.Search(
                 player.Position,
                 searchRange.Value,
-                new SearchCheckRange<IDoor>(player.Position, searchRange.Value));
+                new SearchCheckRange<IDoorEntity>(player.Position, searchRange.Value));
 
-            foreach (IDoor door in doors)
+            foreach (IDoorEntity door in doors)
             {
                 context.SendMessage($"Trying to close door {door.Guid}");
                 door.CloseDoor();

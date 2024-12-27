@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -12,15 +11,21 @@ namespace NexusForever.Game.Abstract.Entity
     {
         uint Guid { get; }
         IBaseMap Map { get; }
-        WorldZoneEntry Zone { get; }
         Vector3 Position { get; }
 
         IMapInfo PreviousMap { get; }
 
         /// <summary>
+        /// Determines if the <see cref="IGridEntity"/> is on a <see cref="IBaseMap"/>.
+        /// </summary>
+        bool InWorld { get; }
+
+        /// <summary>
         /// Distance between <see cref="IGridEntity"/> and a <see cref="IMapGrid"/> for activation.
         /// </summary>
         float ActivationRange { get; }
+
+        float? RangeCheck { get; }
 
         /// <summary>
         /// Invoke <see cref="Action{T}"/> against <see cref="IGridEntity"/> script collection.
@@ -78,7 +83,7 @@ namespace NexusForever.Game.Abstract.Entity
         void RemoveVisible(IGridEntity entity);
 
         /// <summary>
-        /// Return visible <see cref="IWorldEntity"/> by supplied guid.
+        /// Return visible <see cref="IGridEntity"/> by supplied guid.
         /// </summary>
         T GetVisible<T>(uint guid) where T : IGridEntity;
 
@@ -86,5 +91,20 @@ namespace NexusForever.Game.Abstract.Entity
         /// Return visible <see cref="IWorldEntity"/> by supplied creature id.
         /// </summary>
         IEnumerable<T> GetVisibleCreature<T>(uint creatureId) where T : IWorldEntity;
+
+        /// <summary>
+        /// Set range check for <see cref="IGridEntity"/>.
+        /// </summary>
+        void SetInRangeCheck(float range);
+
+        /// <summary>
+        /// Checks if the provided <see cref="IGridEntity"/> is at a range to trigger an event on this <see cref="IGridEntity"/>.
+        /// </summary>
+        void CheckEntityInRange(IGridEntity target);
+
+        /// <summary>
+        /// Returns all <see cref="IGridEntity"/> in range of this <see cref="IGridEntity"/>.
+        /// </summary>
+        IEnumerable<T> GetInRange<T>(uint guid) where T : IGridEntity;
     }
 }

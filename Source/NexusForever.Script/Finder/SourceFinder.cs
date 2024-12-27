@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NexusForever.Script.Configuration.Model;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace NexusForever.Script.Finder
 {
@@ -32,7 +35,7 @@ namespace NexusForever.Script.Finder
                 return list;
 
             // running from build directory, find root source directory
-            if (Find("..\\..\\..\\..\\", out list))
+            if (Find(Path.Combine("..", "..", "..", ".."), out list))
                 return list;
 
             return new List<string>();
@@ -50,3 +53,4 @@ namespace NexusForever.Script.Finder
         }
     }
 }
+

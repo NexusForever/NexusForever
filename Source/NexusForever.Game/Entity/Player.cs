@@ -7,9 +7,15 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Abstract.Map.Lock;
+using NexusForever.Game.Abstract.Matching.Match;
+using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
@@ -31,7 +37,7 @@ using NexusForever.Game.Static.Social;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
@@ -71,10 +77,12 @@ namespace NexusForever.Game.Entity
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
-        public IAccount Account { get; }
+        public override EntityType Type => EntityType.Player;
 
-        public ulong CharacterId { get; }
-        public string Name { get; }
+        public IAccount Account { get; private set; }
+
+        public ulong CharacterId { get; private set; }
+        public string Name { get; private set; }
 
         public Sex Sex
         {
@@ -104,7 +112,7 @@ namespace NexusForever.Game.Entity
 
         private Race race;
 
-        public Class Class { get; }
+        public Class Class { get; private set; }
 
         public CharacterFlag Flags
         {
@@ -165,7 +173,7 @@ namespace NexusForever.Game.Entity
             }
         }
 
-        public DateTime CreateTime { get; }
+        public DateTime CreateTime { get; private set; }
         public double TimePlayedTotal { get; private set; }
         public double TimePlayedLevel { get; private set; }
         public double TimePlayedSession { get; private set; }
@@ -176,16 +184,7 @@ namespace NexusForever.Game.Entity
         public uint? ControlGuid { get; private set; }
 
         /// <summary>
-        /// Guid of the <see cref="IVehicle"/> the <see cref="IPlayer"/> is a passenger on.
-        /// </summary>
-        public uint? VehicleGuid
-        {
-            get => MovementManager.GetPlatform();
-            set => MovementManager.SetPlatform(value);
-        }
-
-        /// <summary>
-        /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
+        /// Guid of the <see cref="IPetEntity"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         public uint? VanityPetGuid { get; set; }
 
@@ -197,37 +196,37 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool SignatureEnabled => Account.RbacManager.HasPermission(Permission.Signature);
 
-        public IGameSession Session { get; }
+        public IGameSession Session { get; private set; }
 
         /// <summary>
         /// Returns if <see cref="IPlayer"/>'s client is currently in a loading screen.
         /// </summary>
         public bool IsLoading { get; set; } = true;
 
-        public IInventory Inventory { get; }
+        public IInventory Inventory { get; private set; }
         public ICurrencyManager CurrencyManager { get; }
-        public IPathManager PathManager { get; }
-        public ITitleManager TitleManager { get; }
-        public ISpellManager SpellManager { get; }
-        public ICostumeManager CostumeManager { get; }
-        public IPetCustomisationManager PetCustomisationManager { get; }
-        public ICharacterKeybindingManager KeybindingManager { get; }
-        public IDatacubeManager DatacubeManager { get; }
-        public IMailManager MailManager { get; }
-        public IZoneMapManager ZoneMapManager { get; }
-        public IQuestManager QuestManager { get; }
-        public ICharacterAchievementManager AchievementManager { get; }
-        public ISupplySatchelManager SupplySatchelManager { get; }
-        public IXpManager XpManager { get; }
-        public IReputationManager ReputationManager { get; }
-        public IGuildManager GuildManager { get; }
-        public IChatManager ChatManager { get; }
-        public IResidenceManager ResidenceManager { get; }
-        public ICinematicManager CinematicManager { get; }
-        public ICharacterEntitlementManager EntitlementManager { get; }
-        public ILogoutManager LogoutManager { get; }
-        public IAppearanceManager AppearanceManager { get; }
-        public IResurrectionManager ResurrectionManager { get; }
+        public IPathManager PathManager { get; private set; }
+        public ITitleManager TitleManager { get; private set; }
+        public ISpellManager SpellManager { get; private set; }
+        public ICostumeManager CostumeManager { get; private set; }
+        public IPetCustomisationManager PetCustomisationManager { get; private set; }
+        public ICharacterKeybindingManager KeybindingManager { get; private set; }
+        public IDatacubeManager DatacubeManager { get; private set; }
+        public IMailManager MailManager { get; private set; }
+        public IZoneMapManager ZoneMapManager { get; private set; }
+        public IQuestManager QuestManager { get; private set; }
+        public ICharacterAchievementManager AchievementManager { get; private set; }
+        public ISupplySatchelManager SupplySatchelManager { get; private set; }
+        public IXpManager XpManager { get; private set; }
+        public IReputationManager ReputationManager { get; private set; }
+        public IGuildManager GuildManager { get; private set; }
+        public IChatManager ChatManager { get; private set; }
+        public IResidenceManager ResidenceManager { get; private set; }
+        public ICinematicManager CinematicManager { get; private set; }
+        public ICharacterEntitlementManager EntitlementManager { get; private set; }
+        public ILogoutManager LogoutManager { get; private set; }
+        public IAppearanceManager AppearanceManager { get; private set; }
+        public IResurrectionManager ResurrectionManager { get; private set; }
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
@@ -236,11 +235,34 @@ namespace NexusForever.Game.Entity
 
         private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> itemProperties = new();
 
+        #region Dependency Injection
+
+        private readonly IEntityFactory entityFactory;
+        private readonly IMatchingManager matchingManager;
+        private readonly IMatchManager matchManager;
+
+        public Player(
+            IMovementManager movementManager,
+            IEntityFactory entityFactory,
+            IMatchingManager matchingManager,
+            IMatchManager matchManager,
+            ICurrencyManager currencyManager)
+            : base(movementManager)
+        {
+            this.entityFactory   = entityFactory;
+            this.matchingManager = matchingManager;
+            this.matchManager    = matchManager;
+
+            // managers
+            CurrencyManager = currencyManager;
+        }
+
+        #endregion
+
         /// <summary>
-        /// Create a new <see cref="IPlayer"/> from supplied <see cref="IGameSession"/> and <see cref="CharacterModel"/>.
+        /// Initialise <see cref="IPlayer"/> from supplied <see cref="IGameSession"/> and <see cref="CharacterModel"/>.
         /// </summary>
-        public Player(IGameSession session, IAccount account, CharacterModel model)
-            : base(EntityType.Player)
+        public void Initialise(IGameSession session, IAccount account, CharacterModel model)
         {
             ActivationRange   = BaseMap.DefaultVisionRange;
 
@@ -284,7 +306,7 @@ namespace NexusForever.Game.Entity
 
             CostumeManager          = new CostumeManager(this, model);
             Inventory               = new Inventory(this, model);
-            CurrencyManager         = new CurrencyManager(this, model);
+            CurrencyManager.Initialise(this, model);
             PathManager             = new PathManager(this, model);
             TitleManager            = new TitleManager(this, model);
             SpellManager            = new SpellManager(this, model);
@@ -328,7 +350,7 @@ namespace NexusForever.Game.Entity
 
         public override void Update(double lastTick)
         {
-             LogoutManager.Update(lastTick);
+            LogoutManager.Update(lastTick);
 
             // don't process world updates while logout is finalising
             if (LogoutManager.State is LogoutState.Logout or LogoutState.Finished)
@@ -563,18 +585,17 @@ namespace NexusForever.Game.Entity
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
             {
-                var vanityPet = new VanityPet(this, pendingTeleport.VanityPetId.Value);
+                var pet = entityFactory.CreateEntity<IPetEntity>();
+                pet.Initialise(this, pendingTeleport.VanityPetId.Value);
 
                 var position = new MapPosition
                 {
                     Position = Position
                 };
 
-                if (map.CanEnter(vanityPet, position))
-                    map.EnqueueAdd(vanityPet, position);
+                if (map.CanEnter(pet, position))
+                    map.EnqueueAdd(pet, position);
             }
-
-            pendingTeleport = null;
 
             SendPacketsAfterAddToMap();
 
@@ -628,7 +649,7 @@ namespace NexusForever.Game.Entity
 
             ResidenceManager.SendHousingBasics();
             Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
-            Session.EnqueueMessageEncrypted(new ServerInstanceSettings());
+            Session.EnqueueMessageEncrypted(new ServerInstanceSettings() { ClientEntitySendUpdateInterval = 125 });
 
             SetControl(this);
 
@@ -718,7 +739,7 @@ namespace NexusForever.Game.Entity
             base.AddVisible(entity);
 
             if (entity is IWorldEntity worldEntity)
-                Session.EnqueueMessageEncrypted(worldEntity.BuildCreatePacket());
+                Session.EnqueueMessageEncrypted(worldEntity.BuildCreatePacket(IsLoading));
 
             if (entity is IPlayer playerEntity)
                 Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
@@ -777,9 +798,6 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetControl(IWorldEntity entity)
         {
-            if (entity.Guid == ControlGuid)
-                return;
-
             if (ControlGuid != null)
             {
                 IWorldEntity control = Map.GetEntity<IWorldEntity>(ControlGuid.Value);
@@ -787,16 +805,21 @@ namespace NexusForever.Game.Entity
                     control.ControllerGuid = null;
             }
 
-            uint? guid = entity != this ? entity.Guid : null;
-            ControlGuid           = guid;
-            entity.ControllerGuid = guid;
+            ControlGuid = entity?.Guid;
 
-            Session.EnqueueMessageEncrypted(new ServerMovementControl
+            if (ControlGuid != null)
             {
-                Ticket    = 1,
-                Immediate = true,
-                UnitId    = entity.Guid
-            });
+                entity.ControllerGuid = Guid;
+
+                Session.EnqueueMessageEncrypted(new ServerMovementControl
+                {
+                    Ticket    = 1,
+                    Immediate = true,
+                    UnitId    = ControlGuid.Value
+                });
+            }
+            else
+                Session.EnqueueMessageEncrypted(new ServerMovementControlRemove());
         }
 
         private void Logout()
@@ -857,6 +880,9 @@ namespace NexusForever.Game.Entity
             GlobalChatManager.Instance.JoinDefaultChatChannels(this);
 
             ShutdownManager.Instance.OnLogin(this);
+
+            matchingManager.OnLogin(this);
+            matchManager.OnLogin(this);
         }
 
         private void OnLogout()
@@ -864,6 +890,9 @@ namespace NexusForever.Game.Entity
             GuildManager.OnLogout();
             ChatManager.OnLogout();
             GlobalChatManager.Instance.LeaveDefaultChatChannels(this);
+
+            matchingManager.OnLogout(this);
+            matchManager.OnLogout(this);
 
             scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }
@@ -877,26 +906,26 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        public void TeleportTo(ushort worldId, float x, float y, float z, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate)
+        public void TeleportTo(ushort worldId, float x, float y, float z, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate)
         {
             WorldEntry entry = GameTableManager.Instance.World.GetEntry(worldId);
             if (entry == null)
                 throw new ArgumentException($"{worldId} is not a valid world id!");
 
-            TeleportTo(entry, new Vector3(x, y, z), instanceId, reason);
+            TeleportTo(entry, new Vector3(x, y, z), mapLock, reason);
         }
 
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        public void TeleportTo(WorldEntry entry, Vector3 position, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate)
+        public void TeleportTo(WorldEntry entry, Vector3 position, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate)
         {
             TeleportTo(new MapPosition
             {
                 Info = new MapInfo
                 {
-                    Entry      = entry,
-                    InstanceId = instanceId
+                    Entry   = entry,
+                    MapLock = mapLock
                 },
                 Position = position
             }, reason);
@@ -923,7 +952,7 @@ namespace NexusForever.Game.Entity
             uint? vanityPetId = null;
             if (VanityPetGuid != null)
             {
-                IVanityPet pet = GetVisible<IVanityPet>(VanityPetGuid.Value);
+                IPetEntity pet = GetVisible<IPetEntity>(VanityPetGuid.Value);
                 vanityPetId = pet?.CreatureId;
             }
 
@@ -934,8 +963,10 @@ namespace NexusForever.Game.Entity
                 VanityPetId = vanityPetId
             };
 
+            SetControl(null);
+
             MapManager.Instance.AddToMap(this, mapPosition);
-            log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.InstanceId ?? 0ul}.");
+            log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.MapLock?.InstanceId ?? null}.");
         }
 
         /// <summary>
@@ -947,6 +978,8 @@ namespace NexusForever.Game.Entity
             {
                 SendGenericError(error);
                 pendingTeleport = null;
+
+                SetControl(this);
 
                 log.Trace($"Error {error} occured during teleport for {Name}({CharacterId})!");
             }
@@ -961,6 +994,23 @@ namespace NexusForever.Game.Entity
 
                 log.Trace($"Error {error} occured during teleport for {Name}({CharacterId}), client will be disconnected!");
             }
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IPlayer""/> has finished loading and is ready to enter world.
+        /// </summary>
+        public void OnEnteredWorld()
+        {
+            // right before the loading screen is removed we can now send the actual network entity commands
+            // this ensures there is no desync between the client and server caused by loading
+            foreach (IGridEntity item in visibleEntities.Values)
+                if (item is IWorldEntity we && we.MovementManager.RequiresSynchronisation)
+                    we.MovementManager.SendNetworkEntityCommands(Session);
+
+            Session.EnqueueMessageEncrypted(new ServerPlayerEnteredWorld());
+
+            pendingTeleport = null;
+            IsLoading = false;
         }
 
         /// <summary>
@@ -1065,7 +1115,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool CanMount()
         {
-            return VehicleGuid == null && pendingTeleport == null;
+            return PlatformGuid == null && pendingTeleport == null;
         }
 
         /// <summary>
@@ -1073,11 +1123,11 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void Dismount()
         {
-            if (VehicleGuid == null)
+            if (PlatformGuid == null)
                 return;
 
-            IVehicle vehicle = GetVisible<IVehicle>(VehicleGuid.Value);
-            vehicle.PassengerRemove(this);
+            IVehicleEntity vehicle = GetVisible<IVehicleEntity>(PlatformGuid.Value);
+            vehicle?.PassengerRemove(this);
         }
 
         /// <summary>
@@ -1090,7 +1140,7 @@ namespace NexusForever.Game.Entity
 
             if (VanityPetGuid != null)
             {
-                IVanityPet pet = GetVisible<IVanityPet>(VanityPetGuid.Value);
+                IPetEntity pet = GetVisible<IPetEntity>(VanityPetGuid.Value);
                 pet?.RemoveFromMap();
                 VanityPetGuid = null;
             }
@@ -1102,7 +1152,7 @@ namespace NexusForever.Game.Entity
 
         private void RemoveControlUnit()
         {
-            if (ControlGuid == null)
+            if (ControlGuid == null || ControlGuid == Guid)
                 return;
 
             IWorldEntity controlled = Map.GetEntity<IWorldEntity>(ControlGuid.Value);
@@ -1306,13 +1356,16 @@ namespace NexusForever.Game.Entity
             RemoveControlUnit();
 
             // TODO: Replace with DelayEvent (of 2 seconds) with map updates.
-            IGhost ghost = new Ghost(this);
+
+            IGhostEntity ghost = entityFactory.CreateEntity<IGhostEntity>();
+            ghost.Initialise(this);
+
             Map.EnqueueAdd(ghost, new MapPosition
             {
                 Info = new MapInfo
                 {
-                    Entry      = Map.Entry,
-                    InstanceId = Map is IMapInstance instance ? instance.InstanceId : 0u
+                    Entry   = Map.Entry,
+                    MapLock = Map is IMapInstance instance ? instance.MapLock : null
                 },
                 Position = Position
             });

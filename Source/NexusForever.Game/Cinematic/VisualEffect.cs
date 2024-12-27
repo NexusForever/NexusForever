@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 

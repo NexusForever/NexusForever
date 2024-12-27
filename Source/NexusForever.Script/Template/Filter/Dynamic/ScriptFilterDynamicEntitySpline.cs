@@ -30,7 +30,7 @@ namespace NexusForever.Script.Template.Filter.Dynamic
 
             parameters.CreatureId ??= new HashSet<uint>();
             foreach (EntityModel model in entities)
-                parameters.CreatureId.Add(model.Id);
+                parameters.CreatureId.Add(model.Creature);
         }
     }
 }

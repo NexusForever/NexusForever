@@ -1,20 +1,23 @@
-﻿using NexusForever.Game.Abstract.Entity.Movement.Spline;
-using NexusForever.Game.Abstract.Entity.Movement.Spline.Type;
+﻿using NexusForever.Game.Abstract.Entity.Movement.Spline.Mode;
 using NexusForever.Game.Static.Entity.Movement.Spline;
 
 namespace NexusForever.Game.Entity.Movement.Spline.Mode
 {
-    [SplineMode(SplineMode.OneShotReverse)]
     public class SplineModeOneShotReverse : ISplineMode
     {
-        public SplineDirection InitialDirection => SplineDirection.Backward;
+        public SplineMode Mode => SplineMode.OneShotReverse;
 
-        public (SplineDirection Direction, uint Point)? GetNextPoint(ISplineType type, SplineDirection direction, uint point)
+        /// <summary>
+        /// Calculate the interpolated offset for the supplied offset value.
+        /// </summary>
+        public ISplineModeInterpolatedOffset GetInterpolatedOffset(float offset)
         {
-            if (point == type.TopReverseIndex)
-                return null;
-
-            return (direction, point - 1u);
+            return new SplineModeInterpolatedOffset
+            {
+                Offset    = 1.0f - Math.Clamp(offset, 0.0f, 1.0f),
+                Direction = SplineDirection.Backward,
+                Finalised = offset >= 1.0f
+            };
         }
     }
 }

@@ -1,17 +1,19 @@
 ﻿using System.Numerics;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Setting;
 using NexusForever.GameTable.Model;
-using NexusForever.Network;
+using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -36,18 +38,15 @@ namespace NexusForever.Game.Abstract.Entity
         double TimePlayedLevel { get; }
         double TimePlayedSession { get; }
 
+        void Initialise(IGameSession session, IAccount account, CharacterModel model);
+
         /// <summary>
         /// Guid of the <see cref="IWorldEntity"/> that currently being controlled by the <see cref="IPlayer"/>.
         /// </summary>
         uint? ControlGuid { get; }
 
         /// <summary>
-        /// Guid of the <see cref="IVehicle"/> the <see cref="IPlayer"/> is a passenger on.
-        /// </summary>
-        uint? VehicleGuid { get; set; }
-
-        /// <summary>
-        /// Guid of the <see cref="IVanityPet"/> currently summoned by the <see cref="IPlayer"/>.
+        /// Guid of the <see cref="IPetEntity"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         uint? VanityPetGuid { get; set; }
 
@@ -125,12 +124,12 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        void TeleportTo(ushort worldId, float x, float y, float z, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate);
+        void TeleportTo(ushort worldId, float x, float y, float z, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate);
 
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
-        void TeleportTo(WorldEntry entry, Vector3 position, ulong? instanceId = null, TeleportReason reason = TeleportReason.Relocate);
+        void TeleportTo(WorldEntry entry, Vector3 position, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate);
 
         /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
@@ -141,6 +140,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Invoked when <see cref="IPlayer"/> teleport fails.
         /// </summary>
         void OnTeleportToFailed(GenericError error);
+
+        /// <summary>
+        /// Invoked when <see cref="IPlayer"/> has finished loading and is ready to enter world.
+        /// </summary>
+        void OnEnteredWorld();
 
         /// <summary>
         /// Make <see cref="IPlayer"/> sit on provided <see cref="IWorldEntity"/>.

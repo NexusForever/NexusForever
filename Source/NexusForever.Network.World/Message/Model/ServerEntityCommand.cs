@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
         public uint Time { get; set; }
         public bool TimeReset { get; set; }
         public bool ServerControlled { get; set; }
-        public List<(EntityCommand, IEntityCommandModel)> Commands { get; set; } = new();
+        public List<INetworkEntityCommand> Commands { get; set; } = new();
 
         public void Write(GamePacketWriter writer)
         {
@@ -20,10 +20,10 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(ServerControlled);
 
             writer.Write((byte)Commands.Count, 5u);
-            foreach ((EntityCommand id, IEntityCommandModel command) in Commands)
+            foreach (INetworkEntityCommand command in Commands)
             {
-                writer.Write(id, 5);
-                command.Write(writer);
+                writer.Write(command.Command, 5);
+                command.Model.Write(writer);
             }
         }
     }

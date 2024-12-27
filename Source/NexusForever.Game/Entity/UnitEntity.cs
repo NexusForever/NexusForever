@@ -1,5 +1,7 @@
-﻿using NexusForever.Game.Abstract.Combat;
+﻿using System.Numerics;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Spell;
@@ -87,13 +89,17 @@ namespace NexusForever.Game.Entity
 
         private Dictionary<Property, Dictionary</*spell4Id*/uint, ISpellPropertyModifier>> spellProperties = new();
 
-        protected UnitEntity(EntityType type)
-            : base(type)
+        #region Dependency Injection
+
+        public UnitEntity(IMovementManager movementManager)
+            : base(movementManager)
         {
             ThreatManager = new ThreatManager(this);
 
             InitialiseHitRadius();
         }
+
+        #endregion
 
         public override void Dispose()
         {
@@ -133,7 +139,7 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
-        /// Remove tracked <see cref="IUnitEntity"/> that is no longer in vision range.
+        /// Remove tracked <see cref="IGridEntity"/> that is no longer in vision range.
         /// </summary>
         public override void RemoveVisible(IGridEntity entity)
         {
@@ -361,7 +367,7 @@ namespace NexusForever.Game.Entity
         public bool IsValidAttackTarget()
         {
             // TODO: Expand on this. There's bound to be flags or states that should prevent an entity from being attacked.
-            return (this is IPlayer or INonPlayer);
+            return (this is IPlayer or INonPlayerEntity);
         }
 
         /// <summary>
@@ -431,8 +437,12 @@ namespace NexusForever.Game.Entity
         {
             player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature, CreatureId, 1u);
             player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillCreature2, CreatureId, 1u);
-            player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroup, CreatureId, 1u);
-            player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroups, CreatureId, 1u);
+
+            foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId))
+            {
+                player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroup, targetGroupId, 1u);
+                player.QuestManager.ObjectiveUpdate(QuestObjectiveType.KillTargetGroups, targetGroupId, 1u);
+            }
 
             // TODO: Reward XP
             // TODO: Reward Loot

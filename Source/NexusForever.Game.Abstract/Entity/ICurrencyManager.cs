@@ -1,4 +1,5 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -6,9 +7,9 @@ namespace NexusForever.Game.Abstract.Entity
     public interface ICurrencyManager : IDatabaseCharacter, IEnumerable<ICurrency>
     {
         /// <summary>
-        /// Returns total amount of acquired <see cref="CurrencyType"/>.
+        /// Initialise <see cref="ICurrencyManager"/> from <see cref="CharacterModel"/> database model.
         /// </summary>
-        ulong? GetCurrency(CurrencyType currencyId);
+        void Initialise(IPlayer owner, CharacterModel model);
 
         /// <summary>
         /// Returns if <see cref="IPlayer"/> has the supplied amount of <see cref="CurrencyType"/>.
