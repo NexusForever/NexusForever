@@ -3,8 +3,8 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCooldown)]
-    public class ServerCooldown : IWritable
+    [Message(GameMessageOpcode.ServerSpellCooldownStart)]
+    public class ServerSpellCooldownStart : IWritable
     {
         public Cooldown Cooldown { get; set; }
 

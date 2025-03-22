@@ -206,7 +206,7 @@ namespace NexusForever.Game.Spell
 
             if (Caster is IPlayer player && !player.IsLoading)
             {
-                player.Session.EnqueueMessageEncrypted(new Server07F9
+                player.Session.EnqueueMessageEncrypted(new ServerSpellInterrupted1
                 {
                     ServerUniqueId = CastingId,
                     CastResult     = result,
@@ -425,7 +425,7 @@ namespace NexusForever.Game.Spell
                     if (targetEffectInfo.Damage != null)
                     {
                         networkTargetEffectInfo.InfoType = 1;
-                        networkTargetEffectInfo.DamageDescriptionData = new TargetInfo.EffectInfo.DamageDescription
+                        networkTargetEffectInfo.EffectResultData = new SpellEffectResult
                         {
                             RawDamage          = targetEffectInfo.Damage.RawDamage,
                             RawScaledDamage    = targetEffectInfo.Damage.RawScaledDamage,
@@ -495,10 +495,10 @@ namespace NexusForever.Game.Spell
             if (!Parameters.SpellInfo.BaseInfo.HasIcon)
                 throw new InvalidOperationException();
 
-            Caster.EnqueueToVisible(new ServerSpellBuffRemove
+            Caster.EnqueueToVisible(new ServerSpellRemoveOneStackOfBuff
             {
                 CastingId = CastingId,
-                CasterId  = unitId
+                TargetUnitId  = unitId
             }, true);
         }
     }

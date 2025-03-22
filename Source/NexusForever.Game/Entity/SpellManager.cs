@@ -300,7 +300,7 @@ namespace NexusForever.Game.Entity
 
             if (!player.IsLoading)
             {
-                player.Session.EnqueueMessageEncrypted(new ServerCooldown
+                player.Session.EnqueueMessageEncrypted(new ServerSpellCooldownStart
                 {
                     Cooldown = new Cooldown
                     {
