@@ -3,7 +3,7 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Misc
 {
-    public class ClientWatchdogStatisticsHandler : IMessageHandler<WorldSession, ClientStatisticsWatchdog>
+    public class ClientStatisticsWatchdogHandler : IMessageHandler<WorldSession, ClientStatisticsWatchdog>
     {
         /// <summary>
         /// Client sends this first when joining the world server, before the player's character has been selected, and
