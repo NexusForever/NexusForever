@@ -3,12 +3,12 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Misc
 {
-    internal class ClientStatisticsWindowOpenHandler : IMessageHandler<WorldSession, ClientStatisticsWindowOpen>
+    public class ClientStatisticsWindowOpenHandler : IMessageHandler<IWorldSession, ClientStatisticsWindowOpen>
     {
         /// <summary>
         /// Sent when the client closes an open UI window.
         /// </summary>
-        public void HandleMessage(WorldSession session, ClientStatisticsWindowOpen windowOpenStatistics)
+        public void HandleMessage(IWorldSession session, ClientStatisticsWindowOpen windowOpenStatistics)
         {
         }
     }

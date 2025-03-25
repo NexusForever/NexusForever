@@ -14,7 +14,6 @@ namespace NexusForever.Network.World.Message.Model
         public float GfxStat7 { get; private set; }
         public float GfxStat8 { get; private set; }
 
-
         public void Read(GamePacketReader reader)
         {
             GfxStat1 = reader.ReadSingle();
