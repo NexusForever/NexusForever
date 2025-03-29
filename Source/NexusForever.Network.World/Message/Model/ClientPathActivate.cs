@@ -3,8 +3,8 @@ using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPathActivate)]
-    public class ClientPathActivate : IReadable
+    [Message(GameMessageOpcode.ClientPlayerPathChange)]
+    public class ClientPlayerPathActivate : IReadable
     {
         public Path Path { get; private set; }
         public bool UseTokens { get; private set; }

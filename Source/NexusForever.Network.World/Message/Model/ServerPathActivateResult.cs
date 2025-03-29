@@ -4,8 +4,8 @@ using NexusForever.Network.World.Message.Static;
 namespace NexusForever.Network.World.Message.Model
 {
 
-    [Message(GameMessageOpcode.ServerPathActivateResult)]
-    public class ServerPathActivateResult : IWritable
+    [Message(GameMessageOpcode.ServerPlayerPathChangeResult)]
+    public class ServerPlayerPathChangeResult : IWritable
     {
         public GenericError Result { get; set; }
 

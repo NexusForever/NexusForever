@@ -7,7 +7,7 @@ using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Path
 {
-    public class ClientPathActivateHandler : IMessageHandler<IWorldSession, ClientPathActivate>
+    public class ClientPathActivateHandler : IMessageHandler<IWorldSession, ClientPlayerPathChange>
     {
         #region Dependency Injection
 
@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientPathActivate clientPathActivate)
+        public void HandleMessage(IWorldSession session, ClientPlayerPathChange clientPathActivate)
         {
             uint activateCooldown = gameTableManager.GameFormula.GetEntry(2366).Dataint0;
             uint bypassCost       = gameTableManager.GameFormula.GetEntry(2366).Dataint01;
