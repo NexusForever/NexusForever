@@ -454,6 +454,7 @@ namespace NexusForever.Network.Message
         ServerEntityHealthUpdate        = 0x0937,
         ServerEntityStatUpdateInteger   = 0x0938,
         ServerEntityPropertiesUpdate    = 0x093A,
+        ServerUnitUpdateObjectiveIndex  = 0x093B,
         ServerEmote                     = 0x093C,
         ClientItemUse                   = 0x0943,
         ClientWhoRequest                = 0x0959,
