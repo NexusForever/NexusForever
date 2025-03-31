@@ -6,14 +6,14 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientPlayerPathExplorerCastSearching : IReadable
     {
         public uint ClientSpellCastUniqueID { get; set; }
-        public byte AbilityItemIndex { get; set; }
-        public ushort Unknown {  get; set; }
+        public byte SearchRadiusBand { get; set; } // casts 1 of 4 Searching spells depending on band
+        public ushort PathExplorerScavengerClueId {  get; set; } // Relates to nearest ScavengerHunt WorldLocation
 
         public void Read(GamePacketReader reader)
         {
             ClientSpellCastUniqueID = reader.ReadUInt();
-            AbilityItemIndex = reader.ReadByte(2);
-            Unknown = reader.ReadUShort(14);
+            SearchRadiusBand = reader.ReadByte(2);
+            PathExplorerScavengerClueId = reader.ReadUShort(14);
         }
     }
 }
