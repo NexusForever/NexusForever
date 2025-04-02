@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPlayerPathExplorerCastSearching)]
-    public class ClientPlayerPathExplorerCastSearching : IReadable
+    [Message(GameMessageOpcode.ClientPathExplorerCastSearching)]
+    public class ClientPathExplorerCastSearching : IReadable
     {
         public uint ClientSpellCastUniqueID { get; set; }
         public byte SearchRadiusBand { get; set; } // casts 1 of 4 Searching spells depending on band

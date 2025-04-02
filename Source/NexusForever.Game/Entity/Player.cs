@@ -744,7 +744,7 @@ namespace NexusForever.Game.Entity
             if (entity is IPlayer playerEntity)
                 Session.EnqueueMessageEncrypted(new ServerSetUnitPathType
                 {
-                    Guid = playerEntity.Guid,
+                    UnitId = playerEntity.Guid,
                     Path = playerEntity.Path
                 });
 

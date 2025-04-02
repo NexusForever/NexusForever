@@ -4,8 +4,8 @@ namespace NexusForever.Network.World.Message.Model
 {
     // Fires whenever the player fails a Tracking mission.
 
-    [Message(GameMessageOpcode.ServerPlayerPathExplorerPowerMapFailed)]
-    public class ServerPlayerPathExplorerPowerMapFailed : IWritable
+    [Message(GameMessageOpcode.ServerPathExplorerPowerMapFailed)]
+    public class ServerPathExplorerPowerMapFailed : IWritable
     {
         public ushort PathMissionId { get; set; }
 

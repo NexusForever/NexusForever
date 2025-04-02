@@ -2,10 +2,9 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    // Fires whenever the player enters an area where a Tracking mission can be started
-
-    [Message(GameMessageOpcode.ServerPlayerPathExplorerPowerMapEntered)]
-    public class ServerPlayerPathExplorerPowerMapEntered : IWritable
+    // Fires whenever progress is made on a multi-step path mission.
+    [Message(GameMessageOpcode.ServerPathMissionAdvanced)]
+    public class ServerPathMissionAdvanced : IWritable
     {
         public ushort PathMissionId { get; set; }
 

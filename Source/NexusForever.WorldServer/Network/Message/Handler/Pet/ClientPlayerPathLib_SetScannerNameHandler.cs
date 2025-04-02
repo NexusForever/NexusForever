@@ -3,7 +3,7 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Pet
 {
-    public class ClientClientPlayerPathLib_SetScannerNameHandler : IMessageHandler<IWorldSession, ClientPlayerPathLib_SetScannerName>
+    public class ClientPlayerPathLib_SetScannerNameHandler : IMessageHandler<IWorldSession, ClientPlayerPathLib_SetScannerName>
     {
         public void HandleMessage(IWorldSession session, ClientPlayerPathLib_SetScannerName petRename)
         {

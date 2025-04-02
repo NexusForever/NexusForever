@@ -2,6 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
+    // Sent when PlayerPathLib::PathAction or GameCommand::PathAction is called, the active path is Scientist and there is no scanbot present
+    // 
     [Message(GameMessageOpcode.ClientPathScientistRequestScanbot)]
     public class ClientPathScientistRequestScanbot1 : IReadable
     {

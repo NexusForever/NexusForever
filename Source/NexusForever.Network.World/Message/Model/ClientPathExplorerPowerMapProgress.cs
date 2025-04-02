@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPlayerPathExplorerPowerMapProgress)]
-    public class ClientPlayerPathExplorerPowerMapProgress : IReadable
+    [Message(GameMessageOpcode.ClientPathExplorerPowerMapProgress)]
+    public class ClientPathExplorerPowerMapProgress : IReadable
     {
         public uint PathMissionId { get; private set; }
 

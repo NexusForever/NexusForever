@@ -2,10 +2,10 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    //Fires when the unit that is being tracked in a Tracking mission reaches its destination before the player.
+    // Fires whenever the player leaves a location where a power map mission can be started.
 
-    [Message(GameMessageOpcode.ServerPlayerPathExplorerPowerMapWaiting)]
-    public class ServerPlayerPathExplorerPowerMapWaiting : IWritable
+    [Message(GameMessageOpcode.ServerPathExplorerPowerMapExited)]
+    public class ServerPathExplorerPowerMapExited : IWritable
     {
         public ushort PathMissionId { get; set; }
 

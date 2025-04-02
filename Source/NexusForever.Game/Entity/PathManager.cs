@@ -268,7 +268,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         private void SendPathLogPacket()
         {
-            player.Session.EnqueueMessageEncrypted(new ServerPlayerPathInitialise
+            player.Session.EnqueueMessageEncrypted(new ServerPathInitialise
             {
                 ActivePath                  = player.Path,
                 PathProgress                = paths.Values.Select(p => p.TotalXp).ToArray(),
@@ -289,7 +289,7 @@ namespace NexusForever.Game.Entity
         {
             player.EnqueueToVisible(new ServerSetUnitPathType
             {
-                Guid = player.Guid,
+                UnitId = player.Guid,
                 Path = player.Path,
             }, true);
         }
