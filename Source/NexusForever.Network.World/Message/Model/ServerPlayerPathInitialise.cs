@@ -4,8 +4,8 @@ using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPathLog)]
-    public class ServerPathLog : IWritable
+    [Message(GameMessageOpcode.ServerPlayerPathInitialise)]
+    public class ServerPlayerPathInitialise : IWritable
     {
 
         public Path ActivePath { get; set; }

@@ -7,21 +7,21 @@ namespace NexusForever.Network.World.Message.Model
     {
         public class Mission : IWritable
         {
-            public uint MissionId { get; set; }
+            public uint PathMissionId { get; set; }
             public bool Completed { get; set; }
-            public uint Userdata { get; set; } // % of mission progress
-            public uint Statedata { get; set; } // 
-            public byte Reason { get; set; } 
-            public uint Giver { get; set; }
+            public uint ObjectiveCompletionFlags { get; set; } // 
+            public uint StateFlags { get; set; } // 
+            public byte MissionStateEnum { get; set; } 
+            public uint GiverUnitId { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(MissionId, 15);
+                writer.Write(PathMissionId, 15);
                 writer.Write(Completed);
-                writer.Write(Userdata);
-                writer.Write(Statedata);
-                writer.Write(Reason, 3);
-                writer.Write(Giver);
+                writer.Write(ObjectiveCompletionFlags);
+                writer.Write(StateFlags);
+                writer.Write(MissionStateEnum, 3);
+                writer.Write(GiverUnitId);
             }
         }
 

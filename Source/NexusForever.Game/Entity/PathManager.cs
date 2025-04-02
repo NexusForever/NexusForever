@@ -268,7 +268,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         private void SendPathLogPacket()
         {
-            player.Session.EnqueueMessageEncrypted(new ServerPathLog
+            player.Session.EnqueueMessageEncrypted(new ServerPlayerPathInitialise
             {
                 ActivePath                  = player.Path,
                 PathProgress                = paths.Values.Select(p => p.TotalXp).ToArray(),
@@ -300,7 +300,7 @@ namespace NexusForever.Game.Entity
         /// <param name="result">Used for success or error values</param>
         public void SendServerPathActivateResult(GenericError result = GenericError.Ok)
         {
-            player.Session.EnqueueMessageEncrypted(new ServerPathActivateResult
+            player.Session.EnqueueMessageEncrypted(new ServerPathChangeResult
             {
                 Result = result
             });
