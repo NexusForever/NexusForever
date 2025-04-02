@@ -7,13 +7,13 @@ using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Path
 {
-    public class ClientPathActivateHandler : IMessageHandler<IWorldSession, ClientPathActivate>
+    public class ClientPathChangeRequestHandler : IMessageHandler<IWorldSession, ClientPathChangeRequest>
     {
         #region Dependency Injection
 
         private readonly IGameTableManager gameTableManager;
 
-        public ClientPathActivateHandler(
+        public ClientPathChangeRequestHandler(
             IGameTableManager gameTableManager)
         {
             this.gameTableManager = gameTableManager;
@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientPathActivate clientPathActivate)
+        public void HandleMessage(IWorldSession session, ClientPathChangeRequest clientPathChangeRequest)
         {
             uint activateCooldown = gameTableManager.GameFormula.GetEntry(2366).Dataint0;
             uint bypassCost       = gameTableManager.GameFormula.GetEntry(2366).Dataint01;
@@ -29,17 +29,17 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
 
             GenericError CanActivatePath()
             {
-                if (needToUseTokens && !clientPathActivate.UseTokens)
+                if (needToUseTokens && !clientPathChangeRequest.OnCooldown)
                     return GenericError.PathChangeOnCooldown;
 
                 bool hasEnoughTokens = session.Account.CurrencyManager.CanAfford(AccountCurrencyType.ServiceToken, bypassCost); // TODO: Check user has enough tokens
-                if (needToUseTokens && clientPathActivate.UseTokens && !hasEnoughTokens)
+                if (needToUseTokens && clientPathChangeRequest.OnCooldown && !hasEnoughTokens)
                     return GenericError.PathChangeInsufficientFunds;
 
-                if (!session.Player.PathManager.IsPathUnlocked(clientPathActivate.Path))
+                if (!session.Player.PathManager.IsPathUnlocked(clientPathChangeRequest.Path))
                     return GenericError.PathChangeNotUnlocked;
 
-                if (session.Player.PathManager.IsPathActive(clientPathActivate.Path))
+                if (session.Player.PathManager.IsPathActive(clientPathChangeRequest.Path))
                     return GenericError.PathChangeRequested;
 
                 return GenericError.Ok;
@@ -52,10 +52,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
                 return;
             }
 
-            if (needToUseTokens && clientPathActivate.UseTokens)
+            if (needToUseTokens && clientPathChangeRequest.OnCooldown)
                 session.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, bypassCost);
 
-            session.Player.PathManager.ActivatePath(clientPathActivate.Path);
+            session.Player.PathManager.ActivatePath(clientPathChangeRequest.Path);
         }
     }
 }
