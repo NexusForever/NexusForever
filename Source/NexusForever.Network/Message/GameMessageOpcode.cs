@@ -359,7 +359,7 @@ namespace NexusForever.Network.Message
         ClientEntityInteract            = 0x07EA,
         ClientPetCustomisation          = 0x07ED,
         ClientSelectRealm               = 0x07DF,
-        ServerSpellGo                   = 0x7F4,
+        ServerSpellGo                   = 0x7F4, // execute spells cast by the player
         ServerSpellEffectExecute        = 0x7F5,
         ServerSpellReflect              = 0x7F6,
         ServerSpellEffectRemove         = 0x7F7,
@@ -370,7 +370,7 @@ namespace NexusForever.Network.Message
         ServerSpellCastResult           = 0x7FC,
         ServerSpellConfirmCast          = 0x7FD,
         ServerSpellFinish               = 0x7FE,
-        ServerSpellStart                = 0x7FF,
+        ServerSpellStart                = 0x7FF, 
         ClientSpellStopCast             = 0x801,
         ClientCancelEffect              = 0x802,
         ServerSpellCooldownStart        = 0x804,
@@ -385,7 +385,7 @@ namespace NexusForever.Network.Message
         ServerSpell0x815                = 0x815,
         ServerSpellThresholdStart       = 0x816,
         ServerSpellThresholdUpdate      = 0x817,
-        Server0818                      = 0x818,
+        ServerSpell0818                 = 0x818, // executes spells cast by others 
         ServerSpellAuraCancel           = 0x819,
         Server081A                      = 0x081A, // spline related
         Server081B                      = 0x081B, // spline related
