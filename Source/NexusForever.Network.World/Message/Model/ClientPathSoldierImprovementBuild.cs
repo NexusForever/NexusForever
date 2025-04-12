@@ -2,10 +2,10 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPathSoldierImprovement_Build)]
-    public class ClientPathSoldierImprovement_Build : IReadable
+    [Message(GameMessageOpcode.ClientPathSoldierImprovementBuild)]
+    public class ClientPathSoldierImprovementBuild : IReadable
     {
-        public ushort PathSoldierTowerDefenseId { get; set; }
+        public ushort PathSoldierTowerDefenseId { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

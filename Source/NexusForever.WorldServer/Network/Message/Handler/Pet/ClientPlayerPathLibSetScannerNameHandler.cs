@@ -3,9 +3,9 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Pet
 {
-    public class ClientPlayerPathLib_SetScannerNameHandler : IMessageHandler<IWorldSession, ClientPlayerPathLib_SetScannerName>
+    public class ClientPlayerPathLibSetScannerNameHandler : IMessageHandler<IWorldSession, ClientPlayerPathLibSetScannerName>
     {
-        public void HandleMessage(IWorldSession session, ClientPlayerPathLib_SetScannerName petRename)
+        public void HandleMessage(IWorldSession session, ClientPlayerPathLibSetScannerName petRename)
         {
             session.Player.PetCustomisationManager.RenamePet(petRename.PetType,
                 petRename.PathScientistScanBotProfileId,

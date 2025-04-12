@@ -2,10 +2,10 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPathMission_AttempScientistExperimentation)]
-    public class ClientPathMission_AttempScientistExperimentation : IReadable
+    [Message(GameMessageOpcode.ClientPathMissionAttemptScientistExperimentation)]
+    public class ClientPathMissionAttemptScientistExperimentation : IReadable
     {
-        public List<uint> Choices { get; } = new(); // Are all PathScientistExperimentationPatternDataId
+        public List<uint> Choices { get; private set; } = new(); // Are all PathScientistExperimentationPatternDataId
 
         public void Read(GamePacketReader reader)
         {

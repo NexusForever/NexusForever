@@ -5,10 +5,16 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerPathSettlerAddImprovementInfoToUnit)]
     public class ServerPathSettlerAddImprovementInfoToUnit : IWritable
     {
-        public class ImprovementInfo
+        public class ImprovementInfo : IWritable
         {
             public string Name { get; set; }
             public uint Tier { get; set; }
+
+            public void Write(GamePacketWriter writer)
+            {
+                writer.WriteStringWide(Name);
+                writer.Write(Tier);
+            }
         }
 
         public uint UnitId { get; set; }
@@ -31,8 +37,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(Improvements.Count);
             foreach (var improvement in Improvements)
             {
-                writer.WriteStringWide(improvement.Name);
-                writer.Write(improvement.Tier);
+                improvement.Write(writer);
             }
         }
     }

@@ -1,23 +1,11 @@
 ﻿using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerPathSoldierHoldoutStatus)]
     public class ServerPathSoldierHoldoutStatus : IWritable
     {
-        public class TowerDefenseUnitInfo
-        {
-            public enum TowerDefenseUnitType
-            {
-                Defend = 0,
-                Auxiliary = 1,
-                Escaping = 2
-            }
-
-            public uint UnitId { get; set; }
-            public TowerDefenseUnitType Type { get; set; }
-        }
-
         public enum PlayerPathSoldierEventMode
         {
             Inactive = 0,
@@ -43,8 +31,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(UnitInfo.Count);
             foreach (var unitInfo in UnitInfo)
             {
-                writer.Write(unitInfo.UnitId);
-                writer.Write(unitInfo.Type);
+                unitInfo.Write(writer);
             }
             writer.Write(UnitId);
             writer.Write(IsBoss);
