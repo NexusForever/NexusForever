@@ -342,7 +342,7 @@ namespace NexusForever.Network.Message
         ServerPendingWorldRemovalCancel = 0x0688,
         ServerPendingWorldRemoval       = 0x0689,
         Server068B                      = 0x068B, // pet customization something
-        ClientPlayerPathLibSetScannerName = 0x068C,
+        ClientPathScientistSetScannerName = 0x068C,
         ServerUnlockPetFlair            = 0x068D,
         ServerChangePetStance           = 0x068F,
         ClientRequestPlayed             = 0x0693,

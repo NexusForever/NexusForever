@@ -3,8 +3,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientPlayerPathLibSetScannerName)]
-    public class ClientPlayerPathLibSetScannerName : IReadable
+    [Message(GameMessageOpcode.ClientPathScientistSetScannerName)]
+    public class ClientPathScientistSetScannerName : IReadable
     {
         public PetType PetType { get; private set; }
         public uint PathScientistScanBotProfileId { get; private set; }
