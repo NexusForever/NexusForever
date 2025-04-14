@@ -14,184 +14,180 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared.Game.Events;
 
-namespace NexusForever.WorldServer.Network.Message.Handler.Character;
-
-public class CharacterListManager : ICharacterListManager
+namespace NexusForever.WorldServer.Network.Message.Handler.Character
 {
-    private ILogger<CharacterListHandler> log;
-
-    private readonly IDatabaseManager databaseManager;
-    private readonly IRealmContext realmContext;
-
-    public CharacterListManager(
-        ILogger<CharacterListHandler> log,
-        IDatabaseManager databaseManager,
-        IRealmContext realmContext
-    )
+    public class CharacterListManager : ICharacterListManager
     {
-        this.log = log;
-        this.databaseManager = databaseManager;
-        this.realmContext = realmContext;
-    }
+        private readonly ILogger<CharacterListHandler> log;
 
-    public void SendCharacterListPackets(IWorldSession session)
-    {
-        if (session.IsQueued == true)
+        private readonly IDatabaseManager databaseManager;
+        private readonly IRealmContext realmContext;
+
+        public CharacterListManager(
+            ILogger<CharacterListHandler> log,
+            IDatabaseManager databaseManager,
+            IRealmContext realmContext)
         {
-            return;
+            this.log = log;
+            this.databaseManager = databaseManager;
+            this.realmContext = realmContext;
         }
 
-        session.Events.EnqueueEvent(new TaskGenericEvent<List<CharacterModel>>(
-            databaseManager.GetDatabase<CharacterDatabase>().GetCharacters(session.Account.Id),
-            characters =>
-            {
-                foreach (var packet in GetPackets(session, characters))
+        public void SendCharacterListPackets(IWorldSession session)
+        {
+            if (session.IsQueued == true)
+                return;
+
+            session.Events.EnqueueEvent(new TaskGenericEvent<List<CharacterModel>>(
+                databaseManager.GetDatabase<CharacterDatabase>().GetCharacters(session.Account.Id),
+                characters =>
                 {
-                    session.EnqueueMessageEncrypted(packet);
-                }
-            }));
-    }
+                    session.Characters.Clear();
+                    session.Characters.AddRange(characters);
 
-    public IEnumerable<IWritable> GetPackets(IWorldSession session, IEnumerable<CharacterModel> characters)
-    {
-        session.Characters.Clear();
-        session.Characters.AddRange(characters);
+                    foreach (IWritable packet in GetPackets(session))
+                        session.EnqueueMessageEncrypted(packet);
+                }));
+        }
 
-        session.Account.CurrencyManager.SendCharacterListPacket();
-        session.Account.GenericUnlockManager.SendUnlockList();
-
-        yield return new ServerAccountEntitlements
+        private IEnumerable<IWritable> GetPackets(IWorldSession session)
         {
-            Entitlements = session.Account.EntitlementManager
-                .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
-                {
-                    Entitlement = e.Type,
-                    Count = e.Amount
-                })
-                .ToList()
-        };
+            session.Account.CurrencyManager.SendCharacterListPacket();
+            session.Account.GenericUnlockManager.SendUnlockList();
 
-        yield return new ServerAccountTier
-        {
-            Tier = session.Account.AccountTier
-        };
-
-        var serverCharacterList = CreateServerCharacterList(
-            session.Account.RewardPropertyManager,
-            MapServerCharacters(session.Characters)
-        );
-
-        var maxCharacterLevelAchieved = serverCharacterList.Characters
-            .Select(i => i.Level)
-            .Append((byte)1)
-            .Max();
-
-        yield return new ServerMaxCharacterLevelAchieved
-        {
-            Level = maxCharacterLevelAchieved
-        };
-        yield return serverCharacterList;
-    }
-
-    private ServerCharacterList CreateServerCharacterList(IRewardPropertyManager rewardPropertyManager,
-        IEnumerable<ServerCharacterList.Character> characters)
-    {
-        var characterList = (characters as IList<ServerCharacterList.Character> ?? characters.ToList());
-        // 2 is just a fail safe for the minimum amount of character slots
-        // this is set in the tbl files so a value should always exist
-        var characterSlots =
-            (uint)(rewardPropertyManager.GetRewardProperty(RewardPropertyType.CharacterSlots).GetValue(0u) ?? 2u);
-
-        var serverCharacterList = new ServerCharacterList
-        {
-            ServerTime = realmContext.GetServerTime(),
-            RealmId = realmContext.RealmId,
-            // no longer used as replaced by entitlements but retail server still used to send this
-            AdditionalCount = (uint)characterList.Count,
-            AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)characterSlots - characterList.Count),
-            // Free Level 50 needs(?) support. It appears to have just been a custom flag on the account that was consume when used up.
-            // FreeLevel50 = true
-        };
-        serverCharacterList.Characters.AddRange(characterList);
-
-        return serverCharacterList;
-    }
-
-    private IEnumerable<ServerCharacterList.Character> MapServerCharacters(IEnumerable<CharacterModel> characters)
-    {
-        foreach (CharacterModel character in characters)
-        {
-            var listCharacter = new ServerCharacterList.Character
+            yield return new ServerAccountEntitlements
             {
-                Id = character.Id,
-                Name = character.Name,
-                Sex = (Sex)character.Sex,
-                Race = (Race)character.Race,
-                Class = (Class)character.Class,
-                Faction = character.FactionId,
-                Level = character.Level,
-                WorldId = character.WorldId,
-                WorldZoneId = character.WorldZoneId,
-                RealmId = realmContext.RealmId,
-                Path = (byte)character.ActivePath,
-                LastLoggedOutDays =
-                    (float)DateTime.UtcNow.Subtract(character.LastOnline ?? DateTime.UtcNow).TotalDays * -1f
+                Entitlements = session.Account.EntitlementManager
+                    .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
+                    {
+                        Entitlement = e.Type,
+                        Count       = e.Amount
+                    })
+                    .ToList()
             };
 
-            try
+            yield return new ServerAccountTier
             {
-                // create a temporary Inventory and CostumeManager to show equipped gear
-                var inventory = new Inventory(null, character);
-                var costumeManager = new CostumeManager(null, character);
+                Tier = session.Account.AccountTier
+            };
 
-                ICostume costume = null;
-                if (costumeManager.CostumeIndex.HasValue)
-                    costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
+            ServerCharacterList serverCharacterList = CreateServerCharacterList(
+                session.Account.RewardPropertyManager,
+                MapServerCharacters(session.Characters)
+            );
 
-                listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+            uint maxCharacterLevelAchieved = serverCharacterList.Characters
+                .Select(i => i.Level)
+                .Append((byte)1)
+                .Max();
 
-                Dictionary<ItemSlot, IItemVisual> costumeVisuals =
-                    costume?.GetItemVisuals().ToDictionary(c => c.Slot);
-                foreach (IItemVisual itemVisual in inventory.GetItemVisuals())
+            yield return new ServerMaxCharacterLevelAchieved
+            {
+                Level = maxCharacterLevelAchieved
+            };
+            yield return serverCharacterList;
+        }
+
+        private ServerCharacterList CreateServerCharacterList(IRewardPropertyManager rewardPropertyManager,
+            IEnumerable<ServerCharacterList.Character> characters)
+        {
+            var characterList = (characters as IList<ServerCharacterList.Character> ?? characters.ToList());
+            // 2 is just a fail safe for the minimum amount of character slots
+            // this is set in the tbl files so a value should always exist
+            uint characterSlots =
+                (uint)(rewardPropertyManager.GetRewardProperty(RewardPropertyType.CharacterSlots).GetValue(0u) ?? 2u);
+
+            var serverCharacterList = new ServerCharacterList
+            {
+                ServerTime                     = realmContext.GetServerTime(),
+                RealmId                        = realmContext.RealmId,
+                // no longer used as replaced by entitlements but retail server still used to send this
+                AdditionalCount                = (uint)characterList.Count,
+                AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)characterSlots - characterList.Count),
+                // Free Level 50 needs(?) support. It appears to have just been a custom flag on the account that was consume when used up.
+                // FreeLevel50 = true
+            };
+            serverCharacterList.Characters.AddRange(characterList);
+
+            return serverCharacterList;
+        }
+
+        private IEnumerable<ServerCharacterList.Character> MapServerCharacters(IEnumerable<CharacterModel> characters)
+        {
+            foreach (CharacterModel character in characters)
+            {
+                var listCharacter = new ServerCharacterList.Character
                 {
-                    if (costumeVisuals != null
-                        && costumeVisuals.TryGetValue(itemVisual.Slot, out IItemVisual costumeVisual)
-                        && costumeVisual.DisplayId.HasValue)
-                        listCharacter.Gear.Add(costumeVisual.Build());
-                    else
-                        listCharacter.Gear.Add(itemVisual.Build());
-                }
+                    Id                = character.Id,
+                    Name              = character.Name,
+                    Sex               = (Sex)character.Sex,
+                    Race              = (Race)character.Race,
+                    Class             = (Class)character.Class,
+                    Faction           = character.FactionId,
+                    Level             = character.Level,
+                    WorldId           = character.WorldId,
+                    WorldZoneId       = character.WorldZoneId,
+                    RealmId           = realmContext.RealmId,
+                    Path              = (byte)character.ActivePath,
+                    LastLoggedOutDays =
+                        (float)DateTime.UtcNow.Subtract(character.LastOnline ?? DateTime.UtcNow).TotalDays * -1f
+                };
 
-                foreach (CharacterAppearanceModel appearance in character.Appearance)
+                try
                 {
-                    listCharacter.Appearance.Add(new NexusForever.Network.World.Message.Model.Shared.ItemVisual
+                    // create a temporary Inventory and CostumeManager to show equipped gear
+                    var inventory      = new Inventory(null, character);
+                    var costumeManager = new CostumeManager(null, character);
+
+                    ICostume costume = null;
+                    if (costumeManager.CostumeIndex.HasValue)
+                        costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
+
+                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+
+                    Dictionary<ItemSlot, IItemVisual> costumeVisuals =
+                        costume?.GetItemVisuals().ToDictionary(c => c.Slot);
+                    foreach (IItemVisual itemVisual in inventory.GetItemVisuals())
                     {
-                        Slot = (ItemSlot)appearance.Slot,
-                        DisplayId = appearance.DisplayId
-                    });
-                }
+                        if (costumeVisuals != null
+                            && costumeVisuals.TryGetValue(itemVisual.Slot, out IItemVisual costumeVisual)
+                            && costumeVisual.DisplayId.HasValue)
+                            listCharacter.Gear.Add(costumeVisual.Build());
+                        else
+                            listCharacter.Gear.Add(itemVisual.Build());
+                    }
 
-                foreach (CharacterBoneModel bone in character.Bone.OrderBy(bone => bone.BoneIndex))
-                {
-                    listCharacter.Bones.Add(bone.Bone);
-                }
-
-                foreach (CharacterStatModel stat in character.Stat)
-                {
-                    if ((Stat)stat.Stat == Stat.Level)
+                    foreach (CharacterAppearanceModel appearance in character.Appearance)
                     {
-                        listCharacter.Level = (uint)stat.Value;
-                        break;
+                        listCharacter.Appearance.Add(new NexusForever.Network.World.Message.Model.Shared.ItemVisual
+                        {
+                            Slot      = (ItemSlot)appearance.Slot,
+                            DisplayId = appearance.DisplayId
+                        });
+                    }
+
+                    foreach (CharacterBoneModel bone in character.Bone.OrderBy(bone => bone.BoneIndex))
+                    {
+                        listCharacter.Bones.Add(bone.Bone);
+                    }
+
+                    foreach (CharacterStatModel stat in character.Stat)
+                    {
+                        if ((Stat)stat.Stat == Stat.Level)
+                        {
+                            listCharacter.Level = (uint)stat.Value;
+                            break;
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                log.LogCritical(ex, $"An error has occured while loading character '{character.Name}'");
-                continue;
-            }
+                catch (Exception ex)
+                {
+                    log.LogCritical(ex, $"An error has occured while loading character '{character.Name}'");
+                    continue;
+                }
 
-            yield return listCharacter;
+                yield return listCharacter;
+            }
         }
     }
 }

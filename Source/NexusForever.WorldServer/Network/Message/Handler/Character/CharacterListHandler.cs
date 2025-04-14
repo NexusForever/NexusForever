@@ -11,7 +11,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
         #region Dependency Injection
 
         public CharacterListHandler(
-            ICharacterListManager characterListManager, ILoginQueueManager loginQueueManager)
+            ICharacterListManager characterListManager,
+            ILoginQueueManager loginQueueManager)
         {
             this.characterListManager = characterListManager;
             this.loginQueueManager = loginQueueManager;
