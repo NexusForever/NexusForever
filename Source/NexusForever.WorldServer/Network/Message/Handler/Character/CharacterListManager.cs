@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 characters =>
                 {
                     session.Characters.Clear();
-                    session.Characters.AddRange(characters);
+                    session.Characters.AddRange(characters.Where(c => c.DeleteTime == null));
 
                     foreach (IWritable packet in GetPackets(session))
                         session.EnqueueMessageEncrypted(packet);
