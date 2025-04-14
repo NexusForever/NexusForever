@@ -14,16 +14,16 @@ namespace NexusForever.Network.World.Message.Model
             Active = 3,
         }
 
-        public uint PathSoldierEventId;
-        public List<TowerDefenseUnitInfo> UnitInfo;
-        public uint UnitId;
-        public bool IsBoss;
-        PlayerPathSoldierEventMode Mode;
-        public int DelayTime;
-        public int WaveIndex;
-        public float MaxDefendHealth;
-        public float MaxAuxiliaryHealth;
-        public int StartTimeOffset;
+        public uint PathSoldierEventId { get; set; }
+        public List<TowerDefenseUnitInfo> UnitInfo { get; set; }
+        public uint UnitId { get; set; }
+        public bool IsBoss { get; set; }
+        public PlayerPathSoldierEventMode Mode { get; set; }
+        public int DelayTime { get; set; }
+        public int WaveIndex { get; set; }
+        public float MaxDefendHealth { get; set; }
+        public float MaxAuxiliaryHealth { get; set; }
+        public int StartTimeOffset { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
