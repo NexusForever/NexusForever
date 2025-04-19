@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerP2PTradeUpdateItem : IWritable
     {
         public uint TradeIndex { get; set; }
-        public uint OwnerUnitid { get; set; }
+        public uint OwnerUnitId { get; set; }
         public uint Item2Id { get; set; }
         public ulong ItemGuid { get; set; }
         public uint Quantity { get; set; }
@@ -19,7 +19,7 @@ namespace NexusForever.Network.World.Message.Model
         public void Write(GamePacketWriter writer)
         {
             writer.Write(TradeIndex);
-            writer.Write(OwnerUnitid);
+            writer.Write(OwnerUnitId);
             writer.Write(Item2Id, 18);
             writer.Write(ItemGuid);
             writer.Write(Quantity);

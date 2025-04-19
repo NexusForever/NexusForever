@@ -5,11 +5,11 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerP2PTradeInvite)]
     public class ServerP2PTradeInvite : IWritable
     {
-        public uint TraderInviterUnitId { get; set; }
+        public uint TradeInviterUnitId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(TraderInviterUnitId);
+            writer.Write(TradeInviterUnitId);
         }
     }
 }
