@@ -33,7 +33,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Result);
+            writer.Write(Result, 5);
             writer.Write(Cancelled);
         }
     }
