@@ -1,5 +1,4 @@
 using NexusForever.Network.Message;
-using System.Runtime.CompilerServices;
 
 namespace NexusForever.Network.World.Message.Model
 {

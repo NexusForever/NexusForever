@@ -1,4 +1,5 @@
 using NexusForever.Network.Message;
+using static NexusForever.Network.World.Message.Model.Shared.CraftingLib;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -6,14 +7,14 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientCraftingRuneSlotAdd : IReadable
     {
         public ulong ItemGuid { get; private set; }
-        public bool Field_8_1bit { get; private set; }
-        public byte SlotIndex_5bit { get; private set; }
+        public bool IsNotFusion { get; private set; }
+        public RuneType Type { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
             ItemGuid = reader.ReadULong();
-            Field_8_1bit = reader.ReadBit();
-            SlotIndex_5bit = reader.ReadByte(5);
+            IsNotFusion = reader.ReadBit();
+            Type = (RuneType)reader.ReadByte(5);
         }
     }
 }

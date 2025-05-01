@@ -1,4 +1,5 @@
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -8,25 +9,25 @@ namespace NexusForever.Network.World.Message.Model
         public uint ClientSpellcastUniqueId { get; private set; }
         public uint CraftingStationUnitId { get; private set; }
         public uint TradeskillSchematic2Id { get; private set; }
-        public ulong Field_10_64bit { get; private set; }
-        public uint Field_18_18bit { get; private set; }
-        public uint Field_1C_32bit { get; private set; }
-        public uint[] UnknownArray { get; private set; }
+        public CraftStats Stats { get; set; } = new CraftStats();
+        public uint PowerCoreItem2Id { get; private set; }
+        public uint ApSpSplitDelta { get; private set; }
+        public int[] UnknownArray { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
             ClientSpellcastUniqueId = reader.ReadUInt();
             CraftingStationUnitId = reader.ReadUInt();
             TradeskillSchematic2Id = reader.ReadUInt();
-            Field_10_64bit = reader.ReadULong();
-            Field_18_18bit = reader.ReadUInt(18);
-            Field_1C_32bit = reader.ReadUInt();
+            Stats.Read(reader);
+            PowerCoreItem2Id = reader.ReadUInt(18);
+            ApSpSplitDelta = reader.ReadUInt();
 
             uint count = reader.ReadUInt(3);
-            UnknownArray = new uint[count];
+            UnknownArray = new int[count];
             for (int i = 0; i < count; i++)
             {
-                UnknownArray[i] = reader.ReadUInt();
+                UnknownArray[i] = reader.ReadInt();
             }
         }
     }

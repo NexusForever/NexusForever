@@ -1,4 +1,5 @@
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Shared;
 using System.Numerics;
 
 namespace NexusForever.Network.World.Message.Model
@@ -7,37 +8,35 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerCraftingCurrentCraft : IWritable
     {
         public uint TradeskillSchematic2Id { get; set; }
-        public ulong CraftData { get; set; }
-        public uint field_10_32bit { get; set; }
+        public CraftStats Stats { get; set; } = new CraftStats();
+        public uint CraftingGroupFlags { get; set; }
         public uint SchematicCount { get; set; }
         public uint AdditiveCount { get; set; }
-        public uint field_1C_32bit { get; set; }
-        public uint field_20_20bit { get; set; }
-        public uint[] UnknownArray { get; set; } = new uint[4];
+        public uint Unused { get; set; } = 0;
+        public uint[] UnknownArray { get; set; } = new uint[5];
         public uint Item2Id { get; set; }
-        public Vector2 UnknownVector1 { get; set; }
-        public Vector2 UnknownVector2 { get; set; }
-        public float field_48 { get; set; }
+        public Vector2 DiscoveryCoordinates { get; set; }
+        public Vector2 DiscoveryVectorMultiplier { get; set; }
+        public float DiscoveryRadiusMultiplier { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(TradeskillSchematic2Id, 15);
-            writer.Write(CraftData);
-            writer.Write(field_10_32bit);
+            Stats.Write(writer);
+            writer.Write(CraftingGroupFlags);
             writer.Write(SchematicCount);
             writer.Write(AdditiveCount);
-            writer.Write(field_1C_32bit);
-            writer.Write(field_20_20bit, 20);
+            writer.Write(Unused);
             foreach (var id in UnknownArray)
             {
                 writer.Write(id);
             }
             writer.Write(Item2Id, 18);
-            writer.Write(UnknownVector1.X);
-            writer.Write(UnknownVector1.Y);
-            writer.Write(UnknownVector2.X);
-            writer.Write(UnknownVector2.Y);
-            writer.Write(field_48);
+            writer.Write(DiscoveryCoordinates.X);
+            writer.Write(DiscoveryCoordinates.Y);
+            writer.Write(DiscoveryVectorMultiplier.X);
+            writer.Write(DiscoveryVectorMultiplier.Y);
+            writer.Write(DiscoveryRadiusMultiplier);
         }
     }
 }

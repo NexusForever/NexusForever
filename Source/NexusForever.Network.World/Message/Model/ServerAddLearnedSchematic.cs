@@ -1,21 +1,22 @@
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Shared;
+using System.Numerics;
 
 namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerAddLearnedSchematic)]
     public class ServerAddLearnedSchematic : IWritable
     {
-        public uint TradeskillId { get; set; }
+        public TradeskillType TradeskillId { get; set; }
         public uint TradeskillSchematic2Id { get; set; }
-        public float Field_8 { get; set; }
-        public float Field_C { get; set; }
+        public Vector2 DiscoveryCoordinates { get; set; } // Coordinates on the discovery panel
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(TradeskillId);
             writer.Write(TradeskillSchematic2Id);
-            writer.Write(Field_8);
-            writer.Write(Field_C);
+            writer.Write(DiscoveryCoordinates.X);
+            writer.Write(DiscoveryCoordinates.Y);
         }
     }
 }

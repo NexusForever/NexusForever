@@ -1,16 +1,16 @@
 using NexusForever.Network.Message;
+using static NexusForever.Network.World.Message.Model.Shared.CraftingLib;
 
 namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerTradeSkillSigilResult)]
     public class ServerTradeSkillSigilResult : IWritable
     {
-        public uint TradeskillSigilResult { get; set; }
+        public TradeskillResult TradeskillSigilResult { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(TradeskillSigilResult);
-            
+            writer.Write(TradeskillSigilResult, 32u);
         }
     }
 }

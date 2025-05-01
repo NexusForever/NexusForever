@@ -7,15 +7,15 @@ namespace NexusForever.Network.World.Message.Model
     {
         public ulong ItemGuid { get; private set; }
         public uint RuneSlotIndex { get; private set; }
-        public bool Field_C_1bit { get; private set; }
-        public bool Field_10_1bit { get; private set; }
+        public bool RecoverRune { get; private set; } // clear slot = 0, recover = 1
+        public bool UseGroupCurrency { get; private set; } // use credits = 0, use group currency = 1
 
         public void Read(GamePacketReader reader)
         {
             ItemGuid = reader.ReadULong();
             RuneSlotIndex = reader.ReadUInt();
-            Field_C_1bit = reader.ReadBit();
-            Field_10_1bit = reader.ReadBit();
+            RecoverRune = reader.ReadBit();
+            UseGroupCurrency = reader.ReadBit();
         }
     }
 }

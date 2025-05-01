@@ -1,28 +1,28 @@
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
+using System.Numerics;
 
 namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerProfessionsLoad)]
     public class ServerProfessionsLoad : IWritable
     {
-        public class SchematicUnknown : IWritable
+        public class DiscoveredSchematic : IWritable
         {
             public uint TradeskillSchematic2Id { get; set; }
-            public float Field_4 { get; set; }
-            public float Field_8 { get; set; }
+            public Vector2 Coordinates { get; set; } // Coordinates on the discovery panel
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(TradeskillSchematic2Id);
-                writer.Write(Field_4);
-                writer.Write(Field_8);
+                writer.Write(Coordinates.X);
+                writer.Write(Coordinates.Y);
             }
         }
 
         List<TradeskillInfo> Tradeskills { get; set; } = new List<TradeskillInfo>();
         List<uint> LearnedSchematics { get; set; } = new List<uint>(); // TradeskillSchematic2Id
-        List<SchematicUnknown> SchematicUnknowns { get; set; } = new List<SchematicUnknown>();
+        List<DiscoveredSchematic> DiscoveredSchematics { get; set; } = new List<DiscoveredSchematic>();
         List<uint> UnknownArray { get; set; } = new List<uint>();
         public uint RelearnCooldown { get; set; } // Sent as an offset from the time now, to the finish time, in milliseconds.
 
@@ -40,10 +40,10 @@ namespace NexusForever.Network.World.Message.Model
                 writer.Write(schematic);
             }
 
-            writer.Write(SchematicUnknowns.Count);
-            foreach (var unknown in SchematicUnknowns)
+            writer.Write(DiscoveredSchematics.Count);
+            foreach (var schematic in DiscoveredSchematics)
             {
-                unknown.Write(writer);
+                schematic.Write(writer);
             }
 
             writer.Write(UnknownArray.Count);
