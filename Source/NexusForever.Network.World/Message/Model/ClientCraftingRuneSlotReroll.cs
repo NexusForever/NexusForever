@@ -1,5 +1,5 @@
 using NexusForever.Network.Message;
-using static NexusForever.Network.World.Message.Model.Shared.CraftingLib;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {

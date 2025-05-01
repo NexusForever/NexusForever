@@ -1,6 +1,5 @@
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
-using static NexusForever.Network.World.Message.Model.Shared.CraftingLib;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -13,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
             TradeskillType TradeskillId { get; set; }
             uint Item2TypeId { get; set; }
             uint Item2MaterialId { get; set; }
-            float Coefficient { get; set; } // Can be used additive or multiplier, depends on Type
+            float Coefficient { get; set; } // Might be used additive or multiplier, depends on Type
             uint FixedValue { get; set; }
 
             public void Write(GamePacketWriter writer)

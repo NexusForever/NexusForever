@@ -430,7 +430,6 @@ namespace NexusForever.Network.Message
         ClientStorefrontRequestCatalog  = 0x082D,
         ClientSummonVanityPet           = 0x082F,
         ServerTimeOfDay                 = 0x0845,
-
         ClientCraftingAddAdditive       = 0x084A,
         ServerProfessionModifiers       = 0x084C,
         ClientCraftingAbandon           = 0x084D,
@@ -453,7 +452,6 @@ namespace NexusForever.Network.Message
         ServerAddLearnedSchematic       = 0x085F,
         ServerProfessionUpdate          = 0x0860,
         ServerTradeskillRelearnCooldownUpdate = 0x861,
-
         ServerVehiclePassengerAdd       = 0x086F,
         ServerEntityAggroSwitch         = 0x0876,
         ServerEntityCCStateSet          = 0x087F,
