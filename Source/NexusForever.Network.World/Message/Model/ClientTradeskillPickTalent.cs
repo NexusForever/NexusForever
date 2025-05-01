@@ -3,8 +3,8 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCraftingPickTradeskillTalent)]
-    public class ClientCraftingPickTradeskillTalent : IReadable
+    [Message(GameMessageOpcode.ClientTradeskillPickTalent)]
+    public class ClientTradeskillPickTalent : IReadable
     {
         public TradeskillType TradeskillId { get; private set; }
         public uint Tier { get; private set; }
