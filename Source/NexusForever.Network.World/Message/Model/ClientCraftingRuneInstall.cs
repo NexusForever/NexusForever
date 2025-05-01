@@ -2,8 +2,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientCraftingInstallRuneIntoSlot)]
-    public class ClientCraftingInstallRuneIntoSlot : IReadable
+    [Message(GameMessageOpcode.ClientCraftingRuneInstall)]
+    public class ClientCraftingRuneInstall : IReadable
     {
         public ulong ItemGuid { get; private set; }
         public uint[] RuneSlotItem2Id { get; private set; } // Item2Id of rune, arranged in order of slot

@@ -3,8 +3,8 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerTradeSkillSigilResult)]
-    public class ServerTradeSkillSigilResult : IWritable
+    [Message(GameMessageOpcode.ServerTradeskillSigilResult)]
+    public class ServerTradeskillSigilResult : IWritable
     {
         public TradeskillResult TradeskillSigilResult { get; set; }
 

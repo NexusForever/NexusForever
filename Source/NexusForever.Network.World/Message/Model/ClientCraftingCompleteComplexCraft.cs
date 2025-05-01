@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model
         public uint ClientSpellcastUniqueId { get; private set; }
         public uint CraftingStationUnitId { get; private set; }
         public uint TradeskillSchematic2Id { get; private set; }
-        public CraftStats Stats { get; set; } = new CraftStats();
+        public CraftStats Stats { get; private set; } = new CraftStats();
         public uint PowerCoreItem2Id { get; private set; }
         public uint ApSpSplitDelta { get; private set; }
         public int[] UnknownArray { get; private set; }
