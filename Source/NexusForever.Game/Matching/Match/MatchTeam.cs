@@ -102,7 +102,7 @@ namespace NexusForever.Game.Matching.Match
         {
             matchTeamMember.Send(new ServerMatchingMatchJoined
             {
-                MatchingGameMap = match.MatchingMap.Id
+                MatchingGameMapId = match.MatchingMap.Id
             });
         }
 

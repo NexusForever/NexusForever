@@ -5,7 +5,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientMatchingMatchReadyResponse)]
     public class ClientMatchingGameReadyResponse : IReadable
     {
-        public bool Response { get; private set; }
+        public bool Response { get; private set; } // decline = false, join = true
 
         public void Read(GamePacketReader reader)
         {

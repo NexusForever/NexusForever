@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     {
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(0, 5u);
+            writer.Write(0, 5u); // Not used by client
         }
     }
 }

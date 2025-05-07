@@ -109,9 +109,9 @@ namespace NexusForever.Game.Matching.Queue
             Static.Matching.MatchType currentMatchType = matchManager.GetMatchCharacter(CharacterId).Match?.MatchingMap.GameTypeEntry.MatchTypeEnum
                 ?? Static.Matching.MatchType.None;
 
-            var matchingQueueLeave = new ServerMatchingStatus()
+            var matchingQueueLeave = new ServerMatchingQueueStatus()
             {
-                Unknown   = 0,
+                Result    = MatchingQueueResultShort.InQueue,
                 MatchType = currentMatchType,
                 Unknown8  = Static.Matching.MatchType.None,
             };

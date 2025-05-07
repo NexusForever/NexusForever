@@ -3,7 +3,8 @@
     [Flags]
     public enum MatchingQueueFlags
     {
-        None      = 0x00,
-        SoloMatch = 0x80
+        None            = 0x00,
+        GroupIsQueued   = 0x04,
+        SoloMatch       = 0x80
     }
 }

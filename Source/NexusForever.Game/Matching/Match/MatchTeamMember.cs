@@ -69,7 +69,7 @@ namespace NexusForever.Game.Matching.Match
             InMatch = true;
             Send(new ServerMatchingMatchEntered
             {
-                MatchingGameMap = matchingMap.Id
+                MatchingGameMapId = matchingMap.Id
             });
         }
 
