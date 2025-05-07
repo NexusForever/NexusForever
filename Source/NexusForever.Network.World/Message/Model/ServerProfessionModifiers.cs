@@ -1,5 +1,5 @@
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Game.Static.Crafting;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -8,12 +8,12 @@ namespace NexusForever.Network.World.Message.Model
     {
         public class CraftingModifier : IWritable
         {
-            CraftingModifierType Type { get; set; }
-            TradeskillType TradeskillId { get; set; }
-            uint Item2TypeId { get; set; }
-            uint Item2MaterialId { get; set; }
-            float Coefficient { get; set; } // Might be used additive or multiplier, depends on Type
-            uint FixedValue { get; set; }
+            public CraftingModifierType Type { get; set; }
+            public TradeskillType TradeskillId { get; set; }
+            public uint Item2TypeId { get; set; }
+            public uint Item2MaterialId { get; set; }
+            public float Coefficient { get; set; } // Might be used additive or multiplier, depends on Type
+            public uint FixedValue { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -26,7 +26,7 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        public List<CraftingModifier> Modifiers { get; set; } = new List<CraftingModifier>();
+        public List<CraftingModifier> Modifiers { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

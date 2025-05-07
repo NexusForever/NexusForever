@@ -1,5 +1,5 @@
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Game.Static.Crafting;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -13,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model
         public CraftingDiscovery HotOrCold { get; set; }
         public CraftingDirection Direction { get; set; }
         public uint EarnedXp { get; set; }
-        public List<uint> MaterialReturnedIds { get; set; } = new List<uint>();
+        public List<uint> MaterialReturnedIds { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

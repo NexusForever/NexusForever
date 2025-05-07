@@ -1,5 +1,5 @@
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Game.Static.Crafting;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model
         {
             ItemGuid = reader.ReadULong();
             SlotIndex = reader.ReadUInt();
-            Type = (RuneType)reader.ReadByte(5);
+            Type = reader.ReadEnum<RuneType>(5);
         }
     }
 }

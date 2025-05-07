@@ -20,10 +20,10 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        List<TradeskillInfo> Tradeskills { get; set; } = new List<TradeskillInfo>();
-        List<uint> LearnedSchematics { get; set; } = new List<uint>(); // TradeskillSchematic2Id
-        List<DiscoveredSchematic> DiscoveredSchematics { get; set; } = new List<DiscoveredSchematic>();
-        List<uint> UnknownArray { get; set; } = new List<uint>();
+        public List<TradeskillInfo> Tradeskills { get; set; } = [];
+        public List<uint> LearnedSchematics { get; set; } = []; // TradeskillSchematic2Id
+        public List<DiscoveredSchematic> DiscoveredSchematics { get; set; } = [];
+        public List<uint> UnknownArray { get; set; } = [];
         public uint RelearnCooldown { get; set; } // Sent as an offset from the time now, to the finish time, in milliseconds.
 
         public void Write(GamePacketWriter writer)

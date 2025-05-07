@@ -1,5 +1,5 @@
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Game.Static.Crafting;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            TradeskillId = (TradeskillType)reader.ReadUInt();
+            TradeskillId = reader.ReadEnum<TradeskillType>();
             Tier = reader.ReadUInt();
             TradeskillBonusId = reader.ReadUInt();
         }
