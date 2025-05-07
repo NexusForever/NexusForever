@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerMatchingQueueResult : IWritable
     {
         public MatchingQueueResult Result { get; set; }
-        public uint Unknown { get; set; }
+        public MatchingQueueResultShort Unknown { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

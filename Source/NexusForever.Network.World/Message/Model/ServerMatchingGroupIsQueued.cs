@@ -2,12 +2,12 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerMatchingMatchLeft)]
-    public class ServerMatchingMatchLeft : IWritable
+    [Message(GameMessageOpcode.ServerMatchingGroupIsQueued)]
+    public class ServerMatchingGroupIsQueued : IWritable
     {
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(0, 5u); // Not used by client
+            // Zero byte message
         }
     }
 }

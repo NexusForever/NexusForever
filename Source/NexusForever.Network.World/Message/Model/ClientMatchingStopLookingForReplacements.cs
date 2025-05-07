@@ -2,12 +2,12 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientMatchingTransferIntoMatch)]
-    public class ClientMatchingTransferIntoMatch : IReadable
+    [Message(GameMessageOpcode.ClientMatchingStopLookingForReplacements)]
+    public class ClientMatchingStopLookingForReplacements : IReadable
     {
         public void Read(GamePacketReader reader)
         {
-            // deliberately empty
+            // Zero byte message
         }
     }
 }

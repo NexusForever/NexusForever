@@ -137,8 +137,8 @@ namespace NexusForever.Game.Matching.Match
                 message = new ServerMatchingMatchInProgressReady()
                 {
                     MatchType    = MatchingQueueGroup.MatchType,
-                    TotalAllies  = allyTeam.MemberCount,
-                    TotalEnemies = enemyTeam?.MemberCount ?? 0u,
+                    AcceptedAllies  = allyTeam.MemberCount, // Needs concept of total invited allies, accepted allies, and unaccepted allies
+                    UnacceptedAllies = 0, // Related to the above
                 };
             }
             else
@@ -146,8 +146,8 @@ namespace NexusForever.Game.Matching.Match
                 message = new ServerMatchingMatchReady()
                 {
                     MatchType    = MatchingQueueGroup.MatchType,
-                    TotalAllies  = allyTeam.MemberCount,
-                    TotalEnemies = enemyTeam?.MemberCount ?? 0u,
+                    UnacceptedAllies  = allyTeam.MemberCount, // Needs works, as above
+                    UnacceptedEnemies = enemyTeam?.MemberCount ?? 0u, // Needs works, as above
                 };
             }
 
@@ -156,9 +156,9 @@ namespace NexusForever.Game.Matching.Match
 
         private void SendMatchPendingUpdate(IMatchProposalTeam responseTeam, IMatchProposalTeam team)
         {
-            var test = new ServerMatchingMatchPendingUpdate()
+            var test = new ServerMatchingMatchParticpantCountUpdate()
             {
-                Ally = responseTeam.Guid == team.Guid
+                Ally = responseTeam.Guid == team.Guid // Needs work, see comments on ServerMatchingMatchParticpantCountUpdate message
             };
 
             team.Broadcast(test);
