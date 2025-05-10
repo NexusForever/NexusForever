@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerMatchingPvpRatingUpdated)]
     public class ServerMatchingPvpRatingUpdated : IWritable
     {
-        public enum MatchingGameRatingType : byte
+        public enum MatchingGameRatingType
         {
             Arena2v2 = 0x0,
             Arena3v3 = 0x1,

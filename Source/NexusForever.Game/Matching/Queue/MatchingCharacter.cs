@@ -111,14 +111,14 @@ namespace NexusForever.Game.Matching.Queue
 
             var matchingQueueLeave = new ServerMatchingQueueStatus()
             {
-                Result    = MatchingQueueResultShort.InQueue,
-                MatchType = currentMatchType,
-                Unknown8  = Static.Matching.MatchType.None,
+                RoleCheckCancelReason   = MatchingQueueResultShort.InQueue,
+                JoinedMatchType         = currentMatchType,
+                RoleCheckMatchType      = Static.Matching.MatchType.None,
             };
 
             // bit mask of all match types this character is queued for
             foreach (Static.Matching.MatchType existingMatchType in matchingCharacterGroups.Keys)
-                matchingQueueLeave.Mask.SetBit((uint)existingMatchType, true);
+                matchingQueueLeave.QueuesJoined.SetBit((uint)existingMatchType, true);
 
             Send(matchingQueueLeave);
         }

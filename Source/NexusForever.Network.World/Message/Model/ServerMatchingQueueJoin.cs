@@ -44,14 +44,14 @@ namespace NexusForever.Network.World.Message.Model
 
         public Map MapData { get; set; }
         public Queue QueueData { get; set; }
-        public uint Unknown { get; set; }
+        public Role QueuedRoles { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             MapData.Write(writer);
             QueueData.Write(writer);
 
-            writer.Write(Unknown);
+            writer.Write(QueuedRoles, 32u);
         }
     }
 }

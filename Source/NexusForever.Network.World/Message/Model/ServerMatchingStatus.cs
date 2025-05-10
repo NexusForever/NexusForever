@@ -6,19 +6,19 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerMatchingQueueStatus)]
     public class ServerMatchingQueueStatus : IWritable
     {
-        public MatchingQueueResultShort Result { get; set; }
-        public Game.Static.Matching.MatchType MatchType { get; set; }
-        public Game.Static.Matching.MatchType Unknown8 { get; set; }
-        public NetworkBitArray Mask { get; set; } = new NetworkBitArray(16, NetworkBitArray.BitOrder.LeastSignificantBit);
-        // Mask is array of bits to indicate which MatchType is joined, true = joined false = not joined
-        // Order of array is same order as Game.Static.Matching.MatchType
+        public MatchingQueueResultShort RoleCheckCancelReason { get; set; }
+        public Game.Static.Matching.MatchType JoinedMatchType { get; set; }
+        public Game.Static.Matching.MatchType RoleCheckMatchType { get; set; } // MatchType for active role check on group that members can role check for
+        public NetworkBitArray QueuesJoined { get; set; } = new NetworkBitArray(16, NetworkBitArray.BitOrder.LeastSignificantBit);
+        // QueuesJoined is array of bits to indicate which MatchType queue is joined, true = joined false = not joined
+        // Order of array is same order as Game.Static.Matching.MatchType enum
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Result, 4u);
-            writer.Write(MatchType, 5u);
-            writer.Write(Unknown8, 5u);
-            writer.WriteBytes(Mask.GetBuffer());
+            writer.Write(RoleCheckCancelReason, 4u);
+            writer.Write(JoinedMatchType, 5u);
+            writer.Write(RoleCheckMatchType, 5u);
+            writer.WriteBytes(QueuesJoined.GetBuffer());
         }
     }
 }

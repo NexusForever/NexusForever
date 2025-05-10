@@ -291,7 +291,6 @@ namespace NexusForever.Network.Message
         ServerMailAvailable             = 0x05A3,
         ServerMailUnavailable           = 0x05A7,
         ServerMailTakeAttachment        = 0x05A8,
-
         ServerMatchingManager0x5B0      = 0x05B0,
         ClientMatchingRoleCheckResponse = 0x05B2,
         ClientMatchingQueueLeaveAll     = 0x05B4,
@@ -346,7 +345,6 @@ namespace NexusForever.Network.Message
         ServerMatchingMatchOperationResult = 0x0623,
         ClientMatchingMatchCastVoteSurrender = 0x0624,
         ServerMatchingAverageWaitTimeUpdate = 0x0628,
-
         Server0635                      = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
