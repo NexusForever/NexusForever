@@ -6,15 +6,17 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerMatchingPvpTeamInfoUpdate)]
     public class ServerMatchingPvpTeamInfoUpdate : IWritable
     {
-        public string TeamName { get; set; }
-        public uint Rating1 { get; set; }
-        public uint Rating2 { get; set; }
+        public string Team1Name { get; set; }
+        public string Team2Name { get; set; }
+        public uint Team1Rating { get; set; }
+        public uint Team2Rating { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.WriteStringWide(TeamName);
-            writer.Write(Rating1);
-            writer.Write(Rating2);
+            writer.WriteStringWide(Team1Name);
+            writer.WriteStringWide(Team2Name);
+            writer.Write(Team1Rating);
+            writer.Write(Team2Rating);
         }
     }
 }

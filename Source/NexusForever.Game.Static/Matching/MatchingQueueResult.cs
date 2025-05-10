@@ -54,24 +54,4 @@
         CannotQueueCrossFaction        = 50,
         RequiresFullGroup              = 51
     }
-
-    public enum MatchingQueueResultShort
-    {
-        InQueue                        = 0,
-        InGame                         = 1,
-        Level                          = 2,
-        GroupSize                      = 3,
-        TypeMismatch                   = 4,
-        OfflineGroupMember             = 5,
-        Role                           = 6,
-        NotInGroup                     = 7,
-        GroupMemberMatching            = 8,
-        InvalidGame                    = 9,
-        InvalidTeamMember              = 10,
-        Left                           = 11,
-        Declined                       = 12,
-        CannotQueueSoloAndGroup        = 13,
-        UnableToQueue                  = 14,
-        RemovedByServer                = 15,
-    }
 }

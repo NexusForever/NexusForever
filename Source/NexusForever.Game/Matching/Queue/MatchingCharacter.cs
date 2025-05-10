@@ -90,7 +90,7 @@ namespace NexusForever.Game.Matching.Queue
 
             if (leaveReason != null)
             {
-                Send(new ServerMatchingQueueResult()
+                Send(new ServerMatchingQueueResultAnnounce()
                 {
                     Result = leaveReason.Value,
                 });
@@ -111,9 +111,9 @@ namespace NexusForever.Game.Matching.Queue
 
             var matchingQueueLeave = new ServerMatchingQueueStatus()
             {
-                RoleCheckCancelReason   = MatchingQueueResultShort.InQueue,
-                JoinedMatchType         = currentMatchType,
-                RoleCheckMatchType      = Static.Matching.MatchType.None,
+                Status              = MatchingQueueStatus.NotInQueue,
+                JoinedMatchType     = currentMatchType,
+                ReadyMatchType      = Static.Matching.MatchType.None,
             };
 
             // bit mask of all match types this character is queued for

@@ -6,11 +6,11 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerMatchingPvpRatingUpdated)]
     public class ServerMatchingPvpRatingUpdated : IWritable
     {
-        public uint Rating;
-        public uint Wins;
-        public uint Losses;
-        public uint Draws;
-        MatchingGameRatingType Type;
+        public uint Rating { get; set; }
+        public uint Wins { get; set; }
+        public uint Losses { get; set; }
+        public uint Draws { get; set; }
+        MatchingGameRatingType Type { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

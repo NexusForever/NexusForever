@@ -8,12 +8,12 @@ namespace NexusForever.Network.World.Message.Model
     {
         public class PvpRating : IWritable
         {
-            public uint Category; // Arena2v2, Arena3v3, Arena5v5, RatedBattleground = 5, Warplot = 1
-            MatchingGameRatingType Type;
-            public uint Rating;
-            public uint Wins;
-            public uint Losses;
-            public uint Draws;
+            public uint Category { get; set; } // Arena2v2, Arena3v3, Arena5v5, RatedBattleground = 5, Warplot = 1
+            MatchingGameRatingType Type { get; set; }
+            public uint Rating { get; set; }
+            public uint Wins { get; set; }
+            public uint Losses { get; set; }
+            public uint Draws { get; set; }
 
             public void Write(GamePacketWriter writer)
             {

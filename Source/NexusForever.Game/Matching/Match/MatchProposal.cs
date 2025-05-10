@@ -158,7 +158,7 @@ namespace NexusForever.Game.Matching.Match
         {
             var test = new ServerMatchingMatchParticpantCountUpdate()
             {
-                Ally = responseTeam.Guid == team.Guid // Needs work, see comments on ServerMatchingMatchParticpantCountUpdate message
+                Ally = responseTeam.Guid == team.Guid
             };
 
             team.Broadcast(test);

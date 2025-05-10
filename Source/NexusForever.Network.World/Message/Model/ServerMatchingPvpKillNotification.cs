@@ -52,7 +52,7 @@ namespace NexusForever.Network.World.Message.Model
                 throw new InvalidOperationException("Both a Killer and Victim must created.");
             }
 
-            writer.Write(KillerType);
+            writer.Write(KillerType, 2u);
             if (KillerType == OpponentType.Player)
             {
                 KillerPlayer.Write(writer);
@@ -62,7 +62,7 @@ namespace NexusForever.Network.World.Message.Model
                 KillerCreature.Write(writer);
             }
             
-            writer.Write(VictimType);
+            writer.Write(VictimType, 2u);
             if (VictimType == OpponentType.Player)
             {
                 VictimPlayer.Write(writer);
