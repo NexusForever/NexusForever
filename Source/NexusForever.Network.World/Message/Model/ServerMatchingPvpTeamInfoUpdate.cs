@@ -1,8 +1,8 @@
-﻿using NexusForever.Game.Static.Matching;
-using NexusForever.Network.Message;
+﻿using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
+    // Send whenever the information for a team in a PvP match is updated during a match. This includes when a team first joins a match.
     [Message(GameMessageOpcode.ServerMatchingPvpTeamInfoUpdate)]
     public class ServerMatchingPvpTeamInfoUpdate : IWritable
     {

@@ -5,25 +5,11 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    // Must create a OpponentPlayer or OpponentCreature for both Killer and Victim
+    // Must create an OpponentPlayer or OpponentCreature for both Killer and Victim
 
     [Message(GameMessageOpcode.ServerMatchingPvpKillNotification)]
     public class ServerMatchingPvpKillNotification : IWritable
     {
-        public enum PvpDeathReason
-        {
-            KilledByPlayer = 0x0,
-            KilledByCreature = 0x1,
-            Falling = 0x2,
-            Drowning = 0x3,
-        };
-
-        public enum OpponentType
-        {
-            Player = 0x0,
-            Creature = 0x1,
-        };
-
         public class OpponentPlayer : IWritable
         {
             public TargetPlayerIdentity Identity { get; set; } = new();

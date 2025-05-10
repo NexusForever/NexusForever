@@ -1,5 +1,5 @@
-﻿using NexusForever.Network.Message;
-using static NexusForever.Network.World.Message.Model.ServerMatchingPvpRatingUpdated;
+﻿using NexusForever.Game.Static.Matching;
+using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -28,12 +28,12 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        public List<PvpRating> PvpRatingList { get; set; } = [];
+        public List<PvpRating> PveRatings { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(PvpRatingList.Count);
-            foreach (var rating in PvpRatingList)
+            writer.Write(PveRatings.Count);
+            foreach (var rating in PveRatings)
             {
                 rating.Write(writer);
             }
