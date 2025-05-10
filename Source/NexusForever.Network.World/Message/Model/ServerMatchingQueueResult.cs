@@ -7,12 +7,12 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerMatchingQueueResult : IWritable
     {
         public MatchingQueueResult Result { get; set; }
-        public MatchingQueueResultShort Unknown { get; set; }
+        public MatchingQueueResultShort RoleCheckCancelReason { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Result, 6u);
-            writer.Write(Unknown, 4u);
+            writer.Write(RoleCheckCancelReason, 4u);
         }
     }
 }
