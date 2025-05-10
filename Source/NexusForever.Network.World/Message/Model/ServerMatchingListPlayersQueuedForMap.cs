@@ -7,6 +7,30 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerMatchingListPlayersQueuedForMap)]
     public class ServerMatchingListPlayersQueuedForMap : IWritable
     {
+        public class UnknownStruct0 : IWritable
+        {
+            public ushort Unknown6 { get; set; } = 0;
+            public byte Unknown7 { get; set; } = 48;
+
+            public void Write(GamePacketWriter writer)
+            {
+                writer.Write(Unknown6);
+                writer.Write(Unknown7);
+            }
+        }
+
+        public class PrimeLevelInfo : IWritable
+        {
+            public ushort WorldId { get; set; }
+            public ushort PrimeLevelAchieved { get; set; }
+
+            public void Write(GamePacketWriter writer)
+            {
+                writer.Write(WorldId, 15u);
+                writer.Write(PrimeLevelAchieved);
+            }
+        }
+
         public class QueuedPlayerInfo : IWritable
         {
             public TargetPlayerIdentity Identity { get; set; }
@@ -21,6 +45,8 @@ namespace NexusForever.Network.World.Message.Model
             public bool field_34_1bit { get; set; }
             public uint field_38_32bit { get; set; }
             public float field_3C_32bit { get; set; }
+            public UnknownStruct0[] SomeStatList = new UnknownStruct0[5];
+            public List<PrimeLevelInfo> PrimeLevels { get; set; } = new List<PrimeLevelInfo>();
 
             public void Write(GamePacketWriter writer)
             {
@@ -36,6 +62,12 @@ namespace NexusForever.Network.World.Message.Model
                 writer.Write(field_34_1bit);
                 writer.Write(field_38_32bit);
                 writer.Write(field_3C_32bit);
+                foreach (var stat in SomeStatList)
+                {
+                    stat.Write(writer);
+                }
+                writer.Write(PrimeLevels.Count);
+                PrimeLevels.ForEach(i => i.Write(writer));
             }
 
         }
