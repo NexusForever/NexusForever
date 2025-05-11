@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientMatchingRoleCheckResponse)]
     public class ClientMatchingRoleCheckResponse : IReadable
     {
-        public Game.Static.Matching.MatchType Type { get; private set; } // Uses RoleCheckMatchType sent in 0x05E3 
+        public Game.Static.Matching.MatchType Type { get; private set; } // Uses ReadyMatchType sent in 0x05E3 
         public Role Roles { get; private set; }
         public bool Response { get; private set; }
 

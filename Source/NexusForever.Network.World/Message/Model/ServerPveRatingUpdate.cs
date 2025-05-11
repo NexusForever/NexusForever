@@ -8,14 +8,14 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerPveRatingUpdate)]
     public class ServerPveRatingUpdate : IWritable
     {
-        public class PvpRating : IWritable
+        public class PveRating : IWritable
         {
-            public uint Category; // similar to ServerPvpRatingUpdate, not sure what the categories are
-            MatchingGameRatingType Type;
-            public uint Unknown1; 
-            public uint Unknown2;
-            public uint Unknown3;
-            public uint Unknown4;
+            public uint Category { get; set; } // similar to ServerPvpRatingUpdate, not sure what the categories are
+            MatchingGameRatingType Type { get; set; }
+            public uint Unknown1 { get; set; }
+            public uint Unknown2 { get; set; }
+            public uint Unknown3 { get; set; }
+            public uint Unknown4 { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -28,7 +28,7 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        public List<PvpRating> PveRatings { get; set; } = [];
+        public List<PveRating> PveRatings { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
