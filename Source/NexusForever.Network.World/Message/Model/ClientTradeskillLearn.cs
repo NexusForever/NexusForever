@@ -11,8 +11,8 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            ToLearnTradeskillId = reader.ReadEnum<TradeskillType>();
-            ToDropTradeskillId = reader.ReadEnum<TradeskillType>();
+            ToLearnTradeskillId = reader.ReadEnum<TradeskillType>(32u);
+            ToDropTradeskillId = reader.ReadEnum<TradeskillType>(32u);
         }
     }
 }

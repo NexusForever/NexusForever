@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            TradeskillId = reader.ReadEnum<TradeskillType>();
+            TradeskillId = reader.ReadEnum<TradeskillType>(32u);
             Tier = reader.ReadUInt();
             TradeskillBonusId = reader.ReadUInt();
         }

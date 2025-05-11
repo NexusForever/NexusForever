@@ -13,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(TradeskillId);
+            writer.Write(TradeskillId, 32u);
             writer.Write(TradeskillSchematic2Id);
             writer.Write(DiscoveryCoordinates.X);
             writer.Write(DiscoveryCoordinates.Y);
