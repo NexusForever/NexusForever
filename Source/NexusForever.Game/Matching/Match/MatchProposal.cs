@@ -156,7 +156,7 @@ namespace NexusForever.Game.Matching.Match
 
         private void SendMatchPendingUpdate(IMatchProposalTeam responseTeam, IMatchProposalTeam team)
         {
-            var test = new ServerMatchingMatchParticpantCountUpdate()
+            var test = new ServerMatchingMatchParticipantCountUpdate()
             {
                 Ally = responseTeam.Guid == team.Guid
             };

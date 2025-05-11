@@ -305,7 +305,7 @@ namespace NexusForever.Network.Message
         ServerMatchingMatchJoined       = 0x05C6,
         ClientMatchingMatchReadyResponse = 0x05C8,
         ServerMatchingMatchReady        = 0x05CA,
-        ServerMatchingMatchParticpantCountUpdate = 0x05CC,
+        ServerMatchingMatchParticipantCountUpdate = 0x05CC,
         ClientMatchingMatchInitiateVoteToKick = 0x05D1,
         ClientMatchingMatchInitiateVoteToSurrender = 0x05D3,
         ClientMatchingMatchInitiateLookingForReplacements = 0x05D5,
