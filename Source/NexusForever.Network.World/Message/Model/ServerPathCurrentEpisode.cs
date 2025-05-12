@@ -2,16 +2,16 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPathCurrentEpisode)]
-    public class ServerPathCurrentEpisode : IWritable
+    [Message(GameMessageOpcode.ServerPathSetCurrentEpisode)]
+    public class ServerPathSetCurrentEpisode : IWritable
     {
-        public ushort Unknown0 { get; set; }
-        public ushort EpisodeId { get; set; }
+        public ushort Unknown0 { get; set; } // Not used in the client
+        public ushort PathEpisodeId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Unknown0, 15);
-            writer.Write(EpisodeId, 14);
+            writer.Write(PathEpisodeId, 14);
         }
     }
 }

@@ -152,11 +152,11 @@ namespace NexusForever.Game.Entity
                 return;
 
             // TODO: research this...
-            player.Session.EnqueueMessageEncrypted(new Server08B3
+            player.Session.EnqueueMessageEncrypted(new ServerPathScientistSetUnitScanParameters
             {
-                MountGuid = Guid,
-                Unknown0  = 0,
-                Unknown1  = true
+                UnitId = Guid,
+                ScanRewardFlags  = 0,
+                IsScannable  = true
             });
 
             // TODO: research this, something UI related
