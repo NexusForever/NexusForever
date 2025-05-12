@@ -4,8 +4,8 @@ using NexusForever.Network.World.Message.Model.Shared;
 namespace NexusForever.Network.World.Message.Model
 {
     // Seems to fire when buffs are applied from NPC-created Telegraphs, like speed boosts in Northern Wilds
-    [Message(GameMessageOpcode.Server0818)]
-    public class Server0818 : IWritable
+    [Message(GameMessageOpcode.ServerSpellExecute)]
+    public class ServerSpellExecute : IWritable
     {
        public uint CastingId { get; set; }
        public TargetInfo TargetInfo { get; set; }

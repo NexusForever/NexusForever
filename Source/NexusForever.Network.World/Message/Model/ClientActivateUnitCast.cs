@@ -5,13 +5,13 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientActivateUnitCast)]
     public class ClientActivateUnitCast : IReadable
     {
-        public uint ClientUniqueId { get; private set; }
-        public uint ActivateUnitId { get; private set; }
+        public uint ClientSpellCastUniqueId { get; private set; }
+        public uint UnitId { get; private set; } // Unit to activate
 
         public void Read(GamePacketReader reader)
         {
-            ClientUniqueId  = reader.ReadUInt();
-            ActivateUnitId  = reader.ReadUInt();
+            ClientSpellCastUniqueId  = reader.ReadUInt();
+            UnitId  = reader.ReadUInt();
         }
     }
 }

@@ -160,7 +160,7 @@ namespace NexusForever.Game.Entity
             });
 
             // TODO: research this, something UI related
-            player.Session.EnqueueMessageEncrypted(new Server0237
+            player.Session.EnqueueMessageEncrypted(new ServerInteractionChange
             {
             });
 

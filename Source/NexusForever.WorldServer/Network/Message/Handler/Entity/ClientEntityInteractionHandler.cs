@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Quest;
+using NexusForever.Game.Static.Spell;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
@@ -29,7 +30,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 
         public void HandleMessage(IWorldSession session, ClientEntityInteract entityInteraction)
         {
-            IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.Guid);
+            IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.UnitId);
             if (entity != null)
             {
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
@@ -38,51 +39,51 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                     session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.TalkToTargetGroup, targetGroupId, 1u);
             }
 
-            switch (entityInteraction.Event)
+            switch (entityInteraction.Type)
             {
-                case 37: // Quest NPC
+                case InteractionType.TalkTo: // Quest NPC
                 {
                     session.EnqueueMessageEncrypted(new Server0357
                     {
-                        UnitId = entityInteraction.Guid
+                        UnitId = entityInteraction.UnitId
                     });
                     break;
                 }
-                case 49: // Handle Vendor
+                case InteractionType.Vendor: // Handle Vendor
                     HandleVendor(session, entity);
                     break;
-                case 68: // "MailboxActivate"
-                    var mailboxEntity = session.Player.Map.GetEntity<IMailboxEntity>(entityInteraction.Guid);
+                case InteractionType.Mail: // "MailboxActivate"
+                    var mailboxEntity = session.Player.Map.GetEntity<IMailboxEntity>(entityInteraction.UnitId);
                     break;
-                case 8: // "HousingGuildNeighborhoodBrokerOpen"
-                case 40:
-                case 41: // "ResourceConversionOpen"
-                case 42: // "ToggleAbilitiesWindow"
-                case 43: // "InvokeTradeskillTrainerWindow"
-                case 45: // "InvokeShuttlePrompt"
-                case 46:
-                case 47:
-                case 48: // "InvokeTaxiWindow"
-                case 65: // "MannequinWindowOpen"
-                case 66: // "ShowBank"
-                case 67: // "ShowRealmBank"
-                case 69: // "ShowDye"
-                case 70: // "GuildRegistrarOpen"
-                case 71: // "WarPartyRegistrarOpen"
-                case 72: // "GuildBankerOpen"
-                case 73: // "WarPartyBankerOpen"
-                case 75: // "ToggleMarketplaceWindow"
-                case 76: // "ToggleAuctionWindow"
-                case 79: // "TradeskillEngravingStationOpen"
-                case 80: // "HousingMannequinOpen"
-                case 81: // "CityDirectionsList"
-                case 82: // "ToggleCREDDExchangeWindow"
-                case 84: // "CommunityRegistrarOpen"
-                case 85: // "ContractBoardOpen"
-                case 86: // "BarberOpen"
-                case 87: // "MasterCraftsmanOpen"
+                case InteractionType.HousingGuildBroker: // "HousingGuildNeighborhoodBrokerOpen"
+                case InteractionType.ConvertItem:
+                case InteractionType.ConvertRep: // "ResourceConversionOpen"
+                case InteractionType.Trainer: // "ToggleAbilitiesWindow"
+                case InteractionType.TradeskillTrainer: // "InvokeTradeskillTrainerWindow"
+                case InteractionType.Shuttle: // "InvokeShuttlePrompt"
+                case InteractionType.FlightPathSettler:
+                case InteractionType.FlightPathNew:
+                case InteractionType.FlightPath: // "InvokeTaxiWindow"
+                case InteractionType.Mannequin: // "MannequinWindowOpen"
+                case InteractionType.Bank: // "ShowBank"
+                case InteractionType.SharedRealmBank: // "ShowRealmBank"
+                case InteractionType.Dye: // "ShowDye"
+                case InteractionType.GuildRegistrar: // "GuildRegistrarOpen"
+                case InteractionType.WarPartyRegistrar: // "WarPartyRegistrarOpen"
+                case InteractionType.GuildBank: // "GuildBankerOpen"
+                case InteractionType.WarPartyBank: // "WarPartyBankerOpen"
+                case InteractionType.CommodityMarketplace: // "ToggleMarketplaceWindow"
+                case InteractionType.ItemAuctionhouse: // "ToggleAuctionWindow"
+                case InteractionType.EngravingStation: // "TradeskillEngravingStationOpen"
+                case InteractionType.HousingMannequin: // "HousingMannequinOpen"
+                case InteractionType.CityDirections: // "CityDirectionsList"
+                case InteractionType.CREDDExchange: // "ToggleCREDDExchangeWindow"
+                case InteractionType.CommunityRegistrar: // "CommunityRegistrarOpen"
+                case InteractionType.ContractBoard: // "ContractBoardOpen"
+                case InteractionType.Barber: // "BarberOpen"
+                case InteractionType.MasterCraftsman: // "MasterCraftsmanOpen"
                 default:
-                    log.LogWarning($"Received unhandled interaction event {entityInteraction.Event} from Entity {entityInteraction.Guid}");
+                    log.LogWarning($"Received unhandled interaction event {entityInteraction.Type} from Entity {entityInteraction.UnitId}");
                     break;
             }
         }

@@ -30,6 +30,7 @@ namespace NexusForever.Network.Message
         ClientVendorPurchase            = 0x00BE,
         ClientLogoutRequest             = 0x00BF,
         ClientLogoutConfirm             = 0x00C0,
+        ClientCastServiceToken          = 0x00C2,
         ClientHousingResidencePrivacyLevel = 0x00C9,
         ServerPublicEventEnd            = 0x00D6,
         ServerCostume                   = 0x00D8,
@@ -40,6 +41,7 @@ namespace NexusForever.Network.Message
         ServerDatacubeUpdateList        = 0x00E0,
         ServerDatacubeUpdate            = 0x00E1,
         ServerDatacubeVolumeUpdate      = 0x00E2,
+        ClientCastDefaultAttack         = 0x00E3,    
         ClientResurrectRequest          = 0x00E4,
         ServerCharacterDeleteResult     = 0x00E6,
         ServerInstanceSettings          = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
@@ -157,7 +159,7 @@ namespace NexusForever.Network.Message
         ServerCinematicShowAnimate      = 0x022E,
         ServerCinematicActorAngle       = 0x0230,
         ServerCinematicNotify           = 0x0232,
-        Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
+        ServerInteractionChange         = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
         ClientWatchdogStatistics        = 0x023C,
         ClientPing                      = 0x0241,
         ClientEncrypted                 = 0x0244,
@@ -385,7 +387,7 @@ namespace NexusForever.Network.Message
         ServerSpell0x815                = 0x815,
         ServerSpellThresholdStart       = 0x816,
         ServerSpellThresholdUpdate      = 0x817,
-        ServerSpell0818                 = 0x818, // executes spells cast by others 
+        ServerSpellExecute              = 0x818, // executes spells cast by others 
         ServerSpellAuraCancel           = 0x819,
         Server081A                      = 0x081A, // spline related
         Server081B                      = 0x081B, // spline related
