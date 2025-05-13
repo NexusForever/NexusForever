@@ -397,7 +397,7 @@ namespace NexusForever.Game.Entity
 
         private void SendServerSpellList()
         {
-            var serverSpellList = new ServerSpellList();
+            var serverSpellList = new ServerAbilities();
             foreach ((uint spell4BaseId, ICharacterSpell spell) in spells)
             {
                 ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
@@ -407,7 +407,7 @@ namespace NexusForever.Game.Entity
                 for (byte i = 0; i < ActionSet.MaxActionSets; i++)
                 {
                     IActionSetShortcut shortcut = actionSets[i].GetShortcut(ShortcutType.Spell, spell4BaseId);
-                    serverSpellList.Spells.Add(new ServerSpellList.Spell
+                    serverSpellList.Spells.Add(new ServerAbilities.Spell
                     {
                         Spell4BaseId      = spell4BaseId,
                         TierIndexAchieved = shortcut?.Tier ?? spell.Tier,

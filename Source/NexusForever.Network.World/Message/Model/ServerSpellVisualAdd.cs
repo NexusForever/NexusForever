@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
         public uint VisualEffectIdSound { get; set; }
         public uint Spell4VisualId { get; set; }
         public uint Unk14 { get; set; }
-        public Position position { get; set; }
+        public Position Position { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -22,7 +22,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(VisualEffectIdSound, 11);
             writer.Write(Spell4VisualId, 11);
             writer.Write(Unk14);
-            position.Write(writer);
+            Position.Write(writer);
         }
     }
 }

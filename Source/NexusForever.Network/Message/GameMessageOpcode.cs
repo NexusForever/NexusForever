@@ -350,7 +350,9 @@ namespace NexusForever.Network.Message
         ServerStoryPanelShow            = 0x075A,
         ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
-        ServerRealmMessages             = 0x0763,
+        ServerRealmMessages             = 0x0763,        
+        ServerSpellVisualEffectRemove   = 0x0784,
+        ServerSpellVisualEffectRemoveFromUnit = 0x0785,
         ClientHousingCommunityRename    = 0x0788,
         ClientTitleSet                  = 0x078E,
         ServerNewRealm                  = 0x07A1,
