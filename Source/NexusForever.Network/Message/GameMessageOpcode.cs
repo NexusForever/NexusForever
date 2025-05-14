@@ -13,7 +13,7 @@ namespace NexusForever.Network.Message
         ClientGameCommand               = 0x0096,
         ClientActivateUnitCast          = 0x0097,
         ClientCastBindPointSpell        = 0x0098,
-        ClientExplorerPathSearching     = 0x0099,
+        ClientPathExplorerCastSearching = 0x0099,
         ClientCastSpell                 = 0x009A,
         ClientMoveToCast                = 0x009B,
         ClientCastObjectiveAbility      = 0x009D,
