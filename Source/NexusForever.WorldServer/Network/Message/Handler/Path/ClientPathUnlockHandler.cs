@@ -6,7 +6,7 @@ using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Path
 {
-    public class ClientPathUnlockHandler : IMessageHandler<IWorldSession, ClientPathUnlock>
+    public class ClientPathUnlockHandler : IMessageHandler<IWorldSession, ClientPathUnlockRequest>
     {
         #region Dependency Injection
 
@@ -20,7 +20,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientPathUnlock clientPathUnlock)
+        public void HandleMessage(IWorldSession session, ClientPathUnlockRequest clientPathUnlockRequest)
         {
             uint unlockCost = gameTableManager.GameFormula.GetEntry(2365).Dataint0;
 
@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
                 if (!hasEnoughTokens)
                     return GenericError.PathInsufficientFunds;
 
-                if (session.Player.PathManager.IsPathUnlocked(clientPathUnlock.Path))
+                if (session.Player.PathManager.IsPathUnlocked(clientPathUnlockRequest.Path))
                     return GenericError.PathAlreadyUnlocked;
 
                 return GenericError.Ok;
@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
                 return;
             }
 
-            session.Player.PathManager.UnlockPath(clientPathUnlock.Path);
+            session.Player.PathManager.UnlockPath(clientPathUnlockRequest.Path);
             session.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, unlockCost);
         }
     }

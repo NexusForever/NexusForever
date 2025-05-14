@@ -6,12 +6,12 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerSetUnitPathType)]
     public class ServerSetUnitPathType : IWritable
     {
-        public uint Guid { get; set; }
+        public uint UnitId { get; set; }
         public Path Path { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
+            writer.Write(UnitId);
             writer.Write(Path, 3);
         }
     }

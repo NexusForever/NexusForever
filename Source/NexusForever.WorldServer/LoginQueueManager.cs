@@ -8,6 +8,7 @@ using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Network;
+using NexusForever.WorldServer.Network.Message.Handler.Character;
 
 namespace NexusForever.WorldServer
 {
@@ -30,39 +31,30 @@ namespace NexusForever.WorldServer
         private readonly Dictionary<string, QueueData> queueData = new();
         private readonly Queue<string> queue = new();
 
-        private Action<IWorldSession> admitCallback;
-
         private uint maximumPlayers;
         private readonly UpdateTimer queueCheck = new(TimeSpan.FromSeconds(5));
 
         #region Dependency Injection
 
         private readonly ILogger<LoginQueueManager> log;
-        private readonly IOptions<RealmConfig> realmOptions;
 
         private readonly INetworkManager<IWorldSession> networkManager;
+        private readonly ICharacterListManager characterListManager;
 
         public LoginQueueManager(
             ILogger<LoginQueueManager> log,
             IOptions<RealmConfig> realmOptions,
-            INetworkManager<IWorldSession> networkManager)
+            INetworkManager<IWorldSession> networkManager,
+            ICharacterListManager characterListManager)
         {
             this.log            = log;
-            this.realmOptions   = realmOptions;
 
             this.networkManager = networkManager;
+            this.characterListManager = characterListManager;
+            this.maximumPlayers = realmOptions.Value.MaxPlayers;
         }
 
         #endregion
-
-        public void Initialise(Action<IWorldSession> callback)
-        {
-            if (admitCallback != null)
-                throw new InvalidOperationException();
-
-            admitCallback  = callback;
-            maximumPlayers = realmOptions.Value.MaxPlayers;
-        }
 
         public void Update(double lastTick)
         {
@@ -162,7 +154,7 @@ namespace NexusForever.WorldServer
             AdmitSession(session);
 
             session.EnqueueMessageEncrypted(new ServerQueueFinish());
-            admitCallback.Invoke(session);
+            characterListManager.SendCharacterListPackets(session);
         }
 
         private void AdmitSession(IWorldSession session)

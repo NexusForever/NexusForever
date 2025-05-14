@@ -76,11 +76,11 @@ namespace NexusForever.Game.Entity
 
             owner.VanityPetGuid = Guid;
 
-            owner.EnqueueToVisible(new Server08B3
+            owner.EnqueueToVisible(new ServerPathScientistSetUnitScanParameters
             {
-                MountGuid = Guid,
-                Unknown0  = 0,
-                Unknown1  = true
+                UnitId = Guid,
+                ScanRewardFlags  = 0,
+                IsScannable  = true
             }, true);
         }
 

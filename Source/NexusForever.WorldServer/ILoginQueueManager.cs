@@ -14,8 +14,6 @@ namespace NexusForever.WorldServer
         /// </remarks>
         uint ConnectedPlayers { get; }
 
-        void Initialise(Action<IWorldSession> callback);
-
         /// <summary>
         /// Attempt to admit session to realm, if the world is full the session will be queued.
         /// </summary>

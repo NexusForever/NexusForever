@@ -5,17 +5,17 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerPathMissionUpdate)]
     public class ServerPathMissionUpdate : IWritable
     {
-        public ushort MissionId { get; set; }
+        public ushort PathMissionId { get; set; }
         public bool Completed { get; set; }
-        public uint Userdata { get; set; }
-        public uint Statedata { get; set; }
+        public uint ObjectiveCompletionFlags { get; set; }
+        public uint StateFlags { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(MissionId, 15);
+            writer.Write(PathMissionId, 15);
             writer.Write(Completed);
-            writer.Write(Userdata);
-            writer.Write(Statedata);
+            writer.Write(ObjectiveCompletionFlags);
+            writer.Write(StateFlags);
         }
     }
 }
