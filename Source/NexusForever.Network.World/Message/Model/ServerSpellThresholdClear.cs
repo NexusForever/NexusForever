@@ -6,12 +6,12 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerSpellThresholdClear : IWritable
     {
         public uint Spell4Id { get; set; }
-        public bool Unknown0 { get; set; }
+        public bool ProcessCooldown { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Spell4Id, 18u);
-            writer.Write(Unknown0);
+            writer.Write(ProcessCooldown);
         }
     }
 }

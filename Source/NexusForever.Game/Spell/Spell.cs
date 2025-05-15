@@ -317,7 +317,7 @@ namespace NexusForever.Game.Spell
         {
             var spellStart = new ServerSpellStart
             {
-                CastingId              = CastingId,
+                ServerUniqueId         = CastingId,
                 CasterId               = Caster.Guid,
                 PrimaryTargetId        = Caster.Guid,
                 Spell4Id               = Parameters.SpellInfo.Entry.Id,
@@ -497,7 +497,7 @@ namespace NexusForever.Game.Spell
 
             Caster.EnqueueToVisible(new ServerSpellRemoveOneStackOfBuff
             {
-                CastingId = CastingId,
+                ServerUniqueId = CastingId,
                 TargetUnitId  = unitId
             }, true);
         }

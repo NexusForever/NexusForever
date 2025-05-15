@@ -44,12 +44,12 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        public uint CastingId { get; set; }
+        public uint ServerUniqueId { get; set; }
         public uint Spell4Id { get; set; }
         public uint RootSpell4Id { get; set; }
         public uint ParentSpell4Id { get; set; }
         public uint CasterId { get; set; }
-        public ushort Unknown20 { get; set; }
+        public ushort Unused { get; set; } // Server did send values here but the client does not use them
         public uint PrimaryTargetId { get; set; }
         public Position FieldPosition { get; set; } = new Position();
         public float Yaw { get; set; }
@@ -61,12 +61,12 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(CastingId);
+            writer.Write(ServerUniqueId);
             writer.Write(Spell4Id, 18u);
             writer.Write(RootSpell4Id, 18u);
             writer.Write(ParentSpell4Id, 18u);
             writer.Write(CasterId);
-            writer.Write(Unknown20);
+            writer.Write(Unused);
             writer.Write(PrimaryTargetId);
             FieldPosition.Write(writer);
             writer.Write(Yaw);
