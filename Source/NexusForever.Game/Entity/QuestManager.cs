@@ -144,11 +144,11 @@ namespace NexusForever.Game.Entity
                         QuestId    = q.Id,
                         State      = q.State,
                         Flags      = q.Flags,
-                        Timer      = q.Timer ?? 0u,
+                        QuestTimeElapsed      = q.Timer ?? 0u,
                         Objectives = q.Select(o => new ServerQuestInit.QuestActive.Objective
                         {
                             Progress = o.Progress,
-                            Timer    = 0u
+                            TimeElapsed    = 0u
                         }).ToList()
                     }).ToList()
             });
