@@ -213,6 +213,8 @@ namespace NexusForever.Network.Message
         ClientEmote                     = 0x037E,
         ClientCostumeItemForget         = 0x038B,
         ClientPackedWorld               = 0x038C,
+        ClientFriendAccountAddByEmail   = 0x0397,
+        ClientFriendAccountUpgradeFromFriend = 0x0398,
         ServerFriendAccountUpdate       = 0x0399,
         ServerFriendAccountRemovedCharacter = 0x039A,
         ClientFriendshipSetPublicDisplayName = 0x039B,
