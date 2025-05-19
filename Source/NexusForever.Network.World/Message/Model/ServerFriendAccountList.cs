@@ -17,7 +17,7 @@ namespace NexusForever.Network.World.Message.Model
             public string DisplayName { get; set; } = "";
             public AccountPresenceState Presence { get; set; }
 
-            public List<CharacterData> CharacterList = new List<CharacterData>();
+            public List<CharacterData> CharacterList = [];
 
             public void Write(GamePacketWriter writer)
             {

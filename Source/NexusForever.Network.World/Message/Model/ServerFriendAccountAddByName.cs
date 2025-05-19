@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Contact;
+﻿using NexusForever.Game.Static.Friend;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 

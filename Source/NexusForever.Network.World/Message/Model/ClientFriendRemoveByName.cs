@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Contact;
+﻿using NexusForever.Game.Static.Friend;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
