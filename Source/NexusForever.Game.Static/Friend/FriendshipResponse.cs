@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Contact
+﻿namespace NexusForever.Game.Static.Friend
 {
     public enum FriendshipResponse
     {

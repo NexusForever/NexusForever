@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            Presence = (AccountPresenceState)reader.ReadByte(3u);
+            Presence = reader.ReadEnum<AccountPresenceState>(3u);
         }
     }
 }
