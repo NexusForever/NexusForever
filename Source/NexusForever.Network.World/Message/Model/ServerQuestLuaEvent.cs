@@ -29,6 +29,12 @@ namespace NexusForever.Network.World.Message.Model
         {
             public int Int { get; set; }
 
+            public LuaEventData_Int(int value)
+            {
+                Type = LuaEventType.Int;
+                Int = value;
+            }
+
             public override void Write(GamePacketWriter writer)
             {
                 base.Write(writer);
@@ -40,6 +46,12 @@ namespace NexusForever.Network.World.Message.Model
         {
             public string Text { get; set; }
 
+            public LuaEventData_String(string text)
+            {
+                Type = LuaEventType.String;
+                Text = text;
+            }
+
             public override void Write(GamePacketWriter writer)
             {
                 base.Write(writer);
@@ -50,6 +62,12 @@ namespace NexusForever.Network.World.Message.Model
         public class LuaEventData_Bool : LuaEventData, IWritable
         {
             public bool Bool { get; set; }
+    
+            public LuaEventData_Bool(bool value)
+            {
+                Type = LuaEventType.Bool;
+                Bool = value;
+            }
 
             public override void Write(GamePacketWriter writer)
             {
@@ -62,6 +80,12 @@ namespace NexusForever.Network.World.Message.Model
         {
             public uint Item2Id { get; set; }
 
+            public LuaEventData_Item(uint item2Id)
+            {
+                Type = LuaEventType.Item;
+                Item2Id = item2Id;
+            }
+
             public override void Write(GamePacketWriter writer)
             {
                 base.Write(writer);
@@ -72,6 +96,12 @@ namespace NexusForever.Network.World.Message.Model
         public class LuaEventData_Quest : LuaEventData, IWritable
         {
             public uint QuestId { get; set; }
+
+            public LuaEventData_Quest(uint questId)
+            {
+                Type = LuaEventType.Quest;
+                QuestId = questId;
+            }
 
             public override void Write(GamePacketWriter writer)
             {
