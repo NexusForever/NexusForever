@@ -11,8 +11,8 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            InviteId = reader.ReadULong(64u);
-            Response  = (FriendshipResponse)reader.ReadByte(3u);
+            InviteId = reader.ReadULong();
+            Response  = reader.ReadEnum<FriendshipResponse>(3u);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model
         public class FriendAccountInviteInfo : IWritable
         {
             public ulong AccountFriendInviteId { get; set; }
-            FriendshipType Type { get; set; }
+            public FriendshipType Type { get; set; }
             public string DisplayName { get; set; }
             public string Note { get; set; }
             public float DaysUntilExpired { get; set; }
@@ -27,7 +27,7 @@ namespace NexusForever.Network.World.Message.Model
         }
 
         public uint AccountId { get; set; }
-        List<FriendAccountInviteInfo> FriendAccountInvites { get; set; }
+        public List<FriendAccountInviteInfo> FriendAccountInvites { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
