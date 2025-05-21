@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
         public byte Unknown1 { get; set; }
         public ushort CurrencyId { get; set; } // CurrencyId - 1408 == NCCoin, 768 == Omnibits
         public uint Unknown3 { get; set; }
-        public TargetPlayerIdentity Target { get; set; } = new();
+        public Identity Target { get; set; } = new();
         public uint Unknown6 { get; set; }
 
         public void Read(GamePacketReader reader)

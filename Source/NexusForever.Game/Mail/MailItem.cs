@@ -347,7 +347,7 @@ namespace NexusForever.Game.Mail
                 CostOnDeliveryAmount = IsCashOnDelivery && !HasPaidOrCollectedCurrency ? CurrencyAmount : 0,
                 ExpiryTimeInDays     = ExpiryTime,
                 Flags                = Flags,
-                Sender = new TargetPlayerIdentity
+                Sender = new Identity
                 {
                     RealmId     = isPlayer ? RealmContext.Instance.RealmId : (ushort)0,
                     CharacterId = isPlayer ? SenderId : 0ul

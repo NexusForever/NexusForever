@@ -8,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model
     {
         public ushort RealmId { get; set; }
         public ulong GuildId { get; set; }
-        public TargetPlayerIdentity PlayerIdentity { get; set; }
+        public Identity PlayerIdentity { get; set; }
         public ushort Unknown0 { get; set; }
         public ushort Unknown1 { get; set; }
 

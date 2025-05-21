@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientPlayerInfoRequest : IReadable
     {
         public byte Type { get; private set; }
-        public TargetPlayerIdentity Identity { get; } = new();
+        public Identity Identity { get; } = new();
 
         public void Read(GamePacketReader reader)
         {

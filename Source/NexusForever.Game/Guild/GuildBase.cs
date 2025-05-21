@@ -456,7 +456,7 @@ namespace NexusForever.Game.Guild
                 {
                     RealmId        = RealmContext.Instance.RealmId,
                     GuildId        = Id,
-                    PlayerIdentity = new TargetPlayerIdentity
+                    PlayerIdentity = new Identity
                     {
                         RealmId     = RealmContext.Instance.RealmId,
                         CharacterId = member.CharacterId

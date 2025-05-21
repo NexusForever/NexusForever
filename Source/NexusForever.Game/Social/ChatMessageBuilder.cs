@@ -98,7 +98,7 @@ namespace NexusForever.Game.Social
                 Self          = Self,
                 AutoResponse  = AutoResponse,
 
-                From          = new TargetPlayerIdentity
+                From          = new Identity
                 {
                     RealmId     = FromCharacterRealmId,
                     CharacterId = FromCharacterId

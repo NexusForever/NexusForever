@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientHousingEditMode)]
     public class ClientHousingEditMode : IReadable
     {
-        public TargetPlayerIdentity TargetPlayerIdentity { get; } = new();
+        public Identity TargetPlayerIdentity { get; } = new();
         public bool Enabled { get; private set; }
 
         public void Read(GamePacketReader reader)
