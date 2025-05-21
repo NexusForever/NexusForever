@@ -4,16 +4,13 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientGroupSetRole)]
-    public class ClientGroupSetRole : IReadable
+    [Message(GameMessageOpcode.ClientGroupSetMemberFlags)]
+    public class ClientGroupSetMemberFlags : IReadable
     {
-        public ulong GroupId { get; set; }
-
-        public TargetPlayerIdentity TargetedPlayer { get; set; } = new TargetPlayerIdentity();
-
-        public GroupMemberInfoFlags CurrentFlags { get; set; }
-
-        public GroupMemberInfoFlags ChangedFlag { get; set; }
+        public ulong GroupId { get; private set; }
+        public Identity TargetedPlayer { get; private set; } = new Identity();
+        public GroupMemberInfoFlags CurrentFlags { get; private set; }
+        public GroupMemberInfoFlags ChangedFlag { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

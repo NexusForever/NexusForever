@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Group;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Group;
 using NexusForever.Game.Static.Group;
 using NexusForever.Network.Message;
@@ -8,30 +9,42 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
     public class ClientGroupInviteResponseHandler : IMessageHandler<IWorldSession, ClientGroupInviteResponse>
     {
-        public void HandleMessage(IWorldSession session, ClientGroupInviteResponse groupInviteResponse)
+        /// <summary>
+        /// </summary>
+        public void HandleMessage(IWorldSession session, ClientGroupInviteResponse inviteeResponse)
         {
-            IGroup joinedGroup = GroupManager.Instance.GetGroupById(groupInviteResponse.GroupId);
-            if (joinedGroup == null)
+            IPlayer invitee = session.Player;
+
+            // Only proceed if the response came from a player that was invited to a group.
+            if (invitee.GroupInvite == null)
             {
-                GroupHelper.SendGroupResult(session, GroupResult.GroupNotFound, groupInviteResponse.GroupId, session.Player.Name);
+                return;
+            }
+
+            IGroup invitingGroup = invitee.GroupInvite.Group;
+            if (invitingGroup == null)
+            {
+                GroupHelper.SendGroupResult(session, GroupResult.GroupNotFound, 0, invitee.Name);
                 return;
             }
 
             // Check if the targeted player declined the group invite.
-            if (groupInviteResponse.Result == GroupInviteResult.Declined)
+            if (inviteeResponse.Result == GroupInviteResponse.Declined)
             {
-                joinedGroup.DeclineInvite(session.Player.GroupInvite);
+                invitingGroup.DeclineInvite(invitee.GroupInvite);
                 return;
             }
 
             // Check if the Player can join the group
-            if (!joinedGroup.CanJoinGroup(out GroupResult result))
+            if (!invitingGroup.CanJoinGroup(out GroupResult result))
             {
-                GroupHelper.SendGroupResult(session, result, joinedGroup.Id, session.Player.Name);
+                GroupHelper.SendGroupResult(session, result, invitingGroup.Id, invitee.Name);
                 return;
             }
 
-            joinedGroup.AcceptInvite(session.Player.GroupInvite);
+            invitingGroup.AcceptInvite(invitee.GroupInvite);
         }
     }
 }
+
+

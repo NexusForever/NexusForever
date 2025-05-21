@@ -11,7 +11,7 @@ namespace NexusForever.Game.Abstract.Group
         bool CanKick { get; }
         bool CanMark { get; }
         bool CanReadyCheck { get; }
-        ulong CharacterId { get; set; }
+        Identity Identity { get; set; }
         GroupMemberInfoFlags Flags { get; set; }
         IGroup Group { get; }
         uint GroupIndex { get; }

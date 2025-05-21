@@ -2,7 +2,7 @@
 
 namespace NexusForever.Network.World.Message.Model.Shared
 {
-    public class TargetPlayerIdentity : IReadable, IWritable
+    public class Identity : IReadable, IWritable
     {
         public ushort RealmId { get; set; }
         public ulong CharacterId { get; set; }

@@ -230,8 +230,8 @@ namespace NexusForever.Game.Entity
         public IAppearanceManager AppearanceManager { get; private set; }
         public IResurrectionManager ResurrectionManager { get; private set; }
 
-        public IGroupMember GroupMembership1 { get; private set; }
-        public IGroupMember GroupMembership2 { get; private set; }
+        public IGroupMember GroupMembershipForeground { get; private set; }
+        public IGroupMember GroupMembershipBackground { get; private set; }
         public IGroupInvite GroupInvite { get; set; }
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
@@ -570,7 +570,7 @@ namespace NexusForever.Game.Entity
                 PvPFlag   = PvPFlag.Disabled,
 
                 // We use Group 1 as the "dominant group"
-                GroupId   = GroupMembership1 == null ? 0 : GroupMembership1.Group.Id
+                GroupId   = GroupMembershipForeground == null ? 0 : GroupMembershipForeground.Group.Id
             };
         }
 
@@ -1400,13 +1400,13 @@ namespace NexusForever.Game.Entity
         /// <returns></returns>
         public void AddToGroup(IGroupMember membership)
         {
-            if (GroupMembership2 != null)
+            if (GroupMembershipBackground != null)
                 throw new InvalidOperationException("Player cannot be a member of more than two groups.");
 
-            if (GroupMembership1 != null)
-                GroupMembership2 = GroupMembership1;
+            if (GroupMembershipForeground != null)
+                GroupMembershipBackground = GroupMembershipForeground;
 
-            GroupMembership1 = membership;
+            GroupMembershipForeground = membership;
             EnqueueToVisible(membership.BuildGroupAssociation());
         }
 
@@ -1416,24 +1416,24 @@ namespace NexusForever.Game.Entity
         /// <param name="membership"></param>
         public void RemoveFromGroup(IGroupMember membership)
         {
-            if (GroupMembership2 != null && membership.Group.Id == GroupMembership2.Group.Id)
+            if (GroupMembershipBackground != null && membership.Group.Id == GroupMembershipBackground.Group.Id)
             {
                 // We are being removed from group 2
                 // No need to send a ServerEntityGroupAssociation packet, we already know we are a member of group 1 over this.
-                GroupMembership2 = null;
+                GroupMembershipBackground = null;
             }
-            else if (membership.Group.Id == GroupMembership1.Group.Id)
+            else if (membership.Group.Id == GroupMembershipForeground.Group.Id)
             {
                 // We are being removed from Group 1
-                if (GroupMembership2 != null)
+                if (GroupMembershipBackground != null)
                 {
-                    GroupMembership1 = GroupMembership2;
-                    GroupMembership2 = null;
+                    GroupMembershipForeground = GroupMembershipBackground;
+                    GroupMembershipBackground = null;
                     EnqueueToVisible(membership.BuildGroupAssociation());
                 }
                 else
                 {
-                    GroupMembership1 = null;
+                    GroupMembershipForeground = null;
                     EnqueueToVisible(new ServerEntityGroupAssociation { UnitId = Guid, GroupId = 0 });
                 }
             }
@@ -1461,7 +1461,7 @@ namespace NexusForever.Game.Entity
                 Realm           = RealmContext.Instance.RealmId,
                 WorldZoneId     = (ushort)Zone.Id,
                 MapId           = Map.Entry.Id,
-                SyncedToGroup   = true
+                InInstance      = true,
             };
         }
     }

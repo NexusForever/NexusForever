@@ -7,15 +7,13 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerGroupReferral : IWritable
     {
         public ulong GroupId { get; set; }
-
-        public TargetPlayerIdentity InviteeIdentity { get; set; }
-
+        public Identity InvokerIdentity { get; set; } // Member of party that made referral
         public string InviteeName { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(GroupId);
-            InviteeIdentity.Write(writer);
+            InvokerIdentity.Write(writer);
             writer.WriteStringWide(InviteeName);
         }
     }

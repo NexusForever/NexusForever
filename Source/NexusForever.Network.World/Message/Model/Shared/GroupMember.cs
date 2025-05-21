@@ -18,15 +18,15 @@ namespace NexusForever.Network.World.Message.Model.Shared
             }
         }
 
-        public class UnknownStruct1 : IWritable
+        public class PrimeLevelInfo : IWritable
         {
-            public ushort Unknown30 { get; set; }
-            public ushort Unknown31 { get; set; }
+            public ushort WorldId { get; set; }
+            public ushort PrimeLevelAchieved { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Unknown30, 15u);
-                writer.Write(Unknown31);
+                writer.Write(WorldId, 15u);
+                writer.Write(PrimeLevelAchieved);
             }
         }
 
@@ -42,32 +42,32 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public ushort GroupMemberId { get; set; }
 
         public UnknownStruct0[] SomeStatList = new UnknownStruct0[5];
-        public List<UnknownStruct1> UnknownStruct1List { get; set; } = new List<UnknownStruct1>();
+        public List<PrimeLevelInfo> PrimeLevels { get; set; } = new List<PrimeLevelInfo>();
 
-        public TargetPlayerIdentity MentoringTarget { get; set; }
+        public Identity Mentee { get; set; }
 
-        public uint Unknown10 { get; set; }
-        public ushort Unknown11 { get; set; }
-        public ushort Unknown12 { get; set; }
-        public ushort Unknown13 { get; set; }
-        public ushort Unknown14 { get; set; }
-        public ushort Unknown15 { get; set; }
-        public ushort Unknown16 { get; set; }
-        public ushort Unknown17 { get; set; }
-        public ushort Unknown18 { get; set; }
-        public ushort Unknown19 { get; set; }
-        public ushort Unknown20 { get; set; }
-        public ushort Unknown21 { get; set; }
+        public uint Health { get; set; }
+        public ushort HealthMax { get; set; }
+        public ushort ShieldCapacity { get; set; }
+        public ushort ShieldCapacityMax { get; set; }
+        public ushort InterruptArmor { get; set; }
+        public ushort InterruptArmorMax { get; set; }
+        public ushort Absorption { get; set; }
+        public ushort AbsorptionMax { get; set; }
+        public ushort Focus { get; set; }
+        public ushort BaseFocusPool { get; set; }
+        public ushort HealingAbsorption { get; set; }
+        public ushort HealingAbsorptionMax { get; set; }
         public ushort Unknown22 { get; set; }
 
         public ushort Realm { get; set; }
         public ushort WorldZoneId { get; set; }
         public uint MapId { get; set; }
         public uint PhaseId { get; set; } = 1;
-        public bool SyncedToGroup { get; set; }
+        public bool InInstance { get; set; }
 
-        public uint Unknown28 { get; set; }
-        public uint Unknown29 { get; set; }
+        public uint PhasesCanBePerceived { get; set; }
+        public uint PhasesCanPerceive { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -88,37 +88,37 @@ namespace NexusForever.Network.World.Message.Model.Shared
                 SomeStatList[i].Write(writer);
             }
 
-            if (MentoringTarget == null)
+            if (Mentee == null)
             {
                 writer.Write((ushort)0, 14u);
                 writer.Write((ulong)0);
             }
             else
-                MentoringTarget.Write(writer);
+                Mentee.Write(writer);
 
-            writer.Write(Unknown10);
-            writer.Write(Unknown11);
-            writer.Write(Unknown12);
-            writer.Write(Unknown13);
-            writer.Write(Unknown14);
-            writer.Write(Unknown15);
-            writer.Write(Unknown16);
-            writer.Write(Unknown17);
-            writer.Write(Unknown18);
-            writer.Write(Unknown19);
-            writer.Write(Unknown20);
-            writer.Write(Unknown21);
+            writer.Write(Health);
+            writer.Write(HealthMax);
+            writer.Write(ShieldCapacity);
+            writer.Write(ShieldCapacityMax);
+            writer.Write(InterruptArmor);
+            writer.Write(InterruptArmorMax);
+            writer.Write(Absorption);
+            writer.Write(AbsorptionMax);
+            writer.Write(Focus);
+            writer.Write(BaseFocusPool);
+            writer.Write(HealingAbsorption);
+            writer.Write(HealingAbsorptionMax);
             writer.Write(Unknown22);
             writer.Write(Realm, 14u);
             writer.Write(WorldZoneId, 15u);
             writer.Write(MapId);
             writer.Write(PhaseId);
-            writer.Write(SyncedToGroup);
-            writer.Write(Unknown28);
-            writer.Write(Unknown29);
+            writer.Write(InInstance);
+            writer.Write(PhasesCanBePerceived);
+            writer.Write(PhasesCanPerceive);
 
-            writer.Write(UnknownStruct1List.Count);
-            UnknownStruct1List.ForEach(i => i.Write(writer));
+            writer.Write(PrimeLevels.Count);
+            PrimeLevels.ForEach(i => i.Write(writer));
         }
     }
 }

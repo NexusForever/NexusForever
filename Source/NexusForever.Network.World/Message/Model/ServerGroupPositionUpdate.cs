@@ -7,17 +7,25 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerGroupPositionUpdate)]
     public class ServerGroupPositionUpdate : IWritable
     {
-        public class UnknownStruct0
+        public class GroupMemberState
         {
-            public TargetPlayerIdentity Identity { get; set; }
+            public enum MemberCombatState
+            {
+                OutOfCombat = 0x0,
+                InCombatPvP = 0x1,
+                InCombatPvE = 0x2,
+                InCombat    = 0x3,
+            }
+
+            public Identity Identity { get; set; }
             public Position Position { get; set; }
-            public uint Unknown0 { get; set; } //afaict this is never used in the client.
-            public uint Flags { get; set; } = 0; // bInCombatPvp = 1, bIInCombatPve = 2, InCombat = 3
+            public uint WorldZoneId { get; set; }
+            public MemberCombatState CombatState { get; set; } = 0; 
         }
 
         public ulong GroupId { get; set; }
         public uint WorldId { get; set; }
-        public List<UnknownStruct0> Updates { get; set; } = new List<UnknownStruct0>();
+        public List<GroupMemberState> Updates { get; set; } = new List<GroupMemberState>();
 
         public void Write(GamePacketWriter writer)
         {
@@ -27,8 +35,8 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write((uint)Updates.Count);
             Updates.ForEach(update => update.Identity.Write(writer));
             Updates.ForEach(update => update.Position.Write(writer));
-            Updates.ForEach(update => writer.Write(update.Unknown0));
-            Updates.ForEach(update => writer.Write(update.Flags));
+            Updates.ForEach(update => writer.Write(update.WorldZoneId));
+            Updates.ForEach(update => writer.Write(update.CombatState));
         }
     }
 }

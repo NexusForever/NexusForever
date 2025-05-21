@@ -7,13 +7,13 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerGroupMemberAdd : IWritable
     {
         public ulong GroupId { get; set; }
-        public uint Unknown0 { get; set; }
+        public uint Unused { get; set; } // Unpacked but not used by client
         public GroupMemberInfo AddedMemberInfo { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(GroupId);
-            writer.Write(Unknown0);
+            writer.Write(Unused);
             AddedMemberInfo.Write(writer);
         }
     }

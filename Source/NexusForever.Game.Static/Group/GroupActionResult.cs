@@ -1,0 +1,37 @@
+﻿namespace NexusForever.Game.Static.Group
+{
+    public enum GroupActionResult
+    {
+        LeaveSuccess            = 0x1,
+        LeaveFailed             = 0x2,
+        DisbandSuccess          = 0x3,
+        DisbandFailed           = 0x4,
+        KickSuccess             = 0x5,
+        KickFailed              = 0x6,
+        PromoteSuccess          = 0x7,
+        PromoteFailed           = 0x8,
+        FlagsSuccess            = 0x9,
+        FlagsFailed             = 0xA,
+        MemberFlagsSuccess      = 0xB,
+        MemberFlagsFailed       = 0xC,
+        NotInGroup              = 0xD,
+        ChangeSettingsFailed    = 0xF,
+        ChangeSettingsSuccess   = 0xE,
+        MentoringInvalidMentor  = 0x10,
+        MentoringInvalidMentee  = 0x11,
+        InvalidGroup            = 0x12,
+        MentoringSelf           = 0x13,
+        ReadyCheckFailed        = 0x14,
+        MentoringNotAllowed     = 0x17,
+        MarkingNotPermitted     = 0x15,
+        InvalidMarkIndex        = 0x16,
+        InvalidMarkTarget       = 0x18,
+        MentoringInCombat       = 0x19,
+        MentoringLowestLevel    = 0x1A,
+        MentoringNoAction       = 0x1D,
+        OrderInvalidMember      = 0x1E,
+        OrderFailedLeader       = 0x1F,
+        AlreadyInGroupInstance  = 0x1B,
+        OrderFailedInUse        = 0x21,
+    };
+}

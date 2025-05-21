@@ -6,15 +6,15 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGroupInviteResponse)]
     public class ClientGroupInviteResponse : IReadable
     {
-        public ulong GroupId { get; set; }
-        public GroupInviteResult Result { get; set; }
-        public uint Unk1 { get; set; }
+        public ulong InviteId { get; private set; }
+        public GroupInviteResponse Result { get; private set; }
+        public uint Unknown { get; private set; } // Client does set this in GroupLib.AcceptInvite
 
         public void Read(GamePacketReader reader)
         {
-            GroupId = reader.ReadULong();
-            Result  = reader.ReadEnum<GroupInviteResult>(1);
-            Unk1    = reader.ReadUInt();
+            InviteId = reader.ReadULong();
+            Result  = reader.ReadEnum<GroupInviteResponse>(1);
+            Unknown    = reader.ReadUInt();
         }
     }
 }

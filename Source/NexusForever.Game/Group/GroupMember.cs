@@ -12,7 +12,7 @@ namespace NexusForever.Game.Group
     {
         public ulong Id { get; }
         public IGroup Group { get; }
-        public ulong CharacterId { get; set; }
+        public Identity Identity { get; set; }
         public ushort ZoneId { get; set; }
         public uint GroupIndex { get { return Group.GetMemberIndex(this); } }
 
@@ -30,7 +30,7 @@ namespace NexusForever.Game.Group
         {
             Id = id;
             Group = group;
-            CharacterId = player.CharacterId;
+            Identity = new Identity{ CharacterId = player.CharacterId, RealmId = RealmContext.Instance.RealmId };
             ZoneId = (ushort)player.Zone.Id;
             AreFlagsSet = false;
         }
@@ -116,7 +116,7 @@ namespace NexusForever.Game.Group
         /// </summary>
         public NetworkGroupMember Build()
         {
-            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(CharacterId);
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity.CharacterId);
             if (targetPlayer == null)
                 return null;
 
@@ -130,9 +130,9 @@ namespace NexusForever.Game.Group
         {
             return new GroupMemberInfo
             {
-                MemberIdentity = new TargetPlayerIdentity
+                Identity = new Identity
                 {
-                    CharacterId = CharacterId,
+                    CharacterId = Identity.CharacterId,
                     RealmId = RealmContext.Instance.RealmId
                 },
                 Flags = Flags,
@@ -146,7 +146,7 @@ namespace NexusForever.Game.Group
         /// </summary>
         public ServerEntityGroupAssociation BuildGroupAssociation()
         {
-            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(CharacterId);
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity.CharacterId);
             if (targetPlayer == null)
                 return null;
 
@@ -162,7 +162,7 @@ namespace NexusForever.Game.Group
         /// </summary>
         public ServerGroupMemberStatUpdate BuildGroupStatUpdate()
         {
-            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(CharacterId);
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity.CharacterId);
             if (targetPlayer == null)
                 return null;
 
@@ -170,17 +170,13 @@ namespace NexusForever.Game.Group
             {
                 GroupId = Group.Id,
                 GroupMemberId = (ushort)Id,
-                TargetPlayer = new TargetPlayerIdentity
-                {
-                    CharacterId = CharacterId,
-                    RealmId = RealmContext.Instance.RealmId
-                },
+                TargetPlayer = Identity,
                 Level = (byte)targetPlayer.Level,
                 EffectiveLevel = (byte)targetPlayer.Level,
                 Health = (ushort)targetPlayer.Health,
-                HealthMax = (ushort)targetPlayer.Health,
-                Shield = (ushort)targetPlayer.Shield,
-                ShieldMax = (ushort)targetPlayer.Shield,
+                HealthMax = (ushort)targetPlayer.MaxHealth,
+                ShieldCapacity = (ushort)targetPlayer.Shield,
+                ShieldCapacityMax = (ushort)targetPlayer.MaxShieldCapacity,
                 InterruptArmor = (ushort)targetPlayer.InterruptArmor,
                 InterruptArmorMax = (ushort)targetPlayer.InterruptArmor,
                 Path = targetPlayer.Path

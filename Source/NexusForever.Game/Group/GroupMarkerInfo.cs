@@ -39,7 +39,7 @@ namespace NexusForever.Game.Group
 
         private void BroadcastMarkEvent(uint unitID, GroupMarker marker)
         {
-            Group.BroadcastPacket(new ServerGroupMarkUnit
+            Group.BroadcastPacket(new ServerGroupSetMark
             {
                 GroupId = Group.Id,
                 Marker = marker,

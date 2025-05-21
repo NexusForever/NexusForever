@@ -3,17 +3,18 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerGroupRequestJoinResponse)]
-    public class ServerGroupRequestJoinResponse : IWritable
+    [Message(GameMessageOpcode.ServerGroupReadyCheck)]
+    public class ServerGroupReadyCheck : IWritable
     {
         public ulong GroupId { get; set; }
-
-        public GroupMemberInfo MemberInfo { get; set; }
+        public Identity Invoker { get; set; }
+        public string Message { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(GroupId);
-            MemberInfo.Write(writer);
+            Invoker.Write(writer);
+            writer.WriteStringWide(Message);
         }
     }
 }

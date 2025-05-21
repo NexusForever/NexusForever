@@ -6,12 +6,12 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerGroupJoin)]
     public class ServerGroupJoin : IWritable
     {
-        public TargetPlayerIdentity TargetPlayer { get; set; } = new TargetPlayerIdentity();
-        public GroupInfo GroupInfo { get; set; } = new GroupInfo();
+        public Identity Player { get; set; }
+        public GroupInfo GroupInfo { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            TargetPlayer.Write(writer);
+            Player.Write(writer);
             GroupInfo.Write(writer);
         }
     }

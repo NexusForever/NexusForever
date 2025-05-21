@@ -15,8 +15,8 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public LootThreshold LootThreshold { get; set; }
         public HarvestLootRule LootRuleHarvest { get; set; }
 
-        public TargetPlayerIdentity LeaderIdentity { get; set; } = new TargetPlayerIdentity();
-        public ushort RealmId { get; set; }     //< Why again? Tf?
+        public Identity Leader { get; set; }
+        public ushort RealmId { get; set; }     // Group not necessarily hosted on realm of leader
 
         public GroupMarkerInfo MarkerInfo { get; set; }
 
@@ -34,7 +34,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             MemberInfos.ForEach(member => member.Write(writer));
 
-            LeaderIdentity.Write(writer);
+            Leader.Write(writer);
             writer.Write(RealmId, 14);
 
             MarkerInfo.Write(writer);

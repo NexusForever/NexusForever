@@ -6,9 +6,8 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGroupFlagsChanged)]
     public class ClientGroupFlagsChanged : IReadable
     {
-        public ulong GroupId { get; set; }
-
-        public GroupFlags NewFlags { get; set; }
+        public ulong GroupId { get; private set; }
+        public GroupFlags NewFlags { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

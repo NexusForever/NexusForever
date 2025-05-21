@@ -3,19 +3,14 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientGroupLootRulesChange)]
-    public class ClientGroupLootRulesChange : IReadable
+    [Message(GameMessageOpcode.ClientGroupSetLootRules)]
+    public class ClientGroupSetLootRules : IReadable
     {
-        public ulong GroupId { get; set; }
-
-        public LootRule LootRulesUnderThreshold { get; set; }
-
-        public LootRule LootRulesThresholdAndOver { get; set; }
-
-        public LootThreshold Threshold { get; set; }
-
-        public HarvestLootRule HarvestingRule { get; set; }
-
+        public ulong GroupId { get; private set; }
+        public LootRule LootRulesUnderThreshold { get; private set; }
+        public LootRule LootRulesThresholdAndOver { get; private set; }
+        public LootThreshold Threshold { get; private set; }
+        public HarvestLootRule HarvestingRule { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

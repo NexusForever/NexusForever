@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerGroupMemberStatUpdate : IWritable
     {
         public ulong GroupId { get; set; }
-        public TargetPlayerIdentity TargetPlayer { get; set; }
+        public Identity TargetPlayer { get; set; }
 
         public byte Level { get; set; }
         public byte EffectiveLevel { get; set; }
@@ -19,19 +19,19 @@ namespace NexusForever.Network.World.Message.Model
 
         public ushort Health { get; set; }
         public ushort HealthMax { get; set; }
-        public ushort Shield { get; set; }
-        public ushort ShieldMax { get; set; }
+        public ushort ShieldCapacity { get; set; }
+        public ushort ShieldCapacityMax { get; set; }
         public ushort InterruptArmor { get; set; }
         public ushort InterruptArmorMax { get; set; }
         public ushort Absorption { get; set; }
         public ushort AbsorptionMax { get; set; }
-        public ushort Mana { get; set; }
-        public ushort ManaMax { get; set; }
+        public ushort Focus { get; set; }
+        public ushort BaseFocusPool { get; set; }
         public ushort HealingAbsorb { get; set; }
         public ushort HealingAbsorbMax { get; set; }
 
-        public uint PhaseFlags1 { get; set; } = 1;
-        public uint PhaseFlags2 { get; set; } = 1;
+        public uint PhasesCanBeSeen { get; set; } = 1;
+        public uint PhasesCanSee { get; set; } = 1;
         public Game.Static.Entity.Path Path { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -53,19 +53,19 @@ namespace NexusForever.Network.World.Message.Model
 
             writer.Write(Health);
             writer.Write(HealthMax);
-            writer.Write(Shield);
-            writer.Write(ShieldMax);
+            writer.Write(ShieldCapacity);
+            writer.Write(ShieldCapacityMax);
             writer.Write(InterruptArmor);
             writer.Write(InterruptArmorMax);
             writer.Write(Absorption);
             writer.Write(AbsorptionMax);
-            writer.Write(Mana);
-            writer.Write(ManaMax);
+            writer.Write(Focus);
+            writer.Write(BaseFocusPool);
             writer.Write(HealingAbsorb);
             writer.Write(HealingAbsorbMax);
 
-            writer.Write(PhaseFlags1);
-            writer.Write(PhaseFlags2);
+            writer.Write(PhasesCanBeSeen);
+            writer.Write(PhasesCanSee);
             writer.Write(Path, 3);
         }
     }

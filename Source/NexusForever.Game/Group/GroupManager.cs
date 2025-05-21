@@ -38,7 +38,7 @@ namespace NexusForever.Game.Group
                 return;
 
             groups.Remove(group.Id);
-            groupOwner.Remove(group.Leader.CharacterId);
+            groupOwner.Remove(group.Leader.Identity.CharacterId);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace NexusForever.Game.Group
 
             foreach (IGroup group in groups.Values)
             {
-                IGroupMember membership = group.FindMember(new TargetPlayerIdentity() { CharacterId = player.CharacterId, RealmId = RealmContext.Instance.RealmId });
+                IGroupMember membership = group.FindMember(new Identity() { CharacterId = player.CharacterId, RealmId = RealmContext.Instance.RealmId });
 
                 if (membership == null)
                     continue;
@@ -110,7 +110,7 @@ namespace NexusForever.Game.Group
                 player.AddToGroup(membership2);
                 player.Session.EnqueueMessageEncrypted(new ServerGroupJoin
                 {
-                    TargetPlayer = new TargetPlayerIdentity
+                    Player = new Identity
                     {
                         CharacterId = player.CharacterId,
                         RealmId = RealmContext.Instance.RealmId
@@ -123,7 +123,7 @@ namespace NexusForever.Game.Group
             player.AddToGroup(membership);
             player.Session.EnqueueMessageEncrypted(new ServerGroupJoin
             {
-                TargetPlayer = new TargetPlayerIdentity
+                Player = new Identity
                 {
                     CharacterId = player.CharacterId,
                     RealmId = RealmContext.Instance.RealmId

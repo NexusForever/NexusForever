@@ -7,9 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerGroupMaxSizeChange : IWritable
     {
         public ulong GroupId { get; set; }
-
-        public GroupFlags NewFlags { get; set; }
-
+        public GroupFlags NewFlags { get; set; } // Unpacked but unused by client
         public uint NewMaxSize { get; set; }
 
         public void Write(GamePacketWriter writer)

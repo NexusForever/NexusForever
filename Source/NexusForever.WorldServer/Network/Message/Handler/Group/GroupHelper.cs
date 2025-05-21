@@ -15,7 +15,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
             session.EnqueueMessageEncrypted(new ServerGroupInviteResult
             {
                 GroupId = groupId,
-                Name = targetPlayerName,
+                InviteeName = targetPlayerName,
                 Result = result
             });
         }
@@ -29,14 +29,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
         public static void AssertGroupId(IWorldSession session, ulong recievedGroupId, bool assertPrimaryGroup = true)
         {
             // If the player is not part of a Group1 they cannot be part of a Group2 so no need to check.
-            if (session.Player.GroupMembership1 == null || session.Player.GroupMembership1.Group == null)
+            if (session.Player.GroupMembershipForeground == null || session.Player.GroupMembershipForeground.Group == null)
                 throw new InvalidPacketValueException();
 
-            ulong sessionGroupId = session.Player.GroupMembership1.Group.Id;
+            ulong sessionGroupId = session.Player.GroupMembershipForeground.Group.Id;
             if (sessionGroupId != recievedGroupId && assertPrimaryGroup)
                 throw new InvalidPacketValueException("Player does not belong to the group they wish to perform the action on.");
 
-            if (recievedGroupId != session.Player.GroupMembership1.Group.Id && recievedGroupId != session.Player.GroupMembership2?.Group?.Id)
+            if (recievedGroupId != session.Player.GroupMembershipForeground.Group.Id && recievedGroupId != session.Player.GroupMembershipBackground?.Group?.Id)
                 throw new InvalidPacketValueException("Player does not belong to the group they wish to perform the action on.");
         }
 
@@ -45,14 +45,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
         /// </summary>
         public static void AssertPermission(IWorldSession session, ulong groupID, GroupMemberInfoFlags action)
         {
-            if (session.Player.GroupMembership1.Group.Id == groupID)
+            if (session.Player.GroupMembershipForeground.Group.Id == groupID)
             {
-                if (!session.Player.GroupMembership1.Flags.HasFlag(action))
+                if (!session.Player.GroupMembershipForeground.Flags.HasFlag(action))
                     throw new InvalidPacketValueException("Player does not have the Group Role required to perform that action.");
             }
-            else if (session.Player.GroupMembership2.Group.Id == groupID)
+            else if (session.Player.GroupMembershipBackground.Group.Id == groupID)
             {
-                if (!session.Player.GroupMembership2.Flags.HasFlag(action))
+                if (!session.Player.GroupMembershipBackground.Flags.HasFlag(action))
                     throw new InvalidPacketValueException("Player does not have the Group Role required to perform that action.");
             }
         }
@@ -62,14 +62,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
         /// </summary>
         public static void AssertGroupLeader(IWorldSession session, ulong groupID)
         {
-            if (session.Player.GroupMembership1.Group.Id == groupID)
+            if (session.Player.GroupMembershipForeground.Group.Id == groupID)
             {
-                if (!session.Player.GroupMembership1.IsPartyLeader)
+                if (!session.Player.GroupMembershipForeground.IsPartyLeader)
                     throw new InvalidPacketValueException("Player must be the leader of the group to perform this action.");
             }
-            else if (session.Player.GroupMembership2.Group.Id == groupID)
+            else if (session.Player.GroupMembershipBackground.Group.Id == groupID)
             {
-                if (!session.Player.GroupMembership2.IsPartyLeader)
+                if (!session.Player.GroupMembershipBackground.IsPartyLeader)
                     throw new InvalidPacketValueException("Player must be the leader of the group to perform this action.");
             }
         }

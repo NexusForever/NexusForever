@@ -5,14 +5,14 @@ namespace NexusForever.Network.World.Message.Model.Shared
 {
     public class GroupMemberInfo : IWritable
     {
-        public TargetPlayerIdentity MemberIdentity { get; set; } = new TargetPlayerIdentity();
+        public Identity Identity { get; set; }
         public GroupMemberInfoFlags Flags { get; set; }
         public GroupMember Member { get; set; }
         public uint GroupIndex { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            MemberIdentity.Write(writer);
+            Identity.Write(writer);
             writer.Write(Flags, 32);
             Member.Write(writer);
             writer.Write(GroupIndex);

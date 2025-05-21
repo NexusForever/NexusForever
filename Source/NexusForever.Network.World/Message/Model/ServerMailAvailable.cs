@@ -52,7 +52,7 @@ namespace NexusForever.Network.World.Message.Model
             public ulong CostOnDeliveryAmount { get; set; }
             public float ExpiryTimeInDays { get; set; }
             public MailFlag Flags { get; set; }
-            public TargetPlayerIdentity Sender { get; set; } = new();
+            public Identity Sender { get; set; } = new();
             public List<Attachment> Attachments { get; set; } = new();
 
             public void Write(GamePacketWriter writer)

@@ -3,14 +3,12 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerGroupPromote)]
-    public class ServerGroupPromote : IWritable
+    [Message(GameMessageOpcode.ServerGroupMemberPromoted)]
+    public class ServerGroupMemberPromoted : IWritable
     {
         public ulong GroupId { get; set; }
-
-        public uint LeaderIndex { get; set; }
-
-        public TargetPlayerIdentity NewLeader { get; set; }
+        public uint LeaderIndex { get; set; } // Unpacked but unused by Client
+        public Identity NewLeader { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

@@ -2,12 +2,11 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientGroupSendReadyCheck)]
-    public class ClientGroupSendReadyCheck : IReadable
+    [Message(GameMessageOpcode.ClientGroupReadyCheckRequest)]
+    public class ClientGroupReadyCheckRequest : IReadable
     {
-        public ulong GroupId { get; set; }
-
-        public string Message { get; set; }
+        public ulong GroupId { get; private set; }
+        public string Message { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

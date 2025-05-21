@@ -3,15 +3,12 @@ using NexusForever.Game.Static.Group;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerGroupRequestJoinResult)]
-    public class ServerGroupRequestJoinResult : IWritable
+    [Message(GameMessageOpcode.ServerGroupRequestResult)]
+    public class ServerGroupRequestResult : IWritable
     {
         public ulong GroupId { get; set; }
-
         public string Name { get; set; }
-
         public GroupResult Result { get; set; }
-
         public bool IsJoin { get; set; }
 
         public void Write(GamePacketWriter writer)

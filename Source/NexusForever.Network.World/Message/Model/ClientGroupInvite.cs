@@ -5,13 +5,13 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGroupInvite)]
     public class ClientGroupInvite : IReadable
     {
-        public string Name { get; set; }
-        public string UnknownString { get; set; }
+        public string InviteeName { get; private set; }
+        public string Unused { get; private set; } // Always filled with empty string
 
         public void Read(GamePacketReader reader)
         {
-            Name            = reader.ReadWideString();
-            UnknownString   = reader.ReadWideString();
+            InviteeName     = reader.ReadWideString();
+            Unused          = reader.ReadWideString();
         }
     }
 }

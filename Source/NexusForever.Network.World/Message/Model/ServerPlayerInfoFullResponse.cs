@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model
         public class Base : IWritable
         {
             public byte ResultCode { get; set; }
-            public TargetPlayerIdentity Identity { get; set; }
+            public Identity Identity { get; set; }
             public string Name { get; set; }
             public Faction Faction { get; set; }
 
