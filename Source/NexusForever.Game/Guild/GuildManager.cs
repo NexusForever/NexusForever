@@ -10,9 +10,10 @@ using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.TextFilter;
 using NexusForever.Game.Text.Filter;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
 using NLog;
-using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.GuildMember;
+using NetworkGuildMember = NexusForever.Network.World.Message.Model.Guild.GuildMember;
 
 namespace NexusForever.Game.Guild
 {
@@ -176,12 +177,12 @@ namespace NexusForever.Game.Guild
                 NetworkGuildMember member = guild.GetMember(owner.CharacterId).Build();
                 if (guildAffiliation?.Id == guild.Id)
                 {
-                    guildInit.NameplateIndex = index;
-                    member.Unknown10 = 1; // TODO: research this
+                    guildInit.ShowNameplateIndex = index;
+                    member.RecruitmentAvailability = 1; // TODO: research this
                 }
 
                 guildInit.Self.Add(member);
-                guildInit.SelfPrivate.Add(new GuildPlayerLimits());
+                guildInit.BankWithdrawlInfo.Add(new GuildWithdrawlInfo());
                 guildInit.Guilds.Add(guild.Build());
 
                 index++;
@@ -301,7 +302,7 @@ namespace NexusForever.Game.Guild
         /// <remarks>
         /// <see cref="CanInviteToGuild(ulong)"/> should be invoked before invoking this method.
         /// </remarks>
-        public void InviteToGuild(ulong id, IPlayer invitee)
+        public void InviteToGuild(ulong id, IPlayer invitee, IPlayer inviter)
         {
             IGuildBase guild = GlobalGuildManager.Instance.GetGuild(id);
             if (guild == null)
@@ -317,8 +318,8 @@ namespace NexusForever.Game.Guild
             {
                 GuildName  = guild.Name,
                 GuildType  = guild.Type,
-                PlayerName = invitee.Name,
-                Flags      = (uint)guild.Flags
+                InviterName = inviter.Name,
+                Flags      = guild.Flags
             });
 
             log.Trace($"Invited character {owner.CharacterId} to guild {id}.");
@@ -352,17 +353,19 @@ namespace NexusForever.Game.Guild
             if (pendingInvite == null)
                 throw new InvalidOperationException($"Invalid guild invite for {owner.CharacterId}!");
 
+            Identity GuildIdentity = new Identity { Id = pendingInvite.GuildId , RealmId = RealmContext.Instance.RealmId};
+
             IPlayer invitee = PlayerManager.Instance.GetPlayer(pendingInvite.InviteeId);
             if (accepted)
             {
                 if (invitee?.Session != null)
-                    GuildBase.SendGuildResult(invitee.Session, GuildResult.InviteAccepted, referenceText: owner.Name);
+                    GuildBase.SendGuildResult(invitee.Session, GuildResult.InviteAccepted, GuildIdentity, referenceText: owner.Name);
                 JoinGuild(pendingInvite.GuildId);
             }
             else
             {
                 if (invitee?.Session != null)
-                    GuildBase.SendGuildResult(invitee.Session, GuildResult.InviteDeclined, referenceText: owner.Name);
+                    GuildBase.SendGuildResult(invitee.Session, GuildResult.InviteDeclined, GuildIdentity, referenceText: owner.Name);
             }
 
             pendingInvite = null;
@@ -470,7 +473,7 @@ namespace NexusForever.Game.Guild
             else if (GuildAffiliation?.Type == GuildType.Guild)
                 RemoveHolomark();
 
-            owner.EnqueueToVisible(new ServerEntityGuildAffiliation
+            owner.EnqueueToVisible(new ServerUnitGuildNameplateChanged
             {
                 UnitId    = owner.Guid,
                 GuildName = guild.Name,
@@ -494,7 +497,7 @@ namespace NexusForever.Game.Guild
             if (GuildAffiliation.Type == GuildType.Guild)
                 RemoveHolomark();
 
-            owner.EnqueueToVisible(new ServerEntityGuildAffiliation
+            owner.EnqueueToVisible(new ServerUnitGuildNameplateChanged
             {
                 UnitId    = owner.Guid,
                 GuildName = "",

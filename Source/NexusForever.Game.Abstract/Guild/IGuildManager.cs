@@ -72,7 +72,7 @@ namespace NexusForever.Game.Abstract.Guild
         /// <remarks>
         /// <see cref="CanInviteToGuild(ulong)"/> should be invoked before invoking this method.
         /// </remarks>
-        void InviteToGuild(ulong id, IPlayer invitee);
+        void InviteToGuild(ulong id, IPlayer invitee, IPlayer inviter);
 
         /// <summary>
         /// Return if <see cref="IPlayer"/> can accept the existing <see cref="IGuildInvite"/>.

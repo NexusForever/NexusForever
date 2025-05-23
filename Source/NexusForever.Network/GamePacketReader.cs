@@ -129,6 +129,14 @@ namespace NexusForever.Network
             return ReadBits(bits);
         }
 
+        public long ReadLong(uint bits = 64u)
+        {
+            if (bits > sizeof(long) * 8)
+                throw new ArgumentException();
+
+            return (long)ReadBits(bits);
+        }
+
         public T ReadEnum<T>(uint bits = 64u) where T : Enum
         {
             if (bits > sizeof(ulong) * 8)

@@ -240,11 +240,27 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        public IGuildBase GetGuild(Identity guildIdentity)
+        {
+            return guilds.TryGetValue(guildIdentity.Id, out IGuildBase guild) ? guild : null;
+        }
+
+        /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
         public T GetGuild<T>(ulong guildId) where T : IGuildBase
         {
             return guilds.TryGetValue(guildId, out IGuildBase guild) ? (T)guild : default;
+        }
+
+        /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        public T GetGuild<T>(Identity identity) where T : IGuildBase
+        {
+            return guilds.TryGetValue(identity.Id, out IGuildBase guild) ? (T)guild : default;
         }
 
         /// <summary>
@@ -376,7 +392,7 @@ namespace NexusForever.Game.Guild
         private IGuildResultInfo HandleGuildOperation((GuildOperationHandlerDelegate Delegate, GuildOperationHandlerResultDelegate ResultDelegate) handlers,
             IPlayer player, ClientGuildOperation operation)
         {
-            IGuildBase guild = GetGuild(operation.GuildId);
+            IGuildBase guild = GetGuild(operation.GuildIdentity);
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
@@ -392,7 +408,7 @@ namespace NexusForever.Game.Guild
             else
             {
                 IGuildResultInfo info = handlers.ResultDelegate.Invoke(guild, member, player, operation);
-                info.GuildId = guild.Id;
+                info.GuildIdentity = guild.Identity;
                 return info;
             }
         }

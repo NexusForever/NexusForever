@@ -15,13 +15,13 @@ namespace NexusForever.Game.Guild
             IGuildResultInfo GetResult()
             {
                 if (member.Rank.Index > 0)
-                    return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
+                    return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions, Identity);
 
                 if (!TextFilterManager.Instance.IsTextValid(operation.TextValue)
                     || !TextFilterManager.Instance.IsTextValid(operation.TextValue, UserText.GuildName)) 
-                    return new GuildResultInfo(GuildResult.InvalidGuildInfo);
+                    return new GuildResultInfo(GuildResult.InvalidGuildInfo, Identity);
 
-                return new GuildResultInfo(GuildResult.Success);
+                return new GuildResultInfo(GuildResult.Success, Identity);
             }
 
             IGuildResultInfo result = GetResult();
@@ -31,9 +31,8 @@ namespace NexusForever.Game.Guild
 
                 Broadcast(new ServerGuildInfoMessageUpdate
                 {
-                    RealmId        = RealmContext.Instance.RealmId,
-                    GuildId        = Id,
-                    AdditionalInfo = AdditionalInfo
+                    GuildIdentity = Identity,
+                    InfoMessage = AdditionalInfo
                 });
             }
 
@@ -46,13 +45,13 @@ namespace NexusForever.Game.Guild
             IGuildResultInfo GetResult()
             {
                 if (!member.Rank.HasPermission(GuildRankPermission.MessageOfTheDay))
-                    return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
+                    return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions, Identity);
 
                 if (!TextFilterManager.Instance.IsTextValid(operation.TextValue)
                     || !TextFilterManager.Instance.IsTextValid(operation.TextValue, UserText.GuildMessageOfTheDay))
-                    return new GuildResultInfo(GuildResult.InvalidMessageOfTheDay);
+                    return new GuildResultInfo(GuildResult.InvalidMessageOfTheDay, Identity);
 
-                return new GuildResultInfo(GuildResult.Success);
+                return new GuildResultInfo(GuildResult.Success, Identity);
             }
 
             IGuildResultInfo result = GetResult();
@@ -62,8 +61,7 @@ namespace NexusForever.Game.Guild
 
                 Broadcast(new ServerGuildMotdUpdate
                 {
-                    RealmId         = RealmContext.Instance.RealmId,
-                    GuildId         = Id,
+                    GuildIdentity = Identity,
                     MessageOfTheDay = MessageOfTheDay
                 });
             }
@@ -77,9 +75,9 @@ namespace NexusForever.Game.Guild
             IGuildResultInfo GetResult()
             {
                 if (member.Rank.Index > 0)
-                    return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions);
+                    return new GuildResultInfo(GuildResult.RankLacksSufficientPermissions, Identity);
 
-                return new GuildResultInfo(GuildResult.Success);
+                return new GuildResultInfo(GuildResult.Success, Identity);
             }
 
             IGuildResultInfo result = GetResult();

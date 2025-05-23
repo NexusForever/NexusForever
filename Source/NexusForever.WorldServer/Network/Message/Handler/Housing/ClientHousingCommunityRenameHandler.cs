@@ -88,10 +88,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             session.EnqueueMessageEncrypted(new ServerHousingCommunityRename
             {
                 Result      = HousingResult.Success,
-                TargetGuild = new TargetGuild
+                TargetGuild = new Identity
                 {
                     RealmId = realmContext.RealmId,
-                    GuildId = community.Id
+                    Id      = community.Id
                 }
             });
         }
