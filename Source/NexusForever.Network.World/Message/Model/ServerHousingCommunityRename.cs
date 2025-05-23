@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerHousingCommunityRename)]
     public class ServerHousingCommunityRename : IWritable
     {
-        public TargetGuild TargetGuild { get; set; }
+        public Identity TargetGuild { get; set; }
         public HousingResult Result { get; set; }
 
         public void Write(GamePacketWriter writer)

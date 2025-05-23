@@ -2,13 +2,15 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Game.Abstract.Guild
 {
     public interface IGuildBase : IDatabaseCharacter, INetworkBuildable<GuildData>, IEnumerable<IGuildMember>
     {
-        ulong Id { get; }
+        Identity Identity { get; }
+        ulong Id { get => Identity.Id; }
         GuildType Type { get; }
         DateTime CreateTime { get; }
         string Name { get; set; }
