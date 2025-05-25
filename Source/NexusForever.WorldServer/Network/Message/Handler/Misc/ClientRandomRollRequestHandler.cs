@@ -34,7 +34,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Misc
                 TargetPlayerIdentity = new Identity
                 {
                     RealmId     = realmContext.RealmId,
-                    CharacterId = session.Player.CharacterId
+                    Id = session.Player.CharacterId
                 },
                 MinRandom        = randomRoll.MinRandom,
                 MaxRandom        = randomRoll.MaxRandom,

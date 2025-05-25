@@ -98,7 +98,7 @@ namespace NexusForever.Game.Event
                 UnitId = player.Guid,
                 Player = new Identity
                 {
-                    CharacterId = player.CharacterId,
+                    Id = player.CharacterId,
                     RealmId     = realmContext.RealmId
                 },
                 Class = @class,

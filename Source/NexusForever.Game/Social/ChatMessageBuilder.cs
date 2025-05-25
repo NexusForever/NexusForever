@@ -101,7 +101,7 @@ namespace NexusForever.Game.Social
                 From          = new Identity
                 {
                     RealmId     = FromCharacterRealmId,
-                    CharacterId = FromCharacterId
+                    Id = FromCharacterId
                 },
                
                 FromName      = FromName,

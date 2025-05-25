@@ -38,7 +38,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public IPlayer GetPlayer(ulong characterId)
         {
-            return players.TryGetValue( new Identity{ CharacterId = characterId, RealmId = RealmContext.Instance.RealmId }, out IPlayer player) ? player : null;
+            return players.TryGetValue( new Identity{ Id = characterId, RealmId = RealmContext.Instance.RealmId }, out IPlayer player) ? player : null;
         }
 
         /// <summary>

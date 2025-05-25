@@ -83,7 +83,7 @@ namespace NexusForever.Game.Entity
 
         public Identity Identity { get; private set; }
 
-        public ulong CharacterId { get => Identity.CharacterId; }
+        public ulong CharacterId { get => Identity.Id; }
 
         public string Name { get; private set; }
 
@@ -272,7 +272,7 @@ namespace NexusForever.Game.Entity
             Session           = session;
 
             Account           = account;
-            Identity          = new Identity{CharacterId = model.Id, RealmId = RealmContext.Instance.RealmId };
+            Identity          = new Identity{Id = model.Id, RealmId = RealmContext.Instance.RealmId };
             Name              = model.Name;
             sex               = (Sex)model.Sex;
             race              = (Race)model.Race;

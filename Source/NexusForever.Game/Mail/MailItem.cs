@@ -350,7 +350,7 @@ namespace NexusForever.Game.Mail
                 Sender = new Identity
                 {
                     RealmId     = isPlayer ? RealmContext.Instance.RealmId : (ushort)0,
-                    CharacterId = isPlayer ? SenderId : 0ul
+                    Id = isPlayer ? SenderId : 0ul
                 },
             };
 
