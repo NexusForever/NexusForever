@@ -28,7 +28,7 @@ namespace NexusForever.Network.Message
         ClientVendorPurchase            = 0x00BE,
         ClientLogoutRequest             = 0x00BF,
         ClientLogoutConfirm             = 0x00C0,
-        ClientChallengeChoice         = 0x00C5,
+        ClientChallengeChoice           = 0x00C5,
         ServerChallengeResult           = 0x00C6,
         ServerChallengeUpdate           = 0x00C7,
         ClientHousingResidencePrivacyLevel = 0x00C9,
