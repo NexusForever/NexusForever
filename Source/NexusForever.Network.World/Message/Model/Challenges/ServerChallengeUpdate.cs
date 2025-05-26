@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model
         public class ActiveChallenge : IWritable
         {
             public uint ChallengeId { get; set; }
-            public uint ChallengeType { get; set; }
+            public ChallengeType Type { get; set; }
             public uint Field_8 { get; set; }
             public uint Field_C { get; set; }
             public uint Field_10 { get; set; }
@@ -34,7 +34,7 @@ namespace NexusForever.Network.World.Message.Model
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(ChallengeId, 14u);
-                writer.Write(ChallengeType, 4u);
+                writer.Write(Type, 4u);
                 writer.Write(Field_8);
                 writer.Write(Field_C);
                 writer.Write(Field_10);
