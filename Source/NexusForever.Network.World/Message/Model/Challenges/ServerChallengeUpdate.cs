@@ -6,62 +6,62 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerChallengeUpdate)]
     public class ServerChallengeUpdate : IWritable
     {
-        public class ActiveChallenge : IWritable
+        public class Challenge : IWritable
         {
             public uint ChallengeId { get; set; }
             public ChallengeType Type { get; set; }
-            public uint Field_8 { get; set; }
-            public uint Field_C { get; set; }
-            public uint Field_10 { get; set; }
+            public uint TargetGroupId { get; set; } // See tbl targetGroup
+            public uint QualifyCount { get; set; }
+            public uint QualityTotal { get; set; }
             public uint CurrentCount { get; set; }
-            public uint TotalCount { get; set; }
+            public uint GoalCount { get; set; }
             public uint ObjectiveCompletion { get; set; } // Sometimes a number, sometimes bit flags. Depends on challege.challengeFlags in tbl
-            public uint MaxAchievedChallengeTier { get; set; }
-            public uint LastRewardTierCompleted { get; set; }
+            public uint CurrentTier { get; set; }
+            public uint LastRewardTier { get; set; }
             public uint CompletionCount { get; set; }
             public bool Unlocked { get; set; }
-            public bool Active { get; set; }
+            public bool Activated { get; set; }
             public bool OnCooldown { get; set; }
-            public bool HasLeftArea { get; set; }
-            public uint TimeRemaining { get; set; }
-            public uint DurationMs { get; set; }
-            public uint CooldownRemaining { get; set; }
-            public uint CooldownDurationMs { get; set; }
-            public uint LeftAreaTimeRemaining { get; set; }
-            public uint LeftAreaTimeoutMs { get; set; }
-            public uint[] ChallengeTierGoalCount { get; set; } = new uint[3];
+            public bool LeftArea { get; set; }
+            public uint TimeActivatedDt { get; set; }
+            public uint TimeTotalActive { get; set; } // varies, most commonly 5 minutes
+            public uint TimeCooldownDt { get; set; }
+            public uint TimeTotalCooldown { get; set; } // typically 30 minutes
+            public uint TimeAreaFailDt { get; set; }
+            public uint TimeTotalAreaFail { get; set; } // typically 10 seconds
+            public uint[] TierGoalCount { get; set; } = new uint[3];
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(ChallengeId, 14u);
                 writer.Write(Type, 4u);
-                writer.Write(Field_8);
-                writer.Write(Field_C);
-                writer.Write(Field_10);
+                writer.Write(TargetGroupId);
+                writer.Write(QualifyCount);
+                writer.Write(QualityTotal);
                 writer.Write(CurrentCount);
-                writer.Write(TotalCount);
+                writer.Write(GoalCount);
                 writer.Write(ObjectiveCompletion);
-                writer.Write(MaxAchievedChallengeTier);
-                writer.Write(LastRewardTierCompleted);
+                writer.Write(CurrentTier);
+                writer.Write(LastRewardTier);
                 writer.Write(CompletionCount);
                 writer.Write(Unlocked);
-                writer.Write(Active);
+                writer.Write(Activated);
                 writer.Write(OnCooldown);
-                writer.Write(HasLeftArea);
-                writer.Write(TimeRemaining);
-                writer.Write(DurationMs);
-                writer.Write(CooldownRemaining);
-                writer.Write(CooldownDurationMs);
-                writer.Write(LeftAreaTimeRemaining);
-                writer.Write(LeftAreaTimeoutMs);
-                foreach (var tier in ChallengeTierGoalCount)
+                writer.Write(LeftArea);
+                writer.Write(TimeActivatedDt);
+                writer.Write(TimeTotalActive);
+                writer.Write(TimeCooldownDt);
+                writer.Write(TimeTotalCooldown);
+                writer.Write(TimeAreaFailDt);
+                writer.Write(TimeTotalAreaFail);
+                foreach (var tier in TierGoalCount)
                 {
                     writer.Write(tier);
                 }
             }
         }
 
-        List<ActiveChallenge> ActiveChallenges { get; set; } = [];
+        List<Challenge> ActiveChallenges { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

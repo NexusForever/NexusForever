@@ -8,13 +8,13 @@ namespace NexusForever.Network.World.Message.Model
     {
         public ushort ChallengeId { get; set; }
         public ChallengeResult Result { get; set; }
-        public int Value { get; set; } // Sometimes localizedStringId, sometimes tier value
+        public int Data { get; set; } // Sometimes localizedStringId, sometimes tier value
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(ChallengeId, 14u);
             writer.Write(Result);
-            writer.Write(Value);
+            writer.Write(Data);
         }
     }
 }

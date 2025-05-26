@@ -1,7 +1,7 @@
 ﻿namespace NexusForever.Game.Static.Setting
 {
     [Flags]
-    public enum OptionFlags
+    public enum CastingOptionFlags
     {
         Unknown                = 1,
         ButtonDownForAbilities = 2,

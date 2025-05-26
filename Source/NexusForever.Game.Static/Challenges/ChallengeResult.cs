@@ -7,10 +7,10 @@
         AbandonRemoveArrows = 0x3,
         TimerExpired        = 0x4,
         LeftArea            = 0x5,
-        GenericFail         = 0x6, // Uses Value as localizedStringId if set
+        GenericFail         = 0x6, // Uses Data as localizedStringId if set
         AreaRestriction     = 0x7,
-        Completed           = 0x8, // Uses Value as tier value, 0 indexed
-        TierAchieved        = 0x9, // Uses Value as tier value, 0 indexed
+        Completed           = 0x8, // Uses Data as tier value, 0 indexed
+        TierAchieved        = 0x9, // Uses Data as tier value, 0 indexed
         TypeAlreadyActive   = 0xA,
         CooldownActive      = 0xB,
         LeftAreaWarning     = 0xC,
