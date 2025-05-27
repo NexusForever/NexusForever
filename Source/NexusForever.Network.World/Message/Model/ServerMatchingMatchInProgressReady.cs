@@ -9,14 +9,14 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerMatchingMatchInProgressReady : IWritable
     {
         public Game.Static.Matching.MatchType MatchType { get; set; }
-        public uint UnacceptedAllies { get; set; }
-        public uint AcceptedAllies { get; set; }
+        public uint PendingAllies { get; set; }
+        public uint CurrentAllies { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(MatchType, 5u);
-            writer.Write(UnacceptedAllies);
-            writer.Write(AcceptedAllies);
+            writer.Write(PendingAllies);
+            writer.Write(CurrentAllies);
         }
     }
 }

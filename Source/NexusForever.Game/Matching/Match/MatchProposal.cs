@@ -137,8 +137,8 @@ namespace NexusForever.Game.Matching.Match
                 message = new ServerMatchingMatchInProgressReady()
                 {
                     MatchType    = MatchingQueueGroup.MatchType,
-                    AcceptedAllies  = allyTeam.MemberCount, // Needs concept of total invited allies, accepted allies, and unaccepted allies
-                    UnacceptedAllies = 0, // Related to the above
+                    CurrentAllies  = allyTeam.MemberCount, // Needs concept of total invited allies, accepted allies, and unaccepted allies
+                    PendingAllies = 0, // Related to the above
                 };
             }
             else
@@ -146,8 +146,8 @@ namespace NexusForever.Game.Matching.Match
                 message = new ServerMatchingMatchReady()
                 {
                     MatchType    = MatchingQueueGroup.MatchType,
-                    UnacceptedAllies  = allyTeam.MemberCount, // Needs works, as above
-                    UnacceptedEnemies = enemyTeam?.MemberCount ?? 0u, // Needs works, as above
+                    PendingAllies  = allyTeam.MemberCount, // Needs works, as above
+                    PendingEnemies = enemyTeam?.MemberCount ?? 0u, // Needs works, as above
                 };
             }
 

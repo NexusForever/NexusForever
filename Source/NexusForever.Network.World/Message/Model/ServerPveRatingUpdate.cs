@@ -11,7 +11,7 @@ namespace NexusForever.Network.World.Message.Model
         public class PveRating : IWritable
         {
             public uint Category { get; set; } // similar to ServerPvpRatingUpdate, not sure what the categories are
-            MatchingGameRatingType Type { get; set; }
+            public MatchingGameRatingType Type { get; set; }
             public uint Unknown1 { get; set; }
             public uint Unknown2 { get; set; }
             public uint Unknown3 { get; set; }

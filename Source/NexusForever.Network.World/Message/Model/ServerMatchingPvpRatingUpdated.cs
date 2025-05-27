@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
         public uint Wins { get; set; }
         public uint Losses { get; set; }
         public uint Draws { get; set; }
-        MatchingGameRatingType Type { get; set; }
+        public MatchingGameRatingType Type { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
