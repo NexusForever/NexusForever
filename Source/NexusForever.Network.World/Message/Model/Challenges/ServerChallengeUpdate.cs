@@ -61,7 +61,7 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        List<Challenge> ActiveChallenges { get; set; } = [];
+        public List<Challenge> ActiveChallenges { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
