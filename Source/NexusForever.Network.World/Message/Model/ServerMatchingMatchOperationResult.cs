@@ -3,7 +3,7 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    // If MatchQueueRsult is that personal or global surrender cooldown is active, sends the WaitTime
+    // If MatchQueueRsult is PersonalSurrenderCooldown or GlobalSurrenderCooldown, uses the WaitTime
     [Message(GameMessageOpcode.ServerMatchingMatchOperationResult)]
     public class ServerMatchingMatchOperationResult : IWritable
     {

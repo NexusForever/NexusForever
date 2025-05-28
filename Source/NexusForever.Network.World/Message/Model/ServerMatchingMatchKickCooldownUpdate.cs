@@ -3,8 +3,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    // If MatchQueueResult is GlobalKickCooldown, no wait time is sent
-    // If MatchQueueResult is that personal or global kick cooldown is active, sends the WaitTime
+    // If MatchQueueResult is GlobalKickCooldown, no wait time is needs to be sent as the message does not use the field
+    // If MatchQueueResult is that PersonalKickCooldown, uses the WaitTime to update client views
     [Message(GameMessageOpcode.ServerMatchingMatchKickCooldownUpdate)]
     public class ServerMatchingMatchKickCooldownUpdate : IWritable
     {

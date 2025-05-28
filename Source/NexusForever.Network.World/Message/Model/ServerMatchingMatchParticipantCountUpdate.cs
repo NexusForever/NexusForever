@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    // Increments the AcceptedAlly count and decrements the UnacceptedAlly count if true
-    // Increments the AcceptedEnemy count and decrements the UnacceptedEnemy count if false
+    // Increments the CurrentAlly count and decrements the PendingAlly count if true
+    // Increments the CurrentEnemy count and decrements the PendingEnemy count if false
     [Message(GameMessageOpcode.ServerMatchingMatchParticipantCountUpdate)]
     public class ServerMatchingMatchParticipantCountUpdate : IWritable
     {

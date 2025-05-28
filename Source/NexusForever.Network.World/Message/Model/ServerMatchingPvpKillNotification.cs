@@ -49,7 +49,7 @@ namespace NexusForever.Network.World.Message.Model
         {
             if ( (KillerPlayer == null && KillerCreature == null) || (VictimPlayer == null && VictimCreature == null) )
             {
-                throw new InvalidOperationException("Both a Killer and Victim must created.");
+                throw new InvalidOperationException("Both a Killer and Victim must be created.");
             }
 
             writer.Write(KillerType, 2u);

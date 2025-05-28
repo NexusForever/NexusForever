@@ -2,7 +2,7 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    // Updates the wait type for a specific match type
+    // Updates the wait time for a specific match type
     [Message(GameMessageOpcode.ServerMatchingAverageWaitTimeUpdate)]
     public class ServerMatchingAverageWaitTimeUpdate : IWritable
     {
