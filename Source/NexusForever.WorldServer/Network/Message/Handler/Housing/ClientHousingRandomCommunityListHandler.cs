@@ -1,11 +1,12 @@
-﻿using NexusForever.Game.Abstract;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingRandomCommunityListHandler : IMessageHandler<IWorldSession, ClientHousingRandomCommunityList>
+    public class ClientHousingRandomCommunityListHandler : IMessageHandler<IWorldSession, ClientHousingRequestRandomCommunityList>
     {
         #region Dependency Injection
 
@@ -22,17 +23,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientHousingRandomCommunityList _)
+        public void HandleMessage(IWorldSession session, ClientHousingRequestRandomCommunityList _)
         {
             var serverHousingRandomCommunityList = new ServerHousingRandomCommunityList();
             foreach (IPublicCommunity community in globalResidenceManager.GetRandomVisitableCommunities())
             {
                 serverHousingRandomCommunityList.Communities.Add(new ServerHousingRandomCommunityList.Community
                 {
-                    RealmId        = realmContext.RealmId,
-                    NeighborhoodId = community.NeighbourhoodId,
-                    Owner          = community.Owner,
-                    Name           = community.Name
+                    GuildIdentity   = community.GuildIdentity.ToNetworkIdentity(),
+                    CommunityLeader = community.Owner,
+                    Name            = community.Name
                 });
             }
 

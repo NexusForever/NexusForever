@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.Game.Housing
 {
@@ -63,14 +63,14 @@ namespace NexusForever.Game.Housing
             {
                 ResidencePrivacyLevel.Public        => ServerHousingBasics.ResidencePrivacyLevelFlags.Public,
                 ResidencePrivacyLevel.Private       => ServerHousingBasics.ResidencePrivacyLevelFlags.Private,
-                ResidencePrivacyLevel.NeighborsOnly => ServerHousingBasics.ResidencePrivacyLevelFlags.NeighborsOnly,
+                ResidencePrivacyLevel.NeighboursOnly => ServerHousingBasics.ResidencePrivacyLevelFlags.NeighboursOnly,
                 ResidencePrivacyLevel.RoommatesOnly => ServerHousingBasics.ResidencePrivacyLevelFlags.RoommatesOnly,
                 _                                   => throw new NotImplementedException()
             };
 
             owner.Session.EnqueueMessageEncrypted(new ServerHousingBasics
             {
-                ResidenceId     = Residence?.Id ?? 0ul,
+                ResidenceId     = Residence?.Identity.Id ?? 0ul,
                 /*NeighbourhoodId = GuildManager.GetGuild<Community>(GuildType.Community)?.Id ?? 0ul,*/
                 PrivacyLevel    = flags
             });

@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
@@ -6,11 +7,11 @@ using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingPlacedResidencesListHandler : IMessageHandler<IWorldSession, ClientHousingPlacedResidencesList>
+    public class ClientHousingPlacedResidencesListHandler : IMessageHandler<IWorldSession, ClientHousingRequestCommunityPlacedResidencesList>
     {
         #region Dependency Injection
 
@@ -27,7 +28,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientHousingPlacedResidencesList _)
+        public void HandleMessage(IWorldSession session, ClientHousingRequestCommunityPlacedResidencesList _)
         {
             if (session.Player.Map is not IResidenceMapInstance)
                 throw new InvalidPacketValueException();
@@ -40,13 +41,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             foreach (IResidenceChild residenceChild in community.Residence.GetChildren())
             {
                 string owner = null;
-                if (residenceChild.Residence.OwnerId.HasValue)
-                    owner = characterManager.GetCharacter(residenceChild.Residence.OwnerId.Value)?.Name;
+                if (residenceChild.Residence.OwnerIdentity != null)
+                    owner = characterManager.GetCharacter(residenceChild.Residence.OwnerIdentity.Id)?.Name;
 
                 housingPlacedResidencesList.Residences.Add(new ServerHousingPlacedResidencesList.Residence
                 {
-                    RealmId       = realmContext.RealmId,
-                    ResidenceId   = residenceChild.Residence.Id,
+                    ResidenceIdentity = residenceChild.Residence.Identity.ToNetworkIdentity(),
                     PlayerName    = owner ?? "",
                     PropertyIndex = (uint)residenceChild.Residence.PropertyInfoId - 100
                 });

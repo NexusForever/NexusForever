@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 
 namespace NexusForever.Game.Map.Lock
 {
     public class ResidenceMapLock : MapLock, IResidenceMapLock
     {
-        public ulong ResidenceId { get; private set; }
+        public Identity ResidenceIdentity { get; private set; }
 
         #region Dependency Injection
 
@@ -22,13 +23,13 @@ namespace NexusForever.Game.Map.Lock
         /// <summary>
         /// Initialise residence information for <see cref="IResidenceMapLock"/>.
         /// </summary>
-        public void Initialise(ulong residenceId)
+        public void Initialise(Abstract.Identity residenceIdentity)
         {
-            if (ResidenceId != 0)
+            if (ResidenceIdentity != null)
                 throw new InvalidOperationException();
 
-            ResidenceId = residenceId;
-            log.LogTrace($"Set residence id {residenceId} for {InstanceId}");
+            ResidenceIdentity = residenceIdentity;
+            log.LogTrace($"Set residence id {residenceIdentity.RealmId}:{residenceIdentity.Id} for {InstanceId}");
         }
     }
 }

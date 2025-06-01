@@ -5,8 +5,11 @@ namespace NexusForever.Database.Character.Model
     public class ResidenceModel
     {
         public ulong Id { get; set; }
+        public uint RealmId { get; set; }
         public ulong? OwnerId { get; set; }
+        public uint? OwnerRealmId { get; set; }
         public ulong? GuildOwnerId { get; set; }
+        public uint? GuildOwnerRealmId { get; set; }
         public byte PropertyInfoId { get; set; }
         public string Name { get; set; }
         public byte PrivacyLevel { get; set; }

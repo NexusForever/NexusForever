@@ -5,11 +5,11 @@ using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Map;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingReturnHandler : IMessageHandler<IWorldSession, ClientHousingReturn>
+    public class ClientHousingReturnHandler : IMessageHandler<IWorldSession, ClientHousingTakeMeHome>
     {
         #region Dependency Injection
 
@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientHousingReturn _)
+        public void HandleMessage(IWorldSession session, ClientHousingTakeMeHome _)
         {
             // housing return button will only be visible on other residence maps
             IResidence residence = session.Player.ResidenceManager.Residence;

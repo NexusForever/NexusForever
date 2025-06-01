@@ -3,11 +3,11 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Item
 {
-    public class ClientItemUseDecorHandler : IMessageHandler<IWorldSession, ClientItemUseDecor>
+    public class ClientItemUseDecorHandler : IMessageHandler<IWorldSession, ClientHousingAddItemToCrate>
     {
         #region Dependency Injection
 
@@ -21,9 +21,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Item
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientItemUseDecor itemUseDecor)
+        public void HandleMessage(IWorldSession session, ClientHousingAddItemToCrate addItemToCrate)
         {
-            IItem item = session.Player.Inventory.GetItem(itemUseDecor.ItemGuid);
+            IItem item = session.Player.Inventory.GetItem(addItemToCrate.ItemGuid);
             if (item == null)
                 throw new InvalidPacketValueException();
 

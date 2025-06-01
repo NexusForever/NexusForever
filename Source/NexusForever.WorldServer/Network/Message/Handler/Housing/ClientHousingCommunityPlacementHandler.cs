@@ -9,11 +9,11 @@ using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingCommunityPlacementHandler : IMessageHandler<IWorldSession, ClientHousingCommunityPlacement>
+    public class ClientHousingCommunityPlacementHandler : IMessageHandler<IWorldSession, ClientHousingRequestCommunityPlacement>
     {
         #region Dependency Injection
 
@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientHousingCommunityPlacement housingCommunityPlacement)
+        public void HandleMessage(IWorldSession session, ClientHousingRequestCommunityPlacement housingCommunityPlacement)
         {
             if (session.Player.Map is not IResidenceMapInstance)
                 throw new InvalidPacketValueException();
@@ -46,7 +46,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
             if (residence.Parent != null)
             {
-                if (community.Residence.GetChild(session.Player.CharacterId) == null)
+                if (community.Residence.GetChild(session.Player.Identity) == null)
                     throw new InvalidPacketValueException();
 
                 // for residences on a community just remove the residence

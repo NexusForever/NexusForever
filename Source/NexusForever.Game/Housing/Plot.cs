@@ -64,7 +64,7 @@ namespace NexusForever.Game.Housing
 
         private HousingPlugFacing plugFacing;
 
-        public byte BuildState
+        public BuildState BuildState
         {
             get => buildState;
             set
@@ -74,7 +74,7 @@ namespace NexusForever.Game.Housing
             }
         }
 
-        private byte buildState;
+        private BuildState buildState;
 
         private PlotSaveMask saveMask;
 
@@ -90,7 +90,7 @@ namespace NexusForever.Game.Housing
             plotInfoEntry = GameTableManager.Instance.HousingPlotInfo.GetEntry(model.PlotInfoId);
             plugItemEntry = GameTableManager.Instance.HousingPlugItem.GetEntry(model.PlugItemId);
             plugFacing    = (HousingPlugFacing)model.PlugFacing;
-            buildState    = model.BuildState;
+            buildState    = (BuildState)model.BuildState;
 
             saveMask = PlotSaveMask.None;
         }
@@ -129,7 +129,7 @@ namespace NexusForever.Game.Housing
                     PlotInfoId = (ushort)PlotInfoEntry.Id,
                     PlugItemId = (ushort)(PlugItemEntry?.Id ?? 0u),
                     PlugFacing = (byte)PlugFacing,
-                    BuildState = BuildState
+                    BuildState = (byte)BuildState
                 });
             }
             else
@@ -162,7 +162,7 @@ namespace NexusForever.Game.Housing
 
                 if ((saveMask & PlotSaveMask.BuildState) != 0)
                 {
-                    model.BuildState = BuildState;
+                    model.BuildState = (byte)BuildState;
                     entity.Property(p => p.BuildState).IsModified = true;
                 }
             }
@@ -174,7 +174,7 @@ namespace NexusForever.Game.Housing
         {
             // TODO
             PlugItemEntry  = GameTableManager.Instance.HousingPlugItem.GetEntry(plugItemId);
-            BuildState = 4;
+            BuildState = BuildState.InProgress;
         }
     }
 }

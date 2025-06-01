@@ -1,11 +1,12 @@
-﻿using NexusForever.Game.Abstract;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingRandomResidenceListHandler : IMessageHandler<IWorldSession, ClientHousingRandomResidenceList>
+    public class ClientHousingRandomResidenceListHandler : IMessageHandler<IWorldSession, ClientHousingRequestRandomResidenceList>
     {
         #region Dependency Injection
 
@@ -22,15 +23,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientHousingRandomResidenceList _)
+        public void HandleMessage(IWorldSession session, ClientHousingRequestRandomResidenceList _)
         {
             var serverHousingRandomResidenceList = new ServerHousingRandomResidenceList();
             foreach (IPublicResidence residence in globalResidenceManager.GetRandomVisitableResidences())
             {
                 serverHousingRandomResidenceList.Residences.Add(new ServerHousingRandomResidenceList.Residence
                 {
-                    RealmId     = realmContext.RealmId,
-                    ResidenceId = residence.ResidenceId,
+                    ResidenceIdentity = residence.Identity.ToNetworkIdentity(),
                     Owner       = residence.Owner,
                     Name        = residence.Name
                 });

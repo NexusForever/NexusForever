@@ -12,7 +12,7 @@ namespace NexusForever.Game.Abstract.Housing
         HousingPlotInfoEntry PlotInfoEntry { get; set; }
         HousingPlugItemEntry PlugItemEntry { get; set; }
         HousingPlugFacing PlugFacing { get; set; }
-        byte BuildState { get; set; }
+        BuildState BuildState { get; set; }
         
         IPlugEntity PlugEntity { get; set; }
         

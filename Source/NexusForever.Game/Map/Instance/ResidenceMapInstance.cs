@@ -11,9 +11,8 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
-using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Abilities;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Housing;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
 using NLog;
@@ -27,7 +26,7 @@ namespace NexusForever.Game.Map.Instance
         // housing maps have unlimited vision range.
         public override float? VisionRange { get; protected set; } = null;
 
-        private readonly Dictionary<ulong, IResidence> residences = new();
+        private readonly Dictionary<Abstract.Identity, IResidence> residences = new();
 
         #region Dependency Injection
 
@@ -75,7 +74,7 @@ namespace NexusForever.Game.Map.Instance
 
         private void AddResidence(IResidence residence)
         {
-            residences.Add(residence.Id, residence);
+            residences.Add(residence.Identity, residence);
             residence.Map = this;
 
             foreach (IPlot plot in residence.GetPlots()
@@ -97,7 +96,7 @@ namespace NexusForever.Game.Map.Instance
 
         private void RemoveResidence(IResidence residence)
         {
-            residences.Remove(residence.Id);
+            residences.Remove(residence.Identity);
             residence.Map = null;
 
             foreach (IPlot plot in residence.GetPlots()
@@ -152,39 +151,39 @@ namespace NexusForever.Game.Map.Instance
 
         private void SendResidences(IPlayer player = null)
         {
-            var housingProperties = new ServerHousingProperties();
+            var housingResidences = new ServerHousingResidences();
             foreach (IResidence residence in residences.Values)
-                housingProperties.Residences.Add(residence.Build());
+                housingResidences.Residences.Add(residence.Build());
 
             if (player != null)
-                player.Session.EnqueueMessageEncrypted(housingProperties);
+                player.Session.EnqueueMessageEncrypted(housingResidences);
             else
-                EnqueueToAll(housingProperties);
+                EnqueueToAll(housingResidences);
         }
 
         private void SendResidence(IResidence residence, IPlayer player = null)
         {
-            var housingProperties = new ServerHousingProperties();
-            housingProperties.Residences.Add(residence.Build());
+            var housingResidences = new ServerHousingResidences();
+            housingResidences.Residences.Add(residence.Build());
 
             if (player != null)
-                player.Session.EnqueueMessageEncrypted(housingProperties);
+                player.Session.EnqueueMessageEncrypted(housingResidences);
             else
-                EnqueueToAll(housingProperties);
+                EnqueueToAll(housingResidences);
         }
 
         private void SendResidenceRemoved(IResidence residence, IPlayer player = null)
         {
-            var housingProperties = new ServerHousingProperties();
+            var housingResidences = new ServerHousingResidences();
 
-            ServerHousingProperties.Residence residenceInfo = residence.Build();
+            ServerHousingResidences.Residence residenceInfo = residence.Build();
             residenceInfo.ResidenceDeleted = true;
-            housingProperties.Residences.Add(residenceInfo);
+            housingResidences.Residences.Add(residenceInfo);
 
             if (player != null)
-                player.Session.EnqueueMessageEncrypted(housingProperties);
+                player.Session.EnqueueMessageEncrypted(housingResidences);
             else
-                EnqueueToAll(housingProperties);
+                EnqueueToAll(housingResidences);
         }
 
         private void SendResidencePlots(IPlayer player = null)
@@ -197,8 +196,7 @@ namespace NexusForever.Game.Map.Instance
         {
             var housingPlots = new ServerHousingPlots
             {
-                RealmId     = realmContext.RealmId,
-                ResidenceId = residence.Id
+                ResidenceIdentity = residence.Identity.ToNetworkIdentity()
             };
 
             foreach (IPlot plot in residence.GetPlots())
@@ -232,7 +230,7 @@ namespace NexusForever.Game.Map.Instance
         {
             var residenceDecor = new ServerHousingResidenceDecor
             {
-                Operation = 0
+                MessagesRemaining = 0
             };
 
             IDecor[] decors = residence.GetDecor().ToArray();
@@ -289,9 +287,9 @@ namespace NexusForever.Game.Map.Instance
         /// <summary>
         /// Crate all placed <see cref="IDecor"/>.
         /// </summary>
-        public void CrateAllDecor(TargetResidence targetResidence, IPlayer player)
+        public void CrateAllDecor(Abstract.Identity targetResidence, IPlayer player)
         {
-            if (!residences.TryGetValue(targetResidence.ResidenceId, out IResidence residence)
+            if (!residences.TryGetValue(targetResidence, out IResidence residence)
                 || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
@@ -310,22 +308,24 @@ namespace NexusForever.Game.Map.Instance
         /// </summary>
         public void DecorUpdate(IPlayer player, ClientHousingDecorUpdate housingDecorUpdate)
         {
-            foreach (DecorInfo update in housingDecorUpdate.DecorUpdates)
+            foreach (DecorUpdate update in housingDecorUpdate.DecorUpdates)
             {
-                if (!residences.TryGetValue(update.TargetResidence.ResidenceId, out IResidence residence)
+                // TODO: decide how to use the UseServiceToken value in DecorUpdate
+
+                if (!residences.TryGetValue(update.DecorInfo.TargetResidence.ToGameIdentity(), out IResidence residence)
                     || !residence.CanModifyResidence(player))
                     throw new InvalidPacketValueException();
 
                 switch (housingDecorUpdate.Operation)
                 {
                     case DecorUpdateOperation.Create:
-                        DecorCreate(residence, player, update);
+                        DecorCreate(residence, player, update.DecorInfo);
                         break;
-                    case DecorUpdateOperation.Move:
-                        DecorMove(residence, player, update);
+                    case DecorUpdateOperation.Change:
+                        DecorMove(residence, player, update.DecorInfo);
                         break;
                     case DecorUpdateOperation.Delete:
-                        DecorDelete(residence, update);
+                        DecorDelete(residence, update.DecorInfo);
                         break;
                     default:
                         throw new InvalidPacketValueException();
@@ -394,7 +394,7 @@ namespace NexusForever.Game.Map.Instance
 
             EnqueueToAll(new ServerHousingResidenceDecor
             {
-                Operation = 0,
+                MessagesRemaining = 0,
                 DecorData = new List<ServerHousingResidenceDecor.Decor>
                 {
                      decor.Build()
@@ -462,8 +462,7 @@ namespace NexusForever.Game.Map.Instance
             {
                 player.Session.EnqueueMessageEncrypted(new ServerHousingResult
                 {
-                    RealmId     = realmContext.RealmId,
-                    ResidenceId = residence.Id,
+                    ResidenceIdentity = residence.Identity.ToNetworkIdentity(),
                     PlayerName  = player.Name,
                     Result      = result
                 });
@@ -471,7 +470,7 @@ namespace NexusForever.Game.Map.Instance
 
             EnqueueToAll(new ServerHousingResidenceDecor
             {
-                Operation = 0,
+                MessagesRemaining = 0,
                 DecorData = new List<ServerHousingResidenceDecor.Decor>
                 {
                     decor.Build()
@@ -504,10 +503,9 @@ namespace NexusForever.Game.Map.Instance
             var residenceDecor = new ServerHousingResidenceDecor();
             residenceDecor.DecorData.Add(new ServerHousingResidenceDecor.Decor
             {
-                RealmId     = realmContext.RealmId,
-                ResidenceId = residence.Id,
+                ResidenceIdentity = residence.Identity.ToNetworkIdentity(),
                 DecorId     = decor.DecorId,
-                DecorInfoId = 0
+                HousingDecorInfoId = 0
             });
 
             EnqueueToAll(residenceDecor);
@@ -560,9 +558,9 @@ namespace NexusForever.Game.Map.Instance
         /// <summary>
         /// Rename <see cref="IResidence"/> with supplied name.
         /// </summary>
-        public void RenameResidence(IPlayer player, TargetResidence targetResidence, string name)
+        public void RenameResidence(IPlayer player, Abstract.Identity targetResidence, string name)
         {
-            if (!residences.TryGetValue(targetResidence.ResidenceId, out IResidence residence)
+            if (!residences.TryGetValue(targetResidence, out IResidence residence)
                 || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
@@ -581,9 +579,9 @@ namespace NexusForever.Game.Map.Instance
         /// <summary>
         /// Remodel <see cref="IResidence"/>.
         /// </summary>
-        public void Remodel(TargetResidence targetResidence, IPlayer player, ClientHousingRemodel housingRemodel)
+        public void Remodel(Abstract.Identity targetResidence, IPlayer player, ClientHousingRemodel housingRemodel)
         {
-            if (!residences.TryGetValue(targetResidence.ResidenceId, out IResidence residence)
+            if (!residences.TryGetValue(targetResidence, out IResidence residence)
                 || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
@@ -608,15 +606,15 @@ namespace NexusForever.Game.Map.Instance
         /// <summary>
         /// UpdateResidenceFlags <see cref="IResidence"/>.
         /// </summary>
-        public void UpdateResidenceFlags(TargetResidence targetResidence, IPlayer player, ClientHousingFlagsUpdate flagsUpdate)
+        public void UpdateResidenceFlags(Abstract.Identity targetResidence, IPlayer player, ClientHousingFlagsUpdate flagsUpdate)
         {
-            if (!residences.TryGetValue(targetResidence.ResidenceId, out IResidence residence)
+            if (!residences.TryGetValue(targetResidence, out IResidence residence)
                 || !residence.CanModifyResidence(player))
                 throw new InvalidPacketValueException();
 
             residence.Flags           = flagsUpdate.Flags;
-            residence.ResourceSharing = flagsUpdate.ResourceSharing;
-            residence.GardenSharing   = flagsUpdate.GardenSharing;
+            residence.ResourceSharing = flagsUpdate.NeighbourHarvestSplit;
+            residence.GardenSharing   = flagsUpdate.NeighbourGardenSplit;
 
             SendResidences();
         }

@@ -41,7 +41,7 @@ namespace NexusForever.Game.Map.Instance
         public override GenericError? CanEnter(IPlayer entity, IMapPosition position)
         {
             if (position.Info.MapLock is IResidenceMapLock residenceMapLock
-                && globalResidenceManager.GetResidence(residenceMapLock.ResidenceId) == null)
+                && globalResidenceManager.GetResidence(residenceMapLock.ResidenceIdentity) == null)
                 return GenericError.InstanceNotFound;
 
             return null;
@@ -71,7 +71,7 @@ namespace NexusForever.Game.Map.Instance
 
         protected override IResidenceMapInstance CreateInstance(IPlayer player, IMapLock mapLock)
         {
-            IResidence residence = globalResidenceManager.GetResidence((mapLock as IResidenceMapLock).ResidenceId);
+            IResidence residence = globalResidenceManager.GetResidence((mapLock as IResidenceMapLock).ResidenceIdentity);
 
             IResidenceMapInstance residenceMapInstance = instanceFactory.Resolve();
             residenceMapInstance.Initialise(Entry, mapLock);

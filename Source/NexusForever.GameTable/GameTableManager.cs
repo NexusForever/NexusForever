@@ -244,7 +244,7 @@ namespace NexusForever.GameTable
         public GameTable<HousingDecorTypeEntry> HousingDecorType { get; private set; }
         public GameTable<HousingMannequinPoseEntry> HousingMannequinPose { get; private set; }
         public GameTable<HousingMapInfoEntry> HousingMapInfo { get; private set; }
-        public GameTable<HousingNeighborhoodInfoEntry> HousingNeighborhoodInfo { get; private set; }
+        public GameTable<HousingNeighbourhoodInfoEntry> HousingNeighbourhoodInfo { get; private set; }
 
         [GameData]
         public GameTable<HousingPlotInfoEntry> HousingPlotInfo { get; private set; }

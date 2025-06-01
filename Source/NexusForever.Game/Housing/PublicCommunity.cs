@@ -4,7 +4,7 @@ namespace NexusForever.Game.Housing
 {
     public class PublicCommunity : IPublicCommunity
     {
-        public ulong NeighbourhoodId { get; init; }
+        public Abstract.Identity GuildIdentity { get; init; }
         public string Owner { get; init; }
         public string Name { get; init; }
     }

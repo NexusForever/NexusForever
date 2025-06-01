@@ -41,9 +41,9 @@ namespace NexusForever.Game.Abstract.Housing
         IResidence CreateCommunity(ICommunity community);
 
         /// <summary>
-        /// Return existing <see cref="IResidence"/> by supplied residence id.
+        /// Return existing <see cref="IResidence"/> by supplied residence identity.
         /// </summary>
-        IResidence GetResidence(ulong residenceId);
+        IResidence GetResidence(Identity identity);
 
         /// <summary>
         /// Return existing <see cref="IResidence"/> by supplied owner name.
@@ -51,9 +51,9 @@ namespace NexusForever.Game.Abstract.Housing
         IResidence GetResidenceByOwner(string name);
 
         /// <summary>
-        /// Return existing <see cref="IResidence"/> by supplied owner id.
+        /// Return existing <see cref="IResidence"/> by supplied owner identity.
         /// </summary>
-        IResidence GetResidenceByOwner(ulong characterId);
+        IResidence GetResidenceByOwner(Identity identity);
 
         /// <summary>
         /// Return existing <see cref="IResidence"/> by supplied community name.
@@ -61,9 +61,9 @@ namespace NexusForever.Game.Abstract.Housing
         IResidence GetCommunityByOwner(string name);
 
         /// <summary>
-        /// return existing <see cref="IResidence"/> by supplied owner id.
+        /// return existing <see cref="IResidence"/> by supplied community identity.
         /// </summary>
-        IResidence GetCommunityByOwner(ulong communityId);
+        IResidence GetCommunityByOwner(Identity identity);
 
         /// <summary>
         /// Remove an existing <see cref="IResidence"/> by supplied character name.
@@ -85,12 +85,12 @@ namespace NexusForever.Game.Abstract.Housing
         /// <summary>
         /// Deregister residence as visitable, this prevents anyone from visiting through the random property feature.
         /// </summary>
-        void DeregisterResidenceVists(ulong residenceId);
+        void DeregisterResidenceVists(Identity residenceIdentity);
 
         /// <summary>
         /// Deregister community as visitable, this prevents anyone from visiting through the random property feature.
         /// </summary>
-        void DeregisterCommunityVists(ulong residenceId);
+        void DeregisterCommunityVists(Identity residenceIdentity);
 
         /// <summary>
         /// Return 50 random registered visitable residences.

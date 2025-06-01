@@ -5,16 +5,16 @@ using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.Game.Abstract.Housing
 {
-    public interface IResidence : IDatabaseCharacter, INetworkBuildable<ServerHousingProperties.Residence>
+    public interface IResidence : IDatabaseCharacter, INetworkBuildable<ServerHousingResidences.Residence>
     {
-        ulong Id { get; }
+        Abstract.Identity Identity { get; }
         ResidenceType Type { get; }
-        ulong? OwnerId { get; }
-        ulong? GuildOwnerId { get; set; }
+        Abstract.Identity? OwnerIdentity { get; }
+        Abstract.Identity? GuildOwnerIdentity { get; set; }
         PropertyInfoId PropertyInfoId { get; set; }
         string Name { get; set; }
         ResidencePrivacyLevel PrivacyLevel { get; set; }
@@ -69,7 +69,7 @@ namespace NexusForever.Game.Abstract.Housing
         /// <remarks>
         /// Only community residences will have child residences.
         /// </remarks>
-        IResidenceChild GetChild(ulong characterId);
+        IResidenceChild GetChild(Identity playerIdentity);
 
         /// <summary>
         /// Add child <see cref="IResidence"/> to parent <see cref="IResidence"/>.
