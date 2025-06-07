@@ -41,7 +41,7 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Return the average wait time for the supplied <see cref="Static.Matching.MatchType"/>.
         /// </summary>
-        public TimeSpan GetAdverageWaitTime(Static.Matching.MatchType matchType)
+        public TimeSpan GetAverageWaitTime(Static.Matching.MatchType matchType)
         {
             return matchingQueueTimes[matchType].Average;
         }

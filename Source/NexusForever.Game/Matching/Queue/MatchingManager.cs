@@ -251,7 +251,7 @@ namespace NexusForever.Game.Matching.Queue
             MatchingQueueResult? matchingResult = matchingQueueManager.CanQueue(matchingQueueProposal);
             if (matchingResult != null)
             {
-                matchingQueueProposal.Broadcast(new ServerMatchingQueueResult
+                matchingQueueProposal.Broadcast(new ServerMatchingQueueResultAnnounce
                 {
                     Result = matchingResult.Value
                 });

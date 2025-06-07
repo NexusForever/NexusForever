@@ -19,7 +19,7 @@ namespace NexusForever.Game.Social
         public ushort FromCharacterRealmId { get; set; }
         public string FromName { get; set; }
         public string FromRealm { get; set; }
-        public ChatPresenceState PresenceState { get; set; }
+        public AccountPresenceState PresenceState { get; set; }
         public string Text
         {
             get => builder.ToString();

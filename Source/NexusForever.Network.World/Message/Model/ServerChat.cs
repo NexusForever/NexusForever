@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model
         public TargetPlayerIdentity From { get; set; } = new();
         public string FromName { get; set; }
         public string FromRealm { get; set; }
-        public ChatPresenceState PresenceState { get; set; }
+        public AccountPresenceState PresenceState { get; set; }
 
         public string Text { get; set; }
         public List<ChatFormat> Formats { get; set; } = new();

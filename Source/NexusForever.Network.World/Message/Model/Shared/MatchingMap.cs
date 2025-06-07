@@ -5,7 +5,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
     public class MatchingMap
     {
         public Game.Static.Matching.MatchType MatchType { get; private set; }
-        public List<uint> Maps { get; } = [];
+        public List<uint> Maps { get; } = []; // MatchingGameMapIds
         public ushort MatchingGameTypeId { get; private set; }
         public MatchingQueueFlags QueueFlags { get; private set; }
 
