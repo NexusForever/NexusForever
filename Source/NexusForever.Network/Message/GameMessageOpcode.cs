@@ -89,6 +89,7 @@ namespace NexusForever.Network.Message
         ServerPublicEventTimeUpdate     = 0x0136,
         ServerPublicEventPersonalStatsUpdate = 0x0137,
         ServerPublicEventMapRegionUpdate = 0x0138,
+        ServerPublicEventResetObjectiveState = 0x013A,
         ServerPublicEventPersonalStatUpdate = 0x013B,
         ServerPveRatingUpdate           = 0x013C,
         ServerPvpRatingUpdate           = 0x0140,
