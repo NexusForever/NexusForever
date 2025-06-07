@@ -18,9 +18,9 @@ namespace NexusForever.Network.World.Message.Model.Shared
         }
 
         public PublicEventStatus Status { get; set; }
-        public uint ObjectiveData { get; set; } // Contents depends on objective type.
-                                                // For ActivateTargetGroupChecklist and TalkToChecklink, is a bitfield for objective completion
-                                                // For ContestedArea and CapturePoint, indicates team owning the objective
+        public uint ObjectiveData { get; set; } // Contents depends on objective type
+                                                // For ActivateTargetGroupChecklist and TalkToChecklist, is a bitfield for objective completion
+                                                // For ContestedArea and CapturePoint, is PublicEventTeamId indicating team owning the objective
         public uint DynamicMax { get; set; }
         public float Count { get; set; }
         public uint UnkState { get; set; }

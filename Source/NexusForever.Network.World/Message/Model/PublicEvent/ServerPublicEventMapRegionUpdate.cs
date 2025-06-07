@@ -4,7 +4,7 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model.PublicEvent
 {
-    // Unlike LocationUpdate, only allows for adding/removing to PublicEventObjectives, not to the PublicEvent
+    // Unlike PublicEVentLocationUpdate, only allows for adding/removing to PublicEventObjectives, not to the PublicEvent
     [Message(GameMessageOpcode.ServerPublicEventMapRegionUpdate)]
     public class ServerPublicEventMapRegionUpdate : IWritable
     {

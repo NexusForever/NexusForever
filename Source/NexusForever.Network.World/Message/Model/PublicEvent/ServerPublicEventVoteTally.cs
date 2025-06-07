@@ -2,7 +2,7 @@
 
 namespace NexusForever.Network.World.Message.Model.PublicEvent
 {
-    // Fires whenever a group member selections an option during a public event vote.
+    // Fires whenever a group member selects an option during a public event vote.
     [Message(GameMessageOpcode.ServerPublicEventVoteTally)]
     public class ServerPublicEventVoteTally : IWritable
     {

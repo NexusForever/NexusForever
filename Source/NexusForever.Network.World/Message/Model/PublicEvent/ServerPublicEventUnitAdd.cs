@@ -3,7 +3,7 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.PublicEvent
 {
-    // Only for adding a unit to a public event or objective. Ignores remove operations if specified.
+    // Only for adding a unit to a PublicEvent or PublicEventObjective. Ignores remove operations if specified.
     [Message(GameMessageOpcode.ServerPublicEventUnitAdd)]
     public class ServerPublicEventUnitAdd : IWritable
     {

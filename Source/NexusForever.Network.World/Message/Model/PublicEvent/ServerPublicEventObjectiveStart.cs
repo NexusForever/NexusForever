@@ -2,7 +2,7 @@
 
 namespace NexusForever.Network.World.Message.Model.PublicEvent
 {
-    // Only used to trigger a UI event. Not seen in sniffs.
+    // Only used to trigger a UI event. Not seen in sniffs but perfectly usable
     [Message(GameMessageOpcode.ServerPublicEventObjectiveStart)]
     public class ServerPublicEventObjectiveStart : IWritable
     {

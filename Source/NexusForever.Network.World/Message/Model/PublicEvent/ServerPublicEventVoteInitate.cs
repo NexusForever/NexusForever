@@ -2,7 +2,7 @@
 
 namespace NexusForever.Network.World.Message.Model.PublicEvent
 {
-    // Player automatically has the right ability to vote on the event.
+    // Player automatically has the right to vote on the event when started this way.
     [Message(GameMessageOpcode.ServerPublicEventVoteInitate)]
     public class ServerPublicEventVoteInitate : IWritable
     {

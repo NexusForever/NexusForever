@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model.PublicEvent
 {
-    [Message(GameMessageOpcode.ServerPublicEventBombDroped)]
-    public class ServerPublicEventBombDroped : IWritable
+    [Message(GameMessageOpcode.ServerPublicEventBombDropped)]
+    public class ServerPublicEventBombDropped : IWritable
     {
         public uint CarrierUnitId { get; set; }
         public bool Unknown { get; set; }

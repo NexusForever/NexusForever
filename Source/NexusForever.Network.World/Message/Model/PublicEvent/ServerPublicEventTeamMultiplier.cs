@@ -2,8 +2,9 @@
 
 namespace NexusForever.Network.World.Message.Model.PublicEvent
 {
-    [Message(GameMessageOpcode.ServerPublicEventObjectiveTeamMultiplier)]
-    public class ServerPublicEventObjectiveTeamMultiplier : IWritable
+    // Used to scale the required amount for objectives of an event
+    [Message(GameMessageOpcode.ServerPublicEventTeamMultiplier)]
+    public class ServerPublicEventTeamMultiplier : IWritable
     {
         public uint EventId { get; set; }
         public uint TeamMultiplier { get; set; }
