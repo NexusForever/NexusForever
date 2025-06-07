@@ -90,7 +90,7 @@ namespace NexusForever.Game.Matching.Queue
 
             if (leaveReason != null)
             {
-                Send(new ServerMatchingQueueResult()
+                Send(new ServerMatchingQueueResultAnnounce()
                 {
                     Result = leaveReason.Value,
                 });
@@ -109,16 +109,16 @@ namespace NexusForever.Game.Matching.Queue
             Static.Matching.MatchType currentMatchType = matchManager.GetMatchCharacter(CharacterId).Match?.MatchingMap.GameTypeEntry.MatchTypeEnum
                 ?? Static.Matching.MatchType.None;
 
-            var matchingQueueLeave = new ServerMatchingStatus()
+            var matchingQueueLeave = new ServerMatchingQueueStatus()
             {
-                Unknown   = 0,
-                MatchType = currentMatchType,
-                Unknown8  = Static.Matching.MatchType.None,
+                Status              = MatchingQueueStatus.NotInQueue,
+                JoinedMatchType     = currentMatchType,
+                ReadyMatchType      = Static.Matching.MatchType.None,
             };
 
             // bit mask of all match types this character is queued for
             foreach (Static.Matching.MatchType existingMatchType in matchingCharacterGroups.Keys)
-                matchingQueueLeave.Mask.SetBit((uint)existingMatchType, true);
+                matchingQueueLeave.QueuesJoined.SetBit((uint)existingMatchType, true);
 
             Send(matchingQueueLeave);
         }

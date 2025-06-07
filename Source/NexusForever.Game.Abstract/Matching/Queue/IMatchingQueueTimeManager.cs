@@ -10,7 +10,7 @@
         /// <summary>
         /// Return the average wait time for the supplied <see cref="Static.Matching.MatchType"/>.
         /// </summary>
-        TimeSpan GetAdverageWaitTime(Static.Matching.MatchType matchType);
+        TimeSpan GetAverageWaitTime(Static.Matching.MatchType matchType);
 
         /// <summary>
         /// Update average wait time with samples from <see cref="IMatchingQueueGroup"/>.
