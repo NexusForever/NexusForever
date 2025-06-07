@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Event;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -12,7 +12,7 @@ namespace NexusForever.Game.Event
     public class PublicEventTeam : IPublicEventTeam
     {
         public IPublicEvent PublicEvent { get; private set; }
-        public Static.Event.PublicEventTeam Team { get; private set; }
+        public Static.PublicEvent.PublicEventTeam Team { get; private set; }
         public bool IsFinialised { get; private set; }
 
         private readonly Dictionary<ulong, IPublicEventTeamMember> members = [];

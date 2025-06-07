@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 
 namespace NexusForever.Game.Abstract.Event
 {

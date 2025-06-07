@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Matching;
 using NexusForever.Shared;
 
@@ -102,7 +102,7 @@ namespace NexusForever.Game.Abstract.Event
         void UpdateCustomStat(IPlayer player, uint index, uint value);
 
         /// <summary>
-        /// Start a vote for <see cref="Static.Event.PublicEventTeam"/> with the supplied voteId and default choice.
+        /// Start a vote for <see cref="Static.PublicEvent.PublicEventTeam"/> with the supplied voteId and default choice.
         /// </summary>
         /// <remarks>
         /// Default choice will be selected if no response is received within the vote duration.

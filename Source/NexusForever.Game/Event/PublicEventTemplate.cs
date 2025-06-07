@@ -34,7 +34,7 @@ namespace NexusForever.Game.Event
                 .Where(e => e.PublicEventId == entry.Id)
                 .ToDictionary(e => e.Id);
 
-            foreach (Static.Event.PublicEventTeam team in Objectives.Values
+            foreach (Static.PublicEvent.PublicEventTeam team in Objectives.Values
                 .Select(o => o.PublicEventTeamId)
                 .Distinct())
             {
@@ -58,12 +58,12 @@ namespace NexusForever.Game.Event
         public bool HasLiveStats()
         {
             return Entry.PublicEventTypeEnum
-                is Static.Event.PublicEventType.Warplot
-                or Static.Event.PublicEventType.BattlegroundVortex
-                or Static.Event.PublicEventType.BattlegroundHoldTheLine
-                or Static.Event.PublicEventType.BattlegroundCannon
-                or Static.Event.PublicEventType.BattlegroundSabotage
-                or Static.Event.PublicEventType.Arena;
+                is Static.PublicEvent.PublicEventType.Warplot
+                or Static.PublicEvent.PublicEventType.BattlegroundVortex
+                or Static.PublicEvent.PublicEventType.BattlegroundHoldTheLine
+                or Static.PublicEvent.PublicEventType.BattlegroundCannon
+                or Static.PublicEvent.PublicEventType.BattlegroundSabotage
+                or Static.PublicEvent.PublicEventType.Arena;
         }
     }
 }

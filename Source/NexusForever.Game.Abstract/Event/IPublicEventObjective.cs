@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Event;
+﻿using NexusForever.Game.Static.PublicEvent;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;

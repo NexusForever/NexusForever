@@ -5,13 +5,13 @@ namespace NexusForever.Game.Event
 {
     public class PublicEventStats : IPublicEventStats
     {
-        private readonly Dictionary<Static.Event.PublicEventStat, uint> stats = [];
+        private readonly Dictionary<Static.PublicEvent.PublicEventStat, uint> stats = [];
         private readonly Dictionary<uint, uint> customStats = [];
 
         /// <summary>
-        /// Update <see cref="Static.Event.PublicEventStat"/> with supplied value.
+        /// Update <see cref="Static.PublicEvent.PublicEventStat"/> with supplied value.
         /// </summary>
-        public void UpdateStat(Static.Event.PublicEventStat stat, uint value)
+        public void UpdateStat(Static.PublicEvent.PublicEventStat stat, uint value)
         {
             stats[stat] = value;
         }
@@ -28,7 +28,7 @@ namespace NexusForever.Game.Event
         {
             var publicEventStats = new NetworkPublicEventStats();
 
-            foreach ((Static.Event.PublicEventStat stat, uint value) in stats.OrderBy(e => e.Key))
+            foreach ((Static.PublicEvent.PublicEventStat stat, uint value) in stats.OrderBy(e => e.Key))
             {
                 publicEventStats.Mask.SetBit((uint)stat, true);
                 publicEventStats.Values.Add(value);
@@ -36,7 +36,7 @@ namespace NexusForever.Game.Event
 
             foreach ((uint index, uint value) in customStats.OrderBy(e => e.Key))
             {
-                publicEventStats.Mask.SetBit((uint)Static.Event.PublicEventStat.CustomStat + index, true);
+                publicEventStats.Mask.SetBit((uint)Static.PublicEvent.PublicEventStat.CustomStat00 + index, true);
                 publicEventStats.Values.Add(value);
             }
 

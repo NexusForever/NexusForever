@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Event;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.PublicEvent;
 using NexusForever.Script.Template;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
@@ -91,7 +91,7 @@ namespace NexusForever.Game.Event
 
         private void BroadcastVoteInitiate()
         {
-            publicEventTeam.Broadcast(new ServerPublicEventVoteInitiate
+            publicEventTeam.Broadcast(new ServerPublicEventDetailedVoteInitiate
             {
                 EventId       = publicEventTeam.PublicEvent.Id,
                 VoteId        = VoteId,

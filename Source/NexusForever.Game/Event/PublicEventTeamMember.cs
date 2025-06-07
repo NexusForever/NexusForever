@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Event;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 

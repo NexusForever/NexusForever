@@ -3,12 +3,12 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Matching.Match;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Game.Static.Matching;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.PublicEvent;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
@@ -35,7 +35,7 @@ namespace NexusForever.Game.Event
 
         private IScriptCollection scriptCollection;
 
-        private readonly Dictionary<Static.Event.PublicEventTeam, IPublicEventTeam> teams = [];
+        private readonly Dictionary<Static.PublicEvent.PublicEventTeam, IPublicEventTeam> teams = [];
         private readonly Dictionary<ulong, IPublicEventTeam> memberTeams = [];
 
         private double elapsedTimer;
@@ -187,9 +187,9 @@ namespace NexusForever.Game.Event
         }
 
         /// <summary>
-        /// Add <see cref="IPlayer"/> to the <see cref="IPublicEvent"/> on <see cref="Static.Event.PublicEventTeam"/>.
+        /// Add <see cref="IPlayer"/> to the <see cref="IPublicEvent"/> on <see cref="Static.PublicEvent.PublicEventTeam"/>.
         /// </summary>
-        public void JoinEvent(IPlayer player, Static.Event.PublicEventTeam team)
+        public void JoinEvent(IPlayer player, Static.PublicEvent.PublicEventTeam team)
         {
             /*if (player.Level < template.Entry.MinPlayerLevel)
                 return;*/
@@ -369,12 +369,12 @@ namespace NexusForever.Game.Event
         }
 
         /// <summary>
-        /// Start a vote for <see cref="Static.Event.PublicEventTeam"/> with the supplied voteId and default choice.
+        /// Start a vote for <see cref="Static.PublicEvent.PublicEventTeam"/> with the supplied voteId and default choice.
         /// </summary>
         /// <remarks>
         /// Default choice will be selected if no response is received within the vote duration.
         /// </remarks>
-        public void StartVote(Static.Event.PublicEventTeam team, uint voteId, uint defaultChoice)
+        public void StartVote(Static.PublicEvent.PublicEventTeam team, uint voteId, uint defaultChoice)
         {
             IPublicEventTeam publicEventTeam = GetTeam(team);
             if (publicEventTeam == null)
@@ -395,9 +395,9 @@ namespace NexusForever.Game.Event
         }
 
         /// <summary>
-        /// Finish <see cref="IPublicEvent"/> with the supplied <see cref="Static.Event.PublicEventTeam"/> as the winner.
+        /// Finish <see cref="IPublicEvent"/> with the supplied <see cref="Static.PublicEvent.PublicEventTeam"/> as the winner.
         /// </summary>
-        public void Finish(Static.Event.PublicEventTeam? winnerTeam)
+        public void Finish(Static.PublicEvent.PublicEventTeam? winnerTeam)
         {
             if (IsFinalised)
                 return;
@@ -422,7 +422,7 @@ namespace NexusForever.Game.Event
                         PublicEventId    = Id,
                         Reason           = publicEventTeam.Team == winnerTeam ? PublicEventRemoveReason.Success : PublicEventRemoveReason.Failure,
                         ElapsedTimeMs    = (uint)(elapsedTimer * 1000d),
-                        Stats            = publicEventTeamMember.BuildStats(),
+                        PersonalStats            = publicEventTeamMember.BuildStats(),
                         TeamStats        = teamStats,
                         ParticipantStats = participantStats
                     };
@@ -465,7 +465,7 @@ namespace NexusForever.Game.Event
                 publicEventTeam.Broadcast(message);
         }
 
-        private IPublicEventTeam GetTeam(Static.Event.PublicEventTeam publicEventTeam)
+        private IPublicEventTeam GetTeam(Static.PublicEvent.PublicEventTeam publicEventTeam)
         {
             return teams.TryGetValue(publicEventTeam, out IPublicEventTeam team) ? team : null;
         }
