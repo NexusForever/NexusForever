@@ -16,7 +16,7 @@ namespace NexusForever.Game.Abstract.Social
         ushort FromCharacterRealmId { get; set; }
         string FromName { get; set; }
         string FromRealm { get; set; }
-        ChatPresenceState PresenceState { get; set; }
+        AccountPresenceState PresenceState { get; set; }
         string Text { get; set; }
         List<ChatFormat> Formats { get; set; }
         bool CrossFaction { get; set; }

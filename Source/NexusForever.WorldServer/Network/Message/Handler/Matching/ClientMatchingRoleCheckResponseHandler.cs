@@ -23,7 +23,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Matching
             IMatchingRoleCheck matchingRoleCheck = matchingManager.GetMatchingRoleCheck(session.Player.CharacterId);
             if (matchingRoleCheck == null)
             {
-                session.EnqueueMessageEncrypted(new ServerMatchingQueueResult
+                session.EnqueueMessageEncrypted(new ServerMatchingQueueResultAnnounce
                 {
                     Result = Game.Static.Matching.MatchingQueueResult.NotConfirmingRole
                 });
