@@ -15,110 +15,76 @@ namespace NexusForever.Network.World.Message.Model
             Quest   = 5,
         }
 
-        public class LuaEventData : IWritable
+        public interface ILuaEventData : IWritable
         {
-            public LuaEventType Type { get; set; }
-
-            public virtual void Write(GamePacketWriter writer)
-            {
-                writer.Write(Type);
-            }
+            public LuaEventType Type { get; }
         }
 
-        public class LuaEventData_Int : LuaEventData, IWritable
+        public class LuaEventDataInt : ILuaEventData, IWritable
         {
+            public LuaEventType Type => LuaEventType.Int;
             public int Int { get; set; }
 
-            public LuaEventData_Int(int value)
+            public void Write(GamePacketWriter writer)
             {
-                Type = LuaEventType.Int;
-                Int = value;
-            }
-
-            public override void Write(GamePacketWriter writer)
-            {
-                base.Write(writer);
                 writer.Write(Int);
             }
         }
 
-        public class LuaEventData_String : LuaEventData, IWritable
+        public class LuaEventDataString : ILuaEventData, IWritable
         {
+            public LuaEventType Type => LuaEventType.String;
             public string Text { get; set; }
 
-            public LuaEventData_String(string text)
+            public void Write(GamePacketWriter writer)
             {
-                Type = LuaEventType.String;
-                Text = text;
-            }
-
-            public override void Write(GamePacketWriter writer)
-            {
-                base.Write(writer);
                 writer.WriteStringWide(Text);
             }
         }
 
-        public class LuaEventData_Bool : LuaEventData, IWritable
+        public class LuaEventDataBool : ILuaEventData, IWritable
         {
+            public LuaEventType Type => LuaEventType.Bool;
             public bool Bool { get; set; }
     
-            public LuaEventData_Bool(bool value)
+            public void Write(GamePacketWriter writer)
             {
-                Type = LuaEventType.Bool;
-                Bool = value;
-            }
-
-            public override void Write(GamePacketWriter writer)
-            {
-                base.Write(writer);
                 writer.Write(Bool);
             }
         }
 
-        public class LuaEventData_Item : LuaEventData, IWritable
+        public class LuaEventDataItem : ILuaEventData, IWritable
         {
+            public LuaEventType Type => LuaEventType.Item;
             public uint Item2Id { get; set; }
 
-            public LuaEventData_Item(uint item2Id)
+            public void Write(GamePacketWriter writer)
             {
-                Type = LuaEventType.Item;
-                Item2Id = item2Id;
-            }
-
-            public override void Write(GamePacketWriter writer)
-            {
-                base.Write(writer);
                 writer.Write(Item2Id, 18u);
             }
         }
 
-        public class LuaEventData_Quest : LuaEventData, IWritable
+        public class LuaEventDataQuest : ILuaEventData, IWritable
         {
+            public LuaEventType Type => LuaEventType.Quest;
             public uint QuestId { get; set; }
 
-            public LuaEventData_Quest(uint questId)
+            public void Write(GamePacketWriter writer)
             {
-                Type = LuaEventType.Quest;
-                QuestId = questId;
-            }
-
-            public override void Write(GamePacketWriter writer)
-            {
-                base.Write(writer);
                 writer.Write(QuestId, 15u);
             }
         }
 
         public ushort LuaEventId { get; set; }
-        public List<LuaEventData> LuaEvents { get; set; } = [];
+        public List<ILuaEventData> LuaEvents { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(LuaEventId);
             writer.Write(LuaEvents.Count);
-            foreach (var luaEvent in LuaEvents)
+            foreach (ILuaEventData luaEvent in LuaEvents)
             {
+                writer.Write(luaEvent.Type, 32u);
                 luaEvent.Write(writer);
             }
         }
