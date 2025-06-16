@@ -212,7 +212,7 @@ namespace NexusForever.Game.Entity.Movement
         {
             var serverEntityCommand = new ServerEntityCommand
             {
-                Guid             = Owner.Guid,
+                UnitId             = Owner.Guid,
                 Time             = GetTime(),
                 TimeReset        = timeCommandGroup.TimeReset,
                 ServerControlled = ServerControl,

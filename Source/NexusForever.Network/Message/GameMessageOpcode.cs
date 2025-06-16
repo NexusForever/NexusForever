@@ -543,13 +543,16 @@ namespace NexusForever.Network.Message
         ServerMatchingMatchOperationResult = 0x0623,
         ClientMatchingMatchCastVoteSurrender = 0x0624,
         ServerMatchingAverageWaitTimeUpdate = 0x0628,
-        Server0635                      = 0x0635,
-        ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
-        ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
-        ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
+
+        ClientMovementControlAck        = 0x0635,
+        ServerMovementControlRefresh    = 0x0636,
+        ClientEntityCommand             = 0x0637,
+        ServerEntityCommand             = 0x0638,
         ServerMovementControlRemove     = 0x0639,
         ClientZoneChange                = 0x063A,
         ClientPlayerMovementSpeedUpdate = 0x063B,
+
+
         ServerAuthDenied                = 0x063D,
         ServerMarketplaceStatus         = 0x0640,
         ServerOwnedCommodityOrders      = 0x064C,

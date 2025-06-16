@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerEntityCommand)]
     public class ServerEntityCommand : IWritable
     {
-        public uint Guid { get; set; }
+        public uint UnitId { get; set; }
         public uint Time { get; set; }
         public bool TimeReset { get; set; }
         public bool ServerControlled { get; set; }
@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
+            writer.Write(UnitId);
             writer.Write(Time);
             writer.Write(TimeReset);
             writer.Write(ServerControlled);
