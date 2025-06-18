@@ -14,7 +14,6 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Setting;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -23,9 +22,9 @@ namespace NexusForever.Game.Abstract.Entity
     {
         IAccount Account { get; }
 
-        public Identity Identity { get; }
-        public ulong CharacterId { get; }
-        public string Name { get; }
+        IIdentity Identity { get; }
+        ulong CharacterId { get; }
+        string Name { get; }
         Sex Sex { get; set; }
         Race Race { get; set; }
         Class Class { get; }

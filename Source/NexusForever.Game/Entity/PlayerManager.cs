@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Character;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 using NLog;
 
@@ -13,7 +13,7 @@ namespace NexusForever.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly ConcurrentDictionary<Identity, IPlayer> players = new();
+        private readonly ConcurrentDictionary<IIdentity, IPlayer> players = new();
 
         /// <summary>
         /// Add new <see cref="IPlayer"/>.
@@ -57,7 +57,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Returns <see cref="IPlayer"/> with supplied character id.
         /// </summary>
-        public IPlayer GetPlayer(Identity identity)
+        public IPlayer GetPlayer(IIdentity identity)
         {
             return players.TryGetValue(identity, out IPlayer player) ? player : null;
         }
