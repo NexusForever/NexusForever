@@ -7,14 +7,14 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientMatchingQueueRandomParty
     {
         public Game.Static.Matching.MatchType MatchType { get; private set; }
-        public uint Unknown2 { get; private set; }
+        public MatchingQueueFlags Flags { get; private set; }
         public Role Roles { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
             MatchType = reader.ReadEnum<Game.Static.Matching.MatchType>(5u);
-            Unknown2  = reader.ReadUInt();
-            Roles     = reader.ReadEnum<Role>(32u);
+            Flags = reader.ReadEnum<MatchingQueueFlags>(32u);
+            Roles = reader.ReadEnum<Role>(32u);
         }
     }
 }

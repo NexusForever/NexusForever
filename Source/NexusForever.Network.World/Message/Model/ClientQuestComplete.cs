@@ -7,13 +7,13 @@ namespace NexusForever.Network.World.Message.Model
     {
         public ushort QuestId { get; private set; }
         public ushort RewardSelection { get; private set; }
-        public bool IsCommunique { get; private set; }
+        public bool IsCommunicatorMsg { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
             QuestId         = reader.ReadUShort(15u);
             RewardSelection = reader.ReadUShort(15u);
-            IsCommunique    = reader.ReadBit();
+            IsCommunicatorMsg    = reader.ReadBit();
         }
     }
 }

@@ -129,7 +129,7 @@ namespace NexusForever.Game.Matching.Queue
 
         private void SendMatchingRoleCheckCancelled()
         {
-            Broadcast(new ServerMatchingQueueResult
+            Broadcast(new ServerMatchingQueueResultAnnounce
             {
                 Result = MatchingQueueResult.Role
             });
