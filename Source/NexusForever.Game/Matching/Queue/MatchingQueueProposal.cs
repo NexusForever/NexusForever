@@ -164,7 +164,7 @@ namespace NexusForever.Game.Matching.Queue
                 MapData = new()
                 {
                     MatchType  = MatchType,
-                    Maps       = maps.Values.Select(m => m.Id).ToList(),
+                    MatchingGameMapIds = maps.Values.Select(m => m.Id).ToList(),
                     QueueFlags = MatchingQueueFlags
                 },
                 QueueData = new()
@@ -172,7 +172,7 @@ namespace NexusForever.Game.Matching.Queue
                     MatchType         = MatchType,
                     IsParty           = IsParty,
                     QueueTime         = (uint)(DateTime.UtcNow - QueueTime).TotalMilliseconds,
-                    EstimatedWaitTime = (uint)matchingQueueTime.GetAdverageWaitTime(MatchType).TotalMilliseconds
+                    AverageWaitTime = (uint)matchingQueueTime.GetAverageWaitTime(MatchType).TotalMilliseconds
                 },
             };
         }

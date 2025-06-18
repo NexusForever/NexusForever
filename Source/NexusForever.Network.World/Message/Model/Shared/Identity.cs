@@ -18,5 +18,10 @@ namespace NexusForever.Network.World.Message.Model.Shared
             writer.Write(RealmId, 14u);
             writer.Write(Id);
         }
+
+        public override string ToString()
+        {
+            return $"{RealmId}:{Id}";
+        }
     }
 }

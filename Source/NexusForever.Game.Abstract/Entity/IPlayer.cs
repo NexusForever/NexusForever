@@ -22,8 +22,9 @@ namespace NexusForever.Game.Abstract.Entity
     {
         IAccount Account { get; }
 
-        public ulong CharacterId { get; }
-        public string Name { get; }
+        IIdentity Identity { get; }
+        ulong CharacterId { get; }
+        string Name { get; }
         Sex Sex { get; set; }
         Race Race { get; set; }
         Class Class { get; }

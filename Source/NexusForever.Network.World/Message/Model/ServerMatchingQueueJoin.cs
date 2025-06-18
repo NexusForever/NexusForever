@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model
         public class Map : IWritable
         {
             public Game.Static.Matching.MatchType MatchType { get; set; }
-            public List<uint> Maps { get; set; } = [];
+            public List<uint> MatchingGameMapIds { get; set; } = [];
             public ushort MatchingGameType { get; set; }
             public MatchingQueueFlags QueueFlags { get; set; }
 
@@ -17,9 +17,9 @@ namespace NexusForever.Network.World.Message.Model
             {
                 writer.Write(MatchType, 5u);
 
-                writer.Write(Maps.Count);
-                foreach (var map in Maps)
-                    writer.Write(map);
+                writer.Write(MatchingGameMapIds.Count);
+                foreach (var mapId in MatchingGameMapIds)
+                    writer.Write(mapId);
 
                 writer.Write(MatchingGameType, 14u);
                 writer.Write(QueueFlags, 32u);
@@ -31,25 +31,27 @@ namespace NexusForever.Network.World.Message.Model
             public Game.Static.Matching.MatchType MatchType { get; set; }
             public bool IsParty { get; set; }
             public uint QueueTime { get; set; }
-            public uint EstimatedWaitTime { get; set; }
+            public uint AverageWaitTime { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(MatchType, 5u);
                 writer.Write(IsParty);
                 writer.Write(QueueTime);
-                writer.Write(EstimatedWaitTime);
+                writer.Write(AverageWaitTime);
             }
         }
 
         public Map MapData { get; set; }
         public Queue QueueData { get; set; }
+        public Role QueuedRoles { get; set; }
+
         public void Write(GamePacketWriter writer)
         {
             MapData.Write(writer);
             QueueData.Write(writer);
 
-            writer.Write(0);
+            writer.Write(QueuedRoles, 32u);
         }
     }
 }

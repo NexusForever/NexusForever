@@ -5,6 +5,7 @@ using NexusForever.GameTable;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Social.Model;
+using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Social
 {
@@ -19,7 +20,7 @@ namespace NexusForever.Game.Social
         public ushort FromCharacterRealmId { get; set; }
         public string FromName { get; set; }
         public string FromRealm { get; set; }
-        public ChatPresenceState PresenceState { get; set; }
+        public AccountPresenceState PresenceState { get; set; }
         public string Text
         {
             get => builder.ToString();
@@ -97,13 +98,11 @@ namespace NexusForever.Game.Social
                 GM            = GM,
                 Self          = Self,
                 AutoResponse  = AutoResponse,
-
-                From          = new TargetPlayerIdentity
+                From          = new NetworkIdentity
                 {
                     RealmId     = FromCharacterRealmId,
-                    CharacterId = FromCharacterId
+                    Id          = FromCharacterId
                 },
-               
                 FromName      = FromName,
                 FromRealm     = FromRealm,
                 PresenceState = PresenceState,

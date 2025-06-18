@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerRandomRollResponse)]
     public class ServerRandomRollResponse : IWritable
     {
-        public TargetPlayerIdentity TargetPlayerIdentity { get; set; }
+        public Identity TargetPlayerIdentity { get; set; }
         public uint MinRandom { get; set; }
         public uint MaxRandom { get; set; }
         public int RandomRollResult { get; set; }

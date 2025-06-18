@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Static.Event;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
+using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Event
 {
@@ -96,14 +97,14 @@ namespace NexusForever.Game.Event
             return new PublicEventParticipantStats
             {
                 UnitId = player.Guid,
-                Player = new TargetPlayerIdentity
+                Player = new NetworkIdentity
                 {
-                    CharacterId = player.CharacterId,
-                    RealmId     = realmContext.RealmId
+                    Id      = player.CharacterId,
+                    RealmId = realmContext.RealmId,
                 },
-                Class = @class,
-                Path  = path,
-                Stats = BuildStats()
+                Class  = @class,
+                Path   = path,
+                Stats  = BuildStats()
             };
         }
     }

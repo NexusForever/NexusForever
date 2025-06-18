@@ -11,10 +11,10 @@ namespace NexusForever.Network.World.Message.Model
         public bool GM { get; set; }
         public bool Self { get; set; }
         public bool AutoResponse { get; set; }
-        public TargetPlayerIdentity From { get; set; } = new();
+        public Identity From { get; set; } = new();
         public string FromName { get; set; }
         public string FromRealm { get; set; }
-        public ChatPresenceState PresenceState { get; set; }
+        public AccountPresenceState PresenceState { get; set; }
 
         public string Text { get; set; }
         public List<ChatFormat> Formats { get; set; } = new();

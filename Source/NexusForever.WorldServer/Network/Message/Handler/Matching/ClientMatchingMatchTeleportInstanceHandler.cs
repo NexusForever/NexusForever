@@ -4,7 +4,7 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Matching
 {
-    public class ClientMatchingMatchTeleportInstanceHandler : IMessageHandler<IWorldSession, ClientMatchingMatchTeleportInstance>
+    public class ClientMatchingMatchTeleportInstanceHandler : IMessageHandler<IWorldSession, ClientMatchingTransferIntoMatch>
     {
         #region Dependency Injection
 
@@ -18,7 +18,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Matching
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientMatchingMatchTeleportInstance _)
+        public void HandleMessage(IWorldSession session, ClientMatchingTransferIntoMatch _)
         {
             IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(session.Player.CharacterId);
             matchCharacter.Match?.MatchTeleport(matchCharacter.CharacterId);
