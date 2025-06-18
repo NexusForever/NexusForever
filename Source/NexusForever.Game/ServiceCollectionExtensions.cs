@@ -6,7 +6,7 @@ using NexusForever.Game.Cinematic;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Event;
+using NexusForever.Game.PublicEvent;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;

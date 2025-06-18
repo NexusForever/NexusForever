@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Game.Abstract.Event
+namespace NexusForever.Game.Abstract.PublicEvent
 {
     public interface IPublicEventStats : INetworkBuildable<PublicEventStats>
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Static.PublicEvent;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventCharacter : IPublicEventCharacter
     {

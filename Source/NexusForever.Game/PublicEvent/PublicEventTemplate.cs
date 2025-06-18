@@ -1,8 +1,8 @@
-﻿using NexusForever.Game.Abstract.Event;
+﻿using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventTemplate : IPublicEventTemplate
     {

@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Shared;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventTemplateManager : IPublicEventTemplateManager
     {

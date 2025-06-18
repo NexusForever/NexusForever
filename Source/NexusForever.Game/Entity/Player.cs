@@ -8,7 +8,7 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;

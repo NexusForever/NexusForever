@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract.Event;
+﻿using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Static.PublicEvent;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
@@ -6,7 +6,7 @@ using NexusForever.Network.World.Message.Model.PublicEvent;
 using NexusForever.Script.Template;
 using NexusForever.Shared.Game;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventObjective : IPublicEventObjective
     {

@@ -1,7 +1,7 @@
-﻿using NexusForever.Game.Abstract.Event;
+﻿using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Shared;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventFactory : IPublicEventFactory
     {

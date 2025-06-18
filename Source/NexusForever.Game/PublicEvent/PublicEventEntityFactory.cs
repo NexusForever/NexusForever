@@ -4,10 +4,10 @@ using NexusForever.Database;
 using NexusForever.Database.World;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Map;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventEntityFactory : IPublicEventEntityFactory
     {

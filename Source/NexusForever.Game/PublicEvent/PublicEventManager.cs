@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Script.Template;
 using NexusForever.Shared;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventManager : IPublicEventManager
     {

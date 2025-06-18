@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.PublicEvent;
 
-namespace NexusForever.Game.Abstract.Event
+namespace NexusForever.Game.Abstract.PublicEvent
 {
     public interface IPublicEventCharacter
     {

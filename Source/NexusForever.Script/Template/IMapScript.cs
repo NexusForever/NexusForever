@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Shared;
 
 namespace NexusForever.Script.Template

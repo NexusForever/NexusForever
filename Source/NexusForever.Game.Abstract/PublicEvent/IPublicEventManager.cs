@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Shared;
 
-namespace NexusForever.Game.Abstract.Event
+namespace NexusForever.Game.Abstract.PublicEvent
 {
     public interface IPublicEventManager : IUpdate
     {

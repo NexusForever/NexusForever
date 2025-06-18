@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 
-namespace NexusForever.Game.Event
+namespace NexusForever.Game.PublicEvent
 {
     public class PublicEventVoteResponse : IPublicEventVoteResponse
     {
