@@ -7,24 +7,24 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientGuildBankTransaction2 : IReadable
     {
         public Identity GuildIdentity { get; set; } = new Identity();
-        public ulong ItemGuidFrom { get; set; }
-        public ulong ItemGuidTo { get; set; } // Sent if bag slot already contains an item, otherwise 0
-        public uint Item2IdFrom { get; set; }
-        public ItemLocation LocationTo { get; set; } = new ItemLocation();
-        public ItemLocation LocationFrom { get; set; } = new ItemLocation();
+        public ulong SourceItemGuid { get; set; }
+        public ulong DestinationItemGuid { get; set; } // Sent if bag slot already contains an item, otherwise 0
+        public uint SourceItem2Id { get; set; }
+        public ItemLocation Destination { get; set; } = new ItemLocation();
+        public ItemLocation Source { get; set; } = new ItemLocation();
         public bool UseFirstFreeSlot { get; set; }
-        public uint StackCount { get; set; } // Value of 0 transfers entire stack
+        public uint Count { get; set; } // Value of 0 transfers entire stack
 
         public void Read(GamePacketReader reader)
         {
             GuildIdentity.Read(reader);
-            ItemGuidFrom = reader.ReadULong();
-            ItemGuidTo = reader.ReadULong();
-            Item2IdFrom = reader.ReadUInt();
-            LocationTo.Read(reader);
-            LocationFrom.Read(reader);
+            SourceItemGuid = reader.ReadULong();
+            DestinationItemGuid = reader.ReadULong();
+            SourceItem2Id = reader.ReadUInt();
+            Destination.Read(reader);
+            Source.Read(reader);
             UseFirstFreeSlot = reader.ReadBit();
-            StackCount = reader.ReadUInt();
+            Count = reader.ReadUInt();
         }
     }
 }

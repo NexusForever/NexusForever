@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
         public Identity GuildIdentity { get; set; }
         public uint Influence { get; set; }
         public uint BonusInfluenceRemaining { get; set; }
-        public ulong Money { get; set; }
+        public ulong CashAmount { get; set; }
         public uint WarCoins { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -18,7 +18,7 @@ namespace NexusForever.Network.World.Message.Model
             GuildIdentity.Write(writer);
             writer.Write(Influence);
             writer.Write(BonusInfluenceRemaining);
-            writer.Write(Money);
+            writer.Write(CashAmount);
             writer.Write(WarCoins);
         }
     }
