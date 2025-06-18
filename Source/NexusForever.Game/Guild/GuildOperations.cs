@@ -31,7 +31,7 @@ namespace NexusForever.Game.Guild
 
                 Broadcast(new ServerGuildInfoMessageUpdate
                 {
-                    GuildIdentity = Identity,
+                    GuildIdentity = IdentityExtensions.ToNetwork(Identity),
                     InfoMessage = AdditionalInfo
                 });
             }
@@ -61,7 +61,7 @@ namespace NexusForever.Game.Guild
 
                 Broadcast(new ServerGuildMotdUpdate
                 {
-                    GuildIdentity = Identity,
+                    GuildIdentity = IdentityExtensions.ToNetwork(Identity),
                     MessageOfTheDay = MessageOfTheDay
                 });
             }

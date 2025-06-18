@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Character;
-using NexusForever.Network.World.Message.Model.Shared;
 using NetworkGuildMember = NexusForever.Network.World.Message.Model.Guild.GuildMember;
 
 namespace NexusForever.Game.Guild
@@ -26,7 +26,7 @@ namespace NexusForever.Game.Guild
         }
 
         public IGuildBase Guild { get; }
-        public Identity PlayerIdentity { get; }
+        public IIdentity PlayerIdentity { get; }
         public ulong CharacterId { get => PlayerIdentity.Id; }
 
         public IGuildRank Rank
@@ -167,13 +167,11 @@ namespace NexusForever.Game.Guild
         public NetworkGuildMember Build()
         {
             ICharacter characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
+
+
             return new NetworkGuildMember
             {
-                PlayerIdentity           = new Identity
-                {
-                    RealmId              = RealmContext.Instance.RealmId,
-                    Id                   = CharacterId 
-                },
+                PlayerIdentity           = IdentityExtensions.ToNetwork(PlayerIdentity),
                 Rank                     = rank.Index,
                 Name                     = characterInfo.Name,
                 Sex                      = characterInfo.Sex,

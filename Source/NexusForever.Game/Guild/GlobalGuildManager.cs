@@ -5,6 +5,7 @@ using System.Reflection;
 using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Housing;
@@ -242,7 +243,7 @@ namespace NexusForever.Game.Guild
         /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied identity.
         /// </summary>
-        public IGuildBase GetGuild(Identity guildIdentity)
+        public IGuildBase GetGuild(IIdentity guildIdentity)
         {
             return guilds.TryGetValue(guildIdentity.Id, out IGuildBase guild) ? guild : null;
         }
@@ -392,7 +393,7 @@ namespace NexusForever.Game.Guild
         private IGuildResultInfo HandleGuildOperation((GuildOperationHandlerDelegate Delegate, GuildOperationHandlerResultDelegate ResultDelegate) handlers,
             IPlayer player, ClientGuildOperation operation)
         {
-            IGuildBase guild = GetGuild(operation.GuildIdentity);
+            IGuildBase guild = GetGuild(IdentityExtensions.ToGame(operation.GuildIdentity));
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
