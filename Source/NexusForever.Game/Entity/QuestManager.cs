@@ -620,10 +620,19 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void QuestIgnore(ushort questId, bool ignored)
         {
-            if (GlobalQuestManager.Instance.GetQuestInfo(questId) == null)
+            IQuestInfo questInfo = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (questInfo == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
 
-            // TODO:
+            IQuest quest = GetQuest((ushort)questInfo.Entry.Id);
+            if (quest == null)
+                quest = new Quest.Quest(player, questInfo); // Add quest so we can set it to ignored.
+            else
+                QuestRemove(quest); // Removes from quest log. Might not be the cleanest way to do this?
+
+            quest.State = ignored ? QuestState.Ignored : QuestState.Mentioned;
+
+            inactiveQuests.Add(questId, quest);
         }
 
         /// <summary>

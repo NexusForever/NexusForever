@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
         // the TargetPlayerIdentity's realmId and
         // characterId, as well as Unknown0 are 0.
         // As such, these fields are currently unused.
-        public TargetPlayerIdentity TargetPlayerIdentity { get; } = new();
+        public Identity TargetPlayerIdentity { get; } = new();
         public uint MinRandom { get; private set; }
         public uint MaxRandom { get; private set; }
         public uint Unknown0 { get; private set; }

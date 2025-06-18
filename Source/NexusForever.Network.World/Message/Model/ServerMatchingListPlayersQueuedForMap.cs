@@ -33,7 +33,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public class QueuedPlayerInfo : IWritable
         {
-            public TargetPlayerIdentity Identity { get; set; }
+            public Identity Identity { get; set; }
             public string Name { get; set; }
             public Faction Faction { get; set; }
             public uint Race {  get; set; }

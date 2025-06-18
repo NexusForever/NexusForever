@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model
         public class FriendCharacterZoneInfo : IWritable
         {
             public ulong AccountFriendId { get; set; }
-            public TargetPlayerIdentity CharacterInNewZone { get; set; }
+            public Identity CharacterInNewZone { get; set; }
             public uint WorldZoneId { get; set; }
 
             public void Write(GamePacketWriter writer)

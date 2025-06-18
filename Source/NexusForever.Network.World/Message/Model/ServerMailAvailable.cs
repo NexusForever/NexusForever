@@ -52,7 +52,7 @@ namespace NexusForever.Network.World.Message.Model
             public ulong CostOnDeliveryAmount { get; set; }
             public float ExpiryTimeInDays { get; set; }
             public MailFlag Flags { get; set; }
-            public TargetPlayerIdentity Sender { get; set; } = new();
+            public Identity Sender { get; set; } = new();
             public List<Attachment> Attachments { get; set; } = new();
 
             public void Write(GamePacketWriter writer)
@@ -71,7 +71,7 @@ namespace NexusForever.Network.World.Message.Model
                 writer.Write(ExpiryTimeInDays);
                 writer.Write(Flags, 32);
                 writer.Write(Sender.RealmId, 14);
-                writer.Write(Sender.CharacterId);
+                writer.Write(Sender.Id);
 
                 writer.Write(Attachments.Count);
                 Attachments.ForEach(v => v.Write(writer));

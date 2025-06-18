@@ -16,6 +16,7 @@ using NexusForever.Network.World.Message.Model.Shared;
 using NLog;
 using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.GuildMember;
 using NetworkGuildRank = NexusForever.Network.World.Message.Model.Shared.GuildRank;
+using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Guild
 {
@@ -456,10 +457,10 @@ namespace NexusForever.Game.Guild
                 {
                     RealmId        = RealmContext.Instance.RealmId,
                     GuildId        = Id,
-                    PlayerIdentity = new TargetPlayerIdentity
+                    PlayerIdentity = new NetworkIdentity
                     {
-                        RealmId     = RealmContext.Instance.RealmId,
-                        CharacterId = member.CharacterId
+                        RealmId = RealmContext.Instance.RealmId,
+                        Id      = member.CharacterId
                     },
                 });
             }

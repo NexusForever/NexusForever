@@ -8,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
     {
         public PublicEventTeam TeamId { get; set; }
         public uint UnitId { get; set; }
-        public TargetPlayerIdentity Player { get; set; }
+        public Identity Player { get; set; }
         public Class Class { get; set; }
         public Game.Static.Entity.Path Path { get; set; }
         public PublicEventStats Stats { get; set; }

@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerMatchingGroupMemberRoleSelection)]
     public class ServerMatchingGroupMemberRoleSelection : IWritable
     {
-        public TargetPlayerIdentity Identity { get; set; } = new();
+        public Identity Identity { get; set; } = new();
         public Role Role { get; set; }
 
         public void Write(GamePacketWriter writer)

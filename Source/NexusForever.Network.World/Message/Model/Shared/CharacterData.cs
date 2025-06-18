@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
     public class CharacterData : IWritable
     {
         public string Name { get; set; } = "";
-        public TargetPlayerIdentity PlayerIdentity  { get; set; } = new TargetPlayerIdentity();
+        public Identity PlayerIdentity  { get; set; } = new();
         public Class Class { get; set; }
         public Race Race  { get; set; }
         public Game.Static.Entity.Path Path { get; set; }

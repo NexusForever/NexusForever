@@ -8,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientFriendAccountUpgradeFromFriend)]
     public class ClientFriendAccountUpgradeFromFriend : IReadable
     {
-        public TargetPlayerIdentity ExisitingFriend { get; set; } = new();
+        public Identity ExisitingFriend { get; set; } = new();
         public string Note { get; private set; }
 
         public void Read(GamePacketReader reader)

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Character;
@@ -12,15 +13,15 @@ namespace NexusForever.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly ConcurrentDictionary<ulong, IPlayer> players = new();
+        private readonly ConcurrentDictionary<IIdentity, IPlayer> players = new();
 
         /// <summary>
         /// Add new <see cref="IPlayer"/>.
         /// </summary>
         public void AddPlayer(IPlayer player)
         {
-            players.TryAdd(player.CharacterId, player);
-            log.Trace($"Added player {player.CharacterId}.");
+            players.TryAdd(player.Identity, player);
+            log.Trace($"Added player {player.Identity}.");
         }
 
         /// <summary>
@@ -28,16 +29,16 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void RemovePlayer(IPlayer player)
         {
-            players.TryRemove(player.CharacterId, out _);
-            log.Trace($"Removed player {player.CharacterId}.");
+            players.TryRemove(player.Identity, out _);
+            log.Trace($"Removed player {player.Identity}.");
         }
 
         /// <summary>
-        /// Returns <see cref="IPlayer"/> with supplied character id.
+        /// Returns <see cref="IPlayer"/> with supplied character id. Assumes <see cref="IPlayer"/> is in the same realm.
         /// </summary>
         public IPlayer GetPlayer(ulong characterId)
         {
-            return players.TryGetValue(characterId, out IPlayer player) ? player : null;
+            return players.TryGetValue( new Identity{ Id = characterId, RealmId = RealmContext.Instance.RealmId }, out IPlayer player) ? player : null;
         }
 
         /// <summary>
@@ -50,6 +51,15 @@ namespace NexusForever.Game.Entity
                 return null;
 
             return GetPlayer(character.CharacterId);
+        }
+
+
+        /// <summary>
+        /// Returns <see cref="IPlayer"/> with supplied character id.
+        /// </summary>
+        public IPlayer GetPlayer(IIdentity identity)
+        {
+            return players.TryGetValue(identity, out IPlayer player) ? player : null;
         }
 
         public IEnumerator<IPlayer> GetEnumerator()

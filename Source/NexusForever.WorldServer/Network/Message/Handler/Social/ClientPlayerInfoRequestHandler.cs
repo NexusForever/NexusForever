@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Social
         /// </summary>
         public void HandleMessage(IWorldSession session, ClientPlayerInfoRequest request)
         {
-            ICharacter character = characterManager.GetCharacter(request.Identity.CharacterId);
+            ICharacter character = characterManager.GetCharacter(request.Identity.Id);
             if (character == null)
                 throw new InvalidPacketValueException();
 
@@ -39,10 +39,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Social
                 BaseData = new ServerPlayerInfoFullResponse.Base
                 {
                     ResultCode = 0,
-                    Identity = new TargetPlayerIdentity
+                    Identity = new Identity
                     {
                         RealmId = realmContext.RealmId,
-                        CharacterId = character.CharacterId
+                        Id = character.CharacterId
                     },
                     Name = character.Name,
                     Faction = character.Faction1

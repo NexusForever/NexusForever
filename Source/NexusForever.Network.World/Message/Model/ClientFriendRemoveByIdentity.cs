@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientFriendRemoveByIdentity)]
     public class ClientFriendRemoveByIdentity : IReadable
     {
-        public TargetPlayerIdentity PlayerIdentity { get; private set; } = new();
+        public Identity PlayerIdentity { get; private set; } = new();
         public FriendshipType Type { get; private set; }
 
         public void Read(GamePacketReader reader)

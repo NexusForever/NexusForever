@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
     public class FriendData : IWritable
     {
         public ulong FriendshipId { get; set; }
-        public TargetPlayerIdentity PlayerIdentity { get; set; } = new TargetPlayerIdentity();
+        public Identity PlayerIdentity { get; set; } = new();
         public string Note { get; set; } = "";
         public FriendshipType Type { get; set; }
 

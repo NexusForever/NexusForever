@@ -8,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerFriendAccountRemovedCharacter : IWritable
     {
         public uint AccountId { get; set; }
-        public TargetPlayerIdentity CharacterRemoved { get; set; } = new();
+        public Identity CharacterRemoved { get; set; } = new();
 
         public void Write(GamePacketWriter writer)
         {
