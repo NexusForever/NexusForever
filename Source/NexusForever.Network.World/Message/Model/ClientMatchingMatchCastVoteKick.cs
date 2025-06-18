@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientMatchingMatchCastVoteKick)]
     public class ClientMatchingMatchCastVoteKick : IReadable
     {
-        public TargetPlayerIdentity MemberToKick { get; private set; } = new(); // The match member to kick
+        public Identity MemberToKick { get; private set; } = new(); // The match member to kick
         public bool Vote { get; private set; } // true = yes, false = no
 
         public void Read(GamePacketReader reader)

@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerFriendLastOnlineUpdate)]
     public class ServerFriendLastOnlineUpdate : IWritable
     {
-        public TargetPlayerIdentity PlayerIdentity { get; set; }
+        public Identity PlayerIdentity { get; set; }
         public float LastOnlineInDays { get; set; }
 
         public void Write(GamePacketWriter writer)

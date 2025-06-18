@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model
         public class InviteData : IWritable
         {
             public ulong InviteId { get; set; }
-            public TargetPlayerIdentity PlayerIdentity { get; set; }
+            public Identity PlayerIdentity { get; set; }
             public uint Seen { get; set; }
             public float ExpiryInDays { get; set; }
             public string Note { get; set; }

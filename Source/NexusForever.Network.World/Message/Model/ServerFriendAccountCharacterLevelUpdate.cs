@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerFriendAccountCharacterLevelUpdate : IWritable
     {
         public uint AccountId { get; set; }
-        public TargetPlayerIdentity CharacterThatLeveled { get; set; }
+        public Identity CharacterThatLeveled { get; set; }
         public uint Level { get; set; }
 
         public void Write(GamePacketWriter writer)

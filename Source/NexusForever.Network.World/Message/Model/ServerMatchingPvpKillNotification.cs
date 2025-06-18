@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
     {
         public class OpponentPlayer : IWritable
         {
-            public TargetPlayerIdentity Identity { get; set; } = new();
+            public Identity Identity { get; set; } = new();
             public Class Class { get; set; }
 
             public void Write(GamePacketWriter writer)

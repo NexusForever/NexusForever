@@ -7,8 +7,8 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerMatchingMatchVoteKickBegin)]
     public class ServerMatchingMatchVoteKickBegin : IWritable
     {
-        public TargetPlayerIdentity Initiator { get; set; } = new();
-        public TargetPlayerIdentity MemberToKick { get; set; } = new();
+        public Identity Initiator { get; set; } = new();
+        public Identity MemberToKick { get; set; } = new();
 
         public void Write(GamePacketWriter writer)
         {

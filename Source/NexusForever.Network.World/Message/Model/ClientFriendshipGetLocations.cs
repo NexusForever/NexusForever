@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientFriendshipGetLocations)]
     public class ClientFriendshipGetLocations : IReadable
     {
-        public List<TargetPlayerIdentity> Identities { get; private set; } = []; // Identities of friends that are not account friends
+        public List<Identity> Identities { get; private set; } = []; // Identities of friends that are not account friends
         public List<ulong> AccountFriendIds { get; private set; } = []; // For friends that are account friends
 
         public void Read(GamePacketReader reader)
@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model
             uint count = reader.ReadUInt(8);
             for (int i = 0; i < count; i++)
             {
-                TargetPlayerIdentity identity = new TargetPlayerIdentity();
+                var identity = new Identity();
                 identity.Read(reader);
                 Identities.Add(identity);
             }
