@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientHousingPlugUpdate)]
     public class ClientHousingPlugUpdate : IReadable
     {
-        public Identity Identity { get; private set;  } = new();
+        public Identity Identity { get; } = new();
 
         public void Read(GamePacketReader reader)
         {

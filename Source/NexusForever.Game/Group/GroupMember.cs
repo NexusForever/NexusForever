@@ -12,7 +12,7 @@ namespace NexusForever.Game.Group
     {
         public ulong Id { get; }
         public IGroup Group { get; }
-        public Identity Identity { get; set; }
+        public IIdentity Identity { get; set; }
         public ushort ZoneId { get; set; }
         public uint GroupIndex { get { return Group.GetMemberIndex(this); } }
 
@@ -30,7 +30,7 @@ namespace NexusForever.Game.Group
         {
             Id = id;
             Group = group;
-            Identity = new Identity{ CharacterId = player.CharacterId, RealmId = RealmContext.Instance.RealmId };
+            Identity = player.Identity;
             ZoneId = (ushort)player.Zone.Id;
             AreFlagsSet = false;
         }
@@ -116,7 +116,7 @@ namespace NexusForever.Game.Group
         /// </summary>
         public NetworkGroupMember Build()
         {
-            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity.CharacterId);
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity);
             if (targetPlayer == null)
                 return null;
 
@@ -130,9 +130,9 @@ namespace NexusForever.Game.Group
         {
             return new GroupMemberInfo
             {
-                Identity = new Identity
+                MemberIdentity = new NetworkIdentity
                 {
-                    CharacterId = Identity.CharacterId,
+                    Id = CharacterId,
                     RealmId = RealmContext.Instance.RealmId
                 },
                 Flags = Flags,
@@ -146,7 +146,7 @@ namespace NexusForever.Game.Group
         /// </summary>
         public ServerEntityGroupAssociation BuildGroupAssociation()
         {
-            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity.CharacterId);
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity);
             if (targetPlayer == null)
                 return null;
 
@@ -162,7 +162,7 @@ namespace NexusForever.Game.Group
         /// </summary>
         public ServerGroupMemberStatUpdate BuildGroupStatUpdate()
         {
-            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity.CharacterId);
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(Identity);
             if (targetPlayer == null)
                 return null;
 

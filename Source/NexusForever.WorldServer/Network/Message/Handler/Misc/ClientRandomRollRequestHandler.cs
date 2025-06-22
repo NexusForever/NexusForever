@@ -31,10 +31,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Misc
 
             session.EnqueueMessageEncrypted(new ServerRandomRollResponse
             {
-                Identity = new Identity
+                TargetPlayerIdentity = new Identity
                 {
                     RealmId     = realmContext.RealmId,
-                    CharacterId = session.Player.CharacterId
+                    Id = session.Player.CharacterId
                 },
                 MinRandom        = randomRoll.MinRandom,
                 MaxRandom        = randomRoll.MaxRandom,

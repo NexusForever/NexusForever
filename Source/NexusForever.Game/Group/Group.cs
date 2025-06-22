@@ -1,3 +1,4 @@
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Entity;
@@ -175,7 +176,7 @@ namespace NexusForever.Game.Group
             foreach (var member in members)
             {
                 // If the player is not online - can't give them the message.
-                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity.CharacterId);
+                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity);
                 player?.Session.EnqueueMessageEncrypted(message);
             }
         }
@@ -221,11 +222,11 @@ namespace NexusForever.Game.Group
             {
                 case GroupInviteType.Invite:
                     {
-                        IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity.CharacterId);
+                        IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity);
                         if (leader != null)
                             SendGroupResult(leader.Session, GroupResult.ExpiredInviter, Id, invite.InvitedCharacterName);
 
-                        IPlayer invited = PlayerManager.Instance.GetPlayer(Leader.Identity.CharacterId);
+                        IPlayer invited = PlayerManager.Instance.GetPlayer(Leader.Identity);
                         if (invited != null)
                             SendGroupResult(invited.Session, GroupResult.ExpiredInvitee, Id, invite.InvitedCharacterName);
                         break;
@@ -269,7 +270,7 @@ namespace NexusForever.Game.Group
             RemoveInvite(invite);
             AddMember(addedMember);
 
-            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity.CharacterId);
+            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity);
 
             switch (invite.Type)
             {
@@ -314,8 +315,8 @@ namespace NexusForever.Game.Group
 
             RemoveInvite(invite);
 
-            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(invite.InvitedCharacterId); // presumable to decline the invite the player has to be online. Expire is handled seperatly.
-            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity.CharacterId);
+            IPlayer targetPlayer = PlayerManager.Instance.GetPlayer(invite); // presumable to decline the invite the player has to be online. Expire is handled seperatly.
+            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity);
 
             switch (invite.Type)
             {
@@ -333,7 +334,7 @@ namespace NexusForever.Game.Group
                         Name = leader.Name, //TODO: What if the Leader is offline?
                         Result = GroupResult.Declined
                     });
-                    //GroupHelper.SendGroupResult(invite.TargetPlayer.Session, GroupResult.Declined, Id, Leader.Player.Name); //TODO: Does this need to be implemented?
+                    //GroupHandler.SendGroupResult(invite.TargetPlayer.Session, GroupResult.Declined, Id, Leader.Player.Name); //TODO: Does this need to be implemented?
                     break;
 
                 case GroupInviteType.Referral:
@@ -350,7 +351,7 @@ namespace NexusForever.Game.Group
             if (CreateInvite(inviter, invitee, GroupInviteType.Referral) == null)
                 return;
 
-            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity.CharacterId);
+            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity);
             if (leader == null)
                 return; //TODO: What if the leader is Offline? Who can we refer to? Should we refer to a raid assist or just noone and can we replay this invite once the leader comes back online?
 
@@ -358,7 +359,7 @@ namespace NexusForever.Game.Group
                 new ServerGroupReferral
                 {
                     GroupId = Id,
-                    InvokerIdentity = inviter.Identity,
+                    InviteeIdentity = invitee.Identity.ToNetwork(),
                     InviteeName = invitee.Name
                 }
             );
@@ -432,17 +433,13 @@ namespace NexusForever.Game.Group
 
                 foreach (var member in members)
                 {
-                    IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity.CharacterId);
+                    IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity);
                     if (player == null)
                         continue;
 
                     ServerGroupJoin groupJoinPacket = new ServerGroupJoin
                     {
-                        Player = new Identity
-                        {
-                            CharacterId = player.CharacterId,
-                            RealmId = RealmContext.Instance.RealmId
-                        },
+                        Player = player.Identity.ToNetwork(),
                         GroupInfo = Build()
                     };
 
@@ -453,17 +450,13 @@ namespace NexusForever.Game.Group
             }
             else
             {
-                IPlayer addedPlayer = PlayerManager.Instance.GetPlayer(addedMember.Identity.CharacterId);
+                IPlayer addedPlayer = PlayerManager.Instance.GetPlayer(addedMember.Identity);
                 if (addedPlayer == null)
                     return;
 
                 addedPlayer.Session.EnqueueMessageEncrypted(new ServerGroupJoin
                 {
-                    Player = new Identity
-                    {
-                        CharacterId = addedPlayer.CharacterId,
-                        RealmId = RealmContext.Instance.RealmId
-                    },
+                    Player = addedPlayer.Identity.ToNetwork(),
                     GroupInfo = Build()
                 });
 
@@ -480,7 +473,7 @@ namespace NexusForever.Game.Group
         /// <summary>
         /// Kick a <see cref="GroupMember"/> from the <see cref="Group"/>.
         /// </summary>
-        public void KickMember(Identity target)
+        public void KickMember(IIdentity target)
         {
             // TODO: If WoW is anything to go by; instance groups do NOT disband like this; once the instance is closed the group will be cleaned up.// // TODO: If WoW is anything to go by; instance groups do NOT disband like this; once the instance is closed the group will be cleaned up.
             if (members.Count == 2 && IsOpenWorld)
@@ -496,9 +489,9 @@ namespace NexusForever.Game.Group
             if (kickedMember.IsPartyLeader)
                 return;
 
-            IPlayer kickedPlayer = PlayerManager.Instance.GetPlayer(kickedMember.Identity.CharacterId);
+            IPlayer kickedPlayer = PlayerManager.Instance.GetPlayer(kickedMember.Identity);
             members.Remove(kickedMember);
-            membershipsByCharacterID.Remove(kickedMember.Identity.CharacterId);
+            membershipsByCharacterID.Remove(kickedMember.Identity);
 
 
             // Tell the player they are no longer in a group.
@@ -530,9 +523,9 @@ namespace NexusForever.Game.Group
             if (!this.members.Contains(memberToRemove))
                 return;
 
-            IPlayer removedPlayer = PlayerManager.Instance.GetPlayer(memberToRemove.Identity.CharacterId);
+            IPlayer removedPlayer = PlayerManager.Instance.GetPlayer(memberToRemove.Identity);
             members.Remove(memberToRemove);
-            membershipsByCharacterID.Remove(memberToRemove.Identity.CharacterId);
+            membershipsByCharacterID.Remove(memberToRemove.Identity);
 
             if (removedPlayer != null)
             {
@@ -548,7 +541,7 @@ namespace NexusForever.Game.Group
             {
                 GroupId = Id,
                 Reason = RemoveReason.Left,
-                TargetPlayer = memberToRemove.Identity
+                TargetPlayer = memberToRemove.Identity.ToNetwork()
             });
         }
 
@@ -559,7 +552,7 @@ namespace NexusForever.Game.Group
         {
             foreach (IGroupMember member in members)
             {
-                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity.CharacterId);
+                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity);
                 if (player == null)
                     continue;
 
@@ -634,7 +627,7 @@ namespace NexusForever.Game.Group
             BroadcastPacket(new ServerGroupReadyCheck
             {
                 GroupId = Id,
-                Invoker = new Identity() { CharacterId = invoker.CharacterId, RealmId = RealmContext.Instance.RealmId },
+                Invoker = invoker.Identity.ToNetwork(),
                 Message = message,
             });
         }
@@ -646,7 +639,7 @@ namespace NexusForever.Game.Group
         /// <param name="target">The Player whose <see cref="GroupMemberInfo"/> should be updated.</param>
         /// <param name="changedFlag">The flag to change</param>
         /// <param name="addPermission">If true, adds the permission to the <see cref="GroupMember"/> otherwise revokes it.</param>
-        public void UpdateMemberRole(IGroupMember updater, Identity target, GroupMemberInfoFlags changedFlag, bool addPermission)
+        public void UpdateMemberRole(IGroupMember updater, IIdentity target, GroupMemberInfoFlags changedFlag, bool addPermission)
         {
             IGroupMember member = FindMember(target);
             if (member == null)
@@ -684,7 +677,7 @@ namespace NexusForever.Game.Group
              * It seems stupid to send GroupMemeberInfo about somone who is not in the group.
              * If they are not in the group, GroupIndex and Flags are useless.
              */
-            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity.CharacterId);
+            IPlayer leader = PlayerManager.Instance.GetPlayer(Leader.Identity);
             if (leader == null)
                 return; //TODO: What if the Leader is offline? presumable nothing, invites should be resent when the leader logs back in?
 
@@ -697,7 +690,7 @@ namespace NexusForever.Game.Group
                         Member = prospective.BuildGroupMember(),
                         Flags = 0,  // I am assuming this is useless, the client seems todo nothing with it
                         GroupIndex = 0, // I am assuming this is useless, the client seems todo nothing with it
-                        Identity = new Identity() { CharacterId = prospective.CharacterId, RealmId = RealmContext.Instance.RealmId }
+                        MemberIdentity = prospective.Identity.ToNetwork()
                     }
                 }
             );
@@ -736,7 +729,7 @@ namespace NexusForever.Game.Group
         /// Promotes a <see cref="GroupMember"/> to be the new leader of the group.
         /// </summary>
         /// <param name="newLeader"></param>
-        public void Promote(Identity newLeader)
+        public void Promote(IIdentity newLeader)
         {
             IGroupMember memberToPromote = Leader;
             foreach (IGroupMember member in members)
@@ -760,10 +753,10 @@ namespace NexusForever.Game.Group
         /// </summary>
         public IGroupMember FindMember(Identity target)
         {
-            if (!membershipsByCharacterID.ContainsKey(target.CharacterId))
+            if (!membershipsByCharacterID.ContainsKey(target.Id))
                 return null;
 
-            return membershipsByCharacterID[target.CharacterId];
+            return membershipsByCharacterID[target.Id];
         }
 
         /// <summary>
@@ -825,7 +818,7 @@ namespace NexusForever.Game.Group
         {
             foreach (var member in members)
             {
-                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity.CharacterId);
+                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity);
                 if (player == null)
                     continue;
 
@@ -834,7 +827,7 @@ namespace NexusForever.Game.Group
                     member.ZoneId = (ushort)player.Zone.Id;
                     members.ForEach(m =>
                     {
-                        IPlayer p = PlayerManager.Instance.GetPlayer(m.Identity.CharacterId);
+                        IPlayer p = PlayerManager.Instance.GetPlayer(m.Identity);
                         if (p == null)
                             return;
 
@@ -855,7 +848,7 @@ namespace NexusForever.Game.Group
             var updates = new Dictionary<ushort, ServerGroupPositionUpdate>();
             foreach (var member in members)
             {
-                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity.CharacterId);
+                IPlayer player = PlayerManager.Instance.GetPlayer(member.Identity);
                 if (player == null)
                     continue;
 
@@ -884,7 +877,7 @@ namespace NexusForever.Game.Group
             {
                 members.ForEach(m =>
                 {
-                    IPlayer p = PlayerManager.Instance.GetPlayer(m.Identity.CharacterId);
+                    IPlayer p = PlayerManager.Instance.GetPlayer(m.Identity);
                     if (p == null)
                         return;
 

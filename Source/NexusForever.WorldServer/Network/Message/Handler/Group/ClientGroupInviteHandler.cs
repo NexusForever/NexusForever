@@ -1,7 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Group;
-using NexusForever.Game.Entity;
-using NexusForever.Game.Group;
 using NexusForever.Game.Static.Group;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
@@ -10,13 +8,24 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
     public class ClientGroupInviteHandler : IMessageHandler<IWorldSession, ClientGroupInvite>
     {
-        /// <summary>
-        /// </summary>
+        #region Dependency Injection
+
+        private readonly IPlayerManager playerManager;
+        private readonly IGroupManager groupManager;
+
+        public ClientGroupInviteHandler(
+            IPlayerManager playerManager,
+            IGroupManager groupManager)
+        {
+            this.playerManager = playerManager;
+            this.groupManager  = groupManager;
+        }
+
+        #endregion
+
         public void HandleMessage(IWorldSession session, ClientGroupInvite groupInvite)
         {
-            IPlayer inviter = session.Player;
-            IPlayer invitee = PlayerManager.Instance.GetPlayer(groupInvite.InviteeName);
-
+            IPlayer invitee = playerManager.GetPlayer(groupInvite.InviteeName);
             if (invitee == null)
             {
                 GroupHelper.SendGroupResult(session, GroupResult.PlayerNotFound, targetPlayerName: groupInvite.InviteeName);
@@ -58,7 +67,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
             if (inviter.GroupMembershipForeground == null && inviter.GroupMembershipBackground == null)
             {
                 // Inviter is not part of a group - lets create a new one and invite the new guy.
-                IGroup newGroup = GroupManager.Instance.CreateGroup( inviter);
+                IGroup newGroup = groupManager.CreateGroup(inviter);
                 newGroup.Invite(inviter, invitee);
                 return;
             }

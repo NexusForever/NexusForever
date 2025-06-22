@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Quest
     {
         public void HandleMessage(IWorldSession session, ClientQuestComplete questComplete)
         {
-            session.Player.QuestManager.QuestComplete(questComplete.QuestId, questComplete.RewardSelection, questComplete.IsCommunique);
+            session.Player.QuestManager.QuestComplete(questComplete.QuestId, questComplete.RewardSelection, questComplete.IsCommunicatorMsg);
         }
     }
 }

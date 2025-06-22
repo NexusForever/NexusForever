@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ClientMatchingMatchTeleportInstance)]
-    public class ClientMatchingMatchTeleportInstance : IReadable
+    [Message(GameMessageOpcode.ClientMatchingTransferIntoMatch)]
+    public class ClientMatchingTransferIntoMatch : IReadable
     {
         public void Read(GamePacketReader reader)
         {

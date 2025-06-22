@@ -7,7 +7,7 @@ using NexusForever.Game.Abstract.Mail;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Mail;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Mail
 {
@@ -349,8 +349,8 @@ namespace NexusForever.Game.Mail
                 Flags                = Flags,
                 Sender = new Identity
                 {
-                    RealmId     = isPlayer ? RealmContext.Instance.RealmId : (ushort)0,
-                    CharacterId = isPlayer ? SenderId : 0ul
+                    RealmId = isPlayer ? RealmContext.Instance.RealmId : (ushort)0,
+                    Id      = isPlayer ? SenderId : 0ul
                 },
             };
 

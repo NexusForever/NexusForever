@@ -34,22 +34,22 @@ namespace NexusForever.Network.World.Message.Model
         {
             public class Objective
             {
-                public uint Progress { get; set; }
-                public uint Timer { get; set; }
+                public uint Progress { get; set; } // Sometimes flags, sometimes numbers
+                public uint TimeElapsed { get; set; }
             }
 
             public ushort QuestId { get; set; }
             public QuestState State { get; set; }
-            public uint RandomResultId { get; set; }
+            public uint QuestObjectiveId { get; set; } // See questObjective tbl
             public QuestStateFlags Flags { get; set; }
             public List<Objective> Objectives { get; set; } = new();
-            public uint Timer { get; set; }
+            public uint QuestTimeElapsed { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
                 writer.Write(QuestId, 15u);
                 writer.Write(State, 4u);
-                writer.Write(RandomResultId);
+                writer.Write(QuestObjectiveId);
                 writer.Write(Flags, 32u);
 
                 writer.Write(Objectives.Count);
@@ -57,10 +57,10 @@ namespace NexusForever.Network.World.Message.Model
                 foreach (Objective objective in Objectives)
                     writer.Write(objective.Progress);
 
-                writer.Write(Timer);
+                writer.Write(QuestTimeElapsed);
 
                 foreach (Objective objective in Objectives)
-                    writer.Write(objective.Timer);
+                    writer.Write(objective.TimeElapsed);
             }
         }
 

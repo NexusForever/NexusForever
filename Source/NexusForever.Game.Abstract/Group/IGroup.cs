@@ -31,21 +31,21 @@ namespace NexusForever.Game.Abstract.Group
         void DeclineInvite(string inviteeName);
         void Disband();
         void ExpireInvite(IGroupInvite invite);
-        IGroupMember FindMember(Identity target);
+        IGroupMember FindMember(IIdentity target);
         uint GetMemberIndex(IGroupMember groupMember);
         void HandleJoinRequest(IPlayer prospective);
         void Invite(IPlayer inviter, IPlayer invitedPlayer);
-        void KickMember(Identity target);
+        void KickMember(IIdentity target);
         void MarkUnit(uint unitId, GroupMarker marker);
         ulong NextInviteId();
         ulong NextMemberId();
         void PerformReadyCheck(IPlayer invoker, string message);
         void PrepareForReadyCheck();
-        void Promote(Identity newLeader);
+        void Promote(IIdentity newLeader);
         void ReferMember(IGroupMember inviter, IPlayer invitee);
         void RemoveMember(IGroupMember memberToRemove);
         void SetGroupFlags(GroupFlags newFlags);
         void UpdateLootRules(LootRule lootRulesUnderThreshold, LootRule lootRulesThresholdAndOver, LootThreshold lootThreshold, HarvestLootRule harvestLootRule);
-        void UpdateMemberRole(IGroupMember updater, Identity target, GroupMemberInfoFlags changedFlag, bool addPermission);
+        void UpdateMemberRole(IGroupMember updater, IIdentity target, GroupMemberInfoFlags changedFlag, bool addPermission);
     }
 }

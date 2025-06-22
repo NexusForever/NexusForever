@@ -1,5 +1,5 @@
-﻿using NexusForever.Game.Abstract.Group;
-using NexusForever.Game.Group;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Static.Group;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
@@ -8,17 +8,27 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
     public class ClientGroupKickHandler : IMessageHandler<IWorldSession, ClientGroupKick>
     {
-        /// <summary>
-        /// </summary>
-        public void HandleMessage(IWorldSession session, ClientGroupKick kick)
-        {
-            GroupHelper.AssertGroupId(session, kick.GroupId);
-            GroupHelper.AssertPermission(session, kick.GroupId, GroupMemberInfoFlags.CanKick);
+        #region Dependency Injection
 
-            IGroup group = GroupManager.Instance.GetGroupById(kick.GroupId);
+        private readonly IGroupManager groupManager;
+
+        public ClientGroupKickHandler(
+            IGroupManager groupManager)
+        {
+            this.groupManager = groupManager;
+        }
+
+        #endregion
+
+        public void HandleMessage(IWorldSession session, ClientGroupKick groupKick)
+        {
+            GroupHelper.AssertGroupId(session, groupKick.GroupId);
+            GroupHelper.AssertPermission(session, groupKick.GroupId, GroupMemberInfoFlags.CanKick);
+
+            IGroup group = groupManager.GetGroupById(groupKick.GroupId);
             if (group == null)
             {
-                GroupHelper.SendGroupResult(session, GroupResult.GroupNotFound, kick.GroupId, session.Player.Name);
+                GroupHelper.SendGroupResult(session, GroupResult.GroupNotFound, groupKick.GroupId, session.Player.Name);
                 return;
             }
 

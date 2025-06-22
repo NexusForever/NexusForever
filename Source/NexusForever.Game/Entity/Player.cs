@@ -4,6 +4,7 @@ using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
@@ -83,7 +84,10 @@ namespace NexusForever.Game.Entity
 
         public IAccount Account { get; private set; }
 
-        public ulong CharacterId { get; private set; }
+        public IIdentity Identity { get; private set; }
+
+        public ulong CharacterId { get => Identity.Id; }
+
         public string Name { get; private set; }
 
         public Sex Sex
@@ -275,7 +279,7 @@ namespace NexusForever.Game.Entity
             Session           = session;
 
             Account           = account;
-            CharacterId       = model.Id;
+            Identity          = new Identity{ Id = model.Id, RealmId = RealmContext.Instance.RealmId };
             Name              = model.Name;
             sex               = (Sex)model.Sex;
             race              = (Race)model.Race;
@@ -729,7 +733,7 @@ namespace NexusForever.Game.Entity
                 InnateIndex = InnateIndex
             });
 
-            Session.EnqueueMessage(new ServerUpdatePhase());
+            Session.EnqueueMessage(new ServerPhaseVisibilityWorldLocation());
 
             log.Trace($"Player {Name} took {(DateTime.UtcNow - start).TotalMilliseconds}ms to send packets after add to map.");
         }
