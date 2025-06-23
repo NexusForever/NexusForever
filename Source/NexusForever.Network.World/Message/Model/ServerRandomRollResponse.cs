@@ -13,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            Identity.Write(writer);
+            TargetPlayerIdentity.Write(writer);
             writer.Write(MinRandom);
             writer.Write(MaxRandom);
             writer.Write(RandomRollResult);

@@ -1,6 +1,7 @@
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model.Shared
+namespace NexusForever.Network.World.Message.Model.Group
 {
     public class GroupMarkerInfo : IWritable
     {

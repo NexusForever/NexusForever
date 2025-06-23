@@ -1,8 +1,8 @@
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Entity;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Group
@@ -10,7 +10,7 @@ namespace NexusForever.Game.Group
     public sealed class GroupManager : Singleton<GroupManager>, IGroupManager
     {
         private Dictionary<ulong, IGroup> groups = new Dictionary<ulong, IGroup>();
-        private Dictionary<ulong, IGroup> groupOwner = new Dictionary<ulong, IGroup>();
+        private Dictionary<IIdentity, IGroup> groupOwner = new Dictionary<IIdentity, IGroup>();
 
         /// <summary>
         /// Create a <see cref="Group"/> for supplied <see cref="Player"/>
@@ -18,12 +18,12 @@ namespace NexusForever.Game.Group
         public IGroup CreateGroup(IPlayer player)
         {
             // Player is already leader in a group
-            if (groupOwner.ContainsKey(player.CharacterId))
+            if (groupOwner.ContainsKey(player.Identity))
                 return null;
 
             IGroup group = Group.CreateOpenWorld(NextGroupId(), player);
             groups.Add(group.Id, group);
-            groupOwner.Add(player.CharacterId, group);
+            groupOwner.Add(player.Identity, group);
 
             return group;
         }
@@ -38,7 +38,7 @@ namespace NexusForever.Game.Group
                 return;
 
             groups.Remove(group.Id);
-            groupOwner.Remove(group.Leader.Identity.CharacterId);
+            groupOwner.Remove(group.Leader.Identity);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace NexusForever.Game.Group
         /// </summary>
         public IGroup GetGroupByLeader(IPlayer player)
         {
-            if (!groupOwner.TryGetValue(player.CharacterId, out var group))
+            if (!groupOwner.TryGetValue(player.Identity, out var group))
                 return null;
 
             return group;
@@ -110,7 +110,7 @@ namespace NexusForever.Game.Group
                 player.AddToGroup(membership2);
                 player.Session.EnqueueMessageEncrypted(new ServerGroupJoin
                 {
-                    TargetPlayer = player.Identity.ToNetwork(),
+                    Player = player.Identity.ToNetwork(),
                     GroupInfo = membership2.Group.Build()
                 });
             }
@@ -119,7 +119,7 @@ namespace NexusForever.Game.Group
             player.AddToGroup(membership);
             player.Session.EnqueueMessageEncrypted(new ServerGroupJoin
             {
-                TargetPlayer = player.Identity.ToNetwork(),
+                Player = player.Identity.ToNetwork(),
                 GroupInfo = membership.Group.Build()
             });
         }

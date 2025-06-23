@@ -16,7 +16,7 @@ namespace NexusForever.Network.World.Message.Model
         {
             writer.Write(RealmId, 14u);
             writer.Write(GuildId);
-            Identity.Write(writer);
+            PlayerIdentity.Write(writer);
             writer.Write(Unknown0);
             writer.Write(Unknown1);
         }

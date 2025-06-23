@@ -38,7 +38,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
             if (group.MemberCount == 2 && group.IsOpenWorld)
                 group.Disband();
             else
-                group.KickMember(kick.PlayerToKick);
+                group.KickMember(groupKick.PlayerToKick.ToGame());
         }
     }
 }

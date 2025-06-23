@@ -2,7 +2,7 @@ using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Static.Group;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using NetworkGroupMarkerInfo = NexusForever.Network.World.Message.Model.Shared.GroupMarkerInfo;
+using NetworkGroupMarkerInfo = NexusForever.Network.World.Message.Model.Group.GroupMarkerInfo;
 
 namespace NexusForever.Game.Group
 {

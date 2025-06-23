@@ -51,7 +51,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
-using NetworkGroupMember = NexusForever.Network.World.Message.Model.Shared.GroupMember;
+using NetworkGroupMember = NexusForever.Network.World.Message.Model.Group.GroupMember;
 using Path = NexusForever.Game.Static.Entity.Path;
 
 namespace NexusForever.Game.Entity

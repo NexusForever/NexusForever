@@ -5,7 +5,7 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
-    internal class ClientGroupMarkUnitHandler : IMessageHandler<IWorldSession, ClientGroupMark>
+    internal class ClientGroupMarkUnitHandler : IMessageHandler<IWorldSession, ClientGroupSetTargetMark>
     {
         #region Dependency Injection
 
@@ -19,19 +19,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientGroupMark groupMark)
+        public void HandleMessage(IWorldSession session, ClientGroupSetTargetMark clientMark)
         {
             // Players can only mark for their Active group.
-            ulong groupId = session.Player.GroupMembership1.Group.Id;
-            IGroup group = groupManager.GetGroupById(groupId);
+            IGroup group = session.Player.GroupMembershipForeground.Group;
             if (group == null)
             {
-                GroupHelper.SendGroupResult(session, GroupResult.GroupNotFound, groupId, session.Player.Name);
+                GroupHelper.SendGroupResult(session, GroupResult.GroupNotFound, group.Id, session.Player.Name);
                 return;
             }
 
-            GroupHelper.AssertPermission(session, groupId, GroupMemberInfoFlags.CanMark);
-            group.MarkUnit(groupMark.UnitId, groupMark.Marker);
+            GroupHelper.AssertPermission(session, group.Id, GroupMemberInfoFlags.CanMark);
+            group.MarkUnit(clientMark.UnitId, clientMark.TargetMarkerId);
         }
     }
 }

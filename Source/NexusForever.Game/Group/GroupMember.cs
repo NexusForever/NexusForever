@@ -1,10 +1,11 @@
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Group;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
-using NetworkGroupMember = NexusForever.Network.World.Message.Model.Shared.GroupMember;
+using NexusForever.Network.World.Message.Model.Group;
+using NetworkGroupMember = NexusForever.Network.World.Message.Model.Group.GroupMember;
 
 namespace NexusForever.Game.Group
 {
@@ -130,11 +131,7 @@ namespace NexusForever.Game.Group
         {
             return new GroupMemberInfo
             {
-                MemberIdentity = new NetworkIdentity
-                {
-                    Id = CharacterId,
-                    RealmId = RealmContext.Instance.RealmId
-                },
+                MemberIdentity = Identity.ToNetwork(),
                 Flags = Flags,
                 GroupIndex = GroupIndex,
                 Member = Build()
@@ -170,7 +167,7 @@ namespace NexusForever.Game.Group
             {
                 GroupId = Group.Id,
                 GroupMemberId = (ushort)Id,
-                TargetPlayer = Identity,
+                TargetPlayer = Identity.ToNetwork(),
                 Level = (byte)targetPlayer.Level,
                 EffectiveLevel = (byte)targetPlayer.Level,
                 Health = (ushort)targetPlayer.Health,

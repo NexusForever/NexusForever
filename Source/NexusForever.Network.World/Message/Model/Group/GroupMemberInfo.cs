@@ -1,7 +1,8 @@
 using NexusForever.Network.Message;
 using NexusForever.Game.Static.Group;
+using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model.Shared
+namespace NexusForever.Network.World.Message.Model.Group
 {
     public class GroupMemberInfo : IWritable
     {

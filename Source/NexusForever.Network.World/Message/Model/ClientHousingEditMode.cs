@@ -11,7 +11,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            Identity.Read(reader);
+            TargetPlayerIdentity.Read(reader);
             Enabled = reader.ReadBit();
         }
     }

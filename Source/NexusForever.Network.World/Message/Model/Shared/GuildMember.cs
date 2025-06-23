@@ -6,8 +6,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 {
     public class GuildMember : IWritable
     {
-        public ushort Realm { get; set; }
-        public ulong CharacterId { get; set; }
+        public Identity Identity { get; set; }
         public uint Rank { get; set; }
         public string Name { get; set; }
         public Sex Sex { get; set; } // 2
@@ -24,8 +23,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Realm, 14u);
-            writer.Write(CharacterId);
+            Identity.Write(writer);
             writer.Write(Rank);
             writer.WriteStringWide(Name);
             writer.Write(Sex, 2u);

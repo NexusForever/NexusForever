@@ -1,8 +1,9 @@
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model.Shared
+namespace NexusForever.Network.World.Message.Model.Group
 {
     public class GroupMember : IWritable
     {

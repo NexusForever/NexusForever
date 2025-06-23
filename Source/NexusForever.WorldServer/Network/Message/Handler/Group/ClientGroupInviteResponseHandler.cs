@@ -1,5 +1,5 @@
-﻿using NexusForever.Game.Abstract.Group;
-using NexusForever.Game.Group;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Static.Group;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;

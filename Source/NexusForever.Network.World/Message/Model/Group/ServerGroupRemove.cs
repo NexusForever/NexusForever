@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
     {
         public ulong GroupId { get; set; }
         public uint GroupMessageIndex { get; set; } // Unpacked but unused by client
-        public Identity TargetPlayer { get; set; } = new Identity();
+        public Identity TargetPlayer { get; set; }
         public RemoveReason Reason { get; set; }
 
         public void Write(GamePacketWriter writer)

@@ -1,3 +1,4 @@
+using NexusForever.Game.Static.Group;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model.Shared;
@@ -9,23 +10,15 @@ namespace NexusForever.Network.World.Message.Model
     {
         public class GroupMemberState
         {
-            public enum MemberCombatState
-            {
-                OutOfCombat = 0x0,
-                InCombatPvP = 0x1,
-                InCombatPvE = 0x2,
-                InCombat    = 0x3,
-            }
-
             public Identity Identity { get; set; }
             public Position Position { get; set; }
             public uint WorldZoneId { get; set; }
-            public MemberCombatState CombatState { get; set; } = 0; 
+            public MemberCombatState CombatState { get; set; } = 0;
         }
 
         public ulong GroupId { get; set; }
         public uint WorldId { get; set; }
-        public List<GroupMemberState> Updates { get; set; } = new List<GroupMemberState>();
+        public List<GroupMemberState> Updates { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

@@ -16,7 +16,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
             writer.Write(ItemId);
             writer.Write(Unknown0, 5u);
             writer.Write(Unknown1);
-            Identity.Write(writer);
+            TargetPlayerIdentity.Write(writer);
         }
     }
 }

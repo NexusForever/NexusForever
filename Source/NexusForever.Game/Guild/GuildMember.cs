@@ -153,8 +153,11 @@ namespace NexusForever.Game.Guild
             ICharacter characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
             return new NetworkGuildMember
             {
-                Realm                    = RealmContext.Instance.RealmId,
-                CharacterId              = CharacterId,
+                Identity = new Identity
+                {
+                    RealmId              = RealmContext.Instance.RealmId,
+                    Id                   = characterInfo.CharacterId
+                }.ToNetwork(),
                 Rank                     = rank.Index,
                 Name                     = characterInfo.Name,
                 Sex                      = characterInfo.Sex,

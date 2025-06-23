@@ -297,7 +297,6 @@ namespace NexusForever.Network.Message
         ClientCheat                     = 0x03E0,
         ServerRealmBroadcast            = 0x03E1,
         ClientItemGenericUnlock         = 0x0400,
-
         ServerGroupMemberAdd            = 0x0405,
         ClientGroupFlagsChanged         = 0x0406,
         ClientGroupSetMemberFlags       = 0x0408,
@@ -350,7 +349,6 @@ namespace NexusForever.Network.Message
         ServerGroupMemberInstanceUpdate = 0x0467,
         ServerGroupMemberPrimeLevelUpdate = 0x0468,
         ServerGroupPositionUpdate       = 0x0469,
-
         ClientGuildRegister             = 0x0481,
         ServerGuildFlagUpdate           = 0x048B,
         ServerGuildInfoMessageUpdate    = 0x048F,

@@ -5,7 +5,7 @@ using NexusForever.GameTable;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Social.Model;
-using NexusForever.Network.World.Message.Model.Shared.Identity;
+using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Social
 {
@@ -98,8 +98,7 @@ namespace NexusForever.Game.Social
                 GM            = GM,
                 Self          = Self,
                 AutoResponse  = AutoResponse,
-
-                From          = new Identity
+                From          = new NetworkIdentity
                 {
                     RealmId     = FromCharacterRealmId,
                     Id          = FromCharacterId

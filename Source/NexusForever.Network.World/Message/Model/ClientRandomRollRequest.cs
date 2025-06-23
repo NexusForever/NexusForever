@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ClientRandomRollRequest : IReadable
     {
         // Note that for /roll on the command line, 
-        // the Identity's realmId and
+        // the TargetPlayerIdentity's realmId and
         // characterId, as well as Unknown0 are 0.
         // As such, these fields are currently unused.
         public Identity TargetPlayerIdentity { get; } = new();
@@ -17,7 +17,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            Identity.Read(reader);
+            TargetPlayerIdentity.Read(reader);
             MinRandom = reader.ReadUInt();
             MaxRandom = reader.ReadUInt();
             Unknown0 = reader.ReadUInt();

@@ -26,6 +26,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
         public void HandleMessage(IWorldSession session, ClientGroupInvite groupInvite)
         {
             IPlayer invitee = playerManager.GetPlayer(groupInvite.InviteeName);
+            IPlayer inviter = session.Player;
+
             if (invitee == null)
             {
                 GroupHelper.SendGroupResult(session, GroupResult.PlayerNotFound, targetPlayerName: groupInvite.InviteeName);
@@ -42,7 +44,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 
             // Check if inviter faction is same as invited faction.
             // Make cross faction groups possible as an option?
-            if (invitee.Faction1 != session.Player.Faction1)
+            if (invitee.Faction1 != inviter.Faction1)
             {
                 GroupHelper.SendGroupResult(session, GroupResult.WrongFaction, targetPlayerName: groupInvite.InviteeName);
                 return;
@@ -92,5 +94,3 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
         }
     }
 }
-
-

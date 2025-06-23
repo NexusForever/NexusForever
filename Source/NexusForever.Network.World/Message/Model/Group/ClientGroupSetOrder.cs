@@ -6,13 +6,13 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGroupSetOrder)]
     public class ClientGroupSetOrder : IReadable
     {
-        public ulong Groupid { get; private set; }
+        public ulong GroupId { get; private set; }
         public Identity Member { get; private set; } = new Identity();
         public uint NewIndex { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            Groupid = reader.ReadULong();
+            GroupId = reader.ReadULong();
             Member.Read(reader);
             NewIndex = reader.ReadUInt();
         }

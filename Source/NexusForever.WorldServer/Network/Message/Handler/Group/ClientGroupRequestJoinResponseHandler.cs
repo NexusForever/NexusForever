@@ -5,7 +5,7 @@ using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
-    public class ClientGroupRequestJoinResponseHandler : IMessageHandler<IWorldSession, ClientGroupRequestJoinResponse>
+    public class ClientGroupRequestJoinResponseHandler : IMessageHandler<IWorldSession, ClientGroupJoinResponse>
     {
         #region Dependency Injection
 
@@ -19,7 +19,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientGroupRequestJoinResponse groupRequestJoinResponse)
+        public void HandleMessage(IWorldSession session, ClientGroupJoinResponse groupRequestJoinResponse)
         {
             // This comes from the leader / assist of the group, assert they are part of the correct group.
             GroupHelper.AssertGroupId(session, groupRequestJoinResponse.GroupId);

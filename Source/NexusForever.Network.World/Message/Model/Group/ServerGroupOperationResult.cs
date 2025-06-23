@@ -8,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerGroupOperationResult : IWritable
     {
         public ulong GroupId { get; private set; }
-        public Identity Identity { get; private set; } = new Identity();
+        public Identity Identity { get; private set; }
         public GroupActionResult Result { get; set; }
 
         public void Write(GamePacketWriter writer)

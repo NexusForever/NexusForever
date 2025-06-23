@@ -8,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model
     {
         public ulong GroupId { get; set; }
         public uint Unused { get; set; } // Unpacked but unused by Client
-        public List<Identity> MemberIdentities { get; set; } = new List<Identity>();
+        public List<Identity> MemberIdentities { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

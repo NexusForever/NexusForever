@@ -8,8 +8,18 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
     public class ClientGroupReadyCheckRequestHandler : IMessageHandler<IWorldSession, ClientGroupReadyCheckRequest>
     {
-        /// <summary>
-        /// </summary>
+        #region Dependency Injection
+
+        private readonly IGroupManager groupManager;
+
+        public ClientGroupReadyCheckRequestHandler(
+            IGroupManager groupManager)
+        {
+            this.groupManager = groupManager;
+        }
+
+        #endregion
+
         public void HandleMessage(IWorldSession session, ClientGroupReadyCheckRequest readyCheckRequest)
         {
             GroupHelper.AssertGroupId(session, readyCheckRequest.GroupId);

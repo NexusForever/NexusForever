@@ -9,8 +9,21 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
 {
     public class ClientGroupJoinRequestHandler : IMessageHandler<IWorldSession, ClientGroupJoinRequest>
     {
-        /// <summary>
-        /// </summary>
+        #region Dependency Injection
+
+        private readonly IPlayerManager playerManager;
+        private readonly IGroupManager groupManager;
+
+        public ClientGroupJoinRequestHandler(
+            IPlayerManager playerManager,
+            IGroupManager groupManager)
+        {
+            this.playerManager = playerManager;
+            this.groupManager  = groupManager;
+        }
+
+        #endregion
+
         public void HandleMessage(IWorldSession session, ClientGroupJoinRequest joinRequest)
         {
             IPlayer joinRequester = session.Player;
@@ -25,7 +38,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Group
             if (targetedPlayer.GroupMembershipForeground == null)
             {
                 // Player and Target are not part of a group - create one for them both so /join acts as /invite.
-                IGroup newGroup = GroupManager.Instance.CreateGroup(session.Player);
+                IGroup newGroup = GroupManager.Instance.CreateGroup(joinRequester);
                 newGroup.Invite(session.Player, targetedPlayer);
             }
             else

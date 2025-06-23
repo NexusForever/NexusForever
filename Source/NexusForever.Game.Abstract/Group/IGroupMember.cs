@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Group;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Group;
 
 namespace NexusForever.Game.Abstract.Group
 {

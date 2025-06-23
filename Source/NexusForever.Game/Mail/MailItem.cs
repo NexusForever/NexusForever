@@ -7,7 +7,7 @@ using NexusForever.Game.Abstract.Mail;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Mail;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared.Identity;
+using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Mail
 {
@@ -347,7 +347,7 @@ namespace NexusForever.Game.Mail
                 CostOnDeliveryAmount = IsCashOnDelivery && !HasPaidOrCollectedCurrency ? CurrencyAmount : 0,
                 ExpiryTimeInDays     = ExpiryTime,
                 Flags                = Flags,
-                Sender = new Identity
+                Sender               = new NetworkIdentity
                 {
                     RealmId = isPlayer ? RealmContext.Instance.RealmId : (ushort)0,
                     Id      = isPlayer ? SenderId : 0ul
