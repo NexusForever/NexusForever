@@ -23,7 +23,7 @@ namespace NexusForever.Network.World.Message.Model
         {
             writer.Write(Difficulty, 2u);
             writer.Write(PrimeLevel);
-            writer.Write(Flags);
+            writer.Write(Flags, 8u);
             writer.Write(ClientEntitySendUpdateInterval);
         }
     }
