@@ -3,7 +3,7 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Abilities
 {
     [Message(GameMessageOpcode.ServerActionSet)]
     public class ServerActionSet : IWritable
@@ -22,15 +22,15 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        public byte Index { get; set; }
-        public byte Unknown3 { get; set; }
+        public byte SpecIndex { get; set; }
+        public byte Unlocked { get; set; } // Set to 1 to unlock spec index
         public LimitedActionSetResult Result { get; set; }
-        public List<Action> Actions { get; set; } = new();
+        public List<Action> Actions { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Index, 3u);
-            writer.Write(Unknown3, 2u);
+            writer.Write(SpecIndex, 3u);
+            writer.Write(Unlocked, 2u);
             writer.Write(Result, 6u);
             writer.Write(Actions.Count, 6u);
             Actions.ForEach(e => e.Write(writer));

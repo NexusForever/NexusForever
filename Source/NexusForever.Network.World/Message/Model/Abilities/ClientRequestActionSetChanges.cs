@@ -1,6 +1,6 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Abilities
 {
     [Message(GameMessageOpcode.ClientRequestActionSetChanges)]
     public class ClientRequestActionSetChanges : IReadable
@@ -13,15 +13,15 @@ namespace NexusForever.Network.World.Message.Model
             public void Read(GamePacketReader reader)
             {
                 Action = reader.ReadUInt(18u);
-                Tier   = reader.ReadByte();
+                Tier = reader.ReadByte();
             }
         }
 
-        public List<uint> Actions { get; } = new();
-        public List<ActionTier> ActionTiers { get; } = new();
+        public List<uint> Actions { get; } = [];
+        public List<ActionTier> ActionTiers { get; } = [];
         public byte ActionSetIndex { get; private set; }
-        public List<ushort> Amps { get; } = new();
-        
+        public List<ushort> Amps { get; } = [];
+
         public void Read(GamePacketReader reader)
         {
             uint count = reader.ReadByte(4u);
@@ -30,7 +30,7 @@ namespace NexusForever.Network.World.Message.Model
 
             ActionSetIndex = reader.ReadByte(3u);
 
-            count = reader.ReadByte(5u);            
+            count = reader.ReadByte(5u);
             for (uint i = 0u; i < count; i++)
             {
                 var actionTier = new ActionTier();

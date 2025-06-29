@@ -12,6 +12,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
@@ -139,7 +140,7 @@ namespace NexusForever.Game.Map.Instance
             {
                 ShortcutSet            = ShortcutSet.FloatingSpellBar,
                 ActionBarShortcutSetId = 1553,
-                Guid                   = player.Guid
+                AssociatedUnitId                 = player.Guid
             });
         }
 

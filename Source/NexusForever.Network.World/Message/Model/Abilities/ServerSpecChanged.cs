@@ -1,10 +1,10 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Static;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Abilities
 {
-    [Message(GameMessageOpcode.ServerChangeActiveActionSet)]
-    public class ServerChangeActiveActionSet : IWritable
+    [Message(GameMessageOpcode.ServerSpecChanged)]
+    public class ServerSpecChanged : IWritable
     {
         public byte ActionSetIndex { get; set; }
         public SpecError SpecError { get; set; }

@@ -197,7 +197,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                         Id           = character.Id,
                         SpecIndex    = 0,
                         Location     = (ushort)location,
-                        ShortcutType = (byte)ShortcutType.Spell,
+                        ShortcutType = (byte)ShortcutType.SpellbookItem,
                         ObjectId     = spell4Entry.Spell4BaseIdBaseSpell,
                         Tier         = 1
                     });

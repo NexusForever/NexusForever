@@ -1,12 +1,12 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Abilities
 {
-    [Message(GameMessageOpcode.ServerAbilities)]
-    public class ServerSpellList : IWritable
+    [Message(GameMessageOpcode.ServerAbilityBook)]
+    public class ServerAbilityBook : IWritable
     {
         public class Spell : IWritable
-        {   
+        {
             public uint Spell4BaseId { get; set; }
             public byte TierIndexAchieved { get; set; }
             public byte SpecIndex { get; set; }

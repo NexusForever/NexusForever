@@ -41,6 +41,7 @@ using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
@@ -716,7 +717,7 @@ namespace NexusForever.Game.Entity
             Account.RewardPropertyManager.SendInitialPackets();
             ResurrectionManager.SendInitialPackets();
 
-            Session.EnqueueMessageEncrypted(new ServerPlayerInnate
+            Session.EnqueueMessageEncrypted(new ServerStanceChanged
             {
                 InnateIndex = InnateIndex
             });
