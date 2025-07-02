@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Mail;
 
 namespace NexusForever.Game.Abstract.Mail
 {

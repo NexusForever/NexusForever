@@ -11,6 +11,7 @@ using NexusForever.Game.Static.Mail;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Mail;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared.Game;
 
@@ -141,15 +142,15 @@ namespace NexusForever.Game.Entity
 
                 // TODO: Check that the player is not blocked
 
-                if (mailSend.CreditsRequested > 0ul && mailSend.CreditsSent > 0ul)
+                if (mailSend.CashOnDeliveryAmount > 0ul && mailSend.CreditsSent > 0ul)
                     return GenericError.MailCanNotHaveCoDAndGift;
 
-                if (mailSend.CreditsRequested > 0ul && mailSend.Items.All(i => i == 0ul))
+                if (mailSend.CashOnDeliveryAmount > 0ul && mailSend.Items.All(i => i == 0ul))
                     return GenericError.MailFailedToCreate;
 
                 if (mailSend.Items.Any(i => i != 0ul))
                 {
-                    if (!IsTargetMailBoxInRange(mailSend.UnitId))
+                    if (!IsTargetMailBoxInRange(mailSend.MailboxUnitId))
                         return GenericError.MailMailBoxOutOfRange;
 
                     foreach (ulong itemGuid in mailSend.Items.Where(i => i != 0ul))
@@ -166,7 +167,7 @@ namespace NexusForever.Game.Entity
                     }
                 }
 
-                uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
+                uint cost = CalculateMailCost(mailSend.DeliverySpeed, items);
                 if (!player.CurrencyManager.CanAfford(CurrencyType.Credits, cost))
                     return GenericError.MailInsufficientFunds;
 
@@ -187,8 +188,8 @@ namespace NexusForever.Game.Entity
                     Subject              = mailSend.Subject,
                     Body                 = mailSend.Message,
                     MoneyToGive          = mailSend.CreditsSent,
-                    CodAmount            = mailSend.CreditsRequested,
-                    DeliveryTime         = mailSend.DeliveryTime
+                    CodAmount            = mailSend.CashOnDeliveryAmount,
+                    DeliverySpeed         = mailSend.DeliverySpeed
                 };
 
                 foreach (IItem item in items)
@@ -196,7 +197,7 @@ namespace NexusForever.Game.Entity
 
                 SendMail(parameters, items);
 
-                uint cost = CalculateMailCost(mailSend.DeliveryTime, items);
+                uint cost = CalculateMailCost(mailSend.DeliverySpeed, items);
                 player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, cost);
 
                 if (mailSend.CreditsSent > 0ul)
@@ -214,7 +215,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Send mail to self from a creature.
         /// </summary>
-        public void SendMail(uint creatureId, DeliveryTime time, uint subject, uint body, IEnumerable<uint> itemIds)
+        public void SendMail(uint creatureId, DeliverySpeed speed, uint subject, uint body, IEnumerable<uint> itemIds)
         {
             if (GameTableManager.Instance.Creature2.GetEntry(creatureId) == null)
                 throw new ArgumentException($"Invalid creature {creatureId} for mail sender!");
@@ -232,7 +233,7 @@ namespace NexusForever.Game.Entity
                 CreatureId           = creatureId,
                 SubjectStringId      = subject,
                 BodyStringId         = body,
-                DeliveryTime         = time
+                DeliverySpeed        = speed
             };
 
             var items = new List<IItem>();
@@ -267,7 +268,7 @@ namespace NexusForever.Game.Entity
             outgoingMail.Enqueue(mail);
         }
 
-        private uint CalculateMailCost(DeliveryTime time, List<IItem> items)
+        private uint CalculateMailCost(DeliverySpeed time, List<IItem> items)
         {
             GameFormulaEntry GetMailParameters()
             {
@@ -276,9 +277,9 @@ namespace NexusForever.Game.Entity
 
                 return time switch
                 {
-                    DeliveryTime.Instant => GameTableManager.Instance.GameFormula.GetEntry(861),
-                    DeliveryTime.Hour => GameTableManager.Instance.GameFormula.GetEntry(862),
-                    DeliveryTime.Day => GameTableManager.Instance.GameFormula.GetEntry(863),
+                    DeliverySpeed.Instant => GameTableManager.Instance.GameFormula.GetEntry(861),
+                    DeliverySpeed.Hour => GameTableManager.Instance.GameFormula.GetEntry(862),
+                    DeliverySpeed.Day => GameTableManager.Instance.GameFormula.GetEntry(863),
                     _ => null
                 };
             }
@@ -374,7 +375,7 @@ namespace NexusForever.Game.Entity
                     MessageType          = SenderType.Player,
                     Subject              = $"Cash from: {mail.Subject}",
                     MoneyToGive          = mail.CurrencyAmount,
-                    DeliveryTime         = DeliveryTime.Instant
+                    DeliverySpeed        = DeliverySpeed.Instant
                 };
 
                 SendMail(parameters, Enumerable.Empty<Item>());
