@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pregame
 {
     [Message(GameMessageOpcode.ClientCharacterCreate)]
     public class ClientCharacterCreate : IReadable
@@ -15,8 +15,8 @@ namespace NexusForever.Network.World.Message.Model
         public void Read(GamePacketReader reader)
         {
             CharacterCreationId = reader.ReadUInt();
-            Name                = reader.ReadWideString();
-            Path                = reader.ReadByte(3);
+            Name = reader.ReadWideString();
+            Path = reader.ReadByte(3);
 
             uint customisationCount = reader.ReadUInt();
             for (uint i = 0u; i < customisationCount; i++)

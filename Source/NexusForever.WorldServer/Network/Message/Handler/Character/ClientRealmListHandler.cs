@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Server;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Network.World.Message.Static;
 using NetworkMessage = NexusForever.Network.Message.Model.Shared.Message;
 
@@ -35,7 +35,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 if (!server.IsOnline && server.Model.Id != realmContext.RealmId)
                     status = RealmStatus.Down;
 
-                serverRealmList.Realms.Add(new ServerRealmList.RealmInfo
+                serverRealmList.Realms.Add(new RealmInfo
                 {
                     RealmId          = server.Model.Id,
                     RealmName        = server.Model.Name,
@@ -43,7 +43,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                     Status           = status,
                     Population       = RealmPopulation.Low,
                     Unknown8         = new byte[16],
-                    AccountRealmInfo = new ServerRealmList.RealmInfo.AccountRealmData
+                    AccountRealmInfo = new RealmInfo.AccountRealmData
                     {
                         RealmId = server.Model.Id
                     }

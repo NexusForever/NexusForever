@@ -1,8 +1,9 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Static;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pregame
 {
+    // Client only processes message when on RealmSelect screen.
     [Message(GameMessageOpcode.ServerNewRealm)]
     public class ServerNewRealm : IWritable
     {
@@ -18,23 +19,29 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        public uint Unknown0 { get; set; } // not used in packet handler
+        [Flags]
+        public enum RealmFlag
+        {
+            FactionRestricted = 16,
+        }
+
+        public uint Unused { get; set; }
         public byte[] SessionKey { get; set; }
         public Gateway GatewayData { get; set; }
-        public bool Unknown1C { get; set; } // not used in packet handler
+        public bool Unused2 { get; set; }
         public string RealmName { get; set; }
-        public uint Flags { get; set; }
+        public RealmFlag Flags { get; set; }
         public RealmType Type { get; set; }
         public uint NoteTextId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0);
+            writer.Write(Unused);
             writer.WriteBytes(SessionKey, 16u);
             GatewayData.Write(writer);
-            writer.Write(Unknown1C);
+            writer.Write(Unused2);
             writer.WriteStringWide(RealmName);
-            writer.Write(Flags);
+            writer.Write(Flags, 32u);
             writer.Write(Type, 2u);
             writer.Write(NoteTextId, 21u);
         }

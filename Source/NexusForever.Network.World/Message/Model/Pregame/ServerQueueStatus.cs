@@ -1,7 +1,8 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pregame
 {
+    // Client only processes message when on CharacterSelect screen.
     [Message(GameMessageOpcode.ServerQueueStatus)]
     public class ServerQueueStatus : IWritable
     {

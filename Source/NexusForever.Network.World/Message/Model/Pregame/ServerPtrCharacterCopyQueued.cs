@@ -2,8 +2,9 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerPendingWorldRemovalCancel)]
-    public class ServerPendingWorldRemovalCancel : IWritable
+    // Can be sent to client while player is in Game or on CharacterSelect screen.
+    [Message(GameMessageOpcode.ServerPtrCharacterCopyQueued)]
+    public class ServerPtrCharacterCopyQueued : IWritable
     {
         public void Write(GamePacketWriter writer)
         {
