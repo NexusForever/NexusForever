@@ -1,11 +1,11 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Mail
 {
     [Message(GameMessageOpcode.ClientMailDelete)]
     public class ClientMailDelete : IReadable
     {
-        public List<ulong> MailList { get; } = new();
+        public List<ulong> MailList { get; } = [];
 
         public void Read(GamePacketReader reader)
         {

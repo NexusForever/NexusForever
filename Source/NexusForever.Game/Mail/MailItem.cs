@@ -6,7 +6,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Mail;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Mail;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Mail;
 using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Mail
@@ -77,7 +77,7 @@ namespace NexusForever.Game.Mail
         }
         private MailFlag flags;
 
-        public DeliveryTime DeliveryTime { get; }
+        public DeliverySpeed DeliverySpeed { get; }
         public DateTime CreateTime { get; }
         public float ExpiryTime => 30f; // TODO: Make this configurable
 
@@ -112,7 +112,7 @@ namespace NexusForever.Game.Mail
             IsCashOnDelivery           = Convert.ToBoolean(model.IsCashOnDelivery);
             hasPaidOrCollectedCurrency = Convert.ToBoolean(model.HasPaidOrCollectedCurrency);
             flags                      = (MailFlag)model.Flags;
-            DeliveryTime               = (DeliveryTime)model.DeliveryTime;
+            DeliverySpeed               = (DeliverySpeed)model.DeliveryTime;
             CreateTime                 = model.CreateTime;
 
             foreach (CharacterMailAttachmentModel mailAttachment in model.Attachment)
@@ -155,7 +155,7 @@ namespace NexusForever.Game.Mail
             else
                 CurrencyAmount = parameters.MoneyToGive;
 
-            DeliveryTime = parameters.DeliveryTime;
+            DeliverySpeed = parameters.DeliverySpeed;
             CreateTime   = DateTime.Now;
 
             saveMask     = MailSaveMask.Create;
@@ -191,7 +191,7 @@ namespace NexusForever.Game.Mail
                         IsCashOnDelivery           = Convert.ToByte(IsCashOnDelivery),
                         HasPaidOrCollectedCurrency = Convert.ToByte(HasPaidOrCollectedCurrency),
                         Flags                      = (byte)Flags,
-                        DeliveryTime               = (byte)DeliveryTime,
+                        DeliveryTime               = (byte)DeliverySpeed,
                         CreateTime                 = CreateTime
                     });
                 }
@@ -290,19 +290,19 @@ namespace NexusForever.Game.Mail
         }
 
         /// <summary>
-        /// Returns whether this item is ready to be delivered based on <see cref="DeliveryTime"/>.
+        /// Returns whether this item is ready to be delivered based on <see cref="DeliverySpeed"/>.
         /// </summary>
         public bool IsReadyToDeliver()
         {
-            if (DeliveryTime == DeliveryTime.Instant)
+            if (DeliverySpeed == DeliverySpeed.Instant)
                 return true;
 
-            if (DeliveryTime == DeliveryTime.Hour)
+            if (DeliverySpeed == DeliverySpeed.Hour)
                 return DateTime.Now
                     .Subtract(CreateTime)
                     .TotalHours > 1;
 
-            if (DeliveryTime == DeliveryTime.Day)
+            if (DeliverySpeed == DeliverySpeed.Day)
                 return DateTime.Now
                     .Subtract(CreateTime)
                     .TotalDays > 1;
@@ -339,11 +339,11 @@ namespace NexusForever.Game.Mail
                 SenderType           = SenderType,
                 Subject              = Subject,
                 Message              = Message,
-                TextEntrySubject     = TextEntrySubject,
-                TextEntryMessage     = TextEntryMessage,
-                CreatureId           = !isPlayer ? CreatureId : 0,
-                CurrencyGiftType     = 0,
-                CurrencyGiftAmount   = !IsCashOnDelivery && !HasPaidOrCollectedCurrency ? CurrencyAmount : 0,
+                SubjectStringId     = TextEntrySubject,
+                BodyStringId     = TextEntryMessage,
+                FromCreatureId           = !isPlayer ? CreatureId : 0,
+                CurrencySentType     = 0,
+                CurrencySentAmount   = !IsCashOnDelivery && !HasPaidOrCollectedCurrency ? CurrencyAmount : 0,
                 CostOnDeliveryAmount = IsCashOnDelivery && !HasPaidOrCollectedCurrency ? CurrencyAmount : 0,
                 ExpiryTimeInDays     = ExpiryTime,
                 Flags                = Flags,

@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Mail
 {
-    public enum DeliveryTime
+    public enum DeliverySpeed
     {
         Instant = 0,
         Hour    = 1,
