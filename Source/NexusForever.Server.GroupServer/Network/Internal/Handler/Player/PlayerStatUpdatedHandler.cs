@@ -40,9 +40,9 @@ namespace NexusForever.Server.GroupServer.Network.Internal.Handler.Player
         private static bool IsStatValid(Stat stat)
         {
             return stat is Stat.Level
-                or Stat.MentorLevel
+                or Stat.EffectiveLevel
                 or Stat.Health
-                or Stat.Shield
+                or Stat.ShieldCapacity
                 or Stat.InterruptArmour
                 or Stat.Focus;
         }

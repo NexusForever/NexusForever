@@ -7,6 +7,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Entity;
 
 namespace NexusForever.Game.Entity
 {
@@ -25,8 +26,8 @@ namespace NexusForever.Game.Entity
 
                 player.EnqueueToVisible(new ServerTitleSet
                 {
-                    Guid  = player.Guid,
-                    Title = ActiveTitleId
+                    UnitId = player.Guid,
+                    CharacterTitleId = ActiveTitleId
                 }, true);
             }
         }

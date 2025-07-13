@@ -30,7 +30,7 @@ namespace NexusForever.Game.Entity
 
             if (model.EntityVendor != null)
             {
-                CreateFlags |= EntityCreateFlag.Vendor;
+                CreateFlags |= EntityCreateFlag.IsVendor;
                 VendorInfo = new VendorInfo(model);
             }
         }
@@ -40,7 +40,7 @@ namespace NexusForever.Game.Entity
             return new NonPlayerEntityModel
             {
                 CreatureId = CreatureId,
-                QuestChecklistIdx = 0
+                ObjectiveIndex = 0
             };
         }
 

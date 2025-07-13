@@ -45,9 +45,9 @@ namespace NexusForever.Game.Entity
         public void OpenDoor()
         {
             SetStat(Stat.StandState, StandState.State1);
-            EnqueueToVisible(new ServerEmote
+            EnqueueToVisible(new ServerEmoteAndStandState
             {
-                Guid       = Guid,
+                UnitId     = Guid,
                 StandState = StandState.State1
             });
         }
@@ -58,9 +58,9 @@ namespace NexusForever.Game.Entity
         public void CloseDoor()
         {
             SetStat(Stat.StandState, StandState.State0);
-            EnqueueToVisible(new ServerEmote
+            EnqueueToVisible(new ServerEmoteAndStandState
             {
-                Guid       = Guid,
+                UnitId     = Guid,
                 StandState = StandState.State0
             });
         }

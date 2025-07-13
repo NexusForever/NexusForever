@@ -106,8 +106,8 @@ namespace NexusForever.Game.Entity
 
         public uint Shield
         {
-            get => GetStatInteger(Stat.Shield) ?? 0u;
-            set => SetStat(Stat.Shield, Math.Clamp(value, 0u, MaxShieldCapacity)); // TODO: Handle overshield
+            get => GetStatInteger(Stat.ShieldCapacity) ?? 0u;
+            set => SetStat(Stat.ShieldCapacity, Math.Clamp(value, 0u, MaxShieldCapacity)); // TODO: Handle overshield
         }
 
         public uint MaxShieldCapacity
@@ -130,8 +130,8 @@ namespace NexusForever.Game.Entity
 
         public bool Sheathed
         {
-            get => Convert.ToBoolean(GetStatInteger(Stat.Sheathed) ?? 0u);
-            set => SetStat(Stat.Sheathed, Convert.ToUInt32(value));
+            get => Convert.ToBoolean(GetStatInteger(Stat.WeaponSheatheState) ?? 0u);
+            set => SetStat(Stat.WeaponSheatheState, Convert.ToUInt32(value));
         }
 
         public StandState StandState
@@ -141,9 +141,9 @@ namespace NexusForever.Game.Entity
             {
                 SetStat(Stat.StandState, (uint)value);
 
-                EnqueueToVisible(new ServerEmote
+                EnqueueToVisible(new ServerEmoteAndStandState
                 {
-                    Guid       = Guid,
+                    UnitId       = Guid,
                     StandState = value
                 });
             }
@@ -319,7 +319,7 @@ namespace NexusForever.Game.Entity
         {
             var entityCreatePacket = new ServerEntityCreate
             {
-                Guid         = Guid,
+                UnitId       = Guid,
                 Type         = Type,
                 EntityModel  = BuildEntityModel(),
                 CreateFlags  = CreateFlags,
@@ -332,7 +332,7 @@ namespace NexusForever.Game.Entity
                         Data  = s.Data
                     })
                     .ToList(),
-                Time         = MovementManager.GetTime(),
+                CommandTime  = MovementManager.GetTime(),
                 Commands     = (isLoading && MovementManager.RequiresSynchronisation ? MovementManager.GetInitialNetworkEntityCommands() : MovementManager.GetNetworkEntityCommands()).ToList(),
                 VisibleItems = itemVisuals
                     .Select(v => v.Value.Build())
@@ -340,8 +340,8 @@ namespace NexusForever.Game.Entity
                 Properties   = properties.Values
                     .Select(p => p.Build())
                     .ToList(),
-                Faction1     = Faction1,
-                Faction2     = Faction2,
+                MutableFactionId  = Faction1,
+                BaseFactionId     = Faction2,
                 DisplayInfo  = DisplayInfo,
                 OutfitInfo   = OutfitInfo
             };
@@ -354,9 +354,9 @@ namespace NexusForever.Game.Entity
                 {
                     entityCreatePacket.WorldPlacementData = new ServerEntityCreate.WorldPlacement
                     {
-                        Type         = 1,
-                        ActivePropId = ActivePropId,
-                        SocketId     = WorldSocketId
+                        Type          = 1,
+                        ActivePropId  = ActivePropId,
+                        WorldSocketId = WorldSocketId
                     };
                 }
             }
@@ -451,11 +451,11 @@ namespace NexusForever.Game.Entity
         {
             return new ServerEntityVisualUpdate
             {
-                UnitId      = Guid,
-                CreatureId  = CreatureId,
-                DisplayInfo = DisplayInfo,
-                OutfitInfo  = OutfitInfo,
-                ItemVisuals = itemVisuals.Values
+                UnitId              = Guid,
+                Creature2Id         = CreatureId,
+                DisplayInfoId       = DisplayInfo,
+                DisplayOutfitInfoId = OutfitInfo,
+                ItemVisuals         = itemVisuals.Values
                     .Select(v => v.Build())
                     .ToList()
             };
@@ -813,8 +813,8 @@ namespace NexusForever.Game.Entity
 
             EnqueueToVisible(new ServerEntityFaction
             {
-                UnitId  = Guid,
-                Faction = factionId
+                UnitId     = Guid,
+                Faction2Id = factionId
             });
         }
 

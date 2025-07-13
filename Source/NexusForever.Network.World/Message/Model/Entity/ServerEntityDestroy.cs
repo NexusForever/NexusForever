@@ -5,13 +5,13 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerEntityDestroy)]
     public class ServerEntityDestroy : IWritable
     {
-        public uint Guid { get; set; }
-        public bool Unknown0 { get; set; }
+        public uint UnitId { get; set; }
+        public bool UseDeathAnimation { get; set; } // Only applies to units of type Chest
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
-            writer.Write(Unknown0);
+            writer.Write(UnitId);
+            writer.Write(UseDeathAnimation);
         }
     }
 }

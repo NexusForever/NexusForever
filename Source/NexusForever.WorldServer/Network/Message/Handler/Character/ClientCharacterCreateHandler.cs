@@ -222,7 +222,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 character.Stat.Add(new CharacterStatModel
                 {
                     Id    = character.Id,
-                    Stat  = (byte)Stat.Dash,
+                    Stat  = (byte)Stat.DashEnergy,
                     Value = 200
                 });
                 character.Stat.Add(new CharacterStatModel
@@ -240,7 +240,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 character.Stat.Add(new CharacterStatModel
                 {
                     Id    = character.Id,
-                    Stat  = (byte)Stat.Sheathed,
+                    Stat  = (byte)Stat.WeaponSheatheState,
                     Value = 1
                 });
 

@@ -110,7 +110,7 @@ namespace NexusForever.Game.Combat
             owner.EnqueueToVisible(new ServerEntityThreatUpdate
             {
                 UnitId      = owner.Guid,
-                TargetId    = hostileEntity.HatedUnitId,
+                TargetUnitId = hostileEntity.HatedUnitId,
                 ThreatLevel = 0
             });
 

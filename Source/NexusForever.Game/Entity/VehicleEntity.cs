@@ -8,6 +8,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Entity;
 using NetworkVehiclePassenger = NexusForever.Network.World.Message.Model.Shared.VehiclePassenger;
 
 namespace NexusForever.Game.Entity
@@ -43,14 +44,14 @@ namespace NexusForever.Game.Entity
 
             SetStat(Stat.Health, 800u);
             SetStat(Stat.Level, 3u);
-            SetStat(Stat.Sheathed, 800u);
+            SetStat(Stat.WeaponSheatheState, 800u);
         }
 
         protected override IEntityModel BuildEntityModel()
         {
             return new VehicleEntityModel
             {
-                CreatureId    = CreatureEntry.Id,
+                Creature2Id   = CreatureEntry.Id,
                 UnitVehicleId = (ushort)VehicleEntry.Id,
                 Passengers    = passengers
                     .Select(p => new NetworkVehiclePassenger
@@ -166,10 +167,10 @@ namespace NexusForever.Game.Entity
 
             // sets vehicle guid, seat type and seat position to local self entity at client
             // might not be correct as ServerVehiclePassengerAdd does this too, used for changing seats instead?
-            player.Session.EnqueueMessageEncrypted(new Server089B
+            player.Session.EnqueueMessageEncrypted(new ServerMount
             {
-                Self         = passenger.Guid,
-                Vehicle      = Guid,
+                PassengerUnitId = passenger.Guid,
+                MountUnitId  = Guid,
                 SeatType     = passenger.SeatType,
                 SeatPosition = passenger.SeatPosition
             });
@@ -188,8 +189,8 @@ namespace NexusForever.Game.Entity
 
                 EnqueueToVisible(new ServerEntityFaction
                 {
-                    UnitId  = Guid,
-                    Faction = player.Faction1
+                    UnitId     = Guid,
+                    Faction2Id = player.Faction1
                 }, true);
 
                 Faction1 = player.Faction1;

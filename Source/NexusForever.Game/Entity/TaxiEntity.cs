@@ -5,9 +5,9 @@ using NexusForever.Network.World.Entity;
 
 namespace NexusForever.Game.Entity
 {
-    public class TaxiEntity : WorldEntity, ITaxiEntity
+    public class TaxiEntity : VehicleEntity, ITaxiEntity
     {
-        public override EntityType Type => EntityType.Chest;
+        public override EntityType Type => EntityType.Taxi;
 
         #region Dependency Injection
 

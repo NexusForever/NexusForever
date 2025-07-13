@@ -45,6 +45,7 @@ using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Pregame;
+using NexusForever.Network.World.Message.Model.Entity;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
@@ -312,12 +313,11 @@ namespace NexusForever.Game.Entity
                 stats.Add((Stat)statModel.Stat, statValue);
             }
 
-            //SetStat(Stat.Health, 1);
-            SetStat(Stat.Sheathed, 1u);
+            SetStat(Stat.WeaponSheatheState, 1u);
             // temp
-            SetStat(Stat.Dash, 200F);
+            SetStat(Stat.DashEnergy, 200F);
             // sprint
-            SetStat(Stat.Resource0, 500f);
+            SetStat(Stat.SprintEnergy, 500f);
 
             CalculateDefaultProperties();
             SetBaseCharacterProperties();
@@ -848,8 +848,8 @@ namespace NexusForever.Game.Entity
             {
                 Session.EnqueueMessageEncrypted(new ServerEntityDestroy
                 {
-                    Guid     = entity.Guid,
-                    Unknown0 = true
+                    UnitId              = entity.Guid,
+                    UseDeathAnimation   = true
                 });
             }
         }
@@ -1343,8 +1343,8 @@ namespace NexusForever.Game.Entity
             // TODO: note sure if this should be handled better? Should Race and Sex be on the world entity?
             // when emitting a visual update, include player specific properties
             ServerEntityVisualUpdate update = base.BuildVisualUpdate();
-            update.Race = (byte)Race;
-            update.Sex  = (byte)Sex;
+            update.RaceId    = (byte)Race;
+            update.GenderId  = (byte)Sex;
             return update;
         }
 

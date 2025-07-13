@@ -3,7 +3,7 @@
 namespace NexusForever.Network.World.Message.Model
 {
     // Message is used to change the interval at which the client sends entity updates.
-    // This can be sent at any time but will get overwritten by the ServiceInstanceSettings message.
+    // This can be sent at any time but will get overwritten by the ServerInstanceSettings message.
 
     [Message(GameMessageOpcode.ServerClientEntityUpdateInterval)]
     public class ServerClientEntityUpdateInterval : IWritable

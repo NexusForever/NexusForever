@@ -2,7 +2,7 @@
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Internal.Message.Player;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Entity;
 using Rebus.Handlers;
 
 namespace NexusForever.WorldServer.Network.Internal.Handler.Player
@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Player
 
             // TODO: Rawaho: not thread safe
             player.GroupAssociation = message.Group?.Id ?? 0;
-            player.EnqueueToVisible(new ServerEntityGroupAssociation
+            player.EnqueueToVisible(new ServerUnitGroupChanged
             {
                 UnitId  = player.Guid,
                 GroupId = player.GroupAssociation

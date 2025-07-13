@@ -1,9 +1,9 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Entity
 {
-    [Message(GameMessageOpcode.ServerEntityGroupAssociation)]
-    public class ServerEntityGroupAssociation : IWritable
+    [Message(GameMessageOpcode.ServerUnitGroupChanged)]
+    public class ServerUnitGroupChanged : IWritable
     {
         public uint UnitId { get; set; }
         public ulong GroupId { get; set; }
