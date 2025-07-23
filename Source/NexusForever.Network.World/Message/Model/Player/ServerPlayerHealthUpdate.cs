@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Player
 {
     /// <summary>
     /// This is sent to the Player being updated. Forces a refresh on the health bar of that user. UnitId always matches player ID of the client.

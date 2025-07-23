@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Matching.Match;
-using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Player;
 using NexusForever.Game.Static.Matching;
 using NexusForever.Script;
 using NexusForever.Script.Template;

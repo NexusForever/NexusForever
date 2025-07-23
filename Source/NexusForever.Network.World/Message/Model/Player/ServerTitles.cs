@@ -1,20 +1,20 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Player
 {
     [Message(GameMessageOpcode.ServerTitles)]
     public class ServerTitles : IWritable
     {
         public class Title : IWritable
         {
-            public ushort TitleId { get; set; }
+            public ushort CharacterTitleId { get; set; }
             public bool Revoked { get; set; }
             public bool InSchedule { get; set; }
             public uint TimeRemaining { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(TitleId, 14u);
+                writer.Write(CharacterTitleId, 14u);
                 writer.Write(Revoked);
                 writer.Write(InSchedule);
                 writer.Write(TimeRemaining);

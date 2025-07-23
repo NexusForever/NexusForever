@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Reputation
+namespace NexusForever.Network.World.Message.Model.Player
 {
     // For temporarily overriding a player's reputation value for a specific faction.
     // Does not affect the underlying reputation value sent in ServerReputationUpdate.

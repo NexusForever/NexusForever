@@ -1,12 +1,12 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Static.Player;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Player
 {
     [Message(GameMessageOpcode.ServerResurrectionUpdate)]
     public class ServerResurrectionUpdate : IWritable
     {
-        public ResurrectionType ShowRezFlags { get; set; } // 8
+        public ResurrectionType ShowRezFlags { get; set; }
         public bool HasCasterRezRequest { get; set; }
 
         public void Write(GamePacketWriter writer)

@@ -1,17 +1,17 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Player
 {
     [Message(GameMessageOpcode.ServerPlayerChanged)]
     public class ServerPlayerChanged : IWritable
     {
-        public uint Guid { get; set; }
-        public uint Unknown1 { get; set; }
+        public uint UnitId { get; set; }
+        public uint Unused { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
-            writer.Write(Unknown1);
+            writer.Write(UnitId);
+            writer.Write(Unused);
         }
     }
 }

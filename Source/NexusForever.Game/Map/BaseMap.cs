@@ -9,6 +9,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Map.Instance;
+using NexusForever.Game.Static.Player;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Map;
 using NexusForever.GameTable.Model;

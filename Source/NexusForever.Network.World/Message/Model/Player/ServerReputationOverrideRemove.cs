@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Reputation
+namespace NexusForever.Network.World.Message.Model.Player
 {
     [Message(GameMessageOpcode.ServerReputationOverrideRemove)]
     public class ServerReputationOverrideRemove : IWritable

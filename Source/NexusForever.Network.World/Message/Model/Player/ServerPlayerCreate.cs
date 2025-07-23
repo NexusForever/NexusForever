@@ -3,7 +3,7 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 using FactionId = NexusForever.Game.Static.Reputation.Faction;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Player
 {
     [Message(GameMessageOpcode.ServerPlayerCreate)]
     public class ServerPlayerCreate : IWritable
@@ -36,14 +36,14 @@ namespace NexusForever.Network.World.Message.Model
 
         public class Pet : IWritable
         {
-            public uint Guid { get; set; }
+            public uint PetId { get; set; }
             public uint SummoningSpell { get; set; }
             public byte ValidStances { get; set; }
             public byte Stance { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
-                writer.Write(Guid);
+                writer.Write(PetId);
                 writer.Write(SummoningSpell, 18u);
                 writer.Write(ValidStances, 5u);
                 writer.Write(Stance, 5u);
@@ -62,7 +62,7 @@ namespace NexusForever.Network.World.Message.Model
             }
         }
 
-        public List<InventoryItem> Inventory { get; } = new();
+        public List<InventoryItem> Inventory { get; } = [];
         public ulong[] Money { get; } = new ulong[16];
         public uint Xp { get; set; }
         public uint RestBonusXp { get; set; }
@@ -71,15 +71,15 @@ namespace NexusForever.Network.World.Message.Model
         public uint DailyElderPoints { get; set; }
         public byte SpecIndex { get; set; }
         public ushort BonusPower { get; set; }
-        public uint UnknownA0 { get; set; }
+        public uint BonusAbilityTierPoints { get; set; }
         public Faction FactionData { get; set; }
-        public List<Pet> Pets { get; } = new();
+        public List<Pet> Pets { get; } = [];
         public uint InputKeySet { get; set; }
-        public ushort UnknownBC { get; set; }
+        public ushort BindPointId { get; set; }
         public int ActiveCostumeIndex { get; set; }
-        public uint UnknownC4 { get; set; }
-        public uint UnknownC8 { get; set; }
-        public List<ushort> KnownDyes { get; } = new();
+        public uint AttributePoints { get; set; }
+        public uint PvpFlagDuration { get; set; }
+        public List<ushort> KnownDyes { get; } = [];
         public ushort[] TradeskillMaterials { get; set; } = new ushort[512];
         public float GearScore { get; set; }
         public bool IsPvpServer { get; set; }
@@ -101,7 +101,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(DailyElderPoints);
             writer.Write(SpecIndex, 3u);
             writer.Write(BonusPower);
-            writer.Write(UnknownA0);
+            writer.Write(BonusAbilityTierPoints);
 
             FactionData.Write(writer);
 
@@ -109,10 +109,10 @@ namespace NexusForever.Network.World.Message.Model
             Pets.ForEach(p => p.Write(writer));
 
             writer.Write(InputKeySet);
-            writer.Write(UnknownBC);
+            writer.Write(BindPointId);
             writer.Write(ActiveCostumeIndex);
-            writer.Write(UnknownC4);
-            writer.Write(UnknownC8);
+            writer.Write(AttributePoints);
+            writer.Write(PvpFlagDuration);
 
             writer.Write((byte)KnownDyes.Count, 6u);
             KnownDyes.ForEach(a => writer.Write(a));

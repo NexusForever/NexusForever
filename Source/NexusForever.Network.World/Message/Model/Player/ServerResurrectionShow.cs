@@ -1,21 +1,21 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Static.Player;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Player
 {
     [Message(GameMessageOpcode.ServerResurrectionShow)]
     public class ServerResurrectionShow : IWritable
     {
-        public uint GhostId { get; set; }
+        public uint GhostUnitId { get; set; }
         public uint RezCost { get; set; }
 
         /// <summary>
         /// Set the amount of time, in milliseconds, 
         /// </summary>
-        public uint TimeUntilRezMs { get; set; }
+        public uint DeathPenaltyLength { get; set; }
 
-        public bool Dead { get; set; }
-        public ResurrectionType ShowRezFlags { get; set; } // 8
+        public bool PlayerIsDead { get; set; }
+        public ResurrectionType ShowRezFlags { get; set; }
         public bool HasCasterRezRequest { get; set; }
 
         /// <summary>
@@ -27,10 +27,10 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(GhostId);
+            writer.Write(GhostUnitId);
             writer.Write(RezCost);
-            writer.Write(TimeUntilRezMs);
-            writer.Write(Dead);
+            writer.Write(DeathPenaltyLength);
+            writer.Write(PlayerIsDead);
             writer.Write(ShowRezFlags, 8u);
             writer.Write(HasCasterRezRequest);
             writer.Write(TimeUntilWakeHereMs);

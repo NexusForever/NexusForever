@@ -1,5 +1,5 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Player;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Entity.Player
 {
@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity.Player
     {
         public void HandleMessage(IWorldSession session, ClientTitleSet request)
         {
-            session.Player.TitleManager.ActiveTitleId = request.TitleId;
+            session.Player.TitleManager.ActiveTitleId = request.CharacterTitleId;
         }
     }
 }

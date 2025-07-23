@@ -1,7 +1,7 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Static.Player;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Player
 {
     [Message(GameMessageOpcode.ServerResurrectionState)]
     public class ServerResurrectionState : IWritable
