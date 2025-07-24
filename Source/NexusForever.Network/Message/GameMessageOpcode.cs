@@ -7,6 +7,7 @@ namespace NexusForever.Network.Message
         ServerHello                     = 0x0003,
         ServerMaxCharacterLevelAchieved = 0x0036,
         ServerPlayerEnteredWorld        = 0x0061,
+        ServerPetSpawned                = 0x0068,
         ServerClientEntityUpdateInterval = 0x0070,
         ServerAuthEncrypted             = 0x0076,
         ServerLogoutUpdate              = 0x0092,
@@ -215,6 +216,7 @@ namespace NexusForever.Network.Message
         ServerCinematicActorAngle       = 0x0230,
         ServerCinematicNotify           = 0x0232,
         Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
+        ServerPetFlairCleared           = 0x023B,
         ClientStatisticsWatchdog        = 0x023C,
         ClientStatisticsWindowOpen      = 0x023D,
         ClientStatisticsGfx             = 0x023E,
@@ -477,7 +479,8 @@ namespace NexusForever.Network.Message
         Server068B                      = 0x068B, // pet customization something
         ClientPathScientistSetScannerName = 0x068C,
         ServerUnlockPetFlair            = 0x068D,
-        ServerChangePetStance           = 0x068F,
+        ClientPetSetStance              = 0x068E,
+        ServerPetStanceChanged          = 0x068F,
         ClientRequestPlayed             = 0x0693,
         ServerPlayerPlayed              = 0x0694,
         ClientPathChangeRequest         = 0x06B2,
@@ -513,6 +516,7 @@ namespace NexusForever.Network.Message
         ServerRealmFirstAchievement     = 0x075F,
         ServerRealmList                 = 0x0761, // bidirectional? packet has both read and write handlers
         ServerRealmMessages             = 0x0763,
+        ServerPetDespawned              = 0x077F,
         ClientHousingCommunityRename    = 0x0788,
         ClientTitleSet                  = 0x078E,
         ServerNewRealm                  = 0x07A1,

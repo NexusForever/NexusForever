@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pet
 {
     [Message(GameMessageOpcode.ServerPetCustomizationList)]
     public class ServerPetCustomisationList : IWritable
@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.WriteBytes(UnlockedFlair.GetBuffer());
 
             writer.Write(PetCustomisations.Count, 32u);
-            foreach(var petCustomization in PetCustomisations)
+            foreach (var petCustomization in PetCustomisations)
                 petCustomization.Write(writer);
         }
     }

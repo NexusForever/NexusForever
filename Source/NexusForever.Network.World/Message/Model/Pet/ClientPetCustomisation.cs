@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pet
 {
     [Message(GameMessageOpcode.ClientPetCustomisation)]
     public class ClientPetCustomisation : IReadable
@@ -13,10 +13,10 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            PetType        = reader.ReadEnum<PetType>(2u);
-            PetObjectId    = reader.ReadUInt();
+            PetType = reader.ReadEnum<PetType>(2u);
+            PetObjectId = reader.ReadUInt();
             FlairSlotIndex = reader.ReadUShort();
-            FlairId        = reader.ReadUShort(14u);
+            FlairId = reader.ReadUShort(14u);
         }
     }
 }
