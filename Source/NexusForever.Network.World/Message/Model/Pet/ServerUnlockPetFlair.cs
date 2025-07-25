@@ -1,6 +1,6 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pet
 {
     [Message(GameMessageOpcode.ServerUnlockPetFlair)]
     public class ServerUnlockPetFlair : IWritable
@@ -13,4 +13,3 @@ namespace NexusForever.Network.World.Message.Model
         }
     }
 }
-

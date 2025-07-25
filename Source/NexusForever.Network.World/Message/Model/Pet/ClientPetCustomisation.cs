@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model.Pet
     public class ClientPetCustomisation : IReadable
     {
         public PetType PetType { get; private set; }
-        public uint PetObjectId { get; private set; }
+        public uint PetObjectId { get; private set; } // PathScientistScanBotProfileId in the case of scanbots
         public ushort FlairSlotIndex { get; private set; }
         public ushort FlairId { get; private set; }
 

@@ -216,7 +216,7 @@ namespace NexusForever.Network.Message
         ServerCinematicActorAngle       = 0x0230,
         ServerCinematicNotify           = 0x0232,
         Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
-        ServerPetFlairCleared           = 0x023B,
+        ServerClearPetFlair             = 0x023B,
         ClientStatisticsWatchdog        = 0x023C,
         ClientStatisticsWindowOpen      = 0x023D,
         ClientStatisticsGfx             = 0x023E,
@@ -476,7 +476,7 @@ namespace NexusForever.Network.Message
         ServerPathSoldierAddTowerDefense = 0x0681,
         ServerPendingWorldRemovalCancel = 0x0688,
         ServerPendingWorldRemoval       = 0x0689,
-        Server068B                      = 0x068B, // pet customization something
+        ServerPetCustomizationFailed    = 0x068B,
         ClientPathScientistSetScannerName = 0x068C,
         ServerUnlockPetFlair            = 0x068D,
         ClientPetSetStance              = 0x068E,
