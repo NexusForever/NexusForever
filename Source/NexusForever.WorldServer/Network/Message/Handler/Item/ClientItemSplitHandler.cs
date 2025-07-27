@@ -1,5 +1,5 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Item;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Item
 {
@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Item
     {
         public void HandleMessage(IWorldSession session, ClientItemSplit itemSplit)
         {
-            session.Player.Inventory.ItemSplit(itemSplit.Guid, itemSplit.Location, itemSplit.Count);
+            session.Player.Inventory.ItemSplit(itemSplit.ItemGuid, itemSplit.Location, itemSplit.Count);
         }
     }
 }

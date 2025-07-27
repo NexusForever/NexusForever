@@ -6,6 +6,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Item;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 {
@@ -98,7 +99,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             session.Player.SelectedVendorInfo = vendorEntity.VendorInfo;
 
             ServerVendorItemsUpdated vendorItemsUpdated = vendorEntity.VendorInfo.Build();
-            vendorItemsUpdated.Guid = vendorEntity.Guid;
+            vendorItemsUpdated.VendorUnitId = vendorEntity.Guid;
             session.EnqueueMessageEncrypted(vendorItemsUpdated);
         }
     }

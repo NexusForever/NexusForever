@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
-using NetworkBuybackItem = NexusForever.Network.World.Message.Model.Shared.BuybackItem;
+using NetworkBuybackItem = NexusForever.Network.World.Message.Model.Item.BuybackItem;
 
 namespace NexusForever.Game.Entity
 {
@@ -32,18 +32,15 @@ namespace NexusForever.Game.Entity
             var networkBuybackItem = new NetworkBuybackItem
             {
                 UniqueId = UniqueId,
-                ItemId   = Item.Info.Id,
+                Item2Id   = Item.Info.Id,
                 Quantity = Quantity,
             };
 
-            for (int i = 0; i < networkBuybackItem.CurrencyTypeId.Length; i++)
-            {
-                if (i >= CurrencyChange.Count)
-                    continue;
+            networkBuybackItem.CurrencyTypeId_First = CurrencyChange[0].CurrencyTypeId;
+            networkBuybackItem.CurrencyAmount_First = CurrencyChange[0].CurrencyAmount;
 
-                networkBuybackItem.CurrencyTypeId[i] = CurrencyChange[i].CurrencyTypeId;
-                networkBuybackItem.CurrencyAmount[i] = CurrencyChange[i].CurrencyAmount;
-            }
+            networkBuybackItem.CurrencyTypeId_Second = CurrencyChange[1].CurrencyTypeId;
+            networkBuybackItem.CurrencyAmount_Second = CurrencyChange[1].CurrencyAmount;
 
             return networkBuybackItem;
         }

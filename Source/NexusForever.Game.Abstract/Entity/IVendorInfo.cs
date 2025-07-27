@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using NexusForever.Database.World.Model;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Item;
 
 namespace NexusForever.Game.Abstract.Entity
 {
