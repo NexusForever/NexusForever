@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Item;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Entity

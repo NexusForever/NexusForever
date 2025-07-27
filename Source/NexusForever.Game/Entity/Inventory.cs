@@ -7,8 +7,7 @@ using NexusForever.Game.Static.Achievement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Item;
 using NexusForever.Network.World.Message.Static;
 using NLog;
 
@@ -18,10 +17,25 @@ namespace NexusForever.Game.Entity
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private static ulong ItemLocationToDragDropData(InventoryLocation location, ushort slot)
+        private static InventoryId ItemLocationToDragDropData(InventoryLocation location, ushort slot, ushort count = 0)
         {
-            // TODO: research this more, client version of this is more complex
-            return (ulong)location << 8 | slot;
+            InventoryId id = new InventoryId();
+
+            if (slot > 255)
+            {
+                id.Location = InventoryLocation.None;
+                id.BagSlot = 0xFF;
+                id.Count = 0x0;
+                // TODO: consider a way to handle incorrect values and how errors are handled in code that uses this
+            }
+            else
+            {
+                id.Location = location;
+                id.BagSlot = (byte)slot;
+                id.Count = count;
+            }
+
+            return id;
         }
 
         private readonly ulong characterId;
@@ -342,7 +356,7 @@ namespace NexusForever.Game.Entity
             {
                 // when removing bag capacity, make sure there is enough room left for items in the inventory
                 if (item.Info.IsEquippableBag()
-                    && IsEquippableBagSlot(item.Location, item.BagIndex)
+                    && IsEquippableBagSlot((InventoryLocation)item.Location, item.BagIndex)
                     && GetInventorySlotsRemaining(InventoryLocation.Inventory) < item.Info.Entry.MaxStackCount)
                     return GenericError.ItemBagMustBeEmpty;
             }
@@ -419,7 +433,7 @@ namespace NexusForever.Game.Entity
                     {
                         To = new ItemDragDrop
                         {
-                            Guid     = item.Guid,
+                            ItemGuid = item.Guid,
                             DragDrop = ItemLocationToDragDropData(item.Location, (ushort)item.BagIndex)
                         }
                     });
@@ -477,12 +491,12 @@ namespace NexusForever.Game.Entity
                     {
                         To = new ItemDragDrop
                         {
-                            Guid     = item.Guid,
+                            ItemGuid = item.Guid,
                             DragDrop = ItemLocationToDragDropData(item.Location, (ushort)item.BagIndex)
                         },
                         From = new ItemDragDrop
                         {
-                            Guid     = dstItem.Guid,
+                            ItemGuid = dstItem.Guid,
                             DragDrop = ItemLocationToDragDropData(dstItem.Location, (ushort)dstItem.BagIndex)
                         }
                     });
@@ -566,7 +580,7 @@ namespace NexusForever.Game.Entity
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
-                Guid   = item.Guid,
+                ItemGuid = item.Guid,
                 Reason = reason
             });
 
@@ -614,7 +628,7 @@ namespace NexusForever.Game.Entity
 
             player.Session.EnqueueMessageEncrypted(new ServerItemDelete
             {
-                Guid   = item.Guid,
+                ItemGuid = item.Guid,
                 Reason = reason
             });
         }
@@ -745,7 +759,7 @@ namespace NexusForever.Game.Entity
 
             player.Session.EnqueueMessageEncrypted(new ServerItemStackCountUpdate
             {
-                Guid       = item.Guid,
+                ItemGuid   = item.Guid,
                 StackCount = stackCount,
                 Reason     = reason
             });

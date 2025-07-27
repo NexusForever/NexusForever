@@ -1,5 +1,5 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Item;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Item
 {
@@ -7,7 +7,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Item
     {
         public void HandleMessage(IWorldSession session, ClientItemMoveFromSupplySatchel request)
         {
-            session.Player.SupplySatchelManager.MoveToInventory(request.MaterialId, request.Amount);
+            session.Player.SupplySatchelManager.MoveToInventory(request.TradeskillMaterialId, request.Amount);
         }
     }
 }

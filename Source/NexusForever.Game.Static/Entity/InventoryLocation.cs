@@ -18,7 +18,7 @@
         Unknown5  = 5,
         Unknown8  = 8,
         Unknown9  = 9,
-        Unknown10 = 10,
+        SharedBank = 10,
         None      = ushort.MaxValue
     }
 }

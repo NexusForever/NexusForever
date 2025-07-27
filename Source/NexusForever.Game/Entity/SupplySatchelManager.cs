@@ -197,7 +197,7 @@ namespace NexusForever.Game.Entity
         {
             player.Session.EnqueueMessageEncrypted(new ServerSupplySatchelUpdate
             {
-                MaterialId = materialId,
+                TradeskillMaterialId = materialId,
                 StackCount = tradeskillMaterials[materialId].Amount
             });
         }
