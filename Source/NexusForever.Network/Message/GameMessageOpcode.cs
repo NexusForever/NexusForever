@@ -216,7 +216,7 @@ namespace NexusForever.Network.Message
         ServerCinematicActorAngle       = 0x0230,
         ServerCinematicNotify           = 0x0232,
         Server0237                      = 0x0237, // UI related, opens or closes different UI windows (bank, barber, ect...)
-        ServerClearPetFlair             = 0x023B,
+        ServerPetClearFlair             = 0x023B,
         ClientStatisticsWatchdog        = 0x023C,
         ClientStatisticsWindowOpen      = 0x023D,
         ClientStatisticsGfx             = 0x023E,

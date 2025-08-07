@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model.Pet
 {
-    [Message(GameMessageOpcode.ServerClearPetFlair)]
-    public class ServerClearPetFlair : IWritable
+    [Message(GameMessageOpcode.ServerPetClearFlair)]
+    public class ServerPetClearFlair : IWritable
     {
         public void Write(GamePacketWriter writer)
         {
