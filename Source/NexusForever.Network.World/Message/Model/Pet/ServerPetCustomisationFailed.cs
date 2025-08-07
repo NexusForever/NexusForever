@@ -4,8 +4,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Pet
 {
-    [Message(GameMessageOpcode.ServerPetCustomizationFailed)]
-    public class ServerPetCustomizationFailed : IWritable
+    [Message(GameMessageOpcode.ServerPetCustomisationFailed)]
+    public class ServerPetCustomisationFailed : IWritable
     {
         public PetCustomizeResult Reason { get; set; }
         public PetType Type { get; set; }
