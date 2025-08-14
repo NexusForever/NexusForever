@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj" />
-    <ProjectReference Include="..\NexusForever.Script\NexusForever.Script.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Blighthaven\" />
     <Folder Include="Malgrave\" />
     <Folder Include="WesternGrimvault\" />

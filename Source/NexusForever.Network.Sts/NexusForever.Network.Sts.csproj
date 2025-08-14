@@ -6,9 +6,4 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NexusForever.Database.Auth\NexusForever.Database.Auth.csproj" />
-    <ProjectReference Include="..\NexusForever.Network\NexusForever.Network.csproj" />
-  </ItemGroup>
-
 </Project>
