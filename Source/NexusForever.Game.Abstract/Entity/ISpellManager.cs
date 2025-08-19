@@ -25,6 +25,11 @@ namespace NexusForever.Game.Abstract.Entity
         void AddSpell(uint spell4BaseId, byte tier = 1);
 
         /// <summary>
+        /// Removes an existing spell (used for AMPs)
+        /// </summary>
+        void RemoveSpell(uint spell4BaseId);
+
+        /// <summary>
         /// Update existing <see cref="ICharacterSpell"/> with supplied tier. The base tier will be updated if no action set index is supplied.
         /// </summary>
         void UpdateSpell(uint spell4BaseId, byte tier, byte? actionSetIndex);
@@ -60,6 +65,8 @@ namespace NexusForever.Game.Abstract.Entity
         /// Update active <see cref="IActionSet"/> with supplied index, returned <see cref="SpecError"/> is sent to the client.
         /// </summary>
         SpecError SetActiveActionSet(byte value);
+
+        void ApplyAmps();
 
         void SendInitialPackets();
         void SendServerAbilityPoints();
