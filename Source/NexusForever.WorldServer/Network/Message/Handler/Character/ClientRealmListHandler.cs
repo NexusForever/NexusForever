@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Server;
+using NexusForever.Game.Static.Pregame;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Network.World.Message.Static;

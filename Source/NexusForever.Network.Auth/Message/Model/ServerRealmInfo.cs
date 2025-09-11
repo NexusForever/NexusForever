@@ -1,16 +1,11 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Pregame;
+using NexusForever.Network.Message;
 
 namespace NexusForever.Network.Auth.Message.Model
 {
     [Message(GameMessageOpcode.ServerRealmInfo)]
     public class ServerRealmInfo : IWritable
     {
-        [Flags]
-        public enum RealmFlags
-        {
-            FactionRestricted = 16
-        }
-
         public enum RealmType
         {
             PVE,
@@ -22,7 +17,7 @@ namespace NexusForever.Network.Auth.Message.Model
         public byte[] SessionKey { get; set; }
         public uint AccountId { get; set; }
         public string RealmName { get; set; }
-        public RealmFlags Flags { get; set; }
+        public RealmFlag Flags { get; set; }
         public RealmType Type { get; set; }
         public uint NoteTextId { get; set; }
 

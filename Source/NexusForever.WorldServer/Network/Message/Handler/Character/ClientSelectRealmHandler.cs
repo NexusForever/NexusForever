@@ -5,6 +5,7 @@ using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Server;
+using NexusForever.Game.Static.Pregame;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Pregame;

@@ -1,5 +1,5 @@
-﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Static;
+﻿using NexusForever.Game.Static.Pregame;
+using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Pregame
 {
@@ -17,12 +17,6 @@ namespace NexusForever.Network.World.Message.Model.Pregame
                 writer.Write(Address);
                 writer.Write(Port);
             }
-        }
-
-        [Flags]
-        public enum RealmFlag
-        {
-            FactionRestricted = 16,
         }
 
         public uint Unused { get; set; }
