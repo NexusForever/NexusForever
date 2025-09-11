@@ -397,7 +397,7 @@ namespace NexusForever.Game.Guild
         {
             session.EnqueueMessageEncrypted(new ServerGuildRoster
             {
-                GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                GuildIdentity = Identity.ToNetwork(),
                 GuildMembers = members.Values
                     .Select(m => m.Build())
                     .ToList(),
@@ -444,7 +444,7 @@ namespace NexusForever.Game.Guild
 
             player.Session.EnqueueMessageEncrypted(new ServerGuildRemove
             {
-                GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                GuildIdentity = Identity.ToNetwork(),
             });
         }
 
@@ -462,8 +462,8 @@ namespace NexusForever.Game.Guild
             {
                 Broadcast(new ServerGuildMemberRemove
                 {
-                    GuildIdentity = IdentityExtensions.ToNetwork(Identity),
-                    MemberToRemove = IdentityExtensions.ToNetwork(member.PlayerIdentity),
+                    GuildIdentity = Identity.ToNetwork(),
+                    MemberToRemove = member.PlayerIdentity.ToNetwork(),
                 });
             }
 
@@ -725,7 +725,7 @@ namespace NexusForever.Game.Guild
             session.EnqueueMessageEncrypted(new ServerGuildResult
             {
                 Result        = result,
-                GuildIdentity = IdentityExtensions.ToNetwork(guildIdentity),
+                GuildIdentity = guildIdentity.ToNetwork(),
                 ReferenceId   = referenceId,
                 TargetName = referenceText
             });
@@ -751,7 +751,7 @@ namespace NexusForever.Game.Guild
             Broadcast(new ServerGuildResult
             {
                 Result        = result,
-                GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                GuildIdentity = Identity.ToNetwork(),
                 ReferenceId   = referenceId,
                 TargetName = referenceText,
             });
@@ -764,7 +764,7 @@ namespace NexusForever.Game.Guild
         {
             Broadcast(new ServerGuildMemberChange
             {
-                GuildIdentity     = IdentityExtensions.ToNetwork(Identity),
+                GuildIdentity     = Identity.ToNetwork(),
                 GuildMember       = member.Build(),
                 MemberCount       = (ushort)members.Count,
                 OnlineMemberCount = (ushort)onlineMembers.Count
@@ -778,7 +778,7 @@ namespace NexusForever.Game.Guild
         {
             Broadcast(new ServerGuildRankChange
             {
-                GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                GuildIdentity = Identity.ToNetwork(),
                 Ranks   = GetGuildRanksPackets().ToList()
             });
         }
@@ -787,7 +787,7 @@ namespace NexusForever.Game.Guild
         {
             Broadcast(new ServerGuildFlagsUpdate
             {
-                GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                GuildIdentity = Identity.ToNetwork(),
                 Flags   = Flags
             });
         }
@@ -801,7 +801,7 @@ namespace NexusForever.Game.Guild
 
             Broadcast(new ServerGuildRename
             {
-                GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                GuildIdentity = Identity.ToNetwork(),
                 Name = name
             });
         }

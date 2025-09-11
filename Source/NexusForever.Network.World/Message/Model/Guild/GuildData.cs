@@ -74,9 +74,9 @@ namespace NexusForever.Network.World.Message.Model.Guild
         public uint BankTabCount { get; set; }
         public List<string> BankTabNames { get; set; } = new(new string[10]);
 
-        public ulong[] UnlockedPerks { get; set; } = new ulong[2];  // Each ulong is a set of flags represeting the unlock state of a GuildPerkId
-                                                                    // GuildPerkId = 1 is bit 0 of the first ulong and the rest follow upwards joining
-                                                                    // to the next ulong when GuildPerkId > 64
+        public NetworkBitArray UnlockedPerks { get; set; } = new NetworkBitArray(128, NetworkBitArray.BitOrder.LeastSignificantBit);
+        // Set of flags represeting the unlock state of a GuildPerkId
+        // GuildPerkId = 1 is bit 0
 
         public List<ActivePerk> ActivePerks { get; set; } = new();
 
@@ -107,7 +107,9 @@ namespace NexusForever.Network.World.Message.Model.Guild
             foreach (string str in BankTabNames)
                 writer.WriteStringWide(str);
 
-            foreach (ulong perk in UnlockedPerks)
+            // This has not been verified to put the bytes in the correct order.
+            // May need to reverse the bit order or the byte order.
+            foreach (byte perk in UnlockedPerks.GetBuffer()) 
                 writer.Write(perk);
 
             writer.Write(ActivePerks.Count);

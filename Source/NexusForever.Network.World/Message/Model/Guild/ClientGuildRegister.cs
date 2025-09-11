@@ -7,14 +7,14 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGuildRegister)]
     public class ClientGuildRegister : IReadable
     {
-        public uint InteractionUnitId { get; set; }
-        public GuildType GuildType { get; set; }
-        public string GuildName { get; set; }
-        public string MasterTitle { get; set; }
-        public string CouncilTitle { get; set; }
-        public string MemberTitle { get; set; }
-        public GuildStandard GuildStandard { get; set; } = new();
-        public bool AlternateCost { get; set; }
+        public uint InteractionUnitId { get; private set; }
+        public GuildType GuildType { get; private set; }
+        public string GuildName { get; private set; }
+        public string MasterTitle { get; private set; }
+        public string CouncilTitle { get; private set; }
+        public string MemberTitle { get; private set; }
+        public GuildStandard GuildStandard { get; private set; } = new();
+        public bool AlternateCost { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

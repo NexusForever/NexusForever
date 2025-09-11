@@ -6,12 +6,12 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGuildBankTransaction)]
     public class ClientGuildBankTransaction : IReadable
     {
-        public Identity GuildIdentity { get; set; } = new Identity();
-        public ulong SourceItemGuid { get; set; }
-        public ulong DestinationItemGuid { get; set; } // Sent if bag slot already contains an item, otherwise 0
-        public ItemLocation Source { get; set; } = new ItemLocation();
-        public ItemLocation Destination { get; set; } = new ItemLocation();
-        public uint Count { get; set; } // Value of 0 transfers entire stack
+        public Identity GuildIdentity { get; private set; } = new Identity();
+        public ulong SourceItemGuid { get; private set; }
+        public ulong DestinationItemGuid { get; private set; } // Sent if bag slot already contains an item, otherwise 0
+        public ItemLocation Source { get; private set; } = new ItemLocation();
+        public ItemLocation Destination { get; private set; } = new ItemLocation();
+        public uint Count { get; private set; } // Value of 0 transfers entire stack
 
         public void Read(GamePacketReader reader)
         {

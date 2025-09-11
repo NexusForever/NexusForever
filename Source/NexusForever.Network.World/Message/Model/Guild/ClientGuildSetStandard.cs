@@ -8,8 +8,8 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGuildSetStandard)]
     public class ClientGuildSetStandard : IReadable
     {
-        public Identity GuildIdentity { get; set; } = new();
-        public GuildStandard GuildStandard { get; set; } = new();
+        public Identity GuildIdentity { get; private set; } = new();
+        public GuildStandard GuildStandard { get; private set; } = new();
 
         public void Read(GamePacketReader reader)
         {

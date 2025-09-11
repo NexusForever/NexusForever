@@ -8,8 +8,8 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientGuildBankTabOpen)]
     public class ClientGuildBankTabOpen : IReadable
     {
-        public Identity GuildIdentity { get; set; } = new();
-        public ushort BankTabIndex { get; set; } // Guild bank tab indexes are 100-109, WarParty bank tabs 200-209
+        public Identity GuildIdentity { get; private set; } = new();
+        public ushort BankTabIndex { get; private set; } // Guild bank tab indexes are 100-109, WarParty bank tabs 200-209
 
         public void Read(GamePacketReader reader)
         {

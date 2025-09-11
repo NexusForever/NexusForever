@@ -393,7 +393,7 @@ namespace NexusForever.Game.Guild
         private IGuildResultInfo HandleGuildOperation((GuildOperationHandlerDelegate Delegate, GuildOperationHandlerResultDelegate ResultDelegate) handlers,
             IPlayer player, ClientGuildOperation operation)
         {
-            IGuildBase guild = GetGuild(IdentityExtensions.ToGame(operation.GuildIdentity));
+            IGuildBase guild = GetGuild(operation.GuildIdentity.ToGame());
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
