@@ -14,6 +14,6 @@ namespace NexusForever.Game.Abstract.Mail
         uint CreatureId { get; set; }
         ulong MoneyToGive { get; set; }
         ulong CodAmount { get; set; }
-        DeliveryTime DeliveryTime { get; set; }
+        DeliverySpeed DeliverySpeed { get; set; }
     }
 }

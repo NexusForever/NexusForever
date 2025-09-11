@@ -4,7 +4,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Mail;
 using NexusForever.Game.Entity;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Mail;
 
 namespace NexusForever.Game.Mail
 {
@@ -94,8 +94,8 @@ namespace NexusForever.Game.Mail
         {
             return new ServerMailAvailable.Attachment
             {
-                ItemId = Item.Id,
-                Amount = Item.StackCount
+                Item2Id     = Item.Id,
+                StackCount  = Item.StackCount
             };
         }
     }

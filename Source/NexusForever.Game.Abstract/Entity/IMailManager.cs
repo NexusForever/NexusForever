@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Mail;
 using NexusForever.Game.Static.Mail;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Mail;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Entity
@@ -20,7 +20,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Send mail to self from a creature.
         /// </summary>
-        void SendMail(uint creatureId, DeliveryTime time, uint subject, uint body, IEnumerable<uint> itemIds);
+        void SendMail(uint creatureId, DeliverySpeed speed, uint subject, uint body, IEnumerable<uint> itemIds);
 
         /// <summary>
         /// Delete a <see cref="IMailItem"/> with supplied id.
