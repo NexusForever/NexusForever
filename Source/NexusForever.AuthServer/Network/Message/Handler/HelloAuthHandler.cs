@@ -5,11 +5,11 @@ using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Server;
+using NexusForever.Game.Static.Pregame;
 using NexusForever.Network.Auth.Message.Model;
 using NexusForever.Network.Auth.Static;
 using NexusForever.Network.Message;
 using NexusForever.Shared.Game.Events;
-using static NexusForever.Network.Auth.Message.Model.ServerRealmInfo;
 using NetworkMessage = NexusForever.Network.Message.Model.Shared.Message;
 
 namespace NexusForever.AuthServer.Network.Message.Handler
@@ -109,7 +109,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                     {
                         AccountId  = account.Id,
                         SessionKey = sessionKey,
-                        RealmName      = server.Model.Name,
+                        RealmName  = server.Model.Name,
                         Address    = server.Address,
                         Port       = server.Model.Port,
                         Type       = (RealmType)server.Model.Type

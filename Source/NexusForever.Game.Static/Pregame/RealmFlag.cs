@@ -3,6 +3,6 @@
     [Flags]
     public enum RealmFlag
     {
-        FactionRestricted = 16,
+        FactionRestricted = 0x10,
     }
 }

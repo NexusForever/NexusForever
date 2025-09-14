@@ -6,12 +6,6 @@ namespace NexusForever.Network.Auth.Message.Model
     [Message(GameMessageOpcode.ServerRealmInfo)]
     public class ServerRealmInfo : IWritable
     {
-        public enum RealmType
-        {
-            PVE,
-            PVP
-        }
-
         public uint Address { get; set; }
         public ushort Port { get; set; }
         public byte[] SessionKey { get; set; }
