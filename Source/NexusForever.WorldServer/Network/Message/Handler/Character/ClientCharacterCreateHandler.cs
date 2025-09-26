@@ -9,7 +9,7 @@ using NexusForever.Game.Abstract.Customisation;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -76,7 +76,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                     return CharacterModifyResult.CreateFailed_Internal;
 
                 if (creationEntry.CharacterCreationStartEnum == CharacterCreationStart.Level50
-                    && !session.Account.CurrencyManager.CanAfford(AccountCurrencyType.MaxLevelToken, 1ul))
+                    && !session.Account.CurrencyManager.CanAfford(AccountCurrencyType.PromotionToken, 1ul))
                     return CharacterModifyResult.CreateFailed_InsufficientFunds;
 
                 List<(uint Label, uint Value)> customisations = characterCreate.Labels
@@ -257,7 +257,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                     characterManager.AddCharacter(character);
 
                     if (creationEntry.CharacterCreationStartEnum == CharacterCreationStart.Level50)
-                        session.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.MaxLevelToken, 1u);
+                        session.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.PromotionToken, 1u);
 
                     session.EnqueueMessageEncrypted(new ServerCharacterCreate
                     {

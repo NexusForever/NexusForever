@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NexusForever.Game.Abstract.Customisation;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network;
 using NexusForever.Network.Message;

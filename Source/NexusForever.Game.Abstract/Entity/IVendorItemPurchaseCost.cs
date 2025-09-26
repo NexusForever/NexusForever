@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Account;
+﻿using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Game.Abstract.Entity

@@ -1,9 +1,8 @@
-using NexusForever.Network.Message;
+﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.AccountInventory
 {
-    [Message(GameMessageOpcode.ServerAccountItemCooldownSet)]
-    public class ServerAccountItemCooldownSet : IWritable
+    public class AccountItemCooldown : IWritable
     {
         public uint AccountItemCooldownGroup { get; set; }
         public uint CooldownInSeconds { get; set; }
