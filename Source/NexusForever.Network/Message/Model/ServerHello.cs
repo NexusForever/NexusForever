@@ -5,15 +5,15 @@
     {
         public uint AuthVersion { get; set; }
         public uint RealmId { get; set; }
-        public uint RealmGroupId { get; set; }
-        public uint RealmGroupEnum { get; set; }
-        public ulong StartupTime { get; set; }
-        public ushort ListenPort { get; set; }
-        public byte ConnectionType { get; set; }
+        public uint RealmGroupId { get; set; } // unused by client
+        public uint RealmGroupEnum { get; set; } //  unused by client
+        public ulong StartupTime { get; set; } //  unused by client
+        public ushort ListenPort { get; set; } //  unused by client
+        public byte ConnectionType { get; set; } // unused by client
         public uint AuthMessage { get; set; }
-        public uint ProcessId { get; set; }
-        public ulong ProcessCreationTime { get; set; }
-        public uint Unknown30 { get; set; }
+        public uint ProcessId { get; set; } //  unused by client
+        public ulong ProcessCreationTime { get; set; } //  unused by client
+        public uint Unused { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -27,7 +27,7 @@
             writer.Write(AuthMessage);
             writer.Write(ProcessId);
             writer.Write(ProcessCreationTime);
-            writer.Write(Unknown30);
+            writer.Write(Unused);
         }
     }
 }

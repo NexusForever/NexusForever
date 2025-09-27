@@ -1,0 +1,47 @@
+<Solution>
+  <Folder Name="/Client/">
+    <Project Path="NexusForever.ClientConnector/NexusForever.ClientConnector.csproj" />
+    <Project Path="NexusForever.MapGenerator/NexusForever.MapGenerator.csproj" />
+  </Folder>
+  <Folder Name="/Server/">
+    <Project Path="NexusForever.AuthServer/NexusForever.AuthServer.csproj" />
+    <Project Path="NexusForever.Cryptography/NexusForever.Cryptography.csproj" />
+    <Project Path="NexusForever.Database.Auth/NexusForever.Database.Auth.csproj" />
+    <Project Path="NexusForever.Database.Character/NexusForever.Database.Character.csproj" />
+    <Project Path="NexusForever.Database.World/NexusForever.Database.World.csproj" />
+    <Project Path="NexusForever.Database/NexusForever.Database.csproj" />
+    <Project Path="NexusForever.Game.Abstract/NexusForever.Game.Abstract.csproj" />
+    <Project Path="NexusForever.Game.Static/NexusForever.Game.Static.csproj" />
+    <Project Path="NexusForever.Game/NexusForever.Game.csproj" />
+    <Project Path="NexusForever.GameTable/NexusForever.GameTable.csproj" />
+    <Project Path="NexusForever.IO/NexusForever.IO.csproj" />
+    <Project Path="NexusForever.Network.Auth/NexusForever.Network.Auth.csproj" />
+    <Project Path="NexusForever.Network.Sts/NexusForever.Network.Sts.csproj" />
+    <Project Path="NexusForever.Network.World/NexusForever.Network.World.csproj" />
+    <Project Path="NexusForever.Network/NexusForever.Network.csproj" />
+    <Project Path="NexusForever.Script/NexusForever.Script.csproj" />
+    <Project Path="NexusForever.Shared/NexusForever.Shared.csproj" />
+    <Project Path="NexusForever.StsServer/NexusForever.StsServer.csproj" />
+    <Project Path="NexusForever.WorldServer/NexusForever.WorldServer.csproj">
+      <BuildDependency Project="NexusForever.Script.Alizar/NexusForever.Script.Alizar.csproj" />
+      <BuildDependency Project="NexusForever.Script.Arcterra/NexusForever.Script.Arcterra.csproj" />
+      <BuildDependency Project="NexusForever.Script.Farside/NexusForever.Script.Farside.csproj" />
+      <BuildDependency Project="NexusForever.Script.Instance/NexusForever.Script.Instance.csproj" />
+      <BuildDependency Project="NexusForever.Script.Isigrol/NexusForever.Script.Isigrol.csproj" />
+      <BuildDependency Project="NexusForever.Script.Main/NexusForever.Script.Main.csproj" />
+      <BuildDependency Project="NexusForever.Script.Olyssia/NexusForever.Script.Olyssia.csproj" />
+    </Project>
+  </Folder>
+  <Folder Name="/Server/Script/">
+    <Project Path="NexusForever.Script.Alizar/NexusForever.Script.Alizar.csproj" />
+    <Project Path="NexusForever.Script.Arcterra/NexusForever.Script.Arcterra.csproj" />
+    <Project Path="NexusForever.Script.Farside/NexusForever.Script.Farside.csproj" />
+    <Project Path="NexusForever.Script.Instance/NexusForever.Script.Instance.csproj" />
+    <Project Path="NexusForever.Script.Isigrol/NexusForever.Script.Isigrol.csproj" />
+    <Project Path="NexusForever.Script.Main/NexusForever.Script.Main.csproj" />
+    <Project Path="NexusForever.Script.Olyssia/NexusForever.Script.Olyssia.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
+</Solution>

@@ -13,7 +13,6 @@ using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
 using NLog;
-using NLog.Fluent;
 
 namespace NexusForever.WorldServer.Command
 {

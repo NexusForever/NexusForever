@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Map;
-using NexusForever.Game.Event;
+using NexusForever.Game.PublicEvent;
 using NexusForever.Game.Map.Instance;
 using NexusForever.Game.Map.Lock;
 using NexusForever.Shared;

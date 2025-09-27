@@ -7,9 +7,4 @@
     <OutputPath>$(SolutionDir)\NexusForever.WorldServer\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj" />
-    <ProjectReference Include="..\NexusForever.Script\NexusForever.Script.csproj" />
-  </ItemGroup>
-
 </Project>

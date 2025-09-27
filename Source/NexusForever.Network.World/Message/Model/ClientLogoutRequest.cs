@@ -2,6 +2,7 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
+    // Called from RequestCamp, ExitGame, Camp, CancelExit lua functions
     [Message(GameMessageOpcode.ClientLogoutRequest)]
     public class ClientLogoutRequest : IReadable
     {

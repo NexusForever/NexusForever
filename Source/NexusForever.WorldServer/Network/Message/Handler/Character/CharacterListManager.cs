@@ -12,6 +12,7 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Shared.Game.Events;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Character
@@ -103,7 +104,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 RealmId                        = realmContext.RealmId,
                 // no longer used as replaced by entitlements but retail server still used to send this
                 AdditionalCount                = (uint)characterList.Count,
-                AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)characterSlots - characterList.Count),
+                MaxNumberCharacters = (uint)Math.Max(0, (int)characterSlots - characterList.Count),
                 // Free Level 50 needs(?) support. It appears to have just been a custom flag on the account that was consume when used up.
                 // FreeLevel50 = true
             };
