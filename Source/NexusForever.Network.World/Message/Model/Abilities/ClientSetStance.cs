@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model.Abilities
     [Message(GameMessageOpcode.ClientSetStance)]
     public class ClientSetStance : IReadable
     {
-        public byte InnateIndex { get; set; }
+        public byte InnateIndex { get;  private set; }
 
         public void Read(GamePacketReader reader)
         {

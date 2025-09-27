@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model.Abilities
     [Message(GameMessageOpcode.ServerAbilityRemove)]
     public class ServerAbilityRemove : IWritable
     {
-        public ItemLocation Location { get; set; } = new ItemLocation();
+        public ItemLocation Location { get; set; } = new();
 
         public void Write(GamePacketWriter writer)
         {

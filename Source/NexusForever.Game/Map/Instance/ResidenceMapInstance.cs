@@ -140,7 +140,7 @@ namespace NexusForever.Game.Map.Instance
             {
                 ShortcutSet            = ShortcutSet.FloatingSpellBar,
                 ActionBarShortcutSetId = 1553,
-                AssociatedUnitId                 = player.Guid
+                AssociatedUnitId       = player.Guid
             });
         }
 

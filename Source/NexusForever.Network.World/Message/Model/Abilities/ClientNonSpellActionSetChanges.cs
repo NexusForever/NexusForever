@@ -14,9 +14,9 @@ namespace NexusForever.Network.World.Message.Model.Abilities
         public void Read(GamePacketReader reader)
         {
             ActionBarIndex = reader.ReadEnum<UILocation>(6u);
-            ShortcutType = reader.ReadEnum<ShortcutType>(4u);
-            ObjectId = reader.ReadUInt();
-            SpecIndex = reader.ReadByte(4u);
+            ShortcutType   = reader.ReadEnum<ShortcutType>(4u);
+            ObjectId       = reader.ReadUInt();
+            SpecIndex      = reader.ReadByte(4u);
         }
     }
 }

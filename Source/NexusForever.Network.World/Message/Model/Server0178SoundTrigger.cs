@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     // Possibly related to ServerSpellRemove (0x7FE).
     // Included for completeness but not useful unless the GameFormula tbl entry is overwritten.
     [Message(GameMessageOpcode.Server_0x178_SoundTrigger)]
-    public class Server_0x178_SoundTrigger : IWritable
+    public class Server0178SoundTrigger : IWritable
     {
         public void Write(GamePacketWriter writer)
         {
