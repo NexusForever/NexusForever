@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Vendor
                 return;
 
             //TODO Ensure player has room in inventory
-            if (session.Player.Inventory.GetInventorySlotsRemaining(Game.Static.Entity.InventoryLocation.Inventory) < 1)
+            if (session.Player.Inventory.GetInventorySlotsRemaining(InventoryLocation.Inventory) < 1)
             {
                 session.Player.SendGenericError(GenericError.ItemInventoryFull);
                 return;
@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Vendor
             foreach ((CurrencyType currencyTypeId, ulong currencyAmount) in buybackItem.CurrencyChange)
                 session.Player.CurrencyManager.CurrencySubtractAmount(currencyTypeId, currencyAmount);
 
-            session.Player.Inventory.AddItem(buybackItem.Item, Game.Static.Entity.InventoryLocation.Inventory);
+            session.Player.Inventory.AddItem(buybackItem.Item, InventoryLocation.Inventory);
             buybackManager.RemoveItem(session.Player, buybackItem);
         }
     }
