@@ -2,7 +2,7 @@
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Achievement;
-using AchievementNetworkModel = NexusForever.Network.World.Message.Model.Shared.Achievement;
+using AchievementNetworkModel = NexusForever.Network.World.Message.Model.Achievement.Achievement;
 
 namespace NexusForever.Game.Achievement
 {
@@ -139,8 +139,8 @@ namespace NexusForever.Game.Achievement
             return new()
             {
                 AchievementId = Id,
-                Data0         = Data0,
-                Data1         = Data1,
+                ChecklistFlagsLow  = Data0,
+                ChecklistFlagsHigh = Data1,
                 DateCompleted = (ulong)(DateCompleted?.ToFileTimeUtc() ?? 0L)
             };
         }

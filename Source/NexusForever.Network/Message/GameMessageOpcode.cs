@@ -620,6 +620,7 @@ namespace NexusForever.Network.Message
         Server081A                      = 0x081A, // spline related
         Server081B                      = 0x081B, // spline related
         Server081C                      = 0x081C, // spline related
+        ClientSteamAchievements         = 0x0823,
         ClientStorefrontPurchaseAccount = 0x0828,
         ClientStorefrontPurchaseCharacter = 0x082A,
         ClientStorefrontRequestCatalog  = 0x082D,
