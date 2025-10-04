@@ -8,5 +8,4 @@
         Locked      = 0x5,
         InBattle    = 0x6,
     };
-
 }

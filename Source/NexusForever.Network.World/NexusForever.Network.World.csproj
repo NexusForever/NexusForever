@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Message\Model\Guild\ServerGuildPerkDeactivated.cs~RFdb4915.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NexusForever.Game.Static\NexusForever.Game.Static.csproj" />
     <ProjectReference Include="..\NexusForever.Network\NexusForever.Network.csproj" />
   </ItemGroup>

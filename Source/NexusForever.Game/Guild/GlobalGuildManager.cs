@@ -12,6 +12,7 @@ using NexusForever.Game.Housing;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Social;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;

@@ -1,7 +1,7 @@
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Guild
 {
     // Activates the guild nameplate for the player. This can be the nameplate
     // of any guild the player is a member of.

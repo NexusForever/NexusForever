@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Guild;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Guild
 {
     [Message(GameMessageOpcode.ServerGuildInvite)]
     public class ServerGuildInvite : IWritable

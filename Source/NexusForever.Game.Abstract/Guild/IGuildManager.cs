@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.Game.Abstract.Guild
 {

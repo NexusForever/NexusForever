@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Guild
 {
     /// <summary> Updates stack count of item in guild bank inventory. </summary>
     [Message(GameMessageOpcode.ServerGuildBankInventoryCount)]

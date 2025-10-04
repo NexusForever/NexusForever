@@ -1,8 +1,7 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Guild
 {
     [Message(GameMessageOpcode.ServerGuildStandard)]
     public class ServerGuildStandard : IWritable

@@ -9,7 +9,6 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.GameTable.Text.Filter;
 using NexusForever.GameTable.Text.Static;
-using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
 using NLog;

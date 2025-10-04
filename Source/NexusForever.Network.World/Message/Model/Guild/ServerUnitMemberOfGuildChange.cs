@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Guild
 {
     // <summary> Sends all of the GuildIds to which a unit belongs.
     // Circles, Warparties, Arena teams, and Communities all work the same on the client/server as normal Guilds so this

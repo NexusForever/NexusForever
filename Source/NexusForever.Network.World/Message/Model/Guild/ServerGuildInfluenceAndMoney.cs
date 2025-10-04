@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Guild
 {
     // Fires whenever a guild's credits or influence are gained, withdrawn, or spent.
     [Message(GameMessageOpcode.ServerGuildInfluenceAndMoney)]

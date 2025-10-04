@@ -2,7 +2,7 @@
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Guild
 {
     // Fires whenever the arena team or warparty enters a queue, leaves a queue, enters a match, or leaves a match.
     [Message(GameMessageOpcode.ServerGuildQueueStateChanged)]

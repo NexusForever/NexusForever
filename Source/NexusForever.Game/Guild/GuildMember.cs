@@ -168,7 +168,6 @@ namespace NexusForever.Game.Guild
         {
             ICharacter characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
 
-
             return new NetworkGuildMember
             {
                 PlayerIdentity           = PlayerIdentity.ToNetworkIdentity(),

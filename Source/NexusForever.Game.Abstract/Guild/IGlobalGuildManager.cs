@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Guild
