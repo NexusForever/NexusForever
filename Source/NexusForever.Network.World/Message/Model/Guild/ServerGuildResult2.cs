@@ -2,7 +2,6 @@
 
 namespace NexusForever.Network.World.Message.Model.Guild
 {
-    
     [Message(GameMessageOpcode.ServerGuildResult2)]
     public class ServerGuildResult2 : ServerGuildResult
     {
