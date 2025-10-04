@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Reputation
 {
-    public enum Faction
+    public enum Faction : uint
     {
         Dominion      = 166,
         Exile         = 167,

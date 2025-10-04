@@ -9,13 +9,13 @@ namespace NexusForever.Network.World.Message.Model
     {
         public Channel Channel { get; set; }
         public ChatResult ChatResult { get; set; }
-        public ushort Unknown0 { get; set; }
+        public ushort ChatMessageId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             Channel.Write(writer);
             writer.Write(ChatResult, 5u);
-            writer.Write(Unknown0);
+            writer.Write(ChatMessageId);
         }
     }
 }

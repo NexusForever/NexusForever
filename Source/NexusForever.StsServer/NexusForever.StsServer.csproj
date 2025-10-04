@@ -7,19 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.3" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+    <PackageReference Include="NLog.Extensions.Logging" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NexusForever.Cryptography\NexusForever.Cryptography.csproj" />
     <ProjectReference Include="..\NexusForever.Database.Auth\NexusForever.Database.Auth.csproj" />
     <ProjectReference Include="..\NexusForever.Network.Sts\NexusForever.Network.Sts.csproj" />
+    <ProjectReference Include="..\NexusForever.Network\NexusForever.Network.csproj" />
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="StsServer.example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

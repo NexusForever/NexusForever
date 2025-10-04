@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game;
-using NexusForever.Game.Social;
+using NexusForever.Game.Chat;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;
 using NexusForever.Network.Session;

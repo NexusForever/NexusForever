@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Matching;
 using NexusForever.Network.Message;
@@ -9,7 +10,7 @@ namespace NexusForever.Game.Matching.Queue
     {
         public IMatchingQueueProposal MatchingQueueProposal { get; private set; }
 
-        public ulong CharacterId { get; private set; }
+        public Identity Identity { get; private set; }
         public Role Roles { get; private set; }
 
         #region Dependency Injection
@@ -27,13 +28,13 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Initialise <see cref="IMatchingQueueProposalMember"/>.
         /// </summary>
-        public void Initialise(IMatchingQueueProposal matchingQueueProposal, ulong characterId, Role roles)
+        public void Initialise(IMatchingQueueProposal matchingQueueProposal, Identity identity, Role roles)
         {
             if (MatchingQueueProposal != null)
                 throw new InvalidOperationException();
 
             MatchingQueueProposal = matchingQueueProposal;
-            CharacterId           = characterId;
+            Identity              = identity;
             Roles                 = roles;
         }
 
@@ -42,7 +43,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void Send(IWritable message)
         {
-            IPlayer player = playerManager.GetPlayer(CharacterId);
+            IPlayer player = playerManager.GetPlayer(Identity);
             player?.Session.EnqueueMessageEncrypted(message);
         }
     }

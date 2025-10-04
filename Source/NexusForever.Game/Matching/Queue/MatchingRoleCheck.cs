@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Matching;
 using NexusForever.Network.Message;
@@ -14,7 +15,7 @@ namespace NexusForever.Game.Matching.Queue
         public MatchingRoleCheckStatus Status { get; private set; }
         public IMatchingQueueProposal MatchingQueueProposal { get; private set; }
 
-        private readonly Dictionary<ulong, IMatchingRoleCheckMember> members = [];
+        private readonly Dictionary<Identity, IMatchingRoleCheckMember> members = [];
         private UpdateTimer expiryTimer;
 
         #region Dependency Injection
@@ -35,18 +36,18 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Initialise <see cref="IMatchingRoleCheck"/> with the supplied <see cref="IMatchingQueueProposal"/> and character ids.
         /// </summary>
-        public void Initialise(IMatchingQueueProposal matchingQueueProposal, List<ulong> characterIds)
+        public void Initialise(IMatchingQueueProposal matchingQueueProposal, List<Identity> identities)
         {
             if (MatchingQueueProposal != null)
                 throw new InvalidOperationException();
 
             MatchingQueueProposal = matchingQueueProposal;
 
-            foreach (ulong characterId in characterIds)
+            foreach (Identity identity in identities)
             {
                 IMatchingRoleCheckMember matchingRoleCheckMember = matchingRoleCheckMemberFactory.Resolve();
-                matchingRoleCheckMember.Initialise(characterId);
-                members.Add(characterId, matchingRoleCheckMember);
+                matchingRoleCheckMember.Initialise(identity);
+                members.Add(identity, matchingRoleCheckMember);
             }
 
             SendMatchingRoleCheckStarted();
@@ -85,12 +86,12 @@ namespace NexusForever.Game.Matching.Queue
         /// <remarks>
         /// This will also update the <see cref="MatchingRoleCheckStatus"/> to <see cref="MatchingRoleCheckStatus.Success"/> if all members have responded or <see cref="MatchingRoleCheckStatus.Declined"/> if any member has declined.
         /// </remarks>
-        public void Respond(ulong characterId, Role roles)
+        public void Respond(Identity identity, Role roles)
         {
             if (Status != MatchingRoleCheckStatus.Pending)
                 throw new InvalidOperationException();
 
-            if (!members.TryGetValue(characterId, out IMatchingRoleCheckMember matchingRoleCheckMember))
+            if (!members.TryGetValue(identity, out IMatchingRoleCheckMember matchingRoleCheckMember))
                 throw new InvalidOperationException();
 
             matchingRoleCheckMember.SetRoles(roles);
@@ -105,7 +106,7 @@ namespace NexusForever.Game.Matching.Queue
             else
             {
                 uint pendingMembers = (uint)members.Values.Count(m => m.Roles.HasValue);
-                log.LogTrace($"MatchingRoleCheck {Guid} received role {roles} response from {characterId}, waiting for {members.Count - pendingMembers} to respond.");
+                log.LogTrace($"MatchingRoleCheck {Guid} received role {roles} response from {identity}, waiting for {members.Count - pendingMembers} to respond.");
 
                 if (pendingMembers == members.Count)
                 {

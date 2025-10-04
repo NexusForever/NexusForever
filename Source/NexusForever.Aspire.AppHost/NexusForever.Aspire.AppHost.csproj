@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.1" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>27008a3f-0ceb-4ca3-acbf-eab661b470e0</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.Docker" />
+    <PackageReference Include="Aspire.Hosting.MySql" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.API.Character\NexusForever.API.Character.csproj" />
+    <ProjectReference Include="..\NexusForever.Aspire.Database.Migrations\NexusForever.Aspire.Database.Migrations.csproj" />
+    <ProjectReference Include="..\NexusForever.AuthServer\NexusForever.AuthServer.csproj" />
+    <ProjectReference Include="..\NexusForever.Database\NexusForever.Database.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\NexusForever.Network.Internal\NexusForever.Network.Internal.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\NexusForever.Server.ChatServer\NexusForever.Server.ChatServer.csproj" />
+    <ProjectReference Include="..\NexusForever.Server.GroupServer\NexusForever.Server.GroupServer.csproj" />
+    <ProjectReference Include="..\NexusForever.StsServer\NexusForever.StsServer.csproj" />
+    <ProjectReference Include="..\NexusForever.WorldServer\NexusForever.WorldServer.csproj" />
+  </ItemGroup>
+
+</Project>

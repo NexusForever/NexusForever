@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Social;
+using NexusForever.Game.Chat;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;

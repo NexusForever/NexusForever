@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
@@ -19,7 +20,7 @@ namespace NexusForever.Game.Matching.Match
         public IMatchingMapSelectorResult MatchingMapSelectorResult { get; private set; }
 
         private readonly List<IMatchProposalTeam> teams = [];
-        private readonly Dictionary<ulong, IMatchProposalTeam> characterTeams = [];
+        private readonly Dictionary<Identity, IMatchProposalTeam> characterTeams = [];
 
         private UpdateTimer expiryTimer;
 
@@ -57,7 +58,7 @@ namespace NexusForever.Game.Matching.Match
 
                 teams.Add(matchingProposalTeam);
                 foreach (IMatchingQueueProposalMember matchingQueueProposalMember in matchingQueueGroupTeam.GetMembers())
-                    characterTeams.Add(matchingQueueProposalMember.CharacterId, matchingProposalTeam);
+                    characterTeams.Add(matchingQueueProposalMember.Identity, matchingProposalTeam);
             }
 
             foreach (IMatchProposalTeam matchProposalTeam in teams)
@@ -88,7 +89,7 @@ namespace NexusForever.Game.Matching.Match
 
         private IMatchProposalTeam GetTeam(IPlayer player)
         {
-            return characterTeams.TryGetValue(player.CharacterId, out IMatchProposalTeam team) ? team : null;
+            return characterTeams.TryGetValue(player.Identity, out IMatchProposalTeam team) ? team : null;
         }
 
         private IMatchProposalTeam GetOpposingTeam(IMatchProposalTeam matchProposalTeam)
@@ -105,7 +106,7 @@ namespace NexusForever.Game.Matching.Match
             if (team == null)
                 throw new InvalidOperationException();
 
-            team.Respond(player.CharacterId, response);
+            team.Respond(player.Identity, response);
 
             if (response == false)
             {

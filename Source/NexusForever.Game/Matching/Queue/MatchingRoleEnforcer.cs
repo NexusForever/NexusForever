@@ -33,8 +33,8 @@ namespace NexusForever.Game.Matching.Queue
             {
                 result.Members.Add(new MatchingRoleEnforcerResultMember
                 {
-                    CharacterId = member.CharacterId,
-                    Role        = member.Roles
+                    Identity = member.Identity,
+                    Role     = member.Roles
                 });
             }
 

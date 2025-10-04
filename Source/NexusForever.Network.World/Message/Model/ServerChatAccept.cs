@@ -5,6 +5,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerChatAccept)]
     public class ServerChatAccept : IWritable
     {
+        public ushort ChatMessageId { get; set; }
         public string Name { get; set; }
         public string RealmName { get; set; }
         public uint Guid { get; set; }
@@ -12,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(1, 16u); // Result?
+            writer.Write(ChatMessageId);
             writer.Write(GM);
             writer.Write(0, 5u); // Item count
 

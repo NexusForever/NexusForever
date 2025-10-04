@@ -17,7 +17,7 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -1065,6 +1065,10 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnType("tinyint(4)")
                         .HasDefaultValue((sbyte)0)
                         .HasColumnName("inputKeySet");
+
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("isOnline");
 
                     b.Property<DateTime?>("LastOnline")
                         .HasColumnType("datetime")

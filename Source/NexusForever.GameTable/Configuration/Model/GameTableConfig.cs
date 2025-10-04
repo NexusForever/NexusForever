@@ -1,10 +1,11 @@
-﻿using NexusForever.Shared.Configuration;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace NexusForever.GameTable.Configuration.Model;
-
-[ConfigurationBind]
-public class GameTableConfig
+namespace NexusForever.GameTable.Configuration.Model
 {
-    public string GameTablePath { get; set; } = "tbl";
-    public CacheConfig Cache { get; set; }
+    public class GameTableConfig
+    {
+        [Required]
+        public string GameTablePath { get; set; }
+        public CacheConfig Cache { get; set; }
+    }
 }

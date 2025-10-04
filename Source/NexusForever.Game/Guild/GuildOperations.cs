@@ -1,8 +1,8 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.TextFilter;
-using NexusForever.Game.Text.Filter;
+using NexusForever.GameTable.Text.Filter;
+using NexusForever.GameTable.Text.Static;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Guild
@@ -31,7 +31,7 @@ namespace NexusForever.Game.Guild
 
                 Broadcast(new ServerGuildInfoMessageUpdate
                 {
-                    GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                    GuildIdentity = Identity.ToNetworkIdentity(),
                     InfoMessage = AdditionalInfo
                 });
             }
@@ -61,7 +61,7 @@ namespace NexusForever.Game.Guild
 
                 Broadcast(new ServerGuildMotdUpdate
                 {
-                    GuildIdentity = IdentityExtensions.ToNetwork(Identity),
+                    GuildIdentity = Identity.ToNetworkIdentity(),
                     MessageOfTheDay = MessageOfTheDay
                 });
             }

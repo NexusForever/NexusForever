@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.Message;
+﻿using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
@@ -8,8 +9,20 @@ namespace NexusForever.Network.World.Message.Model
     {
         public Channel Channel { get; private set; }
         public string Message { get; private set; }
-        public List<ChatFormat> Formats { get; } = new();
-        public ushort Unknown0C { get; private set; }
+        public List<ChatClientFormat> Formats { get; } = [];
+        public ushort ChatMessageId { get; private set; }
+
+        #region Dependency Injection
+
+        private readonly IServiceProvider serviceProvider;
+
+        public ClientChat(
+            IServiceProvider serviceProvider)
+        {
+            this.serviceProvider = serviceProvider;
+        }
+
+        #endregion
 
         public void Read(GamePacketReader reader)
         {
@@ -20,12 +33,12 @@ namespace NexusForever.Network.World.Message.Model
             byte formatCount = reader.ReadByte(5u);
             for (int i = 0; i < formatCount; i++)
             {
-                var format = new ChatFormat();
+                var format = serviceProvider.GetService<ChatClientFormat>();
                 format.Read(reader);
                 Formats.Add(format);
             }
 
-            Unknown0C = reader.ReadUShort();
+            ChatMessageId = reader.ReadUShort();
         }
     }
 }

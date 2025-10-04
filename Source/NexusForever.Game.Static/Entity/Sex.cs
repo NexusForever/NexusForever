@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
-    public enum Sex
+    public enum Sex : byte
     {
         Male,
         Female

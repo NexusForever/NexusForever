@@ -3,13 +3,13 @@ using System.Linq;
 using System.Text;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Social;
+using NexusForever.Game.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Social;
-using NexusForever.Game.Text.Search;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Text.Search;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.WorldServer.Command.Context;
 

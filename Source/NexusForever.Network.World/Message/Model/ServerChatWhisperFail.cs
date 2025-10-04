@@ -7,13 +7,13 @@ namespace NexusForever.Network.World.Message.Model
     {
         public string CharacterTo { get; set; }
         public bool IsAccountWhisper { get; set; }
-        public ushort Unknown1 { get; set; }
+        public ushort ChatMessageId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.WriteStringWide(CharacterTo);
             writer.Write(IsAccountWhisper);
-            writer.Write(Unknown1); // Result?
+            writer.Write(ChatMessageId);
         }
     }
 }

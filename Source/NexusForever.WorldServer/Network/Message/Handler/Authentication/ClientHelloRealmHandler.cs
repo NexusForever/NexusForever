@@ -4,7 +4,7 @@ using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Shared.Game.Events;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Authentication
@@ -29,11 +29,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Authentication
             session.CanProcessIncomingPackets = false;
 
             string sessionKey = Convert.ToHexString(helloRealm.SessionKey);
-            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(databaseManager.GetDatabase<AuthDatabase>().GetAccountBySessionKeyAsync(helloRealm.Email, sessionKey),
+            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(databaseManager.GetDatabase<AuthDatabase>().GetAccountBySessionKeyAsync(helloRealm.AccountString, sessionKey),
                 account =>
             {
                 if (account == null)
-                    throw new InvalidPacketValueException($"Failed to find account, Id:{helloRealm.AccountId}, Email:{helloRealm.Email}, SessionKey:{sessionKey}!");
+                    throw new InvalidPacketValueException($"Failed to find account, Id:{helloRealm.AccountId}, Email:{helloRealm.AccountString}, SessionKey:{sessionKey}!");
 
                 session.Initialise(account);
                 session.SetEncryptionKey(helloRealm.SessionKey);

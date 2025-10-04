@@ -27,12 +27,12 @@ namespace NexusForever.Game.Abstract.Matching.Queue
         /// <summary>
         /// Add a new member to the <see cref="IMatchingQueueProposal"/> with supplied character id and <see cref="Role"/>.
         /// </summary>
-        void AddMember(ulong characterId, Role roles);
+        void AddMember(Identity identity, Role roles);
 
         /// <summary>
         /// Return <see cref="IMatchingQueueProposalMember"/> for the supplied character id.
         /// </summary>
-        IMatchingQueueProposalMember GetMember(ulong characterId);
+        IMatchingQueueProposalMember GetMember(Identity identity);
 
         IEnumerable<IMatchingQueueProposalMember> GetMembers();
         IEnumerable<IMatchingMap> GetMatchingMaps();

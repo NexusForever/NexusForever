@@ -7,11 +7,11 @@ namespace NexusForever.Game.Guild
     public class GuildResultInfo : IGuildResultInfo
     {
         public GuildResult Result { get; set; }
-        public IIdentity GuildIdentity { get; set; }
+        public Identity GuildIdentity { get; set; }
         public string ReferenceString { get; set; }
         public uint ReferenceId { get; set; }
 
-        public GuildResultInfo(GuildResult result, IIdentity guildIdentity, string referenceString = "", uint referenceId = 0u)
+        public GuildResultInfo(GuildResult result, Identity guildIdentity, string referenceString = "", uint referenceId = 0u)
         {
             Result          = result;
             GuildIdentity   = guildIdentity;
@@ -21,10 +21,10 @@ namespace NexusForever.Game.Guild
 
         public GuildResultInfo(GuildResult result, string referenceString = "", uint referenceId = 0u)
         {
-            Result = result;
-            GuildIdentity = new Identity { Id = 0, RealmId = 0 };
+            Result          = result;
+            GuildIdentity   = new Identity { Id = 0, RealmId = 0 };
             ReferenceString = referenceString;
-            ReferenceId = referenceId;
+            ReferenceId     = referenceId;
         }
     }
 }

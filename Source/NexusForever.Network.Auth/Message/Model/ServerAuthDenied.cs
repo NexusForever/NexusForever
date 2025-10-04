@@ -8,13 +8,13 @@ namespace NexusForever.Network.Auth.Message.Model
     {
         public NpLoginResult LoginResult { get; set; }
         // if LoginResult > 27 client uses this value in some way for an error code
-        public uint Unknown4 { get; set; }
+        public uint ErrorValue { get; set; } // Value to insert into replacement token in the localized string from the LoginResult
         public float SuspendedDays { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(LoginResult, 32);
-            writer.Write(Unknown4);
+            writer.Write(ErrorValue);
             writer.Write(SuspendedDays);
         }
     }

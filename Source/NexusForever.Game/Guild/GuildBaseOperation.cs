@@ -4,8 +4,8 @@ using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Character;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.TextFilter;
-using NexusForever.Game.Text.Filter;
+using NexusForever.GameTable.Text.Filter;
+using NexusForever.GameTable.Text.Static;
 using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Guild

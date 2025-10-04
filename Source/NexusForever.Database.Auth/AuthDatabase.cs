@@ -218,6 +218,14 @@ namespace NexusForever.Database.Auth
                 .ToImmutableList();
         }
 
+        public ServerModel GetServer(ushort realmId)
+        {
+            using var context = new AuthContext(config);
+            return context.Server
+                .AsNoTracking()
+                .SingleOrDefault(s => s.Id == realmId);
+        }
+
         public ImmutableList<ServerMessageModel> GetServerMessages()
         {
             using var context = new AuthContext(config);

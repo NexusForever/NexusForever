@@ -26,7 +26,7 @@ namespace NexusForever.Game.Guild
         }
 
         public IGuildBase Guild { get; }
-        public IIdentity PlayerIdentity { get; }
+        public Identity PlayerIdentity { get; }
         public ulong CharacterId { get => PlayerIdentity.Id; }
 
         public IGuildRank Rank
@@ -171,7 +171,7 @@ namespace NexusForever.Game.Guild
 
             return new NetworkGuildMember
             {
-                PlayerIdentity           = IdentityExtensions.ToNetwork(PlayerIdentity),
+                PlayerIdentity           = PlayerIdentity.ToNetworkIdentity(),
                 Rank                     = rank.Index,
                 Name                     = characterInfo.Name,
                 Sex                      = characterInfo.Sex,

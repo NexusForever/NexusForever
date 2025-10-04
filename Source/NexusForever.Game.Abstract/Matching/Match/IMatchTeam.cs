@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Static.Matching;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
 
@@ -25,7 +26,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Return <see cref="IMatchTeamMember"/> for supplied characterId.
         /// </summary>
-        IMatchTeamMember GetMember(ulong characterId);
+        IMatchTeamMember GetMember(Identity identity);
 
         /// <summary>
         /// Return collection of all <see cref="IMatchTeamMember"/>'s in <see cref="IMatchTeam"/>.
@@ -40,27 +41,27 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Add character to team.
         /// </summary>
-        void MatchJoin(ulong characterId);
+        void MatchJoin(Identity identity, Role roles);
 
         /// <summary>
         /// Invoked when character enters the match.
         /// </summary>
-        void MatchEnter(ulong characterId, IMatchingMap matchingMap);
+        void MatchEnter(Identity identity, IMatchingMap matchingMap);
 
         /// <summary>
         /// Invoked when character exist the match.
         /// </summary>
-        void MatchExit(ulong characterId, bool teleport);
+        void MatchExit(Identity identity, bool teleport);
 
         /// <summary>
         /// Invoked when character leaves the match.
         /// </summary>
-        void MatchLeave(ulong characterId);
+        void MatchLeave(Identity identity);
 
         /// <summary>
         /// Teleport character to match.
         /// </summary>
-        void MatchTeleport(ulong characterId);
+        void MatchTeleport(Identity identity);
 
         /// <summary>
         /// Get return <see cref="IMapPosition"/> for character.
@@ -68,7 +69,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <remarks>
         /// Return position is the position of the character before entering the match.
         /// </remarks>
-        IMapPosition GetReturnPosition(ulong characterId);
+        IMapPosition GetReturnPosition(Identity identity);
 
         /// <summary>
         /// Broadcast <see cref="IWritable"/> to all members.

@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
-    public enum Class
+    public enum Class : byte
     {
         Warrior      = 1,
         Engineer     = 2,

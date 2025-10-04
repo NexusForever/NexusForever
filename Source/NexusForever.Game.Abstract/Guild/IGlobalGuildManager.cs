@@ -26,15 +26,6 @@ namespace NexusForever.Game.Abstract.Guild
         void Shutdown();
 
         /// <summary>
-        /// Validate all <see cref="ICommunity"/> to make sure they have a corresponding residence.
-        /// </summary>
-        /// <remarks>
-        /// This function is mainly here for migrating communities created before the implementation of community plots.
-        /// If this happens normally there could be a bigger issue.
-        /// </remarks>
-        void ValidateCommunityResidences();
-
-        /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
         IGuildBase GetGuild(ulong guildId);
@@ -42,7 +33,7 @@ namespace NexusForever.Game.Abstract.Guild
         /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied identity.
         /// </summary>
-        IGuildBase GetGuild(IIdentity identity);
+        IGuildBase GetGuild(Identity identity);
 
         /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied id.

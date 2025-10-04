@@ -1,35 +1,22 @@
 ﻿using NexusForever.Game.Static.Social;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Social;
+using NexusForever.Network.World.Chat;
 
 namespace NexusForever.Network.World.Message.Model.Shared
 {
-    public class ChatFormat : IReadable, IWritable
+    public class ChatFormat : IWritable
     {
         public ChatFormatType Type { get; set; }
         public ushort StartIndex { get; set; }
         public ushort StopIndex { get; set; }
-        public IChatFormat FormatModel { get; set; }
-
-        public void Read(GamePacketReader reader)
-        {
-            Type        = reader.ReadEnum<ChatFormatType>(4);
-            StartIndex  = reader.ReadUShort();
-            StopIndex   = reader.ReadUShort();
-
-            FormatModel = ChatFormatManager.Instance.NewChatFormatModel(Type);
-            if (FormatModel == null)
-                throw new NotImplementedException();
-
-            FormatModel.Read(reader);
-        }
+        public IChatFormatModel Model { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Type, 4u);
             writer.Write(StartIndex);
             writer.Write(StopIndex);
-            FormatModel.Write(writer);
+            Model.Write(writer);
         }
     }
 }

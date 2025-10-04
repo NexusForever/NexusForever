@@ -9,7 +9,6 @@ using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Reputation;
-using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Setting;
 using NexusForever.GameTable.Model;
@@ -22,7 +21,7 @@ namespace NexusForever.Game.Abstract.Entity
     {
         IAccount Account { get; }
 
-        IIdentity Identity { get; }
+        Identity Identity { get; }
         ulong CharacterId { get; }
         string Name { get; }
         Sex Sex { get; set; }
@@ -50,6 +49,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Guid of the <see cref="IPetEntity"/> currently summoned by the <see cref="IPlayer"/>.
         /// </summary>
         uint? VanityPetGuid { get; set; }
+
+        /// <summary>
+        /// Id of the primary group that <see cref="IPlayer"/> is associated with.
+        /// </summary>
+        ulong GroupAssociation { get; set; }
 
         bool IsSitting { get; }
 
@@ -82,7 +86,6 @@ namespace NexusForever.Game.Abstract.Entity
         IXpManager XpManager { get; }
         IReputationManager ReputationManager { get; }
         IGuildManager GuildManager { get; }
-        IChatManager ChatManager { get; }
         IResidenceManager ResidenceManager { get; }
         ICinematicManager CinematicManager { get; }
         ICharacterEntitlementManager EntitlementManager { get; }

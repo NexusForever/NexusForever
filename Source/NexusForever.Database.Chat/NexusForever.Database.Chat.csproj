@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Database\NexusForever.Database.csproj" />
+    <ProjectReference Include="..\NexusForever.Game.Static\NexusForever.Game.Static.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Static\" />
+  </ItemGroup>
+
+</Project>

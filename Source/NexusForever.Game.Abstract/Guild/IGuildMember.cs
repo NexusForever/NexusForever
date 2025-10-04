@@ -8,7 +8,7 @@ namespace NexusForever.Game.Abstract.Guild
     public interface IGuildMember : IDatabaseCharacter, IDatabaseState, INetworkBuildable<GuildMember>
     {
         IGuildBase Guild { get; }
-        public IIdentity PlayerIdentity { get; }
+        public Identity PlayerIdentity { get; }
         public ulong CharacterId { get => PlayerIdentity.Id; }
         IGuildRank Rank { get; set; }
         string Note { get; set; }

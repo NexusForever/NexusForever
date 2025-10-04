@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
@@ -10,7 +11,7 @@ namespace NexusForever.Game.Matching.Queue
 {
     public class MatchingCharacter : IMatchingCharacter
     {
-        public ulong CharacterId { get; private set; }
+        public Identity Identity { get; private set; }
 
         private readonly Dictionary<Static.Matching.MatchType, IMatchingCharacterQueue> matchingCharacterGroups = [];
 
@@ -35,14 +36,14 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Initialise <see cref="IMatchingCharacter"/> with supplied character id.
         /// </summary>
-        public void Initialise(ulong characterId)
+        public void Initialise(Identity identity)
         {
-            if (CharacterId != 0)
+            if (Identity != null)
                 throw new InvalidOperationException();
 
-            CharacterId = characterId;
+            Identity = identity;
 
-            log.LogTrace($"Matching information initialised for character {characterId}.");
+            log.LogTrace($"Matching information initialised for character {identity}.");
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace NexusForever.Game.Matching.Queue
                 MatchingQueueGroup    = matchingQueueGroup,
             });
 
-            log.LogTrace($"Added matching queue proposal for {matchingQueueProposal.MatchType} to matching character {CharacterId}.");
+            log.LogTrace($"Added matching queue proposal for {matchingQueueProposal.MatchType} to matching character {Identity}.");
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace NexusForever.Game.Matching.Queue
 
             SendMatchingStatus();
 
-            log.LogTrace($"Removed matching queue proposal for {matchType} from matching character {CharacterId}.");
+            log.LogTrace($"Removed matching queue proposal for {matchType} from matching character {Identity}.");
         }
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void SendMatchingStatus()
         {
-            Static.Matching.MatchType currentMatchType = matchManager.GetMatchCharacter(CharacterId).Match?.MatchingMap.GameTypeEntry.MatchTypeEnum
+            Static.Matching.MatchType currentMatchType = matchManager.GetMatchCharacter(Identity).Match?.MatchingMap.GameTypeEntry.MatchTypeEnum
                 ?? Static.Matching.MatchType.None;
 
             var matchingQueueLeave = new ServerMatchingQueueStatus()
@@ -125,7 +126,7 @@ namespace NexusForever.Game.Matching.Queue
 
         private void Send(IWritable message)
         {
-            IPlayer player = playerManager.GetPlayer(CharacterId);
+            IPlayer player = playerManager.GetPlayer(Identity);
             player?.Session.EnqueueMessageEncrypted(message);
         }
     }

@@ -19,7 +19,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Update response for character id.
         /// </summary>
-        void Respond(ulong characterId, bool response);
+        void Respond(Identity identity, bool response);
 
         /// <summary>
         /// Broadcast message to all members.

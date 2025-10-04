@@ -1,13 +1,13 @@
 using System.Numerics;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
-using NexusForever.Game.Abstract.Social;
+using NexusForever.Game.Chat;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
-using NexusForever.Game.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Social;
@@ -120,6 +120,12 @@ namespace NexusForever.Game.Entity
         {
             get => GetStatInteger(Stat.Level) ?? 1u;
             set => SetStat(Stat.Level, value);
+        }
+
+        public uint InterruptArmor
+        {
+            get => GetStatInteger(Stat.InterruptArmour) ?? 1u;
+            set => SetStat(Stat.InterruptArmour, value);
         }
 
         public bool Sheathed
@@ -243,6 +249,8 @@ namespace NexusForever.Game.Entity
             MovementManager.SetPosition(vector, false);
 
             base.OnAddToMap(map, guid, vector);
+
+            UpdateZone(vector);
         }
 
         /// <summary>
@@ -267,7 +275,11 @@ namespace NexusForever.Game.Entity
         public override void OnRelocate(Vector3 vector)
         {
             base.OnRelocate(vector);
+            UpdateZone(vector);
+        }
 
+        private void UpdateZone(Vector3 vector)
+        {
             uint? worldAreaId = Map.File.GetWorldAreaId(vector);
             if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
             {
@@ -721,6 +733,8 @@ namespace NexusForever.Game.Entity
                     }
                 }, true);
             }
+
+            OnStatUpdate(statValue);
         }
 
         /// <summary>
@@ -753,6 +767,8 @@ namespace NexusForever.Game.Entity
                     }
                 }, true);
             }
+
+            OnStatUpdate(statValue);
         }
 
         /// <summary>
@@ -761,6 +777,14 @@ namespace NexusForever.Game.Entity
         protected void SetStat<T>(Stat stat, T value) where T : Enum, IConvertible
         {
             SetStat(stat, value.ToUInt32(null));
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Stat"/> updated.
+        /// </summary>
+        protected virtual void OnStatUpdate(IStatValue statValue)
+        {
+            // deliberately empty
         }
 
         /// <summary>

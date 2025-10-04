@@ -387,7 +387,8 @@ namespace NexusForever.GameTable
         TextTable TextFrench { get; }
         TextTable TextGerman { get; }
 
-        void Initialise();
+        Task Initialise();
+        Task Initialise(GameTableLoader loader);
 
         /// <summary>
         /// Return the <see cref="TextTable"/> for the specified <see cref="Game.Static.Language"/>.

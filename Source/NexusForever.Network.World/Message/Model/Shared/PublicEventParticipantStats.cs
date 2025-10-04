@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Event;
+using NexusForever.Game.Static.PublicEvent;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Shared

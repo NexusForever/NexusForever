@@ -3,6 +3,7 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model
 {
+    // Can be sent to player in Game, CharacterSelect, or RealmSelect screens
     [Message(GameMessageOpcode.ServerRealmBroadcast)]
     public class ServerRealmBroadcast : IWritable
     {

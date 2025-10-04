@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Map.Instance;
-using NexusForever.Game.Abstract.Text.Filter;
-using NexusForever.Game.Static.TextFilter;
+using NexusForever.GameTable.Text.Filter;
+using NexusForever.GameTable.Text.Static;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;

@@ -74,13 +74,13 @@ namespace NexusForever.Network.Auth.Message.Model
         }
 
         public uint Build { get; private set; }
-        public ulong Unknown8 { get; private set; }
-        public string Email { get; private set; }
-        public NetworkGuid Unknown208 { get; } = new();
+        public ulong CryptKeyInteger { get; private set; }
+        public string AccountString { get; private set; }
+        public NetworkGuid UUID_1 { get; } = new();
         public NetworkGuid GameToken { get; } = new();
-        public uint Unknown228 { get; private set; }
+        public uint InetAddress { get; private set; }
         public Language Language { get; private set; }
-        public uint Unknown230 { get; private set; }
+        public uint GameMode { get; private set; }
         public uint Unknown234 { get; private set; }
         public HardwareInformation Hardware { get; } = new();
         public uint RealmDataCenterId { get; private set; }
@@ -88,15 +88,15 @@ namespace NexusForever.Network.Auth.Message.Model
         public void Read(GamePacketReader reader)
         {
             Build      = reader.ReadUInt();
-            Unknown8   = reader.ReadULong(); // 0x1588
-            Email      = reader.ReadWideStringFixed();
+            CryptKeyInteger = reader.ReadULong(); // 0x1588
+            AccountString = reader.ReadWideStringFixed();
 
-            Unknown208.Read(reader);
+            UUID_1.Read(reader);
             GameToken.Read(reader);
 
-            Unknown228 = reader.ReadUInt();
+            InetAddress = reader.ReadUInt();
             Language   = reader.ReadEnum<Language>(32u);
-            Unknown230 = reader.ReadUInt();
+            GameMode = reader.ReadUInt();
             Unknown234 = reader.ReadUInt();
 
             Hardware.Read(reader);

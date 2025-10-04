@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Matching;
@@ -24,7 +25,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public bool IsParty => members.Count > 1;
 
-        private readonly Dictionary<ulong, IMatchingQueueProposalMember> members = [];
+        private readonly Dictionary<Identity, IMatchingQueueProposalMember> members = [];
         private readonly Dictionary<uint, IMatchingMap> maps = [];
 
         private IMatchingQueueGroup matchingQueueGroup;
@@ -91,21 +92,21 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Add a new member to the <see cref="IMatchingQueueProposal"/> with supplied character id and <see cref="Role"/>.
         /// </summary>
-        public void AddMember(ulong characterId, Role roles)
+        public void AddMember(Identity identity, Role roles)
         {
             IMatchingQueueProposalMember matchingQueueProposalMember = memberFactory.Resolve();
-            matchingQueueProposalMember.Initialise(this, characterId, roles);
-            members.Add(characterId, matchingQueueProposalMember);
+            matchingQueueProposalMember.Initialise(this, identity, roles);
+            members.Add(identity, matchingQueueProposalMember);
 
-            log.LogTrace($"Added member {characterId} to matching queue proposal {Guid}.");
+            log.LogTrace($"Added member {identity} to matching queue proposal {Guid}.");
         }
 
         /// <summary>
         /// Return <see cref="IMatchingQueueProposalMember"/> for the supplied character id.
         /// </summary>
-        public IMatchingQueueProposalMember GetMember(ulong characterId)
+        public IMatchingQueueProposalMember GetMember(Identity identity)
         {
-            return members.TryGetValue(characterId, out IMatchingQueueProposalMember member) ? member : null;
+            return members.TryGetValue(identity, out IMatchingQueueProposalMember member) ? member : null;
         }
 
         public IEnumerable<IMatchingQueueProposalMember> GetMembers()
@@ -132,7 +133,7 @@ namespace NexusForever.Game.Matching.Queue
 
             foreach (IMatchingQueueProposalMember matchingQueueProposalMember in GetMembers())
             {
-                IMatchingCharacter character = matchingManager.GetMatchingCharacter(matchingQueueProposalMember.CharacterId);
+                IMatchingCharacter character = matchingManager.GetMatchingCharacter(matchingQueueProposalMember.Identity);
                 character.AddMatchingQueueProposal(this, matchingQueueGroup);
             }
 
@@ -149,7 +150,7 @@ namespace NexusForever.Game.Matching.Queue
 
             foreach (IMatchingQueueProposalMember matchingQueueProposalMember in GetMembers())
             {
-                IMatchingCharacter character = matchingManager.GetMatchingCharacter(matchingQueueProposalMember.CharacterId);
+                IMatchingCharacter character = matchingManager.GetMatchingCharacter(matchingQueueProposalMember.Identity);
                 character.RemoveMatchingQueueProposal(matchingQueueGroup.MatchType, leaveReason);
             }
 

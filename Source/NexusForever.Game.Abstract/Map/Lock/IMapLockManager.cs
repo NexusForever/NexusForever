@@ -11,7 +11,7 @@ namespace NexusForever.Game.Abstract.Map.Lock
         /// <summary>
         /// Create a new solo <see cref="IMapLock"/> for supplied character id and world id.
         /// </summary>
-        IMapLock CreateSoloLock(ulong characterId, uint worldId);
+        IMapLock CreateSoloLock(Identity identity, uint worldId);
 
         /// <summary>
         /// Create a new match <see cref="IMapLock"/> for supplied <see cref="IMatch"/>.
@@ -21,7 +21,7 @@ namespace NexusForever.Game.Abstract.Map.Lock
         /// <summary>
         /// Return <see cref="IMapLock"/> for supplied character id and world id.
         /// </summary>
-        IMapLock GetSoloLock(ulong characterId, uint worldId);
+        IMapLock GetSoloLock(Identity identity, uint worldId);
 
         /// <summary>
         /// Return <see cref="IMapLock"/> for supplied match guid and world id.
