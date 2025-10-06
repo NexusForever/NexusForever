@@ -139,8 +139,8 @@ namespace NexusForever.Game.Achievement
             return new()
             {
                 AchievementId = Id,
-                Data0 = Data0,
-                Data1 = Data1,
+                Data0         = Data0,
+                Data1         = Data1,
                 DateCompleted = (ulong)(DateCompleted?.ToFileTimeUtc() ?? 0L)
             };
         }
