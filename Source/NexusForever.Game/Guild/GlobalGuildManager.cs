@@ -5,12 +5,14 @@ using System.Reflection;
 using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Social;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
@@ -207,11 +209,27 @@ namespace NexusForever.Game.Guild
         }
 
         /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        public IGuildBase GetGuild(Abstract.Identity guildIdentity)
+        {
+            return guilds.TryGetValue(guildIdentity.Id, out IGuildBase guild) ? guild : null;
+        }
+
+        /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
         public T GetGuild<T>(ulong guildId) where T : IGuildBase
         {
             return guilds.TryGetValue(guildId, out IGuildBase guild) ? (T)guild : default;
+        }
+
+        /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        public T GetGuild<T>(Abstract.Identity identity) where T : IGuildBase
+        {
+            return guilds.TryGetValue(identity.Id, out IGuildBase guild) ? (T)guild : default;
         }
 
         /// <summary>
@@ -316,7 +334,7 @@ namespace NexusForever.Game.Guild
         private IGuildResultInfo HandleGuildOperation((GuildOperationHandlerDelegate Delegate, GuildOperationHandlerResultDelegate ResultDelegate) handlers,
             IPlayer player, ClientGuildOperation operation)
         {
-            IGuildBase guild = GetGuild(operation.GuildId);
+            IGuildBase guild = GetGuild(operation.GuildIdentity.ToGameIdentity());
             if (guild == null)
                 return new GuildResultInfo(GuildResult.NotAGuild);
 
@@ -332,7 +350,7 @@ namespace NexusForever.Game.Guild
             else
             {
                 IGuildResultInfo info = handlers.ResultDelegate.Invoke(guild, member, player, operation);
-                info.GuildId = guild.Id;
+                info.GuildIdentity = guild.Identity;
                 return info;
             }
         }

@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
         public void Read(GamePacketReader reader)
         {
-            RealmId     = reader.ReadUShort(14u);
+            RealmId = reader.ReadUShort(14u);
             Id = reader.ReadULong();
         }
 

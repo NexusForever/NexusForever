@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Setting;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Instance
 {
     [Message(GameMessageOpcode.ClientSetInstanceSettings)]
     public class ClientSetInstanceSettings : IReadable

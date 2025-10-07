@@ -7,7 +7,7 @@ using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Network.Internal;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.Game.Guild
 {

@@ -15,12 +15,12 @@ using NexusForever.Network.Message;
 using NexusForever.Network.Message.Model.Shared;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 using NLog;
-using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.GuildMember;
-using NetworkGuildRank = NexusForever.Network.World.Message.Model.Shared.GuildRank;
-using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
+using NetworkGuildMember = NexusForever.Network.World.Message.Model.Guild.GuildMember;
+using NetworkGuildRank = NexusForever.Network.World.Message.Model.Guild.GuildRank;
 
 namespace NexusForever.Game.Guild
 {
@@ -42,7 +42,8 @@ namespace NexusForever.Game.Guild
 
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        public ulong Id { get; private set; }
+        public Abstract.Identity Identity { get; private set; }
+        public ulong Id => Identity.Id;
         public abstract GuildType Type { get; }
         public DateTime CreateTime { get; private set; }
 
@@ -122,7 +123,11 @@ namespace NexusForever.Game.Guild
         /// </summary>
         public virtual void Initialise(GuildModel model)
         {
-            Id         = model.Id;
+            Identity   = new Abstract.Identity
+            {
+                RealmId = RealmContext.Instance.RealmId,
+                Id     = model.Id
+            };
             Name       = model.Name;
             Flags      = (GuildFlag)model.Flags;
             LeaderId   = model.LeaderId;
@@ -149,7 +154,11 @@ namespace NexusForever.Game.Guild
         /// </summary>
         public virtual void Initialise(string guildName, string leaderRankName, string councilRankName, string memberRankName)
         {
-            Id         = GlobalGuildManager.Instance.NextGuildId;
+            Identity    = new Abstract.Identity
+            {
+                RealmId = RealmContext.Instance.RealmId,
+                Id      = GlobalGuildManager.Instance.NextGuildId
+            };
             Name       = guildName;
             Flags      = GuildFlag.None;
             CreateTime = DateTime.Now;
@@ -383,27 +392,27 @@ namespace NexusForever.Game.Guild
 
                 LeaderId = player.CharacterId;
                 member   = AddMember(player, 0);
-                SendGuildResult(player.Session, GuildResult.YouCreated, Id, referenceText: Name);
+                SendGuildResult(player.Session, GuildResult.YouCreated, Identity, referenceText: Name);
             }
             else
             {
                 member = AddMember(player);
-                SendGuildResult(player.Session, GuildResult.YouJoined, Id, referenceText: Name);
+                SendGuildResult(player.Session, GuildResult.YouJoined, Identity, referenceText: Name);
             }
 
-            SendGuildJoin(player, member.Build(), new GuildPlayerLimits());
+            SendGuildJoin(player, member.Build(), new GuildWithdrawlInfo());
             SendGuildRoster(player.Session);
             AnnounceGuildMemberChange(member);
         }
 
-        private void SendGuildJoin(IPlayer player, NetworkGuildMember guildMember, GuildPlayerLimits playerLimits)
+        private void SendGuildJoin(IPlayer player, NetworkGuildMember guildMember, GuildWithdrawlInfo playerLimits)
         {
             player.Session.EnqueueMessageEncrypted(new ServerGuildJoin
             {
-                GuildData   = Build(),
-                Self        = guildMember,
-                SelfPrivate = playerLimits,
-                Nameplate   = player.GuildManager.GuildAffiliation.Id == Id
+                GuildData                 = Build(),
+                Self                      = guildMember,
+                WithdrawlInfo             = playerLimits,
+                DisplayThisGuildNameplate = player.GuildManager.GuildAffiliation.Id == Id
             });
         }
 
@@ -411,8 +420,7 @@ namespace NexusForever.Game.Guild
         {
             session.EnqueueMessageEncrypted(new ServerGuildRoster
             {
-                GuildRealm = RealmContext.Instance.RealmId,
-                GuildId    = Id,
+                GuildIdentity = Identity.ToNetworkIdentity(),
                 GuildMembers = members.Values
                     .Select(m => m.Build())
                     .ToList(),
@@ -455,12 +463,11 @@ namespace NexusForever.Game.Guild
                 throw new ArgumentException($"Invalid member {player.CharacterId} for guild {Id}.");
 
             LeaveGuild(member, reason == GuildResult.GuildDisbanded);
-            SendGuildResult(player.Session, reason, referenceText: Name);
+            SendGuildResult(player.Session, reason, Identity, referenceText: Name);
 
             player.Session.EnqueueMessageEncrypted(new ServerGuildRemove
             {
-                RealmId = RealmContext.Instance.RealmId,
-                GuildId = Id
+                GuildIdentity = Identity.ToNetworkIdentity(),
             });
         }
 
@@ -478,13 +485,8 @@ namespace NexusForever.Game.Guild
             {
                 Broadcast(new ServerGuildMemberRemove
                 {
-                    RealmId        = RealmContext.Instance.RealmId,
-                    GuildId        = Id,
-                    PlayerIdentity = new NetworkIdentity
-                    {
-                        RealmId = RealmContext.Instance.RealmId,
-                        Id      = member.CharacterId
-                    },
+                    GuildIdentity  = Identity.ToNetworkIdentity(),
+                    MemberToRemove = member.PlayerIdentity.ToNetworkIdentity(),
                 });
             }
 
@@ -775,21 +777,20 @@ namespace NexusForever.Game.Guild
         /// </summary>
         public static void SendGuildResult(IGameSession session, IGuildResultInfo info)
         {
-            SendGuildResult(session, info.Result, info.GuildId, info.ReferenceId, info.ReferenceString);
+            SendGuildResult(session, info.Result, info.GuildIdentity, info.ReferenceId, info.ReferenceString);
         }
 
         /// <summary>
         /// Send <see cref="ServerGuildResult"/> to <see cref="IGameSession"/> based on supplied parameters.
         /// </summary>
-        public static void SendGuildResult(IGameSession session, GuildResult result, ulong guildId = 0ul, uint referenceId = 0u, string referenceText = "")
+        public static void SendGuildResult(IGameSession session, GuildResult result, Abstract.Identity guildIdentity, uint referenceId = 0u, string referenceText = "")
         {
             session.EnqueueMessageEncrypted(new ServerGuildResult
             {
                 Result        = result,
-                RealmId       = RealmContext.Instance.RealmId,
-                GuildId       = guildId,
+                GuildIdentity = guildIdentity.ToNetworkIdentity(),
                 ReferenceId   = referenceId,
-                ReferenceText = referenceText
+                TargetName    = referenceText
             });
         }
 
@@ -813,10 +814,9 @@ namespace NexusForever.Game.Guild
             Broadcast(new ServerGuildResult
             {
                 Result        = result,
-                RealmId       = RealmContext.Instance.RealmId,
-                GuildId       = Id,
+                GuildIdentity = Identity.ToNetworkIdentity(),
                 ReferenceId   = referenceId,
-                ReferenceText = referenceText,
+                TargetName    = referenceText,
             });
         }
 
@@ -827,8 +827,7 @@ namespace NexusForever.Game.Guild
         {
             Broadcast(new ServerGuildMemberChange
             {
-                RealmId           = RealmContext.Instance.RealmId,
-                GuildId           = Id,
+                GuildIdentity     = Identity.ToNetworkIdentity(),
                 GuildMember       = member.Build(),
                 MemberCount       = (ushort)members.Count,
                 OnlineMemberCount = (ushort)onlineMembers.Count
@@ -842,19 +841,17 @@ namespace NexusForever.Game.Guild
         {
             Broadcast(new ServerGuildRankChange
             {
-                RealmId = RealmContext.Instance.RealmId,
-                GuildId = Id,
-                Ranks   = GetGuildRanksPackets().ToList()
+                GuildIdentity = Identity.ToNetworkIdentity(),
+                Ranks         = GetGuildRanksPackets().ToList()
             });
         }
 
         protected void SendGuildFlagUpdate()
         {
-            Broadcast(new ServerGuildFlagUpdate
+            Broadcast(new ServerGuildFlagsUpdate
             {
-                RealmId = RealmContext.Instance.RealmId,
-                GuildId = Id,
-                Value   = (uint)Flags
+                GuildIdentity = Identity.ToNetworkIdentity(),
+                Flags         = Flags
             });
         }
 
@@ -867,12 +864,8 @@ namespace NexusForever.Game.Guild
 
             Broadcast(new ServerGuildRename
             {
-                TargetGuild = new TargetGuild
-                {
-                    RealmId = RealmContext.Instance.RealmId,
-                    GuildId = Id
-                },
-                Name = name
+                GuildIdentity = Identity.ToNetworkIdentity(),
+                Name          = name
             });
         }
 

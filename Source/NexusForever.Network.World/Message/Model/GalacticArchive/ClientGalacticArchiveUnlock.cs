@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.GalacticArchive
 {
     // Sent when following GalacticArchiveLink or interacting with creatures that have archiveArticleIdInteractUnlock
     [Message(GameMessageOpcode.ClientGalacticArchiveUnlock)]

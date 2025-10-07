@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.Auth.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pregame
 {
     [Message(GameMessageOpcode.ServerSubscriptionInfo)]
     public class ServerSubscriptionInfo : IWritable

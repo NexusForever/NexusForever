@@ -2,7 +2,7 @@ using NexusForever.Game.Static.Friend;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 
-namespace NexusForever.WorldServer.Network.Message.Model
+namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ClientFriendAccountAddByName)]
     public class ClientFriendAccountAddByName : IReadable

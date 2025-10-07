@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.Game.Abstract.Guild
 {
@@ -72,7 +72,7 @@ namespace NexusForever.Game.Abstract.Guild
         /// <remarks>
         /// <see cref="CanInviteToGuild(ulong)"/> should be invoked before invoking this method.
         /// </remarks>
-        void InviteToGuild(ulong id, IPlayer invitee);
+        void InviteToGuild(ulong id, IPlayer invitee, IPlayer inviter);
 
         /// <summary>
         /// Return if <see cref="IPlayer"/> can accept the existing <see cref="IGuildInvite"/>.

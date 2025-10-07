@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Model.Loot
+namespace NexusForever.Network.World.Message.Model.Loot
 {
     // Trigger BindOnPickup dialog when looting an item
     [Message(GameMessageOpcode.ServerLootBindOnPickup)]

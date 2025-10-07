@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Instance
 {
     // Fires OnInstanceResetResult event with false condition.
     // Not seen in sniffs probably because ServerInstanceResetResult can signal the same condition

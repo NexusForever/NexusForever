@@ -1,7 +1,6 @@
-﻿
-using NexusForever.Network.Message;
+﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Model.Loot
+namespace NexusForever.Network.World.Message.Model.Loot
 {
     // Sets CanLoot flag on the loot
     [Message(GameMessageOpcode.ServerLootCanLoot)]

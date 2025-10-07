@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Challenges
 {
     // Share timeout is set at 30 seconds per GameFormulaId 0x416
     [Message(GameMessageOpcode.ServerChallengeShareTimeout)]

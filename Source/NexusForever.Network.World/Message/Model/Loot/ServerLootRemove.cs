@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Model.Loot
+namespace NexusForever.Network.World.Message.Model.Loot
 {
     [Message(GameMessageOpcode.ServerLootRemove)]
     public class ServerLootRemove : IWritable

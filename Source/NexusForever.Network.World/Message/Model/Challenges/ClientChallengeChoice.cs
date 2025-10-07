@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Challenges;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Challenges
 {
     [Message(GameMessageOpcode.ClientChallengeChoice)]
     public class ClientChallengeChoice : IReadable
