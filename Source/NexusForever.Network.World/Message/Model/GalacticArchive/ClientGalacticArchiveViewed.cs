@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.GalacticArchive
 {
     // Sent when SetViewed function is called on an archiveEntry that is unlocked but unviewed
     // Relies on bit flags sent in ServerGalacticArchiveUpdate to determine which archiveEntry was viewed for the given ArchiveArticleId

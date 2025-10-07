@@ -1,7 +1,6 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Pregame;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pregame
 {
     // Response to ClientGetRealmTransferDestinations (0x3EE)
     // Triggers TransferDestinationRealmList lua event.

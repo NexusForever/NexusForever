@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Loot;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Model.Loot
+namespace NexusForever.Network.World.Message.Model.Loot
 {
     // Notifies the player when someone else loots an item.
     // Ignored if LooterUnitId is the player's UnitId

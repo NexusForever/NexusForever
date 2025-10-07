@@ -8,7 +8,7 @@ using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Achievement;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Achievement;
 
 namespace NexusForever.Game.Achievement
 {

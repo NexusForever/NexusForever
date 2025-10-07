@@ -6,7 +6,7 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.GameTable.Text.Filter;
 using NexusForever.GameTable.Text.Static;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.Game.Guild
 {
@@ -52,7 +52,7 @@ namespace NexusForever.Game.Guild
             return info;
         }        
 
-        [GuildOperationHandler(GuildOperation.InitGuildWindow)]
+        [GuildOperationHandler(GuildOperation.RequestEventLog)]
         private void GuildOperationInitGuildWindow(IGuildMember member, IPlayer player, ClientGuildOperation operation)
         {
             // Probably want to send roster update
@@ -145,7 +145,9 @@ namespace NexusForever.Game.Guild
             if (info.Result != GuildResult.Success)
                 return info;
 
-            target.GuildManager.InviteToGuild(Id, player);
+            IPlayer inviter = PlayerManager.Instance.GetPlayer(member.PlayerIdentity.Id);
+
+            target.GuildManager.InviteToGuild(Id, player, inviter);
             return new GuildResultInfo(GuildResult.InviteSent, referenceString: operation.TextValue);
         }
 
@@ -206,7 +208,7 @@ namespace NexusForever.Game.Guild
                     return new GuildResultInfo(GuildResult.RankLacksRankRenamePermission);
 
                 if (GetRank((byte)operation.Rank) != null)
-                    return new GuildResultInfo(GuildResult.InvalidRank, operation.Rank, operation.TextValue);
+                    return new GuildResultInfo(GuildResult.InvalidRank, Identity, operation.TextValue, operation.Rank);
 
                 if (RankExists(operation.TextValue))
                     return new GuildResultInfo(GuildResult.DuplicateRankName, referenceString: operation.TextValue);
@@ -242,7 +244,7 @@ namespace NexusForever.Game.Guild
 
                 rank = GetRank((byte)operation.Rank);
                 if (rank == null)
-                    return new GuildResultInfo(GuildResult.InvalidRank, operation.Rank, operation.TextValue);
+                    return new GuildResultInfo(GuildResult.InvalidRank, Identity, operation.TextValue, operation.Rank);
 
                 if (member.Rank.Index >= operation.Rank)
                     return new GuildResultInfo(GuildResult.CanOnlyModifyLowerRanks);
@@ -278,7 +280,7 @@ namespace NexusForever.Game.Guild
 
                 rank = GetRank((byte)operation.Rank);
                 if (rank == null)
-                    return new GuildResultInfo(GuildResult.InvalidRank, operation.Rank, operation.TextValue);
+                    return new GuildResultInfo(GuildResult.InvalidRank, Identity, operation.TextValue, operation.Rank);
 
                 if (member.Rank.Index >= operation.Rank)
                     return new GuildResultInfo(GuildResult.CanOnlyModifyLowerRanks);
@@ -315,7 +317,7 @@ namespace NexusForever.Game.Guild
 
                 rank = GetRank((byte)operation.Rank);
                 if (rank == null)
-                    return new GuildResultInfo(GuildResult.InvalidRank, operation.Rank, operation.TextValue);
+                    return new GuildResultInfo(GuildResult.InvalidRank, Identity, operation.TextValue, operation.Rank);
                 
                 // TODO: check if mask options are valid for this guild type
 

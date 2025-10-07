@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.Auth.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pregame
 {
     // Not a very useful message but included for completeness.
     // Client only reads this message when on the CharacaterSelect screen.

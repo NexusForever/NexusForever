@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Guild
@@ -29,6 +29,11 @@ namespace NexusForever.Game.Abstract.Guild
         /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
         IGuildBase GetGuild(ulong guildId);
+
+        /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        IGuildBase GetGuild(Identity identity);
 
         /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied id.

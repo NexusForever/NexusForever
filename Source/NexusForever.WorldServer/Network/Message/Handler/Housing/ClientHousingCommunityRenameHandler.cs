@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Entity;
@@ -88,11 +89,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             session.EnqueueMessageEncrypted(new ServerHousingCommunityRename
             {
                 Result      = HousingResult.Success,
-                TargetGuild = new TargetGuild
-                {
-                    RealmId = realmContext.RealmId,
-                    GuildId = community.Id
-                }
+                TargetGuild = community.Identity.ToNetworkIdentity()
             });
         }
     }

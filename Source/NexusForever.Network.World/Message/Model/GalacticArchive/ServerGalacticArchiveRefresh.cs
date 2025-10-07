@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.GalacticArchive
 {
     // Empties the set of galacticArchive state. Must send again with ServerGalacticArchiveUpdate.
     [Message(GameMessageOpcode.ServerGalacticArchiveRefresh)]

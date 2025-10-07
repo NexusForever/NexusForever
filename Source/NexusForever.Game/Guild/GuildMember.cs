@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Character;
-using NetworkGuildMember = NexusForever.Network.World.Message.Model.Shared.GuildMember;
+using NetworkGuildMember = NexusForever.Network.World.Message.Model.Guild.GuildMember;
 
 namespace NexusForever.Game.Guild
 {
@@ -25,7 +26,8 @@ namespace NexusForever.Game.Guild
         }
 
         public IGuildBase Guild { get; }
-        public ulong CharacterId { get; }
+        public Identity PlayerIdentity { get; }
+        public ulong CharacterId { get => PlayerIdentity.Id; }
 
         public IGuildRank Rank
         {
@@ -78,7 +80,7 @@ namespace NexusForever.Game.Guild
         public GuildMember(GuildMemberModel model, IGuildBase guild, IGuildRank guildRank)
         {
             Guild                    = guild;
-            CharacterId              = model.CharacterId;
+            PlayerIdentity           = new Identity{ Id = model.CharacterId, RealmId = RealmContext.Instance.RealmId };
             rank                     = guildRank;
             note                     = model.Note;
             communityPlotReservation = model.CommunityPlotReservation;
@@ -92,7 +94,21 @@ namespace NexusForever.Game.Guild
         public GuildMember(IGuildBase guild, ulong characterId, IGuildRank guildRank, string note = "")
         {
             Guild                    = guild;
-            CharacterId              = characterId;
+            PlayerIdentity           = new Identity { Id = characterId, RealmId = RealmContext.Instance.RealmId };
+            rank                     = guildRank;
+            this.note                = note;
+            communityPlotReservation = -1;
+
+            saveMask = GuildMemberSaveMask.Create;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="IGuildMember"/> from the supplied member information.
+        /// </summary>
+        public GuildMember(IGuildBase guild, Identity playerIdentity, IGuildRank guildRank, string note = "")
+        {
+            Guild                    = guild;
+            PlayerIdentity           = playerIdentity;
             rank                     = guildRank;
             this.note                = note;
             communityPlotReservation = -1;
@@ -151,10 +167,10 @@ namespace NexusForever.Game.Guild
         public NetworkGuildMember Build()
         {
             ICharacter characterInfo = CharacterManager.Instance.GetCharacter(CharacterId);
+
             return new NetworkGuildMember
             {
-                Realm                    = RealmContext.Instance.RealmId,
-                CharacterId              = CharacterId,
+                PlayerIdentity           = PlayerIdentity.ToNetworkIdentity(),
                 Rank                     = rank.Index,
                 Name                     = characterInfo.Name,
                 Sex                      = characterInfo.Sex,
@@ -163,7 +179,7 @@ namespace NexusForever.Game.Guild
                 Level                    = characterInfo.Level,
                 Note                     = Note,
                 LastLogoutTimeDays       = characterInfo.GetOnlineStatus() ?? 0f,
-                CommunityPlotReservation = communityPlotReservation
+                CommunityReservedPlotIndex = communityPlotReservation
             };
         }
 

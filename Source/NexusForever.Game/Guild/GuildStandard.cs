@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Guild;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NetworkGuildStandard = NexusForever.Network.World.Message.Model.Shared.GuildStandard;
+using NetworkGuildStandard = NexusForever.Network.World.Message.Model.Guild.GuildStandard;
 
 namespace NexusForever.Game.Guild
 {

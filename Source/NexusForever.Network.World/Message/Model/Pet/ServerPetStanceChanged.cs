@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Pet;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Pet
 {
     [Message(GameMessageOpcode.ServerPetStanceChanged)]
     public class ServerPetStanceChanged : IWritable
