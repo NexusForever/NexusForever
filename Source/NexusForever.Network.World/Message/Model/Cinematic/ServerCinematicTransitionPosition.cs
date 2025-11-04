@@ -3,15 +3,15 @@ using NexusForever.Network.World.Entity;
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCinematic0212)]
-    public class ServerCinematic0212 : IWritable
+    [Message(GameMessageOpcode.ServerCinematicTransitionPosition)]
+    public class ServerCinematicTransitionPosition : IWritable
     {
-        public uint Unknown0 { get; set; }
+        public uint Delay { get; set; }
         public Position Position { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0);
+            writer.Write(Delay);
             Position.Write(writer);
         }
     }

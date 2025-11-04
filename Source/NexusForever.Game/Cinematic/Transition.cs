@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Game.Static.Cinematic;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
 
@@ -25,11 +26,11 @@ namespace NexusForever.Game.Cinematic
 
         public void Send(IGameSession session)
         {
-            session.EnqueueMessageEncrypted(new ServerCinematicTransition
+            session.EnqueueMessageEncrypted(new ServerCinematicCamera
             {
                 Delay             = Delay,
-                Flags             = Flags,
-                EndTran           = EndTransition,
+                Flags             = (CameraAddFlags)Flags,
+                EndTransition     = EndTransition,
                 TranDurationStart = Start,
                 TranDurationMid   = Mid,
                 TranDurationEnd   = End

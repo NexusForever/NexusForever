@@ -2,9 +2,10 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCinematicTransitionDurationSet)]
-    public class ServerCinematicTransitionDurationSet : IWritable
+    [Message(GameMessageOpcode.ServerCinematicCameraTransition)]
+    public class ServerCinematicCameraTransition : IWritable
     {
+        public uint Delay { get; set; }
         public uint Type { get; set; }
         public ushort DurationStart { get; set; }
         public ushort DurationMid { get; set; }
@@ -12,6 +13,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Write(GamePacketWriter writer)
         {
+            writer.Write(Delay);
             writer.Write(Type);
             writer.Write(DurationStart);
             writer.Write(DurationMid);

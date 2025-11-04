@@ -5,6 +5,6 @@
         uint Delay { get; }
         IActor Actor { get; }
         bool Hide { get; }
-        bool Unknown0 { get; }
+        bool AffectOnlyPlayers { get; }
     }
 }

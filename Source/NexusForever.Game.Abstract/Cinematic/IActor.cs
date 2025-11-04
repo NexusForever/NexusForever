@@ -8,9 +8,9 @@ namespace NexusForever.Game.Abstract.Cinematic
     {
         uint Id { get; }
         uint InitialDelay { get; }
-        uint CreatureType { get; }
+        uint Creature2Id { get; }
         ushort Flags { get; }
-        ushort Unknown0 { get; }
+        ushort TextureLevelOfDetailBias { get; }
         uint MovementMode { get; }
         float? Angle { get; }
         Position InitialPosition { get; }

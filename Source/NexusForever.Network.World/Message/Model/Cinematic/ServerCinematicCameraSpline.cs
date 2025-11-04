@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerCinematicCameraSpline : IWritable
     {
         public uint Delay { get; set; }
-        public uint Spline { get; set; }
+        public uint SplineId { get; set; }
         public uint SplineMode { get; set; }
         public float Speed { get; set; }
         public bool Target { get; set; }
@@ -15,7 +15,7 @@ namespace NexusForever.Network.World.Message.Model
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Delay);
-            writer.Write(Spline);
+            writer.Write(SplineId);
             writer.Write(SplineMode);
             writer.Write(Speed);
             writer.Write(Target);

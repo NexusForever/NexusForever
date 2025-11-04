@@ -21,14 +21,14 @@ namespace NexusForever.Game.Cinematic
             Speed       = speed;
             Target      = target;
             UseRotation = useRotation;
-        }
+        }               
 
         public void Send(IGameSession session)
         {
             session.EnqueueMessageEncrypted(new ServerCinematicCameraSpline
             {
                 Delay       = Delay,
-                Spline      = Spline,
+                SplineId    = Spline,
                 SplineMode  = SplineMode,
                 Speed       = Speed,
                 Target      = Target,

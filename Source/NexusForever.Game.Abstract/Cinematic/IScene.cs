@@ -3,6 +3,6 @@
     public interface IScene : IKeyframeAction
     {
         uint Delay { get; }
-        uint SceneId { get; }
+        uint Flags { get; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Cinematic;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 
@@ -38,17 +39,17 @@ namespace NexusForever.Game.Cinematic
         /// <summary>
         /// Set an <see cref="IActor"/> as the instance the Player will be spawned in. (Important for playback)
         /// </summary>
-        protected void SetAsPlayerActor(IActor actor, Position initialPosition, uint unknown3)
+        protected void SetAsPlayerActor(IActor actor, Position initialPosition, uint attachementId)
         {
-            IActor player = new Actor(0, 7, 0f, initialPosition, unknown0: 0);
-            player.AddPacketToSend(new ServerCinematic0211
+            IActor player = new Actor(0, 7, 0f, initialPosition, textureLoDBias: 0);
+            player.AddPacketToSend(new ServerCinematicPlatformAdd
             {
-                Unknown0 = 0,
-                UnitId   = player.Id,
-                UnitId1  = actor.Id,
-                Unknown3 = unknown3
+                Delay           = 0,
+                ActorUnitId     = player.Id,
+                PlatformUnitId  = actor.Id,
+                AttachmentId    = attachementId
             });
-            playerActor = player;
+            playerActor         = player;
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace NexusForever.Game.Cinematic
         /// </summary>
         protected IActor GetActor(uint creatureType)
         {
-            return Actors.Values.FirstOrDefault(i => i.CreatureType == creatureType);
+            return Actors.Values.FirstOrDefault(i => i.Creature2Id == creatureType);
         }
 
         /// <summary>
@@ -86,9 +87,9 @@ namespace NexusForever.Game.Cinematic
 
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicNotify
             {
-                Flags       = InitialFlags,
-                Cancel      = InitialCancelMode,
-                Duration    = Duration,
+                Flags       = (CinematicFlags)InitialFlags,
+                CancelMode  = (CancelType)InitialCancelMode,
+                Delay       = Duration,
                 CinematicId = CinematicId
             });
             StartTransition?.Send(Player.Session);
@@ -98,7 +99,7 @@ namespace NexusForever.Game.Cinematic
             EndTransition?.Send(Player.Session);
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicNotify
             {
-                Duration = Duration
+                Delay = Duration
             });
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicComplete());
         }
@@ -119,10 +120,10 @@ namespace NexusForever.Game.Cinematic
         {
             foreach ((uint delay, uint textId) in Texts)
             {
-                Player.Session.EnqueueMessageEncrypted(new ServerCinematicText
+                Player.Session.EnqueueMessageEncrypted(new ServerCinematicSound
                 {
                     Delay  = delay,
-                    TextId = textId
+                    LocalizedTextId = textId
                 });
             }
         }
@@ -134,7 +135,7 @@ namespace NexusForever.Game.Cinematic
         {
             playerActor?.SendInitialPackets(Player.Session);
 
-            Player.Session.EnqueueMessageEncrypted(new ServerCinematicShowAnimate
+            Player.Session.EnqueueMessageEncrypted(new ServerCinematicStart
             {
                 Show = true
             });
@@ -147,7 +148,7 @@ namespace NexusForever.Game.Cinematic
                 return;
 
             Player.Session.EnqueueMessageEncrypted(new ServerCinematic022B());
-            Player.Session.EnqueueMessageEncrypted(new ServerCinematic0212
+            Player.Session.EnqueueMessageEncrypted(new ServerCinematicTransitionPosition
             {
                 Position = new Position(Player.Position)
             });

@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Abstract.Cinematic.Cinematics;
+using NexusForever.Game.Static.Cinematic;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.World.Entity;
@@ -177,7 +178,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
 
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicTransitionDurationSet
             {
-                Type          = 2,
+                Type          = ScaleTransitionType.StartMinimzed,
                 DurationStart = 1500,
                 DurationMid   = 0,
                 DurationEnd   = 1500

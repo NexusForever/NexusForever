@@ -7,20 +7,20 @@ namespace NexusForever.Game.Cinematic
     public class Scene : IScene
     {
         public uint Delay { get; }
-        public uint SceneId { get; }
+        public uint Flags { get; }
 
-        public Scene(uint delay, uint sceneId)
+        public Scene(uint delay, uint flags)
         {
             Delay   = delay;
-            SceneId = sceneId;
+            Flags = flags;
         }
 
         public void Send(IGameSession session)
         {
-            session.EnqueueMessageEncrypted(new ServerCinematicScene
+            session.EnqueueMessageEncrypted(new ServerCinematicFlags
             {
-                Delay   = Delay,
-                SceneId = SceneId
+                Delay = Delay,
+                Flags = Flags
             });
         }
     }

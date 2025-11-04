@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCinematicShowAnimate)]
-    public class ServerCinematicShowAnimate : IWritable
+    [Message(GameMessageOpcode.ServerCinematicStart)]
+    public class ServerCinematicStart : IWritable
     {
         public uint Delay { get; set; }
         public bool Show { get; set; }

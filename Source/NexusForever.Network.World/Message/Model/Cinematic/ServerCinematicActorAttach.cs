@@ -2,13 +2,13 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCinematicActorAttach)]
+    [Message(GameMessageOpcode.ServerCinematicCameraAttach)]
     public class ServerCinematicCameraAttach : IWritable
     {
         public uint AttachType { get; set; }
         public uint AttachId { get; set; }
         public uint Delay { get; set; }
-        public uint ParentUnit { get; set; }
+        public uint ParentUnitId { get; set; }
         public bool UseRotation { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -16,7 +16,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(AttachType);
             writer.Write(AttachId);
             writer.Write(Delay);
-            writer.Write(ParentUnit);
+            writer.Write(ParentUnitId);
             writer.Write(UseRotation);
         }
     }

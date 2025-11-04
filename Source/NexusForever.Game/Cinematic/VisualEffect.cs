@@ -46,22 +46,22 @@ namespace NexusForever.Game.Cinematic
 
         public void Send(IGameSession session)
         {
-            session.EnqueueMessageEncrypted(new ServerCinematicVisualEffect
+            session.EnqueueMessageEncrypted(new ServerCinematicVisualEffectAdd
             {
-                Delay             = InitialDelay,
-                UnitId            = UnitId,
-                VisualHandle      = Id,
-                VisualEffectId    = VisualEffectId,
-                Position          = Position,
-                RemoveOnCameraEnd = RemoveOnCameraEnd
+                Delay                = InitialDelay,
+                UnitId               = UnitId,
+                VisualEffectUniqueId = Id,
+                VisualEffectId       = VisualEffectId,
+                Position             = Position,
+                RemoveOnCameraEnd    = RemoveOnCameraEnd
             });
 
             if (Duration > 0)
             {
                 session.EnqueueMessageEncrypted(new ServerCinematicVisualEffectEnd
                 {
-                    Delay        = InitialDelay + Duration,
-                    VisualHandle = Id
+                    Delay                = InitialDelay + Duration,
+                    VisualEffectUniqueId = Id
                 });
             }
         }

@@ -1,4 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Network.Message;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
@@ -10,9 +12,9 @@ namespace NexusForever.Game.Cinematic
     {
         public uint Id { get; }
         public uint InitialDelay { get; }
-        public uint CreatureType { get; }
+        public uint Creature2Id { get; }
         public ushort Flags { get; }
-        public ushort Unknown0 { get; }
+        public ushort TextureLevelOfDetailBias { get; }
         public uint MovementMode { get; }
         public float? Angle { get; }
         public Position InitialPosition { get; }
@@ -23,18 +25,18 @@ namespace NexusForever.Game.Cinematic
 
         public List<IWritable> PacketsToSend { get; } = new();
 
-        public Actor(uint creatureType, ushort flags, float? angle, Position position, uint initialDelay = 0, ushort unknown0 = 10, uint movementMode = 3, ulong activePropId = 0, uint socketId = 0)
+        public Actor(uint creatureType, ushort flags, float? angle, Position position, uint initialDelay = 0, ushort textureLoDBias = 10, uint movementMode = 3, ulong activePropId = 0, uint socketId = 0)
         {
-            Id              = GlobalCinematicManager.Instance.NextCinematicId;
-            CreatureType    = creatureType;
-            Flags           = flags;
-            Angle           = angle;
-            InitialPosition = position;
-            InitialDelay    = initialDelay;
-            Unknown0        = unknown0;
-            MovementMode    = movementMode;
-            ActivePropId    = activePropId;
-            SocketId        = socketId;
+            Id                       = GlobalCinematicManager.Instance.NextCinematicId;
+            Creature2Id              = creatureType;
+            Flags                    = flags;
+            Angle                    = angle;
+            InitialPosition          = position;
+            InitialDelay             = initialDelay;
+            TextureLevelOfDetailBias = textureLoDBias;
+            MovementMode             = movementMode;
+            ActivePropId             = activePropId;
+            SocketId                 = socketId;
         }
 
         public void AddVisualEffect(IVisualEffect visualEffect)
@@ -56,17 +58,17 @@ namespace NexusForever.Game.Cinematic
 
         public void SendInitialPackets(IGameSession session)
         {
-            session.EnqueueMessageEncrypted(new ServerCinematicActor
+            session.EnqueueMessageEncrypted(new ServerCinematicActorAdd
             {
-                Delay           = InitialDelay,
-                Flags           = Flags,
-                Unknown0        = Unknown0,
-                SpawnHandle     = Id,
-                CreatureType    = CreatureType,
-                MovementMode    = MovementMode,
-                InitialPosition = InitialPosition,
-                ActivePropId    = ActivePropId,
-                SocketId        = SocketId
+                Delay                    = InitialDelay,
+                Flags                    = (EntityCreateFlag)Flags,
+                TextureLevelOfDetailBias = TextureLevelOfDetailBias,
+                UnitId                   = Id,
+                Creature2Id              = Creature2Id,
+                MovementMode             = (ModeType)MovementMode,
+                Position                 = InitialPosition,
+                ActivePropId             = ActivePropId,
+                WorldSocketId            = SocketId
             });
 
             if (Angle.HasValue)

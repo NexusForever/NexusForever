@@ -2,16 +2,16 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCinematicVisualEffectEnd)]
-    public class ServerCinematicVisualEffectEnd : IWritable
+    [Message(GameMessageOpcode.ServerCinematicPlatformDetachActor)]
+    public class ServerCinematicPlatformDetachActor : IWritable
     {
         public uint Delay { get; set; }
-        public uint VisualHandle { get; set; }
+        public uint UnitId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Delay);
-            writer.Write(VisualHandle);
+            writer.Write(UnitId);
         }
     }
 }
