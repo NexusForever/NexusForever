@@ -3,8 +3,8 @@
     public enum GenericUnlockResult
     {
         AlreadyUnlocked = 0,
-        Unlocked        = 1,
-        AlreadyAcquired = 2,
-        Invalid         = 3
+        Granted         = 1,
+        Invalid         = 2,
+        PartialUnlock   = 3
     }
 }

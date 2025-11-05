@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Static;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.GenericUnlocks
 {
     [Message(GameMessageOpcode.ServerGenericUnlockResult)]
     public class ServerGenericUnlockResult : IWritable
