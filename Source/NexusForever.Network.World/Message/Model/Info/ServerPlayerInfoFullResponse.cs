@@ -1,32 +1,13 @@
 using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
 using Path = NexusForever.Game.Static.Entity.Path;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Info
 {
     [Message(GameMessageOpcode.ServerPlayerInfoFullResponse)]
     public class ServerPlayerInfoFullResponse : IWritable
     {
-        public Base BaseData { get; set; }
-
-        public class Base : IWritable
-        {
-            public byte ResultCode { get; set; }
-            public Identity Identity { get; set; }
-            public string Name { get; set; }
-            public Faction Faction { get; set; }
-
-            public void Write(GamePacketWriter writer)
-            {
-                writer.Write(ResultCode, 3u);
-                Identity.Write(writer);
-                writer.WriteStringFixed(Name);
-                writer.Write(Faction, 14u);
-            }
-        }
-
+        public PlayerInfoBase BaseData { get; set; }
         public bool IsClassPathSet { get; set; } = true;
         public Path Path { get; set; }
         public Class Class { get; set; }

@@ -1,14 +1,14 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Utility
 {
-    [Message(GameMessageOpcode.ServerPlayerPlayed)]
-    public class ServerPlayerPlayed : IWritable
+    [Message(GameMessageOpcode.ServerPlayedResponse)]
+    public class ServerPlayedResponse : IWritable
     {
         public DateTime CreateTime { get; set; }
-        public uint  TimePlayedSession { get; set; }
-        public uint  TimePlayedTotal { get; set; }
-        public uint  TimePlayedLevel { get; set; }
+        public uint TimePlayedSession { get; set; }
+        public uint TimePlayedTotal { get; set; }
+        public uint TimePlayedLevel { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
