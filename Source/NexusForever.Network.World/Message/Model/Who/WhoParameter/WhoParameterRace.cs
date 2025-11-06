@@ -1,12 +1,14 @@
-﻿namespace NexusForever.Network.World.Message.Model.Who
+﻿using NexusForever.Game.Static.Entity;
+
+namespace NexusForever.Network.World.Message.Model.Who
 {
     public class WhoParameterRace : IWhoParameterData
     {
-        public uint RaceId { get; set; }
+        public Race RaceId { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            RaceId = reader.ReadUInt(14u);
+            RaceId = reader.ReadEnum<Race>(14u);
         }
     }
 }

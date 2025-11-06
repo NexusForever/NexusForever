@@ -1,12 +1,14 @@
-﻿namespace NexusForever.Network.World.Message.Model.Who
+﻿using NexusForever.Game.Static.Entity;
+
+namespace NexusForever.Network.World.Message.Model.Who
 {
     public class WhoParameterClass : IWhoParameterData
     {
-        public uint ClassId { get; set; }
+        public Class ClassId { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            ClassId = reader.ReadUInt(14u);
+            ClassId = reader.ReadEnum<Class>(14u);
         }
     }
 }
