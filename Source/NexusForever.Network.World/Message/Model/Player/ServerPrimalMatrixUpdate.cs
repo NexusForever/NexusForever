@@ -5,12 +5,7 @@ namespace NexusForever.Network.World.Message.Model.Player
     [Message(GameMessageOpcode.ServerPrimalMatrixUpdate)]
     public class ServerPrimalMatrixUpdate : IWritable
     {
-        public class PrimalMatrixNode
-        {
-            public uint PrimalMatrixNodeId { get; set; }
-            public byte Value { get; set; }
-        }
-
+        // AllocationCount in each node is the saved allocation count after a save is requested
         public List<PrimalMatrixNode> PrimalMatrixNodes { get; set; }
         public uint EldanPowerAugmentation { get; set; }
 
@@ -18,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model.Player
         {
             writer.Write(PrimalMatrixNodes.Count);
             PrimalMatrixNodes.ForEach(node => writer.Write(node.PrimalMatrixNodeId));
-            PrimalMatrixNodes.ForEach(node => writer.Write(node.Value));
+            PrimalMatrixNodes.ForEach(node => writer.Write(node.AllocationCount));
             writer.Write(EldanPowerAugmentation);
         }
     }

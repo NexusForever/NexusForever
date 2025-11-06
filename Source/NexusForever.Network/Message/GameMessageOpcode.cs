@@ -10,6 +10,7 @@ namespace NexusForever.Network.Message
         ServerPetSpawned                = 0x0068,
         ServerClientEntityUpdateInterval = 0x0070,
         ServerAuthEncrypted             = 0x0076,
+        ClientPrimalMatrixSave          = 0x007F,
         ServerLogoutUpdate              = 0x0092,
         ClientCommodityOrderCancel      = 0x0093,
         ClientAuctionCancel             = 0x0094,
