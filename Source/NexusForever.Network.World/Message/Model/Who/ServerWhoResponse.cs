@@ -1,9 +1,10 @@
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.Game.Static.Who;
 using NexusForever.Network.Message;
 using Path = NexusForever.Game.Static.Entity.Path;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Who
 {
     [Message(GameMessageOpcode.ServerWhoResponse)]
     public class ServerWhoResponse : IWritable
@@ -35,14 +36,13 @@ namespace NexusForever.Network.World.Message.Model
         }
 
         public List<WhoPlayer> Players { get; set; }
+        public WhoResult Result { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Players.Count, 32);
-
+            writer.Write(Players.Count, 32u);
             Players.ForEach((player) => player.Write(writer));
-
-            writer.Write(1, 2);
+            writer.Write(Result, 2u);
         }
     }
 }
