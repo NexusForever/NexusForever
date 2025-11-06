@@ -477,6 +477,8 @@ namespace NexusForever.Network.Message
         ClientPlayerInfoRequest         = 0x0597,
         ServerPlayerInfoBasicResponse   = 0x0598,
         ServerPlayerInfoFullResponse    = 0x0599,
+        ClientRealmInfoRequest          = 0x059C,
+        ServerRealmInfoResponse         = 0x059D,
         ServerMailResult                = 0x05A2,
         ServerMailAvailable             = 0x05A3,
         ServerMailUnavailable           = 0x05A7,
