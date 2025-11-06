@@ -3,7 +3,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Setting;
 using NexusForever.Game.Setting;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Option;
 
 namespace NexusForever.Game.Entity
 {

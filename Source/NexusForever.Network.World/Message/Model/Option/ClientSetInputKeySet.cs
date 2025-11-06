@@ -1,7 +1,7 @@
-using NexusForever.Game.Static.Setting;
+using NexusForever.Game.Static.Option;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Option
 {
     [Message(GameMessageOpcode.ClientSetInputKeySet)]
     public class ClientSetInputKeySet : IReadable

@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Option
 {
     [Message(GameMessageOpcode.ClientRequestInputKeySet)]
     public class ClientRequestInputKeySet : IReadable

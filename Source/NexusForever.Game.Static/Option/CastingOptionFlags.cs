@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Setting
+﻿namespace NexusForever.Game.Static.Option
 {
     [Flags]
     public enum CastingOptionFlags

@@ -1,7 +1,7 @@
-﻿using NexusForever.Game.Static.Setting;
+﻿using NexusForever.Game.Static.Option;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Option
 {
     // When Type is Casting, NewValue is a bitmask of CastingOptionFlags.
     // When Type is SharedChallenge, NewValue only indicates whether the player wants to allow shared challenges.

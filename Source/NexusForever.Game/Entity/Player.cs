@@ -32,7 +32,7 @@ using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Setting;
+using NexusForever.Game.Static.Option;
 using NexusForever.Game.Static.Social;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;

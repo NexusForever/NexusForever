@@ -1,4 +1,4 @@
-namespace NexusForever.Game.Static.Setting
+namespace NexusForever.Game.Static.Option
 {
     public enum InputDevice
     {
