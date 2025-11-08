@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static;
+using NexusForever.Game.Static.Story;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract
@@ -14,6 +15,9 @@ namespace NexusForever.Game.Abstract
         /// <summary>
         /// Sends a story communicator window to the <see cref="IPlayer"/>.
         /// </summary>
-        void SendStoryCommunicator(uint textId, uint creatureId, IPlayer player, uint durationMs = 10000, StoryPanelType storyPanelType = StoryPanelType.Default, WindowType windowTypeId = WindowType.LeftAligned, uint soundEventId = 0, byte priority = 0);
+        void SendStoryCommunicator(uint textId, uint creatureId, IPlayer player, uint durationMs = 10000, uint soundEventId = 0,
+                                        CommunicatorOverlay overlay = CommunicatorOverlay.Default,
+                                        CommunicatorPortraitPlacement placement = CommunicatorPortraitPlacement.Left,
+                                        CommunicatorBackground background = CommunicatorBackground.Default);
     }
 }

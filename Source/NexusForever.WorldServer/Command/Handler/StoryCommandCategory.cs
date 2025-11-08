@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Story;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.WorldServer.Command.Context;
@@ -37,23 +37,23 @@ namespace NexusForever.WorldServer.Command.Handler
             uint creatureId,
             [Parameter("")]
             uint? duration,
-            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<StoryPanelType>))]
-            StoryPanelType? storyPanelType,
-            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<WindowType>))]
-            WindowType? windowType,
             [Parameter("")]
             uint? soundEvent,
-            [Parameter("")]
-            byte? priority)
+            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<CommunicatorOverlay>))]
+            CommunicatorOverlay? overlay,
+            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<CommunicatorPortraitPlacement>))]
+            CommunicatorPortraitPlacement? placement,
+            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<CommunicatorBackground>))]
+            CommunicatorBackground? background)
         {
             duration       ??= 10000u;
-            storyPanelType ??= StoryPanelType.Default;
-            windowType     ??= WindowType.LeftAligned;
             soundEvent     ??= 0u;
-            priority       ??= 0;
+            overlay        ??= CommunicatorOverlay.Default;
+            placement      ??= CommunicatorPortraitPlacement.Left;
+            background     ??= 0;
 
             StoryBuilder.Instance.SendStoryCommunicator(textId, creatureId, context.GetTargetOrInvoker<IPlayer>(),
-                duration.Value, storyPanelType.Value, windowType.Value, soundEvent.Value, priority.Value);
+                duration.Value, soundEvent.Value, overlay.Value, placement.Value, background.Value);
         }
     }
 }

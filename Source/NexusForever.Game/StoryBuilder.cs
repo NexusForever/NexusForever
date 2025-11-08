@@ -1,9 +1,8 @@
 ﻿using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static;
+using NexusForever.Game.Static.Story;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Story;
 using NexusForever.Shared;
 
 namespace NexusForever.Game
@@ -20,8 +19,8 @@ namespace NexusForever.Game
 
             var storyMessage = new StoryMessage
             {
-                MsgId       = entry.Id,
-                GeneralVoId = entry.SoundEventId
+                MsgId            = entry.Id,
+                RandomTextLineId = entry.SoundEventId
             };
             storyMessage.AddPlayer(BuildPlayer(player));
 
@@ -35,7 +34,10 @@ namespace NexusForever.Game
         /// <summary>
         /// Sends a story communicator window to the <see cref="IPlayer"/>.
         /// </summary>
-        public void SendStoryCommunicator(uint textId, uint creatureId, IPlayer player, uint durationMs = 10000, StoryPanelType storyPanelType = StoryPanelType.Default, WindowType windowTypeId = WindowType.LeftAligned, uint soundEventId = 0, byte priority = 0)
+        public void SendStoryCommunicator(uint textId, uint creatureId, IPlayer player, uint durationMs = 10000, uint soundEventId = 0,
+                                        CommunicatorOverlay overlay = CommunicatorOverlay.Default, 
+                                        CommunicatorPortraitPlacement placement = CommunicatorPortraitPlacement.Left, 
+                                        CommunicatorBackground background = CommunicatorBackground.Default)
         {
             if (textId == 0)
                 throw new ArgumentOutOfRangeException(nameof(textId));
@@ -47,14 +49,14 @@ namespace NexusForever.Game
             storyMessage.AddCreature(creatureId);
             storyMessage.AddPlayer(BuildPlayer(player));
 
-            player.Session.EnqueueMessageEncrypted(new ServerStoryCommunicatorShow
+            player.Session.EnqueueMessageEncrypted(new ServerStoryTextCommunicator
             {
-                StoryMessage   = storyMessage,
-                SoundEventId   = soundEventId > 0 ? soundEventId : creatureId,
-                DurationMs     = durationMs,
-                StoryPanelType = storyPanelType,
-                WindowTypeId   = windowTypeId,
-                Priority       = priority
+                StoryMessage      = storyMessage,
+                Creature2Id       = soundEventId > 0 ? soundEventId : creatureId,
+                DurationMs        = durationMs,
+                Overlay           = overlay,
+                PortraitPlacement = placement,
+                Background        = background
             });
         }
 
@@ -62,15 +64,15 @@ namespace NexusForever.Game
         {
             return new StoryMessage.Player
             {
-                PlayerGuid    = player.Guid,
-                PlayerName    = player.Name,
-                PlayerLevel   = player.Level,
-                PlayerGender  = player.Sex,
-                PlayerRace    = player.Race,
-                PlayerClass   = player.Class,
-                PlayerFaction = player.Faction1,
-                PlayerPath    = player.Path,
-                PlayerTitle   = player.TitleManager.ActiveTitleId
+                UnitId  = player.Guid,
+                Name    = player.Name,
+                Level   = player.Level,
+                Gender  = player.Sex,
+                Race    = player.Race,
+                Class   = player.Class,
+                Faction = player.Faction1,
+                Path    = player.Path,
+                TitleId   = player.TitleManager.ActiveTitleId
             };
         }
     }
