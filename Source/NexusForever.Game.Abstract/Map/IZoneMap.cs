@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Map;
 
 namespace NexusForever.Game.Abstract.Map
 {
