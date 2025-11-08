@@ -2,6 +2,7 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
+    // Triggers the aggro switch sound effect if the targetId is the player.
     [Message(GameMessageOpcode.ServerEntityAggroSwitch)]
     public class ServerEntityAggroSwitch : IWritable
     {

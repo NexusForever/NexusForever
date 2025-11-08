@@ -46,16 +46,16 @@ namespace NexusForever.Game.Entity
                 .SingleOrDefault(x => x.Creature2DisplayGroupId == CreatureEntry.Creature2DisplayGroupId);
             DisplayInfo = displayGroupEntry?.Creature2DisplayInfoId ?? 0u;
 
-            CreateFlags |= EntityCreateFlag.SpawnAnimation;
+            CreateFlags |= EntityCreateFlag.UseDefaultBirthSequence;
         }
 
         protected override IEntityModel BuildEntityModel()
         {
             return new MountEntityModel
             {
-                CreatureId    = CreatureEntry.Id,
+                Creature2Id   = CreatureEntry.Id,
                 UnitVehicleId = (ushort)VehicleEntry.Id,
-                OwnerId       = OwnerGuid,
+                OwnerUnitId   = OwnerGuid,
                 Passengers    = passengers
                     .Select(p => new NetworkVehiclePassenger
                     {
@@ -71,8 +71,8 @@ namespace NexusForever.Game.Entity
         {
             base.OnAddToMap(map, guid, vector);
 
-            CreateFlags &= ~EntityCreateFlag.SpawnAnimation;
-            CreateFlags |= EntityCreateFlag.NoSpawnAnimation;
+            CreateFlags &= ~EntityCreateFlag.UseDefaultBirthSequence;
+            CreateFlags |= EntityCreateFlag.DontTimeAdjustInitialMovementCommands;
         }
 
         protected override void OnPassengerAdd(IPlayer player, VehicleSeatType seatType, byte seatPosition)

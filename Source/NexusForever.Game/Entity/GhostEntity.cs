@@ -57,13 +57,13 @@ namespace NexusForever.Game.Entity
             Faction1 = owner.Faction1;
             Faction2 = owner.Faction2;
 
-            CreateFlags |= EntityCreateFlag.NoSpawnAnimation;
+            CreateFlags |= EntityCreateFlag.DontTimeAdjustInitialMovementCommands;
 
             SetBaseProperty(Property.BaseHealth, 101.0f);
 
             SetStat(Stat.Health, 101u);
             SetStat(Stat.Level, owner.Level);
-            SetStat(Stat.Sheathed, 1);
+            SetStat(Stat.WeaponSheatheState, 1);
         }
 
         protected override IEntityModel BuildEntityModel()

@@ -18,7 +18,7 @@ namespace NexusForever.Network.World.Entity.Model
         public List<ulong> GuildIds { get; set; } = new(); // Only appears in sniffs when user has a guild, assume related to guild as well. Guild members?
         public List<float> Bones { get; set; } = new();
         public PvPFlag PvPFlag { get; set; }
-        public byte Unknown4C { get; set; }
+        public byte PremiumTier { get; set; }
         public ushort Title { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -44,7 +44,7 @@ namespace NexusForever.Network.World.Entity.Model
             Bones.ForEach(e => writer.Write(e));
 
             writer.Write(PvPFlag, 3);
-            writer.Write(Unknown4C);
+            writer.Write(PremiumTier);
             writer.Write(Title, 14);
         }
     }

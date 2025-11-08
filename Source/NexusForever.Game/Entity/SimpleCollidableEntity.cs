@@ -24,7 +24,7 @@ namespace NexusForever.Game.Entity
             return new SimpleCollidableEntityModel
             {
                 CreatureId = CreatureId,
-                QuestChecklistIdx = 0
+                ObjectiveIndex = 0
             };
         }
     }

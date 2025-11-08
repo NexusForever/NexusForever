@@ -3,12 +3,12 @@ namespace NexusForever.Network.World.Entity.Model
     public class SimpleCollidableEntityModel : IEntityModel
     {
         public uint CreatureId { get; set; }
-        public byte QuestChecklistIdx { get; set; }
+        public byte ObjectiveIndex { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CreatureId, 18);
-            writer.Write(QuestChecklistIdx);
+            writer.Write(ObjectiveIndex);
         }
     }
 }

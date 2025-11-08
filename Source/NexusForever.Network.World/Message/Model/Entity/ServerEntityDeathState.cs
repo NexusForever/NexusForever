@@ -6,15 +6,14 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerEntityDeathState : IWritable
     {
         public uint UnitId { get; set; }
-        public bool Dead { get; set; }
-        // doesn't seem to be used by the client
-        public byte Reason { get; set; }
+        public bool IsDead { get; set; }
+        public byte Reason { get; set; } // unused by client
         public uint RezHealth { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(UnitId);
-            writer.Write(Dead);
+            writer.Write(IsDead);
             writer.Write(Reason, 5u);
             writer.Write(RezHealth);
         }

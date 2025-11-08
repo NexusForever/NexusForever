@@ -10,13 +10,13 @@ namespace NexusForever.Network.World.Message.Model
     {
         public uint UnitId { get; set; }
         public uint Health { get; set; }
-        public bool Unknown0 { get; set; }
+        public bool IsDead { get; set; } // Updates unit's death state only if Health = 0
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(UnitId);
             writer.Write(Health);
-            writer.Write(Unknown0);
+            writer.Write(IsDead);
         }
     }
 }

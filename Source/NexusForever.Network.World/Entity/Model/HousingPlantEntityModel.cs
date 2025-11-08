@@ -2,13 +2,13 @@ namespace NexusForever.Network.World.Entity.Model
 {
     public class HousingPlantEntityModel : IEntityModel
     {
-        public ushort PlugId { get; set; }
-        public ushort SocketId { get; set; }
+        public ushort Creature2Id { get; set; }
+        public ushort WorldSocketId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(PlugId, 15u);
-            writer.Write(SocketId, 14u);
+            writer.Write(Creature2Id, 18u);
+            writer.Write(WorldSocketId, 14u);
         }
     }
 }

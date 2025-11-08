@@ -48,16 +48,16 @@ namespace NexusForever.Game.Entity
 
             SetStat(Stat.Health, 800u);
             SetStat(Stat.Level, 3u);
-            SetStat(Stat.Sheathed, 0u);
+            SetStat(Stat.WeaponSheatheState, 0u);
         }
 
         protected override IEntityModel BuildEntityModel()
         {
             return new PetEntityModel
             {
-                CreatureId  = CreatureEntry.Id,
-                OwnerId     = OwnerGuid,
-                Name        = ""
+                Creature2Id  = CreatureEntry.Id,
+                OwnerUnitId  = OwnerGuid,
+                Name         = ""
             };
         }
 
@@ -78,9 +78,9 @@ namespace NexusForever.Game.Entity
 
             owner.EnqueueToVisible(new ServerPathScientistSetUnitScanParameters
             {
-                UnitId = Guid,
-                ScanRewardFlags  = 0,
-                IsScannable  = true
+                UnitId          = Guid,
+                ScanRewardFlags = 0,
+                IsScannable     = true
             }, true);
         }
 

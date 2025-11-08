@@ -10,13 +10,13 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerEntityThreatUpdate : IWritable
     {
         public uint UnitId { get; set; }
-        public uint TargetId { get; set; }
+        public uint TargetUnitId { get; set; }
         public uint ThreatLevel { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(UnitId);
-            writer.Write(TargetId);
+            writer.Write(TargetUnitId);
             writer.Write(ThreatLevel);
         }
     }

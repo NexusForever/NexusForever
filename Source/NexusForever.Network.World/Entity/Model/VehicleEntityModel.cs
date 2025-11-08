@@ -4,13 +4,13 @@ namespace NexusForever.Network.World.Entity.Model
 {
     public class VehicleEntityModel : IEntityModel
     {
-        public uint CreatureId { get; set; }
+        public uint Creature2Id { get; set; }
         public ushort UnitVehicleId { get; set; }
-        public List<VehiclePassenger> Passengers { get; set; } = new();
+        public List<VehiclePassenger> Passengers { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(CreatureId, 18u);
+            writer.Write(Creature2Id, 18u);
             writer.Write(UnitVehicleId, 14u);
 
             writer.Write((byte)Passengers.Count, 3u);

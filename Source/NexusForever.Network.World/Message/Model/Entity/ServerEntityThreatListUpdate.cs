@@ -5,6 +5,7 @@ namespace NexusForever.Network.World.Message.Model
     /// <summary>
     /// Values from this packet are stored in a "global" threat list which is only used for the current target.
     /// This is different from <see cref="ServerEntityThreatUpdate"/> where values are stored against the entity object in the client.
+    /// SrcUnitId must be the player's targetted unit otherwise the client will not update the threat list.
     /// </summary>
     [Message(GameMessageOpcode.ServerEntityThreatListUpdate)]
     public class ServerEntityThreatListUpdate : IWritable

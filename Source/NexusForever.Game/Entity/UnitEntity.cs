@@ -45,7 +45,7 @@ namespace NexusForever.Game.Entity
                     EnqueueToVisible(new ServerEntityDeathState
                     {
                         UnitId    = Guid,
-                        Dead      = !IsAlive,
+                        IsDead    = !IsAlive,
                         Reason    = 0, // client does nothing with this value
                         RezHealth = IsAlive ? Health : 0u
                     }, true);

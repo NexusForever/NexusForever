@@ -67,8 +67,8 @@ namespace NexusForever.Server.GroupServer.Character
 
         public byte EffectiveLevel
         {
-            get => (byte)(GetStat(Stat.MentorLevel) ?? 0u);
-            set => SetStat(Stat.MentorLevel, value);
+            get => (byte)(GetStat(Stat.EffectiveLevel) ?? 0u);
+            set => SetStat(Stat.EffectiveLevel, value);
         }
 
         public Faction Faction
@@ -91,8 +91,8 @@ namespace NexusForever.Server.GroupServer.Character
 
         public float Shield
         {
-            get => GetStat(Stat.Shield) ?? 0f;
-            set => SetStat(Stat.Shield, value);
+            get => GetStat(Stat.ShieldCapacity) ?? 0f;
+            set => SetStat(Stat.ShieldCapacity, value);
         }
 
         public float MaxShield

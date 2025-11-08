@@ -9,21 +9,20 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerEntityCreate)]
     public class ServerEntityCreate : IWritable
     {
-        #region Unknown Structures
-
         public class SpellInit : IWritable
         {
             public void Write(GamePacketWriter writer)
             {
+                // Implemented in spell PR https://github.com/NexusForever/NexusForever/pull/489
                 throw new NotImplementedException();
             }
         }
 
-        public class UnknownStructureA8 : IWritable
+        public class VendorInfo : IWritable
         {
-            public byte Type { get; set; }
-            public bool Unknown0 { get; set; }
-            public uint Unknown1 { get; set; }
+            public byte Type { get; set; } // 1 = isVendor
+            public bool Unused { get; set; }
+            public uint VendorInteractionPrerequisiteId { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -32,10 +31,10 @@ namespace NexusForever.Network.World.Message.Model
                 switch (Type)
                 {
                     case 0:
-                        writer.Write(Unknown0);
+                        writer.Write(Unused);
                         break;
                     case 1:
-                        writer.Write(Unknown1, 17u);
+                        writer.Write(VendorInteractionPrerequisiteId, 17u);
                         break;
                 }
             }
@@ -43,10 +42,10 @@ namespace NexusForever.Network.World.Message.Model
 
         public class WorldPlacement : IWritable
         {
-            public byte Type { get; set; }
-            public bool Unknown0 { get; set; }
+            public byte Type { get; set; } // 1 = isWorldProp
+            public bool Unused { get; set; }
             public ulong ActivePropId { get; set; }
-            public ushort SocketId { get; set; }
+            public ushort WorldSocketId { get; set; }
 
             public void Write(GamePacketWriter writer)
             {
@@ -55,22 +54,22 @@ namespace NexusForever.Network.World.Message.Model
                 switch (Type)
                 {
                     case 0:
-                        writer.Write(Unknown0);
+                        writer.Write(Unused);
                         break;
                     case 1:
                         writer.Write(ActivePropId);
-                        writer.Write(SocketId, 14u);
+                        writer.Write(WorldSocketId, 14u);
                         break;
                 }
             }
         }
 
-        public class UnknownStructureC8 : IWritable
+        public class TargetClusterInfo : IWritable
         {
-            public byte Type { get; set; }
-            public bool Unknown0 { get; set; }
-            public uint Unknown1 { get; set; }
-            public uint Unknown2 { get; set; }
+            public byte Type { get; set; } // 1 = isInCluster
+            public bool Unused { get; set; }
+            public uint TargetClusterId { get; set; }
+            public uint Unknown2 { get; set; } // non-zero in sniffs, but likely unused by client
 
             public void Write(GamePacketWriter writer)
             {
@@ -79,43 +78,41 @@ namespace NexusForever.Network.World.Message.Model
                 switch (Type)
                 {
                     case 0:
-                        writer.Write(Unknown0);
+                        writer.Write(Unused);
                         break;
                     case 1:
-                        writer.Write(Unknown1);
+                        writer.Write(TargetClusterId);
                         writer.Write(Unknown2, 18);
                         break;
                 }
             }
         }
 
-        #endregion
-
-        public uint Guid { get; set; }
+        public uint UnitId { get; set; }
         public EntityType Type { get; set; }
-        public EntityCreateFlag CreateFlags { get; set; }
         public IEntityModel EntityModel { get; set; }
-        public List<StatValueInitial> Stats { get; set; } = new();
-        public uint Time { get; set; }
-        public List<INetworkEntityCommand> Commands { get; set; } = new();
-        public List<PropertyValue> Properties { get; set; } = new();
-        public List<ItemVisual> VisibleItems { get; set; } = new();
-        public List<SpellInit> SpellInitData { get; } = new();
-        public uint CurrentSpellUniqueId { get; set; }
-        public Faction Faction1 { get; set; }
-        public Faction Faction2 { get; set; }
-        public uint UnitTagOwner { get; set; }
-        public ulong GroupTagOwner { get; set; }
-        public UnknownStructureA8 UnknownA8 { get; set; } = new();
+        public EntityCreateFlag CreateFlags { get; set; }
+        public List<StatValueInitial> Stats { get; set; } = [];
+        public uint CommandTime { get; set; }
+        public List<INetworkEntityCommand> Commands { get; set; } = [];
+        public List<PropertyValue> Properties { get; set; } = [];
+        public List<ItemVisual> VisibleItems { get; set; } = [];
+        public List<SpellInit> SpellInitData { get; } = [];
+        public uint CurrentSpellCastUniqueId { get; set; }
+        public Faction MutableFactionId { get; set; } // Can be updated after creation with ServerEntityFaction. Send the same value as BaseFactionId if no reason to override it
+        public Faction BaseFactionId { get; set; } // Not changeable after creation
+        public uint TagOwnerUnitId { get; set; }
+        public ulong TagOwnerGroupId { get; set; }
+        public VendorInfo VendorData { get; set; } = new();
         public WorldPlacement WorldPlacementData { get; set; } = new();
-        public UnknownStructureC8 UnknownC8 { get; set; } = new();
+        public TargetClusterInfo TargetClusterData { get; set; } = new();
         public ushort MiniMapMarker { get; set; }
         public uint DisplayInfo { get; set; }
         public ushort OutfitInfo { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
+            writer.Write(UnitId);
             writer.Write(Type, 6);
             EntityModel.Write(writer);
             writer.Write(CreateFlags, 8);
@@ -123,7 +120,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write((byte)Stats.Count, 5);
             Stats.ForEach(o => o.Write(writer));
 
-            writer.Write(Time);
+            writer.Write(CommandTime);
 
             writer.Write((byte)Commands.Count, 5);
             foreach (INetworkEntityCommand command in Commands)
@@ -141,15 +138,15 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write((short)SpellInitData.Count, 9);
             SpellInitData.ForEach(o => o.Write(writer));
 
-            writer.Write(CurrentSpellUniqueId);
-            writer.Write(Faction1, 14);
-            writer.Write(Faction2, 14);
-            writer.Write(UnitTagOwner);
-            writer.Write(GroupTagOwner);
+            writer.Write(CurrentSpellCastUniqueId);
+            writer.Write(MutableFactionId, 14);
+            writer.Write(BaseFactionId, 14);
+            writer.Write(TagOwnerUnitId);
+            writer.Write(TagOwnerGroupId);
 
-            UnknownA8.Write(writer);
+            VendorData.Write(writer);
             WorldPlacementData.Write(writer);
-            UnknownC8.Write(writer);
+            TargetClusterData.Write(writer);
 
             writer.Write(MiniMapMarker, 14);
             writer.Write(DisplayInfo, 17);

@@ -6,12 +6,12 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ServerItemVisualUpdate)]
     public class ServerItemVisualUpdate : IWritable
     {
-        public uint Guid { get; set; }
-        public List<ItemVisual> ItemVisuals { get; set; } = new();
+        public uint UnitId { get; set; }
+        public List<ItemVisual> ItemVisuals { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
+            writer.Write(UnitId);
             writer.Write(ItemVisuals.Count);
             ItemVisuals.ForEach(v => v.Write(writer));
         }

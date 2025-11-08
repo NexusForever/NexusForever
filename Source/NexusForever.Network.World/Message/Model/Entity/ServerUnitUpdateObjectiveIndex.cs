@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Entity
 {
     /// <summary>
     /// ObjectiveIndex is used for PathMissions, Quests, Challenges, Datacubes, PublicEvents, Achievements.

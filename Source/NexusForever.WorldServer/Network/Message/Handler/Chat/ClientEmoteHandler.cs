@@ -4,6 +4,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Entity;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {
@@ -36,9 +37,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             if (emote.EmoteId == 0 && session.Player.IsSitting)
                 session.Player.Unsit();
 
-            session.Player.EnqueueToVisible(new ServerEmote
+            session.Player.EnqueueToVisible(new ServerEmoteAndStandState
             {
-                Guid       = session.Player.Guid,
+                UnitId     = session.Player.Guid,
                 StandState = standState,
                 EmoteId    = emote.EmoteId
             });
