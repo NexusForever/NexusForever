@@ -2,9 +2,11 @@
 using NexusForever.Game.Abstract.Account.Reward;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Rewards;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Rewards;
 
 namespace NexusForever.Game.Account.Reward
 {
@@ -64,18 +66,18 @@ namespace NexusForever.Game.Account.Reward
                 return account.EntitlementManager.GetEntitlement((EntitlementType)modifierEntry.EntitlementIdModifierCount)?.Amount ?? 0u;
             }
             
-            return (RewardPropertyModifierValueType)entry.RewardModifierValueTypeEnum switch
+            return (RewardModifierValueType)entry.RewardModifierValueTypeEnum switch
             {
-                RewardPropertyModifierValueType.AdditiveScalar       => modifierEntry.ModifierValueFloat,
-                RewardPropertyModifierValueType.Discrete             => modifierEntry.ModifierValueInt,
-                RewardPropertyModifierValueType.MultiplicativeScalar => modifierEntry.ModifierValueFloat,
+                RewardModifierValueType.AdditiveScalar       => modifierEntry.ModifierValueFloat,
+                RewardModifierValueType.Discrete             => modifierEntry.ModifierValueInt,
+                RewardModifierValueType.MultiplicativeScalar => modifierEntry.ModifierValueFloat,
                 _ => 0f
             };
         }
 
         public void SendInitialPackets()
         {
-            account.Session.EnqueueMessageEncrypted(new ServerRewardPropertySet
+            account.Session.EnqueueMessageEncrypted(new ServerPremiumRewards
             {
                 Properties = rewardProperties.Values
                     .SelectMany(e => e.Build())
@@ -117,7 +119,7 @@ namespace NexusForever.Game.Account.Reward
             IRewardProperty rewardProperty = GetRewardProperty(entry);
             rewardProperty.UpdateValue(data, value);
 
-            account.Session.EnqueueMessageEncrypted(new ServerRewardPropertySet
+            account.Session.EnqueueMessageEncrypted(new ServerPremiumRewards
             {
                 Properties = rewardProperty.Build().ToList()
             });

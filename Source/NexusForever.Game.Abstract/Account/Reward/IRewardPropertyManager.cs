@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Rewards;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Abstract.Account.Reward

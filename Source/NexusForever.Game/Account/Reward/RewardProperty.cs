@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Account.Reward;
-using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Rewards;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Rewards;
 
 namespace NexusForever.Game.Account.Reward
 {
@@ -53,14 +53,14 @@ namespace NexusForever.Game.Account.Reward
         }
 
         /// <summary>
-        /// Build the network model <see cref="ServerRewardPropertySet.RewardProperty"/> for this <see cref="IRewardProperty"/>.
+        /// Build the network model <see cref="ServerPremiumRewards.RewardProperty"/> for this <see cref="IRewardProperty"/>.
         /// </summary>
-        public IEnumerable<ServerRewardPropertySet.RewardProperty> Build()
+        public IEnumerable<ServerPremiumRewards.RewardProperty> Build()
         {
-            return values.Select(p => new ServerRewardPropertySet.RewardProperty
+            return values.Select(p => new ServerPremiumRewards.RewardProperty
             {
-                Id    = (RewardPropertyType)Entry.Id,
-                Type  = (RewardPropertyModifierValueType)Entry.RewardModifierValueTypeEnum,
+                RewardPropertyId = (RewardPropertyType)Entry.Id,
+                ModifierType     = (RewardModifierValueType)Entry.RewardModifierValueTypeEnum,
                 Data  = p.Key,
                 Value = p.Value
             });

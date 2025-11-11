@@ -4,6 +4,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entitlement;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Rewards;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 

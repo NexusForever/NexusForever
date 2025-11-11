@@ -1,10 +1,10 @@
 ﻿using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Rewards;
 
 namespace NexusForever.Game.Abstract.Account.Reward
 {
-    public interface IRewardProperty : INetworkBuildable<IEnumerable<ServerRewardPropertySet.RewardProperty>>
+    public interface IRewardProperty : INetworkBuildable<IEnumerable<ServerPremiumRewards.RewardProperty>>
     {
         RewardPropertyEntry Entry { get; }
 
