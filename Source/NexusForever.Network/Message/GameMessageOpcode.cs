@@ -191,6 +191,7 @@ namespace NexusForever.Network.Message
         ServerAmpPowerUpdate            = 0x01A1,
         ClientCommitAmpSpec             = 0x01A2,
         ServerAmpList                   = 0x01A3,
+        ServerElderPoints               = 0x01A4,
         ServerReputationUpdate          = 0x01A5,
         ServerUpdateGearScore           = 0x01A6,
         ServerPathUpdateXP              = 0x01AA,
