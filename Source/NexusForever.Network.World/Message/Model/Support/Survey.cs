@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Shared
+namespace NexusForever.Network.World.Message.Model.Support
 {
     public interface ISurvey : IReadable
     {
@@ -11,7 +11,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public class QuestDifficultySurvey : ISurvey
         {
             // Probably Quest Id
-            public short Unknown { get; set; }
+            public short ObjectId { get; set; }
 
             // Was the quest fun? Use 1 for not fun at all, 5 for really funny.
             public short Fun { get; set; }
@@ -27,7 +27,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                Unknown    = reader.ReadShort(32);
+                ObjectId    = reader.ReadShort(32);
                 Fun        = reader.ReadShort(8);
                 Diffuculty = reader.ReadShort(8);
                 Reward     = reader.ReadShort(8);
@@ -38,7 +38,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public class QuestTSpellSurvey : ISurvey
         {
             // Probably Quest Id
-            public short Unknown { get; set; }
+            public short ObjectId { get; set; }
 
             // Was the quest fun? Use 1 for not fun at all, 5 for really funny.
             public short Fun { get; set; }
@@ -54,7 +54,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                Unknown    = reader.ReadShort(32);
+                ObjectId    = reader.ReadShort(32);
                 Fun        = reader.ReadShort(8);
                 Diffuculty = reader.ReadShort(8);
                 WantMore   = reader.ReadShort(8);
@@ -65,7 +65,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public class QuestHoldoutSurvey : ISurvey
         {
             // Probably Quest Id
-            public short Unknown { get; set; }
+            public short ObjectId { get; set; }
 
             // Was the quest fun? Use 1 for not fun at all, 5 for really funny.
             public short Fun { get; set; }
@@ -81,7 +81,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
 
             public void Read(GamePacketReader reader)
             {
-                Unknown    = reader.ReadShort(32);
+                ObjectId    = reader.ReadShort(32);
                 Fun        = reader.ReadShort(8);
                 Diffuculty = reader.ReadShort(8);
                 WantMore   = reader.ReadShort(8);

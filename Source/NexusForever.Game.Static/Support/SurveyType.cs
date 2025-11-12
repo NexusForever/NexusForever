@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Network.World.Message.Static
+﻿namespace NexusForever.Game.Static.Support
 {
     public enum SurveyType
     {
