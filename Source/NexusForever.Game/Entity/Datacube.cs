@@ -3,7 +3,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
-using NetworkDatacube = NexusForever.Network.World.Message.Model.Shared.Datacube;
+using NetworkDatacube = NexusForever.Network.World.Message.Model.Datacube.Datacube;
 
 namespace NexusForever.Game.Entity
 {

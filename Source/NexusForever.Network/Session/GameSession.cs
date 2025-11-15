@@ -218,7 +218,7 @@ namespace NexusForever.Network.Session
                 }
 
                 if (opcode != GameMessageOpcode.ClientEncrypted
-                    && opcode != GameMessageOpcode.ClientPacked
+                    && opcode != GameMessageOpcode.ClientCharacterCreatePacked
                     && opcode != GameMessageOpcode.ClientPackedWorld
                     && opcode != GameMessageOpcode.ClientEntityCommand)
                     log.Trace($"Received packet {opcode}(0x{opcode:X}).");

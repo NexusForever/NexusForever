@@ -1,6 +1,6 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Shared
+namespace NexusForever.Network.World.Message.Model.Datacube
 {
     public class Datacube : IWritable
     {

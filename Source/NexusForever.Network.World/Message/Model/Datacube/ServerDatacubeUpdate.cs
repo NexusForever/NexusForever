@@ -1,7 +1,6 @@
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Datacube
 {
     [Message(GameMessageOpcode.ServerDatacubeUpdate)]
     public class ServerDatacubeUpdate : IWritable
