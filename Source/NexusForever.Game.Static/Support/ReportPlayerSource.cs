@@ -13,6 +13,6 @@
         TradeRequest         = 0x8,
         AccountFriendRequest = 0x9,
         NeighborRequest      = 0xA,
-        Overturn             = 0xB,
+        Overturn             = 0xB
     };
 }

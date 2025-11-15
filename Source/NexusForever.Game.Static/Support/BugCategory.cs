@@ -11,6 +11,6 @@
         Development       = 7,
         Staging           = 8,
         Deprecated        = 9,
-        LocalDemo         = 10,
+        LocalDemo         = 10
     }
 }

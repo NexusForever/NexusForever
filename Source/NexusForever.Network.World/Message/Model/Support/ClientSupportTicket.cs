@@ -18,7 +18,7 @@ namespace NexusForever.Network.World.Message.Model.Support
         {
             TicketCategoryId = reader.ReadUShort();
             TicketSubCategoryId = reader.ReadUShort();
-            Position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            Position = reader.ReadVector3();
             Subject = reader.ReadWideString();
             Body = reader.ReadWideString();
             LanguageId = reader.ReadEnum<Language>(32u);
