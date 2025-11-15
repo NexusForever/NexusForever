@@ -1,5 +1,5 @@
-﻿using NexusForever.Network.Message;
-using System.Numerics;
+﻿using System.Numerics;
+using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Map
 {
