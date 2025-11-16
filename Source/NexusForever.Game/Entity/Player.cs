@@ -884,7 +884,7 @@ namespace NexusForever.Game.Entity
             {
                 entity.ControllerGuid = Guid;
 
-                Session.EnqueueMessageEncrypted(new ServerMovementControl
+                Session.EnqueueMessageEncrypted(new ServerMovementControlReturn
                 {
                     Ticket    = 1,
                     Immediate = true,

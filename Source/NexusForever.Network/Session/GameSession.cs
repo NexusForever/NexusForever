@@ -220,7 +220,7 @@ namespace NexusForever.Network.Session
                 if (opcode != GameMessageOpcode.ClientEncrypted
                     && opcode != GameMessageOpcode.ClientPacked
                     && opcode != GameMessageOpcode.ClientPackedWorld
-                    && opcode != GameMessageOpcode.ClientEntityCommand)
+                    && opcode != GameMessageOpcode.ClientUnitCommand)
                     log.Trace($"Received packet {opcode}(0x{opcode:X}).");
 
                 // FIXME workaround for now. possible performance impact. 

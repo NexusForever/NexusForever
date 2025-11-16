@@ -2,13 +2,12 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    // If there is a new unit for the client to assume control of, the server will send this message.
-    // When the 
-    [Message(GameMessageOpcode.ServerMovementControlRefresh)]
-    public class ServerMovementControl : IWritable
+    // If there is a new unit for the client to assume control, the server will send this message.
+    [Message(GameMessageOpcode.ServerMovementControlReturn)]
+    public class ServerMovementControlReturn : IWritable
     {
         public uint Ticket { get; set; }
-        public bool Immediate { get; set; }
+        public bool Immediate { get; set; } // executes any queued movement commands
         public uint UnitId { get; set; }
 
         public void Write(GamePacketWriter writer)

@@ -1,16 +1,16 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Movement
 {
-    [Message(GameMessageOpcode.ServerEntityCommand)]
-    public class ServerEntityCommand : IWritable
+    [Message(GameMessageOpcode.ServerUnitCommand)]
+    public class ServerUnitCommand : IWritable
     {
         public uint UnitId { get; set; }
         public uint Time { get; set; }
         public bool TimeReset { get; set; }
         public bool ServerControlled { get; set; }
-        public List<INetworkEntityCommand> Commands { get; set; } = new();
+        public List<INetworkEntityCommand> Commands { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
