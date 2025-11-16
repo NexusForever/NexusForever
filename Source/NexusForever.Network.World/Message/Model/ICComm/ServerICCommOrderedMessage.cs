@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.ICComm
 {
     // Not seen in sniffs so not sure when these would be sent
     [Message(GameMessageOpcode.ServerICCommOrderedMessage)]

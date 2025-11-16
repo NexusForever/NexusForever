@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.ICComm
 {
     [Message(GameMessageOpcode.ServerICCommDirectedMessage)]
     public class ServerICCommDirectedMessage : IWritable
@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
         public void Write(GamePacketWriter writer)
         {
             writer.Write(IccomId);
-            writer.WriteStringChar(Message);
+            writer.WriteString(Message);
             writer.WriteStringWide(SenderName);
         }
     }

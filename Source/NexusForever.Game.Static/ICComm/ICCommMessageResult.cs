@@ -6,7 +6,6 @@
         Throttled          = 0x2,
         NotInChannel       = 0x3,
         InvalidText        = 0x7,
-        MissingEntitlement = 0x8,
+        MissingEntitlement = 0x8
     };
-
 }

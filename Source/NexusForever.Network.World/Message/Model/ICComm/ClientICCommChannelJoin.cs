@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.ICComm;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.ICComm
 {
     [Message(GameMessageOpcode.ClientICCommChannelJoin)]
     public class ClientICCommChannelJoin : IReadable

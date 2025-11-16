@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.ICComm;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.ICComm
 {
     // Presumably sent if a client is not allowed to join a channel but none seen in sniffs
     [Message(GameMessageOpcode.ServerICCommChannelJoinResult)]

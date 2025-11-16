@@ -155,7 +155,7 @@ namespace NexusForever.Network
             WriteBytes(data);
         }
 
-        public void WriteStringChar(string value)
+        public void WriteString(string value)
         {
             byte[] data = Encoding.ASCII.GetBytes(value ?? "");
             bool extended = data.Length > 0x7F;

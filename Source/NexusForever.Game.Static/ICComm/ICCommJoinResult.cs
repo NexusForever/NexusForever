@@ -8,6 +8,6 @@
         BadName            = 0x4,
         Join               = 0x5,
         Left               = 0x6,
-        MissingEntitlement = 0x7,
+        MissingEntitlement = 0x7
     };
 }

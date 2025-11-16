@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.ICComm
 {
     [Message(GameMessageOpcode.ClientICCommMessage)]
     public class ClientICCommMessage : IReadable
@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model
         {
             IccommId = reader.ReadULong();
             MessageId = reader.ReadUInt();
-            Message = reader.ReadStringChar();
+            Message = reader.ReadString();
             RecipientName = reader.ReadWideString();
         }
     }
