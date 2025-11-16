@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Instance
+namespace NexusForever.Network.World.Message.Model
 {
     // Something to do with allowing ClientEvents of type Skybox
     // More research required, specifically what location players were in when receiving these messages
