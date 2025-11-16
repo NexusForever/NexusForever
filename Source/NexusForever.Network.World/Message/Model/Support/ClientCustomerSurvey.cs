@@ -1,21 +1,21 @@
+using NexusForever.Game.Static.Support;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Support
 {
     [Message(GameMessageOpcode.ClientCustomerSurveySubmit)]
     public class ClientCustomerSurveySubmit : IReadable
     {
-        public SurveyType Type { get; set; }
-        public ISurvey Survey { get; set; }
-        public string Comment { get; set; }
+        public SurveyType CustomerSurveyId { get; private set; }
+        public ISurvey Survey { get; private set; }
+        public string Comment { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            Type = (SurveyType)reader.ReadInt(14);
+            CustomerSurveyId = (SurveyType)reader.ReadInt(14);
 
-            switch (Type)
+            switch (CustomerSurveyId)
             {
                 case SurveyType.QuestGeneric:
                     Survey = new Survey.QuestDifficultySurvey();
