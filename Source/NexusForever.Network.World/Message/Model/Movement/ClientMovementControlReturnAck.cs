@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientMovementControlReturnAck)]
     public class ClientMovementControlReturnAck : IReadable
     {
-        public uint Ticket { get; set; }
+        public uint Ticket { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

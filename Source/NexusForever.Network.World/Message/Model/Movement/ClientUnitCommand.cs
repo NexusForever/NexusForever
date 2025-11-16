@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model.Movement
     [Message(GameMessageOpcode.ClientUnitCommand)]
     public class ClientUnitCommand : IReadable
     {
-        public uint Time { get; set; }
+        public uint Time { get; private set; }
         public List<INetworkEntityCommand> Commands { get; } = [];
 
         public void Read(GamePacketReader reader)
