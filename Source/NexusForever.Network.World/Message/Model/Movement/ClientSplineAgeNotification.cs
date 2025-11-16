@@ -7,11 +7,11 @@ namespace NexusForever.Network.World.Message.Model.Movement
     [Message(GameMessageOpcode.ClientSplineAgeNotification)]
     public class ClientSplineAgeNotification : IReadable
     {
-        public ushort Spline2Id { get; private set; }
+        public uint Spline2Id { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            Spline2Id = reader.ReadUShort();
+            Spline2Id = reader.ReadUInt();
         }
     }
 }
