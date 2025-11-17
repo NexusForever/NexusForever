@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Hazards;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Hazards
+namespace NexusForever.Network.World.Message.Model.Hazard
 {
     [Message(GameMessageOpcode.ServerHazardAction)]
     public class ServerHazardAction : IWritable

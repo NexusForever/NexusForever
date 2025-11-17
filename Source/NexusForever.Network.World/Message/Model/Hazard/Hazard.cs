@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Hazards;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Hazards
+namespace NexusForever.Network.World.Message.Model.Hazard
 {
     public class Hazard : IWritable
     {
@@ -13,11 +13,11 @@ namespace NexusForever.Network.World.Message.Model.Hazards
         public uint ProcSpell4Id { get; set; }
         public uint HazardUnitId { get; set; }
         public uint PulseTimeLeft { get; set; }
-        public bool bUnitBased { get; set; }
-        public bool bStartsFull { get; set; }
-        public bool bEnabled { get; set; }
-        public bool bSuspended { get; set; }
-        public bool bDoNotRefill { get; set; }
+        public bool UnitBased { get; set; }
+        public bool StartsFull { get; set; }
+        public bool Enabled { get; set; }
+        public bool Suspended { get; set; }
+        public bool DoNotRefill { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
@@ -29,11 +29,11 @@ namespace NexusForever.Network.World.Message.Model.Hazards
             writer.Write(ProcSpell4Id, 18u);
             writer.Write(HazardUnitId);
             writer.Write(PulseTimeLeft);
-            writer.Write(bUnitBased);
-            writer.Write(bStartsFull);
-            writer.Write(bEnabled);
-            writer.Write(bSuspended);
-            writer.Write(bDoNotRefill);
+            writer.Write(UnitBased);
+            writer.Write(StartsFull);
+            writer.Write(Enabled);
+            writer.Write(Suspended);
+            writer.Write(DoNotRefill);
         }
     }
 }
