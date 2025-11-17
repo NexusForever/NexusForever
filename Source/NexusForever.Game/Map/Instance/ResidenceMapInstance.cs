@@ -136,7 +136,7 @@ namespace NexusForever.Game.Map.Instance
             SendResidenceDecor(player);
 
             // this shows the housing toolbar, might need to move this to a more generic place in the future
-            player.Session.EnqueueMessageEncrypted(new ServerShowActionBar
+            player.Session.EnqueueMessageEncrypted(new ServerActionBarSet
             {
                 ShortcutSet            = ShortcutSet.FloatingSpellBar,
                 ActionBarShortcutSetId = 1553,

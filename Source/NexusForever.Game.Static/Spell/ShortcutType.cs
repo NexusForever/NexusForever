@@ -7,6 +7,11 @@
         Macro         = 2, // DDMacro
         GameCommand   = 3, // DDGameCommand
         SpellbookItem = 4, // DDSpellbookItem
-        // Client has code paths for other values, but it seems these were collapsed into GameCommands and those paths are never called
+        Spell         = 6,
+        VehicleAction = 7,
+        ScanbotScan   = 10,
+        ToggleScanbot = 11,
+        MiscSkill     = 12,
+        NonCombat     = 13
     }
 }

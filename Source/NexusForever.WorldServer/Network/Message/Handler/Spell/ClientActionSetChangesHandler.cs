@@ -7,9 +7,9 @@ using NexusForever.Network.World.Message.Model.Abilities;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 {
-    public class ClientRequestActionSetChangesHandler : IMessageHandler<IWorldSession, ClientRequestActionSetChanges>
+    public class ClientActionSetChangesHandler : IMessageHandler<IWorldSession, ClientActionSetChanges>
     {
-        public void HandleMessage(IWorldSession session, ClientRequestActionSetChanges requestActionSetChanges)
+        public void HandleMessage(IWorldSession session, ClientActionSetChanges requestActionSetChanges)
         {
             // TODO: check for client validity, e.g. Level & Spell4TierRequirements
 
@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
                 }
             }
 
-            foreach (ClientRequestActionSetChanges.ActionTier actionTier in requestActionSetChanges.ActionTiers)
+            foreach (ClientActionSetChanges.ActionTier actionTier in requestActionSetChanges.ActionTiers)
                 session.Player.SpellManager.UpdateSpell(actionTier.Action, actionTier.Tier, requestActionSetChanges.ActionSetIndex);
 
             session.EnqueueMessageEncrypted(actionSet.BuildServerActionSet());
