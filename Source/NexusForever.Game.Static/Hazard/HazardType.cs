@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Hazards
+﻿namespace NexusForever.Game.Static.Hazard
 {
     public enum HazardType
     {

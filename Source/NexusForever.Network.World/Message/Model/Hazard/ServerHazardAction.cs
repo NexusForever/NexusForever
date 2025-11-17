@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Hazards;
+﻿using NexusForever.Game.Static.Hazard;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Hazard
