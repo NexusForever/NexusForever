@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Static.Spell;
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Spell;
 
 namespace NexusForever.Network.World.Message.Model.Shared
 {

@@ -8,6 +8,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Spell;
 using NetworkVehiclePassenger = NexusForever.Network.World.Message.Model.Shared.VehiclePassenger;
 
 namespace NexusForever.Game.Entity
