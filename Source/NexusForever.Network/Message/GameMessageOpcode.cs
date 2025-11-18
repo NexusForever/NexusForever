@@ -785,6 +785,7 @@ namespace NexusForever.Network.Message
         ServerCreddRedeemResult         = 0x097B,
         ServerAccountItemRemove         = 0x097C,
         ServerPendingAccountItemRemove  = 0x097D,
+        ServerPendingAccountItemGroupRemove = 0x097E,
         ServerAccountTier               = 0x097F,
         ServerWalletUpdate              = 0x0980,
         ServerGenericUnlockList         = 0x0981,

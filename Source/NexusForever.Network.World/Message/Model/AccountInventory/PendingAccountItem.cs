@@ -5,7 +5,7 @@ namespace NexusForever.Network.World.Message.Model.AccountInventory
 {
     public class PendingAccountItem : IWritable
     {
-        public ulong Unused1 { get; set; }
+        public ulong PendingItemGroupId { get; set; } // never seen to be used
         public uint AccountItemId { get; set; }
         public ulong Unused2 { get; set; }
         public string TransactionId { get; set; } // used a format like 89d2a447-df3c-4c3c-a135-d4eb8dfa4fd7 but could be anything
@@ -18,7 +18,7 @@ namespace NexusForever.Network.World.Message.Model.AccountInventory
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unused1);
+            writer.Write(PendingItemGroupId);
             writer.Write(AccountItemId);
             writer.Write(Unused2);
             writer.WriteStringWide(TransactionId);
