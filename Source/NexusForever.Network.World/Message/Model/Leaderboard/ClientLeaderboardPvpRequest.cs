@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Leaderboard;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Loot
+namespace NexusForever.Network.World.Message.Model.Leaderboard
 {
     [Message(GameMessageOpcode.ClientLeaderboardPvpRequest)]
     public class ClientLeaderboardPvpRequest : IReadable
