@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Network.World.Message.Static
+﻿namespace NexusForever.Game.Static.GenericUnlock
 {
     public enum GenericUnlockResult
     {

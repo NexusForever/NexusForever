@@ -4,10 +4,10 @@ using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Account.Unlock;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.GenericUnlock;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model.GenericUnlocks;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.GenericUnlock;
 
 namespace NexusForever.Game.Account.Unlock
 {
@@ -41,7 +41,7 @@ namespace NexusForever.Game.Account.Unlock
             GenericUnlockEntryEntry entry = GameTableManager.Instance.GenericUnlockEntry.GetEntry(genericUnlockEntryId);
             if (entry == null)
             {
-                SendUnlockResult(GenericUnlockResult.PartialUnlock);
+                SendUnlockResult(GenericUnlockResult.Invalid);
                 return;
             }
 
