@@ -11,6 +11,6 @@
         BattlegroundSpellslinger = 0x6,
         PveDungeon               = 0x7,
         PveExpeditionGroup       = 0x8,
-        PveExpeditionSolo        = 0x9,
+        PveExpeditionSolo        = 0x9
     };
 }
