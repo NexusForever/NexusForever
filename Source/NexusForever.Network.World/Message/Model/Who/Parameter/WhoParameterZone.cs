@@ -1,8 +1,8 @@
-﻿namespace NexusForever.Network.World.Message.Model.Who
+﻿namespace NexusForever.Network.World.Message.Model.Who.Parameter
 {
     public class WhoParameterZone : IWhoParameterData
     {
-        public uint WorldZoneId { get; set; }
+        public uint WorldZoneId { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

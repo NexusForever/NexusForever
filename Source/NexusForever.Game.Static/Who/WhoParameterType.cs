@@ -10,6 +10,6 @@
         Guild   = 5,
         Player  = 6,
         Combo   = 7,
-        Faction = 8,
+        Faction = 8
     }
 }

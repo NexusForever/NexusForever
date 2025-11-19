@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Who;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Who
+namespace NexusForever.Network.World.Message.Model.Who.Parameter
 {
     public class WhoParameter : IReadable
     {
@@ -11,8 +11,6 @@ namespace NexusForever.Network.World.Message.Model.Who
         public void Read(GamePacketReader reader)
         {
             Type = reader.ReadEnum<WhoParameterType>(4u);
-
-            Data = null;
 
             switch (Type)
             {
@@ -43,10 +41,9 @@ namespace NexusForever.Network.World.Message.Model.Who
                 case WhoParameterType.Faction:
                     Data = new WhoParameterFaction();
                     break;
+                default:
+                    throw new NotImplementedException();
             }
-
-            if (Data == null)
-                throw new NotImplementedException();
 
             Data.Read(reader);
         }

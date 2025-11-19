@@ -1,10 +1,10 @@
 ﻿using Path = NexusForever.Game.Static.Entity.Path;
 
-namespace NexusForever.Network.World.Message.Model.Who
+namespace NexusForever.Network.World.Message.Model.Who.Parameter
 {
     public class WhoParameterPath : IWhoParameterData
     {
-        public Path PathId { get; set; }
+        public Path PathId { get; private set; }
 
         public void Read(GamePacketReader reader)
         {

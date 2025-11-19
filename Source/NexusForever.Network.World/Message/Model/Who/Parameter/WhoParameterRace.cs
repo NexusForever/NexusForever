@@ -1,10 +1,10 @@
 ﻿using NexusForever.Game.Static.Entity;
 
-namespace NexusForever.Network.World.Message.Model.Who
+namespace NexusForever.Network.World.Message.Model.Who.Parameter
 {
     public class WhoParameterRace : IWhoParameterData
     {
-        public Race RaceId { get; set; }
+        public Race RaceId { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
