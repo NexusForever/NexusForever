@@ -73,7 +73,7 @@ namespace NexusForever.Game.Entity
         {
             owner.Session.EnqueueMessageEncrypted(new ServerResurrectionState
             {
-                RezType = canResurrectOtherPlayer ? ResurrectionType.SpellCasterLocation : ResurrectionType.None
+                RezOptions = canResurrectOtherPlayer ? ResurrectionType.SpellCasterLocation : ResurrectionType.None
             });
         }
 

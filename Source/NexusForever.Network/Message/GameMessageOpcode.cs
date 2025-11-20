@@ -71,7 +71,7 @@ namespace NexusForever.Network.Message
         ServerPathExplorerPowerMapWaiting = 0x00FA,
         Client0xFB                      = 0x00FB,
         ServerCharacterFlagsUpdated     = 0x00FE,
-        ServerResurrectionState         = 0x0100,
+        ServerForbiddenZone             = 0x0100,
         ServerForceResurrect            = 0x0101,
         ServerGalacticArchiveRefresh    = 0x0102,
         ClientGalacticArchiveUnlock     = 0x0103,
