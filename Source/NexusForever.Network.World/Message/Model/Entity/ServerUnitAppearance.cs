@@ -8,7 +8,7 @@ namespace NexusForever.Network.World.Message.Model.Entity
         public uint UnitId { get; set; }
         public uint Creature2Id { get; set; }
         public uint DisplayInfoId { get; set; }
-        public bool Unknown { get; set; } // costume related
+        public bool TriggerDefaultBirthSequence { get; set; }
         public bool ShowDefaultName { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -16,7 +16,7 @@ namespace NexusForever.Network.World.Message.Model.Entity
             writer.Write(UnitId);
             writer.Write(Creature2Id, 18u);
             writer.Write(DisplayInfoId, 17u);
-            writer.Write(Unknown);
+            writer.Write(TriggerDefaultBirthSequence);
             writer.Write(ShowDefaultName);
         }
     }

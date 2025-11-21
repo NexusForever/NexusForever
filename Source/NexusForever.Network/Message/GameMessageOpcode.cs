@@ -737,7 +737,7 @@ namespace NexusForever.Network.Message
         ServerUnitCreatureDifficulty    = 0x08D3,
         ServerReputationOverrideAdd     = 0x08D7,
         ServerUnitImmunity              = 0x08F4,
-        ServerUnitWarplotTier  = 0x08F6,
+        ServerUnitWarplotTier           = 0x08F6,
         ServerUnitStealth               = 0x08F5,
         ServerUnitUnaware               = 0x0902,
         ServerEntityVisualUpdate        = 0x0905,
