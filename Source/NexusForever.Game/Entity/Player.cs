@@ -54,7 +54,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Game.Entity
 {

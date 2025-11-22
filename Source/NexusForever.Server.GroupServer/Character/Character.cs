@@ -9,7 +9,7 @@ using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Network.Internal.Message.Player;
 using NexusForever.Server.GroupServer.Group;
 using NexusForever.Server.GroupServer.Network.Internal;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Server.GroupServer.Character
 {

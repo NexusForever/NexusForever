@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Network.World.Message.Model.Guild
 {
@@ -29,7 +29,7 @@ namespace NexusForever.Network.World.Message.Model.Guild
             writer.WriteStringWide(Name);
             writer.Write(Sex, 2u);
             writer.Write(Class, 32u);
-            writer.Write(Path, 32u);
+            writer.Write((Path)Path, 32u);
             writer.Write(Level);
             writer.Write(LastLogoutTimeDays);
             writer.Write(PvpWins);

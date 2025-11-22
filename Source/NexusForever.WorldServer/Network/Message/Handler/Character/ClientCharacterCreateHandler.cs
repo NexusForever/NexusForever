@@ -126,7 +126,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
 
                 uint startingLevel = gameTableManager.XpPerLevel.Entries.First(l => l.MinXpForLevel >= creationEntry.Xp).Id;
 
-                for (Game.Static.Entity.Path path = Game.Static.Entity.Path.Soldier; path <= Game.Static.Entity.Path.Explorer; path++)
+                for (Game.Static.PlayerPath.Path path = Game.Static.PlayerPath.Path.Soldier; path <= Game.Static.PlayerPath.Path.Explorer; path++)
                 {
                     character.Path.Add(new CharacterPathModel
                     {

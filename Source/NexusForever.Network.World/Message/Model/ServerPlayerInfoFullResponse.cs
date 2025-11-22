@@ -2,7 +2,7 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Network.World.Message.Model
 {
@@ -38,7 +38,7 @@ namespace NexusForever.Network.World.Message.Model
         {
             BaseData.Write(writer);
             writer.Write(IsClassPathSet);
-            writer.Write(Path, 3u);
+            writer.Write((Game.Static.PlayerPath.Path)Path, 3u);
             writer.Write(Class, 14u);
             writer.Write(Level);
             writer.Write(IsLastLoggedOnInDaysSet);

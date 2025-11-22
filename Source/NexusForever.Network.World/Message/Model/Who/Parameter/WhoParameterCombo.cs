@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Static.Entity;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Network.World.Message.Model.Who.Parameter
 {
