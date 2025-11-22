@@ -1,6 +1,6 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Crafting
 {
     [Message(GameMessageOpcode.ServerTradeskillRelearnCooldown)]
     public class ServerTradeskillRelearnCooldown : IWritable

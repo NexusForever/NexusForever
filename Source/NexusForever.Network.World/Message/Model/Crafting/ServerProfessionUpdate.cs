@@ -1,7 +1,7 @@
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Crafting
 {
     [Message(GameMessageOpcode.ServerProfessionUpdate)]
     public class ServerProfessionUpdate : IWritable

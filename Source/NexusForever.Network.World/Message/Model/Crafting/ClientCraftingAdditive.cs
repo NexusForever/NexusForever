@@ -1,9 +1,9 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Crafting
 {
-    [Message(GameMessageOpcode.ClientCraftingAddAdditive)]
-    public class ClientCraftingAddAdditive : IReadable
+    [Message(GameMessageOpcode.ClientCraftingAdditive)]
+    public class ClientCraftingAdditive : IReadable
     {
         public uint CraftingStationUnitId { get; private set; }
         public uint AdditiveItem2Id { get; private set; }

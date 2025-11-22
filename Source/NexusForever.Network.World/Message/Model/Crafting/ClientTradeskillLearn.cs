@@ -1,7 +1,7 @@
 using NexusForever.Network.Message;
 using NexusForever.Game.Static.Crafting;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Crafting
 {
     [Message(GameMessageOpcode.ClientTradeskillLearn)]
     public class ClientTradeskillLearn : IReadable

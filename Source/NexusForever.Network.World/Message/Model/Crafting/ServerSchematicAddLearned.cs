@@ -2,10 +2,10 @@ using NexusForever.Network.Message;
 using NexusForever.Game.Static.Crafting;
 using System.Numerics;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Crafting
 {
-    [Message(GameMessageOpcode.ServerAddLearnedSchematic)]
-    public class ServerAddLearnedSchematic : IWritable
+    [Message(GameMessageOpcode.ServerSchematicAddLearned)]
+    public class ServerSchematicAddLearned : IWritable
     {
         public TradeskillType TradeskillId { get; set; }
         public uint TradeskillSchematic2Id { get; set; }

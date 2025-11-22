@@ -1,10 +1,10 @@
 using NexusForever.Network.Message;
 using NexusForever.Game.Static.Crafting;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Crafting
 {
-    [Message(GameMessageOpcode.ServerCraftingDiscoveryHotCold)]
-    public class ServerCraftingDiscoveryHotCold : IWritable
+    [Message(GameMessageOpcode.ServerCraftingFinish)]
+    public class ServerCraftingFinish : IWritable
     {
         public bool Pass { get; set; }
         public uint TradeskillSchematic2IdCrafted { get; set; }

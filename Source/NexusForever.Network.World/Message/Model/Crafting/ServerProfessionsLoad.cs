@@ -2,7 +2,7 @@ using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 using System.Numerics;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Crafting
 {
     [Message(GameMessageOpcode.ServerProfessionsLoad)]
     public class ServerProfessionsLoad : IWritable
@@ -23,7 +23,7 @@ namespace NexusForever.Network.World.Message.Model
         public List<TradeskillInfo> Tradeskills { get; set; } = [];
         public List<uint> LearnedSchematics { get; set; } = []; // TradeskillSchematic2Id
         public List<DiscoveredSchematic> DiscoveredSchematics { get; set; } = [];
-        public List<uint> UnknownArray { get; set; } = [];
+        public List<uint> LearnedSchematicDiscoveredFlags { get; set; } = []; // which LearnedSchematics were discovered, bit order matches LearnedSchematics array
         public uint RelearnCooldown { get; set; } // Sent as an offset from the time now, to the finish time, in milliseconds.
 
         public void Write(GamePacketWriter writer)
@@ -46,8 +46,8 @@ namespace NexusForever.Network.World.Message.Model
                 schematic.Write(writer);
             }
 
-            writer.Write(UnknownArray.Count);
-            foreach (var id in UnknownArray)
+            writer.Write(LearnedSchematicDiscoveredFlags.Count);
+            foreach (var id in LearnedSchematicDiscoveredFlags)
             {
                 writer.Write(id);
             }
