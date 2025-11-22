@@ -2,10 +2,10 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Crafting
 {
-    [Message(GameMessageOpcode.ClientCraftingCraftWithCatalyst)]
-    public class ClientCraftingCraftWithCatalyst : IReadable
+    [Message(GameMessageOpcode.ClientCraftingCraftItemAutoCraft)]
+    public class ClientCraftingCraftItemAutoCraft : IReadable
     {
-        public uint ClientSpellcastUniqueId { get; private set; }
+        public uint ClientSpellcastUniqueId { get; private set; } // creates a spell cast when the craft is Runecrafting
         public uint CraftingStationUnitId { get; private set; }
         public uint TradeskillSchematic2Id { get; private set; }
         public uint SchematicCount { get; private set; }
