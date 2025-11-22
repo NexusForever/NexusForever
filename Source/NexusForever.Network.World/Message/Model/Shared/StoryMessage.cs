@@ -80,7 +80,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
                 writer.Write(PlayerRace, 5u);
                 writer.Write(PlayerClass, 5u);
                 writer.Write(PlayerFaction, 14u);
-                writer.Write((Game.Static.PlayerPath.Path)PlayerPath, 3u);
+                writer.Write(PlayerPath, 3u);
                 writer.Write(PlayerTitle, 14u);
                 base.Write(writer);
             }

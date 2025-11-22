@@ -2,9 +2,9 @@
 {
     public enum PathMissionState
     {
-        NoMission = 0x0,
-        Unlocked  = 0x2,
-        Started   = 0x3,
-        Complete  = 0x4,
+        NoMission = 0,
+        Unlocked  = 2,
+        Started   = 3,
+        Complete  = 4,
     };
 }

@@ -38,7 +38,7 @@ namespace NexusForever.Network.World.Message.Model
         {
             BaseData.Write(writer);
             writer.Write(IsClassPathSet);
-            writer.Write((Game.Static.PlayerPath.Path)Path, 3u);
+            writer.Write(Path, 3u);
             writer.Write(Class, 14u);
             writer.Write(Level);
             writer.Write(IsLastLoggedOnInDaysSet);

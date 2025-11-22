@@ -36,10 +36,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
                 if (needToUseTokens && clientPathChangeRequest.OnCooldown && !hasEnoughTokens)
                     return GenericError.PathChangeInsufficientFunds;
 
-                if (!session.Player.PathManager.IsPathUnlocked((Game.Static.PlayerPath.Path)clientPathChangeRequest.Path))
+                if (!session.Player.PathManager.IsPathUnlocked(clientPathChangeRequest.Path))
                     return GenericError.PathChangeNotUnlocked;
 
-                if (session.Player.PathManager.IsPathActive((Game.Static.PlayerPath.Path)clientPathChangeRequest.Path))
+                if (session.Player.PathManager.IsPathActive(clientPathChangeRequest.Path))
                     return GenericError.PathChangeRequested;
 
                 return GenericError.Ok;
@@ -55,7 +55,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Path
             if (needToUseTokens && clientPathChangeRequest.OnCooldown)
                 session.Account.CurrencyManager.CurrencySubtractAmount(AccountCurrencyType.ServiceToken, bypassCost);
 
-            session.Player.PathManager.ActivatePath((Game.Static.PlayerPath.Path)clientPathChangeRequest.Path);
+            session.Player.PathManager.ActivatePath(clientPathChangeRequest.Path);
         }
     }
 }

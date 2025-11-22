@@ -56,7 +56,7 @@ namespace NexusForever.Network.Message
         ClientDuelForfeit               = 0x00EA,
         ServerDuelFailure               = 0x00EB,
         ClientDuelInitate               = 0x00EC,
-        ClientPathScientistDismissScanbot1 = 0x00F0,
+        ClientPathScientistDismissScanbot = 0x00F0,
         ServerInstanceSettings          = 0x00F1, // handler sends 0x00D5 and ClientPlayerMovementSpeedUpdate
         ClientEnteredWorld              = 0x00F2,
         ClientPathExplorerProgressReport = 0x00F3,
@@ -134,7 +134,7 @@ namespace NexusForever.Network.Message
         ServerResurrectRequest          = 0x015B,
         ClientLootRollAction            = 0x015D,
         ClientItemUseLootBag            = 0x015E,
-        ClientPathScientistDismissScanbot2 = 0x015F,
+        ClientPathScientistDismissScanbotPathAction = 0x015F,
         ClientPathScientistRequestScanbot = 0x0180,
         ServerCharacterSelectFail       = 0x0162,
         ClientSetInstanceSettings       = 0x0163,

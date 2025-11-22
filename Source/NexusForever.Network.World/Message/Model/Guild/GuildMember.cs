@@ -29,7 +29,7 @@ namespace NexusForever.Network.World.Message.Model.Guild
             writer.WriteStringWide(Name);
             writer.Write(Sex, 2u);
             writer.Write(Class, 32u);
-            writer.Write((Path)Path, 32u);
+            writer.Write(Path, 32u);
             writer.Write(Level);
             writer.Write(LastLogoutTimeDays);
             writer.Write(PvpWins);
