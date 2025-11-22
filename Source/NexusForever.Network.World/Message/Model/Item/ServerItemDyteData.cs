@@ -2,16 +2,16 @@
 
 namespace NexusForever.Network.World.Message.Model.Item
 {
-    [Message(GameMessageOpcode.ServerItemUnknown44)]
-    public class ServerItemUnknown44 : IWritable
+    [Message(GameMessageOpcode.ServerItemDyteData)]
+    public class ServerItemDyteData : IWritable
     {
         public ulong ItemGuid { get; set; }
-        public uint Unknown44 { get; set; } // is the Unknown44 field in the Item message (0x111), possibly costume related
+        public uint DyeData { get; set; } // see GenerateDyeMask in CostumeItem
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(ItemGuid);
-            writer.Write(Unknown44);
+            writer.Write(DyeData);
         }
     }
 }

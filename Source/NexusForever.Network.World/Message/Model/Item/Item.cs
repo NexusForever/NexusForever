@@ -32,7 +32,7 @@ namespace NexusForever.Network.World.Message.Model.Item
         public RuneSlots GlyphData { get; set; } = new ();
         public ItemThresholds ThresholdData { get; set; } = new ();
         public float Durability { get; set; }
-        public uint Unknown44 { get; set; } // possibly costume related
+        public uint DyeData { get; set; } // see GenerateDyeMask in CostumeItem
         public ItemFlags Flags { get; set; }
         public uint ReturnTimeRemaining { get; set; }
         public uint ExpireTimeRemaining { get; set; }
@@ -57,7 +57,7 @@ namespace NexusForever.Network.World.Message.Model.Item
             GlyphData.Write(writer);
             ThresholdData.Write(writer);
             writer.Write(Durability);
-            writer.Write(Unknown44);
+            writer.Write(DyeData);
             writer.Write(Flags, 32u);
             writer.Write(ReturnTimeRemaining);
             writer.Write(ExpireTimeRemaining);

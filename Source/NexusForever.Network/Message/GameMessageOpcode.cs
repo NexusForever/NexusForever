@@ -195,7 +195,7 @@ namespace NexusForever.Network.Message
         ServerAmpList                   = 0x01A3,
         ServerReputationUpdate          = 0x01A5,
         ServerItemDurability            = 0x01A7,
-        ServerItemUnknown44             = 0x01A8,
+        ServerItemDyteData              = 0x01A8,
         ServerPathUpdateXP              = 0x01AA,
         ServerResurrectionUpdate        = 0x01AB,
         ServerExperienceGained          = 0x01AC,
