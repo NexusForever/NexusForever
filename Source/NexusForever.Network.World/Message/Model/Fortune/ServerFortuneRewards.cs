@@ -1,9 +1,9 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Fortunes
+namespace NexusForever.Network.World.Message.Model.Fortune
 {
-    [Message(GameMessageOpcode.ServerFortunesRewards)]
-    public class ServerFortunesRewards : IWritable
+    [Message(GameMessageOpcode.ServerFortuneRewards)]
+    public class ServerFortuneRewards : IWritable
     {
         public class MoneyReward : IWritable
         {

@@ -1,9 +1,9 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Fortunes
+namespace NexusForever.Network.World.Message.Model.Fortune
 {
-    [Message(GameMessageOpcode.ClientFortunesFlipCard)]
-    public class ClientFortunesFlipCard : IReadable
+    [Message(GameMessageOpcode.ClientFortuneFlipCard)]
+    public class ClientFortuneFlipCard : IReadable
     {
         public uint SelectedCardIndex { get; private set; }
 
