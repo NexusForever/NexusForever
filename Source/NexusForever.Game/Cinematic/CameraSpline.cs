@@ -21,7 +21,7 @@ namespace NexusForever.Game.Cinematic
             Speed       = speed;
             Target      = target;
             UseRotation = useRotation;
-        }               
+        }
 
         public void Send(IGameSession session)
         {

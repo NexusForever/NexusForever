@@ -142,7 +142,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
 
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicTransitionDurationSet
             {
-                Type          = ScaleTransitionType.StartMinimzed,
+                Type          = ScaleTransitionType.StartMinimized,
                 DurationStart = 1500,
                 DurationMid   = 0,
                 DurationEnd   = 1500
