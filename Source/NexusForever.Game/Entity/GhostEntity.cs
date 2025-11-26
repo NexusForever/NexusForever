@@ -57,7 +57,7 @@ namespace NexusForever.Game.Entity
             Faction1 = owner.Faction1;
             Faction2 = owner.Faction2;
 
-            CreateFlags |= EntityCreateFlag.NoSpawnAnimation;
+            CreateFlags |= EntityCreateFlag.UseDefaultBirthSequence;
 
             SetBaseProperty(Property.BaseHealth, 101.0f);
 

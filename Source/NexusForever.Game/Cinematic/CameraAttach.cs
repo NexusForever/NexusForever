@@ -16,7 +16,7 @@ namespace NexusForever.Game.Cinematic
         {
             Delay        = delay;
             AttachId     = attachId;
-            ParentUnitId = parentUnit.CameraActor.Id;
+            ParentUnitId = parentUnit.CameraActor.UnitId;
             AttachType   = attachType;
             UseRotation  = useRotation;
         }

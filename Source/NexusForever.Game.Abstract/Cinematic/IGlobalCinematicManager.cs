@@ -5,7 +5,7 @@
         /// <summary>
         /// Id to be assigned to the next Cinematic.
         /// </summary>
-        uint NextCinematicId { get; }
+        uint NextActorUnitId { get; }
 
         /// <summary>
         /// Initialises the <see cref="IGlobalCinematicManager"/>.

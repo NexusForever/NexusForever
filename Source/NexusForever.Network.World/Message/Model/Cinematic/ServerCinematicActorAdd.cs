@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model
     public class ServerCinematicActorAdd : IWritable
     {
         public uint Delay { get; set; }
-        public EntityCreateFlag Flags { get; set; }
+        public EntityCreateFlag CreateFlags { get; set; }
         public ushort TextureLevelOfDetailBias { get; set; } // outside chance this is a signed value but sniffs do not show it used that way
         public uint UnitId { get; set; }
         public uint Creature2Id { get; set; }
@@ -21,7 +21,7 @@ namespace NexusForever.Network.World.Message.Model
         public void Write(GamePacketWriter writer)
         {
             writer.Write(Delay);
-            writer.Write(Flags, 16u);
+            writer.Write(CreateFlags, 16u);
             writer.Write(TextureLevelOfDetailBias);
             writer.Write(UnitId);
             writer.Write(Creature2Id);

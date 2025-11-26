@@ -23,7 +23,7 @@ namespace NexusForever.Game.Cinematic
             session.EnqueueMessageEncrypted(new ServerCinematicActorVisibility
             {
                 Delay             = Delay,
-                UnitId            = Actor.Id,
+                UnitId            = Actor.UnitId,
                 Hide              = Hide,
                 AffectOnlyPlayers = AffectOnlyPlayers
             });

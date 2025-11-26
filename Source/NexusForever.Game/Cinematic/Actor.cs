@@ -10,12 +10,12 @@ namespace NexusForever.Game.Cinematic
 {
     public class Actor : IActor
     {
-        public uint Id { get; }
+        public uint UnitId { get; }
         public uint InitialDelay { get; }
         public uint Creature2Id { get; }
-        public ushort Flags { get; }
+        public EntityCreateFlag CreateFlags { get; }
         public ushort TextureLevelOfDetailBias { get; }
-        public uint MovementMode { get; }
+        public ModeType MovementMode { get; }
         public float? Angle { get; }
         public Position InitialPosition { get; }
         public List<IVisualEffect> InitialVisualEffects { get; } = new();
@@ -25,11 +25,11 @@ namespace NexusForever.Game.Cinematic
 
         public List<IWritable> PacketsToSend { get; } = new();
 
-        public Actor(uint creatureType, ushort flags, float? angle, Position position, uint initialDelay = 0, ushort textureLoDBias = 10, uint movementMode = 3, ulong activePropId = 0, uint socketId = 0)
+        public Actor(uint creature2Id, EntityCreateFlag createFlags, float? angle, Position position, uint initialDelay = 0, ushort textureLoDBias = 10, ModeType movementMode = ModeType.Free, ulong activePropId = 0, uint socketId = 0)
         {
-            Id                       = GlobalCinematicManager.Instance.NextCinematicId;
-            Creature2Id              = creatureType;
-            Flags                    = flags;
+            UnitId                   = GlobalCinematicManager.Instance.NextActorUnitId;
+            Creature2Id              = creature2Id;
+            CreateFlags              = createFlags;
             Angle                    = angle;
             InitialPosition          = position;
             InitialDelay             = initialDelay;
@@ -61,11 +61,11 @@ namespace NexusForever.Game.Cinematic
             session.EnqueueMessageEncrypted(new ServerCinematicActorAdd
             {
                 Delay                    = InitialDelay,
-                Flags                    = (EntityCreateFlag)Flags,
+                CreateFlags              = CreateFlags,
                 TextureLevelOfDetailBias = TextureLevelOfDetailBias,
-                UnitId                   = Id,
+                UnitId                   = UnitId,
                 Creature2Id              = Creature2Id,
-                MovementMode             = (ModeType)MovementMode,
+                MovementMode             = MovementMode,
                 Position                 = InitialPosition,
                 ActivePropId             = ActivePropId,
                 WorldSocketId            = SocketId
@@ -76,7 +76,7 @@ namespace NexusForever.Game.Cinematic
                 session.EnqueueMessageEncrypted(new ServerCinematicActorAngle
                 {
                     Delay  = 0,
-                    UnitId = Id,
+                    UnitId = UnitId,
                     Angle  = Angle.Value
                 });
             }

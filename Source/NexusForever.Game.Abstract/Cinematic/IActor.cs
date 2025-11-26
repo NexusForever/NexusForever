@@ -1,4 +1,6 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement.Command.Mode;
+using NexusForever.Network.Message;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 
@@ -6,12 +8,12 @@ namespace NexusForever.Game.Abstract.Cinematic
 {
     public interface IActor
     {
-        uint Id { get; }
+        uint UnitId { get; }
         uint InitialDelay { get; }
         uint Creature2Id { get; }
-        ushort Flags { get; }
+        EntityCreateFlag CreateFlags { get; }
         ushort TextureLevelOfDetailBias { get; }
-        uint MovementMode { get; }
+        ModeType MovementMode { get; }
         float? Angle { get; }
         Position InitialPosition { get; }
         List<IVisualEffect> InitialVisualEffects { get; }

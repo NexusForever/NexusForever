@@ -1,6 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Cinematic;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 
@@ -33,7 +34,7 @@ namespace NexusForever.Game.Cinematic
             foreach (IVisualEffect visualEffect in initialVisuals)
                 actor.AddVisualEffect(visualEffect);
 
-            Actors.Add(actor.Id, actor);
+            Actors.Add(actor.UnitId, actor);
         }
 
         /// <summary>
@@ -41,12 +42,12 @@ namespace NexusForever.Game.Cinematic
         /// </summary>
         protected void SetAsPlayerActor(IActor actor, Position initialPosition, uint attachementId)
         {
-            IActor player = new Actor(0, 7, 0f, initialPosition, textureLoDBias: 0);
+            IActor player = new Actor(0, EntityCreateFlag.UseDefaultBirthSequence | EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, 0f, initialPosition, textureLoDBias: 0);
             player.AddPacketToSend(new ServerCinematicPlatformAdd
             {
                 Delay           = 0,
-                ActorUnitId     = player.Id,
-                PlatformUnitId  = actor.Id,
+                ActorUnitId     = player.UnitId,
+                PlatformUnitId  = actor.UnitId,
                 AttachmentId    = attachementId
             });
             playerActor         = player;
