@@ -6,11 +6,12 @@ namespace NexusForever.Game.Cinematic
     public sealed class GlobalCinematicManager : Singleton<GlobalCinematicManager>, IGlobalCinematicManager
     {
         /// <summary>
-        /// Actors use the same unitId system as regular units (players, game play npcs) but start from a higher range
+        /// Unique Id to be assigned to the next Cinematic element. For actors, this is the unitId as for regular units
+        /// and can easily check if they are actors as the unitIds will all being with 0x40000000.
         /// </summary>
-        public uint NextActorUnitId => nextActorUnitId++;
+        public uint NextCinematicId => nextCinematicId++;
 
-        private uint nextActorUnitId = 0x4000000;
+        private uint nextCinematicId = 0x40000000;
 
         /// <summary>
         /// Initialises the <see cref="GlobalCinematicManager"/>.

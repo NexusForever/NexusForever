@@ -2,7 +2,7 @@
 {
     public enum ScaleTransitionType
     {
-        StartMinimzed  = 2,
+        StartMinimized = 2,
         StartMaximized = 3,
     }
 }
