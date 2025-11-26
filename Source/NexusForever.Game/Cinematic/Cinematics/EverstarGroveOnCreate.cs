@@ -1,8 +1,9 @@
-﻿using System.Numerics;
-using NexusForever.Game.Abstract.Cinematic;
+﻿using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Abstract.Cinematic.Cinematics;
+using NexusForever.Game.Static.Cinematic;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
+using System.Numerics;
 
 namespace NexusForever.Game.Cinematic.Cinematics
 {
@@ -17,8 +18,8 @@ namespace NexusForever.Game.Cinematic.Cinematics
             InitialFlags      = 7;
             InitialCancelMode = 2;
             CinematicId       = 35;
-            StartTransition   = new Transition(0, 1, 2, 1000, 0, 1500);
-            EndTransition     = new Transition(14333, 0, 0, 1000, 0, 1000);
+            StartTransition   = new Transition(0, CameraAddFlags.AddCamera, 2, 1000, 0, 1500);
+            EndTransition     = new Transition(14333, CameraAddFlags.WhiteOut, 0, 1000, 0, 1000);
 
             SetupActors();
             SetupTexts();

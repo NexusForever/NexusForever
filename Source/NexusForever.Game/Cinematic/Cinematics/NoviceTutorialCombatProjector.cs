@@ -27,8 +27,8 @@ namespace NexusForever.Game.Cinematic.Cinematics
             Duration          = 10000;
             InitialFlags      = 7;
             InitialCancelMode = 2;
-            StartTransition   = new Transition(0, 1, 2, 1500, 0, 1500);
-            EndTransition     = new Transition(8500, 0, 0, 1500, 0, 1500);
+            StartTransition   = new Transition(0, CameraAddFlags.AddCamera, 2, 1500, 0, 1500);
+            EndTransition     = new Transition(8500, CameraAddFlags.WhiteOut, 0, 1500, 0, 1500);
 
             SetupActors();
             SetupTexts();

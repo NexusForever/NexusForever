@@ -18,7 +18,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
             InitialFlags = 7;
             InitialCancelMode = 2;
             CinematicId = 35;
-            StartTransition = new Transition(0, 5, 1, 1500, 0, 1500);
+            StartTransition = new Transition(0, CameraAddFlags.AddCamera | CameraAddFlags.NotifyCancelNextCamera, 1, 1500, 0, 1500);
             //EndTransition = new Transition(11000, 0, 0, 1000, 0, 1000);
 
             SetupActors();
