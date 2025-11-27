@@ -13,8 +13,8 @@ namespace NexusForever.Game.Cinematic
 
         public ushort CinematicId { get; set; }
         public uint Duration { get; set; }
-        public ushort InitialFlags { get; set; }
-        public ushort InitialCancelMode { get; set; }
+        public CinematicFlags InitialFlags { get; set; }
+        public CancelType InitialCancelMode { get; set; }
         public Dictionary</* Id */ uint, IActor> Actors { get; } = new();
         public Dictionary</* Delay */ uint, /* TextId */ uint> Texts { get; } = new();
         public Dictionary<string, List<IKeyframeAction>> Keyframes { get; } = new();
@@ -40,7 +40,7 @@ namespace NexusForever.Game.Cinematic
         /// <summary>
         /// Set an <see cref="IActor"/> as the instance the Player will be spawned in. (Important for playback)
         /// </summary>
-        protected void SetAsPlayerActor(IActor actor, Position initialPosition, uint attachementId)
+        protected void SetAsPlayerActor(IActor actor, Position initialPosition, uint attachmentId)
         {
             IActor player = new Actor(0, EntityCreateFlag.UseDefaultBirthSequence | EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, 0f, initialPosition, textureLoDBias: 0);
             player.AddPacketToSend(new ServerCinematicPlatformAdd
@@ -48,7 +48,7 @@ namespace NexusForever.Game.Cinematic
                 Delay           = 0,
                 ActorUnitId     = player.UnitId,
                 PlatformUnitId  = actor.UnitId,
-                AttachmentId    = attachementId
+                AttachmentId    = attachmentId
             });
             playerActor         = player;
         }
@@ -88,8 +88,8 @@ namespace NexusForever.Game.Cinematic
 
             Player.Session.EnqueueMessageEncrypted(new ServerCinematicNotify
             {
-                Flags       = (CinematicFlags)InitialFlags,
-                CancelMode  = (CancelType)InitialCancelMode,
+                Flags       = InitialFlags,
+                CancelMode  = InitialCancelMode,
                 Delay       = Duration,
                 CinematicId = CinematicId
             });

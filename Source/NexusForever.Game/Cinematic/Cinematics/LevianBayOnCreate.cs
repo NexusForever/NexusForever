@@ -13,12 +13,12 @@ namespace NexusForever.Game.Cinematic.Cinematics
 
         protected override void Setup()
         {
-            Duration = 34033;
-            InitialFlags = 7;
-            InitialCancelMode = 2;
-            CinematicId = 28;
-            StartTransition = new Transition(0, CameraAddFlags.AddCamera, 2, 1000, 0, 1500);
-            EndTransition = new Transition(32533, CameraAddFlags.WhiteOut, 0);
+            Duration          = 34033;
+            InitialFlags      = CinematicFlags.EndImmediate | CinematicFlags.Unknown2 | CinematicFlags.NotifyServer;
+            InitialCancelMode = CancelType.EndImmediate;
+            CinematicId       = 28;
+            StartTransition   = new Transition(0, CameraAddFlags.AddCamera, 2, 1000, 0, 1500);
+            EndTransition     = new Transition(32533, CameraAddFlags.WhiteOut, 0);
 
             SetupActors();
             SetupTexts();
