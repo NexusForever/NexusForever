@@ -31,7 +31,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
             EndTransition     = new Transition(8500, CameraAddFlags.WhiteOut, 0, 1500, 0, 1500);
 
             SetupActors();
-            SetupTexts();
+            SetupVoiceOvers();
             SetupCamera();
 
             Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
@@ -124,10 +124,10 @@ namespace NexusForever.Game.Cinematic.Cinematics
             SetAsPlayerActor(player, initialPosition, 71);
         }
 
-        private void SetupTexts()
+        private void SetupVoiceOvers()
         {
-            AddText(749303, 1500, 6400);
-            AddText(749304, 6500, 14900);
+            AddVoiceOver(749303, 1500, 6400);
+            AddVoiceOver(749304, 6500, 14900);
         }
 
         private void SetupCamera()

@@ -36,9 +36,9 @@ namespace NexusForever.Game.Cinematic.Cinematics
             SetupCamera();
 
             if (Player.Faction1 == Faction.Dominion)
-                AddDominionTexts();
+                AddDominionVoiceOvers();
             else if (Player.Faction1 == Faction.Exile)
-                AddExileTexts();
+                AddExileVoiceOvers();
 
             // Add Scenes
             Keyframes.Add("Scenes", new List<IKeyframeAction>
@@ -144,32 +144,32 @@ namespace NexusForever.Game.Cinematic.Cinematics
             holoActor.AddVisibility(10500, true);
         }
 
-        private void AddDominionTexts()
+        private void AddDominionVoiceOvers()
         {
-            AddText(750178, 1700, 5100);
-            AddText(750179, 5133, 12033);
-            AddText(750180, 12067, 16400);
-            AddText(750181, 16433, 20433);
-            AddText(750182, 20467, 23733);
-            AddText(750183, 23767, 27867);
-            AddText(750184, 27900, 34400);
-            AddText(750185, 34433, 41067);
-            AddText(750186, 41100, 43800);
-            AddText(750187, 43833, 49500);
+            AddVoiceOver(750178, 1700, 5100);
+            AddVoiceOver(750179, 5133, 12033);
+            AddVoiceOver(750180, 12067, 16400);
+            AddVoiceOver(750181, 16433, 20433);
+            AddVoiceOver(750182, 20467, 23733);
+            AddVoiceOver(750183, 23767, 27867);
+            AddVoiceOver(750184, 27900, 34400);
+            AddVoiceOver(750185, 34433, 41067);
+            AddVoiceOver(750186, 41100, 43800);
+            AddVoiceOver(750187, 43833, 49500);
         }
 
-        private void AddExileTexts()
+        private void AddExileVoiceOvers()
         {
-            AddText(750164, 1300, 5767);
-            AddText(750165, 5800, 11567);
-            AddText(750166, 11600, 16467);
-            AddText(750167, 16500, 20733);
-            AddText(750168, 20767, 23633);
-            AddText(750169, 23667, 28333);
-            AddText(750170, 28367, 34333);
-            AddText(750171, 34367, 40833);
-            AddText(750173, 40867, 44567);
-            AddText(750174, 44600, 49500);
+            AddVoiceOver(750164, 1300, 5767);
+            AddVoiceOver(750165, 5800, 11567);
+            AddVoiceOver(750166, 11600, 16467);
+            AddVoiceOver(750167, 16500, 20733);
+            AddVoiceOver(750168, 20767, 23633);
+            AddVoiceOver(750169, 23667, 28333);
+            AddVoiceOver(750170, 28367, 34333);
+            AddVoiceOver(750171, 34367, 40833);
+            AddVoiceOver(750173, 40867, 44567);
+            AddVoiceOver(750174, 44600, 49500);
         }
 
         protected override void Play()

@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerCinematicSound)]
-    public class ServerCinematicSound : IWritable
+    [Message(GameMessageOpcode.ServerCinematicVoiceOverLine)]
+    public class ServerCinematicVoiceOverLine : IWritable
     {
         public uint Delay { get; set; }
         public uint LocalizedTextId { get; set; }

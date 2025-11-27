@@ -22,7 +22,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
             EndTransition     = new Transition(14333, CameraAddFlags.WhiteOut, 0, 1000, 0, 1000);
 
             SetupActors();
-            SetupTexts();
+            SetupVoiceOvers();
             SetupCamera();
 
             Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
@@ -51,12 +51,12 @@ namespace NexusForever.Game.Cinematic.Cinematics
             SetAsPlayerActor(ship, initialPosition, 23);
         }
 
-        private void SetupTexts()
+        private void SetupVoiceOvers()
         {
-            AddText(578488, 4000, 6400);
-            AddText(578489, 6500, 10900);
-            AddText(578490, 11000, 12600);
-            AddText(578491, 12700, 15400);
+            AddVoiceOver(578488, 4000, 6400);
+            AddVoiceOver(578489, 6500, 10900);
+            AddVoiceOver(578490, 11000, 12600);
+            AddVoiceOver(578491, 12700, 15400);
         }
 
         private void SetupCamera()

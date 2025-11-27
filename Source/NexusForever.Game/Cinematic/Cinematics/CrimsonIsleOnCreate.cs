@@ -19,7 +19,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
             EndTransition     = new Transition(17000, CameraAddFlags.WhiteOut, 0);
 
             SetupActors();
-            SetupTexts();
+            SetupVoiceOvers();
             SetupCamera();
 
             Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
@@ -33,12 +33,12 @@ namespace NexusForever.Game.Cinematic.Cinematics
             // TODO: Need parse of Crimson Isle cinematic to finish
         }
 
-        private void SetupTexts()
+        private void SetupVoiceOvers()
         {
-            AddText(578443, 1000, 2500);
-            AddText(578444, 2600, 8000);
-            AddText(578445, 8100, 12600);
-            AddText(578446, 12700, 16500);
+            AddVoiceOver(578443, 1000, 2500);
+            AddVoiceOver(578444, 2600, 8000);
+            AddVoiceOver(578445, 8100, 12600);
+            AddVoiceOver(578446, 12700, 16500);
         }
 
         private void SetupCamera()

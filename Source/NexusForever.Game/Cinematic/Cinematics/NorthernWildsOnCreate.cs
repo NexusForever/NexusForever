@@ -22,7 +22,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
             //EndTransition   = new Transition(11000, 0, 0, 1000, 0, 1000);
 
             SetupActors();
-            SetupTexts();
+            SetupVoiceOvers();
             SetupCamera();
 
             uint dropPodUnitId = Player.GetVisibleCreature<WorldEntity>(ACTOR_GRANOK_DROP_POD).FirstOrDefault()?.Guid ?? 0u;
@@ -59,10 +59,10 @@ namespace NexusForever.Game.Cinematic.Cinematics
             });
         }
 
-        private void SetupTexts()
+        private void SetupVoiceOvers()
         {
-            AddText(578135, 2900, 5700);
-            AddText(578136, 5800, 11000);
+            AddVoiceOver(578135, 2900, 5700);
+            AddVoiceOver(578136, 5800, 11000);
         }
 
         private void SetupCamera()
