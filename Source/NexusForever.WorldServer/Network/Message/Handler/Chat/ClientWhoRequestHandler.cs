@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
 using NexusForever.Network.Session;
@@ -12,45 +13,46 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {
     public class ClientWhoRequestHandler : IMessageHandler<IWorldSession, ClientWhoRequest>
     {
-
         private enum FilterStrategy
         {
             Name,
             Race,
             Class,
+            Path
         }
 
+        private IWorldSession requestingSession;
         private FilterStrategy inferredFilterStrategy;
-        public void HandleMessage(IWorldSession session, ClientWhoRequest request)
+        private readonly bool shouldSearchesIncludeThePlayerInitiatingSearch = false;
+        public void HandleMessage(IWorldSession requestingSession, ClientWhoRequest request)
         {
+            this.requestingSession = requestingSession;
             INetworkManager<IWorldSession> worldSessions = LegacyServiceProvider.Provider.GetService<INetworkManager<IWorldSession>>();
 
             var players = new List<ServerWhoResponse.WhoPlayer>();
             var currentRequestParameter = request.Parameters.Count > 0 ? request.Parameters[0] : null;
 
-            // Iterate over sessions for filtering.
-            foreach (var sessionKey in worldSessions)
+            // Iterate over sessions (connected clients) for filtering.
+            foreach (IWorldSession sessionCandidate in worldSessions)
             {
-                var sessionPlayer = sessionKey.Player;
-
                 if (currentRequestParameter == null)
                 {
-                    AddPlayerToList(players, sessionPlayer);
+                    AddPlayerToList(players, sessionCandidate);
                 }
                 else if (currentRequestParameter.Type == Game.Static.Who.WhoParameterType.Combo)
                 {
                     WhoParameterCombo comboData = currentRequestParameter.Data as WhoParameterCombo;
-                    FilterByCombo(players, sessionPlayer, comboData);
+                    FilterByCombo(players, sessionCandidate, comboData);
                 }
             }
 
-            session.EnqueueMessageEncrypted(new ServerWhoResponse
+            requestingSession.EnqueueMessageEncrypted(new ServerWhoResponse
             {
                 Players = players
             });
         }
 
-        private void FilterByCombo(List<ServerWhoResponse.WhoPlayer> players, Game.Abstract.Entity.IPlayer sessionPlayer, WhoParameterCombo comboData)
+        private void FilterByCombo(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate, WhoParameterCombo comboData)
         {
             inferredFilterStrategy = FilterStrategy.Name;
 
@@ -58,47 +60,62 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             {
                 inferredFilterStrategy = FilterStrategy.Race;
             }
-            else if (comboData.ClassId != 0)
+            else if (comboData.ClassId != Class.None)
             {
                 inferredFilterStrategy = FilterStrategy.Class;
             }
+            else if (comboData.PathId != Game.Static.Entity.Path.None)
+            {
+                inferredFilterStrategy = FilterStrategy.Path;
+            }
 
-            switch (inferredFilterStrategy) 
+            IPlayer candidatePlayer = sessionCandidate.Player;
+            switch (inferredFilterStrategy)
             {
                 case FilterStrategy.Name:
-                    FilterByName(players, sessionPlayer, comboData.SearchString, sessionPlayer.Name);
+                    FilterByName(players, sessionCandidate, comboData.SearchString, candidatePlayer.Name);
                     break;
                 case FilterStrategy.Race:
-                    FilterByArgs(players, sessionPlayer, comboData.RaceId, sessionPlayer.Race);
+                    FilterByArgs(players, sessionCandidate, comboData.RaceId, candidatePlayer.Race);
                     break;
                 case FilterStrategy.Class:
-                    FilterByArgs(players, sessionPlayer, comboData.ClassId, sessionPlayer.Class);
+                    FilterByArgs(players, sessionCandidate, comboData.ClassId, candidatePlayer.Class);
+                    break;
+                case FilterStrategy.Path:
+                    FilterByArgs(players, sessionCandidate, comboData.ClassId, candidatePlayer.Class);
                     break;
             }
         }
 
-        private void FilterByArgs<T>(List<ServerWhoResponse.WhoPlayer> players, Game.Abstract.Entity.IPlayer sessionPlayer, T filterValue, T sessionValue)
+        private void FilterByArgs<T>(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate, T filterValue, T candidateValue)
         {
-            if (EqualityComparer<T>.Default.Equals(filterValue, sessionValue))
+            if (EqualityComparer<T>.Default.Equals(filterValue, candidateValue))
             {
-                AddPlayerToList(players, sessionPlayer);
+                AddPlayerToList(players, sessionCandidate);
             }
         }
 
-        private void FilterByName(List<ServerWhoResponse.WhoPlayer> players, Game.Abstract.Entity.IPlayer sessionPlayer, string comboSearchString, string sessionName)
+        private void FilterByName(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate, string filterString, string candidateName)
         {
             // We want to filter in a case insensitive way
-            string lowercaseSearch = comboSearchString.ToLower();
-            string lowercaseSessionName = sessionName.ToLower();
+            string lowerFilterString = filterString.ToLower();
+            string lowerCandidateName = candidateName.ToLower();
 
-            if (lowercaseSessionName.IndexOf(lowercaseSearch) != -1)
+            if (lowerCandidateName.IndexOf(lowerFilterString) != -1)
             {
-                AddPlayerToList(players, sessionPlayer);
+                AddPlayerToList(players, sessionCandidate);
             }
         }
 
-        private static void AddPlayerToList(List<ServerWhoResponse.WhoPlayer> players, Game.Abstract.Entity.IPlayer sessionPlayer)
+        private void AddPlayerToList(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate)
         {
+            if (requestingSession.Id == sessionCandidate.Id && (shouldSearchesIncludeThePlayerInitiatingSearch == false))
+            {
+                // This code exits early if searching party's session ID is matched with one of the filtered client session's IDs.
+                return;
+            }
+
+            IPlayer sessionPlayer = sessionCandidate.Player;
             players.Add(new()
             {
                 Name = sessionPlayer.Name,
