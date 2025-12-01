@@ -23,7 +23,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 
         private IWorldSession requestingSession;
         private FilterStrategy inferredFilterStrategy;
-        private readonly bool shouldSearchesIncludeThePlayerInitiatingSearch = false;
+
+        private readonly bool shouldSearchesIncludeThePlayerInitiatingSearch = true;
+        private readonly bool shouldSearchesIncludeOppositeFaction = true;
         public void HandleMessage(IWorldSession requestingSession, ClientWhoRequest request)
         {
             this.requestingSession = requestingSession;
@@ -82,7 +84,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
                     FilterByArgs(players, sessionCandidate, comboData.ClassId, candidatePlayer.Class);
                     break;
                 case FilterStrategy.Path:
-                    FilterByArgs(players, sessionCandidate, comboData.ClassId, candidatePlayer.Class);
+                    FilterByArgs(players, sessionCandidate, comboData.PathId, candidatePlayer.Path);
                     break;
             }
         }
@@ -112,6 +114,20 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             if (requestingSession.Id == sessionCandidate.Id && (shouldSearchesIncludeThePlayerInitiatingSearch == false))
             {
                 // This code exits early if searching party's session ID is matched with one of the filtered client session's IDs.
+                return;
+            }
+
+            if (requestingSession.Player.Faction1 != sessionCandidate.Player.Faction1 && (shouldSearchesIncludeOppositeFaction == false))
+            {
+                // This code exits early if searching player's faction does not match the candidate player faction.
+                return;
+            }
+
+            if (requestingSession.Player.Faction2 != sessionCandidate.Player.Faction2 && (shouldSearchesIncludeOppositeFaction == false))
+            {
+                // I'm not sure what Faction2 is supposed to be. My best intuition is this might have some kind of relevance in PvP or dueling.
+                // In any case, I'm going to add this code here to cover my bases for now.
+                // This code exits early if searching player's faction does not match the candidate player faction.
                 return;
             }
 
