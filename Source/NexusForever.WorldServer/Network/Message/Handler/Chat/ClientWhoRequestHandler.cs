@@ -18,7 +18,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             Name,
             Race,
             Class,
-            Path
+            Path,
+            Zone
         }
 
         private IWorldSession requestingSession;
@@ -31,26 +32,26 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             this.requestingSession = requestingSession;
             INetworkManager<IWorldSession> worldSessions = LegacyServiceProvider.Provider.GetService<INetworkManager<IWorldSession>>();
 
-            var players = new List<ServerWhoResponse.WhoPlayer>();
-            var currentRequestParameter = request.Parameters.Count > 0 ? request.Parameters[0] : null;
+            List<ServerWhoResponse.WhoPlayer> whoResponsePlayerList = new List<ServerWhoResponse.WhoPlayer>();
+            WhoParameter? currentRequestParameter = request.Parameters.Count > 0 ? request.Parameters[0] : null;
 
             // Iterate over sessions (connected clients) for filtering.
             foreach (IWorldSession sessionCandidate in worldSessions)
             {
                 if (currentRequestParameter == null)
                 {
-                    AddPlayerToList(players, sessionCandidate);
+                    AddPlayerToList(whoResponsePlayerList, sessionCandidate);
                 }
                 else if (currentRequestParameter.Type == Game.Static.Who.WhoParameterType.Combo)
                 {
                     WhoParameterCombo comboData = currentRequestParameter.Data as WhoParameterCombo;
-                    FilterByCombo(players, sessionCandidate, comboData);
+                    FilterByCombo(whoResponsePlayerList, sessionCandidate, comboData);
                 }
             }
 
             requestingSession.EnqueueMessageEncrypted(new ServerWhoResponse
             {
-                Players = players
+                Players = whoResponsePlayerList
             });
         }
 
@@ -70,6 +71,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             {
                 inferredFilterStrategy = FilterStrategy.Path;
             }
+            else if (comboData.WorldZoneId != 0)
+            {
+                inferredFilterStrategy = FilterStrategy.Zone;
+            }
 
             IPlayer candidatePlayer = sessionCandidate.Player;
             switch (inferredFilterStrategy)
@@ -85,6 +90,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
                     break;
                 case FilterStrategy.Path:
                     FilterByArgs(players, sessionCandidate, comboData.PathId, candidatePlayer.Path);
+                    break;
+                case FilterStrategy.Zone:
+                    FilterByArgs(players, sessionCandidate, comboData.WorldZoneId, candidatePlayer.Zone.Id);
                     break;
             }
         }
