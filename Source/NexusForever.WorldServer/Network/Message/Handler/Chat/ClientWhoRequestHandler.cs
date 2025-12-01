@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualBasic;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Who;
 using NexusForever.Network.Message;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model.Who;
 using NexusForever.Network.World.Message.Model.Who.Parameter;
 using NexusForever.Shared;
+using System;
 using System.Collections.Generic;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
@@ -19,7 +20,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             Race,
             Class,
             Path,
-            Zone
+            Zone,
+            Level
         }
 
         private IWorldSession requestingSession;
@@ -42,10 +44,15 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
                 {
                     AddPlayerToList(whoResponsePlayerList, sessionCandidate);
                 }
-                else if (currentRequestParameter.Type == Game.Static.Who.WhoParameterType.Combo)
+                else if (currentRequestParameter.Type == WhoParameterType.Combo)
                 {
                     WhoParameterCombo comboData = currentRequestParameter.Data as WhoParameterCombo;
                     FilterByCombo(whoResponsePlayerList, sessionCandidate, comboData);
+                }
+                else if (currentRequestParameter.Type == WhoParameterType.Level)
+                {
+                    WhoParameterLevel levelData = currentRequestParameter.Data as WhoParameterLevel;
+                    FilterByLevel(whoResponsePlayerList, sessionCandidate, levelData);
                 }
             }
 
@@ -55,7 +62,17 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             });
         }
 
-        private void FilterByCombo(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate, WhoParameterCombo comboData)
+        private void FilterByLevel(List<ServerWhoResponse.WhoPlayer> whoResponsePlayerList, IWorldSession sessionCandidate, WhoParameterLevel levelData)
+        {
+            IPlayer candidatePlayer = sessionCandidate.Player;
+            uint candidateLevel = candidatePlayer.Level;
+            if (candidateLevel >= levelData.BottomLevel && candidateLevel < levelData.TopLevel)
+            {
+                AddPlayerToList(whoResponsePlayerList, sessionCandidate);
+            }
+        }
+
+        private void FilterByCombo(List<ServerWhoResponse.WhoPlayer> whoResponsePlayerList, IWorldSession sessionCandidate, WhoParameterCombo comboData)
         {
             inferredFilterStrategy = FilterStrategy.Name;
 
@@ -80,32 +97,32 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             switch (inferredFilterStrategy)
             {
                 case FilterStrategy.Name:
-                    FilterByName(players, sessionCandidate, comboData.SearchString, candidatePlayer.Name);
+                    FilterByName(whoResponsePlayerList, sessionCandidate, comboData.SearchString, candidatePlayer.Name);
                     break;
                 case FilterStrategy.Race:
-                    FilterByArgs(players, sessionCandidate, comboData.RaceId, candidatePlayer.Race);
+                    FilterByArgs(whoResponsePlayerList, sessionCandidate, comboData.RaceId, candidatePlayer.Race);
                     break;
                 case FilterStrategy.Class:
-                    FilterByArgs(players, sessionCandidate, comboData.ClassId, candidatePlayer.Class);
+                    FilterByArgs(whoResponsePlayerList, sessionCandidate, comboData.ClassId, candidatePlayer.Class);
                     break;
                 case FilterStrategy.Path:
-                    FilterByArgs(players, sessionCandidate, comboData.PathId, candidatePlayer.Path);
+                    FilterByArgs(whoResponsePlayerList, sessionCandidate, comboData.PathId, candidatePlayer.Path);
                     break;
                 case FilterStrategy.Zone:
-                    FilterByArgs(players, sessionCandidate, comboData.WorldZoneId, candidatePlayer.Zone.Id);
+                    FilterByArgs(whoResponsePlayerList, sessionCandidate, comboData.WorldZoneId, candidatePlayer.Zone.Id);
                     break;
             }
         }
 
-        private void FilterByArgs<T>(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate, T filterValue, T candidateValue)
+        private void FilterByArgs<T>(List<ServerWhoResponse.WhoPlayer> whoResponsePlayerList, IWorldSession sessionCandidate, T filterValue, T candidateValue)
         {
             if (EqualityComparer<T>.Default.Equals(filterValue, candidateValue))
             {
-                AddPlayerToList(players, sessionCandidate);
+                AddPlayerToList(whoResponsePlayerList, sessionCandidate);
             }
         }
 
-        private void FilterByName(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate, string filterString, string candidateName)
+        private void FilterByName(List<ServerWhoResponse.WhoPlayer> whoResponsePlayerList, IWorldSession sessionCandidate, string filterString, string candidateName)
         {
             // We want to filter in a case insensitive way
             string lowerFilterString = filterString.ToLower();
@@ -113,11 +130,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 
             if (lowerCandidateName.IndexOf(lowerFilterString) != -1)
             {
-                AddPlayerToList(players, sessionCandidate);
+                AddPlayerToList(whoResponsePlayerList, sessionCandidate);
             }
         }
 
-        private void AddPlayerToList(List<ServerWhoResponse.WhoPlayer> players, IWorldSession sessionCandidate)
+        private void AddPlayerToList(List<ServerWhoResponse.WhoPlayer> whoResponsePlayerList, IWorldSession sessionCandidate)
         {
             if (requestingSession.Id == sessionCandidate.Id && (shouldSearchesIncludeThePlayerInitiatingSearch == false))
             {
@@ -140,7 +157,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             }
 
             IPlayer sessionPlayer = sessionCandidate.Player;
-            players.Add(new()
+            whoResponsePlayerList.Add(new()
             {
                 Name = sessionPlayer.Name,
                 Level = sessionPlayer.Level,
