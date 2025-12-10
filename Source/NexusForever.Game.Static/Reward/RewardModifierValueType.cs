@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Rewards
+﻿namespace NexusForever.Game.Static.Reward
 {
     public enum RewardModifierValueType
     {

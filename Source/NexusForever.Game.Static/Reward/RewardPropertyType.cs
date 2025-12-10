@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Rewards
+﻿namespace NexusForever.Game.Static.Reward
 {
     /// <summary>
     /// Replication of the CodeEnumRewardProperty enum from the client. Gaps for missing numbers.

@@ -1,6 +1,6 @@
 ﻿using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Rewards;
+using NexusForever.Network.World.Message.Model.Reward;
 
 namespace NexusForever.Game.Abstract.Account.Reward
 {

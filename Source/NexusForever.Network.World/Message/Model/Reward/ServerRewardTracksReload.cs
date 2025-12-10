@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Rewards
+namespace NexusForever.Network.World.Message.Model.Reward
 {
     // Clears all existing RewardTrack data then loads it from this message
     // Triggers RewardTrackedLoaded event

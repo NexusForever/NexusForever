@@ -2,11 +2,10 @@
 using NexusForever.Game.Abstract.Account.Reward;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Game.Static.Rewards;
+using NexusForever.Game.Static.Reward;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Rewards;
+using NexusForever.Network.World.Message.Model.Reward;
 
 namespace NexusForever.Game.Account.Reward
 {

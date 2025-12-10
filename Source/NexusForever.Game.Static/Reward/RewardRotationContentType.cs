@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Rewards
+﻿namespace NexusForever.Game.Static.Reward
 {
     public enum RewardRotationContentType
     {
@@ -9,6 +9,6 @@
         WorldBoss     = 0x4,
         PvP           = 0x5,
         DungeonNormal = 0x6,
-        Invalid       = 0x7,
+        Invalid       = 0x7
     };
 }

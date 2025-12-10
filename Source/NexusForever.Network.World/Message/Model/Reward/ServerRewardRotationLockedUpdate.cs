@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Rewards
+namespace NexusForever.Network.World.Message.Model.Reward
 {
     // Can only update rewards already added via LockedList or LockedAdd
     [Message(GameMessageOpcode.ServerRewardRotationLockedUpdate)]

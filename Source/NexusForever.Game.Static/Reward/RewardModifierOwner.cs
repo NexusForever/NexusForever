@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Rewards
+﻿namespace NexusForever.Game.Static.Reward
 {
     public enum RewardModifierOwner
     {
@@ -12,6 +12,6 @@
         RoleEntitlement                  = 0x7,
         RewardPropertyPremiumGameFormula = 0x8,
         RewardRotation                   = 0x9,
-        PrimalMatrix                     = 0xA,
+        PrimalMatrix                     = 0xA
     };
 }

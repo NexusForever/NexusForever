@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Rewards
+namespace NexusForever.Network.World.Message.Model.Reward
 {
     [Message(GameMessageOpcode.ServerRewardTrackRemove)]
     public class ServerRewardTrackRemove : IWritable
