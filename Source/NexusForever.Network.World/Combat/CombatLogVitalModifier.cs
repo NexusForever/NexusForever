@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Combat;
+using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Network.World.Combat
 {

@@ -1,5 +1,5 @@
-﻿using NexusForever.Game.Static;
-using NexusForever.Game.Static.Combat;
+﻿using NexusForever.Game.Static.Combat;
+using NexusForever.Game.Static.Combat.CrowdControl;
 
 namespace NexusForever.Network.World.Combat
 {

@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Combat;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.Message;
 
