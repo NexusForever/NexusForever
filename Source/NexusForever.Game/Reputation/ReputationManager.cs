@@ -5,8 +5,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Reputation;
+using NexusForever.Network.World.Message.Model.Player;
 
 namespace NexusForever.Game.Reputation
 {

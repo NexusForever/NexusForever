@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Static.Player;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Entity

@@ -1,14 +1,14 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.Player;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message;
-using NexusForever.Network.World.Message.Model;
 using NexusForever.Shared.Game;
 using NLog;
+using NexusForever.Network.World.Message.Model.Player;
 
 namespace NexusForever.Game.Entity
 {
@@ -73,7 +73,7 @@ namespace NexusForever.Game.Entity
         {
             owner.Session.EnqueueMessageEncrypted(new ServerResurrectionState
             {
-                RezType = canResurrectOtherPlayer ? ResurrectionType.SpellCasterLocation : ResurrectionType.None
+                RezOptions = canResurrectOtherPlayer ? ResurrectionType.SpellCasterLocation : ResurrectionType.None
             });
         }
 
@@ -99,10 +99,10 @@ namespace NexusForever.Game.Entity
 
             owner.Session.EnqueueMessageEncrypted(new ServerResurrectionShow
             {
-                GhostId             = owner.ControlGuid ?? 0u,
+                GhostUnitId         = owner.ControlGuid ?? 0u,
                 RezCost             = GetCostForResurrection(),
-                TimeUntilRezMs      = 0u,
-                Dead                = true,
+                DeathPenaltyLength  = 0u,
+                PlayerIsDead        = true,
                 ShowRezFlags        = ResurrectionType,
                 HasCasterRezRequest = false,
                 TimeUntilForceRezMs = 0u,
@@ -241,7 +241,7 @@ namespace NexusForever.Game.Entity
             ResurrectionType |= ResurrectionType.SpellCasterLocation;
 
             // client only reads the unit id from this packet, other properties look to be legacy
-            owner.Session.EnqueueMessageEncrypted(new ServerResurrectRequest
+            owner.Session.EnqueueMessageEncrypted(new ServerCasterResurrectedPlayer
             {
                 UnitId = unitId
             });

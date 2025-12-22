@@ -26,6 +26,7 @@ using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
+using NexusForever.Game.Static.Player;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Game.Static.Quest;
@@ -45,6 +46,7 @@ using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Network.World.Message.Model.Pregame;
+using NexusForever.Network.World.Message.Model.Player;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
@@ -825,8 +827,8 @@ namespace NexusForever.Game.Entity
             {
                 Session.EnqueueMessageEncrypted(new ServerPlayerChanged
                 {
-                    Guid = entity.Guid,
-                    Unknown1 = 1
+                    UnitId = entity.Guid,
+                    Unused = 1
                 });
             }
 

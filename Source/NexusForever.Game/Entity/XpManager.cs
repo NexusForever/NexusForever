@@ -3,7 +3,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.GameTable;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Player;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Entity
@@ -137,7 +137,7 @@ namespace NexusForever.Game.Entity
             player.Session.EnqueueMessageEncrypted(new ServerExperienceGained
             {
                 TotalXpGained     = earnedXp + signatureXp + restXp,
-                RestXpAmount      = restXp,
+                RestXpAmountSpent = restXp,
                 SignatureXpAmount = signatureXp,
                 Reason            = reason
             });
@@ -169,7 +169,7 @@ namespace NexusForever.Game.Entity
             player.Session.EnqueueMessageEncrypted(new ServerExperienceGained
             {
                 TotalXpGained     = newXp - TotalXp,
-                RestXpAmount      = 0,
+                RestXpAmountSpent = 0,
                 SignatureXpAmount = 0,
                 Reason            = reason
             });

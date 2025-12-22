@@ -6,7 +6,7 @@ using NexusForever.Game.Static.Account;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Player;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Entity.Player
 {

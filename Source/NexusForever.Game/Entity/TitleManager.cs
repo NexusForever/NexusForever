@@ -7,6 +7,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Player;
 
 namespace NexusForever.Game.Entity
 {
@@ -102,8 +103,8 @@ namespace NexusForever.Game.Entity
                 {
                     player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
                     {
-                        TitleId      = titleId,
-                        Alreadyowned = true
+                        CharacterTitleId = titleId,
+                        AlreadyOwned = true
                     });
 
                     return;
@@ -116,7 +117,7 @@ namespace NexusForever.Game.Entity
             {
                 player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
                 {
-                    TitleId = titleId
+                    CharacterTitleId = titleId
                 });
             }
         }
@@ -141,7 +142,7 @@ namespace NexusForever.Game.Entity
             {
                 player.Session.EnqueueMessageEncrypted(new ServerTitleUpdate
                 {
-                    TitleId = (ushort)title.Entry.Id,
+                    CharacterTitleId = (ushort)title.Entry.Id,
                     Revoked = true
                 });
             }
@@ -158,7 +159,7 @@ namespace NexusForever.Game.Entity
             {
                 Titles = titles.Values.Select(t => new ServerTitles.Title
                 {
-                    TitleId       = (ushort)t.Entry.Id,
+                    CharacterTitleId = (ushort)t.Entry.Id,
                     Revoked       = t.Revoked,
                     TimeRemaining = (uint)(t.TimeRemaining ?? 0d)
                 }).ToList()
