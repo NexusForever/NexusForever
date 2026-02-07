@@ -14,7 +14,7 @@
         EpisodeState                = 9, // Episode requirement not met
         Gender                      = 10, // Gender requirement not met
         OtherPrerequisite           = 11, // Other requirement not met
-        DeadState                   = 12, // Player death state not correct
+        DeathState                  = 12, // Player death state not correct
         ItemEquipped                = 13, // Item equipment requirement not met
         ItemOnCharacter             = 14, // Inventory requirement not met
         /// <summary>

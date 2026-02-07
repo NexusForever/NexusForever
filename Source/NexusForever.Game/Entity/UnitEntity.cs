@@ -41,10 +41,10 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool IsAlive => Health > 0u && deathState == null;
 
-        protected EntityDeathState? DeathState
+        public EntityDeathState? DeathState
         {
             get => deathState;
-            set
+            protected set
             {
                 deathState = value;
 

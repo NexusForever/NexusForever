@@ -31,8 +31,8 @@ namespace NexusForever.Game.Abstract.Entity
         ushort OutfitInfoId { get; }
         Creature2OutfitInfoEntry CreatureOutfitEntry { get; set; }
 
-        Faction Faction1 { get; set; }
-        Faction Faction2 { get; set; }
+        Faction Faction1 { get; set; } // current primary faction
+        Faction Faction2 { get; set; } // original faction
 
         byte QuestChecklistIdx { get; }
 

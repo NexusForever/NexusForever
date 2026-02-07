@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Reputation;
 
+// TODO: This is potentially false and might be Faction2. Wait for verification from RE
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
