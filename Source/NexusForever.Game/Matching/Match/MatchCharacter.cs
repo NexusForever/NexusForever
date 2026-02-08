@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Matching.Match;
 
 namespace NexusForever.Game.Matching.Match
 {
     public class MatchCharacter : IMatchCharacter
     {
-        public ulong CharacterId { get; private set; }
+        public Identity Identity { get; private set; }
         public IMatchProposal MatchProposal { get; private set; }
         public IMatch Match { get; private set; }
 
@@ -24,14 +25,14 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Initialise <see cref="IMatchCharacter"/> with supplied character id.
         /// </summary>
-        public void Initialise(ulong characterId)
+        public void Initialise(Identity identity)
         {
-            if (CharacterId != 0)
+            if (Identity != null)
                 throw new InvalidOperationException();
 
-            CharacterId = characterId;
+            Identity = identity;
 
-            log.LogTrace($"Matching information initialised for character {characterId}.");
+            log.LogTrace($"Matching information initialised for character {identity}.");
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace NexusForever.Game.Matching.Match
 
             MatchProposal = matchProposal;
 
-            log.LogTrace($"Match proposal added for character {CharacterId}.");
+            log.LogTrace($"Match proposal added for character {Identity}.");
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace NexusForever.Game.Matching.Match
 
             MatchProposal = null;
 
-            log.LogTrace($"Match proposal removed for character {CharacterId}.");
+            log.LogTrace($"Match proposal removed for character {Identity}.");
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace NexusForever.Game.Matching.Match
 
             Match = match;
 
-            log.LogTrace($"Match added for character {CharacterId}.");
+            log.LogTrace($"Match added for character {Identity}.");
         }
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace NexusForever.Game.Matching.Match
 
             Match = null;
 
-            log.LogTrace($"Match removed for character {CharacterId}.");
+            log.LogTrace($"Match removed for character {Identity}.");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Matching.Match;
+﻿using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Network.Message;
 using NexusForever.Shared;
@@ -12,7 +13,7 @@ namespace NexusForever.Game.Matching.Match
         public bool TeamReady { get; private set; }
 
         private IMatchingQueueGroupTeam team;
-        private readonly Dictionary<ulong, IMatchProposalTeamMember> members = [];
+        private readonly Dictionary<Identity, IMatchProposalTeamMember> members = [];
 
         #region Dependency Injection
 
@@ -41,7 +42,7 @@ namespace NexusForever.Game.Matching.Match
             {
                 IMatchProposalTeamMember matchProposalTeamMember = matchProposalTeamMemberFactory.Resolve();
                 matchProposalTeamMember.Initialise(matchingQueueProposalMember);
-                members.Add(matchProposalTeamMember.MatchingQueueProposalMember.CharacterId, matchProposalTeamMember);
+                members.Add(matchProposalTeamMember.MatchingQueueProposalMember.Identity, matchProposalTeamMember);
             }
         }
 
@@ -53,9 +54,9 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Update response for character id.
         /// </summary>
-        public void Respond(ulong characterId, bool response)
+        public void Respond(Identity identity, bool response)
         {
-            if (!members.TryGetValue(characterId, out IMatchProposalTeamMember matchProposalTeamMember))
+            if (!members.TryGetValue(identity, out IMatchProposalTeamMember matchProposalTeamMember))
                 return;
 
             matchProposalTeamMember.SetResponse(response);

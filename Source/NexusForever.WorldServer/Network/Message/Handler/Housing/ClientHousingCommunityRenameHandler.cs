@@ -1,12 +1,13 @@
-﻿using NexusForever.Game.Abstract;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Map.Instance;
-using NexusForever.Game.Abstract.Text.Filter;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.TextFilter;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Text.Filter;
+using NexusForever.GameTable.Text.Static;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
@@ -88,11 +89,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             session.EnqueueMessageEncrypted(new ServerHousingCommunityRename
             {
                 Result      = HousingResult.Success,
-                TargetGuild = new TargetGuild
-                {
-                    RealmId = realmContext.RealmId,
-                    GuildId = community.Id
-                }
+                TargetGuild = community.Identity.ToNetworkIdentity()
             });
         }
     }

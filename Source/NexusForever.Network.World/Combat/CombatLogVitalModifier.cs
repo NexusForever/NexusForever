@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Combat;
+using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Network.World.Combat
 {
@@ -7,7 +8,7 @@ namespace NexusForever.Network.World.Combat
         public CombatLogType Type => CombatLogType.VitalModifier;
 
         public float Amount { get; set; }
-        public uint VitalModified { get; set; } // 5u - TODO: Replace with Vital enum
+        public Vital VitalModified { get; set; }
         public bool BShowCombatLog { get; set; }
         public CombatLogCastData CastData { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
-    public enum Race
+    public enum Race : byte
     {
         None    = 0,
         Human   = 1,

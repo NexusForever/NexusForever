@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Loot
+namespace NexusForever.Network.World.Message.Model.Loot
 {
     [Message(GameMessageOpcode.ClientLootItem)]
     public class ClientLootItem : IReadable

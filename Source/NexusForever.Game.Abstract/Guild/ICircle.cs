@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Abstract.Guild
 {
-    public interface ICircle : IGuildChat
+    public interface ICircle : IGuildBase
     {
     }
 }

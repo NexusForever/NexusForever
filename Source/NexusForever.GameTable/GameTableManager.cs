@@ -1,8 +1,11 @@
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.Extensions.Options;
 using NexusForever.Game.Static;
+using NexusForever.GameTable.Configuration.Model;
 using NexusForever.GameTable.Model;
 using NexusForever.Shared;
+using NexusForever.Shared.Configuration;
 using NLog;
 
 namespace NexusForever.GameTable
@@ -78,7 +81,10 @@ namespace NexusForever.GameTable
         public GameTable<CharacterTitleEntry> CharacterTitle { get; private set; }
 
         public GameTable<CharacterTitleCategoryEntry> CharacterTitleCategory { get; private set; }
+
+        [GameData]
         public GameTable<ChatChannelEntry> ChatChannel { get; private set; }
+
         public GameTable<CinematicEntry> Cinematic { get; private set; }
         public GameTable<CinematicRaceEntry> CinematicRace { get; private set; }
         public GameTable<CityDirectionEntry> CityDirection { get; private set; }
@@ -702,15 +708,77 @@ namespace NexusForever.GameTable
         [GameData("de-DE.bin")]
         public TextTable TextGerman { get; private set; }
 
-        public void Initialise()
+        #region Dependency Injection
+
+        private readonly GameTableConfig configuration;
+
+        public GameTableManager(
+            IOptions<GameTableConfig> configuration)
+        {
+            this.configuration = configuration.Value;
+        }
+
+        #endregion
+
+        public async Task Initialise()
+        {
+            var properties = new List<PropertyInfo>();
+            // It's done this way so we load the text first, because it's huge.
+            foreach (PropertyInfo property in typeof(GameTableManager).GetProperties())
+            {
+                GameDataAttribute attribute = property.GetCustomAttribute<GameDataAttribute>();
+                if (attribute == null)
+                    continue;
+                if (property.PropertyType == typeof(TextTable))
+                    properties.Insert(0, property);
+                else
+                    properties.Add(property);
+            }
+
+            await Initialise(properties);
+        }
+
+        public async Task Initialise(GameTableLoader loader)
+        {
+            var properties = new List<PropertyInfo>();
+
+            foreach (Language language in loader.GetTextTables())
+            {
+                var property = language switch
+                {
+                    Game.Static.Language.English => nameof(TextEnglish),
+                    Game.Static.Language.French  => nameof(TextFrench),
+                    Game.Static.Language.German  => nameof(TextGerman),
+                    _ => null
+                };
+
+                if (property != null)
+                    properties.Add(typeof(GameTableManager).GetProperty(property));
+            }
+
+            foreach (PropertyInfo property in typeof(GameTableManager).GetProperties())
+            {
+                foreach (Type type in loader.GetGameTables())
+                {
+                    if (property.PropertyType.IsGenericType
+                        && property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>)
+                        && property.PropertyType.GetGenericArguments().Single() == type)
+                        properties.Add(property);
+                }
+            }
+
+            if (properties.Count != 0)
+                await Initialise(properties);
+        }
+
+        private async Task Initialise(IEnumerable<PropertyInfo> properties)
         {
             log.Info("Loading GameTables...");
 
             Stopwatch sw = Stopwatch.StartNew();
             try
             {
-                LoadGameTablesAsync().GetAwaiter().GetResult();
-                Debug.Assert(WorldLocation2 != null);
+                await LoadGameTablesAsync(properties);
             }
             catch (Exception exception)
             {
@@ -721,7 +789,7 @@ namespace NexusForever.GameTable
             log.Info($"Loaded GameTables in {sw.ElapsedMilliseconds}ms.");
         }
 
-        private async Task LoadGameTablesAsync()
+        private async Task LoadGameTablesAsync(IEnumerable<PropertyInfo> properties)
         {
             var exceptions = new List<Exception>();
             int loadCount = Environment.ProcessorCount * 2;
@@ -770,19 +838,6 @@ namespace NexusForever.GameTable
                 return fileName;
             }
 
-            var properties = new List<PropertyInfo>();
-            // It's done this way so we load the text first, because it's huge.
-            foreach (PropertyInfo property in typeof(GameTableManager).GetProperties())
-            {
-                GameDataAttribute attribute = property.GetCustomAttribute<GameDataAttribute>();
-                if (attribute == null)
-                    continue;
-                if (property.PropertyType == typeof(TextTable))
-                    properties.Insert(0, property);
-                else
-                    properties.Add(property);
-            }
-
             foreach (PropertyInfo property in properties)
             {
                 string fileName = GetFilename(property);
@@ -829,22 +884,25 @@ namespace NexusForever.GameTable
                     throw new InvalidOperationException($"Failed to load game data table {Path.GetFileName(fileName)}");
             }
 
+            string filePath = Path.Combine(configuration.GameTablePath, fileName);
+
             if (property.PropertyType.IsGenericType &&
                 property.PropertyType.GetGenericTypeDefinition() == typeof(GameTable<>))
                 return Task.Factory.StartNew(() =>
-                        GameTableFactory.LoadGameTable(property.PropertyType.GetGenericArguments().Single(), fileName))
+                        GameTableFactory.LoadGameTable(property.PropertyType.GetGenericArguments().Single(), filePath))
                     .ContinueWith(SetPropertyOnCompletion)
                     .Unwrap()
                     .ContinueWith(VerifyPropertySetOnCompletion)
                     .Unwrap();
 
             if (property.PropertyType == typeof(TextTable))
-                return Task.Factory.StartNew<object>(() => GameTableFactory.LoadTextTable(fileName))
+                return Task.Factory.StartNew<object>(() => GameTableFactory.LoadTextTable(filePath))
                     .ContinueWith(SetPropertyOnCompletion)
                     .Unwrap();
 
             throw new GameTableException($"Unknown game table type {property.PropertyType}");
         }
+
 
         /// <summary>
         /// Return the <see cref="TextTable"/> for the specified <see cref="Game.Static.Language"/>.

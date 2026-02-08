@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Matching;
 using NexusForever.Network.Message;
@@ -7,7 +8,7 @@ namespace NexusForever.Game.Matching.Queue
 {
     public class MatchingRoleCheckMember : IMatchingRoleCheckMember
     {
-        public ulong CharacterId { get; private set; }
+        public Identity Identity { get; private set; }
         public Role? Roles { get; private set; }
 
         #region Dependency Injection
@@ -28,12 +29,12 @@ namespace NexusForever.Game.Matching.Queue
         /// <summary>
         /// Initialise <see cref="IMatchingRoleCheckMember"/> with supplied character id.
         /// </summary>
-        public void Initialise(ulong characterId)
+        public void Initialise(Identity identity)
         {
-            if (CharacterId != 0)
+            if (Identity != null)
                 throw new InvalidOperationException();
 
-            CharacterId = characterId;
+            Identity = identity;
         }
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace NexusForever.Game.Matching.Queue
 
             Roles = roles;
 
-            log.LogTrace($"MatchingRoleCheckMember: {CharacterId} has responded with {Roles}.");
+            log.LogTrace($"MatchingRoleCheckMember: {Identity} has responded with {Roles}.");
         }
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace NexusForever.Game.Matching.Queue
         /// </summary>
         public void Send(IWritable message)
         {
-            IPlayer player = playerManager.GetPlayer(CharacterId);
+            IPlayer player = playerManager.GetPlayer(Identity);
             player?.Session.EnqueueMessageEncrypted(message);
         }
     }

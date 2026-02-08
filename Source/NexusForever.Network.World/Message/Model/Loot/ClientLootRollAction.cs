@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Loot;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Loot
+namespace NexusForever.Network.World.Message.Model.Loot
 {
     [Message(GameMessageOpcode.ClientLootRollAction)]
     public class ClientLootRollAction : IReadable

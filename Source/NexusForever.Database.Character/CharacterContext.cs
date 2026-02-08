@@ -53,6 +53,11 @@ namespace NexusForever.Database.Character
             this.config = config;
         }
 
+        public CharacterContext(DbContextOptions<CharacterContext> options)
+            : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -129,6 +134,9 @@ namespace NexusForever.Database.Character
                     .HasColumnName("inputKeySet")
                     .HasColumnType("tinyint(4)")
                     .HasDefaultValue(0);
+
+                entity.Property(e => e.IsOnline)
+                    .HasColumnName("isOnline");
 
                 entity.Property(e => e.LastOnline)
                     .HasColumnName("lastOnline")

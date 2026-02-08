@@ -3,6 +3,7 @@
     public interface IRealmContext
     {
         ushort RealmId { get; }
+        string RealmName { get; }
         string Motd { get; set; }
 
         void Initialise();

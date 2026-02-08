@@ -1,20 +1,22 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Static.Matching;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Game.Abstract.Matching.Match
 {
     public interface IMatchTeamMember
     {
-        ulong CharacterId { get; }
+        Identity Identity { get; }
         bool InMatch { get; }
+        Role Roles { get; }
         IMapPosition ReturnPosition { get; }
         Vector3 ReturnRotation { get; }
 
         /// <summary>
         /// Initialise new <see cref="IMatchTeamMember"/> with supplied character id.
         /// </summary>
-        void Initialise(ulong characterId);
+        void Initialise(Identity identity, Role roles);
 
         /// <summary>
         /// Invoked when member enters the match.

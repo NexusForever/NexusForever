@@ -1,7 +1,7 @@
 using System.Numerics;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Entity.Movement;
-using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
@@ -44,6 +44,7 @@ namespace NexusForever.Game.Abstract.Entity
         uint Shield { get; set; }
         uint MaxShieldCapacity { get; set; }
         uint Level { get; set; }
+        uint InterruptArmor { get; set; }
         bool Sheathed { get; set; }
 
         StandState StandState { get; set; }

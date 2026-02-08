@@ -129,6 +129,14 @@ namespace NexusForever.Network
             return ReadBits(bits);
         }
 
+        public long ReadLong(uint bits = 64u)
+        {
+            if (bits > sizeof(long) * 8)
+                throw new ArgumentException();
+
+            return (long)ReadBits(bits);
+        }
+
         public T ReadEnum<T>(uint bits = 64u) where T : Enum
         {
             if (bits > sizeof(ulong) * 8)
@@ -160,6 +168,15 @@ namespace NexusForever.Network
 
             byte[] data = ReadBytes(length);
             return Encoding.Unicode.GetString(data);
+        }
+
+        public string ReadString()
+        {
+            bool extended = ReadBit();
+            ushort length = ReadUShort(extended ? 15u : 7u);
+
+            byte[] data = ReadBytes(length);
+            return Encoding.ASCII.GetString(data);
         }
 
         public float ReadPackedFloat()

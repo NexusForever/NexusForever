@@ -48,11 +48,11 @@ namespace NexusForever.Game.Matching.Queue
 
             foreach (IMatchingQueueProposalMember matachingQueueProposalMember in members)
             {
-                IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(matachingQueueProposalMember.CharacterId);
+                IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(matachingQueueProposalMember.Identity);
                 if (matchCharacter.Match != null)
                     return MatchingQueueResult.InGame;
 
-                IMatchingCharacter matchingCharacter = matchingManager.GetMatchingCharacter(matachingQueueProposalMember.CharacterId);
+                IMatchingCharacter matchingCharacter = matchingManager.GetMatchingCharacter(matachingQueueProposalMember.Identity);
                 if (matchingCharacter.GetMatchingCharacterQueue(matchingQueueProposal.MatchType) != null)
                     return MatchingQueueResult.InQueue;
 
@@ -62,7 +62,7 @@ namespace NexusForever.Game.Matching.Queue
             }
 
             List<IPlayer> players = members
-                .Select(c => playerManager.GetPlayer(c.CharacterId))
+                .Select(c => playerManager.GetPlayer(c.Identity))
                 .ToList();
 
             foreach (IPlayer player in players)

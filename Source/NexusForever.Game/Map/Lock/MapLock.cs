@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Static.Map.Lock;
 
@@ -10,7 +11,7 @@ namespace NexusForever.Game.Map.Lock
         public MapLockType Type { get; private set; }
         public uint WorldId { get; private set; }
 
-        private readonly List<ulong> characters = [];
+        private readonly HashSet<Identity> characters = [];
 
         #region Dependency Injection
 
@@ -42,19 +43,19 @@ namespace NexusForever.Game.Map.Lock
         /// <summary>
         /// Add a character to the map lock.
         /// </summary>
-        public void AddCharacer(ulong characterId)
+        public void AddCharacer(Identity identity)
         {
-            characters.Add(characterId);
-            log.LogTrace($"Added character {characterId} to map lock {InstanceId}");
+            characters.Add(identity);
+            log.LogTrace($"Added character {identity} to map lock {InstanceId}");
         }
 
         /// <summary>
         /// Remove a character from the map lock.
         /// </summary>
-        public void RemoveCharacter(ulong characterId)
+        public void RemoveCharacter(Identity identity)
         {
-            characters.Remove(characterId);
-            log.LogTrace($"Removed character {characterId} from map lock {InstanceId}");
+            characters.Remove(identity);
+            log.LogTrace($"Removed character {identity} from map lock {InstanceId}");
         }
     }
 }

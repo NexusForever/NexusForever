@@ -21,11 +21,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Matching
 
         public void HandleMessage(IWorldSession session, ClientMatchingMatchLeave _)
         {
-            IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(session.Player.CharacterId);
+            IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(session.Player.Identity);
 
             // deliberately check match null twice as it is possible for MatchLeave to be called from MatchExit which will nullify the match
             matchCharacter.Match?.MatchExit(session.Player, true);
-            matchCharacter.Match?.MatchLeave(session.Player.CharacterId);
+            matchCharacter.Match?.MatchLeave(session.Player.Identity);
         }
     }
 }

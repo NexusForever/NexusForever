@@ -25,12 +25,18 @@ namespace NexusForever.Database.World
         public DbSet<StoreOfferItemDataModel> StoreOfferItemData { get; set; }
         public DbSet<StoreOfferItemPriceModel> StoreOfferItemPrice { get; set; }
         public DbSet<TutorialModel> Tutorial { get; set; }
+        public DbSet<VersionModel> Version { get; set; }
 
         private readonly IConnectionString config;
 
         public WorldContext(IConnectionString config)
         {
             this.config = config;
+        }
+
+        public WorldContext(DbContextOptions<WorldContext> options)
+            : base(options)
+        {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -694,6 +700,25 @@ namespace NexusForever.Database.World
                     .HasColumnName("note")
                     .HasColumnType("varchar(50)")
                     .HasDefaultValue("");
+            });
+
+            modelBuilder.Entity<VersionModel>(entity =>
+            {
+                entity.ToTable("version");
+
+                entity.HasKey(e => new { e.FileName, e.FileHash })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.FileName)
+                    .HasColumnName("fileName")
+                    .IsRequired();
+
+                entity.Property(e => e.FileHash)
+                    .HasColumnName("fileHash")
+                    .IsRequired();
+
+                entity.Property(e => e.AppliedOn)
+                    .HasColumnName("appliedOn");
             });
         }
     }

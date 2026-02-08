@@ -9,7 +9,8 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public bool Busy { get; set; }
         public uint ElapsedTimeMs { get; set; }
         public uint NotificationMode { get; set; }
-        public List<uint> Locations { get; set; } = [];
+        public List<uint> Locations { get; set; } = []; // array of worldLocation2Id
+        public List<MapRegion> MapRegions { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
@@ -19,11 +20,11 @@ namespace NexusForever.Network.World.Message.Model.Shared
             writer.Write(ElapsedTimeMs);
             writer.Write(NotificationMode);
 
-            writer.Write((uint)Locations.Count);
-            foreach (uint location in Locations)
-                writer.Write(location);
+            writer.Write(Locations.Count);
+            Locations.ForEach(location => writer.Write(location));
 
-            writer.Write(0); // some counter
+            writer.Write(MapRegions.Count);
+            MapRegions.ForEach(region => region.Write(writer));
         }
     }
 }

@@ -23,7 +23,7 @@ namespace NexusForever.Game.Entity
                     info.RemoveItem(buybackItem.UniqueId);
 
                     IPlayer player = PlayerManager.Instance.GetPlayer(characterId);
-                    player.Session?.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
+                    player?.Session?.EnqueueMessageEncrypted(new ServerBuybackItemRemoved
                     {
                         UniqueId = buybackItem.UniqueId
                     });

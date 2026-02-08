@@ -45,7 +45,7 @@ namespace NexusForever.Game.Entity
             player.Session.EnqueueMessageEncrypted(new ServerLogoutUpdate
             {
                 TimeTillLogout     = (uint)timeToLogout * 1000,
-                Unknown0           = false,
+                CancelCamp           = false,
                 SignatureBonusData = new ServerLogoutUpdate.SignatureBonuses
                 {
                     // see FillSignatureBonuses in ExitWindow.lua for more information

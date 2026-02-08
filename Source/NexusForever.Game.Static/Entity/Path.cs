@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
-    public enum Path
+    public enum Path : byte
     {
         Soldier,
         Settler,

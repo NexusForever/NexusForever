@@ -29,7 +29,7 @@ namespace NexusForever.Game.Map.Instance
 
         protected override IMapLock GetMapLock(IPlayer player)
         {
-            IMatch match = matchManager.GetMatchCharacter(player.CharacterId).Match;
+            IMatch match = matchManager.GetMatchCharacter(player.Identity).Match;
             if (match != null)
             {
                 IMapLock matchMapLock = mapLockManager.GetMatchLock(match.Guid, Entry.Id);
@@ -38,8 +38,8 @@ namespace NexusForever.Game.Map.Instance
 
             // TODO: check group lock
 
-            IMapLock soloMapLock = mapLockManager.GetSoloLock(player.CharacterId, Entry.Id);
-            return soloMapLock ?? mapLockManager.CreateSoloLock(player.CharacterId, Entry.Id);
+            IMapLock soloMapLock = mapLockManager.GetSoloLock(player.Identity, Entry.Id);
+            return soloMapLock ?? mapLockManager.CreateSoloLock(player.Identity, Entry.Id);
         }
 
         protected override T CreateInstance(IPlayer player, IMapLock mapLock)
@@ -51,7 +51,7 @@ namespace NexusForever.Game.Map.Instance
             // this could occur if a player or party enters a map via the instance portal
             if (mapLock.Type == MapLockType.Match)
             {
-                IMatch match = matchManager.GetMatchCharacter(player.CharacterId).Match;
+                IMatch match = matchManager.GetMatchCharacter(player.Identity).Match;
                 if (match != null)
                     instance.SetMatch(match);
             }

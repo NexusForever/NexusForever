@@ -7,13 +7,13 @@ namespace NexusForever.Game.Abstract.Matching.Queue
     {
         IMatchingQueueProposal MatchingQueueProposal { get; }
 
-        ulong CharacterId { get; }
+        Identity Identity { get; }
         Role Roles { get; }
 
         /// <summary>
         /// Initialise <see cref="IMatchingQueueProposalMember"/>.
         /// </summary>
-        void Initialise(IMatchingQueueProposal matchingQueueProposal, ulong characterId, Role roles);
+        void Initialise(IMatchingQueueProposal matchingQueueProposal, Identity identity, Role roles);
 
         /// <summary>
         /// Send <see cref="IWritable"/> to member.

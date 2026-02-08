@@ -27,6 +27,8 @@ namespace NexusForever.Game.Abstract.Entity
 
         float? RangeCheck { get; }
 
+        Task<T> SynchroniseAsync<T>(Func<T> func);
+
         /// <summary>
         /// Invoke <see cref="Action{T}"/> against <see cref="IGridEntity"/> script collection.
         /// </summary>
@@ -91,6 +93,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Return visible <see cref="IWorldEntity"/> by supplied creature id.
         /// </summary>
         IEnumerable<T> GetVisibleCreature<T>(uint creatureId) where T : IWorldEntity;
+
+        /// <summary>
+        /// Return visible <see cref="IPlayer"/> by supplied identity.
+        /// </summary>
+        IPlayer GetVisiblePlayer(Identity identity);
 
         /// <summary>
         /// Set range check for <see cref="IGridEntity"/>.

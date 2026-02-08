@@ -1,17 +1,18 @@
-﻿using NexusForever.Game.Static.Matching;
+﻿using NexusForever.Game.Abstract;
+using NexusForever.Game.Static.Matching;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Game.Matching.Queue
 {
     public interface IMatchingRoleCheckMember
     {
-        ulong CharacterId { get; }
+        Identity Identity { get; }
         Role? Roles { get; }
 
         /// <summary>
         /// Initialise <see cref="IMatchingRoleCheckMember"/> with supplied character id.
         /// </summary>
-        void Initialise(ulong characterId);
+        void Initialise(Identity identity);
 
         /// <summary>
         /// Set <see cref="Role"/> for member.

@@ -2,11 +2,12 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Abilities;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NLog;
@@ -134,7 +135,7 @@ namespace NexusForever.Game.Spell
             if (actions.TryGetValue(location, out IActionSetShortcut shortcut) && !shortcut.PendingDelete)
                 throw new InvalidOperationException($"Failed to add shortcut {type} {objectId} to {location}, location is occupied!");
 
-            if (type == ShortcutType.Spell)
+            if (type == ShortcutType.SpellbookItem)
             {
                 checked
                 {
@@ -164,7 +165,7 @@ namespace NexusForever.Game.Spell
         {
             var shortcut = new ActionSetShortcut(this, model);
 
-            if (shortcut.ShortcutType == ShortcutType.Spell)
+            if (shortcut.ShortcutType == ShortcutType.SpellbookItem)
             {
                 checked
                 {
@@ -176,11 +177,11 @@ namespace NexusForever.Game.Spell
         }
 
         /// <summary>
-        /// Update a <see cref="ShortcutType.Spell"/> shortcut with supplied tier.
+        /// Update a <see cref="ShortcutType.SpellbookItem"/> shortcut with supplied tier.
         /// </summary>
         public void UpdateSpellShortcut(uint spell4BaseId, byte tier)
         {
-            IActionSetShortcut shortcut = GetShortcut(ShortcutType.Spell, spell4BaseId);
+            IActionSetShortcut shortcut = GetShortcut(ShortcutType.SpellbookItem, spell4BaseId);
             if (shortcut == null)
                 throw new ArgumentException();
 
@@ -203,7 +204,7 @@ namespace NexusForever.Game.Spell
             if (shortcut == null)
                 throw new ArgumentException($"Failed to remove shortcut from {location}, location isn't occupied!");
 
-            if (shortcut.ShortcutType == ShortcutType.Spell)
+            if (shortcut.ShortcutType == ShortcutType.SpellbookItem)
             {
                 checked
                 {
@@ -338,9 +339,9 @@ namespace NexusForever.Game.Spell
         {
             var serverActionSet = new ServerActionSet
             {
-                Index    = Index,
-                Unknown3 = 1,
-                Result   = LimitedActionSetResult.Ok
+                SpecIndex   = Index,
+                Unlocked    = 1,
+                Result      = LimitedActionSetResult.Ok
             };
 
             for (UILocation i = 0; i < (UILocation)MaxActionCount; i++)

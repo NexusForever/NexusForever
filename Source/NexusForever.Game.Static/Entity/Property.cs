@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
-    public enum Property
+    public enum Property : byte
     {
         Strength                                    = 0,
         Dexterity                                   = 1,

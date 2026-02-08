@@ -4,7 +4,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Guild;
-using NetworkGuildRank = NexusForever.Network.World.Message.Model.Shared.GuildRank;
+using NetworkGuildRank = NexusForever.Network.World.Message.Model.Guild.GuildRank;
 
 namespace NexusForever.Game.Guild
 {

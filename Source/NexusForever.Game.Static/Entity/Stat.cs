@@ -1,6 +1,6 @@
 ﻿namespace NexusForever.Game.Static.Entity
 {
-    public enum Stat
+    public enum Stat : byte
     {
         [Stat(StatType.Integer, false)]
         Health              = 0,

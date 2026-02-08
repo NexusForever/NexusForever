@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Model.Loot
+namespace NexusForever.Network.World.Message.Model.Loot
 {
     [Message(GameMessageOpcode.ServerLootNotify)]
     public class ServerLootNotify : IWritable

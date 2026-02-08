@@ -20,8 +20,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Matching
 
         public void HandleMessage(IWorldSession session, ClientMatchingTransferIntoMatch _)
         {
-            IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(session.Player.CharacterId);
-            matchCharacter.Match?.MatchTeleport(matchCharacter.CharacterId);
+            IMatchCharacter matchCharacter = matchManager.GetMatchCharacter(session.Player.Identity);
+            matchCharacter.Match?.MatchTeleport(matchCharacter.Identity);
         }
     }
 }

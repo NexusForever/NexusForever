@@ -2,7 +2,7 @@
 
 namespace NexusForever.Game.Abstract.Guild
 {
-    public interface ICommunity : IGuildChat
+    public interface ICommunity : IGuildBase
     {
         IResidence Residence { get; set; }
 

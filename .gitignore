@@ -59,6 +59,8 @@ project.fragment.lock.json
 artifacts/
 **/Properties/launchSettings.json
 
+!Source/NexusForever.Aspire.AppHost/Properties/launchSettings.json
+
 # StyleCop
 StyleCopReport.xml
 

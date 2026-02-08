@@ -3,7 +3,7 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Game.Abstract.Achievement
 {
-    public interface IAchievement : IDatabaseCharacter, INetworkBuildable<Network.World.Message.Model.Shared.Achievement>
+    public interface IAchievement : IDatabaseCharacter, INetworkBuildable<Network.World.Message.Model.Achievement.Achievement>
     {
         IAchievementInfo Info { get; }
         ushort Id { get; }
