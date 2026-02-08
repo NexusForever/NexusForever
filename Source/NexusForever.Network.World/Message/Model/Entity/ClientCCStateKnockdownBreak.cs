@@ -4,8 +4,8 @@ using NexusForever.Network.Message;
 namespace NexusForever.Network.World.Message.Model.Entity
 {
     // Only sent when the player is knocked down and dashes to break out of it.
-    [Message(GameMessageOpcode.ClientKnockdownDashBreak)]
-    public class ClientKnockdownDashBreak : IReadable
+    [Message(GameMessageOpcode.ClientCCStateKnockdownBreak)]
+    public class ClientCCStateKnockdownBreak : IReadable
     {
         public DashDirection Direction { get; private set; }
 

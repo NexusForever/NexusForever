@@ -2,9 +2,9 @@
 {
     public enum DashDirection
     {
-        Forward = 0x1,
-        Back = 0x2,
-        Left = 0x3,
-        Right = 0x4,
+        Forward = 1,
+        Back    = 2,
+        Left    = 3,
+        Right   = 4
     }
 }
