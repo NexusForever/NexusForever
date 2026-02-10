@@ -10,18 +10,21 @@ using NexusForever.Shared;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.PositionalRequirement)]
-    public class PrerequisiteCheckPositionalRequirement : IPrerequisiteCheck
+    public class PrerequisiteCheckPositionalRequirement : BasePrerequisiteHandler, IPrerequisiteCheck
     {
-        private readonly ILogger<PrerequisiteCheckPositionalRequirement> log;
+        #region Dependency Injection
+
         private readonly IGameTableManager gameTableManager;
 
         public PrerequisiteCheckPositionalRequirement(
-            ILogger<PrerequisiteCheckPositionalRequirement> log,
+            ILogger<BasePrerequisiteHandler> log,
             IGameTableManager gameTableManager)
+            : base(log)
         {
-            this.log              = log;
             this.gameTableManager = gameTableManager;
         }
+
+        #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
@@ -51,16 +54,7 @@ namespace NexusForever.Game.Prerequisite.Check
             float maxBounds = entry.AngleCenter + entry.AngleRange / 2f;
             bool isAllowed = angle >= minBounds && angle <= maxBounds;
 
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return isAllowed;
-                case PrerequisiteComparison.NotEqual:
-                    return !isAllowed;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.PositionalRequirement}!");
-                    return false;
-            }
+            return MatchBoolean(isAllowed, comparison, PrerequisiteType.PositionalRequirement);
         }
     }
 }

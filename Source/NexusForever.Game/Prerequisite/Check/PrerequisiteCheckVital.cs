@@ -7,40 +7,22 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.Vital)]
-    public class PrerequisiteCheckVital : IPrerequisiteCheck
+    public class PrerequisiteCheckVital : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckVital> log;
-
         public PrerequisiteCheckVital(
-            ILogger<PrerequisiteCheckVital> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return player.GetVitalValue((Vital)objectId) == value;
-                case PrerequisiteComparison.NotEqual:
-                    return player.GetVitalValue((Vital)objectId) != value;
-                case PrerequisiteComparison.GreaterThanOrEqual:
-                    return player.GetVitalValue((Vital)objectId) >= value;
-                case PrerequisiteComparison.GreaterThan:
-                    return player.GetVitalValue((Vital)objectId) > value;
-                case PrerequisiteComparison.LessThanOrEqual:
-                    return player.GetVitalValue((Vital)objectId) <= value;
-                case PrerequisiteComparison.LessThan:
-                    return player.GetVitalValue((Vital)objectId) < value;
-                default:
-                    log.LogWarning($"Unhandled {comparison} for {PrerequisiteType.Vital}!");
-                    return false;
-            }
+            float vitalValue = player.GetVitalValue((Vital)objectId);
+            return MatchCompareable(vitalValue, value, comparison, PrerequisiteType.Vital);
         }
     }
 }

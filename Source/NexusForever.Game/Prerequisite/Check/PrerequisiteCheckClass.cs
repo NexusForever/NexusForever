@@ -7,32 +7,21 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.Class)]
-    public class PrerequisiteCheckClass : IPrerequisiteCheck
+    public class PrerequisiteCheckClass : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckClass> log;
-
         public PrerequisiteCheckClass(
-            ILogger<PrerequisiteCheckClass> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return player.Class == (Class)value;
-                case PrerequisiteComparison.NotEqual:
-                    return player.Class != (Class)value;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Class}!");
-                    return true;
-            }
+            return MatchEnum(player.Class, (Class)value, comparison, PrerequisiteType.Class);
         }
     }
 }

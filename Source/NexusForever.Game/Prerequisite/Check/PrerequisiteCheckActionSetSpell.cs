@@ -8,16 +8,14 @@ using NexusForever.Game.Static.Spell;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.ActionSetSpell)]
-    public class PrerequisiteCheckActionSetSpell : IPrerequisiteCheck
+    public class PrerequisiteCheckActionSetSpell : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckActionSetSpell> log;
-
         public PrerequisiteCheckActionSetSpell(
-            ILogger<PrerequisiteCheckActionSetSpell> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
@@ -29,17 +27,9 @@ namespace NexusForever.Game.Prerequisite.Check
                 return false;
 
             IActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.SpellbookItem, objectId);
+            bool hasShortcut = shortcut != null;
 
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return shortcut != null;
-                case PrerequisiteComparison.NotEqual:
-                    return shortcut == null;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.ActionSetSpell}!");
-                    return false;
-            }
+            return MatchBoolean(hasShortcut, comparison, PrerequisiteType.ActionSetSpell);
         }
     }
 }

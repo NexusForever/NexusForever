@@ -6,32 +6,22 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.AchievementState)]
-    public class PrerequisiteCheckAchievementState : IPrerequisiteCheck
+    public class PrerequisiteCheckAchievementState : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckAchievementState> log;
-
         public PrerequisiteCheckAchievementState(
-            ILogger<PrerequisiteCheckAchievementState> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.NotEqual:
-                    return !player.AchievementManager.HasCompletedAchievement((ushort)objectId);
-                case PrerequisiteComparison.Equal:
-                    return player.AchievementManager.HasCompletedAchievement((ushort)objectId);
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.AchievementState}!");
-                    return false;
-            }
+            bool hasCompletedAchievement = player.AchievementManager.HasCompletedAchievement((ushort)objectId);
+            return MatchBoolean(hasCompletedAchievement, comparison, PrerequisiteType.AchievementState);
         }
     }
 }

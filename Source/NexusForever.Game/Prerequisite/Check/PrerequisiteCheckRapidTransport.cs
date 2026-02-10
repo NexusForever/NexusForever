@@ -28,7 +28,7 @@ namespace NexusForever.Game.Prerequisite.Check
         }
 
         #endregion
-
+        // This handler can not be refactored to use the generic comparison logic of BasePrerequisiteHandler
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             if (!CanAffordRapidTransport(player, parameters))

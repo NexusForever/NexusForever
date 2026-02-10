@@ -3,40 +3,50 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Prerequisite;
-using System.Xml;
 
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.DeathState)]
-    public class PrerequisiteCheckDeathState : IPrerequisiteCheck
+    public class PrerequisiteCheckDeathState : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
-        private readonly ILogger<PrerequisiteCheckDeathState> log;
+
         public PrerequisiteCheckDeathState(
-            ILogger<PrerequisiteCheckDeathState> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
+
         #endregion
+
         /// <summary>
         /// Determines whether the specified player meets a death state prerequisite based on the provided comparison and value.
         /// </summary>
         /// <remarks>
-        /// <paramref name="value">The death state value to compare against the player's current death state. Must correspond to a valid DeathState enumeration value.</param>
+        /// <paramref name="value">The death state value to compare against the player's current death state. Must correspond to a valid DeathState enumeration value.
         /// <paramref name="objectId"/> and <paramref name="parameters"/> are not used for this prerequisite check. 
         /// </remarks>
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
+
+            EntityDeathState? deathState = player.DeathState; // snapshot otherwise the value could change during the check
+
+            if (deathState == null)
             {
-                case PrerequisiteComparison.Equal:
-                    return !player.IsAlive &&  player.DeathState == (EntityDeathState)value;
-                case PrerequisiteComparison.NotEqual:
-                    return player.IsAlive || player.DeathState != (EntityDeathState)value;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.DeathState}!");
-                    return false;
+                return comparison switch
+                {
+                    PrerequisiteComparison.Equal => false,              // null can not be equal to any valid value
+                    PrerequisiteComparison.NotEqual => true,            // null will always be not equal to any valid value
+                    PrerequisiteComparison.GreaterThan => false,        // null cannot be > a value
+                    PrerequisiteComparison.GreaterThanOrEqual => false, // null cannot be >= a value
+                    PrerequisiteComparison.LessThan => false,           // null cannot be < a value
+                    PrerequisiteComparison.LessThanOrEqual => false,    // null cannot be <= a value
+                    _ => throw new InvalidOperationException($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.DeathState}!")
+                };
             }
+
+            // player does have a deathState
+            return MatchEnum(deathState.Value, (EntityDeathState) value, comparison, PrerequisiteType.DeathState);
         }
     }
 }

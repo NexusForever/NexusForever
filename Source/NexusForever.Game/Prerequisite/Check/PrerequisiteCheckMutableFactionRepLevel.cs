@@ -7,15 +7,16 @@ using NexusForever.Game.Static.Reputation;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.Reputation)]
-    public class PrerequisiteCheckMutableFactionReputationLevel : IPrerequisiteCheck
+    public class PrerequisiteCheckMutableFactionReputationLevel : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
-        private readonly ILogger<PrerequisiteCheckMutableFaction> log;
+
         public PrerequisiteCheckMutableFactionReputationLevel(
-            ILogger<PrerequisiteCheckMutableFaction> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
+
         #endregion
 
         /// <summary>
@@ -29,25 +30,7 @@ namespace NexusForever.Game.Prerequisite.Check
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             Disposition playerReputation = player.GetDispositionTo(player.Faction1);
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return playerReputation == (Disposition) value;
-                case PrerequisiteComparison.NotEqual:
-                    return playerReputation != (Disposition) value;
-                case PrerequisiteComparison.GreaterThanOrEqual:
-                    return playerReputation >= (Disposition) value;
-                case PrerequisiteComparison.GreaterThan:
-                    return playerReputation >  (Disposition) value;
-                case PrerequisiteComparison.LessThanOrEqual:
-                    return playerReputation <= (Disposition) value;
-                case PrerequisiteComparison.LessThan:
-                    return playerReputation <  (Disposition) value;
-
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Reputation}!");
-                    return false;
-            }
+            return MatchEnum(playerReputation, (Disposition)value, comparison, PrerequisiteType.Reputation);
         }
     }
 }

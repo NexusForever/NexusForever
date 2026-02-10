@@ -7,32 +7,24 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.PetFlair)]
-    public class PrerequisiteCheckPetFlair : IPrerequisiteCheck
+    public class PrerequisiteCheckPetFlair : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckPetFlair> log;
-
         public PrerequisiteCheckPetFlair(
-            ILogger<PrerequisiteCheckPetFlair> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return player.PetCustomisationManager.GetCustomisation(PetType.HoverBoard, objectId) != null;
-                case PrerequisiteComparison.NotEqual:
-                    return player.PetCustomisationManager.GetCustomisation(PetType.HoverBoard, objectId) == null;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.PetFlair}!");
-                    return false;
-            }
+            IPetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(PetType.HoverBoard, objectId);
+            bool hasCustomisation = customisation != null;
+            
+            return MatchBoolean(hasCustomisation, comparison, PrerequisiteType.PetFlair);
         }
     }
 }
