@@ -155,6 +155,24 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Determines if any item with the itemId exists in any <see cref="InventoryLocation.Inventory"/> except the SpellBag.
+        /// </summary>
+        public bool HasItem(uint itemId)
+        {
+            return bags.Any(b => b.Key != InventoryLocation.Ability && b.Value.HasItem(itemId));
+        }
+
+        /// <summary>
+        /// Determines whether the specified item exists in the given inventory location.
+        /// </summary>
+        public bool HasItem(uint itemId, InventoryLocation location)
+        {
+            if (GetBag(location) == null)
+                log.Warn($"Checking for item in invalid bag location {location}");
+            return GetBag(location)?.HasItem(itemId) ?? false;
+        }
+
+        /// <summary>
         /// Return <see cref="IItem"/> at supplied <see cref="ItemLocation"/>.
         /// </summary>
         public IItem GetItem(ItemLocation itemLocation)
