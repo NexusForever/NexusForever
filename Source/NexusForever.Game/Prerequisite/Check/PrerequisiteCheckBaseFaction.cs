@@ -5,6 +5,7 @@ using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Reputation;
 
 // TODO: This is potentially false and might be Faction2. Wait for verification from RE
+// ObjectId is not used in this check, however gametable queries for prerequisites have shown a non zero value for objectId, if it becomes a problem investigate further
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
