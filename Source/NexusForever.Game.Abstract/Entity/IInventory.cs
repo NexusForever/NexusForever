@@ -45,6 +45,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool HasItem(uint itemId);
 
         /// <summary>
+        /// Determines if itemId is present in any of the given <see cref="ICollection{InventoryLocation}<"/>
+        /// </summary>
+        bool HasItem(uint itemId, ICollection<InventoryLocation> inventoryLocations);
+
+        /// <summary>
         /// Determines whether the specified item exists in the given inventory location.
         /// </summary>
         bool HasItem(uint itemId, InventoryLocation location);
