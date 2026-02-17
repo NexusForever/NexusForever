@@ -6,32 +6,22 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.PurchasedTitle)]
-    public class PrerequisiteCheckPurchasedTitle : IPrerequisiteCheck
+    public class PrerequisiteCheckPurchasedTitle : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckPurchasedTitle> log;
-
         public PrerequisiteCheckPurchasedTitle(
-            ILogger<PrerequisiteCheckPurchasedTitle> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return player.TitleManager.HasTitle((ushort)objectId);
-                case PrerequisiteComparison.NotEqual:
-                    return !player.TitleManager.HasTitle((ushort)objectId);
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.PurchasedTitle}!");
-                    return true;
-            }
+            bool hasTitle = player.TitleManager.HasTitle((ushort)objectId);
+            return MatchBoolean(hasTitle, comparison, PrerequisiteType.PurchasedTitle);
         }
     }
 }

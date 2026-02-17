@@ -4,35 +4,26 @@ using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Reputation;
 
+// TODO: This is potentially false and might be Faction2. Wait for verification from RE
+// ObjectId is not used in this check, however gametable queries for prerequisites have shown a non zero value for objectId, if it becomes a problem investigate further
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.BaseFaction)]
-    public class PrerequisiteCheckBaseFaction : IPrerequisiteCheck
+    public class PrerequisiteCheckBaseFaction : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckBaseFaction> log;
-
         public PrerequisiteCheckBaseFaction(
-            ILogger<PrerequisiteCheckBaseFaction> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return player.Faction1 == (Faction)value;
-                case PrerequisiteComparison.NotEqual:
-                    return player.Faction1 != (Faction)value;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.BaseFaction}!");
-                    return false;
-            }
+            return MatchEnum(player.Faction1, (Faction)value, comparison, PrerequisiteType.BaseFaction);
         }
     }
 }

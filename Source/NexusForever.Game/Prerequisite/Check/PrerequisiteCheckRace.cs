@@ -4,35 +4,25 @@ using NexusForever.Game.Abstract.Prerequisite;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Prerequisite;
 
+// ObjectId is not used in this check, however gametable queries for prerequisites have shown a non zero value for objectId, if it becomes a problem investigate further
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.Race)]
-    public class PrerequisiteCheckRace : IPrerequisiteCheck
+    public class PrerequisiteCheckRace : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckLevel> log;
-
         public PrerequisiteCheckRace(
-            ILogger<PrerequisiteCheckLevel> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return player.Race == (Race)value;
-                case PrerequisiteComparison.NotEqual:
-                    return player.Race != (Race)value;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Race}!");
-                    return false;
-            }
+            return MatchEnum(player.Race, (Race)value, comparison, PrerequisiteType.Race);
         }
     }
 }

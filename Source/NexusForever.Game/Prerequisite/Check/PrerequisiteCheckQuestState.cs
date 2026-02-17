@@ -7,32 +7,25 @@ using NexusForever.Game.Static.Quest;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.QuestState)]
-    public class PrerequisiteCheckQuestState : IPrerequisiteCheck
+    public class PrerequisiteCheckQuestState : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckQuestState> log;
-
         public PrerequisiteCheckQuestState(
-            ILogger<PrerequisiteCheckQuestState> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.Equal:
-                    return player.QuestManager.GetQuestState((ushort)objectId) == (QuestState)value;
-                case PrerequisiteComparison.NotEqual:
-                    return player.QuestManager.GetQuestState((ushort)objectId) != (QuestState)value;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.QuestState}!");
-                    return false;
-            }
+            QuestState? questState = player.QuestManager.GetQuestState((ushort)objectId);
+            if (questState == null)
+                return false;
+
+            return MatchEnum(questState.Value, (QuestState)value, comparison, PrerequisiteType.QuestState);
         }
     }
 }
