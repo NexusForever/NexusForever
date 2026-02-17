@@ -518,5 +518,10 @@ namespace NexusForever.Game.Entity
         {
             return visibleEntities.Values.Cast<T>();
         }
+
+        public float GetDistanceTo(Vector3 position)
+        {
+            return Vector3.Distance(Position, position);
+        }
     }
 }
