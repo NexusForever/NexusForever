@@ -72,7 +72,7 @@ internal class Program
                         continue;
 
                     url.DisplayText = "Web Console";
-                    url.Url = new UriBuilder(url.Url) { Path = "Console.html" }.ToString();
+                    url.Url = new UriBuilder(url.Url) { Path = "console.html" }.ToString();
                 }
             }
         });
