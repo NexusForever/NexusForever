@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
     [Message(GameMessageOpcode.ServerCinematicTransitionPosition)]
     public class ServerCinematicTransitionPosition : IWritable

@@ -3,6 +3,6 @@
     public enum CancelType
     {
         EndTransition = 1,
-        EndImmediate  = 2,
+        EndImmediate  = 2
     }
 }

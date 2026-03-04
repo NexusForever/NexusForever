@@ -22,15 +22,15 @@ namespace NexusForever.Game.Cinematic.Cinematics
             EndTransition     = new Transition(14333, CameraAddFlags.WhiteOut, 0, 1000, 0, 1000);
 
             SetupActors();
-            SetupVoiceOvers();
+            SetupTexts();
             SetupCamera();
 
-            Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
-            {
+            Keyframes.AddRange(
+            [
                 new VisualEffect(21853, Player.Guid),
                 new VisualEffect(24610, Player.Guid),
                 new VisualEffect(24612, Player.Guid)
-            });
+            ]);
         }
 
         private void SetupActors()
@@ -38,25 +38,25 @@ namespace NexusForever.Game.Cinematic.Cinematics
             Position initialPosition = new Position(new Vector3(-773.25146484375f, -904.217041015625f, -2269.524658203125f));
 
             Actor ship = new Actor(ACTOR_AURIN_SHIP, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, 3.1415929794311523f, initialPosition);
-            AddActor(ship, new List<IVisualEffect>
-            {
+            AddActor(ship,
+            [
                 new VisualEffect(11096)
-            });
+            ]);
 
-            AddActor(new Actor(ACTOR_RAPTARUK, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, 3.1415929794311523f, initialPosition), new List<IVisualEffect>
-            {
+            AddActor(new Actor(ACTOR_RAPTARUK, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, 3.1415929794311523f, initialPosition),
+            [
                 new VisualEffect(11096)
-            });
+            ]);
 
             SetAsPlayerActor(ship, initialPosition, 23);
         }
 
-        private void SetupVoiceOvers()
+        private void SetupTexts()
         {
-            AddVoiceOver(578488, 4000, 6400);
-            AddVoiceOver(578489, 6500, 10900);
-            AddVoiceOver(578490, 11000, 12600);
-            AddVoiceOver(578491, 12700, 15400);
+            AddText(578488, 4000, 6400);
+            AddText(578489, 6500, 10900);
+            AddText(578490, 11000, 12600);
+            AddText(578491, 12700, 15400);
         }
 
         private void SetupCamera()
@@ -74,7 +74,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
         {
             base.Play();
 
-            foreach (IKeyframeAction keyframeAction in Keyframes.Values.SelectMany(i => i))
+            foreach (IKeyframeAction keyframeAction in Keyframes)
                 keyframeAction.Send(Player.Session);
         }
     }

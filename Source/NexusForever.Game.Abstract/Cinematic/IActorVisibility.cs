@@ -2,7 +2,6 @@
 {
     public interface IActorVisibility : IKeyframeAction
     {
-        uint Delay { get; }
         IActor Actor { get; }
         bool Hide { get; }
         bool AffectOnlyPlayers { get; }

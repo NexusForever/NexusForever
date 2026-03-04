@@ -1,8 +1,7 @@
 ﻿namespace NexusForever.Game.Abstract.Cinematic
 {
-    public interface IScene : IKeyframeAction
+    public interface IFlagsKeyframe : IKeyframeAction
     {
-        uint Delay { get; }
         uint Flags { get; }
     }
 }

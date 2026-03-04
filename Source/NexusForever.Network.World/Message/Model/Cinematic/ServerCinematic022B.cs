@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
     [Message(GameMessageOpcode.ServerCinematic022B)]
     public class ServerCinematic022B : IWritable

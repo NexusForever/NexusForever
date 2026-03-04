@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
     [Message(GameMessageOpcode.ServerCinematicActorMode)]
     public class ServerCinematicActorMode : IWritable

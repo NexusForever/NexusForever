@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Cinematic;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic
 {
@@ -15,10 +15,10 @@ namespace NexusForever.Game.Cinematic
         public uint Duration { get; set; }
         public CinematicFlags InitialFlags { get; set; }
         public CancelType InitialCancelMode { get; set; }
-        public Dictionary</* Id */ uint, IActor> Actors { get; } = new();
-        public Dictionary</* Delay */ uint, /* TextId */ uint> VoiceOvers { get; } = new();
-        public Dictionary<string, List<IKeyframeAction>> Keyframes { get; } = new();
-        public List<ICamera> Cameras { get; } = new();
+        public Dictionary</* Id */ uint, IActor> Actors { get; } = [];
+        public Dictionary</* Delay */ uint, /* TextId */ uint> Texts { get; } = [];
+        public List<IKeyframeAction> Keyframes { get; } = [];
+        public List<ICamera> Cameras { get; } = [];
         public ITransition StartTransition { get; protected set; }
         public ITransition EndTransition { get; protected set; }
 
@@ -62,12 +62,12 @@ namespace NexusForever.Game.Cinematic
         }
 
         /// <summary>
-        /// Add a VoiceOver entry to the Cinematic playback. Will shown Cinematic subtitles to match if enabled by the Player.
+        /// Add a localised text entry to the Cinematic playback. Will shown Cinematic subtitles to match if enabled by the Player.
         /// </summary>
-        protected void AddVoiceOver(uint textId, uint start, uint end)
+        protected void AddText(uint textId, uint start, uint end)
         {
-            VoiceOvers.Add(start, textId);
-            VoiceOvers.Add(end, 0);
+            Texts.Add(start, textId);
+            Texts.Add(end, 0);
         }
 
         /// <summary>
@@ -117,11 +117,11 @@ namespace NexusForever.Game.Cinematic
         /// <summary>
         /// Sends all packet data to the Player for all VoiceOvers stored for playback.
         /// </summary>
-        protected void SendVoiceOvers()
+        protected void SendText()
         {
-            foreach ((uint delay, uint textId) in VoiceOvers)
+            foreach ((uint delay, uint textId) in Texts)
             {
-                Player.Session.EnqueueMessageEncrypted(new ServerCinematicVoiceOverLine
+                Player.Session.EnqueueMessageEncrypted(new ServerCinematicText
                 {
                     Delay  = delay,
                     LocalizedTextId = textId
@@ -171,7 +171,7 @@ namespace NexusForever.Game.Cinematic
         {
             SendActors();
             SendPlayerActor();
-            SendVoiceOvers();
+            SendText();
 
             SendCameras();
         }

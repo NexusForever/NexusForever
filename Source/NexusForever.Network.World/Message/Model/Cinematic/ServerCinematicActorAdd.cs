@@ -3,7 +3,7 @@ using NexusForever.Game.Static.Entity.Movement.Command.Mode;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
     [Message(GameMessageOpcode.ServerCinematicActorAdd)]
     public class ServerCinematicActorAdd : IWritable
@@ -25,7 +25,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(TextureLevelOfDetailBias);
             writer.Write(UnitId);
             writer.Write(Creature2Id);
-            writer.Write(MovementMode);
+            writer.Write(MovementMode, 32u);
             Position.Write(writer);
             writer.Write(ActivePropId);
             writer.Write(WorldSocketId);

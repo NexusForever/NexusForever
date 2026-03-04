@@ -1,11 +1,8 @@
 ﻿using NexusForever.Game.Static.Cinematic;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
-    // This is used for multiple things:
-    // It 
-    // It is used to schedule the end of the 
     [Message(GameMessageOpcode.ServerCinematicNotify)]
     public class ServerCinematicNotify : IWritable
     {

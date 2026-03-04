@@ -1,17 +1,17 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic
 {
-    public class Scene : IScene
+    public class FlagsKeyframe : IFlagsKeyframe
     {
         public uint Delay { get; }
         public uint Flags { get; }
 
-        public Scene(uint delay, uint flags)
+        public FlagsKeyframe(uint delay, uint flags)
         {
-            Delay   = delay;
+            Delay = delay;
             Flags = flags;
         }
 

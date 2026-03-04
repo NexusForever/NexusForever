@@ -2,7 +2,7 @@
 using NexusForever.Network.World.Entity;
 using System.Numerics;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
     [Message(GameMessageOpcode.ServerCinematicCameraPosVel)]
     public class ServerCinematicCameraPosVel : IWritable

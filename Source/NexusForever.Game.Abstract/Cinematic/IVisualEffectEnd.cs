@@ -2,7 +2,6 @@
 {
     public interface IVisualEffectEnd : IKeyframeAction
     {
-        uint Delay { get; }
         uint VisualEffectUniqueId { get; }
     }
 }

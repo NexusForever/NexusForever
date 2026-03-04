@@ -5,7 +5,7 @@ using NexusForever.Game.Static.Cinematic;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.World.Entity;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic.Cinematics
 {
@@ -36,25 +36,25 @@ namespace NexusForever.Game.Cinematic.Cinematics
             SetupCamera();
 
             if (Player.Faction1 == Faction.Dominion)
-                AddDominionVoiceOvers();
+                AddDominionTexts();
             else if (Player.Faction1 == Faction.Exile)
-                AddExileVoiceOvers();
+                AddExileTexts();
 
             // Add Scenes
-            Keyframes.Add("Scenes", new List<IKeyframeAction>
-            {
-                new Scene(0, 259504),
-                new Scene(32500, 262143)
-            });
+            Keyframes.AddRange(
+            [
+                new FlagsKeyframe(0, 259504),
+                new FlagsKeyframe(32500, 262143)
+            ]);
 
             // Add Screen Effects
-            Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
-            {
+            Keyframes.AddRange(
+            [
                 new VisualEffect(50800, Player.Guid, duration: 16100),
-                new VisualEffect(50694, Player.Guid, initialDelay: 16100, duration: 16400),
-                new VisualEffect(49483, Player.Guid, initialDelay: 32500, duration: 4000),
-                new VisualEffect(50700, Player.Guid, initialDelay: 36500)
-            });
+                new VisualEffect(50694, Player.Guid, delay: 16100, duration: 16400),
+                new VisualEffect(49483, Player.Guid, delay: 32500, duration: 4000),
+                new VisualEffect(50700, Player.Guid, delay: 36500)
+            ]);
 
             // Add Player Effects
             List<IKeyframeAction> playerEffects = new()
@@ -67,7 +67,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
             else
                 playerEffects.Add(new VisualEffect(VFX_DORIAN_VOICEOVER, Player.Guid));
 
-            Keyframes.Add("PlayerEffects", playerEffects);
+            Keyframes.AddRange(playerEffects);
         }
 
         private void SetupCamera()
@@ -126,17 +126,17 @@ namespace NexusForever.Game.Cinematic.Cinematics
             uint factionHead = Player.Faction1 == Faction.Dominion ? ACTOR_ARTEMIS : ACTOR_DORIAN;
             uint factionHolo = Player.Faction1 == Faction.Dominion ? ACTOR_ARTEMIS_HOLO : ACTOR_DORIAN_HOLO;
 
-            AddActor(new Actor(factionHead, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, initialAngle, initialPosition), new List<IVisualEffect>
-                {
+            AddActor(new Actor(factionHead, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, initialAngle, initialPosition),
+                [
                     new VisualEffect(45237)
-                });
+                ]);
 
             Actor holoActor = new Actor(factionHolo, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, initialAngle, initialPosition);
-            AddActor(holoActor, new List<IVisualEffect>
-                {
+            AddActor(holoActor,
+                [
                     new VisualEffect(45237),
                     new VisualEffect(24490)
-                });
+                ]);
             holoActor.AddVisibility(9600, true);
             holoActor.AddVisibility(9700, false);
             holoActor.AddVisibility(9800, true);
@@ -144,32 +144,32 @@ namespace NexusForever.Game.Cinematic.Cinematics
             holoActor.AddVisibility(10500, true);
         }
 
-        private void AddDominionVoiceOvers()
+        private void AddDominionTexts()
         {
-            AddVoiceOver(750178, 1700, 5100);
-            AddVoiceOver(750179, 5133, 12033);
-            AddVoiceOver(750180, 12067, 16400);
-            AddVoiceOver(750181, 16433, 20433);
-            AddVoiceOver(750182, 20467, 23733);
-            AddVoiceOver(750183, 23767, 27867);
-            AddVoiceOver(750184, 27900, 34400);
-            AddVoiceOver(750185, 34433, 41067);
-            AddVoiceOver(750186, 41100, 43800);
-            AddVoiceOver(750187, 43833, 49500);
+            AddText(750178, 1700, 5100);
+            AddText(750179, 5133, 12033);
+            AddText(750180, 12067, 16400);
+            AddText(750181, 16433, 20433);
+            AddText(750182, 20467, 23733);
+            AddText(750183, 23767, 27867);
+            AddText(750184, 27900, 34400);
+            AddText(750185, 34433, 41067);
+            AddText(750186, 41100, 43800);
+            AddText(750187, 43833, 49500);
         }
 
-        private void AddExileVoiceOvers()
+        private void AddExileTexts()
         {
-            AddVoiceOver(750164, 1300, 5767);
-            AddVoiceOver(750165, 5800, 11567);
-            AddVoiceOver(750166, 11600, 16467);
-            AddVoiceOver(750167, 16500, 20733);
-            AddVoiceOver(750168, 20767, 23633);
-            AddVoiceOver(750169, 23667, 28333);
-            AddVoiceOver(750170, 28367, 34333);
-            AddVoiceOver(750171, 34367, 40833);
-            AddVoiceOver(750173, 40867, 44567);
-            AddVoiceOver(750174, 44600, 49500);
+            AddText(750164, 1300, 5767);
+            AddText(750165, 5800, 11567);
+            AddText(750166, 11600, 16467);
+            AddText(750167, 16500, 20733);
+            AddText(750168, 20767, 23633);
+            AddText(750169, 23667, 28333);
+            AddText(750170, 28367, 34333);
+            AddText(750171, 34367, 40833);
+            AddText(750173, 40867, 44567);
+            AddText(750174, 44600, 49500);
         }
 
         protected override void Play()
@@ -184,7 +184,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
                 DurationEnd   = 1500
             });
                 
-            foreach (IKeyframeAction keyframeAction in Keyframes.Values.SelectMany(i => i))
+            foreach (IKeyframeAction keyframeAction in Keyframes)
                 keyframeAction.Send(Player.Session);
         }
     }

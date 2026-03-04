@@ -13,12 +13,7 @@ namespace NexusForever.Network.World.Message.Model.Cinematic
         public void Read(GamePacketReader reader)
         {
             Position.Read(reader);
-            Velocity = new Vector3
-            (
-                reader.ReadSingle(),
-                reader.ReadSingle(),
-                reader.ReadSingle()
-            );
+            Velocity = reader.ReadVector3();
         }
     }
 }

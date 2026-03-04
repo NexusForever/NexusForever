@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Cinematic;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
     [Message(GameMessageOpcode.ServerCinematicScaleTransition)]
     public class ServerCinematicTransitionDurationSet : IWritable

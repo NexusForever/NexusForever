@@ -251,7 +251,7 @@ namespace NexusForever.Network.Message
         ServerCinematicFlags            = 0x0227,
         ServerCinematicActorAdd         = 0x0228,
         ServerCinematicStoryPanelDialogHide = 0x0229,
-        ServerCinematicVoiceOverLine    = 0x022A,
+        ServerCinematicText             = 0x022A,
         ServerCinematic022B             = 0x022B,
         ServerCinematicEnd              = 0x022C,
         ServerCinematicWhiteOut         = 0x022D,

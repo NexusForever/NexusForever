@@ -4,7 +4,6 @@ namespace NexusForever.Game.Abstract.Cinematic
 {
     public interface ITransition : IKeyframeAction
     {
-        uint Delay { get; }
         CameraAddFlags Flags { get; }
         uint EndTransition { get; }
         ushort Start { get; }

@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Cinematic
 {
     // Starts the outro transition of the cinematic, returning to the game camera
     [Message(GameMessageOpcode.ServerCinematicEnd)]

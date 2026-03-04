@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Game.Static.Cinematic;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic
 {

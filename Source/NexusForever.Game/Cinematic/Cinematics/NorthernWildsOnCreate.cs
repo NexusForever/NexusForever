@@ -4,7 +4,7 @@ using NexusForever.Game.Abstract.Cinematic.Cinematics;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Cinematic;
 using NexusForever.Network.World.Entity;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic.Cinematics
 {
@@ -22,47 +22,40 @@ namespace NexusForever.Game.Cinematic.Cinematics
             //EndTransition   = new Transition(11000, 0, 0, 1000, 0, 1000);
 
             SetupActors();
-            SetupVoiceOvers();
+            SetupTexts();
             SetupCamera();
 
             uint dropPodUnitId = Player.GetVisibleCreature<WorldEntity>(ACTOR_GRANOK_DROP_POD).FirstOrDefault()?.Guid ?? 0u;
             if (dropPodUnitId != 0u)
-            {
-                Keyframes.Add("ScreenEffects", new List<IKeyframeAction> 
-                {
-                    new VisualEffect(7913, dropPodUnitId),
-                });
-            }
+                Keyframes.Add(new VisualEffect(7913, dropPodUnitId));
 
-            Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
-            {
+            Keyframes.AddRange(
+            [
                 new VisualEffect(8345, Player.Guid),
-                new VisualEffect(8341, Player.Guid, initialDelay: 950),
-                new VisualEffect(8344, Player.Guid, initialDelay: 3000),
-                new VisualEffect(8340, Player.Guid, initialDelay: 5800),
-                new VisualEffect(8342, Player.Guid, initialDelay: 7000),
-            });
+                new VisualEffect(8341, Player.Guid, delay: 950),
+                new VisualEffect(8344, Player.Guid, delay: 3000),
+                new VisualEffect(8340, Player.Guid, delay: 5800),
+                new VisualEffect(8342, Player.Guid, delay: 7000),
+            ]);
         }
 
         private void SetupActors()
         {
             Position initialPosition = new Position(new Vector3(4110.7099609375f, -660.8599853515625f, -5145.47998046875f));
 
-            AddActor(new Actor(13562, 0, 0.33161258697509766f, initialPosition), new List<IVisualEffect>
-            {
+            AddActor(new Actor(13562, 0, 0.33161258697509766f, initialPosition),
+            [
                 new VisualEffect(7913),
-                new VisualEffect(5705, initialDelay: 950)
-            });
+                new VisualEffect(5705, delay: 950)
+            ]);
 
-            AddActor(new Actor(14125, 0, 0.33161258697509766f, new Position(new Vector3(4110.7099609375f, -658.8698120117188f, -5145.47998046875f)), initialDelay: 950), new List<IVisualEffect>
-            {
-            });
+            AddActor(new Actor(14125, 0, 0.33161258697509766f, new Position(new Vector3(4110.7099609375f, -658.8698120117188f, -5145.47998046875f)), initialDelay: 950), []);
         }
 
-        private void SetupVoiceOvers()
+        private void SetupTexts()
         {
-            AddVoiceOver(578135, 2900, 5700);
-            AddVoiceOver(578136, 5800, 11000);
+            AddText(578135, 2900, 5700);
+            AddText(578136, 5800, 11000);
         }
 
         private void SetupCamera()
@@ -84,7 +77,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
                 DurationEnd = 1500
             });
 
-            foreach (IKeyframeAction keyframeAction in Keyframes.Values.SelectMany(i => i))
+            foreach (IKeyframeAction keyframeAction in Keyframes)
                 keyframeAction.Send(Player.Session);
         }
     }

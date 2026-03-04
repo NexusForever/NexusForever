@@ -4,7 +4,7 @@ using NexusForever.Game.Abstract.Cinematic.Cinematics;
 using NexusForever.Game.Static.Cinematic;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic.Cinematics
 {
@@ -21,56 +21,53 @@ namespace NexusForever.Game.Cinematic.Cinematics
             EndTransition     = new Transition(32533, CameraAddFlags.WhiteOut, 0);
 
             SetupActors();
-            SetupVoiceOvers();
+            SetupTexts();
             SetupCamera();
 
-            Keyframes.Add("ScreenEffects", new List<IKeyframeAction>
-            {
+            Keyframes.AddRange(
+            [
                 new VisualEffect(30667, Player.Guid),
                 new VisualEffect(21853, Player.Guid),
                 new VisualEffect(29743, Player.Guid),
                 new VisualEffect(27968, Player.Guid),
-                new VisualEffect(30489, Player.Guid, initialDelay: 4367)
-            });
+                new VisualEffect(30489, Player.Guid, delay: 4367)
+            ]);
 
-            Keyframes.Add("PlayerVisuals", new List<IKeyframeAction>
-            {
-                new VisualEffect(0, Player.Guid, removeOnCameraEnd: true),
-            });
+            Keyframes.Add(new VisualEffect(0, Player.Guid, removeOnCameraEnd: true));
         }
 
         private void SetupActors()
         {
             Position initialPosition = new Position(new Vector3(-3784.26953125f, -988.6632690429688f, -6188.072265625f));
-            AddActor(new Actor(50444, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq | EntityCreateFlag.Unknown08, 3.1415929794311523f, initialPosition), new List<IVisualEffect>
-            {
+            AddActor(new Actor(50444, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq | EntityCreateFlag.Unknown08, 3.1415929794311523f, initialPosition),
+            [
                 new VisualEffect(20016),
                 new VisualEffect(20016)
-            });
+            ]);
 
-            AddActor(new Actor(50441, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq | EntityCreateFlag.Unknown08, 3.1415929794311523f, initialPosition), new List<IVisualEffect>
-            {
+            AddActor(new Actor(50441, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq | EntityCreateFlag.Unknown08, 3.1415929794311523f, initialPosition),
+            [
                 new VisualEffect(20016)
-            });
+            ]);
 
-            AddActor(new Actor(50442, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq | EntityCreateFlag.Unknown08, 3.1415929794311523f, initialPosition), new List<IVisualEffect>
-            {
+            AddActor(new Actor(50442, EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq | EntityCreateFlag.Unknown08, 3.1415929794311523f, initialPosition),
+            [
                 new VisualEffect(20016)
-            });
+            ]);
 
-            AddActor(new Actor(0, EntityCreateFlag.UseDefaultBirthSequence | EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq , -1.134464144706726f, new Position(new Vector3(-3858.369384765625f, -973.4382934570312f, -6048.97216796875f))), new List<IVisualEffect>
+            AddActor(new Actor(0, EntityCreateFlag.UseDefaultBirthSequence | EntityCreateFlag.Immediate | EntityCreateFlag.HasInteractionPrereq, -1.134464144706726f, new Position(new Vector3(-3858.369384765625f, -973.4382934570312f, -6048.97216796875f))), new List<IVisualEffect>
             {
-                new VisualEffect(21598, initialDelay: 26000)
+                new VisualEffect(21598, delay: 26000)
             });
         }
 
-        private void SetupVoiceOvers()
+        private void SetupTexts()
         {
-            AddVoiceOver(578464, 4500, 6567);
-            AddVoiceOver(578465, 6633, 10200);
-            AddVoiceOver(578466, 10300, 11400);
-            AddVoiceOver(578467, 11500, 13600);
-            AddVoiceOver(578468, 13700, 18000);
+            AddText(578464, 4500, 6567);
+            AddText(578465, 6633, 10200);
+            AddText(578466, 10300, 11400);
+            AddText(578467, 11500, 13600);
+            AddText(578468, 13700, 18000);
         }
 
         private void SetupCamera()
@@ -95,7 +92,7 @@ namespace NexusForever.Game.Cinematic.Cinematics
                 DurationEnd = 1500
             });
 
-            foreach (IKeyframeAction keyframeAction in Keyframes.Values.SelectMany(i => i))
+            foreach (IKeyframeAction keyframeAction in Keyframes)
                 keyframeAction.Send(Player.Session);
         }
     }

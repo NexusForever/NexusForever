@@ -10,8 +10,8 @@ namespace NexusForever.Game.Abstract.Cinematic
         CinematicFlags InitialFlags { get; set; }
         CancelType InitialCancelMode { get; set; }
         Dictionary<uint, IActor> Actors { get; }
-        Dictionary<uint, uint> VoiceOvers { get; }
-        Dictionary<string, List<IKeyframeAction>> Keyframes { get; }
+        Dictionary<uint, uint> Texts { get; }
+        List<IKeyframeAction> Keyframes { get; }
         List<ICamera> Cameras { get; }
         ITransition StartTransition { get; }
         ITransition EndTransition { get; }
