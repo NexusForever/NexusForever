@@ -4,7 +4,7 @@ using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Internal.Message.Shared;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
@@ -31,7 +31,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             messagePublisher.PublishAsync(new ChatChannelMemberOwnerMessage
             {
                 Source = session.Player.Identity.ToInternalIdentity(),
-                Type   = chatOwner.Channel.Type,
+                Type   = chatOwner.Channel.ChatChannelId,
                 ChatId = chatOwner.Channel.ChatId != 0 ? chatOwner.Channel.ChatId : null,
                 Target = new IdentityName
                 {

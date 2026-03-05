@@ -2,9 +2,10 @@
 {
     public enum CinematicState
     {
-        Initalising,
-        Finishing,
-        Playing,
-        Ended
+        Initalising  = 0,
+        Finishing    = 1,
+        Playing      = 2,
+        Ended        = 3,
+        Cancelling   = 4
     }
 }

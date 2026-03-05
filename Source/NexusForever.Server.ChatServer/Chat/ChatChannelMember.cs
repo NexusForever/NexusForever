@@ -1,6 +1,6 @@
 ﻿using NexusForever.Database;
 using NexusForever.Database.Chat.Model;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Server.ChatServer.Character;
 
 namespace NexusForever.Server.ChatServer.Chat

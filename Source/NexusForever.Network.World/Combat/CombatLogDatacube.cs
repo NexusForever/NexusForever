@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Combat;
+using NexusForever.Game.Static.Entity;
 
 namespace NexusForever.Network.World.Combat
 {
@@ -7,7 +8,7 @@ namespace NexusForever.Network.World.Combat
         public CombatLogType Type => CombatLogType.Datacube;
 
         public uint UnitId { get; set; }
-        public byte DatacubeType { get; set; } // 3u
+        public DatacubeType DatacubeType { get; set; } // 3u
         public bool HasPieces { get; set; }
 
         public void Write(GamePacketWriter writer)

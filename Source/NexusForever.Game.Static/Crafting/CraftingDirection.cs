@@ -2,14 +2,14 @@
 {
     public enum CraftingDirection
     {
-        None    = 0x0,
-        N       = 0x1,
-        NE      = 0x2,
-        E       = 0x3,
-        SE      = 0x4,
-        S       = 0x5,
-        SW      = 0x6,
-        W       = 0x7,
-        NW      = 0x8,
+        None    = 0,
+        N       = 1,
+        NE      = 2,
+        E       = 3,
+        SE      = 4,
+        S       = 5,
+        SW      = 6,
+        W       = 7,
+        NW      = 8,
     };
 }

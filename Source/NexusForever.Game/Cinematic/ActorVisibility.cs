@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic
 {
@@ -9,7 +9,7 @@ namespace NexusForever.Game.Cinematic
         public uint Delay { get; }
         public IActor Actor { get; }
         public bool Hide { get; }
-        public bool Unknown0 { get; }
+        public bool AffectOnlyPlayers { get; }
 
         public ActorVisibility(uint delay, IActor actor, bool hide = false)
         {
@@ -22,10 +22,10 @@ namespace NexusForever.Game.Cinematic
         {
             session.EnqueueMessageEncrypted(new ServerCinematicActorVisibility
             {
-                Delay    = Delay,
-                UnitId   = Actor.Id,
-                Hide     = Hide,
-                Unknown0 = Unknown0
+                Delay             = Delay,
+                UnitId            = Actor.UnitId,
+                Hide              = Hide,
+                AffectOnlyPlayers = AffectOnlyPlayers
             });
         }
     }
