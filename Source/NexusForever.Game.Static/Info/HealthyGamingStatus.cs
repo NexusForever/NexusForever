@@ -4,7 +4,6 @@
     {
         Normal    = 0x0,
         Fatigue   = 0x1,
-        Unhealthy = 0x2,
+        Unhealthy = 0x2
     };
-
 }
