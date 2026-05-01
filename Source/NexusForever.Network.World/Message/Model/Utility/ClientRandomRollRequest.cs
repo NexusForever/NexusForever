@@ -1,7 +1,7 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Utility
 {
     [Message(GameMessageOpcode.ClientRandomRollRequest)]
     public class ClientRandomRollRequest : IReadable
@@ -10,17 +10,17 @@ namespace NexusForever.Network.World.Message.Model
         // the TargetPlayerIdentity's realmId and
         // characterId, as well as Unknown0 are 0.
         // As such, these fields are currently unused.
-        public Identity TargetPlayerIdentity { get; } = new();
+        public Identity UnusedIdentity { get; } = new();
         public uint MinRandom { get; private set; }
         public uint MaxRandom { get; private set; }
-        public uint Unknown0 { get; private set; }
+        public uint Unused { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            TargetPlayerIdentity.Read(reader);
+            UnusedIdentity.Read(reader);
             MinRandom = reader.ReadUInt();
             MaxRandom = reader.ReadUInt();
-            Unknown0 = reader.ReadUInt();
+            Unused = reader.ReadUInt();
         }
     }
 }

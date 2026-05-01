@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Info;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {
@@ -35,7 +35,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             float? onlineStatus = character.GetOnlineStatus();
             session.EnqueueMessageEncrypted(new ServerPlayerInfoFullResponse
             {
-                BaseData = new ServerPlayerInfoFullResponse.Base
+                BaseData = new PlayerInfoBase
                 {
                     ResultCode = 0,
                     Identity = new NexusForever.Network.World.Message.Model.Shared.Identity
