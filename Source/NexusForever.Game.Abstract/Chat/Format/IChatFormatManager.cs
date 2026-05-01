@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Internal.Message.Chat.Shared.Format;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Chat;
 
 namespace NexusForever.Game.Abstract.Chat.Format
 {

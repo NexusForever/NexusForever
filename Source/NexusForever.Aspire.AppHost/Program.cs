@@ -9,7 +9,7 @@ internal class Program
     {
         var builder = DistributedApplication.CreateBuilder(args);
 
-        builder.AddDockerComposeEnvironment("nexus-forever");
+        //builder.AddDockerComposeEnvironment("nexus-forever");
 
         var rmq = builder.AddRabbitMQ("rmq")
             .WithManagementPlugin();
@@ -72,7 +72,7 @@ internal class Program
                         continue;
 
                     url.DisplayText = "Web Console";
-                    url.Url = new UriBuilder(url.Url) { Path = "Console.html" }.ToString();
+                    url.Url = new UriBuilder(url.Url) { Path = "console.html" }.ToString();
                 }
             }
         });

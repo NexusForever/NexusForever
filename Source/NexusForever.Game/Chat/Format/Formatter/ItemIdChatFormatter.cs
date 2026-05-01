@@ -13,7 +13,7 @@ namespace NexusForever.Game.Chat.Format.Formatter
         {
             return new ChatChannelTextItemIdFormat
             {
-                ItemId = format.ItemId,
+                Item2Id = format.Item2Id,
             };
         }
 
@@ -21,7 +21,7 @@ namespace NexusForever.Game.Chat.Format.Formatter
         {
             return new ChatFormatItemId
             {
-                ItemId = format.ItemId,
+                Item2Id = format.Item2Id,
             };
         }
     }

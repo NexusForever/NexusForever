@@ -1,12 +1,12 @@
 ﻿using System.Linq.Expressions;
 using NexusForever.Game.Abstract.Chat.Format;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Network.Internal.Message.Chat.Shared.Format;
 using NexusForever.Network.Internal.Message.Chat.Shared.Format.Model;
 using NexusForever.Network.World.Chat;
 using NexusForever.Network.World.Chat.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Chat;
 
 namespace NexusForever.Game.Chat.Format
 {
@@ -42,15 +42,33 @@ namespace NexusForever.Game.Chat.Format
 
         private void InitialiseInternal()
         {
-            RegisterInternalFormatter<ChatFormatItemGuid>(ChatFormatType.ItemGuid);
+            RegisterInternalFormatter<ChatFormat0>(ChatFormatType.Format0);
+            RegisterInternalFormatter<ChatFormatAlien>(ChatFormatType.Alien);
+            RegisterInternalFormatter<ChatFormatRoleplay>(ChatFormatType.Roleplay);
+            RegisterInternalFormatter<ChatFormat3>(ChatFormatType.Format3);
             RegisterInternalFormatter<ChatFormatItemId>(ChatFormatType.ItemId);
             RegisterInternalFormatter<ChatFormatQuestId>(ChatFormatType.QuestId);
+            RegisterInternalFormatter<ChatFormatArchiveArticle>(ChatFormatType.ArchiveArticle);
+            RegisterInternalFormatter<ChatFormatProfanity>(ChatFormatType.Profanity);
+            RegisterInternalFormatter<ChatFormatItemFull>(ChatFormatType.ItemFull);
+            RegisterInternalFormatter<ChatFormatItemGuid>(ChatFormatType.ItemGuid);
+            RegisterInternalFormatter<ChatFormatNavPoint>(ChatFormatType.NavPoint);
+            RegisterInternalFormatter<ChatFormatLoot>(ChatFormatType.Loot);
         }
 
         private void InitialiseNetwork()
         {
+            RegisterNetworkFormatter<ChatChannelTextFormat0Format>(ChatFormatType.Format0);
+            RegisterNetworkFormatter<ChatChannelTextAlienFormat>(ChatFormatType.Alien);
+            RegisterNetworkFormatter<ChatChannelTextRoleplayFormat>(ChatFormatType.Roleplay);
+            RegisterNetworkFormatter<ChatChannelTextFormat3Format>(ChatFormatType.Format3);
             RegisterNetworkFormatter<ChatChannelTextItemIdFormat>(ChatFormatType.ItemId);
             RegisterNetworkFormatter<ChatChannelTextQuestIdFormat>(ChatFormatType.QuestId);
+            RegisterNetworkFormatter<ChatChannelTextArchiveArticleFormat>(ChatFormatType.ArchiveArticle);
+            RegisterNetworkFormatter<ChatChannelTextProfanityFormat>(ChatFormatType.Profanity);
+            RegisterNetworkFormatter<ChatChannelTextItemFullFormat>(ChatFormatType.ItemFull);
+            RegisterNetworkFormatter<ChatChannelTextNavPointFormat>(ChatFormatType.NavPoint);
+            RegisterNetworkFormatter<ChatChannelTextLootFormat>(ChatFormatType.Loot);
         }
 
         private void InitialiseLocal()

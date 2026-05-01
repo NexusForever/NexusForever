@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Combat;
+using NexusForever.Game.Static.Combat.CrowdControl;
 
 namespace NexusForever.Network.World.Combat
 {
@@ -7,7 +8,7 @@ namespace NexusForever.Network.World.Combat
         public CombatLogType Type => CombatLogType.CCStateBreak;
 
         public uint CasterId { get; set; }
-        public byte State { get; set; } // 5u
+        public CCState State { get; set; } // 5u
 
         public void Write(GamePacketWriter writer)
         {

@@ -1,6 +1,6 @@
 ﻿using NexusForever.Database.Chat;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Network.Internal.Message.Guild;
 using NexusForever.Server.ChatServer.Chat;
 using Rebus.Handlers;

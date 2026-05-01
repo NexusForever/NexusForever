@@ -2,7 +2,7 @@
 using NexusForever.Database;
 using NexusForever.Database.Chat.Model;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Server.ChatServer.Chat;
 
 namespace NexusForever.Server.ChatServer.Character

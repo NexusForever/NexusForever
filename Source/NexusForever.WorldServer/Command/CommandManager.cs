@@ -46,8 +46,13 @@ namespace NexusForever.WorldServer.Command
             BuildConverters();
             InitialiseHandlers();
 
-            if (!WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService())
+            if (ShouldStartCommandThread())
                 InitialiseCommandThread();
+        }
+
+        private static bool ShouldStartCommandThread()
+        {
+            return !WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService() && !Console.IsInputRedirected;
         }
 
         private void BuildConverters()

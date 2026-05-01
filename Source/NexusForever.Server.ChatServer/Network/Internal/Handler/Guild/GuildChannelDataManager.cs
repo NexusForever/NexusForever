@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 
 namespace NexusForever.Server.ChatServer.Network.Internal.Handler.Guild
 {

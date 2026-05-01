@@ -10,7 +10,7 @@ using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;

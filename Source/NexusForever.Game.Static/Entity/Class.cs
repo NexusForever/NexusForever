@@ -7,6 +7,7 @@
         Esper        = 3,
         Medic        = 4,
         Stalker      = 5,
-        Spellslinger = 7
+        Spellslinger = 7,
+        PvpTeam      = 23 // used for leaderboards
     }
 }

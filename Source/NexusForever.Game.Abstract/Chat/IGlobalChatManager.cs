@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 
 namespace NexusForever.Game.Abstract.Chat
 {

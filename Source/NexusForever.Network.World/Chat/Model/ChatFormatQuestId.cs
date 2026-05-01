@@ -1,20 +1,20 @@
-﻿using NexusForever.Game.Static.Social;
+﻿using NexusForever.Game.Static.Chat;
 
 namespace NexusForever.Network.World.Chat.Model
 {
     public class ChatFormatQuestId : IChatFormatModel
     {
         public ChatFormatType Type => ChatFormatType.QuestId;
-        public ushort QuestId { get; set; }
+        public ushort Quest2Id { get; set; }
 
         public void Read(GamePacketReader reader)
         {
-            QuestId = reader.ReadUShort(15u);
+            Quest2Id = reader.ReadUShort(15u);
         }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(QuestId, 15u);
+            writer.Write(Quest2Id, 15u);
         }
     }
 }
