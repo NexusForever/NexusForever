@@ -7,6 +7,17 @@
 *.tbl
 *.nfmap
 
+# Distribution directories
+dist/
+
+# World DB SQL dumps (clone NexusForever.WorldDatabase here)
+docker/config
+docker/game-data
+docker/world-database
+
+# Docker Compose local env (copy from .env.example)
+.env
+
 # User-specific files
 *.suo
 *.user

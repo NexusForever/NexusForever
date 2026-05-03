@@ -1,0 +1,430 @@
+# Docker stack aligned with the official server guide:
+# https://www.emulator.ws/installation/server-guide
+#
+# Same sequence as the guide (do these on the host before expecting World/Chat to run):
+#   1) Source — this repository (server-cloning).
+#   2) World DB repo — https://www.emulator.ws/installation/server-guide/world-database-cloning
+#      Clone into docker/world-database/ then ./docker/init.sh (after migrate).
+#   3) Build — Dockerfile follows server-building/linux.md (NexusForever.slnx, Release).
+#   4) Asset extraction — WildStar 16042 required; use NexusForever.MapGenerator per
+#      https://www.emulator.ws/installation/server-guide/asset-extraction.md
+#      (game-tables.md → tbl/*.tbl + *.bin; base-maps.md → map/*.nfmap).
+#      Copy into docker/game-data/tbl and docker/game-data/map OR run docker/extract-from-client.sh sync.
+#   5) Install — docker/config/*.json (like copying *.example.json in server-install-guide-linux.md);
+#      migrate service runs dotnet-ef same as that guide (paths use NexusForever.WorldServer — see migrate.sh).
+#      MariaDB user/password and RabbitMQ user match the Linux guide defaults.
+#   6) Accounts — https://www.emulator.ws/installation/server-guide/account-creation.md
+#      Web console: WorldServer HTTP port (default 5000) when world service is up:
+#      docker compose --profile game up -d
+#
+# Networking: MariaDB is reachable at 172.26.240.10 on the compose network (fixed IPv4 avoids Docker DNS/IPv6 issues).
+# Host publishes MariaDB on port 3306 by default; if that is already in use, set e.g. NEXUS_DB_PORT=3307.
+#
+# Locally built image names use pull_policy: never (see nexusforever-*:local tags).
+#
+# Optional `.env` beside this file (copy from `.env.example`): Docker Compose loads it for ${...}
+# substitution. Define client Patch path for extraction tooling:
+#   WILDSTAR_DIR=/absolute/path/to/WildStar
+# (`extract-from-client.sh` and docs reference this variable.)
+
+name: nexusforever
+
+networks:
+  nf_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.26.240.0/24
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    restart: unless-stopped
+    networks:
+      nf_net:
+        ipv4_address: 172.26.240.10
+    environment:
+      MARIADB_ROOT_PASSWORD: ${NEXUS_MARIADB_ROOT_PASSWORD:-nexusforeverRoot}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./docker/init-db:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${NEXUS_DB_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    restart: unless-stopped
+    networks:
+      - nf_net
+    environment:
+      RABBITMQ_DEFAULT_USER: nexusforever
+      RABBITMQ_DEFAULT_PASS: nexusforever
+    ports:
+      - "${NEXUS_RABBIT_PORT:-5672}:5672"
+      - "${NEXUS_RABBIT_UI_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 6
+      start_period: 45s
+
+  init:
+    image: nexusforever-init:local
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM debian:bookworm-slim
+        RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+            git mariadb-client ca-certificates jq > /dev/null 2>&1 && rm -rf /var/lib/apt/lists/*
+    pull_policy: never
+    restart: "no"
+    networks:
+      - nf_net
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      DB_HOST: "172.26.240.10"
+      DB_PORT: "3306"
+      DB_USER: nexusforever
+      DB_PASS: nexusforever
+      RABBIT_HOST: rabbitmq
+      REALM_ID: "1"
+      CHAR_API_HOST: "http://0.0.0.0:4000"
+      WORLD_DB_REPO: ${WORLD_DB_REPO:-https://github.com/NexusForever/NexusForever.WorldDatabase.git}
+      # Last commit whose tables are fully covered by EF migrations.
+      # Set WORLD_DB_REVISION=HEAD in .env to use the latest world database.
+      WORLD_DB_REVISION: ${WORLD_DB_REVISION:-342cb2e}
+    volumes:
+      - ./Source:/repo/Source:ro
+      - ./docker:/repo/docker
+    entrypoint: ["/bin/bash", "/repo/docker/init.sh"]
+
+  migrate:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    restart: "no"
+    networks:
+      - nf_net
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      init:
+        condition: service_completed_successfully
+    environment:
+      # Host/client Patch path per asset-extraction.md — available inside compose project; migrations ignore it.
+      WILDSTAR_DIR: ${WILDSTAR_DIR:-C:\Program Files (x86)\NCSOFT\WildStar}/Patch
+    volumes:
+      - ./Source:/src/Source
+      - ./docker/config:/migrate-config:ro
+      - ./docker/migrate/migrate.sh:/migrate.sh:ro
+    entrypoint: ["/bin/bash", "/migrate.sh"]
+
+  world-import:
+    image: nexusforever-init:local
+    pull_policy: never
+    restart: "no"
+    networks:
+      - nf_net
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: "172.26.240.10"
+      DB_PORT: "3306"
+      DB_USER: nexusforever
+      DB_PASS: nexusforever
+      NO_IMPORT: "false"
+    volumes:
+      - ./docker:/repo/docker
+    entrypoint: ["/bin/bash", "/repo/docker/import.sh"]
+
+  extractor:
+    profiles:
+      - tools
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    restart: "no"
+    networks:
+      - nf_net
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    environment:
+      WILDSTAR_DIR: ${WILDSTAR_DIR:-C:\Program Files (x86)\NCSOFT\WildStar}/Patch
+    volumes:
+      - ./Source:/src/Source
+      - ./docker/game-data:/game-data
+      - ${WILDSTAR_DIR:-.}/Patch:/wildstar/patch:ro
+    working_dir: /src/Source
+    entrypoint: ["/bin/bash", "-c"]
+    command: 
+      - |
+        set -e
+        echo "=== NexusForever MapGenerator ==="
+        echo "Patch directory contents:"
+        ls -lh /wildstar/patch
+
+        echo ""
+        echo "Building MapGenerator..."
+        cd /src/Source/NexusForever.MapGenerator
+        dotnet build -c Release
+        
+        echo ""
+        cd /src/Source/NexusForever.MapGenerator/bin/Release/net10.0
+        echo "Running: dotnet NexusForever.MapGenerator.dll --extract --patchPath /wildstar/patch"
+        dotnet NexusForever.MapGenerator.dll --extract --patchPath /wildstar/patch
+        
+
+        echo ""
+        cd /src/Source/NexusForever.MapGenerator/bin/Release/net10.0
+        echo "Running: dotnet NexusForever.MapGenerator.dll --generate --patchPath /wildstar/patch"
+        dotnet NexusForever.MapGenerator.dll --generate --patchPath /wildstar/patch
+
+        echo ""
+        echo "Copying tbl files to /game-data/tbl/ ..."
+        mkdir -p /game-data/tbl
+        cp -v tbl/* /game-data/tbl/
+
+        echo ""
+        echo "Copying nfmap files to /game-data/map/ ..."
+        mkdir -p /game-data/map
+        cp -v map/* /game-data/map/
+        echo "Done."
+
+  # Runs after world-import and verifies that tbl/map game-data files exist before
+  # the game servers try to start.  Run `docker compose --profile tools run --rm extractor`
+  # (with WILDSTAR_DIR set) to populate docker/game-data/tbl and docker/game-data/map.
+  check-assets:
+    image: nexusforever-init:local
+    pull_policy: never
+    restart: "no"
+    networks:
+      - nf_net
+    depends_on:
+      world-import:
+        condition: service_completed_successfully
+    volumes:
+      - ./docker/game-data/tbl:/check/tbl:ro
+      - ./docker/game-data/map:/check/map:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        tbl_count=$$(find /check/tbl -maxdepth 1 -name '*.tbl' 2>/dev/null | wc -l)
+        map_count=$$(find /check/map -maxdepth 1 -name '*.nfmap' 2>/dev/null | wc -l)
+        ok=true
+        if [ "$$tbl_count" -eq 0 ]; then
+          echo "ERROR: No .tbl files found in docker/game-data/tbl/"
+          ok=false
+        else
+          echo "  tbl: $$tbl_count file(s) found"
+        fi
+        if [ "$$map_count" -eq 0 ]; then
+          echo "ERROR: No .nfmap files found in docker/game-data/map/"
+          ok=false
+        else
+          echo "  map: $$map_count file(s) found"
+        fi
+        if [ "$$ok" = false ]; then
+          echo ""
+          echo "Run the extractor first:"
+          echo "  WILDSTAR_DIR=/path/to/WildStar docker compose --profile tools run --rm extractor"
+          exit 1
+        fi
+        echo "Asset check passed."
+
+  build-artifacts:
+    profiles:
+      - tools
+    build:
+      context: .
+      dockerfile: Dockerfile.Artifacts
+      target: final
+    image: nexusforever-artifacts:local
+    pull_policy: never
+    # Copies all five zip files to ./dist/artifacts/ on the host.
+    volumes:
+      - ./dist:/output
+    entrypoint: ["/bin/sh", "-c", "cp -rv /artifacts/. /output/ && echo 'Done. Artifacts are in ./dist/artifacts/'"]
+
+  launcher:
+    profiles:
+      - tools
+    build:
+      context: .
+      dockerfile: Dockerfile.Launcher
+    image: nexusforever-launcher:local
+    pull_policy: never
+    # Copies the published win-x64 artifacts to ./dist/Launcher/ on the host.
+    volumes:
+      - ./dist/Launcher:/output
+    entrypoint: ["/bin/sh", "-c", "cp -rv /artifacts/. /output/ && echo 'Done. Artifacts are in ./dist/Launcher/'"]
+
+  character-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: NexusForever.API.Character
+        RUNTIME_IMAGE: mcr.microsoft.com/dotnet/aspnet:10.0
+    image: nexusforever-character-api:local
+    pull_policy: never
+    restart: unless-stopped
+    networks:
+      - nf_net
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "${NEXUS_CHARACTER_API_PORT:-4000}:4000"
+    volumes:
+      - ./docker/config/CharacterAPI.json:/app/CharacterAPI.json:ro
+
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: NexusForever.AuthServer
+        RUNTIME_IMAGE: mcr.microsoft.com/dotnet/runtime:10.0
+    image: nexusforever-auth:local
+    pull_policy: never
+    user: root
+    restart: unless-stopped
+    networks:
+      - nf_net
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "${NEXUS_AUTH_PORT:-23115}:23115"
+    volumes:
+      - ./docker/config/AuthServer.json:/app/AuthServer.json:ro
+    # socat relays 127.0.0.1:24000 → world:24000 inside this container so that
+    # ServerManager.PingHostAsync() succeeds when server.host = '127.0.0.1'.
+    # The WildStar game client also connects to 127.0.0.1:24000 via the published port.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apt-get update -qq && apt-get install -y -qq socat > /dev/null 2>&1
+        socat TCP-LISTEN:24000,fork,reuseaddr TCP:world:24000 &
+        exec dotnet /app/$$ASSEMBLY
+
+  sts:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: NexusForever.StsServer
+        RUNTIME_IMAGE: mcr.microsoft.com/dotnet/runtime:10.0
+    image: nexusforever-sts:local
+    pull_policy: never
+    restart: unless-stopped
+    networks:
+      - nf_net
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "${NEXUS_STS_PORT:-6600}:6600"
+    volumes:
+      - ./docker/config/StsServer.json:/app/StsServer.json:ro
+
+  world:
+    profiles:
+      - game
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: NexusForever.WorldServer
+        RUNTIME_IMAGE: mcr.microsoft.com/dotnet/aspnet:10.0
+    image: nexusforever-world:local
+    pull_policy: never
+    restart: unless-stopped
+    networks:
+      - nf_net
+    depends_on:
+      check-assets:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "${NEXUS_WORLD_GAME_PORT:-24000}:24000"
+      - "${NEXUS_WORLD_HTTP_PORT:-5000}:5000"
+    environment:
+      # Ensures Kestrel binds on all interfaces inside the container (localhost-only breaks host access).
+      ASPNETCORE_URLS: http://0.0.0.0:5000
+    volumes:
+      - ./docker/config/WorldServer.json:/app/WorldServer.json:ro
+      - ./docker/game-data/tbl:/app/tbl:ro
+      - ./docker/game-data/cache:/app/cache
+      - ./docker/game-data/map:/app/map:ro
+
+  chat:
+    profiles:
+      - game
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: NexusForever.Server.ChatServer
+        RUNTIME_IMAGE: mcr.microsoft.com/dotnet/runtime:10.0
+    image: nexusforever-chat:local
+    pull_policy: never
+    restart: unless-stopped
+    networks:
+      - nf_net
+    depends_on:
+      check-assets:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      character-api:
+        condition: service_started
+    volumes:
+      - ./docker/config/ChatServer.json:/app/ChatServer.json:ro
+      - ./docker/game-data/tbl:/app/tbl:ro
+      - ./docker/game-data/cache:/app/cache
+
+  group:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: NexusForever.Server.GroupServer
+        RUNTIME_IMAGE: mcr.microsoft.com/dotnet/runtime:10.0
+    image: nexusforever-group:local
+    pull_policy: never
+    restart: unless-stopped
+    networks:
+      - nf_net
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      mariadb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      character-api:
+        condition: service_started
+    volumes:
+      - ./docker/config/GroupServer.json:/app/GroupServer.json:ro
+
+volumes:
+  mariadb_data:

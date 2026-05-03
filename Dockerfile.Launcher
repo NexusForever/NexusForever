@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1
+#
+# Builds NexusForever.Launcher as a self-contained Windows x64 executable.
+#
+# The Launcher is a WPF GUI application maintained in a separate repository:
+#   https://github.com/NexusForever/NexusForever.Launcher
+#
+# It runs on the *player's* Windows machine to connect to a NexusForever server.
+# This Dockerfile cross-compiles from a Linux SDK image (no Windows daemon needed).
+#
+# Usage (standalone):
+#   docker build -f Dockerfile.Launcher --output ./dist/Launcher .
+#
+# Or via docker-compose (see the `launcher` service in docker-compose.yml):
+#   docker compose --profile tools run --rm launcher
+# Artifacts are written to ./dist/Launcher/ on the host.
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+
+# git is needed to clone the Launcher repository.
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+RUN git clone --depth 1 https://github.com/NexusForever/NexusForever.Launcher.git launcher
+
+WORKDIR /src/launcher
+
+# Publish self-contained win-x64 WPF app.
+# WPF (net*-windows TFM) cross-compiles fine from the Linux SDK when targeting win-x64.
+RUN dotnet publish NexusForever.Launcher/NexusForever.Launcher.csproj \
+    --configuration Release \
+    --runtime win-x64 \
+    --self-contained true \
+    -p:PublishSingleFile=true \
+    -p:IncludeNativeLibrariesForSelfExtract=true \
+    -p:EnableWindowsTargeting=true \
+    --output /artifacts \
+    --verbosity minimal
+
+# ── Final stage ────────────────────────────────────────────────────────────────
+# Artifacts live at /artifacts.  The compose service copies them to the host via
+# a bind-mounted volume at /output.
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS final
+COPY --from=build /artifacts /artifacts
+WORKDIR /artifacts

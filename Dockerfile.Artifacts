@@ -1,0 +1,79 @@
+# syntax=docker/dockerfile:1
+#
+# Builds all five release artifacts as folders:
+#   AuthServer/
+#   ClientConnector/
+#   MapGenerator/
+#   StsServer/
+#   WorldServer/
+#
+# Usage (standalone — exports folders directly to ./dist/artifacts/):
+#   docker build -f Dockerfile.Artifacts --target export --output ./dist/artifacts .
+#
+# Or via docker-compose (copies folders to ./dist/artifacts/ on the host):
+#   docker compose --profile tools run --rm build-artifacts
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src/Source
+
+COPY Source/ .
+
+RUN dotnet restore NexusForever.slnx
+
+# ── AuthServer (linux-x64, framework-dependent) ───────────────────────────────
+RUN dotnet publish NexusForever.AuthServer/NexusForever.AuthServer.csproj \
+    --configuration Release \
+    --runtime linux-x64 \
+    --self-contained false \
+    --output /publish/AuthServer \
+    --verbosity minimal
+
+# ── StsServer (linux-x64, framework-dependent) ────────────────────────────────
+RUN dotnet publish NexusForever.StsServer/NexusForever.StsServer.csproj \
+    --configuration Release \
+    --runtime linux-x64 \
+    --self-contained false \
+    --output /publish/StsServer \
+    --verbosity minimal
+
+# ── WorldServer (linux-x64, framework-dependent) ──────────────────────────────
+RUN dotnet publish NexusForever.WorldServer/NexusForever.WorldServer.csproj \
+    --configuration Release \
+    --runtime linux-x64 \
+    --self-contained false \
+    --output /publish/WorldServer \
+    --verbosity minimal
+
+# ── MapGenerator (linux-x64, framework-dependent) ─────────────────────────────
+RUN dotnet publish NexusForever.MapGenerator/NexusForever.MapGenerator.csproj \
+    --configuration Release \
+    --runtime linux-x64 \
+    --self-contained false \
+    --output /publish/MapGenerator \
+    --verbosity minimal
+
+# ── ClientConnector (win-x64, framework-dependent) ────────────────────────────
+RUN dotnet publish NexusForever.ClientConnector/NexusForever.ClientConnector.csproj \
+    --configuration Release \
+    --runtime win-x64 \
+    --self-contained false \
+    --output /publish/ClientConnector \
+    --verbosity minimal
+
+# ── Final stage (compose): alpine with all folders under /artifacts ──────────
+FROM alpine:3 AS final
+COPY --from=build /publish/AuthServer      /artifacts/AuthServer
+COPY --from=build /publish/StsServer       /artifacts/StsServer
+COPY --from=build /publish/WorldServer     /artifacts/WorldServer
+COPY --from=build /publish/MapGenerator    /artifacts/MapGenerator
+COPY --from=build /publish/ClientConnector /artifacts/ClientConnector
+
+# ── Export target (standalone): bare folders, no shell needed ─────────────────
+# docker build -f Dockerfile.Artifacts --target export --output ./dist/artifacts .
+FROM scratch AS export
+COPY --from=build /publish/AuthServer      /AuthServer
+COPY --from=build /publish/StsServer       /StsServer
+COPY --from=build /publish/WorldServer     /WorldServer
+COPY --from=build /publish/MapGenerator    /MapGenerator
+COPY --from=build /publish/ClientConnector /ClientConnector
+
