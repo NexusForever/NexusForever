@@ -7,12 +7,12 @@ namespace NexusForever.Network.World.Message.Model.Friendship
     public class ServerFriendshipResult : IWritable
     {
         public string Message { get; set; } // In UI causes Event_FireGenericEvent("GenericEvent_SystemChannelMessage", strMessage) 
-        public FriendshipResult Results { get; set; } 
+        public FriendshipResult Result { get; set; } 
 
         public void Write(GamePacketWriter writer)
         {
             writer.WriteStringWide(Message);
-            writer.Write(Results, 6);
+            writer.Write(Result, 6);
         }
     }
 }

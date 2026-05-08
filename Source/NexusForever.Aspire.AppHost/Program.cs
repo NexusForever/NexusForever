@@ -18,11 +18,12 @@ internal class Program
             .WithPhpMyAdmin()
             .WithDataVolume("mysql-data");
 
-        var authdb      = mysql.AddDatabase("authdb");
-        var characterdb = mysql.AddDatabase("characterdb");
-        var worlddb     = mysql.AddDatabase("worlddb");
-        var groupdb     = mysql.AddDatabase("groupdb");
-        var chatdb      = mysql.AddDatabase("chatdb");
+        var authdb       = mysql.AddDatabase("authdb");
+        var characterdb  = mysql.AddDatabase("characterdb");
+        var worlddb      = mysql.AddDatabase("worlddb");
+        var groupdb      = mysql.AddDatabase("groupdb");
+        var chatdb       = mysql.AddDatabase("chatdb");
+        var friendshipdb = mysql.AddDatabase("friendshipdb");
 
         IResourceBuilder<ProjectResource> dbMigration = builder.AddProject<Projects.NexusForever_Aspire_Database_Migrations>("database-migrations")
             .WithReference(authdb)
@@ -30,11 +31,13 @@ internal class Program
             .WithReference(worlddb)
             .WithReference(groupdb)
             .WithReference(chatdb)
+            .WithReference(friendshipdb)
             .WaitFor(authdb)
             .WaitFor(characterdb)
             .WaitFor(worlddb)
             .WaitFor(groupdb)
-            .WaitFor(chatdb);
+            .WaitFor(chatdb)
+            .WaitFor(friendshipdb);
 
         builder.AddProject<Projects.NexusForever_AuthServer>("auth-server")
             .WithNexusForeverTcp(IPAddress.Any, 23115)
@@ -77,6 +80,12 @@ internal class Program
             }
         });
 
+        IResourceBuilder<ProjectResource> accountApi = builder.AddProject<Projects.NexusForever_API_Account>("account-api")
+            .WithNexusForeverHttp(4001)
+            .WithNexusForeverDatabase("Auth", DatabaseProvider.MySql, authdb.Resource)
+            .WaitFor(authdb)
+            .WaitForCompletion(dbMigration);
+
         IResourceBuilder<ProjectResource> characterApi = builder.AddProject<Projects.NexusForever_API_Character>("character-api")
             .WithNexusForeverHttp(4000)
             .WithNexusForeverDatabase("Auth", DatabaseProvider.MySql, authdb.Resource)
@@ -102,6 +111,23 @@ internal class Program
             .WaitFor(rmq)
             .WaitFor(chatdb)
             .WaitForCompletion(dbMigration)
+            .WaitFor(characterApi);
+
+        builder.AddProject<Projects.NexusForever_Server_Friendship>("friendship-server")
+            .WithNexusForeverDatabase("Friendship", DatabaseProvider.MySql, friendshipdb.Resource)
+            .WithNexusForeverMessageBroker("FriendshipServer", BrokerProvider.RabbitMQ, rmq.Resource)
+            .WithNexusForeverApi("Account", accountApi.Resource)
+            .WithNexusForeverApi("Character", characterApi.Resource)
+            .WaitFor(rmq)
+            .WaitFor(friendshipdb)
+            .WaitForCompletion(dbMigration)
+            .WaitFor(accountApi)
+            .WaitFor(characterApi);
+
+        builder.AddProject<Projects.NexusForever_Server_Character>("character-server")
+            .WithNexusForeverMessageBroker("CharacterServer", BrokerProvider.RabbitMQ, rmq.Resource)
+            .WithNexusForeverApi("Character", characterApi.Resource)
+            .WaitFor(rmq)
             .WaitFor(characterApi);
 
         DistributedApplication host = builder.Build();

@@ -923,6 +923,11 @@ namespace NexusForever.Game.Entity
                         if (Map != null)
                             RemoveFromMap();
 
+                        messagePublisher.PublishAsync(new PlayerLoggedOutMessage
+                        {
+                            Identity = Identity.ToInternalIdentity()
+                        }).FireAndForgetAsync();
+
                         Dispose();
                     });
                 }
@@ -961,7 +966,8 @@ namespace NexusForever.Game.Entity
 
             messagePublisher.PublishAsync(new PlayerLoggedInMessage
             {
-                Identity = Identity.ToInternalIdentity()
+                Identity  = Identity.ToInternalIdentity(),
+                AccountId = Account.Id
             }).FireAndForgetAsync();
         }
 
@@ -973,11 +979,6 @@ namespace NexusForever.Game.Entity
             matchManager.OnLogout(this);
 
             IsOnline = false;
-
-            messagePublisher.PublishAsync(new PlayerLoggedOutMessage
-            {
-                Identity = Identity.ToInternalIdentity()
-            }).FireAndForgetAsync();
 
             scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }
