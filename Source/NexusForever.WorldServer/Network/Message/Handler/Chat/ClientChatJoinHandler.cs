@@ -2,7 +2,7 @@
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {

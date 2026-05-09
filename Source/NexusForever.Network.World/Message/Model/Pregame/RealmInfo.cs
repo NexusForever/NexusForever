@@ -29,13 +29,13 @@ namespace NexusForever.Network.World.Message.Model.Pregame
         public RealmType Type { get; set; }
         public RealmStatus Status { get; set; }
         public RealmPopulation Population { get; set; }
-        public uint Unknown7 { get; set; }
-        public byte[] Unknown8 { get; set; }
+        public uint Unused1 { get; set; }
+        public byte[] Unused2 { get; set; } = new byte[16];
         public AccountRealmData AccountRealmInfo { get; set; }
-        public ushort UnknownC { get; set; }
-        public ushort UnknownD { get; set; }
-        public ushort UnknownE { get; set; }
-        public ushort UnknownF { get; set; }
+        public ushort Unused3 { get; set; }
+        public ushort Unused4 { get; set; }
+        public ushort Unused5 { get; set; }
+        public ushort Unused6 { get; set; }
 
         public virtual void Write(GamePacketWriter writer)
         {
@@ -46,13 +46,13 @@ namespace NexusForever.Network.World.Message.Model.Pregame
             writer.Write(Type, 2u);
             writer.Write(Status, 3u);
             writer.Write(Population, 3u);
-            writer.Write(Unknown7);
-            writer.WriteBytes(Unknown8, 16u);
+            writer.Write(Unused1);
+            writer.WriteBytes(Unused2, 16u);
             AccountRealmInfo.Write(writer);
-            writer.Write(UnknownC);
-            writer.Write(UnknownD);
-            writer.Write(UnknownE);
-            writer.Write(UnknownF);
+            writer.Write(Unused3);
+            writer.Write(Unused4);
+            writer.Write(Unused5);
+            writer.Write(Unused6);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace NexusForever.Network.World.Message.Model.Story
             public virtual void Write(GamePacketWriter writer)
             {
                 writer.Write(TokenReplacementValue);
-                writer.WriteStringChar(TokenName);
+                writer.WriteString(TokenName);
             }
         }
 

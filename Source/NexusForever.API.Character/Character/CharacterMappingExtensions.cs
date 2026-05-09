@@ -38,7 +38,7 @@ namespace NexusForever.API.Character.Character
                 },
                 IsOnline   = model.IsOnline,
                 LastOnline = !model.IsOnline ? model.LastOnline : null,
-                Stats = model.Stat.Select(stat => new Model.Character.CharacterStat
+                Stats      = model.Stat.Select(stat => new Model.Character.CharacterStat
                 {
                     Stat  = (Stat)stat.Stat,
                     Value = stat.Value,

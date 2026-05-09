@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Who;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {

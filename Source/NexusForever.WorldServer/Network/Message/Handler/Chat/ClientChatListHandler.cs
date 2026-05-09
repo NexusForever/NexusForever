@@ -2,7 +2,7 @@
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             messagePublisher.PublishAsync(new ChatChannelMembersRequestMessage
             {
                 Identity = session.Player.Identity.ToInternalIdentity(),
-                Type     = chatList.Channel.Type,
+                Type     = chatList.Channel.ChatChannelId,
                 ChatId   = chatList.Channel.ChatId != 0 ? chatList.Channel.ChatId : null
             }).FireAndForgetAsync();
         }

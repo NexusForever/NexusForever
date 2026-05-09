@@ -67,7 +67,6 @@ namespace NexusForever.WorldServer
                     sc.AddOptions<ScriptConfig>()
                         .Bind(hb.Configuration.GetSection("Script"));
 
-                    sc.AddNetworkInternal();
                     sc.AddNetworkInternalBroker(hb.Configuration.GetSection("Network:Internal").Get<BrokerConfig>());
                     sc.AddNetworkInternalHandlers();
 

@@ -1,10 +1,9 @@
 ﻿using System.Text;
 using NexusForever.Game.Abstract.Chat;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.GameTable;
 using NexusForever.Network.World.Chat.Model;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Chat;
 using NetworkIdentity = NexusForever.Network.World.Message.Model.Shared.Identity;
 
 namespace NexusForever.Game.Chat
@@ -57,7 +56,7 @@ namespace NexusForever.Game.Chat
                 StopIndex   = (ushort)builder.Length,
                 Model       = new ChatFormatItemId
                 {
-                    ItemId = itemId
+                    Item2Id = itemId
                 }
             });
         }
@@ -78,7 +77,7 @@ namespace NexusForever.Game.Chat
                 StopIndex   = (ushort)builder.Length,
                 Model       = new ChatFormatQuestId
                 {
-                    QuestId = questId
+                    Quest2Id = questId
                 }
             });
         }
@@ -92,7 +91,7 @@ namespace NexusForever.Game.Chat
             {
                 Channel       = new Channel
                 {
-                    Type   = Type,
+                    ChatChannelId = Type,
                     ChatId = ChatId
                 },
                 GM            = GM,
@@ -109,7 +108,7 @@ namespace NexusForever.Game.Chat
                 Text          = builder.ToString(),
                 Formats       = Formats,
                 CrossFaction  = CrossFaction,
-                Guid          = Guid,
+                UnitId          = Guid,
                 PremiumTier   = PremiumTier
             };
         }

@@ -170,10 +170,10 @@ namespace NexusForever.Network
             return Encoding.Unicode.GetString(data);
         }
 
-        public string ReadCharString()
+        public string ReadString()
         {
             bool extended = ReadBit();
-            ushort length = (ushort)(ReadUShort(extended ? 15u : 7u));
+            ushort length = ReadUShort(extended ? 15u : 7u);
 
             byte[] data = ReadBytes(length);
             return Encoding.ASCII.GetString(data);

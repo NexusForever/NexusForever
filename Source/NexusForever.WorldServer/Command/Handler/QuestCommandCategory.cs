@@ -7,7 +7,7 @@ using NexusForever.Game.Chat;
 using NexusForever.Game.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;

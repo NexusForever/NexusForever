@@ -6,7 +6,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Text.Search;
