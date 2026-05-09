@@ -30,7 +30,7 @@ namespace NexusForever.Game.Entity
 
             if (model.EntityVendor != null)
             {
-                CreateFlags |= EntityCreateFlag.Vendor;
+                CreateFlags |= EntityCreateFlag.HasInteractionPrereq;
                 VendorInfo = new VendorInfo(model);
             }
         }

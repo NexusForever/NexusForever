@@ -8,7 +8,7 @@ A server emulator for WildStar written in C# that supports build 16042.
 [Server Setup Guide](https://www.emulator.ws/installation/server-guide)
 
 ### Requirements
- * Visual Studio 2022 (.NET 9 and C# 13 support required)
+ * Visual Studio 2026 (.NET 10 and C# 14 support required)
  * MySQL Server (or equivalent, eg: MariaDB)
  * Message Broker (RabbitMQ or Azure Service Bus)
  * WildStar 16042 client

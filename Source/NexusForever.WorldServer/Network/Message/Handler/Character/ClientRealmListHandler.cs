@@ -43,7 +43,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                     Type             = (RealmType)server.Model.Type,
                     Status           = status,
                     Population       = RealmPopulation.Low,
-                    Unknown8         = new byte[16],
                     AccountRealmInfo = new RealmInfo.AccountRealmData
                     {
                         RealmId = server.Model.Id

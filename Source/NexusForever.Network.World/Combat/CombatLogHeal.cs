@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Combat
 
         public uint HealAmount { get; set; }
         public uint Overheal { get; set; }
-        public uint Unknown0 { get; set; }
+        public uint Absorption { get; set; } // not used by client
         public SpellEffectType EffectType { get; set; } // 8u
         public CombatLogCastData CastData { get; set; }
 
@@ -17,7 +17,7 @@ namespace NexusForever.Network.World.Combat
         {
             writer.Write(HealAmount);
             writer.Write(Overheal);
-            writer.Write(Unknown0);
+            writer.Write(Absorption);
             writer.Write(EffectType, 8u);
             CastData.Write(writer);
         }

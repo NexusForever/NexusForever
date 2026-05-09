@@ -7,13 +7,13 @@ namespace NexusForever.Network.World.Message.Model.Pregame
     [Message(GameMessageOpcode.ServerRealmList)]
     public class ServerRealmList : IWritable
     {
-        public ulong Unknown0 { get; set; }
+        public ulong Unused { get; set; }
         public List<RealmInfo> Realms { get; set; } = [];
         public List<NetworkMessage> Messages { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0);
+            writer.Write(Unused);
             writer.Write(Realms.Count);
             Realms.ForEach(s => s.Write(writer));
             writer.Write(Messages.Count);

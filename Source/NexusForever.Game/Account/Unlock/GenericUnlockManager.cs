@@ -4,10 +4,10 @@ using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Account.Unlock;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.GenericUnlock;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.GenericUnlock;
 
 namespace NexusForever.Game.Account.Unlock
 {
@@ -54,7 +54,7 @@ namespace NexusForever.Game.Account.Unlock
             unlocks.Add(genericUnlockEntryId, new GenericUnlock(account, entry));
 
             SendUnlock(genericUnlockEntryId);
-            SendUnlockResult(GenericUnlockResult.Unlocked);
+            SendUnlockResult(GenericUnlockResult.Granted);
         }
 
         /// <summary>
@@ -112,9 +112,9 @@ namespace NexusForever.Game.Account.Unlock
         /// </summary>
         public void SendUnlockList()
         {
-            account.Session.EnqueueMessageEncrypted(new ServerGenericUnlockList
+            account.Session.EnqueueMessageEncrypted(new ServerGenericUnlockAccountList
             {
-                Unlocks = unlocks.Keys.ToList()
+                GenericUnlockEntryIds = unlocks.Keys.ToList()
             });
         }
 

@@ -3,8 +3,7 @@ using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Internal.Message.Chat.Shared;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Chat;
 using Rebus.Handlers;
 
 namespace NexusForever.WorldServer.Network.Internal.Handler.Chat
@@ -29,9 +28,10 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Chat
             {
                 Channel = new Channel
                 {
-                    Type   = message.Channel.Type,
+                    ChatChannelId = message.Channel.Type,
                     ChatId = message.Channel.ChatId
                 },
+
                 Action    = message.Action,
                 NameActor = message.Source.Character.IdentityName.Name
             };

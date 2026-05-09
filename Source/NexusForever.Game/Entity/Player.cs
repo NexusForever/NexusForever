@@ -9,7 +9,6 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
-using NexusForever.Game.Abstract.Entity.Movement.Spline;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -27,13 +26,13 @@ using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
+using NexusForever.Game.Static.Option;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Option;
-using NexusForever.Game.Static.Social;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -44,6 +43,8 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Abilities;
+using NexusForever.Network.World.Message.Model.Chat;
+using NexusForever.Network.World.Message.Model.Info;
 using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
@@ -922,6 +923,11 @@ namespace NexusForever.Game.Entity
                         if (Map != null)
                             RemoveFromMap();
 
+                        messagePublisher.PublishAsync(new PlayerLoggedOutMessage
+                        {
+                            Identity = Identity.ToInternalIdentity()
+                        }).FireAndForgetAsync();
+
                         Dispose();
                     });
                 }
@@ -960,7 +966,8 @@ namespace NexusForever.Game.Entity
 
             messagePublisher.PublishAsync(new PlayerLoggedInMessage
             {
-                Identity = Identity.ToInternalIdentity()
+                Identity  = Identity.ToInternalIdentity(),
+                AccountId = Account.Id
             }).FireAndForgetAsync();
         }
 
@@ -972,11 +979,6 @@ namespace NexusForever.Game.Entity
             matchManager.OnLogout(this);
 
             IsOnline = false;
-
-            messagePublisher.PublishAsync(new PlayerLoggedOutMessage
-            {
-                Identity = Identity.ToInternalIdentity()
-            }).FireAndForgetAsync();
 
             scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }
@@ -1188,7 +1190,12 @@ namespace NexusForever.Game.Entity
             {
                 Channel = new Channel
                 {
-                    Type = ChatChannelType.System
+                    ChatChannelId = ChatChannelType.System
+                },
+                From = new Network.World.Message.Model.Shared.Identity
+                {
+                    Id = 0,
+                    RealmId = 0,
                 },
                 Text = text
             });

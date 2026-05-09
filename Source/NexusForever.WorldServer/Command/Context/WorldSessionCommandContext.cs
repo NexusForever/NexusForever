@@ -4,7 +4,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Chat;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.WorldServer.Network;
 
 namespace NexusForever.WorldServer.Command.Context

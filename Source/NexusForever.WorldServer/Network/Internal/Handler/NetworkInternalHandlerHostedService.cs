@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using NexusForever.Network.Internal.Message.Chat;
+using NexusForever.Network.Internal.Message.Friendship;
 using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Network.Internal.Message.Player;
 using Rebus.Bus;
@@ -35,6 +36,31 @@ namespace NexusForever.WorldServer.Network.Internal.Handler
             await bus.Subscribe<ChatWhisperFailedMessage>();
             await bus.Subscribe<ChatWhisperTextMessage>();
 
+            await bus.Subscribe<FriendshipAccountInviteListMessage>();
+            await bus.Subscribe<FriendshipAccountInviteRemovedMessage>();
+            await bus.Subscribe<FriendshipAccountLastOnlineUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountLevelUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountListMessage>();
+            await bus.Subscribe<FriendshipAccountLocationsUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountNicknameUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountNoteUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountPersonalStatusUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountPresenceUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountRemovedMessage>();
+            await bus.Subscribe<FriendshipAccountStatusUpdatedMessage>();
+            await bus.Subscribe<FriendshipAccountUpdatedMessage>();
+            await bus.Subscribe<FriendshipAddedMessage>();
+            await bus.Subscribe<FriendshipInviteListMessage>();
+            await bus.Subscribe<FriendshipInviteRemovedMessage>();
+            await bus.Subscribe<FriendshipLastOnlineUpdatedMessage>();
+            await bus.Subscribe<FriendshipLevelUpdatedMessage>();
+            await bus.Subscribe<FriendshipListMessage>();
+            await bus.Subscribe<FriendshipLocationsUpdatedMessage>();
+            await bus.Subscribe<FriendshipNoteUpdatedMessage>();
+            await bus.Subscribe<FriendshipRemovedMessage>();
+            await bus.Subscribe<FriendshipResultMessage>();
+            await bus.Subscribe<FriendshipTypeUpdatedMessage>();
+
             await bus.Subscribe<GroupActionResultMessage>();
             await bus.Subscribe<GroupFlagsUpdatedMessage>();
             await bus.Subscribe<GroupLootRulesUpdatedMessage>();
@@ -56,6 +82,7 @@ namespace NexusForever.WorldServer.Network.Internal.Handler
             await bus.Subscribe<GroupReadyCheckStartedMessage>();
 
             await bus.Subscribe<PlayerGroupAssociationUpdatedMessage>();
+            await bus.Subscribe<PlayerInfoResponseMessage>();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
