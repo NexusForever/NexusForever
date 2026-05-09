@@ -38,6 +38,7 @@ namespace NexusForever.Server.Friendship.Game.Character
                 AccountId    = character.AccountId,
                 Race         = character.Race,
                 Class        = character.Class,
+                Path         = character.Path,
                 Faction      = character.Faction,
                 WorldZoneId  = character.WorldZoneId,
                 WorldId      = character.WorldId,
