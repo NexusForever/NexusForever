@@ -1,6 +1,6 @@
 ﻿using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Story
+namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerUnitInUse)]
     public class ServerUnitInUse : IWritable

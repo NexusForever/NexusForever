@@ -6,6 +6,6 @@
         Exiles    = 0x1,
         Dominion  = 0x2,
         Drusera   = 0x3,
-        TheEntity = 0x4,
+        TheEntity = 0x4
     };
 }

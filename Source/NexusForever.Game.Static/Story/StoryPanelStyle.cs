@@ -9,7 +9,6 @@
         Arcane     = 0x4,
         Natural    = 0x5,
         Exile      = 0x6,
-        Dominion   = 0x7,
+        Dominion   = 0x7
     };
-
 }

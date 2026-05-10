@@ -3,14 +3,14 @@
 namespace NexusForever.Network.World.Message.Model.Story
 {
     // Appears over the player's unit
-    [Message(GameMessageOpcode.ServerGenericFloaterLocalized)]
-    public class ServerGenericFloaterLocalized : IWritable
+    [Message(GameMessageOpcode.ServerGenericFloaterLocalised)]
+    public class ServerGenericFloaterLocalised : IWritable
     {
-        public uint LocalizedStringId { get; set; }
+        public uint LocalisedTextId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(LocalizedStringId);
+            writer.Write(LocalisedTextId);
         }
     }
 }

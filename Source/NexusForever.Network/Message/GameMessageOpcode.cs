@@ -671,7 +671,7 @@ namespace NexusForever.Network.Message
         ClientCinematicCameraSubjectUnit = 0x071F,
         ClientCinematicState            = 0x0720,
         ClientCinematicWhiteOutFinished = 0x0721,
-        ServerGenericFloaterLocalized   = 0x0723,
+        ServerGenericFloaterLocalised   = 0x0723,
         ServerGenericFloaterString      = 0x0724,
         ServerGenericMapNode            = 0x0737,
         ServerGenericFloaterComplex     = 0x0738,

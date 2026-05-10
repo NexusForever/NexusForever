@@ -1,4 +1,5 @@
 ﻿using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Story.Message;
 
 namespace NexusForever.Network.World.Message.Model.Story
 {
@@ -7,13 +8,13 @@ namespace NexusForever.Network.World.Message.Model.Story
     [Message(GameMessageOpcode.ServerGenericFloaterComplex)]
     public class ServerGenericFloaterComplex : IWritable
     {
-        public uint LocalizedTextId { get; set; }
+        public uint LocalisedTextId { get; set; }
         public uint RandomTextLineId { get; set; }
         public List<StoryMessage> Messages { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(LocalizedTextId);
+            writer.Write(LocalisedTextId);
             writer.Write(RandomTextLineId);
             writer.Write(Messages.Count, 8u);
             Messages.ForEach(message => message.Write(writer));

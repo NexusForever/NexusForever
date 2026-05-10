@@ -1,5 +1,6 @@
 ﻿using NexusForever.Game.Static.Story;
 using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Story.Message;
 
 namespace NexusForever.Network.World.Message.Model.Story
 {
@@ -8,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model.Story
     {
         public StoryMessage StoryMessage { get; set; }
         public uint SoundContextEventId { get; set; }
-        public StoryPanel StoryPanelType { get; set; }
+        public StoryPanelType StoryPanelType { get; set; }
         public uint DurationMS { get; set; }
         public StoryPanelStyle StoryPanelStyle { get; set; }
 

@@ -6,8 +6,10 @@ namespace NexusForever.Network.World.Message.Model.Story
     public class ServerCommunicatorMessage : IWritable
     {
         public ushort CommunicatorMessagesId { get; set; }
-        public bool CheckConditions { get; set; } // If false, this will make the message appear even if the player doesn't meet the
-                                                  // conditions for the message
+
+        // If false, this will make the message appear even if the player doesn't meet the
+        // conditions for the message
+        public bool CheckConditions { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
