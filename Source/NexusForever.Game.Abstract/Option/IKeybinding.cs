@@ -4,7 +4,7 @@ using NexusForever.Database.Character;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Game.Abstract.Setting
+namespace NexusForever.Game.Abstract.Option
 {
     public interface IKeybinding : IDatabaseCharacter, IDatabaseState, IDatabaseAuth, INetworkBuildable<Binding>
     {

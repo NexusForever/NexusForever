@@ -3,12 +3,12 @@ using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
-using NexusForever.Game.Abstract.Setting;
-using NexusForever.Game.Static.Setting;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Game.Abstract.Option;
+using NexusForever.Game.Static.Option;
+using NexusForever.Network.World.Message.Model.Option;
 using NetworkBinding = NexusForever.Network.World.Message.Model.Shared.Binding;
 
-namespace NexusForever.Game.Setting
+namespace NexusForever.Game.Option
 {
     // TODO: split this further to seperate character and account keybind specific methods
     public class KeybindingSet : IKeybindingSet

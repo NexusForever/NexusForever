@@ -1,8 +1,8 @@
 ﻿using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Option;
 
-namespace NexusForever.Game.Abstract.Setting
+namespace NexusForever.Game.Abstract.Option
 {
     public interface IKeybindingManager : IDatabaseAuth, IDatabaseCharacter
     {

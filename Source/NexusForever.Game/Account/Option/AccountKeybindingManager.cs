@@ -1,11 +1,11 @@
 ﻿using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Game.Abstract.Account.Setting;
-using NexusForever.Game.Abstract.Setting;
-using NexusForever.Game.Setting;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Game.Abstract.Account.Option;
+using NexusForever.Game.Abstract.Option;
+using NexusForever.Game.Option;
+using NexusForever.Network.World.Message.Model.Option;
 
-namespace NexusForever.Game.Account.Setting
+namespace NexusForever.Game.Account.Option
 {
     public class AccountKeybindingManager : IAccountKeybindingManager
     {

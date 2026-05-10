@@ -1,12 +1,13 @@
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Shared;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Option
 {
+    // If sent without a CharacterId, applies to all characters on the account
     [Message(GameMessageOpcode.BiInputKeySet)]
     public class BiInputKeySet : IReadable, IWritable
     {
-        public List<Binding> Bindings { get; set; } = new();
+        public List<Binding> Bindings { get; set; } = [];
         public ulong CharacterId { get; set; }
 
         public void Read(GamePacketReader reader)
