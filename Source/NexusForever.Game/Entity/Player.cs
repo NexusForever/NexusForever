@@ -47,6 +47,7 @@ using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Network.World.Message.Model.Info;
 using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Story;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
 using NexusForever.Script.Template;
@@ -1128,7 +1129,7 @@ namespace NexusForever.Game.Entity
             currentChairGuid = chair.Guid;
 
             // TODO: Emit interactive state from the entity instance itself
-            chair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            chair.EnqueueToVisible(new ServerUnitInUse
             {
                 UnitId = chair.Guid,
                 InUse  = true
@@ -1154,7 +1155,7 @@ namespace NexusForever.Game.Entity
                 throw new InvalidOperationException();
 
             // TODO: Emit interactive state from the entity instance itself
-            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            currentChair.EnqueueToVisible(new ServerUnitInUse
             {
                 UnitId = currentChair.Guid,
                 InUse  = false

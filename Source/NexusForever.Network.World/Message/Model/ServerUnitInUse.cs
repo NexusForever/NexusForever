@@ -2,8 +2,8 @@
 
 namespace NexusForever.Network.World.Message.Model
 {
-    [Message(GameMessageOpcode.ServerEntityInteractiveUpdate)]
-    public class ServerEntityInteractiveUpdate : IWritable
+    [Message(GameMessageOpcode.ServerUnitInUse)]
+    public class ServerUnitInUse : IWritable
     {
         public uint UnitId { get; set; }
         public bool InUse { get; set; }
