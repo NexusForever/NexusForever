@@ -23,6 +23,7 @@
         [UserText(UserTextFlags.NoSpace | UserTextFlags.Unknown20, 20u, 1u)]
         ChatCustomChannelName        = 10,
         ReadyCheck                   = 11,
+        [UserText(UserTextFlags.Unknown80, 32u, 0u)]
         FriendshipNote               = 12,
         [UserText(UserTextFlags.Unknown80, 20u, 0u)]
         ChatCustomChannelPassword    = 13,
@@ -33,10 +34,15 @@
         GuildRecruitDescription      = 16,
         [UserText(UserTextFlags.AllowMultiline | UserTextFlags.Unknown80, 400u, 0u)]
         GuildInfoMessage             = 17,
+        [UserText(UserTextFlags.NoSpace | UserTextFlags.Unknown20, 32u, 2u)]
         FriendshipAccountName        = 18,
+        [UserText(UserTextFlags.Unknown80, 64u, 0u)]
         FriendshipAccountPrivateNote = 19,
+        [UserText(UserTextFlags.Unknown80, 128u, 0u)]
         FriendshipAccountPublicNote  = 20,
+        [UserText(UserTextFlags.NoSpace, 250u, 5u)]
         FriendshipAccountEmail       = 21,
+        [UserText(UserTextFlags.Unknown80, 128u, 0u)]
         FriendshipInviteNote         = 22,
         PlayerTicketText             = 24,
         [UserText(UserTextFlags.NoStartEndSpace | UserTextFlags.Unknown4 | UserTextFlags.NoSpace | UserTextFlags.Unknown100, 29u, 1u)]

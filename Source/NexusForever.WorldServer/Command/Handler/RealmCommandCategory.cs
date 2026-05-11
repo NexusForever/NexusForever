@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game;
 using NexusForever.Game.Chat;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Network.Session;
 using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;

@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Utility;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Misc
 {
@@ -31,7 +32,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Misc
 
             session.EnqueueMessageEncrypted(new ServerRandomRollResponse
             {
-                TargetPlayerIdentity = session.Player.Identity.ToNetworkIdentity(),
+                RollerIdentity       = session.Player.Identity.ToNetworkIdentity(),
                 MinRandom            = randomRoll.MinRandom,
                 MaxRandom            = randomRoll.MaxRandom,
                 RandomRollResult     = Random.Shared.Next((int)randomRoll.MinRandom, (int)randomRoll.MaxRandom)

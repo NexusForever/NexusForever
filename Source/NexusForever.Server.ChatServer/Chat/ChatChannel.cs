@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using NexusForever.Database;
 using NexusForever.Database.Chat.Model;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.GameTable.Text.Filter;
 using NexusForever.GameTable.Text.Static;
 using NexusForever.Network.Internal.Message.Chat;

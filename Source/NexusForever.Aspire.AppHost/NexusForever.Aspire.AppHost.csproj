@@ -1,4 +1,4 @@
-﻿<Project Sdk="Aspire.AppHost.Sdk/13.0.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.3.0">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,12 +16,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NexusForever.API.Account\NexusForever.API.Account.csproj" />
     <ProjectReference Include="..\NexusForever.API.Character\NexusForever.API.Character.csproj" />
     <ProjectReference Include="..\NexusForever.Aspire.Database.Migrations\NexusForever.Aspire.Database.Migrations.csproj" />
     <ProjectReference Include="..\NexusForever.AuthServer\NexusForever.AuthServer.csproj" />
     <ProjectReference Include="..\NexusForever.Database\NexusForever.Database.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\NexusForever.Network.Internal\NexusForever.Network.Internal.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\NexusForever.Server.Character\NexusForever.Server.Character.csproj" />
     <ProjectReference Include="..\NexusForever.Server.ChatServer\NexusForever.Server.ChatServer.csproj" />
+    <ProjectReference Include="..\NexusForever.Server.Friendship\NexusForever.Server.Friendship.csproj" />
     <ProjectReference Include="..\NexusForever.Server.GroupServer\NexusForever.Server.GroupServer.csproj" />
     <ProjectReference Include="..\NexusForever.StsServer\NexusForever.StsServer.csproj" />
     <ProjectReference Include="..\NexusForever.WorldServer\NexusForever.WorldServer.csproj" />
