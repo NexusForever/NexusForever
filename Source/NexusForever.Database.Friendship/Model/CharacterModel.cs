@@ -12,7 +12,7 @@ namespace NexusForever.Database.Friendship.Model
         public uint AccountId { get; set; }
         public Race Race { get; set; }
         public Class Class { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
         public Faction Faction { get; set; }
         public ushort WorldZoneId { get; set; }
         public uint WorldId { get; set; }

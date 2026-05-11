@@ -1,6 +1,6 @@
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Network.World.Message.Model.Info
 {

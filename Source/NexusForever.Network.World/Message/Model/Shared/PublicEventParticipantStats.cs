@@ -10,7 +10,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public uint UnitId { get; set; }
         public Identity Player { get; set; }
         public Class Class { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
         public PublicEventStats Stats { get; set; }
 
         public void Write(GamePacketWriter writer)

@@ -11,7 +11,7 @@ namespace NexusForever.Network.World.Message.Model.Friendship
         public Identity PlayerIdentity  { get; set; } = new();
         public Class Class { get; set; }
         public Race Race  { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
         public uint Level { get; set; }
         public ushort WorldZoneId { get; set; }
         public Faction Faction { get; set; }

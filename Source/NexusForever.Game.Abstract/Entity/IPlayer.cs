@@ -28,7 +28,7 @@ namespace NexusForever.Game.Abstract.Entity
         Race Race { get; set; }
         Class Class { get; }
         CharacterFlag Flags { get; set; }
-        Static.Entity.Path Path { get; set; }
+        Static.PlayerPath.Path Path { get; set; }
         DateTime PathActivatedTime { get; }
         InputSets InputKeySet { get; set; }
         byte InnateIndex { get; set; }

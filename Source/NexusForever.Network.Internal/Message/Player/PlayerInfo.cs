@@ -8,7 +8,7 @@ namespace NexusForever.Network.Internal.Message.Player
     {
         public IdentityName IdentityName { get; set; }
         public Class Class { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
         public Faction Faction { get; set; }
         public byte Level { get; set; }
         public DateTime? LastOnline { get; set; }

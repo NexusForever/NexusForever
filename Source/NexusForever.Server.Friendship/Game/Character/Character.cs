@@ -41,7 +41,7 @@ namespace NexusForever.Server.Friendship.Game.Character
 
         public Class Class => Model.Class;
 
-        public NexusForever.Game.Static.Entity.Path Path => Model.Path;
+        public NexusForever.Game.Static.PlayerPath.Path Path => Model.Path;
 
         public Faction Faction => Model.Faction;
 

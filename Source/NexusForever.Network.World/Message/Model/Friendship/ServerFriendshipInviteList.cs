@@ -16,7 +16,7 @@ namespace NexusForever.Network.World.Message.Model.Friendship
             public string Note { get; set; }
             public string Name { get; set; }
             public Class Class { get; set; } 
-            public Game.Static.Entity.Path Path { get; set; }
+            public Game.Static.PlayerPath.Path Path { get; set; }
             public byte Level { get; set; }
 
             public void Write(GamePacketWriter writer)

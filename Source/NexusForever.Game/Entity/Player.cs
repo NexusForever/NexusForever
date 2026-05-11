@@ -47,7 +47,6 @@ using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Network.World.Message.Model.Info;
 using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Network.World.Message.Model.Shared;
-using NexusForever.Network.World.Message.Model.Story;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
 using NexusForever.Script.Template;
@@ -56,7 +55,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Game.Entity
 {

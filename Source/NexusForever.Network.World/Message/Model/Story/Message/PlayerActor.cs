@@ -14,7 +14,7 @@ namespace NexusForever.Network.World.Message.Model.Story.Message
         public Race Race { get; set; }
         public Class Class { get; set; }
         public Faction Faction { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
         public ushort TitleId { get; set; }
 
         public override void Write(GamePacketWriter writer)

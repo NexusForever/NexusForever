@@ -1,7 +1,7 @@
 ﻿using NexusForever.Game.Static.Account;
 using NexusForever.GameTable;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.PlayerPath;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Path
