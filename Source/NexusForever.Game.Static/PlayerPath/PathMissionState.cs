@@ -5,6 +5,6 @@
         NoMission = 0,
         Unlocked  = 2,
         Started   = 3,
-        Complete  = 4,
+        Complete  = 4
     };
 }

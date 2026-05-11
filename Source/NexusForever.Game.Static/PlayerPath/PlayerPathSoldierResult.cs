@@ -11,6 +11,6 @@
         FailLostResources  = 3,
         FailParticipation  = 7,
         ScriptCancel       = 8,
-        Success            = 9,
+        Success            = 9
     };
 }

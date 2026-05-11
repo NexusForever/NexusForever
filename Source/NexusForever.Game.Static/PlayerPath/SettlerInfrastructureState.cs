@@ -4,6 +4,6 @@
     {
         Inactive = 0,
         Building = 1,
-        Built    = 2,
+        Built    = 2
     };
 }

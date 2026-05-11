@@ -5,6 +5,6 @@
         Inactive     = 0,
         Setup        = 1,
         InitialDelay = 2,
-        Active       = 3,
+        Active       = 3
     }
 }
