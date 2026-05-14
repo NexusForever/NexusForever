@@ -135,7 +135,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 
         private bool FilterByPath(WhoParameter whoParameter, IPlayer playerCandidate)
         {
-            Game.Static.Entity.Path? pathId = null;
+            Game.Static.PlayerPath.Path? pathId = null;
             if (whoParameter.Type == WhoParameterType.Path)
             {
                 WhoParameterPath pathData = whoParameter.Data as WhoParameterPath;
@@ -267,7 +267,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             {
                 inferredFilterStrategy = ComboFilterStrategy.Class;
             }
-            else if (comboData.PathId != Game.Static.Entity.Path.None)
+            else if (comboData.PathId != Game.Static.PlayerPath.Path.None)
             {
                 inferredFilterStrategy = ComboFilterStrategy.Path;
             }

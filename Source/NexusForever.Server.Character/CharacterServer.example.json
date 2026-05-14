@@ -1,0 +1,14 @@
+{
+    "Network": {
+        "Internal": {
+            "Broker": "RabbitMQ",
+            "ConnectionString": "amqp://nexusforever:nexusforever@localhost:5672",
+            "InputQueue": "CharacterServer_1"
+        }
+    },
+    "API": {
+        "Character": {
+            "Host": "http://localhost:4000"
+        }
+    }
+}

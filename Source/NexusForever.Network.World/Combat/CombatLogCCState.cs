@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Combat;
+using NexusForever.Game.Static.Combat.CrowdControl;
 
 namespace NexusForever.Network.World.Combat
 {
@@ -6,11 +7,11 @@ namespace NexusForever.Network.World.Combat
     {
         public CombatLogType Type => CombatLogType.CCState;
 
-        public byte State { get; set; } // 5u
+        public CCState State { get; set; } // 5u
         public bool BRemoved { get; set; }
         public uint InterruptArmorTaken { get; set; }
-        public byte Result { get; set; } // 4u
-        public ushort Unknown0 { get; set; } // 14u
+        public CCStateApplyRulesResult Result { get; set; } // 4u
+        public ushort CcStateDiminishingReturnsId { get; set; } // 14u
         public CombatLogCastData CastData { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -19,7 +20,7 @@ namespace NexusForever.Network.World.Combat
             writer.Write(BRemoved);
             writer.Write(InterruptArmorTaken);
             writer.Write(Result, 4u);
-            writer.Write(Unknown0, 14u);
+            writer.Write(CcStateDiminishingReturnsId, 14u);
             CastData.Write(writer);
         }
     }

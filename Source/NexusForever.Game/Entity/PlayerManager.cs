@@ -1,27 +1,45 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Character;
 using NexusForever.Shared;
-using NLog;
 
 namespace NexusForever.Game.Entity
 {
     public sealed class PlayerManager : Singleton<PlayerManager>, IPlayerManager
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
+        private readonly ConcurrentDictionary<Identity, IPlayer> players = [];
+        private readonly ConcurrentDictionary<uint, Identity> accountPlayer = [];
 
-        private readonly ConcurrentDictionary<Identity, IPlayer> players = new();
+        #region Dependency Injection
+
+        private readonly ILogger<PlayerManager> log;
+        private readonly ICharacterManager characterManager;
+
+        public PlayerManager(
+            ILogger<PlayerManager> log,
+            ICharacterManager characterManager)
+        {
+            this.log              = log;
+            this.characterManager = characterManager;
+        }
+
+        #endregion
 
         /// <summary>
         /// Add new <see cref="IPlayer"/>.
         /// </summary>
         public void AddPlayer(IPlayer player)
         {
-            players.TryAdd(player.Identity, player);
-            log.Trace($"Added player {player.Identity}.");
+            if (!players.TryAdd(player.Identity, player))
+                return;
+
+            if (!accountPlayer.TryAdd(player.Account.Id, player.Identity))
+                return;
+
+            log.LogTrace($"Added player {player.Identity}.");
         }
 
         /// <summary>
@@ -29,8 +47,13 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void RemovePlayer(IPlayer player)
         {
-            players.TryRemove(player.Identity, out _);
-            log.Trace($"Removed player {player.Identity}.");
+            if (!players.TryRemove(player.Identity, out _))
+                return;
+
+            if (!accountPlayer.TryRemove(player.Account.Id, out _))
+                return;
+
+            log.LogTrace($"Removed player {player.Identity}.");
         }
 
         /// <summary>
@@ -46,7 +69,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public IPlayer GetPlayer(string name)
         {
-            ICharacter character = CharacterManager.Instance.GetCharacter(name);
+            ICharacter character = characterManager.GetCharacter(name);
             if (character == null)
                 return null;
 
@@ -59,6 +82,17 @@ namespace NexusForever.Game.Entity
         public IPlayer GetPlayer(Identity identity)
         {
             return players.TryGetValue(identity, out IPlayer player) ? player : null;
+        }
+
+        /// <summary>
+        /// Return <see cref="IPlayer"/> with supplied account id.
+        /// </summary>
+        public IPlayer GetPlayerByAccountId(uint accountId)
+        {
+            if (!accountPlayer.TryGetValue(accountId, out Identity identity))
+                return null;
+
+            return GetPlayer(identity);
         }
 
         public IEnumerator<IPlayer> GetEnumerator()
