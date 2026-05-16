@@ -423,7 +423,7 @@ namespace NexusForever.Database.Character
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.VisibilityMask)
-                    .HasColumnName("mask")
+                    .HasColumnName("visibilityMask")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
@@ -465,11 +465,11 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.DyeData)
                     .HasColumnName("dyeData")
-                    .HasColumnType("int(10)")
+                    .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
                 entity.Property(e => e.Item2Id)
-                    .HasColumnName("itemId")
+                    .HasColumnName("item2Id")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
