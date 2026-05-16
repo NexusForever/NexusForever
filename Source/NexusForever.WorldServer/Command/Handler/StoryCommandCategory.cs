@@ -1,9 +1,12 @@
-﻿using NexusForever.Game;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static;
+using NexusForever.Game.Abstract.Story;
 using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Story;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Shared;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
@@ -26,34 +29,33 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            StoryBuilder.Instance.SendStoryPanel(entry, context.GetTargetOrInvoker<IPlayer>());
+            IStoryBuilder storyBuilder = LegacyServiceProvider.Provider.GetService<IStoryBuilder>();
+            storyBuilder.SendServerStoryPanelShow(context.GetTargetOrInvoker<IPlayer>(), entry.Id);
         }
 
         [Command(Permission.StoryCommunicator, "Send a story communicator window to a character.", "communicator", "c")]
         public void TestSubCommand(ICommandContext context,
             [Parameter("")]
-            uint textId,
+            uint localisedTextId,
             [Parameter("")]
             uint creatureId,
             [Parameter("")]
             uint? duration,
-            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<StoryPanelType>))]
-            StoryPanelType? storyPanelType,
-            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<WindowType>))]
-            WindowType? windowType,
-            [Parameter("")]
-            uint? soundEvent,
-            [Parameter("")]
-            byte? priority)
+            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<CommunicatorOverlay>))]
+            CommunicatorOverlay? overlay,
+            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<CommunicatorPortraitPlacement>))]
+            CommunicatorPortraitPlacement? placement,
+            [Parameter("", ParameterFlags.None, typeof(EnumParameterConverter<CommunicatorBackground>))]
+            CommunicatorBackground? background)
         {
             duration       ??= 10000u;
-            storyPanelType ??= StoryPanelType.Default;
-            windowType     ??= WindowType.LeftAligned;
-            soundEvent     ??= 0u;
-            priority       ??= 0;
+            overlay        ??= CommunicatorOverlay.Default;
+            placement      ??= CommunicatorPortraitPlacement.Left;
+            background     ??= CommunicatorBackground.Default;
 
-            StoryBuilder.Instance.SendStoryCommunicator(textId, creatureId, context.GetTargetOrInvoker<IPlayer>(),
-                duration.Value, storyPanelType.Value, windowType.Value, soundEvent.Value, priority.Value);
+            IStoryBuilder storyBuilder = LegacyServiceProvider.Provider.GetService<IStoryBuilder>();
+            storyBuilder.SendServerStoryTextCommunicator(context.GetTargetOrInvoker<IPlayer>(), localisedTextId, creatureId,
+                TimeSpan.FromSeconds(duration.Value), overlay.Value, placement.Value, background.Value);
         }
     }
 }

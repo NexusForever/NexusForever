@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Context;
 
@@ -45,7 +46,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             {
                 session.EnqueueMessageEncrypted(new ServerChatAccept
                 {
-                    Name          = session.Player.Name,
+                    SenderName    = session.Player.Name,
                     ChatMessageId = chat.ChatMessageId
                 });
 

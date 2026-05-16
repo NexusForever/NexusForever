@@ -14,7 +14,7 @@ namespace NexusForever.Network.Internal.Message.Group.Shared
         public Sex Sex { get; set; }
         public byte Level { get; set; }
         public byte EffectiveLevel { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
         public float Health { get; set; }
         public float HealthMax { get; set; }
         public float Shield { get; set; }

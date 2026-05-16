@@ -2,12 +2,12 @@
 {
     public enum RuneType
     {
-        Air     = 0x7,
-        Fire    = 0xA,
-        Water   = 0x8,
-        Earth   = 0x9,
-        Logic   = 0xB,
-        Life    = 0xC,
-        Fusion  = 0xD,
+        Air     = 7,
+        Water   = 8,
+        Earth   = 9,
+        Fire    = 10,
+        Logic   = 11,
+        Life    = 12,
+        Fusion  = 13,
     };
 }

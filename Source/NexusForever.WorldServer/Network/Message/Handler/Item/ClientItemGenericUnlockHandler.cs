@@ -3,7 +3,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.GenericUnlock;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Item
 {

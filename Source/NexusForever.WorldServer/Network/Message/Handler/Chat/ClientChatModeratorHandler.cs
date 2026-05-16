@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {
@@ -29,14 +29,14 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             messagePublisher.PublishAsync(new ChatChannelMemberModeratorMessage
             {
                 Source = session.Player.Identity.ToInternalIdentity(),
-                Type   = chatModerator.Channel.Type,
+                Type   = chatModerator.Channel.ChatChannelId,
                 ChatId = chatModerator.Channel.ChatId != 0 ? chatModerator.Channel.ChatId : null,
                 Target = new NexusForever.Network.Internal.Message.Shared.IdentityName
                 {
                     Name      = chatModerator.CharacterName,
                     RealmName = realmContext.RealmName,
                 },
-                Set = chatModerator.Status
+                Set = chatModerator.MakeModerator
             });
         }
     }

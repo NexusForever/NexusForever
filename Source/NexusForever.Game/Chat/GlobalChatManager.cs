@@ -3,13 +3,14 @@ using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Chat.Format;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.GameTable.Text.Filter;
 using NexusForever.GameTable.Text.Static;
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Chat
@@ -63,9 +64,9 @@ namespace NexusForever.Game.Chat
         /// </summary>
         public void HandleClientChat(IPlayer player, ClientChat chat)
         {
-            if (IsLocalChat(chat.Channel.Type))
+            if (IsLocalChat(chat.Channel.ChatChannelId))
                 HandleLocalChat(player, chat);
-            else if (IsInternalChat(chat.Channel.Type))
+            else if (IsInternalChat(chat.Channel.ChatChannelId))
                 HandleChatServerChat(player, chat);
             else
             {
@@ -89,8 +90,8 @@ namespace NexusForever.Game.Chat
             {
                 player.Session.EnqueueMessageEncrypted(new ServerChatAccept
                 {
-                    Name          = player.Name,
-                    Guid          = player.Guid,
+                    SenderName          = player.Name,
+                    UnitId          = player.Guid,
                     GM            = player.Account.RbacManager.HasPermission(Permission.GMFlag),
                     ChatMessageId = chat.ChatMessageId
                 });
@@ -105,7 +106,7 @@ namespace NexusForever.Game.Chat
 
             var builder = new ChatMessageBuilder
             {
-                Type     = chat.Channel.Type,
+                Type     = chat.Channel.ChatChannelId,
                 FromName = player.Name,
                 Text     = chat.Message,
                 Formats  = chatFormatManager.ToLocal(player, chat.Formats).ToList(),
@@ -122,7 +123,7 @@ namespace NexusForever.Game.Chat
             messagePublisher.PublishAsync(new ChatChannelTextRequestMessage
             {
                 Source        = player.Identity.ToInternalIdentity(),
-                Type          = chat.Channel.Type,
+                Type          = chat.Channel.ChatChannelId,
                 ChatId        = chat.Channel.ChatId != 0 ? chat.Channel.ChatId : null,
                 Text          = new Network.Internal.Message.Chat.Shared.ChatChannelText
                 {
@@ -143,8 +144,8 @@ namespace NexusForever.Game.Chat
                 Sender    = player.Identity.ToInternalIdentity(),
                 Recipient = new Network.Internal.Message.Shared.IdentityName
                 {
-                    Name      = whisper.PlayerName,
-                    RealmName = whisper.RealmName
+                    Name      = whisper.ToName,
+                    RealmName = whisper.ToRealmName
                 },
                 Text = new Network.Internal.Message.Chat.Shared.ChatChannelText
                 {

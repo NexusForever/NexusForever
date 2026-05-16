@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Database.Chat.Model;
 using NexusForever.Database.Chat.Repository;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 
 namespace NexusForever.Server.ChatServer.Chat
 {

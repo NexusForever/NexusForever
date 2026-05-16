@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.PlayerPath;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;

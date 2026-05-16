@@ -170,6 +170,15 @@ namespace NexusForever.Network
             return Encoding.Unicode.GetString(data);
         }
 
+        public string ReadString()
+        {
+            bool extended = ReadBit();
+            ushort length = ReadUShort(extended ? 15u : 7u);
+
+            byte[] data = ReadBytes(length);
+            return Encoding.ASCII.GetString(data);
+        }
+
         public float ReadPackedFloat()
         {
             float UnpackFloat(ushort packed)
