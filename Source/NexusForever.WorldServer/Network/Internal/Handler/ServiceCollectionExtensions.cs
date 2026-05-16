@@ -3,6 +3,7 @@ using NexusForever.WorldServer.Network.Internal.Handler.Chat;
 using NexusForever.WorldServer.Network.Internal.Handler.Friendship;
 using NexusForever.WorldServer.Network.Internal.Handler.Group;
 using NexusForever.WorldServer.Network.Internal.Handler.Player;
+using NexusForever.WorldServer.Network.Internal.Handler.Who;
 using Rebus.Config;
 
 namespace NexusForever.WorldServer.Network.Internal.Handler
@@ -69,6 +70,8 @@ namespace NexusForever.WorldServer.Network.Internal.Handler
 
             sc.AddRebusHandler<PlayerGroupAssociationUpdatedHandler>();
             sc.AddRebusHandler<PlayerInfoResponseHandler>();
+
+            sc.AddRebusHandler<WhoResponseHandler>();
 
             return sc;
         }

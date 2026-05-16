@@ -16,6 +16,7 @@
     <Project Path="NexusForever.Database.Chat/NexusForever.Database.Chat.csproj" />
     <Project Path="NexusForever.Database.Friendship/NexusForever.Database.Friendship.csproj" Id="938f33d6-1742-409d-943f-10c9fd8608b7" />
     <Project Path="NexusForever.Database.Group/NexusForever.Database.Group.csproj" />
+    <Project Path="NexusForever.Database.Query/NexusForever.Database.Query.csproj" Id="0fb52d37-accf-4a39-ac51-a97b286f0eff" />
     <Project Path="NexusForever.Database.World/NexusForever.Database.World.csproj" />
     <Project Path="NexusForever.Database/NexusForever.Database.csproj" />
     <Project Path="NexusForever.Game.Abstract/NexusForever.Game.Abstract.csproj" />

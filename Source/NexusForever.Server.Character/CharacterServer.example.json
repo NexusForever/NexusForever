@@ -3,12 +3,23 @@
         "Internal": {
             "Broker": "RabbitMQ",
             "ConnectionString": "amqp://nexusforever:nexusforever@localhost:5672",
-            "InputQueue": "CharacterServer_1"
+            "InputQueue": "CharacterServer"
+        }
+    },
+    "Database": {
+        "Query": {
+            "ConnectionString": "server=127.0.0.1;port=3306;user=nexusforever;password=nexusforever;database=nexus_forever_query",
+            "Provider": "MySql"
         }
     },
     "API": {
         "Character": {
             "Host": "http://localhost:4000"
         }
+    },
+    "Who": {
+        "MaxResults": 50,
+        "PermitLimit": 10,
+        "WindowSeconds": 60
     }
 }

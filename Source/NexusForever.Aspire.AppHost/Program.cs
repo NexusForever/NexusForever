@@ -24,6 +24,7 @@ internal class Program
         var groupdb      = mysql.AddDatabase("groupdb");
         var chatdb       = mysql.AddDatabase("chatdb");
         var friendshipdb = mysql.AddDatabase("friendshipdb");
+        var querydb      = mysql.AddDatabase("querydb");
 
         IResourceBuilder<ProjectResource> dbMigration = builder.AddProject<Projects.NexusForever_Aspire_Database_Migrations>("database-migrations")
             .WithReference(authdb)
@@ -32,12 +33,14 @@ internal class Program
             .WithReference(groupdb)
             .WithReference(chatdb)
             .WithReference(friendshipdb)
+            .WithReference(querydb)
             .WaitFor(authdb)
             .WaitFor(characterdb)
             .WaitFor(worlddb)
             .WaitFor(groupdb)
             .WaitFor(chatdb)
-            .WaitFor(friendshipdb);
+            .WaitFor(friendshipdb)
+            .WaitFor(querydb);
 
         builder.AddProject<Projects.NexusForever_AuthServer>("auth-server")
             .WithNexusForeverTcp(IPAddress.Any, 23115)
@@ -125,9 +128,11 @@ internal class Program
             .WaitFor(characterApi);
 
         builder.AddProject<Projects.NexusForever_Server_Character>("character-server")
+            .WithNexusForeverDatabase("Query", DatabaseProvider.MySql, querydb.Resource)
             .WithNexusForeverMessageBroker("CharacterServer", BrokerProvider.RabbitMQ, rmq.Resource)
             .WithNexusForeverApi("Character", characterApi.Resource)
             .WaitFor(rmq)
+            .WaitFor(querydb)
             .WaitFor(characterApi);
 
         DistributedApplication host = builder.Build();

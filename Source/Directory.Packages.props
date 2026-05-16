@@ -45,5 +45,6 @@
     <PackageVersion Include="Rebus.AzureServiceBus" Version="10.6.0" />
     <PackageVersion Include="Rebus.RabbitMq" Version="10.1.1" />
     <PackageVersion Include="Rebus.ServiceProvider" Version="10.7.2" />
+    <PackageVersion Include="System.Threading.RateLimiting" Version="10.0.8" />
   </ItemGroup>
 </Project>

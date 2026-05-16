@@ -1,7 +1,6 @@
-﻿using NexusForever.API.Character.Client;
-using NexusForever.Game.Static.Entity;
-using NexusForever.Network.Internal;
+﻿using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Player;
+using NexusForever.Server.Character.Game.Character;
 using Rebus.Handlers;
 
 namespace NexusForever.Server.Character.Network.Internal.Handler.Player
@@ -10,15 +9,15 @@ namespace NexusForever.Server.Character.Network.Internal.Handler.Player
     {
         #region Dependency Injection
 
-        private readonly CharacterAPIClient _characterAPIClient;
+        private readonly CharacterManager _characterManager;
         private readonly IInternalMessagePublisher _messagePublisher;
 
         public PlayerInfoRequestHandler(
-            CharacterAPIClient characterAPIClient,
+            CharacterManager characterManager,
             IInternalMessagePublisher messagePublisher)
         {
-            _characterAPIClient = characterAPIClient;
-            _messagePublisher   = messagePublisher;
+            _characterManager = characterManager;
+            _messagePublisher = messagePublisher;
         }
 
         #endregion
@@ -32,7 +31,7 @@ namespace NexusForever.Server.Character.Network.Internal.Handler.Player
                 Type   = message.Type
             };
 
-            API.Model.Character.Character character = await _characterAPIClient.GetCharacterAsync(message.Target.ToAPIdentity());
+            Game.Character.Character character = await _characterManager.GetCharacterRemoteAsync(message.Target.ToQueryIdentity());
             if (character != null)
             {
                 playerInfoResponse.PlayerInfo = new PlayerInfo
@@ -41,8 +40,8 @@ namespace NexusForever.Server.Character.Network.Internal.Handler.Player
                     Class        = character.Class,
                     Path         = character.Path,
                     Faction      = character.Faction,
-                    Level        = (byte)(character.Stats.SingleOrDefault(s => s.Stat == Stat.Level)?.Value ?? 0),
-                    LastOnline   = !character.IsOnline ? character.LastOnline : null
+                    Level        = (byte)character.Level,
+                    LastOnline   = character.LastOnline
                 };
             }
 

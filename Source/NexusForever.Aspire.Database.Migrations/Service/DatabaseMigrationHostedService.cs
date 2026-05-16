@@ -5,6 +5,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Chat;
 using NexusForever.Database.Friendship;
 using NexusForever.Database.Group;
+using NexusForever.Database.Query;
 using NexusForever.Database.World;
 
 namespace NexusForever.Aspire.Database.Migrations.Service
@@ -19,6 +20,7 @@ namespace NexusForever.Aspire.Database.Migrations.Service
         private readonly GroupContext _groupContext;
         private readonly ChatContext _chatContext;
         private readonly FriendshipContext _friendshipContext;
+        private readonly QueryContext _queryContext;
 
         public DatabaseMigrationHostedService(
             AuthContext authContext,
@@ -26,7 +28,8 @@ namespace NexusForever.Aspire.Database.Migrations.Service
             WorldContext worldContext,
             GroupContext groupContext,
             ChatContext chatContext,
-            FriendshipContext friendshipContext)
+            FriendshipContext friendshipContext,
+            QueryContext queryContext)
         {
             _authContext       = authContext;
             _characterContext  = characterContext;
@@ -34,6 +37,7 @@ namespace NexusForever.Aspire.Database.Migrations.Service
             _groupContext      = groupContext;
             _chatContext       = chatContext;
             _friendshipContext = friendshipContext;
+            _queryContext      = queryContext;
         }
 
         #endregion
@@ -46,6 +50,7 @@ namespace NexusForever.Aspire.Database.Migrations.Service
             await _groupContext.Database.MigrateAsync();
             await _chatContext.Database.MigrateAsync();
             await _friendshipContext.Database.MigrateAsync();
+            await _queryContext.Database.MigrateAsync();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

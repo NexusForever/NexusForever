@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using NexusForever.Network.Internal.Message.Player;
+using NexusForever.Network.Internal.Message.Who;
 using Rebus.Bus;
 
 namespace NexusForever.Server.Character.Network.Internal.Handler
@@ -20,7 +21,14 @@ namespace NexusForever.Server.Character.Network.Internal.Handler
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            await _bus.Subscribe<PlayerGuildAssociationUpdatedMessage>();
             await _bus.Subscribe<PlayerInfoRequestMessage>();
+            await _bus.Subscribe<PlayerLoggedInMessage>();
+            await _bus.Subscribe<PlayerLoggedOutMessage>();
+            await _bus.Subscribe<PlayerStatUpdatedMessage>();
+            await _bus.Subscribe<PlayerWorldZoneUpdatedMessage>();
+
+            await _bus.Subscribe<WhoRequestMessage>();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
