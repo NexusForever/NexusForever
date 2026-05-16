@@ -5,6 +5,7 @@ using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Internal.Message.Friendship;
 using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Network.Internal.Message.Player;
+using NexusForever.Network.Internal.Message.Who;
 using Rebus.Bus;
 
 namespace NexusForever.WorldServer.Network.Internal.Handler
@@ -83,6 +84,8 @@ namespace NexusForever.WorldServer.Network.Internal.Handler
 
             await bus.Subscribe<PlayerGroupAssociationUpdatedMessage>();
             await bus.Subscribe<PlayerInfoResponseMessage>();
+
+            await bus.Subscribe<WhoResponseMessage>();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

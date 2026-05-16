@@ -17,7 +17,6 @@ namespace NexusForever.Network.Internal.Message.Chat.Shared.Format
     [JsonDerivedType(typeof(ChatChannelTextItemGuidFormat), nameof(ChatFormatType.ItemGuid))]
     [JsonDerivedType(typeof(ChatChannelTextNavPointFormat), nameof(ChatFormatType.NavPoint))]
     [JsonDerivedType(typeof(ChatChannelTextLootFormat), nameof(ChatFormatType.Loot))]
-        
     public interface IChatChannelTextFormatModel
     {
         ChatFormatType Type { get; }

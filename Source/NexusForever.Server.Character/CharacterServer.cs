@@ -1,14 +1,20 @@
 ﻿using System.Reflection;
+using System.Threading.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NexusForever.API.Character.Client;
 using NexusForever.API.Configuration.Model;
+using NexusForever.Database.Configuration.Model;
+using NexusForever.Database.Query;
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Configuration;
+using NexusForever.Server.Character.Configuration;
+using NexusForever.Server.Character.Game;
 using NexusForever.Server.Character.Network.Internal.Handler;
 using NLog.Extensions.Logging;
 
@@ -44,6 +50,31 @@ namespace NexusForever.Server.Character
                 {
                     sc.AddHostedService<NetworkInternalHandlerHostedService>();
 
+                    sc.AddOptions<WhoOptions>()
+                        .Bind(hb.Configuration.GetSection("Who"));
+
+                    sc.AddSingleton(sp =>
+                    {
+                        var whoOptions = sp.GetRequiredService<IOptions<WhoOptions>>().Value;
+
+                        return PartitionedRateLimiter.Create<Identity, Identity>(c =>
+                        {
+                            return RateLimitPartition.GetFixedWindowLimiter(c, args =>
+                            {
+                                return new FixedWindowRateLimiterOptions
+                                {
+                                    PermitLimit       = (int)whoOptions.PermitLimit,
+                                    Window            = TimeSpan.FromSeconds(whoOptions.WindowSeconds),
+                                    AutoReplenishment = true
+                                };
+                            });
+                        });
+                    });
+
+                    sc.AddQueryDatabase(
+                        hb.Configuration.GetSection("Database:Query")
+                        .Get<DatabaseConnectionString>());
+
                     sc.AddCharacterAPIClient(
                         hb.Configuration.GetSection("API:Character")
                         .Get<APIConfig>());
@@ -53,6 +84,8 @@ namespace NexusForever.Server.Character
                         .Get<BrokerConfig>());
 
                     sc.AddNetworkInternalHandlers();
+
+                    sc.AddGame();
                 })
                 .UseWindowsService()
                 .UseSystemd();

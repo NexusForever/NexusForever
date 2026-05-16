@@ -8,15 +8,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
     <PackageReference Include="NLog" />
     <PackageReference Include="NLog.Extensions.Logging" />
+    <PackageReference Include="System.Threading.RateLimiting" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NexusForever.API.Character.Client\NexusForever.API.Character.Client.csproj" />
+    <ProjectReference Include="..\NexusForever.Database.Query\NexusForever.Database.Query.csproj" />
     <ProjectReference Include="..\NexusForever.Network.Internal\NexusForever.Network.Internal.csproj" />
   </ItemGroup>
 

@@ -235,7 +235,7 @@ namespace NexusForever.Game.Entity
         public ISupplySatchelManager SupplySatchelManager { get; private set; }
         public IXpManager XpManager { get; private set; }
         public IReputationManager ReputationManager { get; private set; }
-        public IGuildManager GuildManager { get; private set; }
+        public IGuildManager GuildManager { get; }
         public IResidenceManager ResidenceManager { get; private set; }
         public ICinematicManager CinematicManager { get; private set; }
         public ICharacterEntitlementManager EntitlementManager { get; private set; }
@@ -266,7 +266,8 @@ namespace NexusForever.Game.Entity
             IEntityFactory entityFactory,
             IMatchingManager matchingManager,
             IMatchManager matchManager,
-            ICurrencyManager currencyManager)
+            ICurrencyManager currencyManager,
+            IGuildManager guildManager)
             : base(movementManager)
         {
             this.messagePublisher = messagePublisher;
@@ -276,6 +277,7 @@ namespace NexusForever.Game.Entity
 
             // managers
             CurrencyManager = currencyManager;
+            GuildManager    = guildManager;
         }
 
         #endregion
@@ -345,7 +347,7 @@ namespace NexusForever.Game.Entity
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
-            GuildManager            = new GuildManager(this, model);
+            GuildManager.Initialise(this, model);
             ResidenceManager        = new ResidenceManager(this);
             CinematicManager        = new CinematicManager(this);
 
