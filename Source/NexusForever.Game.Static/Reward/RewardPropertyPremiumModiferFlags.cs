@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Entity
+﻿namespace NexusForever.Game.Static.Reward
 {
     [Flags]
     public enum RewardPropertyPremiumModiferFlags
