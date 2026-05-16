@@ -145,7 +145,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                     if (costumeManager.CostumeIndex.HasValue)
                         costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
 
-                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+                    listCharacter.GearMask = costume?.VisibilityMask ?? 0xFFFFFFFF;
 
                     Dictionary<ItemSlot, IItemVisual> costumeVisuals =
                         costume?.GetItemVisuals().ToDictionary(c => c.Slot);

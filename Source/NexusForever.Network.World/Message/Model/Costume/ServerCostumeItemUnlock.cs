@@ -1,17 +1,17 @@
-﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Static;
+﻿using NexusForever.Game.Static.Costume;
+using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Costume
 {
     [Message(GameMessageOpcode.ServerCostumeItemUnlock)]
     public class ServerCostumeItemUnlock : IWritable
     {
-        public uint ItemId { get; set; }
+        public uint Item2Id { get; set; }
         public CostumeUnlockResult Result { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(ItemId, 18u);
+            writer.Write(Item2Id, 18u);
             writer.Write(Result, 32u);
         }
     }

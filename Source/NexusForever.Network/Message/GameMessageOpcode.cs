@@ -280,7 +280,7 @@ namespace NexusForever.Network.Message
         ServerQuestContractGoodQualityChanged = 0x0252,
         ClientCostumeSave               = 0x0255,
         ClientCostumeSet                = 0x0256,
-        ServerCostumeSave               = 0x0257,
+        ServerCostumeSaveResult         = 0x0257,
         ServerCostumeItemUnlockMultiple = 0x0258,
         ServerCostumeItemUnlock         = 0x0259,
         ServerCostumeItemList           = 0x025A,

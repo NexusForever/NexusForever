@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Entity
+﻿namespace NexusForever.Game.Static.Costume
 {
     public enum CostumeSetResult
     {
