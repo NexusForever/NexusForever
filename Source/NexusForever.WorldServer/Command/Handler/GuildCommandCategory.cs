@@ -1,15 +1,16 @@
-﻿using NexusForever.WorldServer.Command.Context;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
+using NexusForever.Game.Guild;
+using NexusForever.Game.Static.Guild;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Guild;
-using NexusForever.WorldServer.Game.Guild.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Guild, "A collection of commands to manage a guilds.", "guild")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class GuildCommandCategory : CommandCategory
     {
         [Command(Permission.GuildRegister, "Register a new guild.", "register")]
@@ -25,7 +26,7 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("", ParameterFlags.Optional)]
             string memberRank)
         {
-            Player player = context.Invoker as Player;
+            IPlayer player = context.Invoker as IPlayer;
 
             // default ranks from client
             leaderRank  ??= "Leader";
@@ -33,11 +34,11 @@ namespace NexusForever.WorldServer.Command.Handler
             memberRank  ??= "Member";
 
             // default standard from the client
-            GuildStandard standard = null;
+            IGuildStandard standard = null;
             if (type == GuildType.Guild)
                 standard = new GuildStandard(4, 5, 6);
 
-            GuildResultInfo info = player.GuildManager.CanRegisterGuild(type, name, leaderRank, councilRank, memberRank, standard);
+            IGuildResultInfo info = player.GuildManager.CanRegisterGuild(type, name, leaderRank, councilRank, memberRank, standard);
             if (info.Result != GuildResult.Success)
             {
                 GuildBase.SendGuildResult(player.Session, info);
@@ -49,13 +50,16 @@ namespace NexusForever.WorldServer.Command.Handler
 
         [Command(Permission.GuildJoin, "Join an existing guild.", "join")]
         public void HandleGuildJoin(ICommandContext context,
+            [Parameter("Type of guild to join.", ParameterFlags.None, typeof(EnumParameterConverter<GuildType>))]
+            GuildType type,
             [Parameter("Name of guild to join.")]
             string name)
         {
-            Player player = context.Invoker as Player;
-            ulong guildId = GlobalGuildManager.Instance.GetGuild(name)?.Id ?? 0;
+            IPlayer player = context.Invoker as IPlayer;
 
-            GuildResultInfo info = player.GuildManager.CanJoinGuild(guildId);
+            ulong guildId = GlobalGuildManager.Instance.GetGuild(type, name)?.Id ?? 0;
+
+            IGuildResultInfo info = player.GuildManager.CanJoinGuild(guildId);
             if (info.Result != GuildResult.Success)
             {
                 GuildBase.SendGuildResult(player.Session, info);

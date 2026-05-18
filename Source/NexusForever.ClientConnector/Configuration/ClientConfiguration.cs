@@ -1,4 +1,4 @@
-﻿namespace NexusForever.ClientConnector
+﻿namespace NexusForever.ClientConnector.Configuration
 {
     public class ClientConfiguration
     {

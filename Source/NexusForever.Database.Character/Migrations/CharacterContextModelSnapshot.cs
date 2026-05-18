@@ -2,8 +2,11 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.Character;
+
+#nullable disable
 
 namespace NexusForever.Database.Character.Migrations
 {
@@ -14,12 +17,15 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterAchievementModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -49,12 +55,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "AchievementId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_achievement");
+                    b.ToTable("character_achievement", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterActionSetAmpModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -73,12 +80,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "SpecIndex", "AmpId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_action_set_amp");
+                    b.ToTable("character_action_set_amp", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterActionSetShortcutModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -114,12 +122,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "SpecIndex", "Location")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_action_set_shortcut");
+                    b.ToTable("character_action_set_shortcut", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterAppearanceModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -139,20 +148,17 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Slot")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_appearance");
+                    b.ToTable("character_appearance", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterBoneModel", b =>
                 {
                     b.Property<ulong>("Id")
                         .HasColumnType("bigint(20) unsigned")
-                        .HasDefaultValue(0ul)
                         .HasColumnName("id");
 
                     b.Property<byte>("BoneIndex")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(4) unsigned")
-                        .HasDefaultValue((byte)0)
                         .HasColumnName("boneIndex");
 
                     b.Property<float>("Bone")
@@ -164,12 +170,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "BoneIndex")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_bone");
+                    b.ToTable("character_bone", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCostumeItemModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -184,27 +191,28 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((byte)0)
                         .HasColumnName("slot");
 
-                    b.Property<int>("DyeData")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(10)")
-                        .HasDefaultValue(0)
-                        .HasColumnName("dyeData");
-
-                    b.Property<uint>("ItemId")
+                    b.Property<uint>("DyeData")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
-                        .HasColumnName("itemId");
+                        .HasColumnName("dyeData");
+
+                    b.Property<uint>("Item2Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("item2Id");
 
                     b.HasKey("Id", "Index", "Slot")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_costume_item");
+                    b.ToTable("character_costume_item", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCostumeModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -214,27 +222,442 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((byte)0)
                         .HasColumnName("index");
 
-                    b.Property<uint>("Mask")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(10) unsigned")
-                        .HasDefaultValue(0u)
-                        .HasColumnName("mask");
-
                     b.Property<DateTime>("Timestamp")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
                         .HasColumnName("timestamp")
                         .HasDefaultValueSql("current_timestamp()");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlComputedColumn(b.Property<DateTime>("Timestamp"));
+
+                    b.Property<uint>("VisibilityMask")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("visibilityMask");
+
                     b.HasKey("Id", "Index")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_costume");
+                    b.ToTable("character_costume", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCreateModel", b =>
+                {
+                    b.Property<byte>("Race")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(4) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("race");
+
+                    b.Property<ushort>("Faction")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0)
+                        .HasColumnName("faction");
+
+                    b.Property<byte>("CreationStart")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(4) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("creationStart");
+
+                    b.Property<string>("Comment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(200)")
+                        .HasDefaultValue("")
+                        .HasColumnName("comment");
+
+                    b.Property<float>("Rx")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("rx");
+
+                    b.Property<float>("Ry")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("ry");
+
+                    b.Property<float>("Rz")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("rz");
+
+                    b.Property<uint>("WorldId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("worldId");
+
+                    b.Property<float>("X")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("x");
+
+                    b.Property<float>("Y")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("y");
+
+                    b.Property<float>("Z")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("z");
+
+                    b.HasKey("Race", "Faction", "CreationStart")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_create", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Human - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Human - Veteran",
+                            Rx = 0.317613f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 426u,
+                            X = 4110.71f,
+                            Y = -658.6249f,
+                            Z = -5145.48f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Human - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)3,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Granok - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)3,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Granok- Veteran",
+                            Rx = 0.317613f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 426u,
+                            X = 4110.71f,
+                            Y = -658.6249f,
+                            Z = -5145.48f
+                        },
+                        new
+                        {
+                            Race = (byte)3,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Granok - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)4,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Aurin - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)4,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Aurin - Veteran",
+                            Rx = -1.1214035f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 990u,
+                            X = -771.823f,
+                            Y = -904.2852f,
+                            Z = -2269.56f
+                        },
+                        new
+                        {
+                            Race = (byte)4,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Aurin - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)16,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)4,
+                            Comment = "Exile Mordesh - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)16,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)3,
+                            Comment = "Exile Mordesh - Veteran",
+                            Rx = -1.1214035f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 990u,
+                            X = -771.823f,
+                            Y = -904.2852f,
+                            Z = -2269.56f
+                        },
+                        new
+                        {
+                            Race = (byte)16,
+                            Faction = (ushort)167,
+                            CreationStart = (byte)5,
+                            Comment = "Exile Mordesh - Level 50",
+                            Rx = 0f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 51u,
+                            X = 4074.34f,
+                            Y = -797.8368f,
+                            Z = -2399.37f
+                        },
+                        new
+                        {
+                            Race = (byte)13,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Chua - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)13,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Chua - Veteran",
+                            Rx = -2.215535f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 870u,
+                            X = -8261.398f,
+                            Y = -995.471f,
+                            Z = -242.3648f
+                        },
+                        new
+                        {
+                            Race = (byte)13,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Chua - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        },
+                        new
+                        {
+                            Race = (byte)5,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Draken - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)5,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Draken - Veteran",
+                            Rx = -2.215535f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 870u,
+                            X = -8261.398f,
+                            Y = -995.471f,
+                            Z = -242.3648f
+                        },
+                        new
+                        {
+                            Race = (byte)5,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Draken - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Cassian - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Cassian - Veteran",
+                            Rx = -0.45682f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 1387u,
+                            X = -3835.341f,
+                            Y = -980.2174f,
+                            Z = -6050.524f
+                        },
+                        new
+                        {
+                            Race = (byte)1,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Cassian - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        },
+                        new
+                        {
+                            Race = (byte)12,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)4,
+                            Comment = "Dominion Mechari - Novice",
+                            Rx = -2.751458f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 3460u,
+                            X = 29.1286f,
+                            Y = -853.8716f,
+                            Z = -560.188f
+                        },
+                        new
+                        {
+                            Race = (byte)12,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)3,
+                            Comment = "Dominion Mechari - Veteran",
+                            Rx = -0.45682f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 1387u,
+                            X = -3835.341f,
+                            Y = -980.2174f,
+                            Z = -6050.524f
+                        },
+                        new
+                        {
+                            Race = (byte)12,
+                            Faction = (ushort)166,
+                            CreationStart = (byte)5,
+                            Comment = "Dominion Mechari - Level 50",
+                            Rx = -0.7632219f,
+                            Ry = 0f,
+                            Rz = 0f,
+                            WorldId = 22u,
+                            X = -3343.58f,
+                            Y = -887.4646f,
+                            Z = -536.03f
+                        });
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCurrencyModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -254,12 +677,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "CurrencyId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_currency");
+                    b.ToTable("character_currency", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterCustomisationModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -279,12 +703,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Label")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_customisation");
+                    b.ToTable("character_customisation", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterDatacubeModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -308,12 +733,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Type", "Datacube")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_datacube");
+                    b.ToTable("character_datacube", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterEntitlementModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -333,12 +759,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "EntitlementId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_entitlement");
+                    b.ToTable("character_entitlement", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterKeybindingModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -423,12 +850,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "InputActionId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_keybinding");
+                    b.ToTable("character_keybinding", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterMailAttachmentModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -439,6 +867,7 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnName("index");
 
                     b.Property<ulong>("ItemGuid")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("itemGuid");
@@ -450,7 +879,7 @@ namespace NexusForever.Database.Character.Migrations
                         .IsUnique()
                         .HasDatabaseName("itemGuid");
 
-                    b.ToTable("character_mail_attachment");
+                    b.ToTable("character_mail_attachment", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterMailModel", b =>
@@ -558,7 +987,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasIndex("RecipientId")
                         .HasDatabaseName("FK__character_mail_recipientId__character_id");
 
-                    b.ToTable("character_mail");
+                    b.ToTable("character_mail", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterModel", b =>
@@ -637,6 +1066,10 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((sbyte)0)
                         .HasColumnName("inputKeySet");
 
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("isOnline");
+
                     b.Property<DateTime?>("LastOnline")
                         .HasColumnType("datetime")
                         .HasColumnName("lastOnline");
@@ -693,6 +1126,24 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue(0u)
                         .HasColumnName("restBonusXp");
 
+                    b.Property<float>("RotationX")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("rotationX");
+
+                    b.Property<float>("RotationY")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("rotationY");
+
+                    b.Property<float>("RotationZ")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("rotationZ");
+
                     b.Property<byte>("Sex")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(3) unsigned")
@@ -740,12 +1191,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasIndex("AccountId")
                         .HasDatabaseName("accountId");
 
-                    b.ToTable("character");
+                    b.ToTable("character", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPathModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -777,12 +1229,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Path")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_path");
+                    b.ToTable("character_path", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPetCustomisationModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -815,12 +1268,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Type", "ObjectId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_pet_customisation");
+                    b.ToTable("character_pet_customisation", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterPetFlairModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -834,12 +1288,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "PetFlairId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_pet_flair");
+                    b.ToTable("character_pet_flair", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterQuestModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -873,17 +1328,19 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "QuestId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_quest");
+                    b.ToTable("character_quest", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterQuestObjectiveModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
 
                     b.Property<ushort>("QuestId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("smallint(5) unsigned")
                         .HasDefaultValue((ushort)0)
                         .HasColumnName("questId");
@@ -907,12 +1364,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "QuestId", "Index")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_quest_objective");
+                    b.ToTable("character_quest_objective", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterReputation", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -932,12 +1390,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "FactionId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_reputation");
+                    b.ToTable("character_reputation", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterSpellModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -957,12 +1416,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Spell4BaseId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_spell");
+                    b.ToTable("character_spell", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterStatModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -981,12 +1441,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Stat")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_stats");
+                    b.ToTable("character_stats", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterTitleModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1012,12 +1473,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Title")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_title");
+                    b.ToTable("character_title", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterTradeskillMaterialModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1037,12 +1499,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "MaterialId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_tradeskill_materials");
+                    b.ToTable("character_tradeskill_materials", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterZonemapHexgroupModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1062,12 +1525,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "ZoneMap", "HexGroup")
                         .HasName("PRIMARY");
 
-                    b.ToTable("character_zonemap_hexgroup");
+                    b.ToTable("character_zonemap_hexgroup", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ChatChannelMemberModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1087,7 +1551,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "CharacterId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("chat_channel_member");
+                    b.ToTable("chat_channel_member", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ChatChannelModel", b =>
@@ -1119,12 +1583,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.ToTable("chat_channel");
+                    b.ToTable("chat_channel", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.GuildAchievementModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1154,12 +1619,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "AchievementId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("guild_achievement");
+                    b.ToTable("guild_achievement", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.GuildDataModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1197,12 +1663,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.ToTable("guild_guild_data");
+                    b.ToTable("guild_guild_data", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.GuildMemberModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1212,6 +1679,12 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("characterId");
+
+                    b.Property<int>("CommunityPlotReservation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasDefaultValue(-1)
+                        .HasColumnName("communityPlotReservation");
 
                     b.Property<string>("Note")
                         .ValueGeneratedOnAdd()
@@ -1228,7 +1701,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "CharacterId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("guild_member");
+                    b.ToTable("guild_member", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.GuildModel", b =>
@@ -1282,12 +1755,13 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.ToTable("guild");
+                    b.ToTable("guild", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.GuildRankModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1331,7 +1805,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Index")
                         .HasName("PRIMARY");
 
-                    b.ToTable("guild_rank");
+                    b.ToTable("guild_rank", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ItemModel", b =>
@@ -1393,12 +1867,372 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("FK__item_ownerId__character_id");
 
-                    b.ToTable("item");
+                    b.ToTable("item", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.Character.Model.PropertyBaseModel", b =>
+                {
+                    b.Property<uint>("Type")
+                        .HasColumnType("int unsigned")
+                        .HasColumnName("type")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<uint>("Subtype")
+                        .HasColumnType("int unsigned")
+                        .HasColumnName("subtype")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<uint>("Property")
+                        .HasColumnType("int unsigned")
+                        .HasColumnName("property")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<ushort>("ModType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint unsigned")
+                        .HasColumnName("modType")
+                        .HasDefaultValueSql("'0'");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("note")
+                        .HasDefaultValueSql("''");
+
+                    b.Property<float>("Value")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasColumnName("value")
+                        .HasDefaultValueSql("'0'");
+
+                    b.HasKey("Type", "Subtype", "Property")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("property_base", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 0u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Strength",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 1u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Dexterity",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 2u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Technology",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 3u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Magic",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 4u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Wisdom",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 7u,
+                            ModType = (ushort)3,
+                            Note = "Player - Base HP per Level",
+                            Value = 200f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 9u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Endurance",
+                            Value = 500f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 16u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Endurance Regen",
+                            Value = 0.0225f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 35u,
+                            ModType = (ushort)3,
+                            Note = "Player - Base Assault Rating per Level",
+                            Value = 18f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 36u,
+                            ModType = (ushort)3,
+                            Note = "Player - Base Support Rating per Level",
+                            Value = 18f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 38u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Dash Energy",
+                            Value = 200f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 39u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Dash Energy Regen",
+                            Value = 0.045f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 41u,
+                            ModType = (ushort)0,
+                            Note = "Player - Shield Capacity Base",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 100u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Movement Speed",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 101u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Avoid Chance",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 102u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Crit Chance",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 107u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Focus Recovery In Combat",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 108u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Focus Recovery Out of Combat",
+                            Value = 0f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 112u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Multi-Hit Amount",
+                            Value = 0.3f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 130u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Gravity Multiplier",
+                            Value = 0.8f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 150u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Taken Offset - Physical",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 151u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Taken Offset - Tech",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 152u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Taken Offset - Magic",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 154u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Mutli-Hit Chance",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 155u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Damage Reflect Amount",
+                            Value = 0.05f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 191u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Mount Movement Speed",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 195u,
+                            ModType = (ushort)0,
+                            Note = "Player - Base Glance Amount",
+                            Value = 0.3f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 1u,
+                            Property = 10u,
+                            ModType = (ushort)0,
+                            Note = "Class - Warrior - Base Kinetic Energy Cap",
+                            Value = 1000f
+                        },
+                        new
+                        {
+                            Type = 0u,
+                            Subtype = 0u,
+                            Property = 17u,
+                            ModType = (ushort)0,
+                            Note = "Warrior - Base Kinetic Energy Regen",
+                            Value = 1f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 2u,
+                            Property = 10u,
+                            ModType = (ushort)0,
+                            Note = "Class - Engineer - Base Volatile Energy Cap",
+                            Value = 100f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 3u,
+                            Property = 10u,
+                            ModType = (ushort)0,
+                            Note = "Class - Esper - Base Psi Point Cap",
+                            Value = 5f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 4u,
+                            Property = 10u,
+                            ModType = (ushort)0,
+                            Note = "Class - Medic - Base Medic Core Cap",
+                            Value = 4f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 5u,
+                            Property = 12u,
+                            ModType = (ushort)0,
+                            Note = "Class - Stalker - Base Suit Power Cap",
+                            Value = 100f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 5u,
+                            Property = 19u,
+                            ModType = (ushort)0,
+                            Note = "Class - Stalker - Base Suit Power Regeneration Rate",
+                            Value = 0.035f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 7u,
+                            Property = 13u,
+                            ModType = (ushort)0,
+                            Note = "Class - Spellslinger - Base Spell Power Cap",
+                            Value = 100f
+                        });
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ResidenceDecor", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -1434,7 +2268,6 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnName("decorType");
 
                     b.Property<uint>("PlotIndex")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(2147483647u)
                         .HasColumnName("plotIndex");
@@ -1490,7 +2323,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "DecorId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("residence_decor");
+                    b.ToTable("residence_decor", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ResidenceModel", b =>
@@ -1531,6 +2364,10 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((ushort)0)
                         .HasColumnName("groundWallpaperId");
 
+                    b.Property<ulong?>("GuildOwnerId")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasColumnName("guildOwnerId");
+
                     b.Property<ushort>("MusicId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint(5) unsigned")
@@ -1544,9 +2381,8 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue("")
                         .HasColumnName("name");
 
-                    b.Property<ulong>("OwnerId")
+                    b.Property<ulong?>("OwnerId")
                         .HasColumnType("bigint(20) unsigned")
-                        .HasDefaultValue(0ul)
                         .HasColumnName("ownerId");
 
                     b.Property<byte>("PrivacyLevel")
@@ -1587,22 +2423,24 @@ namespace NexusForever.Database.Character.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GuildOwnerId");
+
                     b.HasIndex("OwnerId")
                         .IsUnique()
                         .HasDatabaseName("ownerId");
 
-                    b.ToTable("residence");
+                    b.ToTable("residence", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ResidencePlotModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
 
                     b.Property<byte>("Index")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(3) unsigned")
                         .HasDefaultValue((byte)0)
                         .HasColumnName("index");
@@ -1634,7 +2472,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasKey("Id", "Index")
                         .HasName("PRIMARY");
 
-                    b.ToTable("residence_plot");
+                    b.ToTable("residence_plot", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterAchievementModel", b =>
@@ -1642,9 +2480,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Achievement")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_achievement_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_achievement_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1654,9 +2492,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("ActionSetAmp")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_action_set_amp_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_action_set_amp_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1666,9 +2504,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("ActionSetShortcut")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_action_set_shortcut_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_action_set_shortcut_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1678,9 +2516,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Appearance")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_appearance_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_appearance_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1690,9 +2528,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Bone")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK_character_bone_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_character_bone_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1702,9 +2540,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterCostumeModel", "Costume")
                         .WithMany("CostumeItem")
                         .HasForeignKey("Id", "Index")
-                        .HasConstraintName("FK__character_costume_item_id-index__character_costume_id-index")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_costume_item_id-index__character_costume_id-index");
 
                     b.Navigation("Costume");
                 });
@@ -1714,9 +2552,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Costume")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_costume_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_costume_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1726,9 +2564,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Currency")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK_character_currency_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_character_currency_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1738,9 +2576,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Customisation")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_customisation_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_customisation_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1750,9 +2588,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Datacube")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_datacube_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_datacube_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1762,9 +2600,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Entitlement")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_entitlement_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_entitlement_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1774,9 +2612,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Keybinding")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_keybinding_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_keybinding_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1786,16 +2624,16 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterMailModel", "Mail")
                         .WithMany("Attachment")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_mail_attachment_id__character_mail_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_mail_attachment_id__character_mail_id");
 
                     b.HasOne("NexusForever.Database.Character.Model.ItemModel", "Item")
                         .WithOne("MailAttachment")
                         .HasForeignKey("NexusForever.Database.Character.Model.CharacterMailAttachmentModel", "ItemGuid")
-                        .HasConstraintName("FK__character_mail_attachment_itemGuid__item_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_mail_attachment_itemGuid__item_id");
 
                     b.Navigation("Item");
 
@@ -1807,9 +2645,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Recipient")
                         .WithMany("Mail")
                         .HasForeignKey("RecipientId")
-                        .HasConstraintName("FK__character_mail_recipientId__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_mail_recipientId__character_id");
 
                     b.Navigation("Recipient");
                 });
@@ -1819,9 +2657,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Path")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_path_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_path_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1831,9 +2669,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("PetCustomisation")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_pet_customisation_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_pet_customisation_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1843,9 +2681,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("PetFlair")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_pet_flair_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_pet_flair_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1855,9 +2693,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Quest")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_quest_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_quest_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1867,9 +2705,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterQuestModel", "Quest")
                         .WithMany("QuestObjective")
                         .HasForeignKey("Id", "QuestId")
-                        .HasConstraintName("FK__character_quest_objective_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_quest_objective_id__character_id");
 
                     b.Navigation("Quest");
                 });
@@ -1879,9 +2717,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Reputation")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_reputation_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_reputation_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1891,9 +2729,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Spell")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_spell_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_spell_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1903,9 +2741,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Stat")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_stats_stat_id_character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_stats_stat_id_character_id");
 
                     b.Navigation("Character");
                 });
@@ -1915,9 +2753,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("CharacterTitle")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_title_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_title_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1927,9 +2765,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("TradeskillMaterials")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_tradeskill_material_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_tradeskill_material_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1939,9 +2777,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("ZonemapHexgroup")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__character_zonemap_hexgroup_id__character_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__character_zonemap_hexgroup_id__character_id");
 
                     b.Navigation("Character");
                 });
@@ -1951,9 +2789,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.ChatChannelModel", "Channel")
                         .WithMany("Members")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__chat_channel_member_id__chat_channel_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__chat_channel_member_id__chat_channel_id");
 
                     b.Navigation("Channel");
                 });
@@ -1963,9 +2801,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
                         .WithMany("Achievement")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__guild_achievement_id__guild_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__guild_achievement_id__guild_id");
 
                     b.Navigation("Guild");
                 });
@@ -1975,9 +2813,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
                         .WithOne("GuildData")
                         .HasForeignKey("NexusForever.Database.Character.Model.GuildDataModel", "Id")
-                        .HasConstraintName("FK__guild_guild_data_id__guild_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__guild_guild_data_id__guild_id");
 
                     b.Navigation("Guild");
                 });
@@ -1987,9 +2825,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
                         .WithMany("GuildMember")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__guild_member_id__guild_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__guild_member_id__guild_id");
 
                     b.Navigation("Guild");
                 });
@@ -1999,9 +2837,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
                         .WithMany("GuildRank")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__guild_rank_id__guild_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__guild_rank_id__guild_id");
 
                     b.Navigation("Guild");
                 });
@@ -2011,8 +2849,8 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithMany("Item")
                         .HasForeignKey("OwnerId")
-                        .HasConstraintName("FK__item_ownerId__character_id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasConstraintName("FK__item_ownerId__character_id");
 
                     b.Navigation("Character");
                 });
@@ -2022,23 +2860,28 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.ResidenceModel", "Residence")
                         .WithMany("Decor")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__residence_decor_id__residence_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__residence_decor_id__residence_id");
 
                     b.Navigation("Residence");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ResidenceModel", b =>
                 {
+                    b.HasOne("NexusForever.Database.Character.Model.GuildModel", "Guild")
+                        .WithMany("Residence")
+                        .HasForeignKey("GuildOwnerId")
+                        .HasConstraintName("FK__residence_guildOwnerId__guild_id");
+
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
                         .WithOne("Residence")
                         .HasForeignKey("NexusForever.Database.Character.Model.ResidenceModel", "OwnerId")
-                        .HasConstraintName("FK__residence_ownerId__character_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasConstraintName("FK__residence_ownerId__character_id");
 
                     b.Navigation("Character");
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ResidencePlotModel", b =>
@@ -2046,9 +2889,9 @@ namespace NexusForever.Database.Character.Migrations
                     b.HasOne("NexusForever.Database.Character.Model.ResidenceModel", "Residence")
                         .WithMany("Plot")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__residence_plot_id__residence_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__residence_plot_id__residence_id");
 
                     b.Navigation("Residence");
                 });
@@ -2133,6 +2976,8 @@ namespace NexusForever.Database.Character.Migrations
                     b.Navigation("GuildMember");
 
                     b.Navigation("GuildRank");
+
+                    b.Navigation("Residence");
                 });
 
             modelBuilder.Entity("NexusForever.Database.Character.Model.ItemModel", b =>

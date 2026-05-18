@@ -4,16 +4,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using NexusForever.Cryptography;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Shared.Cryptography;
-using NexusForever.Shared.Network;
+using NexusForever.Network.Session;
+using NexusForever.Network.Sts;
+using NexusForever.Network.Sts.Model;
+using NexusForever.Shared;
 using NexusForever.StsServer.Network.Message;
-using NexusForever.StsServer.Network.Message.Model;
 using NexusForever.StsServer.Network.Packet;
 
 namespace NexusForever.StsServer.Network
 {
-    public class StsSession : NetworkSession
+    public class StsSession : NetworkSession, IStsSession
     {
         public AccountModel Account { get; set; }
         public SessionState State { get; set; }
@@ -29,6 +31,18 @@ namespace NexusForever.StsServer.Network
         private readonly Queue<ServerStsPacket> outgoingPackets = new();
 
         private uint sequence;
+
+        #region Dependency Injection
+
+        private readonly IMessageManager messageManager;
+
+        public StsSession(
+            IMessageManager messageManager)
+        {
+            this.messageManager = messageManager;
+        }
+
+        #endregion
 
         public void EnqueueMessageOk(IWritable message)
         {
@@ -104,14 +118,14 @@ namespace NexusForever.StsServer.Network
 
         private void HandlePacket(ClientStsPacket packet)
         {
-            IReadable message = MessageManager.Instance.GetMessage(packet.Uri);
+            IReadable message = messageManager.GetMessage(packet.Uri);
             if (message == null)
             {
                 log.Info($"Received unknown packet {packet.Uri}");
                 return;
             }
 
-            MessageHandlerInfo handlerInfo = MessageManager.Instance.GetMessageHandler(packet.Uri);
+            MessageHandlerInfo handlerInfo = messageManager.GetMessageHandler(packet.Uri);
             if (handlerInfo == null)
             {
                 log.Info($"Received unhandled packet {packet.Uri}");

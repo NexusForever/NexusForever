@@ -1,0 +1,40 @@
+﻿namespace NexusForever.Game.Static.Guild
+{
+    public enum GuildOperation
+    {
+        Disband                 = 1,
+        RankAdd                 = 2,
+        RankDelete              = 3,
+        RankPermissions         = 4,
+        NominateOrVote          = 5,
+        MemberPromote           = 6,
+        MemberDemote            = 7,
+        MemberInvite            = 8,
+        MemberRemove            = 9,
+        MemberQuit              = 10,
+        RosterRequest           = 11,
+        RankRename              = 15,
+        SetNameplateAffiliation = 16,
+        MakeLeader              = 21,
+        BankTabRename           = 22,
+        BankTabPermissions      = 23,
+        WithdrawalLimitChange   = 24,
+        PurchasePerk            = 25,
+        ActivatePerk            = 26,
+        MessageOfTheDay         = 27,
+        EditPlayerNote          = 28,
+        TaxUpdate               = 29,
+        RepairLimitChange       = 30,
+        RequestBankLog          = 31,
+        RequestEventLog         = 32,
+        AdditionalInfo          = 33,
+        GuildRename             = 34,
+        RecruitmentDescription  = 35,
+        RecruitmentDemand       = 36,
+        GuildClassification     = 37,
+        RecruitmentMinLevel     = 38,
+        SetMyRecruitmentAvailability = 39,
+        PlotReservation         = 41,
+        PlotReservationRemoval  = 42
+    }
+}

@@ -1,13 +1,13 @@
-﻿using NexusForever.WorldServer.Command.Context;
+﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.RBAC, "A collection of commands of manage RBAC permissions and roles.", "rbac")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class RBACCommandCategory : CommandCategory
     {
         [Command(Permission.RBACAccount, "A collection of commands to manage RBAC permissions and roles for an account.", "account")]
@@ -21,7 +21,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     [Parameter("Permission to grant", ParameterFlags.None, typeof(EnumParameterConverter<Permission>))]
                     Permission permission)
                 {
-                    context.GetTargetOrInvoker<Player>().Session.AccountRbacManager.GrantPermission(permission);
+                    context.GetTargetOrInvoker<IPlayer>().Account.RbacManager.GrantPermission(permission);
                 }
 
                 [Command(Permission.RBACAccountPermissionRevoke, "", "revoke")]
@@ -29,7 +29,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     [Parameter("Permission to revoke", ParameterFlags.None, typeof(EnumParameterConverter<Permission>))]
                     Permission permission)
                 {
-                    context.GetTargetOrInvoker<Player>().Session.AccountRbacManager.RevokePermission(permission);
+                    context.GetTargetOrInvoker<IPlayer>().Account.RbacManager.RevokePermission(permission);
                 }
             }
 
@@ -41,7 +41,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     [Parameter("Role to grant", ParameterFlags.None, typeof(EnumParameterConverter<Role>))]
                     Role role)
                 {
-                    context.GetTargetOrInvoker<Player>().Session.AccountRbacManager.GrantRole(role);
+                    context.GetTargetOrInvoker<IPlayer>().Account.RbacManager.GrantRole(role);
                 }
 
                 [Command(Permission.RBACAccountRoleRevoke, "Remove role from account", "revoke")]
@@ -49,7 +49,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     [Parameter("Role to revoke", ParameterFlags.None, typeof(EnumParameterConverter<Role>))]
                     Role role)
                 {
-                    context.GetTargetOrInvoker<Player>().Session.AccountRbacManager.RevokeRole(role);
+                    context.GetTargetOrInvoker<IPlayer>().Account.RbacManager.RevokeRole(role);
                 }
             }
         }

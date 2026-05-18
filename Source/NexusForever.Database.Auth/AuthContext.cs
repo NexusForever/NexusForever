@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 
 namespace NexusForever.Database.Auth
 {
@@ -10,27 +10,34 @@ namespace NexusForever.Database.Auth
         public DbSet<AccountCostumeUnlockModel> AccountCostumeUnlock { get; set; }
         public DbSet<AccountCurrencyModel> AccountCurrency { get; set; }
         public DbSet<AccountEntitlementModel> AccountEntitlement { get; set; }
+        public DbSet<AccountExternalReferenceModel> AccountExternalReference { get; set; }
         public DbSet<AccountGenericUnlockModel> AccountGenericUnlock { get; set; }
         public DbSet<AccountKeybindingModel> AccountKeybinding { get; set; }
         public DbSet<AccountPermissionModel> AccountPermission { get; set; }
         public DbSet<AccountRoleModel> AccountRole { get; set; }
+        public DbSet<AccountSuspensionModel> AccountSuspension { get; set; }
         public DbSet<PermissionModel> Permission { get; set; }
         public DbSet<RoleModel> Role { get; set; }
         public DbSet<RolePermissionModel> RolePermission { get; set; }
         public DbSet<ServerModel> Server { get; set; }
         public DbSet<ServerMessageModel> ServerMessage { get; set; }
 
-        private readonly IDatabaseConfig config;
+        private readonly IConnectionString config;
 
-        public AuthContext(IDatabaseConfig config)
+        public AuthContext(IConnectionString config)
         {
             this.config = config;
+        }
+
+        public AuthContext(DbContextOptions<AuthContext> options)
+            : base(options)
+        {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(config, DatabaseType.Auth);
+                optionsBuilder.UseConfiguration(config);
 
             optionsBuilder.EnableSensitiveDataLogging();
         }
@@ -173,6 +180,31 @@ namespace NexusForever.Database.Auth
                     .WithMany(p => p.AccountEntitlement)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__account_entitlement_id__account_id");
+            });
+
+            modelBuilder.Entity<AccountExternalReferenceModel>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.Type })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("account_external_reference");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned");
+
+                entity.Property(e => e.Type)
+                    .HasColumnName("type")
+                    .HasColumnType("varchar(64)");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasColumnType("varchar(512)");
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.AccountExternalReference)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__account_external_reference_id__account_id");
             });
 
             modelBuilder.Entity<AccountGenericUnlockModel>(entity =>
@@ -340,6 +372,39 @@ namespace NexusForever.Database.Auth
                     .HasConstraintName("FK__account_role_role_id__role_id");
             });
 
+            modelBuilder.Entity<AccountSuspensionModel>(entity =>
+            {
+                entity.ToTable("account_suspension");
+
+                entity.HasKey(e => new { e.Id, e.BanId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.BanId)
+                    .HasColumnName("banId")
+                    .HasColumnType("int(10) unsigned")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.StartTime)
+                    .HasColumnName("startTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("current_timestamp()");
+
+                entity.Property(e => e.EndTime)
+                    .HasColumnName("endTime")
+                    .HasColumnType("datetime")
+                    .HasDefaultValue(null);
+
+                entity.HasOne(e => e.Account)
+                    .WithMany(f => f.AccountSuspension)
+                    .HasForeignKey(e => e.Id)
+                    .HasConstraintName("FK__account_suspension_account_id__account_id");
+            });
+
             modelBuilder.Entity<PermissionModel>(entity =>
             {
                 entity.ToTable("permission");
@@ -493,7 +558,7 @@ namespace NexusForever.Database.Auth
                     new PermissionModel
                     {
                         Id   = 41,
-                        Name = "Command: EntitlementAccountAdd"
+                        Name = "Command: EntitlementAdd"
                     },
                     new PermissionModel
                     {
@@ -504,11 +569,6 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 37,
                         Name = "Category: EntitlementCharacter"
-                    },
-                    new PermissionModel
-                    {
-                        Id   = 38,
-                        Name = "Command: EntitlementCharacterAdd"
                     },
                     new PermissionModel
                     {
@@ -812,6 +872,11 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 116,
+                        Name = "Command: ItemInfo"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 82,
                         Name = "Category: Realm"
                     },
@@ -847,6 +912,131 @@ namespace NexusForever.Database.Auth
                     },
                     new PermissionModel
                     {
+                        Id   = 100,
+                        Name = "Category: Guild"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 101,
+                        Name = "Command: GuildRegister"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 102,
+                        Name = "Command: GuildJoin"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 103,
+                        Name = "Category: Map"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 104,
+                        Name = "Command: MapUnload"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 105,
+                        Name = "Command: MapPlayerRemove"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 106,
+                        Name = "Command: MapPlayerRemoveCancel"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 107,
+                        Name = "Category: RealmShutdown"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 108,
+                        Name = "Command: RealmShutdownStart"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 109,
+                        Name = "Command: RealmShutdownCancel"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 110,
+                        Name = "Command: QuestList"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 111,
+                        Name = "Command: RealmMaxPlayers"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 112,
+                        Name = "Category: Script"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 113,
+                        Name = "Command: ScriptReload"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 114,
+                        Name = "Command: ScriptInfo"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 115,
+                        Name = "Command: ScriptAdd"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 117,
+                        Name = "Category: Ban"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 118,
+                        Name = "Category: BanAccount"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 119,
+                        Name = "Command: BanAccountPlayer"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 120,
+                        Name = "Command: BanAccountCharacter"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 121,
+                        Name = "Category: EntityThreat"
+                    },
+                    new PermissionModel()
+                    {
+                        Id   = 122,
+                        Name = "Command: EntityThreatAdjust"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 123,
+                        Name = "Command: EntityThreatList"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 124,
+                        Name = "Command: EntityThreatClear"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 125,
+                        Name = "Command: EntityThreatRemove"
+                    },
+                    new PermissionModel
+                    {
                         Id   = 10000,
                         Name = "Other: InstantLogout"
                     },
@@ -854,6 +1044,21 @@ namespace NexusForever.Database.Auth
                     {
                         Id   = 10001,
                         Name = "Other: Signature"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10002,
+                        Name = "Other: BypassInstanceLimits"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10003,
+                        Name = "Other: GMFlag"
+                    },
+                    new PermissionModel
+                    {
+                        Id   = 10004,
+                        Name = "Other: EntitlementGrantOther"
                     });
             });
 

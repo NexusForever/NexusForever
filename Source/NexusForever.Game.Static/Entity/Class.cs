@@ -1,0 +1,14 @@
+﻿namespace NexusForever.Game.Static.Entity
+{
+    public enum Class : byte
+    {
+        None = 0,
+        Warrior      = 1,
+        Engineer     = 2,
+        Esper        = 3,
+        Medic        = 4,
+        Stalker      = 5,
+        Spellslinger = 7,
+        PvpTeam      = 23 // used for leaderboards
+    }
+}

@@ -1,18 +1,21 @@
 ﻿using System.Text;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
+using NexusForever.Game;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Housing;
+using NexusForever.Game.Abstract.Map.Lock;
+using NexusForever.Game.Housing;
+using NexusForever.Game.Map.Lock;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Text.Search;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Static;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Housing;
-using NexusForever.WorldServer.Game.Map;
-using NexusForever.WorldServer.Game.RBAC.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.House, "A collection of commands to modify housing residences.", "house")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class HouseCommandCategory : CommandCategory
     {
         [Command(Permission.HouseDecor, "A collection of commands to modify decor in housing residences.", "decor")]
@@ -27,12 +30,6 @@ namespace NexusForever.WorldServer.Command.Handler
             {
                 quantity ??= 1u;
 
-                if (!(context.GetTargetOrInvoker<Player>().Map is ResidenceMap residenceMap))
-                {
-                    context.SendMessage("You need to be on a housing map to use this command!");
-                    return;
-                }
-
                 HousingDecorInfoEntry entry = GameTableManager.Instance.HousingDecorInfo.GetEntry(decorInfoId);
                 if (entry == null)
                 {
@@ -40,7 +37,7 @@ namespace NexusForever.WorldServer.Command.Handler
                     return;
                 }
 
-                residenceMap.DecorCreate(entry, quantity.Value);
+                context.GetTargetOrInvoker<IPlayer>().ResidenceManager.DecorCreate(entry, quantity.Value);
             }
 
             [Command(Permission.HouseDecorLookup, "Returns a list of decor ids that match the supplied name.", "lookup")]
@@ -68,18 +65,18 @@ namespace NexusForever.WorldServer.Command.Handler
             [Parameter("", ParameterFlags.Optional)]
             string name)
         {
-            Player target = context.GetTargetOrInvoker<Player>();
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
             if (!target.CanTeleport())
             {
                 context.SendMessage("You have a pending teleport! Please wait to use this command.");
                 return;
             }
 
-            Residence residence = ResidenceManager.Instance.GetResidence(name ?? target.Name).GetAwaiter().GetResult();
+            IResidence residence = GlobalResidenceManager.Instance.GetResidenceByOwner(name ?? target.Name);
             if (residence == null)
             {
                 if (name == null)
-                    residence = ResidenceManager.Instance.CreateResidence(target);
+                    residence = GlobalResidenceManager.Instance.CreateResidence(target);
                 else
                 {
                     context.SendMessage("A residence for that character doesn't exist!");
@@ -87,8 +84,11 @@ namespace NexusForever.WorldServer.Command.Handler
                 }
             }
 
-            ResidenceEntrance entrance = ResidenceManager.Instance.GetResidenceEntrance(residence);
-            target.TeleportTo(entrance.Entry, entrance.Position, 0u, residence.Id);
+            IMapLock mapLock = MapLockManager.Instance.GetResidenceLock(residence.Parent ?? residence);
+
+            IResidenceEntrance entrance = GlobalResidenceManager.Instance.GetResidenceEntrance(residence.PropertyInfoId);
+            target.Rotation = entrance.Rotation.ToEuler();
+            target.TeleportTo(entrance.Entry, entrance.Position, mapLock);
         }
     }
 }

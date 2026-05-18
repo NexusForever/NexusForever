@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using Nexus.Archive;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.Shared;
-using NexusForever.Shared.GameTable;
-using NexusForever.Shared.GameTable.Model;
 
 namespace NexusForever.MapGenerator.GameTable
 {
@@ -10,7 +10,7 @@ namespace NexusForever.MapGenerator.GameTable
     {
         public GameTable<WorldEntry> World { get; private set; }
 
-        private GameTableManager()
+        public GameTableManager()
         {
         }
 

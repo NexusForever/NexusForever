@@ -1,4 +1,5 @@
-﻿using NexusForever.StsServer.Network.Message.Model;
+﻿using NexusForever.Network.Sts;
+using NexusForever.Network.Sts.Model;
 
 namespace NexusForever.StsServer.Network.Message.Handler
 {

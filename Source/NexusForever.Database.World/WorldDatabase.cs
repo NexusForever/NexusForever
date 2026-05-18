@@ -3,21 +3,22 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
 using NLog;
 
 namespace NexusForever.Database.World
 {
-    public class WorldDatabase
+    [Database(DatabaseType.World)]
+    public class WorldDatabase : IDatabase
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly IDatabaseConfig config;
+        private IConnectionString config;
 
-        public WorldDatabase(IDatabaseConfig config)
+        public void Initialise(IConnectionString connectionString)
         {
-            this.config = config;
+            config = connectionString;
         }
 
         public void Migrate()
@@ -35,14 +36,40 @@ namespace NexusForever.Database.World
             }
         }
 
-        public ImmutableList<EntityModel> GetEntities(ushort world)
+        private IQueryable<EntityModel> EntitiesInclude(IQueryable<EntityModel> entities)
         {
-            using var context = new WorldContext(config);
-            return context.Entity.Where(e => e.World == world)
+            return entities
+                .Include(e => e.EntityEvent)
+                .Include(e => e.EntitySpline)
                 .Include(e => e.EntityVendor)
                 .Include(e => e.EntityVendorCategory)
                 .Include(e => e.EntityVendorItem)
-                .Include(e => e.EntityStat)
+                .Include(e => e.EntityStat);
+        }
+
+        public ImmutableList<EntityModel> GetEntities(ushort world)
+        {
+            using var context = new WorldContext(config);
+            return EntitiesInclude(context.Entity.Where(e => e.World == world && e.EntityEvent == null))
+                .AsSplitQuery()
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<EntityModel> GetEntitiesPublicEvent(uint publicEventId)
+        {
+            using var context = new WorldContext(config);
+            return EntitiesInclude(context.Entity.Where(e => e.EntityEvent != null && e.EntityEvent.EventId == publicEventId))
+                .AsSplitQuery()
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<EntityModel> GetEntitiesWithSpline()
+        {
+            using var context = new WorldContext(config);
+            return context.Entity.Where(e => e.EntitySpline != null)
+                .Include(e => e.EntitySpline)
                 .AsNoTracking()
                 .ToImmutableList();
         }
@@ -96,6 +123,14 @@ namespace NexusForever.Database.World
                     .ThenInclude(e => e.StoreOfferItemData)
                 .Include(e => e.StoreOfferItem)
                     .ThenInclude(e => e.StoreOfferItemPrice)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<MapEntranceModel> GetMapEntrances()
+        {
+            using var context = new WorldContext(config);
+            return context.MapEntrance
                 .AsNoTracking()
                 .ToImmutableList();
         }

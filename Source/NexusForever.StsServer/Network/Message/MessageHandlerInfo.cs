@@ -1,4 +1,6 @@
-﻿namespace NexusForever.StsServer.Network.Message
+﻿using NexusForever.Network.Sts;
+
+namespace NexusForever.StsServer.Network.Message
 {
     public class MessageHandlerInfo
     {

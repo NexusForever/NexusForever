@@ -1,7 +1,13 @@
 {
+    "Urls": "http://0.0.0.0:5000",
     "Network": {
         "Host": "0.0.0.0",
-        "Port": 24000
+        "Port": 24000,
+        "Internal": {
+            "Broker": "RabbitMQ",
+            "ConnectionString": "amqp://nexusforever:nexusforever@localhost:5672",
+            "InputQueue": "WorldServer_1"
+        }
     },
     "Database": {
         "Auth": {
@@ -17,23 +23,44 @@
             "Provider": "MySql"
         }
     },
-    "Map": {
-        "MapPath": "map",
-        "PrecacheBaseMaps": [
-            22,
-            51,
-            1061
-        ],
-        "PrecacheMapSpawns": [
-            22,
-            51,
-            1061
-        ],
-        "GridActionThreshold": 100,
-        "GridUnloadTimer": 3600
+    "GameTable": {
+        "GameTablePath": "tbl",
+        "Cache": {
+            "UseCache": true,
+            "CachePath": "cache"
+        }
     },
-    "RealmId": 1,
-    "MessageOfTheDay": "Welcome to this NexusForever server!",
-    "LengthOfInGameDay": 12600,
-    "CrossFactionChat": true
+    "Realm": {
+        "Map": {
+            "MapPath": "map",
+            "PrecacheBaseMaps": [
+                22,
+                51,
+                1061
+            ],
+            "PrecacheMapSpawns": [
+                22,
+                51,
+                1061
+            ],
+            "SynchronousUpdate": false,
+            "GridActionThreshold": 100,
+            "GridActionMaxRetry": 5,
+            "GridUnloadTimer": 3600,
+            "MaxInstances": 10
+        },
+        "RealmId": 1,
+        "MessageOfTheDay": "Welcome to this NexusForever server!",
+        "LengthOfInGameDay": 12600,
+        "CrossFactionChat": true,
+        "MaxPlayers": 50
+    },
+    "Script": {
+        "Enable": true,
+        "Directory": "",
+        "Dynamic": {
+            "Enable": true,
+            "Directory": ""
+        }
+    }
 }

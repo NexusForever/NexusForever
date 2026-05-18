@@ -19,7 +19,6 @@ namespace NexusForever.WorldServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -31,12 +30,6 @@ namespace NexusForever.WorldServer
                 KeepAliveInterval = TimeSpan.FromSeconds(30)
             });
             app.UseMiddleware<WebSocketMiddleware>();
-
-            app.UseRouting();
-            app.UseEndpoints(ep =>
-            {
-                ep.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-            });
         }
     }
 }

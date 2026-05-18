@@ -3,11 +3,16 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# NexusForever generated files
+*.tbl
+*.nfmap
+
 # User-specific files
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+*.bat
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -53,6 +58,8 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 **/Properties/launchSettings.json
+
+!Source/NexusForever.Aspire.AppHost/Properties/launchSettings.json
 
 # StyleCop
 StyleCopReport.xml

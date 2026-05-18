@@ -1,5 +1,5 @@
-﻿using NexusForever.Database.Configuration;
-using NexusForever.Shared.Configuration;
+﻿using NexusForever.Database.Configuration.Model;
+using NexusForever.Network.Configuration.Model;
 
 namespace NexusForever.StsServer
 {

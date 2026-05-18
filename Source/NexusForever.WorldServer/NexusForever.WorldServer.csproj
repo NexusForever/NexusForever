@@ -2,8 +2,18 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;NU1608</NoWarn>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1605</WarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;NU1608</NoWarn>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1605</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,25 +27,37 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.2">
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	<PackageReference Include="Microsoft.CodeAnalysis.Common" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NLog.Web.AspNetCore" Version="4.10.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+    <PackageReference Include="NLog.Extensions.Logging" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Game\NexusForever.Game.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.Internal\NexusForever.Network.Internal.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.World\NexusForever.Network.World.csproj" />
+    <ProjectReference Include="..\NexusForever.Script\NexusForever.Script.csproj" />
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="WorldServer.example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Web\Controllers\" />
-  </ItemGroup>
+  <Import Project="./ExtractGameTableFiles.targets" Condition="$(ExtractGameTables) == 'true'" />
+
+  <Import Project="./GenerateBaseMapFiles.targets" Condition="$(GenerateMapFiles) == 'true'" />
 
 </Project>

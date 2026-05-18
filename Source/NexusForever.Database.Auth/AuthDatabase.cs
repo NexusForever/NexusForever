@@ -6,20 +6,21 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Auth.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 using NLog;
 
 namespace NexusForever.Database.Auth
 {
-    public class AuthDatabase
+    [Database(DatabaseType.Auth)]
+    public class AuthDatabase : IDatabase
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        private readonly IDatabaseConfig config;
+        private IConnectionString config;
 
-        public AuthDatabase(IDatabaseConfig config)
+        public void Initialise(IConnectionString connectionString)
         {
-            this.config = config;
+            config = connectionString;
         }
 
         public async Task Save(Action<AuthContext> action)
@@ -59,7 +60,9 @@ namespace NexusForever.Database.Auth
         public async Task<AccountModel> GetAccountByGameTokenAsync(string email, string gameToken)
         {
             using var context = new AuthContext(config);
-            return await context.Account.SingleOrDefaultAsync(a => a.Email == email && a.GameToken == gameToken);
+            return await context.Account
+                .Include(a => a.AccountSuspension)
+                .SingleOrDefaultAsync(a => a.Email == email && a.GameToken == gameToken);
         }
 
         /// <summary>
@@ -69,6 +72,7 @@ namespace NexusForever.Database.Auth
         {
             using var context = new AuthContext(config);
             return await context.Account
+                .AsSplitQuery()
                 .Include(a => a.AccountCostumeUnlock)
                 .Include(a => a.AccountCurrency)
                 .Include(a => a.AccountGenericUnlock)
@@ -77,6 +81,18 @@ namespace NexusForever.Database.Auth
                 .Include(a => a.AccountPermission)
                 .Include(a => a.AccountRole)
                 .SingleOrDefaultAsync(a => a.Email == email && a.SessionKey == sessionKey);
+        }
+
+        /// <summary>
+        /// Selects an <see cref="AccountModel"/> asynchronously that matches the supplied external reference type and value.
+        /// </summary>
+        public async Task<List<AccountModel>> GetAccountsByExternalReference(string referenceType, string referenceValue)
+        {
+            using var context = new AuthContext(config);
+            return await context.Account
+                .Include(a => a.AccountExternalReference)
+                .Where(a => a.AccountExternalReference.Any(r => r.Type == referenceType && r.Value == referenceValue))
+                .ToListAsync();
         }
 
         /// <summary>
@@ -91,20 +107,44 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Create a new account with the supplied email, salt and password verifier that is inserted into the database.
         /// </summary>
-        public void CreateAccount(string email, string s, string v)
+        public void CreateAccount(string email, string s, string v, uint role)
         {
             if (AccountExists(email))
                 throw new InvalidOperationException($"Account with that username already exists.");
 
+            CreateAccountAsync(email, s, v, role, []).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Create a new account with the supplied email, salt and password verifier and external references that is inserted into the database.
+        /// </summary>
+        public async Task CreateAccountAsync(string email, string s, string v, uint role, IEnumerable<(string referenceType, string referenceValue)> externalReferences)
+        {
             using var context = new AuthContext(config);
-            context.Account.Add(new AccountModel
+
+            var model = new AccountModel
             {
                 Email = email,
                 S     = s,
                 V     = v
+            };
+
+            model.AccountRole.Add(new AccountRoleModel
+            {
+                RoleId = role
             });
 
-            context.SaveChanges();
+            foreach ((string referenceType, string referenceValue) in externalReferences)
+            {
+                model.AccountExternalReference.Add(new AccountExternalReferenceModel
+                {
+                    Type  = referenceType,
+                    Value = referenceValue,
+                });
+            }
+
+            context.Account.Add(model);
+            await context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -124,12 +164,14 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Update <see cref="AccountModel"/> with supplied game token asynchronously.
         /// </summary>
-        public async Task UpdateAccountGameToken(AccountModel account, string gameToken)
+        public async Task UpdateAccountGameToken(uint accountId, string gameToken)
         {
-            account.GameToken = gameToken;
-
             using var context = new AuthContext(config);
-            EntityEntry<AccountModel> entity = context.Attach(account);
+            EntityEntry<AccountModel> entity = context.Attach(new AccountModel
+            {
+                Id        = accountId,
+                GameToken = gameToken
+            });
             entity.Property(p => p.GameToken).IsModified = true;
             await context.SaveChangesAsync();
         }
@@ -137,13 +179,34 @@ namespace NexusForever.Database.Auth
         /// <summary>
         /// Update <see cref="AccountModel"/> with supplied session key asynchronously.
         /// </summary>
-        public async Task UpdateAccountSessionKey(AccountModel account, string sessionKey)
+        public async Task UpdateAccountSessionKey(uint accountId, string sessionKey)
         {
-            account.SessionKey = sessionKey;
-
             await using var context = new AuthContext(config);
-            EntityEntry<AccountModel> entity = context.Attach(account);
+            EntityEntry<AccountModel> entity = context.Attach(new AccountModel
+            {
+                Id         = accountId,
+                SessionKey = sessionKey
+            });
             entity.Property(p => p.SessionKey).IsModified = true;
+            await context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Update <see cref="AccountModel"/> with supplied salt and verifier asynchronously.
+        /// </summary>
+        public async Task UpdateAccountPasswordSaltAndVerifier(uint accountId, string s, string v)
+        {
+            await using var context = new AuthContext(config);
+            EntityEntry<AccountModel> entity = context.Attach(new AccountModel
+            {
+                Id = accountId,
+                S  = s,
+                V  = v
+            });
+
+            entity.Property(p => p.S).IsModified = true;
+            entity.Property(p => p.V).IsModified = true;
+
             await context.SaveChangesAsync();
         }
 
@@ -153,6 +216,14 @@ namespace NexusForever.Database.Auth
             return context.Server
                 .AsNoTracking()
                 .ToImmutableList();
+        }
+
+        public ServerModel GetServer(ushort realmId)
+        {
+            using var context = new AuthContext(config);
+            return context.Server
+                .AsNoTracking()
+                .SingleOrDefault(s => s.Id == realmId);
         }
 
         public ImmutableList<ServerMessageModel> GetServerMessages()
@@ -178,6 +249,19 @@ namespace NexusForever.Database.Auth
                 .Include(r => r.RolePermission)
                 .AsNoTracking()
                 .ToImmutableList();
+        }
+
+        public void BanAccount(uint accountId, string reason, DateTime? endTime)
+        {
+            using var context = new AuthContext(config);
+            context.AccountSuspension.Add(new AccountSuspensionModel
+            {
+                Id      = accountId,
+                Reason  = reason,
+                EndTime = endTime,
+            });
+
+            context.SaveChanges();
         }
     }
 }

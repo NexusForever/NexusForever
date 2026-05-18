@@ -1,0 +1,64 @@
+﻿using NexusForever.Game.Abstract.Cinematic;
+using NexusForever.Game.Abstract.Cinematic.Cinematics;
+using NexusForever.Game.Static.Cinematic;
+using NexusForever.Network.World.Message.Model.Cinematic;
+
+namespace NexusForever.Game.Cinematic.Cinematics
+{
+    public class CrimsonIsleOnCreate : CinematicBase, ICrimsonIsleOnCreate
+    {
+        const uint VO_MONDO = 30484;
+
+        protected override void Setup()
+        {
+            Duration          = 18500;
+            InitialFlags      = CinematicFlags.EndImmediate | CinematicFlags.Unknown2 | CinematicFlags.NotifyServer;
+            InitialCancelMode = CancelType.EndImmediate;
+            CinematicId       = 35;
+            StartTransition   = new Transition(0, CameraAddFlags.AddCamera | CameraAddFlags.NotifyCancelNextCamera, 1, 1500, 0, 1500);
+            EndTransition     = new Transition(17000, CameraAddFlags.WhiteOut, 0);
+
+            SetupActors();
+            SetupTexts();
+            SetupCamera();
+
+            Keyframes.Add(new VisualEffect(VO_MONDO, Player.Guid, delay: 950));
+        }
+
+        private void SetupActors()
+        {
+            // TODO: Need parse of Crimson Isle cinematic to finish
+        }
+
+        private void SetupTexts()
+        {
+            AddText(578443, 1000, 2500);
+            AddText(578444, 2600, 8000);
+            AddText(578445, 8100, 12600);
+            AddText(578446, 12700, 16500);
+        }
+
+        private void SetupCamera()
+        {
+            Camera mainCam = new Camera(72364, 0, 0, 1f, useRotation: true);
+            AddCamera(mainCam);
+            mainCam.AddTransition(0, 0, 1500, 0, 1500);
+        }
+
+        protected override void Play()
+        {
+            base.Play();
+
+            Player.Session.EnqueueMessageEncrypted(new ServerCinematicTransitionDurationSet
+            {
+                Type = ScaleTransitionType.StartMinimized,
+                DurationStart = 1500,
+                DurationMid = 0,
+                DurationEnd = 1500
+            });
+
+            foreach (IKeyframeAction keyframeAction in Keyframes)
+                keyframeAction.Send(Player.Session);
+        }
+    }
+}

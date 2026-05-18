@@ -1,14 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NexusForever.Database.Configuration;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement.Spline;
 
 namespace NexusForever.Database.World
 {
     public class WorldContext : DbContext
     {
         public DbSet<DisableModel> Disable { get; set; }
-        public DbSet<EntityLootModel> EntityLoot { get; set; }
         public DbSet<EntityModel> Entity { get; set; }
+        public DbSet<EntityEventModel> EntityEvent { get; set; }
+        public DbSet<EntityLootModel> EntityLoot { get; set; }
         public DbSet<EntitySplineModel> EntitySpline { get; set; }
         public DbSet<EntityStatModel> EntityStat { get; set; }
         public DbSet<EntityVendorModel> EntityVendor { get; set; }
@@ -17,6 +21,7 @@ namespace NexusForever.Database.World
         public DbSet<ItemLootModel> ItemLoot { get; set; }
         public DbSet<LootGroupModel> LootGroup { get; set; }
         public DbSet<LootItemModel> LootItem { get; set; }
+        public DbSet<MapEntranceModel> MapEntrance { get; set; }
         public DbSet<StoreCategoryModel> StoreCategory { get; set; }
         public DbSet<StoreOfferGroupModel> StoreOfferGroup { get; set; }
         public DbSet<StoreOfferGroupCategoryModel> StoreOfferGroupCategory { get; set; }
@@ -24,18 +29,24 @@ namespace NexusForever.Database.World
         public DbSet<StoreOfferItemDataModel> StoreOfferItemData { get; set; }
         public DbSet<StoreOfferItemPriceModel> StoreOfferItemPrice { get; set; }
         public DbSet<TutorialModel> Tutorial { get; set; }
+        public DbSet<VersionModel> Version { get; set; }
 
-        private readonly IDatabaseConfig config;
+        private readonly IConnectionString config;
 
-        public WorldContext(IDatabaseConfig config)
+        public WorldContext(IConnectionString config)
         {
             this.config = config;
+        }
+
+        public WorldContext(DbContextOptions<WorldContext> options)
+            : base(options)
+        {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(config, DatabaseType.World);
+                optionsBuilder.UseConfiguration(config);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -64,6 +75,36 @@ namespace NexusForever.Database.World
                     .HasDefaultValue("");
             });
 
+            modelBuilder.Entity<EntityEventModel>(entity =>
+            {
+                entity.ToTable("entity_event");
+
+                entity.HasKey(e => new { e.Id, e.EventId, e.Phase })
+                    .HasName("PRIMARY");
+
+                entity.HasIndex(e => e.EventId);
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Phase)
+                    .HasColumnName("phase")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.EventId)
+                    .HasColumnName("eventId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Entity)
+                    .WithOne(p => p.EntityEvent)
+                    .HasForeignKey<EntityEventModel>(d => d.Id)
+                    .HasConstraintName("FK__entity_event_id__entity_id");
+            });
+
             modelBuilder.Entity<EntityLootModel>(entity =>
             {
                 entity.ToTable("entity_loot");
@@ -71,20 +112,15 @@ namespace NexusForever.Database.World
                 entity.HasKey(e => new { e.Id, e.LootGroupId })
                     .HasName("PRIMARY");
 
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
-                    .HasColumnType("int(10) unsigned")
-                    .HasDefaultValue(0);
+                entity.Property(e => e.LootGroupId)
+                    .HasColumnName("lootGroupId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(null);
 
                 entity.Property(e => e.Comment)
                     .HasColumnName("comment")
                     .HasColumnType("varchar(200)")
                     .HasDefaultValue("");
-
-                entity.Property(e => e.LootGroupId)
-                    .HasColumnName("lootGroupId")
-                    .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue(null);
             });
 
             modelBuilder.Entity<EntityModel>(entity =>
@@ -154,7 +190,8 @@ namespace NexusForever.Database.World
                 entity.Property(e => e.Type)
                     .HasColumnName("type")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(EntityType.NonPlayer)
+                    .HasConversion<EnumToNumberConverter<EntityType, byte>>();
 
                 entity.Property(e => e.World)
                     .HasColumnName("world")
@@ -209,7 +246,8 @@ namespace NexusForever.Database.World
                 entity.Property(e => e.Mode)
                     .HasColumnName("mode")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(SplineMode.OneShot)
+                    .HasConversion<EnumToNumberConverter<SplineMode, byte>>();
 
                 entity.Property(e => e.Speed)
                     .HasColumnName("speed")
@@ -335,10 +373,65 @@ namespace NexusForever.Database.World
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.ExtraCost1Type)
+                    .HasColumnName("extraCost1Type")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(ItemExtraCostType.None)
+                    .HasConversion<EnumToNumberConverter<ItemExtraCostType, byte>>();
+                
+                entity.Property(e => e.ExtraCost1Quantity)
+                    .HasColumnName("extraCost1Quantity")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost1ItemOrCurrencyId)
+                    .HasColumnName("extraCost1ItemOrCurrencyId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost2Type)
+                    .HasColumnName("extraCost2Type")
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(ItemExtraCostType.None)
+                    .HasConversion<EnumToNumberConverter<ItemExtraCostType, byte>>();
+
+                entity.Property(e => e.ExtraCost2Quantity)
+                    .HasColumnName("extraCost2Quantity")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.ExtraCost2ItemOrCurrencyId)
+                    .HasColumnName("extraCost2ItemOrCurrencyId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
                 entity.HasOne(d => d.Entity)
                     .WithMany(p => p.EntityVendorItem)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__entity_vendor_item_id__entity_id");
+            });
+
+            modelBuilder.Entity<ItemLootModel>(entity =>
+            {
+                entity.ToTable("item_loot");
+
+                entity.HasKey(e => new { e.Id, e.LootGroupId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.LootGroupId)
+                    .HasColumnName("lootGroupId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(null);
+
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValue("");
             });
 
             modelBuilder.Entity<LootGroupModel>(entity =>
@@ -440,27 +533,24 @@ namespace NexusForever.Database.World
                     .HasConstraintName("FK__loot_item_id__loot_group_id");
             });
 
-            modelBuilder.Entity<ItemLootModel>(entity =>
+            modelBuilder.Entity<MapEntranceModel>(entity =>
             {
-                entity.ToTable("item_loot");
+                entity.ToTable("map_entrance");
 
-                entity.HasKey(e=> new { e.Id, e.LootGroupId })
+                entity.HasKey(e => new { e.MapId, e.Team })
                     .HasName("PRIMARY");
 
-                entity.Property(e => e.Id)
-                    .HasColumnName("id")
-                    .HasColumnType("int(10) unsigned")
-                    .HasDefaultValue(0);
+                entity.Property(e => e.MapId)
+                    .HasColumnName("mapId")
+                    .HasColumnType("int(10) unsigned");
 
-                entity.Property(e => e.Comment)
-                    .HasColumnName("comment")
-                    .HasColumnType("varchar(200)")
-                    .HasDefaultValue("");
+                entity.Property(e => e.Team)
+                    .HasColumnName("team")
+                    .HasColumnType("tinyint(3) unsigned");
 
-                entity.Property(e => e.LootGroupId)
-                    .HasColumnName("lootGroupId")
-                    .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue(null);
+                entity.Property(e => e.WorldLocationId)
+                    .HasColumnName("worldLocationId")
+                    .HasColumnType("int(10) unsigned");
             });
 
             modelBuilder.Entity<StoreCategoryModel>(entity =>
@@ -754,6 +844,25 @@ namespace NexusForever.Database.World
                     .HasColumnName("note")
                     .HasColumnType("varchar(50)")
                     .HasDefaultValue("");
+            });
+
+            modelBuilder.Entity<VersionModel>(entity =>
+            {
+                entity.ToTable("version");
+
+                entity.HasKey(e => new { e.FileName, e.FileHash })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.FileName)
+                    .HasColumnName("fileName")
+                    .IsRequired();
+
+                entity.Property(e => e.FileHash)
+                    .HasColumnName("fileHash")
+                    .IsRequired();
+
+                entity.Property(e => e.AppliedOn)
+                    .HasColumnName("appliedOn");
             });
         }
     }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character.Model;
-using NexusForever.Database.Configuration;
+using NexusForever.Database.Configuration.Model;
 
 namespace NexusForever.Database.Character
 {
@@ -14,6 +14,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterBoneModel> CharacterBone { get; set; }
         public DbSet<CharacterCostumeModel> CharacterCostume { get; set; }
         public DbSet<CharacterCostumeItemModel> CharacterCostumeItem { get; set; }
+        public DbSet<CharacterCreateModel> CharacterCreate { get; set; }
         public DbSet<CharacterCurrencyModel> CharacterCurrency { get; set; }
         public DbSet<CharacterCustomisationModel> CharacterCustomisation { get; set; }
         public DbSet<CharacterDatacubeModel> CharacterDatacube { get; set; }
@@ -40,21 +41,27 @@ namespace NexusForever.Database.Character
         public DbSet<GuildAchievementModel> GuildAchievement { get; set; }
         public DbSet<GuildDataModel> GuildData { get; set; }
         public DbSet<ItemModel> Item { get; set; }
+        public DbSet<PropertyBaseModel> PropertyBase { get; set; }
         public DbSet<ResidenceModel> Residence { get; set; }
         public DbSet<ResidenceDecor> ResidenceDecor { get; set; }
         public DbSet<ResidencePlotModel> ResidencePlot { get; set; }
 
-        private readonly IDatabaseConfig config;
+        private readonly IConnectionString config;
 
-        public CharacterContext(IDatabaseConfig config)
+        public CharacterContext(IConnectionString config)
         {
             this.config = config;
+        }
+
+        public CharacterContext(DbContextOptions<CharacterContext> options)
+            : base(options)
+        {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseConfiguration(config, DatabaseType.Character);
+                optionsBuilder.UseConfiguration(config);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -128,6 +135,9 @@ namespace NexusForever.Database.Character
                     .HasColumnType("tinyint(4)")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.IsOnline)
+                    .HasColumnName("isOnline");
+
                 entity.Property(e => e.LastOnline)
                     .HasColumnName("lastOnline")
                     .HasColumnType("datetime");
@@ -149,6 +159,21 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.LocationZ)
                     .HasColumnName("locationZ")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RotationX)
+                    .HasColumnName("rotationX")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RotationY)
+                    .HasColumnName("rotationY")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.RotationZ)
+                    .HasColumnName("rotationZ")
                     .HasColumnType("float")
                     .HasDefaultValue(0);
 
@@ -362,13 +387,11 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
-                    .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue(0);
+                    .HasColumnType("bigint(20) unsigned");
 
                 entity.Property(e => e.BoneIndex)
                     .HasColumnName("boneIndex")
-                    .HasColumnType("tinyint(4) unsigned")
-                    .HasDefaultValue(0);
+                    .HasColumnType("tinyint(4) unsigned");
 
                 entity.Property(e => e.Bone)
                     .HasColumnName("bone")
@@ -399,8 +422,8 @@ namespace NexusForever.Database.Character
                     .HasDefaultValue(0)
                     .ValueGeneratedNever();
 
-                entity.Property(e => e.Mask)
-                    .HasColumnName("mask")
+                entity.Property(e => e.VisibilityMask)
+                    .HasColumnName("visibilityMask")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
@@ -431,7 +454,8 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Index)
                     .HasColumnName("index")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Slot)
                     .HasColumnName("slot")
@@ -441,11 +465,11 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.DyeData)
                     .HasColumnName("dyeData")
-                    .HasColumnType("int(10)")
+                    .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
-                entity.Property(e => e.ItemId)
-                    .HasColumnName("itemId")
+                entity.Property(e => e.Item2Id)
+                    .HasColumnName("item2Id")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
@@ -453,6 +477,407 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.CostumeItem)
                     .HasForeignKey(d => new { d.Id, d.Index })
                     .HasConstraintName("FK__character_costume_item_id-index__character_costume_id-index");
+            });
+
+            modelBuilder.Entity<CharacterCreateModel>(entity =>
+            {
+                entity.ToTable("character_create");
+
+                entity.HasKey(e => new { e.Race, e.Faction, e.CreationStart })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Race)
+                    .HasColumnName("race")
+                    .HasColumnType("tinyint(4) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Faction)
+                    .HasColumnName("faction")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.CreationStart)
+                    .HasColumnName("creationStart")
+                    .HasColumnType("tinyint(4) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.X)
+                    .HasColumnName("x")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Y)
+                    .HasColumnName("y")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Z)
+                    .HasColumnName("z")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Rx)
+                    .HasColumnName("rx")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Ry)
+                    .HasColumnName("ry")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Rz)
+                    .HasColumnName("rz")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Comment)
+                    .HasColumnName("comment")
+                    .HasColumnType("varchar(200)")
+                    .HasDefaultValue("");
+
+                entity.HasData(
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Human - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 426,
+                        X             = 4110.71f,
+                        Y             = -658.6249f,
+                        Z             = -5145.48f,
+                        Rx            = 0.317613f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Human - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Human - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 3,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Granok - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 3,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 426,
+                        X             = 4110.71f,
+                        Y             = -658.6249f,
+                        Z             = -5145.48f,
+                        Rx            = 0.317613f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment = "Exile Granok- Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 3,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Granok - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 4,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Aurin - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 4,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 990,
+                        X             = -771.823f,
+                        Y             = -904.2852f,
+                        Z             = -2269.56f,
+                        Rx            = -1.1214035f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Aurin - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 4,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Aurin - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 16,
+                        Faction       = 167,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Mordesh - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 16,
+                        Faction       = 167,
+                        CreationStart = 3,
+                        WorldId       = 990,
+                        X             = -771.823f,
+                        Y             = -904.2852f,
+                        Z             = -2269.56f,
+                        Rx            = -1.1214035f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Mordesh - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 16,
+                        Faction       = 167,
+                        CreationStart = 5,
+                        WorldId       = 51,
+                        X             = 4074.34f,
+                        Y             = -797.8368f,
+                        Z             = -2399.37f,
+                        Rx            = 0f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Exile Mordesh - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 13,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Chua - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 13,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 870,
+                        X             = -8261.3984f,
+                        Y             = -995.471f,
+                        Z             = -242.3648f,
+                        Rx            = -2.215535f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Chua - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 13,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Chua - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 5,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Draken - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 5,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 870,
+                        X             = -8261.3984f,
+                        Y             = -995.471f,
+                        Z             = -242.3648f,
+                        Rx            = -2.215535f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Draken - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 5,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Draken - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Cassian - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 1387,
+                        X             = -3835.341f,
+                        Y             = -980.2174f,
+                        Z             = -6050.524f,
+                        Rx            = -0.456820f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Cassian - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 1,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Cassian - Level 50"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 12,
+                        Faction       = 166,
+                        CreationStart = 4,
+                        WorldId       = 3460,
+                        X             = 29.1286f,
+                        Y             = -853.8716f,
+                        Z             = -560.188f,
+                        Rx            = -2.751458f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Mechari - Novice"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 12,
+                        Faction       = 166,
+                        CreationStart = 3,
+                        WorldId       = 1387,
+                        X             = -3835.341f,
+                        Y             = -980.2174f,
+                        Z             = -6050.524f,
+                        Rx            = -0.456820f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Mechari - Veteran"
+                    },
+                    new CharacterCreateModel
+                    {
+                        Race          = 12,
+                        Faction       = 166,
+                        CreationStart = 5,
+                        WorldId       = 22,
+                        X             = -3343.58f,
+                        Y             = -887.4646f,
+                        Z             = -536.03f,
+                        Rx            = -0.7632219f,
+                        Ry            = 0f,
+                        Rz            = 0f,
+                        Comment       = "Dominion Mechari - Level 50"
+                    });
             });
 
             modelBuilder.Entity<CharacterCurrencyModel>(entity =>
@@ -1407,6 +1832,11 @@ namespace NexusForever.Database.Character
                     .HasColumnType("varchar(32)")
                     .HasDefaultValue("");
 
+                entity.Property(e => e.CommunityPlotReservation)
+                    .HasColumnName("communityPlotReservation")
+                    .HasColumnType("int(11)")
+                    .HasDefaultValue(-1);
+
                 entity.HasOne(d => d.Guild)
                     .WithMany(p => p.GuildMember)
                     .HasForeignKey(d => d.Id)
@@ -1472,6 +1902,360 @@ namespace NexusForever.Database.Character
                     .HasConstraintName("FK__item_ownerId__character_id");
             });
 
+            modelBuilder.Entity<PropertyBaseModel>(entity =>
+            {
+                entity.HasKey(e => new { e.Type, e.Subtype, e.Property, })
+                    .HasName("PRIMARY");
+
+                entity.ToTable("property_base");
+
+                entity.Property(e => e.Type)
+                    .ValueGeneratedNever()
+                    .HasColumnName("type")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Property)
+                    .ValueGeneratedNever()
+                    .HasColumnName("property")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Subtype)
+                    .ValueGeneratedNever()
+                    .HasColumnName("subtype")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.ModType)
+                    .HasColumnName("modType")
+                    .HasDefaultValueSql("'0'");
+
+                entity.Property(e => e.Note)
+                    .IsRequired()
+                    .HasColumnName("note")
+                    .HasColumnType("varchar(100)")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.Value)
+                    .HasColumnName("value")
+                    .HasDefaultValueSql("'0'");
+
+                entity.HasData(
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 0,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Strength"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 1,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Dexterity"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 2,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Technology"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 3,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Magic"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 4,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Wisdom"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 7,
+                        ModType = 3,
+                        Value = 200,
+                        Note = "Player - Base HP per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 9,
+                        ModType = 0,
+                        Value = 500,
+                        Note = "Player - Base Endurance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 16,
+                        ModType = 0,
+                        Value = 0.0225f,
+                        Note = "Player - Base Endurance Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 35,
+                        ModType = 3,
+                        Value = 18,
+                        Note = "Player - Base Assault Rating per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 36,
+                        ModType = 3,
+                        Value = 18,
+                        Note = "Player - Base Support Rating per Level"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 38,
+                        ModType = 0,
+                        Value = 200,
+                        Note = "Player - Base Dash Energy"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 39,
+                        ModType = 0,
+                        Value = 0.045f,
+                        Note = "Player - Base Dash Energy Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 41,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Shield Capacity Base"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 100,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Movement Speed"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 101,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Avoid Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 102,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Crit Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 107,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Focus Recovery In Combat"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 108,
+                        ModType = 0,
+                        Value = 0,
+                        Note = "Player - Base Focus Recovery Out of Combat"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 112,
+                        ModType = 0,
+                        Value = 0.3f,
+                        Note = "Player - Base Multi-Hit Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 130,
+                        ModType = 0,
+                        Value = 0.8f,
+                        Note = "Player - Base Gravity Multiplier"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 150,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Physical"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 151,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Tech"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 152,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Damage Taken Offset - Magic"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 154,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Mutli-Hit Chance"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 155,
+                        ModType = 0,
+                        Value = 0.05f,
+                        Note = "Player - Base Damage Reflect Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 191,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Player - Base Mount Movement Speed"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 195,
+                        ModType = 0,
+                        Value = 0.3f,
+                        Note = "Player - Base Glance Amount"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 1,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 1000,
+                        Note = "Class - Warrior - Base Kinetic Energy Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 0,
+                        Subtype = 0,
+                        Property = 17,
+                        ModType = 0,
+                        Value = 1,
+                        Note = "Warrior - Base Kinetic Energy Regen"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 2,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 100,
+                        Note = "Class - Engineer - Base Volatile Energy Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 3,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 5,
+                        Note = "Class - Esper - Base Psi Point Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 4,
+                        Property = 10,
+                        ModType = 0,
+                        Value = 4,
+                        Note = "Class - Medic - Base Medic Core Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 5,
+                        Property = 12,
+                        ModType = 0,
+                        Value = 100,
+                        Note = "Class - Stalker - Base Suit Power Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 5,
+                        Property = 19,
+                        ModType = 0,
+                        Value = 0.035f,
+                        Note = "Class - Stalker - Base Suit Power Regeneration Rate"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 7,
+                        Property = 13,
+                        ModType = 0,
+                        Value = 100,
+                        Note = "Class - Spellslinger - Base Spell Power Cap"
+                    });
+            });
+
             modelBuilder.Entity<ResidenceModel>(entity =>
             {
                 entity.ToTable("residence");
@@ -1524,7 +2308,12 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.OwnerId)
                     .HasColumnName("ownerId")
                     .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(null);
+
+                entity.Property(e => e.GuildOwnerId)
+                    .HasColumnName("guildOwnerId")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(null);
 
                 entity.Property(e => e.PrivacyLevel)
                     .HasColumnName("privacyLevel")
@@ -1560,6 +2349,11 @@ namespace NexusForever.Database.Character
                     .WithOne(p => p.Residence)
                     .HasForeignKey<ResidenceModel>(d => d.OwnerId)
                     .HasConstraintName("FK__residence_ownerId__character_id");
+
+                entity.HasOne(d => d.Guild)
+                    .WithMany(p => p.Residence)
+                    .HasForeignKey(d => d.GuildOwnerId)
+                    .HasConstraintName("FK__residence_guildOwnerId__guild_id");
             });
 
             modelBuilder.Entity<ResidenceDecor>(entity =>
@@ -1602,7 +2396,8 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.PlotIndex)
                     .HasColumnName("plotIndex")
                     .HasColumnType("int(10) unsigned")
-                    .HasDefaultValue(2147483647);
+                    .HasDefaultValue(2147483647)
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Qw)
                     .HasColumnName("qw")
@@ -1665,7 +2460,8 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Index)
                     .HasColumnName("index")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.BuildState)
                     .HasColumnName("buildState")

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using NexusForever.Shared.Network;
+using NexusForever.Shared;
 
 namespace NexusForever.StsServer.Network.Packet
 {

@@ -1,0 +1,10 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="ExtractGameTableFiles" AfterTargets="AfterBuild">
+    <Message Text="Extracting game table files." Importance="High" />
+
+    <!-- Extract the Game Table files into the NexusForever.WorldServer build directory -->
+    <Exec Command='dotnet run --project ../NexusForever.MapGenerator -- --e --i "$(WsInstallDir)\Patch" --o $(MSBuildThisFileDirectory)$(OutDir)'/>
+
+    <Message Text="Done extracting game table files!" Importance="High" />
+  </Target>
+</Project>

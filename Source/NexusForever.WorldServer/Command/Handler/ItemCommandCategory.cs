@@ -1,18 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NexusForever.Shared.GameTable.Model;
+using System.Text;
+using NexusForever.Game;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Chat;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.RBAC;
+using NexusForever.Game.Static.Chat;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Text.Search;
+using NexusForever.Network.World.Message.Static;
 using NexusForever.WorldServer.Command.Context;
-using NexusForever.WorldServer.Game;
-using NexusForever.WorldServer.Game.Entity;
-using NexusForever.WorldServer.Game.Entity.Static;
-using NexusForever.WorldServer.Game.RBAC.Static;
-using NexusForever.WorldServer.Game.Social;
-using NexusForever.WorldServer.Game.Social.Static;
 
 namespace NexusForever.WorldServer.Command.Handler
 {
     [Command(Permission.Item, "A collection of commands to manage items for a character.", "item")]
-    [CommandTarget(typeof(Player))]
+    [CommandTarget(typeof(IPlayer))]
     public class ItemCommandCategory : CommandCategory
     {
         [Command(Permission.ItemAdd, "Add an item to inventory, optionally specifying quantity and charges.", "add")]
@@ -26,7 +30,7 @@ namespace NexusForever.WorldServer.Command.Handler
         {
             quantity ??= 1u;
             charges ??= 1u;
-            context.GetTargetOrInvoker<Player>().Inventory.ItemCreate(itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
+            context.GetTargetOrInvoker<IPlayer>().Inventory.ItemCreate(InventoryLocation.Inventory, itemId, quantity.Value, ItemUpdateReason.Cheat, charges.Value);
         }
 
         [Command(Permission.ItemLookup, "Lookup an item by partial name.", "lookup")]
@@ -49,7 +53,7 @@ namespace NexusForever.WorldServer.Command.Handler
 
             context.SendMessage($"Item lookup results for '{name}' ({searchResults.Count}):");
 
-            var target = context.GetTargetOrInvoker<Player>();
+            var target = context.GetTargetOrInvoker<IPlayer>();
             foreach (Item2Entry itemEntry in searchResults)
             {
                 var builder = new ChatMessageBuilder
@@ -60,6 +64,41 @@ namespace NexusForever.WorldServer.Command.Handler
                 builder.AppendItem(itemEntry.Id);
                 target.Session.EnqueueMessageEncrypted(builder.Build());
             }
+        }
+
+        [Command(Permission.ItemInfo, "Lookup item information by id.", "info", "information", "i")]
+        public void HandleItemInfo(ICommandContext context,
+            [Parameter("Id of item to get information on")]
+            uint itemId)
+        {
+            IItemInfo info = ItemManager.Instance.GetItemInfo(itemId);
+            if (info == null)
+            {
+                context.SendError("Invalid item id!");
+                return;
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"Item Id: {info.Id}");
+            sb.AppendLine($"Item Flags: {info.Entry.Flags}");
+            sb.AppendLine($"Item Secondary Flags: {info.SecondaryItemFlags}");
+            sb.AppendLine($"Item Family: {info.FamilyEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Category: {info.CategoryEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Type: {info.TypeEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Slot: {info.SlotEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Budget: {info.BudgetEntry?.Id ?? 0u}");
+            sb.AppendLine($"Item Stat: {info.StatEntry?.Id ?? 0u}");
+            
+            sb.AppendLine($"Item Power: {info.ItemPower}");
+
+            sb.AppendLine("Properties:");
+            foreach ((Property property, float value) in info.Properties)
+            {
+                UnitProperty2Entry entry = GameTableManager.Instance.UnitProperty2.GetEntry((uint)property);
+                sb.AppendLine($"Property: {entry.Description}, Value: {value}");
+            }
+
+            context.SendMessage(sb.ToString());
         }
     }
 }

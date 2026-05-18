@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <OutputPath>$(SolutionDir)\NexusForever.WorldServer\bin\$(Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Game.Abstract\NexusForever.Game.Abstract.csproj" />
+    <ProjectReference Include="..\NexusForever.Script\NexusForever.Script.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CrimsonBadlands\" />
+    <Folder Include="Deradune\" />
+    <Folder Include="Illium\" />
+    <Folder Include="Auroria\" />
+    <Folder Include="Ellevar\" />
+    <Folder Include="Wilderrun\" />
+  </ItemGroup>
+
+
+</Project>

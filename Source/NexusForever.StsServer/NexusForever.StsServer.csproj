@@ -2,15 +2,28 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+    <PackageReference Include="NLog.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Cryptography\NexusForever.Cryptography.csproj" />
+    <ProjectReference Include="..\NexusForever.Database.Auth\NexusForever.Database.Auth.csproj" />
+    <ProjectReference Include="..\NexusForever.Network.Sts\NexusForever.Network.Sts.csproj" />
+    <ProjectReference Include="..\NexusForever.Network\NexusForever.Network.csproj" />
     <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="StsServer.example.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

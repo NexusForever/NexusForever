@@ -2,8 +2,11 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NexusForever.Database.World;
+
+#nullable disable
 
 namespace NexusForever.Database.World.Migrations
 {
@@ -14,8 +17,10 @@ namespace NexusForever.Database.World.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("NexusForever.Database.World.Model.DisableModel", b =>
                 {
@@ -41,10 +46,10 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Type", "ObjectId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("disable");
+                    b.ToTable("disable", (string)null);
                 });
 
-            modelBuilder.Entity("NexusForever.Database.World.Model.EntityLootModel", b =>
+            modelBuilder.Entity("NexusForever.Database.World.Model.EntityEventModel", b =>
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
@@ -52,7 +57,35 @@ namespace NexusForever.Database.World.Migrations
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
 
-                    b.Property<ulong?>("LootGroupId")
+                    b.Property<uint>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("eventId");
+
+                    b.Property<uint>("Phase")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("phase");
+
+                    b.HasKey("Id", "EventId", "Phase")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("entity_event", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.EntityLootModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<ulong>("LootGroupId")
                         .HasColumnType("bigint(20) unsigned")
                         .HasColumnName("lootGroupId");
 
@@ -67,7 +100,7 @@ namespace NexusForever.Database.World.Migrations
 
                     b.HasIndex("LootGroupId");
 
-                    b.ToTable("entity_loot");
+                    b.ToTable("entity_loot", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityModel", b =>
@@ -182,12 +215,13 @@ namespace NexusForever.Database.World.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("entity");
+                    b.ToTable("entity", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntitySplineModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -230,12 +264,13 @@ namespace NexusForever.Database.World.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("entity_spline");
+                    b.ToTable("entity_spline", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityStatModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -255,12 +290,13 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Id", "Stat")
                         .HasName("PRIMARY");
 
-                    b.ToTable("entity_stats");
+                    b.ToTable("entity_stats", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityVendorCategoryModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -280,12 +316,13 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Id", "Index")
                         .HasName("PRIMARY");
 
-                    b.ToTable("entity_vendor_category");
+                    b.ToTable("entity_vendor_category", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityVendorItemModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -302,6 +339,42 @@ namespace NexusForever.Database.World.Migrations
                         .HasDefaultValue(0u)
                         .HasColumnName("categoryIndex");
 
+                    b.Property<uint>("ExtraCost1ItemOrCurrencyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("extraCost1ItemOrCurrencyId");
+
+                    b.Property<uint>("ExtraCost1Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("extraCost1Quantity");
+
+                    b.Property<byte>("ExtraCost1Type")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("extraCost1Type");
+
+                    b.Property<uint>("ExtraCost2ItemOrCurrencyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("extraCost2ItemOrCurrencyId");
+
+                    b.Property<uint>("ExtraCost2Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("extraCost2Quantity");
+
+                    b.Property<byte>("ExtraCost2Type")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("extraCost2Type");
+
                     b.Property<uint>("ItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
@@ -311,12 +384,13 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Id", "Index")
                         .HasName("PRIMARY");
 
-                    b.ToTable("entity_vendor_item");
+                    b.ToTable("entity_vendor_item", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityVendorModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -335,7 +409,7 @@ namespace NexusForever.Database.World.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("entity_vendor");
+                    b.ToTable("entity_vendor", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.ItemLootModel", b =>
@@ -346,7 +420,7 @@ namespace NexusForever.Database.World.Migrations
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
 
-                    b.Property<ulong?>("LootGroupId")
+                    b.Property<ulong>("LootGroupId")
                         .HasColumnType("bigint(20) unsigned")
                         .HasColumnName("lootGroupId");
 
@@ -361,7 +435,7 @@ namespace NexusForever.Database.World.Migrations
 
                     b.HasIndex("LootGroupId");
 
-                    b.ToTable("item_loot");
+                    b.ToTable("item_loot", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.LootGroupModel", b =>
@@ -416,12 +490,13 @@ namespace NexusForever.Database.World.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("loot_group");
+                    b.ToTable("loot_group", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.LootItemModel", b =>
                 {
                     b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint(20) unsigned")
                         .HasDefaultValue(0ul)
                         .HasColumnName("id");
@@ -465,7 +540,27 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Id", "Type", "StaticId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("loot_item");
+                    b.ToTable("loot_item", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.MapEntranceModel", b =>
+                {
+                    b.Property<uint>("MapId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasColumnName("mapId");
+
+                    b.Property<byte>("Team")
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasColumnName("team");
+
+                    b.Property<uint>("WorldLocationId")
+                        .HasColumnType("int(10) unsigned")
+                        .HasColumnName("worldLocationId");
+
+                    b.HasKey("MapId", "Team")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("map_entrance", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreCategoryModel", b =>
@@ -513,12 +608,13 @@ namespace NexusForever.Database.World.Migrations
                     b.HasIndex("ParentId")
                         .HasDatabaseName("parentId");
 
-                    b.ToTable("store_category");
+                    b.ToTable("store_category", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreOfferGroupCategoryModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -547,7 +643,7 @@ namespace NexusForever.Database.World.Migrations
                     b.HasIndex("CategoryId")
                         .HasDatabaseName("FK__store_offer_group_category_categoryId__store_category_id");
 
-                    b.ToTable("store_offer_group_category");
+                    b.ToTable("store_offer_group_category", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreOfferGroupModel", b =>
@@ -592,12 +688,13 @@ namespace NexusForever.Database.World.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("store_offer_group");
+                    b.ToTable("store_offer_group", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreOfferItemDataModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -623,7 +720,7 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Id", "ItemId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("store_offer_item_data");
+                    b.ToTable("store_offer_item_data", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreOfferItemModel", b =>
@@ -688,12 +785,13 @@ namespace NexusForever.Database.World.Migrations
                         .IsUnique()
                         .HasDatabaseName("id");
 
-                    b.ToTable("store_offer_item");
+                    b.ToTable("store_offer_item", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreOfferItemPriceModel", b =>
                 {
                     b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
                         .HasColumnName("id");
@@ -737,7 +835,7 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Id", "CurrencyId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("store_offer_item_price");
+                    b.ToTable("store_offer_item_price", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.TutorialModel", b =>
@@ -771,7 +869,39 @@ namespace NexusForever.Database.World.Migrations
                     b.HasKey("Id", "Type", "TriggerId")
                         .HasName("PRIMARY");
 
-                    b.ToTable("tutorial");
+                    b.ToTable("tutorial", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.VersionModel", b =>
+                {
+                    b.Property<string>("FileName")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("fileName");
+
+                    b.Property<string>("FileHash")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("fileHash");
+
+                    b.Property<DateTime>("AppliedOn")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("appliedOn");
+
+                    b.HasKey("FileName", "FileHash")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("version", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.EntityEventModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
+                        .WithOne("EntityEvent")
+                        .HasForeignKey("NexusForever.Database.World.Model.EntityEventModel", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__entity_event_id__entity_id");
+
+                    b.Navigation("Entity");
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityLootModel", b =>
@@ -790,9 +920,9 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
                         .WithOne("EntitySpline")
                         .HasForeignKey("NexusForever.Database.World.Model.EntitySplineModel", "Id")
-                        .HasConstraintName("FK__entity_spline_id__entity_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__entity_spline_id__entity_id");
 
                     b.Navigation("Entity");
                 });
@@ -802,9 +932,9 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
                         .WithMany("EntityStat")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__entity_stats_stat_id_entity_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__entity_stats_stat_id_entity_id");
 
                     b.Navigation("Entity");
                 });
@@ -814,9 +944,9 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
                         .WithMany("EntityVendorCategory")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__entity_vendor_category_id__entity_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__entity_vendor_category_id__entity_id");
 
                     b.Navigation("Entity");
                 });
@@ -826,9 +956,9 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
                         .WithMany("EntityVendorItem")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__entity_vendor_item_id__entity_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__entity_vendor_item_id__entity_id");
 
                     b.Navigation("Entity");
                 });
@@ -838,9 +968,9 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
                         .WithOne("EntityVendor")
                         .HasForeignKey("NexusForever.Database.World.Model.EntityVendorModel", "Id")
-                        .HasConstraintName("FK__entity_vendor_id__entity_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__entity_vendor_id__entity_id");
 
                     b.Navigation("Entity");
                 });
@@ -871,9 +1001,9 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.LootGroupModel", "LootGroup")
                         .WithMany("Item")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__loot_item_id__loot_group_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__loot_item_id__loot_group_id");
 
                     b.Navigation("LootGroup");
                 });
@@ -883,16 +1013,16 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.StoreCategoryModel", "Category")
                         .WithMany("StoreOfferGroupCategory")
                         .HasForeignKey("CategoryId")
-                        .HasConstraintName("FK__store_offer_group_category_categoryId__store_category_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__store_offer_group_category_categoryId__store_category_id");
 
                     b.HasOne("NexusForever.Database.World.Model.StoreOfferGroupModel", "OfferGroup")
                         .WithMany("StoreOfferGroupCategory")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__store_offer_group_category_id__store_offer_group_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__store_offer_group_category_id__store_offer_group_id");
 
                     b.Navigation("Category");
 
@@ -904,10 +1034,10 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.StoreOfferItemModel", "OfferItem")
                         .WithMany("StoreOfferItemData")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__store_offer_item_data_id__store_offer_item_id")
                         .HasPrincipalKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__store_offer_item_data_id__store_offer_item_id");
 
                     b.Navigation("OfferItem");
                 });
@@ -917,9 +1047,9 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.StoreOfferGroupModel", "Group")
                         .WithMany("StoreOfferItem")
                         .HasForeignKey("GroupId")
-                        .HasConstraintName("FK__store_offer_item_groupId__store_offer_group_id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__store_offer_item_groupId__store_offer_group_id");
 
                     b.Navigation("Group");
                 });
@@ -929,16 +1059,18 @@ namespace NexusForever.Database.World.Migrations
                     b.HasOne("NexusForever.Database.World.Model.StoreOfferItemModel", "OfferItem")
                         .WithMany("StoreOfferItemPrice")
                         .HasForeignKey("Id")
-                        .HasConstraintName("FK__store_offer_item_price_id__store_offer_item_id")
                         .HasPrincipalKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK__store_offer_item_price_id__store_offer_item_id");
 
                     b.Navigation("OfferItem");
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityModel", b =>
                 {
+                    b.Navigation("EntityEvent");
+
                     b.Navigation("EntitySpline");
 
                     b.Navigation("EntityStat");

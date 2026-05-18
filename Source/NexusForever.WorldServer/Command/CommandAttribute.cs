@@ -1,5 +1,5 @@
 ﻿using System;
-using NexusForever.WorldServer.Game.RBAC.Static;
+using NexusForever.Game.Static.RBAC;
 
 namespace NexusForever.WorldServer.Command
 {

@@ -18,6 +18,9 @@ namespace NexusForever.Database.Character.Model
         public float LocationX { get; set; }
         public float LocationY { get; set; }
         public float LocationZ { get; set; }
+        public float RotationX { get; set; }
+        public float RotationY { get; set; }
+        public float RotationZ { get; set; }
         public ushort WorldId { get; set; }
         public ushort WorldZoneId { get; set; }
         public ushort Title { get; set; }
@@ -35,6 +38,7 @@ namespace NexusForever.Database.Character.Model
         public uint RestBonusXp { get; set; }
         public ulong? GuildAffiliation { get; set; }
         public uint Flags { get; set; }
+        public bool IsOnline { get; set; }
 
         public ResidenceModel Residence { get; set; }
         public ICollection<CharacterAchievementModel> Achievement { get; set; } = new HashSet<CharacterAchievementModel>();
