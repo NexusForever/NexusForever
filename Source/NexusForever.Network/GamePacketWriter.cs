@@ -155,6 +155,16 @@ namespace NexusForever.Network
             WriteBytes(data);
         }
 
+        public void WriteString(string value)
+        {
+            byte[] data = Encoding.ASCII.GetBytes(value ?? "");
+            bool extended = data.Length > 0x7F;
+
+            Write(extended);
+            Write(data.Length, extended ? 15u : 7u);
+            WriteBytes(data);
+        }
+
         public void WritePackedFloat(float value)
         {
             ushort PackFloat(float unpacked)

@@ -1,8 +1,8 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Game.Static.Costume;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Costume;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -10,7 +10,7 @@ namespace NexusForever.Game.Abstract.Entity
     {
         ulong Owner { get; }
         byte Index { get; }
-        uint Mask { get; set; }
+        uint VisibilityMask { get; set; }
 
         /// <summary>
         /// Return <see cref="ICostumeItem"/> at supplied index.

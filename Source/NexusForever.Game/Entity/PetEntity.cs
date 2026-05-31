@@ -7,7 +7,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.PlayerPath;
 using NexusForever.Shared.Game;
 using NLog;
 
@@ -76,7 +76,7 @@ namespace NexusForever.Game.Entity
 
             owner.VanityPetGuid = Guid;
 
-            owner.EnqueueToVisible(new ServerPathScientistSetUnitScanParameters
+            owner.EnqueueToVisible(new ServerPathScientistUnitScanParameters
             {
                 UnitId = Guid,
                 ScanRewardFlags  = 0,

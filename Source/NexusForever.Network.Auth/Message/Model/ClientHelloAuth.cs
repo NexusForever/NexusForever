@@ -39,7 +39,7 @@ namespace NexusForever.Network.Auth.Message.Model
                 public uint DeviceId { get; private set; }
                 public uint SubSysId { get; private set; }
                 public uint Revision { get; private set; }
-                public uint Unknown10 { get; private set; }
+                public uint AdapterRamMB { get; private set; }
 
                 public void Read(GamePacketReader reader)
                 {
@@ -48,7 +48,7 @@ namespace NexusForever.Network.Auth.Message.Model
                     DeviceId  = reader.ReadUInt();
                     SubSysId  = reader.ReadUInt();
                     Revision  = reader.ReadUInt();
-                    Unknown10 = reader.ReadUInt();
+                    AdapterRamMB = reader.ReadUInt();
                 }
             }
 
@@ -81,7 +81,7 @@ namespace NexusForever.Network.Auth.Message.Model
         public uint InetAddress { get; private set; }
         public Language Language { get; private set; }
         public uint GameMode { get; private set; }
-        public uint Unknown234 { get; private set; }
+        public uint Unused { get; private set; }
         public HardwareInformation Hardware { get; } = new();
         public uint RealmDataCenterId { get; private set; }
 
@@ -97,7 +97,7 @@ namespace NexusForever.Network.Auth.Message.Model
             InetAddress = reader.ReadUInt();
             Language   = reader.ReadEnum<Language>(32u);
             GameMode = reader.ReadUInt();
-            Unknown234 = reader.ReadUInt();
+            Unused = reader.ReadUInt();
 
             Hardware.Read(reader);
 

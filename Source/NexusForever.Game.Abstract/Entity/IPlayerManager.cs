@@ -26,5 +26,10 @@
         /// Returns <see cref="IPlayer"/> with supplied identity.
         /// </summary>
         IPlayer GetPlayer(Identity identity);
+
+        /// <summary>
+        /// Return <see cref="IPlayer"/> with supplied account id.
+        /// </summary>
+        IPlayer GetPlayerByAccountId(uint accountId);
     }
 }

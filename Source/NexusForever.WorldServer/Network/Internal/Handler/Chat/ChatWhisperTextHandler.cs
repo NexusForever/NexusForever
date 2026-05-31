@@ -4,7 +4,7 @@ using NexusForever.Game;
 using NexusForever.Game.Abstract.Chat.Format;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Chat;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Network.Internal.Message.Chat;
 using Rebus.Handlers;
 

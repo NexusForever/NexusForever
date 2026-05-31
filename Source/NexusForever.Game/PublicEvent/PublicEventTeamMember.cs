@@ -14,7 +14,7 @@ namespace NexusForever.Game.PublicEvent
         public ulong CharacterId { get; private set; }
 
         private Static.Entity.Class @class;
-        private Static.Entity.Path path;
+        private Static.PlayerPath.Path path;
 
         private readonly IPublicEventStats stats = new PublicEventStats();
 

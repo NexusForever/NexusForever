@@ -8,12 +8,11 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
-using NexusForever.Game.Housing;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Guild;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
 using NLog;
@@ -317,7 +316,12 @@ namespace NexusForever.Game.Guild
                 {
                     Channel  = new Channel
                     {
-                        Type = ChatChannelType.Debug
+                        ChatChannelId = ChatChannelType.Debug
+                    },
+                    From = new Network.World.Message.Model.Shared.Identity
+                    {
+                        Id = 0,
+                        RealmId = 0,
                     },
                     FromName = "GlobalGuildManager",
                     Text     = $"{operation.Operation} not implemented!",

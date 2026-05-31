@@ -3,12 +3,11 @@ using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Account.Costume;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Account.Costume;
+using NexusForever.Game.Static.Costume;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.Costume;
 
 namespace NexusForever.Game.Account.Costume
 {
@@ -119,7 +118,7 @@ namespace NexusForever.Game.Account.Costume
         {
             account.Session.EnqueueMessageEncrypted(new ServerCostumeItemList
             {
-                Items = costumeUnlocks.Keys.ToList()
+                Item2Ids = costumeUnlocks.Keys.ToList()
             });
         }
 
@@ -134,7 +133,7 @@ namespace NexusForever.Game.Account.Costume
             };
 
             if (itemId != 0u)
-                costumeItemUnlock.ItemId = itemId;
+                costumeItemUnlock.Item2Id = itemId;
 
             account.Session.EnqueueMessageEncrypted(costumeItemUnlock);
         }

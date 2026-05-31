@@ -2,7 +2,7 @@
 
 namespace NexusForever.Network.World.Message.Model.Marketplace
 {
-    [Message(GameMessageOpcode.ClientCommodityOrderCancel)]
+    [Message(GameMessageOpcode.ClientAuctionCancel)]
     public class ClientAuctionCancel : IReadable
     {
         public ulong AuctionId { get; private set; }

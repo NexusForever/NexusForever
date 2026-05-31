@@ -5,7 +5,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;
 using NexusForever.Network.Internal.Message.Chat;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 using Rebus.Handlers;
 
 namespace NexusForever.WorldServer.Network.Internal.Handler.Chat
@@ -39,9 +39,9 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Chat
             IPlayer player = playerManager.GetPlayer(message.Member.Identity.ToGameIdentity());
             player?.Session.EnqueueMessageEncrypted(new ServerChatJoin
             {
-                Channel = new NexusForever.Network.World.Message.Model.Shared.Channel
+                Channel = new Channel
                 {
-                    Type   = message.ChatChannel.Type,
+                    ChatChannelId = message.ChatChannel.Type,
                     ChatId = message.ChatChannel.ChatId,
                 },
                 Name        = message.ChatChannel.Name,

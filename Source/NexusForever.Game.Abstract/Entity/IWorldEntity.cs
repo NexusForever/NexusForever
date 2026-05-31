@@ -104,7 +104,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Add or update <see cref="IItemVisual"/> at <see cref="ItemSlot"/> with supplied data.
         /// </summary>
-        void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, int dyeData = 0);
+        void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, uint dyeData = 0);
 
         /// <summary>
         /// Add or update <see cref="IItemVisual"/>.

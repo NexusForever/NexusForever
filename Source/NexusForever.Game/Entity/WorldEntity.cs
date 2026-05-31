@@ -10,7 +10,7 @@ using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;
@@ -414,7 +414,7 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Add or update <see cref="IItemVisual"/> at <see cref="ItemSlot"/> with supplied data.
         /// </summary>
-        public void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, int dyeData = 0)
+        public void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, uint dyeData = 0)
         {
             AddVisual(new ItemVisual
             {

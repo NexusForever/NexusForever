@@ -6,15 +6,15 @@ namespace NexusForever.Network.World.Combat
     {
         public CombatLogType Type => CombatLogType.Lifesteal;
 
-        public uint Unknown0 { get; set; }
-        public uint Unknown1 { get; set; }
-        public uint Unknown2 { get; set; }
+        public uint UnitId { get; set; }
+        public uint HealthStolen { get; set; }
+        public uint Absorption { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0);
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
+            writer.Write(UnitId);
+            writer.Write(HealthStolen);
+            writer.Write(Absorption);
         }
     }
 }
