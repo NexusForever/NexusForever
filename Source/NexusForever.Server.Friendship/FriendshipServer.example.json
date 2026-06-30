@@ -1,0 +1,42 @@
+{
+    "Network": {
+        "Internal": {
+            "Broker": "RabbitMQ",
+            "ConnectionString": "amqp://nexusforever:nexusforever@localhost:5672",
+            "InputQueue": "FriendshipServer"
+        }
+    },
+    "Database": {
+        "Friendship": {
+            "ConnectionString": "server=127.0.0.1;port=3306;user=nexusforever;password=nexusforever;database=nexus_forever_friendship",
+            "Provider": "MySql"
+        }
+    },
+    "API": {
+        "Account": {
+            "Host": "http://localhost:4001"
+        },
+        "Character": {
+            "Host": "http://localhost:4000"
+        }
+    },
+    "GameTable": {
+        "GameTablePath": "tbl",
+        "Cache": {
+            "UseCache": true,
+            "CachePath": "cache"
+        }
+    },
+    "Limit": {
+        "MaxFriends": 100,
+        "MaxRivals": 100,
+        "MaxIgnored": 100,
+        "MaxAccountFriends": 100,
+        "MaxFriendRequests": 10,
+        "MaxAccountFriendRequests": 10
+    },
+    "Invite": {
+        "InviteLifetimeMinutes": 10080,
+        "AccountInviteLifetimeMinutes": 10080
+    }
+}

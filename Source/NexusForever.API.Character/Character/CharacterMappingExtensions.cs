@@ -25,7 +25,7 @@ namespace NexusForever.API.Character.Character
                 Sex         = (Sex)model.Sex,
                 Race        = (Race)model.Race,
                 Class       = (Class)model.Class,
-                Path        = (Game.Static.Entity.Path)model.ActivePath,
+                Path        = (Game.Static.PlayerPath.Path)model.ActivePath,
                 Faction     = (Faction)model.FactionId,
                 RealmId     = server.Id, // TODO
                 WorldId     = model.WorldId,
@@ -38,7 +38,7 @@ namespace NexusForever.API.Character.Character
                 },
                 IsOnline   = model.IsOnline,
                 LastOnline = !model.IsOnline ? model.LastOnline : null,
-                Stats = model.Stat.Select(stat => new Model.Character.CharacterStat
+                Stats      = model.Stat.Select(stat => new Model.Character.CharacterStat
                 {
                     Stat  = (Stat)stat.Stat,
                     Value = stat.Value,

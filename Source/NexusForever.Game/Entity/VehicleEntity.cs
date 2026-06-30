@@ -8,6 +8,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.PlayerPath;
 using NetworkVehiclePassenger = NexusForever.Network.World.Message.Model.Shared.VehiclePassenger;
 
 namespace NexusForever.Game.Entity
@@ -152,7 +153,7 @@ namespace NexusForever.Game.Entity
                 return;
 
             // TODO: research this...
-            player.Session.EnqueueMessageEncrypted(new ServerPathScientistSetUnitScanParameters
+            player.Session.EnqueueMessageEncrypted(new ServerPathScientistUnitScanParameters
             {
                 UnitId = Guid,
                 ScanRewardFlags  = 0,

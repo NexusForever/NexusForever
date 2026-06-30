@@ -99,7 +99,7 @@ namespace NexusForever.Script.Compile
 
             var compilation = CSharpCompilation.Create(name, 
                 syntaxTrees,
-                Basic.Reference.Assemblies.Net90.References.All
+                Basic.Reference.Assemblies.Net100.References.All
                     .Concat(metadataReferences),
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                 #if DEBUG

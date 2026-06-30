@@ -9,7 +9,10 @@ namespace NexusForever.Database.Auth
         public static IServiceCollection AddAuthDatabase(this IServiceCollection sc, DatabaseConnectionString connectionString)
         {
             sc.AddDbContext<AuthContext>(options => options.UseConfiguration(connectionString));
+
+            sc.AddScoped<AccountRepository>();
             sc.AddScoped<ServerRepository>();
+
             return sc;
         }
     }

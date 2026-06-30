@@ -12,39 +12,19 @@ namespace NexusForever.Network.World.Message.Model.Who.Parameter
         {
             Type = reader.ReadEnum<WhoParameterType>(4u);
 
-            switch (Type)
+            Data = Type switch
             {
-                case WhoParameterType.Level:
-                    Data = new WhoParameterLevel();
-                    break;
-                case WhoParameterType.Race:
-                    Data = new WhoParameterRace();
-                    break;
-                case WhoParameterType.Path:
-                    Data = new WhoParameterPath();
-                    break;
-                case WhoParameterType.Class:
-                    Data = new WhoParameterClass();
-                    break;
-                case WhoParameterType.Zone:
-                    Data = new WhoParameterZone();
-                    break;
-                case WhoParameterType.Guild:
-                    Data = new WhoParameterGuild();
-                    break;
-                case WhoParameterType.Player:
-                    Data = new WhoParameterPlayer();
-                    break;
-                case WhoParameterType.Combo:
-                    Data = new WhoParameterCombo();
-                    break;
-                case WhoParameterType.Faction:
-                    Data = new WhoParameterFaction();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
+                WhoParameterType.Level   => new WhoParameterLevel(),
+                WhoParameterType.Race    => new WhoParameterRace(),
+                WhoParameterType.Path    => new WhoParameterPath(),
+                WhoParameterType.Class   => new WhoParameterClass(),
+                WhoParameterType.Zone    => new WhoParameterZone(),
+                WhoParameterType.Guild   => new WhoParameterGuild(),
+                WhoParameterType.Player  => new WhoParameterPlayer(),
+                WhoParameterType.Combo   => new WhoParameterCombo(),
+                WhoParameterType.Faction => new WhoParameterFaction(),
+                _                        => throw new NotImplementedException()
+            };
             Data.Read(reader);
         }
     }

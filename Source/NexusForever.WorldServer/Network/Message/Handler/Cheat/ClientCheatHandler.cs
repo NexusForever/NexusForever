@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Utility;
 using NexusForever.WorldServer.Command;
 using NexusForever.WorldServer.Command.Context;
 
