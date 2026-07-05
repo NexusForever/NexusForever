@@ -49,11 +49,11 @@ namespace NexusForever.Game.Map.Instance
 
         protected override IMapLock GetMapLock(IPlayer player)
         {
-            IResidence residence = player.ResidenceManager.Residence;
             // residence should always exist, here just incase
-            residence ??= globalResidenceManager.CreateResidence(player);
+            if (player.ResidenceManager.Residence == null)
+                player.ResidenceManager.CreateResidence();
 
-            return mapLockManager.GetResidenceLock(residence);
+            return mapLockManager.GetResidenceLock(player.ResidenceManager.Residence);
         }
 
         protected override void UpdatePosition(IPlayer player, IMapPosition mapPosition)

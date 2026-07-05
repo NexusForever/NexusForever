@@ -36,6 +36,14 @@ namespace NexusForever.Game.Housing
             Residence = globalResidenceManager.GetResidenceByOwner(owner.Identity);
         }
 
+        public void CreateResidence()
+        {
+            if (Residence != null)
+                throw new InvalidOperationException();
+
+            Residence = globalResidenceManager.CreateResidence(owner);
+        }
+
         /// <summary>
         /// Create new <see cref="IDecor"/> from supplied <see cref="HousingDecorInfoEntry"/> to residence your crate.
         /// </summary>
@@ -44,7 +52,8 @@ namespace NexusForever.Game.Housing
         /// </remarks>
         public void DecorCreate(HousingDecorInfoEntry entry, uint quantity = 1u)
         {
-            Residence ??= globalResidenceManager.CreateResidence(owner);
+            if (Residence == null)
+                CreateResidence();
 
             if (Residence.Map != null)
                 Residence.Map.DecorCreate(Residence, entry, quantity);

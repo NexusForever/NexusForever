@@ -101,11 +101,12 @@ namespace NexusForever.Game.Map.Instance
         protected override IMapPosition GetPlayerReturnLocation(IPlayer player)
         {
             // if the residence is unloaded return player to their own residence
-            IResidence returnResidence = globalResidenceManager.GetResidenceByOwner(player.Name);
-            returnResidence ??= globalResidenceManager.CreateResidence(player);
-            IResidenceEntrance entrance = globalResidenceManager.GetResidenceEntrance(returnResidence.PropertyInfoId);
+            if (player.ResidenceManager.Residence == null)
+                player.ResidenceManager.CreateResidence();
 
-            IMapLock mapLock = mapLockManager.GetResidenceLock(returnResidence);
+            IResidenceEntrance entrance = globalResidenceManager.GetResidenceEntrance(player.ResidenceManager.Residence.PropertyInfoId);
+
+            IMapLock mapLock = mapLockManager.GetResidenceLock(player.ResidenceManager.Residence);
 
             return new MapPosition
             {

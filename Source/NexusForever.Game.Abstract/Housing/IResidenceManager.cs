@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model.Housing;
@@ -13,6 +13,8 @@ namespace NexusForever.Game.Abstract.Housing
         /// Initialise a new <see cref="IResidenceManager"/> for <see cref="IPlayer"/>.
         /// </summary>
         void Initialise(IPlayer player);
+
+        void CreateResidence();
 
         /// <summary>
         /// Create new <see cref="IDecor"/> from supplied <see cref="HousingDecorInfoEntry"/> to residence your crate.
