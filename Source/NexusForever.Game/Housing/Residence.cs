@@ -361,6 +361,7 @@ namespace NexusForever.Game.Housing
             {
                 IPlot plot = plotFactory.Resolve();
                 plot.Initialise(plotModel);
+                plots.Add(plot);
             }
 
             saveMask = ResidenceSaveMask.None;
