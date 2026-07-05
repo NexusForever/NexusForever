@@ -319,15 +319,15 @@ namespace NexusForever.Game.Housing
                 RealmId = realmContext.RealmId,
                 Id      = model.Id
             };
-            OwnerIdentity = model.OwnerId != 0 ? new Identity
+            OwnerIdentity = model.OwnerId != null ? new Identity
             {
                 RealmId = realmContext.RealmId,
                 Id      = model.OwnerId.Value,
             } : null;
-            GuildOwnerIdentity = model.GuildOwnerId != 0 ? new Identity
+            GuildOwnerIdentity = model.GuildOwnerId != null ? new Identity
             {
                 RealmId = realmContext.RealmId,
-                Id      = (ulong)model.GuildOwnerId,
+                Id      = model.GuildOwnerId.Value,
             } : null;
             propertyInfoId      = model.PropertyInfoId;
             name                = model.Name;
@@ -445,7 +445,7 @@ namespace NexusForever.Game.Housing
                     {
                         Id                  = Identity.Id,
                         OwnerId             = OwnerIdentity.Id,
-                        GuildOwnerId        = GuildOwnerIdentity.Id,
+                        GuildOwnerId        = GuildOwnerIdentity?.Id ?? null,
                         PropertyInfoId      = PropertyInfoId,
                         Name                = Name,
                         PrivacyLevel        = privacyLevel,
