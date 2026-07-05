@@ -8,6 +8,6 @@
         ClearingPlot = 2,
         Starting     = 3,
         InProgress   = 4,
-        Finishing    = 5,
+        Finishing    = 5
     }
 }

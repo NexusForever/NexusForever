@@ -15,18 +15,15 @@ using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Housing;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
-using NLog;
 
 namespace NexusForever.Game.Map.Instance
 {
     public class ResidenceMapInstance : MapInstance, IResidenceMapInstance
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
         // housing maps have unlimited vision range.
         public override float? VisionRange { get; protected set; } = null;
 
-        private readonly Dictionary<Abstract.Identity, IResidence> residences = new();
+        private readonly Dictionary<Identity, IResidence> residences = [];
 
         #region Dependency Injection
 
@@ -34,7 +31,6 @@ namespace NexusForever.Game.Map.Instance
         private readonly IMapLockManager mapLockManager;
         private readonly IGlobalResidenceManager globalResidenceManager;
         private readonly IGameTableManager gameTableManager;
-        private readonly IRealmContext realmContext;
         private readonly IScriptManager scriptManager;
 
         public ResidenceMapInstance(
@@ -43,7 +39,6 @@ namespace NexusForever.Game.Map.Instance
             IMapLockManager mapLockManager,
             IGlobalResidenceManager globalResidenceManager,
             IGameTableManager gameTableManager,
-            IRealmContext realmContext,
             IScriptManager scriptManager)
             : base(entityFactory, publicEventManager)
         {
@@ -51,7 +46,6 @@ namespace NexusForever.Game.Map.Instance
             this.mapLockManager         = mapLockManager;
             this.globalResidenceManager = globalResidenceManager;
             this.gameTableManager       = gameTableManager;
-            this.realmContext           = realmContext;
             this.scriptManager          = scriptManager;
         }
 
@@ -228,27 +222,30 @@ namespace NexusForever.Game.Map.Instance
 
         private void SendResidenceDecor(IResidence residence, IPlayer player = null)
         {
-            var residenceDecor = new ServerHousingResidenceDecor
-            {
-                MessagesRemaining = 0
-            };
+            // client freaks out if too much decor is sent in a single message, limit to 100
+            const int MaxDecorPerMessage = 100;
 
             IDecor[] decors = residence.GetDecor().ToArray();
-            for (uint i = 0u; i < decors.Length; i++)
+
+            uint messageCount = (uint)MathF.Ceiling((float)decors.Length / MaxDecorPerMessage);
+            for (int i = 0; i < messageCount; i++)
             {
-                IDecor decor = decors[i];
-                residenceDecor.DecorData.Add(decor.Build());
-
-                // client freaks out if too much decor is sent in a single message, limit to 100
-                if (i == decors.Length - 1 || i != 0u && i % 100u == 0u)
+                var residenceDecor = new ServerHousingResidenceDecor
                 {
-                    if (player != null)
-                        player.Session.EnqueueMessageEncrypted(residenceDecor);
-                    else
-                        EnqueueToAll(residenceDecor);
+                    MessagesRemaining = (uint)(messageCount - i - 1)
+                };
 
-                    residenceDecor.DecorData.Clear();
+                foreach (IDecor decor in decors
+                    .Skip(i * MaxDecorPerMessage)
+                    .Take(MaxDecorPerMessage))
+                {
+                    residenceDecor.DecorData.Add(decor.Build());
                 }
+
+                if (player != null)
+                    player.Session.EnqueueMessageEncrypted(residenceDecor);
+                else
+                    EnqueueToAll(residenceDecor);
             }
         }
 
@@ -397,7 +394,7 @@ namespace NexusForever.Game.Map.Instance
                 MessagesRemaining = 0,
                 DecorData = new List<ServerHousingResidenceDecor.Decor>
                 {
-                     decor.Build()
+                    decor.Build()
                 }
             });
         }

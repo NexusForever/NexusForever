@@ -4,6 +4,6 @@
     {
         Place   = 1,
         Remove  = 2,
-        Repair  = 4,
+        Repair  = 4
     }
 }

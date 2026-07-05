@@ -10,6 +10,11 @@ namespace NexusForever.Game.Abstract.Housing
         IResidence Residence { get; }
 
         /// <summary>
+        /// Initialise a new <see cref="IResidenceManager"/> for <see cref="IPlayer"/>.
+        /// </summary>
+        void Initialise(IPlayer player);
+
+        /// <summary>
         /// Create new <see cref="IDecor"/> from supplied <see cref="HousingDecorInfoEntry"/> to residence your crate.
         /// </summary>
         /// <remarks>

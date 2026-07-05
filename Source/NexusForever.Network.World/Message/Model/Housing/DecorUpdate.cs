@@ -10,7 +10,6 @@ namespace NexusForever.Network.World.Message.Model.Housing
         public void Read(GamePacketReader reader)
         {
             DecorInfo.Read(reader);
-            UseServiceToken = reader.ReadBit();
         }
     }
 }

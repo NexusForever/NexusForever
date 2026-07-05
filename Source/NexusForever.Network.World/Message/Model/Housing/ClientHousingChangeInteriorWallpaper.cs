@@ -11,13 +11,10 @@ namespace NexusForever.Network.World.Message.Model.Housing
         public void Read(GamePacketReader reader)
         {
             for(int i = 0; i < LayerUpdated.Length; i++)
-            {
                 LayerUpdated[i] = reader.ReadUInt();
-            }
+
             for (int i = 0; i < DecorUpdates.Length; i++)
-            {
                 DecorUpdates[i].Read(reader);
-            }
         }
     }
 }

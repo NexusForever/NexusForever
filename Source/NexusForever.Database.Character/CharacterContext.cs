@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character.Model;
 using NexusForever.Database.Configuration.Model;
+using NexusForever.Game.Static.Housing;
 
 namespace NexusForever.Database.Character
 {
@@ -2282,7 +2283,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Flags)
                     .HasColumnName("flags")
                     .HasColumnType("smallint(5) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(ResidenceFlags.None);
 
                 entity.Property(e => e.GardenSharing)
                     .HasColumnName("gardenSharing")
@@ -2318,12 +2319,12 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.PrivacyLevel)
                     .HasColumnName("privacyLevel")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(ResidencePrivacyLevel.Public);
 
                 entity.Property(e => e.PropertyInfoId)
                     .HasColumnName("propertyInfoId")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(PropertyInfoId.Residence);
 
                 entity.Property(e => e.ResourceSharing)
                     .HasColumnName("resourceSharing")
@@ -2466,7 +2467,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.BuildState)
                     .HasColumnName("buildState")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(BuildState.Initialising);
 
                 entity.Property(e => e.PlotInfoId)
                     .HasColumnName("plotInfoId")
@@ -2476,7 +2477,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.PlugFacing)
                     .HasColumnName("plugFacing")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(HousingPlugFacing.North);
 
                 entity.Property(e => e.PlugItemId)
                     .HasColumnName("plugItemId")

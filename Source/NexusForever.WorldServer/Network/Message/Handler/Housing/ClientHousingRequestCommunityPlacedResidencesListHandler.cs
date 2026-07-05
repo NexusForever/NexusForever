@@ -11,14 +11,14 @@ using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingPlacedResidencesListHandler : IMessageHandler<IWorldSession, ClientHousingRequestCommunityPlacedResidencesList>
+    public class ClientHousingRequestCommunityPlacedResidencesListHandler : IMessageHandler<IWorldSession, ClientHousingRequestCommunityPlacedResidencesList>
     {
         #region Dependency Injection
 
         private readonly ICharacterManager characterManager;
         private readonly IRealmContext realmContext;
 
-        public ClientHousingPlacedResidencesListHandler(
+        public ClientHousingRequestCommunityPlacedResidencesListHandler(
             ICharacterManager characterManager,
             IRealmContext realmContext)
         {

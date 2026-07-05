@@ -1,4 +1,5 @@
-﻿using NexusForever.Database;
+﻿using Microsoft.Extensions.Logging;
+using NexusForever.Database;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract;
@@ -12,21 +13,22 @@ using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Shared;
-using NLog;
 
 namespace NexusForever.Game.Housing
 {
     public sealed class GlobalResidenceManager : Singleton<GlobalResidenceManager>, IGlobalResidenceManager
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
-
         // TODO: move this to the config file
         private const double SaveDuration = 60d;
 
         /// <summary>
         /// Id to be assigned to the next created residence.
         /// </summary>
-        public ulong NextResidenceId => nextResidenceId++;
+        public Identity NextResidenceId => new()
+        {
+            RealmId = realmContext.RealmId,
+            Id      = nextResidenceId++
+        };
         private ulong nextResidenceId;
 
         /// <summary>
@@ -35,24 +37,45 @@ namespace NexusForever.Game.Housing
         public ulong NextDecorId => nextDecorId++;
         private ulong nextDecorId;
 
-        private readonly Dictionary<Identity, IResidence> residences = new();
-        private readonly Dictionary<Identity, Identity> residenceOwnerCache = new();
-        private readonly Dictionary<Identity, Identity> communityOwnerCache = new();
+        private readonly Dictionary<Identity, IResidence> residences = [];
+        private readonly Dictionary<Identity, Identity> residenceOwnerCache = [];
+        private readonly Dictionary<Identity, Identity> communityOwnerCache = [];
         private readonly Dictionary<string, Identity> residenceSearchCache = new(StringComparer.InvariantCultureIgnoreCase);
         private readonly Dictionary<string, Identity> communitySearchCache = new(StringComparer.InvariantCultureIgnoreCase);
 
-        private readonly Dictionary<Identity, IPublicResidence> visitableResidences = new();
-        private readonly Dictionary<Identity, IPublicCommunity> visitableCommunities = new();
+        private readonly Dictionary<Identity, IPublicResidence> visitableResidences = [];
+        private readonly Dictionary<Identity, IPublicCommunity> visitableCommunities = [];
 
         private double timeToSave = SaveDuration;
+
+        #region Dependency Injection
+
+        private readonly ILogger<GlobalResidenceManager> log;
+        private readonly IRealmContext realmContext;
+        private readonly IDatabaseManager databaseManager;
+        private readonly IFactory<IResidence> residenceFactory;
+
+        public GlobalResidenceManager(
+            ILogger<GlobalResidenceManager> log,
+            IRealmContext realmContext,
+            IDatabaseManager databaseManager,
+            IFactory<IResidence> residenceFactory)
+        {
+            this.log              = log;
+            this.realmContext     = realmContext;
+            this.databaseManager  = databaseManager;
+            this.residenceFactory = residenceFactory;
+        }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IGlobalResidenceManager"/> and any related resources.
         /// </summary>
         public void Initialise()
         {
-            nextResidenceId = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextResidenceId() + 1ul;
-            nextDecorId     = DatabaseManager.Instance.GetDatabase<CharacterDatabase>().GetNextDecorId() + 1ul;
+            nextResidenceId = databaseManager.GetDatabase<CharacterDatabase>().GetNextResidenceId() + 1ul;
+            nextDecorId     = databaseManager.GetDatabase<CharacterDatabase>().GetNextDecorId() + 1ul;
 
             InitialiseResidences();
         }
@@ -67,7 +90,8 @@ namespace NexusForever.Game.Housing
                     if (character == null)
                         throw new DatabaseDataException($"Character owner {model.OwnerId.Value} of residence {model.Id} is invalid!");
 
-                    var residence = new Residence(model);
+                    var residence = residenceFactory.Resolve();
+                    residence.Initialise(model);
                     StoreResidence(residence, character.Name);
                 }
                 else if (model.GuildOwnerId.HasValue)
@@ -76,7 +100,8 @@ namespace NexusForever.Game.Housing
                     if (community == null)
                         throw new DatabaseDataException($"Community owner {model.OwnerId.Value} of residence {model.Id} is invalid!");
 
-                    var residence = new Residence(model);
+                    var residence = residenceFactory.Resolve();
+                    residence.Initialise(model);
                     community.Residence = residence;
 
                     StoreCommunity(residence, community);
@@ -101,7 +126,7 @@ namespace NexusForever.Game.Housing
                 community.Residence.AddChild(residence, communityPlotReservation == -1);
             }
 
-            log.Info($"Loaded {residences.Count} housing residences!");
+            log.LogInformation($"Loaded {residences.Count} housing residences!");
         }
 
         /// <summary>
@@ -112,7 +137,7 @@ namespace NexusForever.Game.Housing
         /// </remarks>
         public void Shutdown()
         {
-            log.Info("Shutting down residence manager...");
+            log.LogInformation("Shutting down residence manager...");
 
             SaveResidences();
         }
@@ -131,7 +156,7 @@ namespace NexusForever.Game.Housing
         {
             var tasks = new List<Task>();
             foreach (IResidence residence in residences.Values)
-                tasks.Add(DatabaseManager.Instance.GetDatabase<CharacterDatabase>().Save(residence.Save));
+                tasks.Add(databaseManager.GetDatabase<CharacterDatabase>().Save(residence.Save));
 
             Task.WaitAll(tasks.ToArray());
         }
@@ -141,10 +166,12 @@ namespace NexusForever.Game.Housing
         /// </summary>
         public IResidence CreateResidence(IPlayer player)
         {
-            var residence = new Residence(player);
+            IResidence residence = residenceFactory.Resolve();
+            residence.Initialise(player);
+
             StoreResidence(residence, player.Name);
 
-            log.Trace($"Created new residence {residence.Identity} for player {player.Name}.");
+            log.LogTrace($"Created new residence {residence.Identity} for player {player.Name}.");
             return residence;
         }
 
@@ -164,10 +191,11 @@ namespace NexusForever.Game.Housing
         /// </summary>
         public IResidence CreateCommunity(ICommunity community)
         {
-            var residence = new Residence(community);
+            IResidence residence = residenceFactory.Resolve();
+            residence.Initialise(community);
             StoreCommunity(residence, community);
 
-            log.Trace($"Created new residence {residence.Identity} for community {community.Name}.");
+            log.LogTrace($"Created new residence {residence.Identity} for community {community.Name}.");
             return residence;
         }
 
@@ -187,19 +215,6 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Return existing <see cref="IResidence"/> by supplied residence id.
-        /// </summary>
-        public IResidence GetResidence(ulong residenceId)
-        {
-            Identity identity = new Identity
-            {
-                RealmId = RealmContext.Instance.RealmId,
-                Id      = residenceId
-            };
-            return residences.TryGetValue(identity, out IResidence residence) ? residence : null;
-        }
-
-        /// <summary>
         /// Return existing <see cref="IResidence"/> by supplied residence identity.
         /// </summary>
         public IResidence GetResidence(Identity residenceIdentity)
@@ -216,19 +231,6 @@ namespace NexusForever.Game.Housing
         }
 
         /// <summary>
-        /// Return existing <see cref="IResidence"/> by supplied owner id.
-        /// </summary>
-        public IResidence GetResidenceByOwner(ulong characterId)
-        {
-            Identity identity = new Identity
-            {
-                RealmId = RealmContext.Instance.RealmId,
-                Id      = characterId
-            };
-            return residenceOwnerCache.TryGetValue(identity, out Identity residenceId) ? GetResidence(residenceId) : null;
-        }
-
-        /// <summary>
         /// Return existing <see cref="IResidence"/> by supplied owner identity.
         /// </summary>
         public IResidence GetResidenceByOwner(Identity identity)
@@ -242,19 +244,6 @@ namespace NexusForever.Game.Housing
         public IResidence GetCommunityByOwner(string name)
         {
             return communitySearchCache.TryGetValue(name, out Identity residenceId) ? GetResidence(residenceId) : null;
-        }
-
-        /// <summary>
-        /// return existing <see cref="IResidence"/> by supplied owner id.
-        /// </summary>
-        public IResidence GetCommunityByOwner(ulong communityId)
-        {
-            Identity identity = new Identity
-            {
-                RealmId = RealmContext.Instance.RealmId,
-                Id      = communityId
-            };
-            return communityOwnerCache.TryGetValue(identity, out Identity residenceId) ? GetResidence(residenceId) : null;
         }
 
         /// <summary>

@@ -13,13 +13,13 @@ using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingCommunityPlacementHandler : IMessageHandler<IWorldSession, ClientHousingRequestCommunityPlacement>
+    public class ClientHousingRequestCommunityPlacementHandler : IMessageHandler<IWorldSession, ClientHousingRequestCommunityPlacement>
     {
         #region Dependency Injection
 
         private readonly IGlobalResidenceManager globalResidenceManager;
 
-        public ClientHousingCommunityPlacementHandler(
+        public ClientHousingRequestCommunityPlacementHandler(
             IGlobalResidenceManager globalResidenceManager)
         {
             this.globalResidenceManager = globalResidenceManager;

@@ -23,7 +23,7 @@ namespace NexusForever.Game.Map.Lock
         /// <summary>
         /// Initialise residence information for <see cref="IResidenceMapLock"/>.
         /// </summary>
-        public void Initialise(Abstract.Identity residenceIdentity)
+        public void Initialise(Identity residenceIdentity)
         {
             if (ResidenceIdentity != null)
                 throw new InvalidOperationException();

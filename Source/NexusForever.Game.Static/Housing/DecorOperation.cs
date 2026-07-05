@@ -4,6 +4,6 @@
     {
         Place           = 0,
         DetachFromProp  = 1,
-        Destroy         = 2,
+        Destroy         = 2
     }
 }

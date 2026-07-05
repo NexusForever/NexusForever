@@ -22,13 +22,13 @@ namespace NexusForever.Network.World.Message.Model.Housing
         }
 
         public List<PlugItem> PlugItems { get; set; } = [];
-        public byte ListType { get; set; } = 0;  // must be zero or else the client ignores the contents of the message
+        public byte ListType { get; set; } = 0; // must be zero or else the client ignores the contents of the message
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(PlugItems.Count);
             PlugItems.ForEach(p => p.Write(writer));
-            writer.Write(ListType, 2);  
+            writer.Write(ListType, 2);
         }
     }
 }

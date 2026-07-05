@@ -9,14 +9,14 @@ using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingReturnHandler : IMessageHandler<IWorldSession, ClientHousingTakeMeHome>
+    public class ClientHousingTakeMeHomeHandler : IMessageHandler<IWorldSession, ClientHousingTakeMeHome>
     {
         #region Dependency Injection
 
         private readonly IGlobalResidenceManager globalResidenceManager;
         private readonly IMapLockManager mapLockManager;
 
-        public ClientHousingReturnHandler(
+        public ClientHousingTakeMeHomeHandler(
             IGlobalResidenceManager globalResidenceManager,
             IMapLockManager mapLockManager)
         {

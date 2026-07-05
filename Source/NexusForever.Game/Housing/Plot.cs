@@ -25,8 +25,8 @@ namespace NexusForever.Game.Housing
             PlotInfoId = 0x0010
         }
 
-        public ulong Id { get; }
-        public byte Index { get; }
+        public ulong Id { get; private set; }
+        public byte Index { get; private set; }
 
         public HousingPlotInfoEntry PlotInfoEntry
         {
@@ -80,25 +80,37 @@ namespace NexusForever.Game.Housing
 
         public IPlugEntity PlugEntity { get; set; }
 
+        #region Dependency Injection
+
+        private readonly IGameTableManager gameTableManager;
+
+        public Plot(
+            IGameTableManager gameTableManager)
+        {
+            this.gameTableManager = gameTableManager;
+        }
+
+        #endregion
+
         /// <summary>
-        /// Create a new <see cref="IPlot"/> from an existing database model.
+        /// Initialise a new <see cref="IPlot"/> from an existing database model.
         /// </summary>
-        public Plot(ResidencePlotModel model)
+        public void Initialise(ResidencePlotModel model)
         {
             Id            = model.Id;
             Index         = model.Index;
-            plotInfoEntry = GameTableManager.Instance.HousingPlotInfo.GetEntry(model.PlotInfoId);
-            plugItemEntry = GameTableManager.Instance.HousingPlugItem.GetEntry(model.PlugItemId);
-            plugFacing    = (HousingPlugFacing)model.PlugFacing;
-            buildState    = (BuildState)model.BuildState;
+            plotInfoEntry = gameTableManager.HousingPlotInfo.GetEntry(model.PlotInfoId);
+            plugItemEntry = gameTableManager.HousingPlugItem.GetEntry(model.PlugItemId);
+            plugFacing    = model.PlugFacing;
+            buildState    = model.BuildState;
 
             saveMask = PlotSaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="IPlot"/> from a <see cref="HousingPlotInfoEntry"/>.
+        /// Initialise a new <see cref="IPlot"/> from a <see cref="HousingPlotInfoEntry"/>.
         /// </summary>
-        public Plot(ulong id, HousingPlotInfoEntry entry)
+        public void Initialise(ulong id, HousingPlotInfoEntry entry)
         {
             Id            = id;
             Index         = (byte)entry.HousingPropertyPlotIndex;
@@ -128,8 +140,8 @@ namespace NexusForever.Game.Housing
                     Index      = Index,
                     PlotInfoId = (ushort)PlotInfoEntry.Id,
                     PlugItemId = (ushort)(PlugItemEntry?.Id ?? 0u),
-                    PlugFacing = (byte)PlugFacing,
-                    BuildState = (byte)BuildState
+                    PlugFacing = PlugFacing,
+                    BuildState = BuildState
                 });
             }
             else
@@ -156,13 +168,13 @@ namespace NexusForever.Game.Housing
 
                 if ((saveMask & PlotSaveMask.PlugFacing) != 0)
                 {
-                    model.PlugFacing = (byte)PlugFacing;
+                    model.PlugFacing = PlugFacing;
                     entity.Property(p => p.PlugFacing).IsModified = true;
                 }
 
                 if ((saveMask & PlotSaveMask.BuildState) != 0)
                 {
-                    model.BuildState = (byte)BuildState;
+                    model.BuildState = BuildState;
                     entity.Property(p => p.BuildState).IsModified = true;
                 }
             }

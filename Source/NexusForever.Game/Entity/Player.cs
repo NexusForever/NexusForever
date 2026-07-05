@@ -237,7 +237,7 @@ namespace NexusForever.Game.Entity
         public IXpManager XpManager { get; private set; }
         public IReputationManager ReputationManager { get; private set; }
         public IGuildManager GuildManager { get; }
-        public IResidenceManager ResidenceManager { get; private set; }
+        public IResidenceManager ResidenceManager { get; }
         public ICinematicManager CinematicManager { get; private set; }
         public ICharacterEntitlementManager EntitlementManager { get; private set; }
         public ILogoutManager LogoutManager { get; private set; }
@@ -268,7 +268,8 @@ namespace NexusForever.Game.Entity
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             ICurrencyManager currencyManager,
-            IGuildManager guildManager)
+            IGuildManager guildManager,
+            IResidenceManager residenceManager)
             : base(movementManager)
         {
             this.messagePublisher = messagePublisher;
@@ -277,8 +278,9 @@ namespace NexusForever.Game.Entity
             this.matchManager     = matchManager;
 
             // managers
-            CurrencyManager = currencyManager;
-            GuildManager    = guildManager;
+            CurrencyManager  = currencyManager;
+            GuildManager     = guildManager;
+            ResidenceManager = residenceManager;
         }
 
         #endregion
@@ -349,7 +351,7 @@ namespace NexusForever.Game.Entity
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
             GuildManager.Initialise(this, model);
-            ResidenceManager        = new ResidenceManager(this);
+            ResidenceManager.Initialise(this);
             CinematicManager        = new CinematicManager(this);
 
             LogoutManager           = new LogoutManager(this);

@@ -1,5 +1,4 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Network.World.Message.Model.Housing
@@ -23,9 +22,7 @@ namespace NexusForever.Network.World.Message.Model.Housing
             }
 
             for (int i = 0; i < count; i++)
-            {
                 DecorUpdates[i].UseServiceToken = reader.ReadBit();
-            }
         }
     }
 }

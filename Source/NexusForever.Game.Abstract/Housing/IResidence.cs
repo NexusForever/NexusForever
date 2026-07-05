@@ -1,4 +1,6 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Map.Instance;
@@ -11,10 +13,10 @@ namespace NexusForever.Game.Abstract.Housing
 {
     public interface IResidence : IDatabaseCharacter, INetworkBuildable<ServerHousingResidences.Residence>
     {
-        Abstract.Identity Identity { get; }
+        Identity Identity { get; }
         ResidenceType Type { get; }
-        Abstract.Identity? OwnerIdentity { get; }
-        Abstract.Identity? GuildOwnerIdentity { get; set; }
+        Identity OwnerIdentity { get; }
+        Identity GuildOwnerIdentity { get; set; }
         PropertyInfoId PropertyInfoId { get; set; }
         string Name { get; set; }
         ResidencePrivacyLevel PrivacyLevel { get; set; }
@@ -30,6 +32,24 @@ namespace NexusForever.Game.Abstract.Housing
         byte GardenSharing { get; set; }
 
         bool IsCommunityResidence { get; }
+
+        /// <summary>
+        /// Initialise a new <see cref="IResidence"/> from an existing database model.
+        /// </summary>
+        void Initialise(ResidenceModel model);
+
+        /// <summary>
+        /// Initialise a new <see cref="IResidence"/> from a <see cref="IPlayer"/>.
+        /// </summary>
+        void Initialise(IPlayer player);
+
+        /// <summary>
+        /// Create a new <see cref="IResidence"/> for a <see cref="ICommunity"/>.
+        /// </summary>
+        /// <remarks>
+        /// This creates the parent <see cref="IResidence"/> which all children are part of.
+        /// </remarks>
+        void Initialise(ICommunity community);
 
         // <summary>
         /// <see cref="IResidenceMapInstance"/> this <see cref="IResidence"/> resides on.

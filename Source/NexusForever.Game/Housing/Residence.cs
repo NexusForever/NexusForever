@@ -12,6 +12,8 @@ using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model.Housing;
+using NexusForever.Shared;
+
 namespace NexusForever.Game.Housing
 {
     public class Residence : IResidence
@@ -42,9 +44,9 @@ namespace NexusForever.Game.Housing
             GuildOwner      = 0x010000
         }
 
-        public Identity Identity { get; }
-        public ResidenceType Type { get; }
-        public Identity OwnerIdentity { get; }
+        public Identity Identity { get; private set; }
+        public ResidenceType Type { get; private set; }
+        public Identity OwnerIdentity { get; private set; }
 
         public Identity GuildOwnerIdentity
         {
@@ -104,7 +106,7 @@ namespace NexusForever.Game.Housing
             get => wallpaperId;
             set
             {
-                if (GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value) == null)
+                if (gameTableManager.HousingWallpaperInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 wallpaperId = value;
@@ -119,7 +121,7 @@ namespace NexusForever.Game.Housing
             get => roofDecorInfoId;
             set
             {
-                if (GameTableManager.Instance.HousingDecorInfo.GetEntry(value) == null)
+                if (gameTableManager.HousingDecorInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 roofDecorInfoId = value;
@@ -134,7 +136,7 @@ namespace NexusForever.Game.Housing
             get => entrywayDecorInfoId;
             set
             {
-                if (GameTableManager.Instance.HousingDecorInfo.GetEntry(value) == null)
+                if (gameTableManager.HousingDecorInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 entrywayDecorInfoId = value;
@@ -149,7 +151,7 @@ namespace NexusForever.Game.Housing
             get => doorDecorInfoId;
             set
             {
-                if (GameTableManager.Instance.HousingDecorInfo.GetEntry(value) == null)
+                if (gameTableManager.HousingDecorInfo.GetEntry(value) == null)
                     throw new ArgumentOutOfRangeException();
 
                 doorDecorInfoId = value;
@@ -164,7 +166,7 @@ namespace NexusForever.Game.Housing
             get => musicId;
             set
             {
-                HousingWallpaperInfoEntry entry = GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value);
+                HousingWallpaperInfoEntry entry = gameTableManager.HousingWallpaperInfo.GetEntry(value);
                 if (entry == null)
                     throw new ArgumentOutOfRangeException();
 
@@ -183,7 +185,7 @@ namespace NexusForever.Game.Housing
             get => groundWallpaperId;
             set
             {
-                HousingWallpaperInfoEntry entry = GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value);
+                HousingWallpaperInfoEntry entry = gameTableManager.HousingWallpaperInfo.GetEntry(value);
                 if (entry == null)
                     throw new ArgumentOutOfRangeException();
 
@@ -202,7 +204,7 @@ namespace NexusForever.Game.Housing
             get => skyWallpaperId;
             set
             {
-                HousingWallpaperInfoEntry entry = GameTableManager.Instance.HousingWallpaperInfo.GetEntry(value);
+                HousingWallpaperInfoEntry entry = gameTableManager.HousingWallpaperInfo.GetEntry(value);
                 if (entry == null)
                     throw new ArgumentOutOfRangeException();
 
@@ -283,29 +285,53 @@ namespace NexusForever.Game.Housing
         private readonly Dictionary<ulong, IDecor> decors = [];
         private readonly List<IPlot> plots = [];
 
-        /// <summary>
-        /// Create a new <see cref="IResidence"/> from an existing database model.
-        /// </summary>
-        public Residence(ResidenceModel model)
+        #region Dependency Injection
+
+        private readonly IRealmContext realmContext;
+        private readonly IGameTableManager gameTableManager;
+        private readonly IGlobalResidenceManager globalResidenceManager;
+        private readonly IFactory<IPlot> plotFactory;
+
+        public Residence(
+            IRealmContext realmContext,
+            IGameTableManager gameTableManager,
+            IGlobalResidenceManager globalResidenceManager,
+            IFactory<IPlot> plotFactory)
         {
+            this.realmContext           = realmContext;
+            this.gameTableManager       = gameTableManager;
+            this.globalResidenceManager = globalResidenceManager;
+            this.plotFactory            = plotFactory;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Initialise a new <see cref="IResidence"/> from an existing database model.
+        /// </summary>
+        public void Initialise(ResidenceModel model)
+        {
+            if (Identity != null)
+                throw new InvalidOperationException("Residence is already initialised.");
+
             Identity = new Identity
             {
-                RealmId = RealmContext.Instance.RealmId,
-                Id = model.Id
+                RealmId = realmContext.RealmId,
+                Id      = model.Id
             };
             OwnerIdentity = model.OwnerId != 0 ? new Identity
             {
-                RealmId = RealmContext.Instance.RealmId,
-                Id      = (ulong)model.OwnerId,
+                RealmId = realmContext.RealmId,
+                Id      = model.OwnerId.Value,
             } : null;
             GuildOwnerIdentity = model.GuildOwnerId != 0 ? new Identity
             {
-                RealmId = RealmContext.Instance.RealmId,
+                RealmId = realmContext.RealmId,
                 Id      = (ulong)model.GuildOwnerId,
             } : null;
-            propertyInfoId      = (PropertyInfoId)model.PropertyInfoId;
+            propertyInfoId      = model.PropertyInfoId;
             name                = model.Name;
-            privacyLevel        = (ResidencePrivacyLevel)model.PrivacyLevel;
+            privacyLevel        = model.PrivacyLevel;
             wallpaperId         = model.WallpaperId;
             roofDecorInfoId     = model.RoofDecorInfoId;
             entrywayDecorInfoId = model.EntrywayDecorInfoId;
@@ -313,7 +339,7 @@ namespace NexusForever.Game.Housing
             groundWallpaperId   = model.GroundWallpaperId;
             musicId             = model.MusicId;
             skyWallpaperId      = model.SkyWallpaperId;
-            flags               = (ResidenceFlags)model.Flags;
+            flags               = model.Flags;
             resourceSharing     = model.ResourceSharing;
             gardenSharing       = model.GardenSharing;
 
@@ -332,21 +358,23 @@ namespace NexusForever.Game.Housing
 
             foreach (ResidencePlotModel plotModel in model.Plot
                 .OrderBy(e => e.Index))
-                plots.Add(new Plot(plotModel));
+            {
+                IPlot plot = plotFactory.Resolve();
+                plot.Initialise(plotModel);
+            }
 
             saveMask = ResidenceSaveMask.None;
         }
 
         /// <summary>
-        /// Create a new <see cref="IResidence"/> from a <see cref="IPlayer"/>.
+        /// Initialise a new <see cref="IResidence"/> from a <see cref="IPlayer"/>.
         /// </summary>
-        public Residence(IPlayer player)
+        public void Initialise(IPlayer player)
         {
-            Identity = new Identity
-            {
-                RealmId = RealmContext.Instance.RealmId,
-                Id = GlobalResidenceManager.Instance.NextResidenceId
-            };
+            if (Identity != null)
+                throw new InvalidOperationException("Residence is already initialised.");
+
+            Identity       = globalResidenceManager.NextResidenceId;
             Type           = ResidenceType.Residence;
             OwnerIdentity  = player.Identity;
             propertyInfoId = PropertyInfoId.Residence;
@@ -367,13 +395,12 @@ namespace NexusForever.Game.Housing
         /// <remarks>
         /// This creates the parent <see cref="IResidence"/> which all children are part of.
         /// </remarks>
-        public Residence(ICommunity community)
+        public void Initialise(ICommunity community)
         {
-            Identity = new Identity
-            {
-                RealmId = RealmContext.Instance.RealmId,
-                Id = GlobalResidenceManager.Instance.NextResidenceId
-            };
+            if (Identity != null)
+                throw new InvalidOperationException("Residence is already initialised.");
+
+            Identity       = globalResidenceManager.NextResidenceId;
             Type           = ResidenceType.Community;
             GuildOwnerIdentity = community.Identity;
             propertyInfoId = PropertyInfoId.Community;
@@ -393,7 +420,11 @@ namespace NexusForever.Game.Housing
             foreach (HousingPlotInfoEntry entry in GameTableManager.Instance.HousingPlotInfo.Entries
                 .Where(e => (PropertyInfoId)e.HousingPropertyInfoId == PropertyInfoId)
                 .OrderBy(e => e.HousingPropertyPlotIndex))
-                plots.Add(new Plot(Identity.Id, entry));
+            {
+                IPlot plot = plotFactory.Resolve();
+                plot.Initialise(Identity.Id, entry);
+                plots.Add(plot);
+            }
         }
 
         private void UpdatePlots()
@@ -413,14 +444,11 @@ namespace NexusForever.Game.Housing
                     context.Add(new ResidenceModel
                     {
                         Id                  = Identity.Id,
-                        RealmId             = Identity.RealmId,
                         OwnerId             = OwnerIdentity.Id,
-                        OwnerRealmId        = OwnerIdentity.RealmId,
                         GuildOwnerId        = GuildOwnerIdentity.Id,
-                        GuildOwnerRealmId   = GuildOwnerIdentity.RealmId,
-                        PropertyInfoId      = (byte)PropertyInfoId,
+                        PropertyInfoId      = PropertyInfoId,
                         Name                = Name,
-                        PrivacyLevel        = (byte)privacyLevel,
+                        PrivacyLevel        = privacyLevel,
                         WallpaperId         = wallpaperId,
                         RoofDecorInfoId     = roofDecorInfoId,
                         EntrywayDecorInfoId = entrywayDecorInfoId,
@@ -428,7 +456,7 @@ namespace NexusForever.Game.Housing
                         GroundWallpaperId   = groundWallpaperId,
                         MusicId             = musicId,
                         SkyWallpaperId      = skyWallpaperId,
-                        Flags               = (ushort)flags,
+                        Flags               = flags,
                         ResourceSharing     = resourceSharing,
                         GardenSharing       = gardenSharing
                     });
@@ -438,8 +466,7 @@ namespace NexusForever.Game.Housing
                     // residence already exists in database, save only data that has been modified
                     var model = new ResidenceModel
                     {
-                        Id = Identity.Id,
-                        RealmId = Identity.RealmId
+                        Id = Identity.Id
                     };
 
                     // could probably clean this up with reflection, works for the time being
@@ -451,7 +478,7 @@ namespace NexusForever.Game.Housing
                     }
                     if ((saveMask & ResidenceSaveMask.PrivacyLevel) != 0)
                     {
-                        model.PrivacyLevel = (byte)PrivacyLevel;
+                        model.PrivacyLevel = PrivacyLevel;
                         entity.Property(p => p.PrivacyLevel).IsModified = true;
                     }
                     if ((saveMask & ResidenceSaveMask.Wallpaper) != 0)
@@ -491,7 +518,7 @@ namespace NexusForever.Game.Housing
                     }
                     if ((saveMask & ResidenceSaveMask.Flags) != 0)
                     {
-                        model.Flags = (ushort)Flags;
+                        model.Flags = Flags;
                         entity.Property(p => p.Flags).IsModified = true;
                     }
                     if ((saveMask & ResidenceSaveMask.ResourceSharing) != 0)
@@ -507,12 +534,11 @@ namespace NexusForever.Game.Housing
                     if ((saveMask & ResidenceSaveMask.GuildOwner) != 0)
                     {
                         model.GuildOwnerId = GuildOwnerIdentity.Id;
-                        model.GuildOwnerRealmId = GuildOwnerIdentity.RealmId;
                         entity.Property(p => p.GuildOwnerId).IsModified = true;
                     }
                     if ((saveMask & ResidenceSaveMask.PropertyInfo) != 0)
                     {
-                        model.PropertyInfoId = (byte)PropertyInfoId;
+                        model.PropertyInfoId = PropertyInfoId;
                         entity.Property(p => p.PropertyInfoId).IsModified = true;
                     }
                 }

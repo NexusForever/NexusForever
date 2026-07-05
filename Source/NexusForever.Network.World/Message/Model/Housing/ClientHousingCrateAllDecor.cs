@@ -3,7 +3,6 @@ using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model.Housing
 {
-
     [Message(GameMessageOpcode.ClientHousingCrateAllDecor)]
     public class ClientHousingCrateAllDecor : IReadable
     {

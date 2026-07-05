@@ -7,13 +7,13 @@ using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Item
 {
-    public class ClientItemUseDecorHandler : IMessageHandler<IWorldSession, ClientHousingAddItemToCrate>
+    public class ClientHousingAddItemToCrateHandler : IMessageHandler<IWorldSession, ClientHousingAddItemToCrate>
     {
         #region Dependency Injection
 
         private readonly IGameTableManager gameTableManager;
 
-        public ClientItemUseDecorHandler(
+        public ClientHousingAddItemToCrateHandler(
             IGameTableManager gameTableManager)
         {
             this.gameTableManager = gameTableManager;

@@ -13,9 +13,7 @@ namespace NexusForever.Network.World.Message.Model.Housing
             writer.Write(Unused, 14u);
             writer.Write(Neighbourhoods.Count);
             foreach (Neighbourhood Neighbourhood in Neighbourhoods)
-            {
                 Neighbourhood.Write(writer);
-            }
         }
     }
 }

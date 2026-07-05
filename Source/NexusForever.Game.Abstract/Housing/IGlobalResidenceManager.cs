@@ -10,7 +10,7 @@ namespace NexusForever.Game.Abstract.Housing
         /// <summary>
         /// Id to be assigned to the next created residence.
         /// </summary>
-        ulong NextResidenceId { get; }
+        Identity NextResidenceId { get; }
 
         /// <summary>
         /// Id to be assigned to the next created residence.

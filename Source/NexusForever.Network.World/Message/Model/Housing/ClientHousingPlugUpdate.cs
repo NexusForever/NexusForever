@@ -43,10 +43,8 @@ namespace NexusForever.Network.World.Message.Model.Housing
             PlotFlags = reader.ReadUInt();
             Operation = reader.ReadEnum<HousingPlugOperation>(3u);
 
-            for (int i = 0; i < HousingContributions.Length; i++)
-            {
-                HousingContributions[i].Read(reader);
-            }
+            foreach (HousingContribution housingContribution in HousingContributions)
+                housingContribution.Read(reader);
         }
     }
 }

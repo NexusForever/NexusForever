@@ -6,14 +6,14 @@ using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
-    public class ClientHousingRandomCommunityListHandler : IMessageHandler<IWorldSession, ClientHousingRequestRandomCommunityList>
+    public class ClientHousingRequestRandomCommunityListHandler : IMessageHandler<IWorldSession, ClientHousingRequestRandomCommunityList>
     {
         #region Dependency Injection
 
         private readonly IGlobalResidenceManager globalResidenceManager;
         private readonly IRealmContext realmContext;
 
-        public ClientHousingRandomCommunityListHandler(
+        public ClientHousingRequestRandomCommunityListHandler(
             IGlobalResidenceManager globalResidenceManager,
             IRealmContext realmContext)
         {

@@ -4,6 +4,6 @@
     {
         CannotEdit = 0,
         CanEdit    = 1,
-        IsMine     = 2,
+        IsMine     = 2
     }
 }
