@@ -8,19 +8,17 @@
     <PackageVersion Include="Aspire.Hosting.MySql" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.4.6" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net100" Version="1.8.9" />
-    <PackageVersion Include="Basic.Reference.Assemblies.Net90" Version="1.8.3" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.10" />
@@ -34,6 +32,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.10" />
+    <PackageVersion Include="Microting.EntityFrameworkCore.MySql" Version="10.0.9" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Nexus.Archive" Version="1.0.1" />
     <PackageVersion Include="NLog" Version="6.1.4" />
