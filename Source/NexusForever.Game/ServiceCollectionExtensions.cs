@@ -9,6 +9,7 @@ using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
+using NexusForever.Game.Loot;
 using NexusForever.Game.Map;
 using NexusForever.Game.Matching;
 using NexusForever.Game.Prerequisite;
@@ -45,6 +46,7 @@ namespace NexusForever.Game
             sc.AddGameEvent();
             sc.AddGameGuild();
             sc.AddGameHousing();
+            sc.AddGameLoot();
             sc.AddGameMap();
             sc.AddGameMatching();
             sc.AddGamePrerequisite();

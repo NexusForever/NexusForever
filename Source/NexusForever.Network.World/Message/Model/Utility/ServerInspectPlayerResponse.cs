@@ -1,5 +1,4 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model.Utility
 {
@@ -7,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model.Utility
     public class ServerInspectPlayerResponse : IWritable
     {
         public uint UnitId { get; set; }
-        public List<Item> Items { get; set; } = [];
+        public List<Shared.Item> Items { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

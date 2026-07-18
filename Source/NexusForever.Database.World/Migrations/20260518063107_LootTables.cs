@@ -1,0 +1,137 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace NexusForever.Database.World.Migrations
+{
+    /// <inheritdoc />
+    public partial class LootTables : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "loot_group",
+                columns: table => new
+                {
+                    id = table.Column<ulong>(type: "bigint(20) unsigned", nullable: false, defaultValue: 0ul),
+                    parentId = table.Column<ulong>(type: "bigint(20) unsigned", nullable: true),
+                    probability = table.Column<float>(type: "float", nullable: false, defaultValue: 100f),
+                    minDrop = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    maxDrop = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    conditionType = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    condition = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    comment = table.Column<string>(type: "varchar(200)", nullable: true, defaultValue: "")
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_loot_group", x => x.id);
+                    table.ForeignKey(
+                        name: "FK__loot_group_parentId__loot_group_id",
+                        column: x => x.parentId,
+                        principalTable: "loot_group",
+                        principalColumn: "id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "entity_loot",
+                columns: table => new
+                {
+                    Id = table.Column<uint>(type: "int unsigned", nullable: false),
+                    lootGroupId = table.Column<ulong>(type: "bigint(20) unsigned", nullable: false),
+                    comment = table.Column<string>(type: "varchar(200)", nullable: true, defaultValue: "")
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.Id, x.lootGroupId });
+                    table.ForeignKey(
+                        name: "FK_entity_loot_loot_group_lootGroupId",
+                        column: x => x.lootGroupId,
+                        principalTable: "loot_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "item_loot",
+                columns: table => new
+                {
+                    id = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    lootGroupId = table.Column<ulong>(type: "bigint(20) unsigned", nullable: false),
+                    comment = table.Column<string>(type: "varchar(200)", nullable: true, defaultValue: "")
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.id, x.lootGroupId });
+                    table.ForeignKey(
+                        name: "FK_item_loot_loot_group_lootGroupId",
+                        column: x => x.lootGroupId,
+                        principalTable: "loot_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "loot_item",
+                columns: table => new
+                {
+                    id = table.Column<ulong>(type: "bigint(20) unsigned", nullable: false, defaultValue: 0ul),
+                    type = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    staticId = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    probability = table.Column<float>(type: "float", nullable: false, defaultValue: 100f),
+                    minCount = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    maxCount = table.Column<uint>(type: "int(10) unsigned", nullable: false, defaultValue: 0u),
+                    comment = table.Column<string>(type: "varchar(200)", nullable: true, defaultValue: "")
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PRIMARY", x => new { x.id, x.type, x.staticId });
+                    table.ForeignKey(
+                        name: "FK__loot_item_id__loot_group_id",
+                        column: x => x.id,
+                        principalTable: "loot_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_entity_loot_lootGroupId",
+                table: "entity_loot",
+                column: "lootGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_item_loot_lootGroupId",
+                table: "item_loot",
+                column: "lootGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_loot_group_parentId",
+                table: "loot_group",
+                column: "parentId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "entity_loot");
+
+            migrationBuilder.DropTable(
+                name: "item_loot");
+
+            migrationBuilder.DropTable(
+                name: "loot_item");
+
+            migrationBuilder.DropTable(
+                name: "loot_group");
+        }
+    }
+}
