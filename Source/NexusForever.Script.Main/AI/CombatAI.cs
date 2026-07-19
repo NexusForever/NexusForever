@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Combat;
+using System.Numerics;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;
@@ -10,6 +11,10 @@ namespace NexusForever.Script.Main.AI
     {
         private ICreatureEntity owner;
 
+        // Interval in seconds between chase path recalculations.
+        private const double ChaseUpdateInterval = 0.5d;
+        private double chaseTimer = 0d;
+
         public void OnLoad(ICreatureEntity owner)
         {
             this.owner = owner;
@@ -20,7 +25,21 @@ namespace NexusForever.Script.Main.AI
             if (!owner.IsAlive)
                 return;
 
-            // TODO
+            if (!owner.InCombat || owner.TargetGuid == null)
+                return;
+
+            chaseTimer -= lastTick;
+            if (chaseTimer > 0d)
+                return;
+            chaseTimer = ChaseUpdateInterval;
+
+            IUnitEntity target = owner.GetVisible<IUnitEntity>(owner.TargetGuid.Value);
+            if (target == null || !target.IsAlive)
+                return;
+
+            float distance = Vector3.Distance(owner.Position, target.Position);
+            if (distance > owner.HitRadius + target.HitRadius)
+                owner.MovementManager.Follow(target, target.HitRadius);
         }
 
         public void OnThreatAddTarget(IHostileEntity hostile)
