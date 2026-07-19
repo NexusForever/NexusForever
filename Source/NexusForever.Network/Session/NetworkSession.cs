@@ -1,4 +1,6 @@
-﻿using System.Net;
+using System.Buffers;
+using System.IO.Pipelines;
+using System.Net;
 using System.Net.Sockets;
 using NexusForever.Network.Session.Static;
 using NexusForever.Shared.Game.Events;
@@ -29,8 +31,8 @@ namespace NexusForever.Network.Session
         public SocketHeartbeat Heartbeat { get; } = new();
 
         private Socket socket;
-        private readonly byte[] buffer = new byte[4096];
-        private int bufferOffset;
+        private CancellationTokenSource receiveCts;
+        private Task receivePipeTask;
 
         private DisconnectState? disconnectState;
 
@@ -43,11 +45,46 @@ namespace NexusForever.Network.Session
                 throw new InvalidOperationException();
 
             Id = Guid.NewGuid().ToString();
-
             socket = newSocket;
-            socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveDataCallback, null);
+
+            var stream = new NetworkStream(socket);
+            var pipeReader = PipeReader.Create(stream);
+
+            receiveCts = new CancellationTokenSource();
+            receivePipeTask = Task.Run(() => RunReceivePipeAsync(pipeReader, receiveCts.Token));
 
             log.Trace($"New client {Id} connected from {newSocket.RemoteEndPoint}.");
+        }
+
+        private async Task RunReceivePipeAsync(PipeReader pipeReader, CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    ReadResult result = await pipeReader.ReadAsync(cancellationToken);
+                    ReadOnlySequence<byte> buffer = result.Buffer;
+
+                    SequencePosition consumed = OnData(in buffer);
+                    pipeReader.AdvanceTo(consumed, buffer.End);
+
+                    if (result.IsCompleted || result.IsCanceled)
+                        break;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // normal shutdown via ForceDisconnect or OnDisconnect
+            }
+            catch (Exception e)
+            {
+                log.Error(e, $"An exception occured for client {Id} during socket read!");
+            }
+            finally
+            {
+                await pipeReader.CompleteAsync();
+                ForceDisconnect();
+            }
         }
 
         /// <summary>
@@ -89,6 +126,8 @@ namespace NexusForever.Network.Session
 
         protected virtual void OnDisconnect()
         {
+            receiveCts?.Cancel();
+
             try
             {
                 EndPoint remoteEndPoint = socket.RemoteEndPoint;
@@ -114,38 +153,9 @@ namespace NexusForever.Network.Session
         }
 
         /// <summary>
-        /// Invoked with <see cref="IAsyncResult"/> when data from the <see cref="Socket"/> is received.
+        /// Invoked when data is received from the remote client. Returns the consumed position within the buffer.
         /// </summary>
-        private void ReceiveDataCallback(IAsyncResult ar)
-        {
-            try
-            {
-                int length = socket.EndReceive(ar);
-                if (length == 0)
-                {
-                    ForceDisconnect();
-                    return;
-                }
-
-                byte[] data = new byte[length + bufferOffset];
-                Buffer.BlockCopy(buffer, 0, data, 0, data.Length);
-                bufferOffset = (int)OnData(data);
-
-                // if we have data that wasn't processed move it to the start of the buffer
-                // any new data will be amended to it
-                if (bufferOffset != 0)
-                    Buffer.BlockCopy(buffer, data.Length - bufferOffset, buffer, 0, bufferOffset);
-
-                socket.BeginReceive(buffer, bufferOffset, buffer.Length - bufferOffset, SocketFlags.None, ReceiveDataCallback, null);
-            }
-            catch (Exception e)
-            {
-                log.Error(e, $"An exception occured for client {Id} during socket read!");
-                ForceDisconnect();
-            }
-        }
-
-        protected abstract uint OnData(byte[] data);
+        protected abstract SequencePosition OnData(in ReadOnlySequence<byte> buffer);
 
         /// <summary>
         /// Send supplied data to remote client on <see cref="Socket"/>.
@@ -164,7 +174,7 @@ namespace NexusForever.Network.Session
         }
 
         /// <summary>
-        /// Forece disconnect of <see cref="NetworkSession"/>.
+        /// Force disconnect of <see cref="NetworkSession"/>.
         /// </summary>
         public void ForceDisconnect()
         {
