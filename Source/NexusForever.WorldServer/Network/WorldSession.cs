@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Cryptography;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Database.Character.Model;
@@ -40,8 +41,9 @@ namespace NexusForever.WorldServer.Network
         public WorldSession(
             IMessageManager messageManager,
             INetworkManager<IWorldSession> networkManager,
-            ILoginQueueManager loginQueueManager)
-            : base(messageManager)
+            ILoginQueueManager loginQueueManager,
+            IServiceScopeFactory serviceScopeFactory)
+            : base(messageManager, serviceScopeFactory)
         {
             this.networkManager    = networkManager;
             this.loginQueueManager = loginQueueManager;
