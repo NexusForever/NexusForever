@@ -1476,6 +1476,11 @@ namespace NexusForever.Database.Character
                     .HasColumnType("float")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.Data)
+                    .HasColumnName("data")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
                 entity.HasOne(d => d.Character)
                     .WithMany(p => p.Stat)
                     .HasForeignKey(d => d.Id)
