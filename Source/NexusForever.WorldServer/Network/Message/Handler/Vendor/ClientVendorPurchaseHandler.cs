@@ -6,7 +6,7 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Account;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Item;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Vendor
 {
@@ -30,7 +30,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Vendor
             if (vendorInfo == null)
                 return;
 
-            EntityVendorItemModel vendorItem = vendorInfo.GetItemAtIndex(vendorPurchase.VendorIndex);
+            EntityVendorItemModel vendorItem = vendorInfo.GetItemAtIndex(vendorPurchase.StockUniqueId);
             if (vendorItem == null)
                 return;
 
@@ -49,7 +49,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Vendor
                     if (currencyType == CurrencyType.None)
                         continue;
 
-                    ulong cost = info.GetVendorBuyAmount(i) * vendorPurchase.VendorItemQty;
+                    ulong cost = info.GetVendorBuyAmount(i) * vendorPurchase.PurchaseQuantity;
                     if (currencyType == CurrencyType.Credits)
                         cost *= (ulong)Math.Ceiling(vendorInfo.BuyPriceMultiplier);
 
@@ -82,7 +82,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Vendor
                 return;
 
             vendorItemPurchaseCost.Charge(session.Player);
-            session.Player.Inventory.ItemCreate(InventoryLocation.Inventory, info.Id, vendorPurchase.VendorItemQty * info.Entry.BuyFromVendorStackCount);
+            session.Player.Inventory.ItemCreate(InventoryLocation.Inventory, info.Id, vendorPurchase.PurchaseQuantity * info.Entry.BuyFromVendorStackCount);
         }
     }
 }

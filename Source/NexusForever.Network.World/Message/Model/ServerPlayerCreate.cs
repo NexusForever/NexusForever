@@ -1,6 +1,6 @@
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Item;
 using FactionId = NexusForever.Game.Static.Reputation.Faction;
 
 namespace NexusForever.Network.World.Message.Model
@@ -79,12 +79,12 @@ namespace NexusForever.Network.World.Message.Model
         public int ActiveCostumeIndex { get; set; }
         public uint UnknownC4 { get; set; }
         public uint UnknownC8 { get; set; }
-        public List<ushort> KnownDyes { get; } = new();
+        public List<ushort> KnownDyes { get; } = [];
         public ushort[] TradeskillMaterials { get; set; } = new ushort[512];
         public float GearScore { get; set; }
         public bool IsPvpServer { get; set; }
         public uint MatchingEligibilityFlagMask { get; set; } // Mask checked against matchingMapPreqrequisite.matchingEligibilityFlagEnum field. Tbl has no entries though.
-        public List<CharacterEntitlement> CharacterEntitlements { set; get; } = new();
+        public List<CharacterEntitlement> CharacterEntitlements { set; get; } = [];
 
         public void Write(GamePacketWriter writer)
         {

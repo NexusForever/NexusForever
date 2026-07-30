@@ -1,6 +1,6 @@
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Item;
 using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Network.World.Message.Model.Abilities

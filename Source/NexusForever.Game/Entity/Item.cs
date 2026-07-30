@@ -6,8 +6,8 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model.Shared;
-using NetworkItem = NexusForever.Network.World.Message.Model.Shared.Item;
+using NexusForever.Network.World.Message.Model.Item;
+using NetworkItem = NexusForever.Network.World.Message.Model.Item.Item;
 
 namespace NexusForever.Game.Entity
 {
@@ -299,8 +299,8 @@ namespace NexusForever.Game.Entity
         {
             var networkItem = new NetworkItem
             {
-                Guid         = Guid,
-                ItemId       = Id,
+                ItemGuid     = Guid,
+                Item2Id      = Id,
                 LocationData = new ItemLocation
                 {
                     Location = Location,
@@ -309,11 +309,8 @@ namespace NexusForever.Game.Entity
                 StackCount = StackCount,
                 Charges    = Charges,
                 Durability = Durability,
-                Unknown58  = new NetworkItem.UnknownStructure[2]
-                {
-                    new NetworkItem.UnknownStructure(),
-                    new NetworkItem.UnknownStructure()
-                }
+                SellPrice_Primary  = new NetworkItem.PriceInfo(),
+                SellPrice_Secondary = new NetworkItem.PriceInfo(),
             };
 
             return networkItem;

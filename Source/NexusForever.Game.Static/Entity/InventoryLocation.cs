@@ -18,7 +18,9 @@
         Unknown5  = 5,
         Unknown8  = 8,
         Unknown9  = 9,
-        Unknown10 = 10,
+        
+        [InventoryLocation(128u)]
+        SharedBank = 10,
 
         [InventoryLocation(128u)]
         GuildBankTab1 = 100,
@@ -60,7 +62,7 @@
         WarPartyBankTab9 = 208,
         [InventoryLocation(128u)]
         WarPartyBankTab10 = 209,
-
+        
         None      = ushort.MaxValue
     }
 }

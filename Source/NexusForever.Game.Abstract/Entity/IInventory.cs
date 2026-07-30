@@ -1,7 +1,7 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Item;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
 

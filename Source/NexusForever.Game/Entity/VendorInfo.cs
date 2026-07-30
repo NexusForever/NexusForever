@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Item;
 
 namespace NexusForever.Game.Entity
 {
@@ -36,34 +36,34 @@ namespace NexusForever.Game.Entity
             {
                 SellPriceMultiplier = SellPriceMultiplier,
                 BuyPriceMultiplier  = BuyPriceMultiplier,
-                Unknown2            = true,
-                Unknown3            = true,
-                Unknown4            = false
+                InitialList         = true,
+                Failed              = true,
+                ClearList           = false
             };
 
             foreach (EntityVendorCategoryModel category in Categories)
             {
-                serverVendor.Categories.Add(new ServerVendorItemsUpdated.Category
+                serverVendor.VendorGroups.Add(new ServerVendorItemsUpdated.VendorGroup
                 {
-                    Index           = category.Index,
+                    GroupIndex      = category.Index,
                     LocalisedTextId = category.LocalisedTextId
                 });
             }
             foreach (EntityVendorItemModel item in Items)
             {
-                serverVendor.Items.Add(new ServerVendorItemsUpdated.Item
+                serverVendor.VendorItems.Add(new ServerVendorItemsUpdated.VendorItem
                 {
-                    Index         = item.Index,
-                    ItemId        = item.ItemId,
-                    CategoryIndex = item.CategoryIndex,
-                    Unknown6      = 0,
-                    ExtraCost1 = new ServerVendorItemsUpdated.Item.ItemExtraCost()
+                    StockUniqueId = item.Index,
+                    StaticDbId    = item.ItemId,
+                    VendorGroupId = item.CategoryIndex,
+                    ExchangeRate  = 0,
+                    ExtraCost1    = new ServerVendorItemsUpdated.VendorItem.ItemExtraCost()
                     {
                         ExtraCostType    = item.ExtraCost1Type,
                         Quantity         = item.ExtraCost1Quantity,
                         ItemOrCurrencyId = item.ExtraCost1ItemOrCurrencyId
                     },
-                    ExtraCost2 = new ServerVendorItemsUpdated.Item.ItemExtraCost()
+                    ExtraCost2 = new ServerVendorItemsUpdated.VendorItem.ItemExtraCost()
                     {
                         ExtraCostType    = item.ExtraCost2Type,
                         Quantity         = item.ExtraCost2Quantity,

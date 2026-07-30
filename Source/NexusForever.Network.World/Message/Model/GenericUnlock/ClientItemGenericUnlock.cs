@@ -1,5 +1,5 @@
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Item;
 
 namespace NexusForever.Network.World.Message.Model.GenericUnlock
 {

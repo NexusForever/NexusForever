@@ -1,4 +1,5 @@
 ﻿using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Item;
 using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Network.World.Message.Model.Guild

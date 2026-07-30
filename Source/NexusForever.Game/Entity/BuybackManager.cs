@@ -1,8 +1,8 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Item;
 using NexusForever.Shared;
-using NetworkBuybackItem = NexusForever.Network.World.Message.Model.Shared.BuybackItem;
+using NetworkBuybackItem = NexusForever.Network.World.Message.Model.Item.BuybackItem;
 
 namespace NexusForever.Game.Entity
 {
@@ -52,18 +52,16 @@ namespace NexusForever.Game.Entity
             var networkBuybackItem = new NetworkBuybackItem
             {
                 UniqueId = uniqueId,
-                ItemId = item.Info.Id,
+                Item2Id = item.Info.Id,
                 Quantity = quantity
             };
 
-            for (int i = 0; i < networkBuybackItem.CurrencyTypeId.Length; i++)
-            {
-                if (i >= currencyChange.Count)
-                    continue;
 
-                networkBuybackItem.CurrencyTypeId[i] = currencyChange[i].CurrencyTypeId;
-                networkBuybackItem.CurrencyAmount[i] = currencyChange[i].CurrencyAmount;
-            }
+            networkBuybackItem.CurrencyTypeId_First  = currencyChange[0].CurrencyTypeId;
+            networkBuybackItem.CurrencyAmount_First  = currencyChange[0].CurrencyAmount;
+
+            networkBuybackItem.CurrencyTypeId_Second = currencyChange[1].CurrencyTypeId;
+            networkBuybackItem.CurrencyAmount_Second = currencyChange[1].CurrencyAmount;
 
             player.Session.EnqueueMessageEncrypted(new ServerBuybackItemUpdated
             {

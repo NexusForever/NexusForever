@@ -46,6 +46,7 @@ using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Network.World.Message.Model.Info;
 using NexusForever.Network.World.Message.Model.Pregame;
+using NexusForever.Network.World.Message.Model.Item;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
