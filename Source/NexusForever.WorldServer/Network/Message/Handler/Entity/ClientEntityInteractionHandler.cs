@@ -54,7 +54,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 case 68: // "MailboxActivate"
                     var mailboxEntity = session.Player.Map.GetEntity<IMailboxEntity>(entityInteraction.Guid);
                     break;
-                case 8: // "HousingGuildNeighborhoodBrokerOpen"
+                case 8: // "HousingGuildNeighbourhoodBrokerOpen"
                 case 40:
                 case 41: // "ResourceConversionOpen"
                 case 42: // "ToggleAbilitiesWindow"

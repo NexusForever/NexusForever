@@ -2,7 +2,7 @@
 {
     public interface IPublicCommunity
     {
-        ulong NeighbourhoodId { get; init; }
+        Identity GuildIdentity { get; init; }
         string Owner { get; init; }
         string Name { get; init; }
     }

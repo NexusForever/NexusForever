@@ -9,6 +9,11 @@ namespace NexusForever.Game.Housing
         public static void AddGameHousing(this IServiceCollection sc)
         {
             sc.AddSingletonLegacy<IGlobalResidenceManager, GlobalResidenceManager>();
+
+            sc.AddTransient<IResidenceManager, ResidenceManager>();
+
+            sc.AddTransientFactory<IResidence, Residence>();
+            sc.AddTransientFactory<IPlot, Plot>();
         }
     }
 }

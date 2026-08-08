@@ -2400,7 +2400,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.Property<byte>("PropertyInfoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(3) unsigned")
-                        .HasDefaultValue((byte)0)
+                        .HasDefaultValue((byte)35)
                         .HasColumnName("propertyInfoId");
 
                     b.Property<byte>("ResourceSharing")

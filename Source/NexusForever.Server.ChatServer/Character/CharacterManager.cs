@@ -73,7 +73,7 @@ namespace NexusForever.Server.ChatServer.Character
             if (databaseModel != null)
                 return InitialiseCharacter(databaseModel);
 
-            API.Model.Character.Character apiModel = await _apiClient.GetCharacterAsync(identity.ToAPIdentity());
+            API.Model.Character.Character apiModel = await _apiClient.GetCharacterAsync(identity.ToAPIIdentity());
             if (apiModel == null)
                 return null;
 

@@ -1,5 +1,5 @@
-﻿using APIIdentity = NexusForever.API.Model.Identity;
-using APIIdentityName = NexusForever.API.Model.IdentityName;
+﻿using APIdentity = NexusForever.API.Model.Identity;
+using APIdentityName = NexusForever.API.Model.IdentityName;
 using InternalIdentity = NexusForever.Network.Internal.Message.Shared.Identity;
 using InternalIdentityName = NexusForever.Network.Internal.Message.Shared.IdentityName;
 
@@ -43,18 +43,18 @@ namespace NexusForever.Server.ChatServer
             };
         }
 
-        public static APIIdentity ToAPIdentity(this Identity identity)
+        public static APIdentity ToAPIIdentity(this Identity identity)
         {
-            return new APIIdentity
+            return new APIdentity
             {
                 Id      = identity.Id,
                 RealmId = identity.RealmId,
             };
         }
 
-        public static APIIdentityName ToAPIIdentity(this IdentityName identity)
+        public static APIdentityName ToAPIIdentity(this IdentityName identity)
         {
-            return new APIIdentityName
+            return new APIdentityName
             {
                 Name      = identity.Name,
                 RealmName = identity.RealmName

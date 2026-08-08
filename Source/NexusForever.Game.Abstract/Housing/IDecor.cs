@@ -4,13 +4,13 @@ using NexusForever.Database.Character;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.Game.Abstract.Housing
 {
     public interface IDecor : IDatabaseCharacter, IDatabaseState, INetworkBuildable<ServerHousingResidenceDecor.Decor>
     {
-        ulong Id { get; }
+        Identity ResidenceIdentity { get; }
         ulong DecorId { get; }
         HousingDecorInfoEntry Entry { get; }
         DecorType Type { get; set; }

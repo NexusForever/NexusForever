@@ -3,8 +3,8 @@
     [Flags]
     public enum ResidenceFlags
     {
-        None,
-        HideGroundClutter,
-        HideNeighborSkyplots
+        None                  = 0,
+        HideGroundClutter     = 1,
+        HideNeighbourSkyplots = 2
     }
 }

@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
@@ -32,7 +32,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             if (housingSetPrivacyLevel.PrivacyLevel == ResidencePrivacyLevel.Public)
                 globalResidenceManager.RegisterResidenceVists(session.Player.ResidenceManager.Residence, session.Player.Name);
             else
-                globalResidenceManager.DeregisterResidenceVists(session.Player.ResidenceManager.Residence.Id);
+                globalResidenceManager.DeregisterResidenceVists(session.Player.ResidenceManager.Residence.Identity);
 
             session.Player.ResidenceManager.SetResidencePrivacy(housingSetPrivacyLevel.PrivacyLevel);
         }
