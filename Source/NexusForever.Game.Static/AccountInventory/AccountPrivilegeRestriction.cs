@@ -2,9 +2,9 @@
 {
     public enum AccountPrivilegeRestriction
     {
-        Chat = 0x0,
-        Invite = 0x1,
+        Chat     = 0x0,
+        Invite   = 0x1,
         PvpMatch = 0x2,
-        Trade = 0x3,
-    };
+        Trade    = 0x3
+    }
 }
