@@ -2,10 +2,10 @@
 using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Account.Currency;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.AccountInventory;
 
 namespace NexusForever.Game.Account.Currency
 {
@@ -25,7 +25,7 @@ namespace NexusForever.Game.Account.Currency
             foreach (AccountCurrencyModel currencyModel in model.AccountCurrency)
             {
                 // Disabled Character Token for now due to causing server errors if the player tries to use it. TODO: Fix level 50 creation
-                if ((AccountCurrencyType)currencyModel.CurrencyId == AccountCurrencyType.MaxLevelToken)
+                if ((AccountCurrencyType)currencyModel.CurrencyId == AccountCurrencyType.PromotionToken)
                     continue;
 
                 currencies.Add((AccountCurrencyType)currencyModel.CurrencyId, new AccountCurrency(account, currencyModel));
@@ -103,7 +103,7 @@ namespace NexusForever.Game.Account.Currency
         /// </summary>
         public void SendCharacterListPacket()
         {
-            account.Session.EnqueueMessageEncrypted(new ServerAccountCurrencySet
+            account.Session.EnqueueMessageEncrypted(new ServerAccountCurrencies
             {
                 AccountCurrencies = currencies.Values.Select(c => c.Build()).ToList()
             });
@@ -121,12 +121,12 @@ namespace NexusForever.Game.Account.Currency
         /// <summary>
         /// Sends information about a player's <see cref="AccountCurrency"/>.
         /// </summary>
-        private void SendAccountCurrencyUpdate(IAccountCurrency accountCurrency, ulong reason = 0)
+        private void SendAccountCurrencyUpdate(IAccountCurrency accountCurrency, ulong amount = 0)
         {
             account.Session.EnqueueMessageEncrypted(new ServerAccountCurrencyGrant
             {
                 AccountCurrency = accountCurrency.Build(),
-                Unknown0 = reason
+                NewAmount = amount
             });
         }
     }

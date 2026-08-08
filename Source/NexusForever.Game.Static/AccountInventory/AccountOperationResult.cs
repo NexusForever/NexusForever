@@ -1,0 +1,35 @@
+﻿namespace NexusForever.Game.Static.AccountInventory
+{
+    public enum AccountOperationResult
+    {
+        Ok                        = 0x0,
+        GenericFail               = 0x1,
+        DBError                   = 0x2,
+        MTXError                  = 0x3,
+        InvalidOffer              = 0x4,
+        InvalidPrice              = 0x5,
+        NotEnoughCurrency         = 0x6,
+        NeedTransaction           = 0x7,
+        InvalidAccountItem        = 0x8,
+        InvalidPendingItem        = 0x9,
+        InvalidInventoryItem      = 0xA,
+        NoConnection              = 0xB,
+        NoCharacter               = 0xC,
+        AlreadyClaimed            = 0xD,
+        MaxEntitlementCount       = 0xE,
+        NoRegift                  = 0xF,
+        NoGifting                 = 0x10,
+        InvalidFriend             = 0x11,
+        InvalidCoupon             = 0x12,
+        CannotReturn              = 0x13,
+        Prereq                    = 0x14,
+        CREDDExchangeNotLoaded    = 0x15,
+        NoCREDD                   = 0x16,
+        NoMatchingOrder           = 0x17,
+        InvalidCREDDOrder         = 0x18,
+        Cooldown                  = 0x19,
+        MissingEntitlement        = 0x1A,
+        AlreadyClaimedMultiRedeem = 0x1B,
+        PremiumOnly               = 0x1C
+    }
+}
