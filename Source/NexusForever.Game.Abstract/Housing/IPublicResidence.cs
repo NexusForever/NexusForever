@@ -2,7 +2,7 @@
 {
     public interface IPublicResidence
     {
-        ulong ResidenceId { get; init; }
+        Identity Identity { get; init; }
         string Owner { get; init; }
         string Name { get; init; }
     }

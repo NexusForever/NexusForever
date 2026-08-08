@@ -13,7 +13,7 @@ namespace NexusForever.Game.Chat.Format.Formatter
         {
             return new ChatChannelTextQuestIdFormat
             {
-                QuestId = format.QuestId,
+                QuestId = format.Quest2Id,
             };
         }
 
@@ -21,7 +21,7 @@ namespace NexusForever.Game.Chat.Format.Formatter
         {
             return new ChatFormatQuestId
             {
-                QuestId = format.QuestId,
+                Quest2Id = format.QuestId,
             };
         }
     }

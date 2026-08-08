@@ -114,7 +114,7 @@ namespace NexusForever.GameTable
         GameTable<HousingDecorTypeEntry> HousingDecorType { get; }
         GameTable<HousingMannequinPoseEntry> HousingMannequinPose { get; }
         GameTable<HousingMapInfoEntry> HousingMapInfo { get; }
-        GameTable<HousingNeighborhoodInfoEntry> HousingNeighborhoodInfo { get; }
+        GameTable<HousingNeighbourhoodInfoEntry> HousingNeighbourhoodInfo { get; }
         GameTable<HousingPlotInfoEntry> HousingPlotInfo { get; }
         GameTable<HousingPlotTypeEntry> HousingPlotType { get; }
         GameTable<HousingPlugItemEntry> HousingPlugItem { get; }

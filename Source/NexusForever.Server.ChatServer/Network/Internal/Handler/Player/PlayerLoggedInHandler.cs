@@ -1,5 +1,5 @@
 ﻿using NexusForever.Database.Chat;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Chat;
 using NexusForever.Network.Internal.Message.Player;

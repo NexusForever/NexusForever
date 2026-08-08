@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Entity.Movement;
+using NexusForever.Game.Guild;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
@@ -55,6 +57,7 @@ namespace NexusForever.Game.Entity
             sc.AddSingletonLegacy<IPlayerManager, PlayerManager>();
 
             sc.AddTransient<ICurrencyManager, CurrencyManager>();
+            sc.AddTransient<IGuildManager, GuildManager>();
         }
     }
 }

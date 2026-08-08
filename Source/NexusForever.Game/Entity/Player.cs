@@ -9,7 +9,6 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
-using NexusForever.Game.Abstract.Entity.Movement.Spline;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -27,13 +26,13 @@ using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
+using NexusForever.Game.Static.Option;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Setting;
-using NexusForever.Game.Static.Social;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -44,7 +43,10 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Abilities;
+using NexusForever.Network.World.Message.Model.Chat;
+using NexusForever.Network.World.Message.Model.Info;
 using NexusForever.Network.World.Message.Model.Pregame;
+using NexusForever.Network.World.Message.Model.Housing;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
@@ -54,7 +56,7 @@ using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Game.Entity
 {
@@ -234,8 +236,8 @@ namespace NexusForever.Game.Entity
         public ISupplySatchelManager SupplySatchelManager { get; private set; }
         public IXpManager XpManager { get; private set; }
         public IReputationManager ReputationManager { get; private set; }
-        public IGuildManager GuildManager { get; private set; }
-        public IResidenceManager ResidenceManager { get; private set; }
+        public IGuildManager GuildManager { get; }
+        public IResidenceManager ResidenceManager { get; }
         public ICinematicManager CinematicManager { get; private set; }
         public ICharacterEntitlementManager EntitlementManager { get; private set; }
         public ILogoutManager LogoutManager { get; private set; }
@@ -265,7 +267,9 @@ namespace NexusForever.Game.Entity
             IEntityFactory entityFactory,
             IMatchingManager matchingManager,
             IMatchManager matchManager,
-            ICurrencyManager currencyManager)
+            ICurrencyManager currencyManager,
+            IGuildManager guildManager,
+            IResidenceManager residenceManager)
             : base(movementManager)
         {
             this.messagePublisher = messagePublisher;
@@ -274,7 +278,9 @@ namespace NexusForever.Game.Entity
             this.matchManager     = matchManager;
 
             // managers
-            CurrencyManager = currencyManager;
+            CurrencyManager  = currencyManager;
+            GuildManager     = guildManager;
+            ResidenceManager = residenceManager;
         }
 
         #endregion
@@ -344,8 +350,8 @@ namespace NexusForever.Game.Entity
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
-            GuildManager            = new GuildManager(this, model);
-            ResidenceManager        = new ResidenceManager(this);
+            GuildManager.Initialise(this, model);
+            ResidenceManager.Initialise(this);
             CinematicManager        = new CinematicManager(this);
 
             LogoutManager           = new LogoutManager(this);
@@ -715,7 +721,7 @@ namespace NexusForever.Game.Entity
             BuybackManager.Instance.SendBuybackItems(this);
 
             ResidenceManager.SendHousingBasics();
-            Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
+            Session.EnqueueMessageEncrypted(new ServerHousingNeighbours());
             Session.EnqueueMessageEncrypted(new ServerInstanceSettings() { ClientEntitySendUpdateInterval = 125 });
 
             SetControl(this);
@@ -922,6 +928,11 @@ namespace NexusForever.Game.Entity
                         if (Map != null)
                             RemoveFromMap();
 
+                        messagePublisher.PublishAsync(new PlayerLoggedOutMessage
+                        {
+                            Identity = Identity.ToInternalIdentity()
+                        }).FireAndForgetAsync();
+
                         Dispose();
                     });
                 }
@@ -960,7 +971,8 @@ namespace NexusForever.Game.Entity
 
             messagePublisher.PublishAsync(new PlayerLoggedInMessage
             {
-                Identity = Identity.ToInternalIdentity()
+                Identity  = Identity.ToInternalIdentity(),
+                AccountId = Account.Id
             }).FireAndForgetAsync();
         }
 
@@ -972,11 +984,6 @@ namespace NexusForever.Game.Entity
             matchManager.OnLogout(this);
 
             IsOnline = false;
-
-            messagePublisher.PublishAsync(new PlayerLoggedOutMessage
-            {
-                Identity = Identity.ToInternalIdentity()
-            }).FireAndForgetAsync();
 
             scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }
@@ -1126,7 +1133,7 @@ namespace NexusForever.Game.Entity
             currentChairGuid = chair.Guid;
 
             // TODO: Emit interactive state from the entity instance itself
-            chair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            chair.EnqueueToVisible(new ServerUnitInUse
             {
                 UnitId = chair.Guid,
                 InUse  = true
@@ -1152,7 +1159,7 @@ namespace NexusForever.Game.Entity
                 throw new InvalidOperationException();
 
             // TODO: Emit interactive state from the entity instance itself
-            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            currentChair.EnqueueToVisible(new ServerUnitInUse
             {
                 UnitId = currentChair.Guid,
                 InUse  = false
@@ -1188,7 +1195,12 @@ namespace NexusForever.Game.Entity
             {
                 Channel = new Channel
                 {
-                    Type = ChatChannelType.System
+                    ChatChannelId = ChatChannelType.System
+                },
+                From = new Network.World.Message.Model.Shared.Identity
+                {
+                    Id = 0,
+                    RealmId = 0,
                 },
                 Text = text
             });

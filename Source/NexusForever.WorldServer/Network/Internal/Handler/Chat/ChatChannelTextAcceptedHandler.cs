@@ -3,7 +3,7 @@ using NexusForever.Game;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Internal.Message.Chat;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Chat;
 using Rebus.Handlers;
 
 namespace NexusForever.WorldServer.Network.Internal.Handler.Chat
@@ -33,14 +33,14 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Chat
 
             var chatAccept = new ServerChatAccept
             {
-                Guid          = player.Guid,
-                Name          = player.Name,
+                UnitId        = player.Guid,
+                SenderName    = player.Name,
                 ChatMessageId = message.ChatMessageId
             };
 
             if (message.Target != null && message.TargetName != null)
             {
-                chatAccept.Name = message.TargetName.Name;
+                chatAccept.SenderName = message.TargetName.Name;
                 if (realmContext.RealmId != message.Target.RealmId)
                     chatAccept.RealmName = message.TargetName.RealmName;
             }

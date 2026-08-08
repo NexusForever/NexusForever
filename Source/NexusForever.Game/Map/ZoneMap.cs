@@ -5,7 +5,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Map;
 
 namespace NexusForever.Game.Map
 {

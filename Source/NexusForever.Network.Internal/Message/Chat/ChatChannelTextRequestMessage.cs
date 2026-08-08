@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Social;
+﻿using NexusForever.Game.Static.Chat;
 using NexusForever.Network.Internal.Message.Chat.Shared;
 using NexusForever.Network.Internal.Message.Shared;
 

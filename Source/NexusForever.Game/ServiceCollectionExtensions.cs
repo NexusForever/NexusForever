@@ -7,18 +7,19 @@ using NexusForever.Game.Cinematic;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
-using NexusForever.Game.PublicEvent;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Matching;
 using NexusForever.Game.Prerequisite;
+using NexusForever.Game.PublicEvent;
 using NexusForever.Game.Quest;
 using NexusForever.Game.RBAC;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Server;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Storefront;
+using NexusForever.Game.Story;
 using NexusForever.Shared;
 
 namespace NexusForever.Game
@@ -33,7 +34,6 @@ namespace NexusForever.Game
             sc.AddSingletonLegacy<IItemManager, ItemManager>();
             sc.AddSingletonLegacy<IRealmContext, RealmContext>();
             sc.AddSingletonLegacy<IShutdownManager, ShutdownManager>();
-            sc.AddSingletonLegacy<IStoryBuilder, StoryBuilder>();
             sc.AddSingletonLegacy<IDamageCalculator, DamageCalculator>();
 
             sc.AddGameAchievement();
@@ -54,6 +54,7 @@ namespace NexusForever.Game
             sc.AddGameServer();
             sc.AddGameChat();
             sc.AddGameSpell();
+            sc.AddGameStory();
             sc.AddGameStore();
         }
     }

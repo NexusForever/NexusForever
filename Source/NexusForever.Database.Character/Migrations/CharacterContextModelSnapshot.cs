@@ -17,7 +17,7 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -191,17 +191,17 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((byte)0)
                         .HasColumnName("slot");
 
-                    b.Property<int>("DyeData")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(10)")
-                        .HasDefaultValue(0)
-                        .HasColumnName("dyeData");
-
-                    b.Property<uint>("ItemId")
+                    b.Property<uint>("DyeData")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int(10) unsigned")
                         .HasDefaultValue(0u)
-                        .HasColumnName("itemId");
+                        .HasColumnName("dyeData");
+
+                    b.Property<uint>("Item2Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("item2Id");
 
                     b.HasKey("Id", "Index", "Slot")
                         .HasName("PRIMARY");
@@ -222,12 +222,6 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((byte)0)
                         .HasColumnName("index");
 
-                    b.Property<uint>("Mask")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(10) unsigned")
-                        .HasDefaultValue(0u)
-                        .HasColumnName("mask");
-
                     b.Property<DateTime>("Timestamp")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime")
@@ -235,6 +229,12 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValueSql("current_timestamp()");
 
                     MySqlPropertyBuilderExtensions.UseMySqlComputedColumn(b.Property<DateTime>("Timestamp"));
+
+                    b.Property<uint>("VisibilityMask")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("visibilityMask");
 
                     b.HasKey("Id", "Index")
                         .HasName("PRIMARY");
@@ -1432,6 +1432,12 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((byte)0)
                         .HasColumnName("stat");
 
+                    b.Property<uint>("Data")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("data");
+
                     b.Property<float>("Value")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float")
@@ -2394,7 +2400,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.Property<byte>("PropertyInfoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(3) unsigned")
-                        .HasDefaultValue((byte)0)
+                        .HasDefaultValue((byte)35)
                         .HasColumnName("propertyInfoId");
 
                     b.Property<byte>("ResourceSharing")

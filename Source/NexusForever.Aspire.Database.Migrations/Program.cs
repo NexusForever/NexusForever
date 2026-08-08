@@ -9,7 +9,9 @@ using NexusForever.Aspire.Database.Migrations.Service;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
 using NexusForever.Database.Chat;
+using NexusForever.Database.Friendship;
 using NexusForever.Database.Group;
+using NexusForever.Database.Query;
 using NexusForever.Database.World;
 using NLog.Extensions.Logging;
 
@@ -85,6 +87,16 @@ namespace NexusForever.Aspire.Database.Migrations
                     sc.AddDbContext<ChatContext>(options =>
                     {
                         var connectionString = hb.Configuration.GetConnectionString("chatdb");
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                    });
+                    sc.AddDbContext<FriendshipContext>(options =>
+                    {
+                        var connectionString = hb.Configuration.GetConnectionString("friendshipdb");
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                    });
+                    sc.AddDbContext<QueryContext>(options =>
+                    {
+                        var connectionString = hb.Configuration.GetConnectionString("querydb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                 });

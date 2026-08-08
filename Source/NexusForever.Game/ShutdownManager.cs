@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Chat;
 using NexusForever.Game.Entity;
-using NexusForever.Game.Static.Social;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
 

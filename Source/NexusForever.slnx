@@ -4,6 +4,8 @@
     <Project Path="NexusForever.MapGenerator/NexusForever.MapGenerator.csproj" />
   </Folder>
   <Folder Name="/Server/">
+    <Project Path="NexusForever.API.Account.Client/NexusForever.API.Account.Client.csproj" Id="69bcadba-c65c-49b1-ba3b-8a0b124de854" />
+    <Project Path="NexusForever.API.Account/NexusForever.API.Account.csproj" Id="f687c7cc-247c-4f80-b80b-eb00b59b667c" />
     <Project Path="NexusForever.API.Character.Client/NexusForever.API.Character.Client.csproj" />
     <Project Path="NexusForever.API.Character/NexusForever.API.Character.csproj" />
     <Project Path="NexusForever.API/NexusForever.API.csproj" />
@@ -12,7 +14,9 @@
     <Project Path="NexusForever.Database.Auth/NexusForever.Database.Auth.csproj" />
     <Project Path="NexusForever.Database.Character/NexusForever.Database.Character.csproj" />
     <Project Path="NexusForever.Database.Chat/NexusForever.Database.Chat.csproj" />
+    <Project Path="NexusForever.Database.Friendship/NexusForever.Database.Friendship.csproj" Id="938f33d6-1742-409d-943f-10c9fd8608b7" />
     <Project Path="NexusForever.Database.Group/NexusForever.Database.Group.csproj" />
+    <Project Path="NexusForever.Database.Query/NexusForever.Database.Query.csproj" Id="0fb52d37-accf-4a39-ac51-a97b286f0eff" />
     <Project Path="NexusForever.Database.World/NexusForever.Database.World.csproj" />
     <Project Path="NexusForever.Database/NexusForever.Database.csproj" />
     <Project Path="NexusForever.Game.Abstract/NexusForever.Game.Abstract.csproj" />
@@ -26,7 +30,9 @@
     <Project Path="NexusForever.Network.World/NexusForever.Network.World.csproj" />
     <Project Path="NexusForever.Network/NexusForever.Network.csproj" />
     <Project Path="NexusForever.Script/NexusForever.Script.csproj" />
+    <Project Path="NexusForever.Server.Character/NexusForever.Server.Character.csproj" Id="fef08215-8811-46bb-86dd-cf8ddfae190d" />
     <Project Path="NexusForever.Server.ChatServer/NexusForever.Server.ChatServer.csproj" />
+    <Project Path="NexusForever.Server.Friendship/NexusForever.Server.Friendship.csproj" Id="663fa1cd-2c38-4a1c-ae12-4b260cad1932" />
     <Project Path="NexusForever.Server.GroupServer/NexusForever.Server.GroupServer.csproj" />
     <Project Path="NexusForever.Shared/NexusForever.Shared.csproj" />
     <Project Path="NexusForever.StsServer/NexusForever.StsServer.csproj" />

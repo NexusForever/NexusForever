@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.Game.Housing
 {
@@ -10,15 +10,38 @@ namespace NexusForever.Game.Housing
     {
         public IResidence Residence { get; private set; }
 
-        private readonly IPlayer owner;
+        private IPlayer owner;
+
+        #region Dependency Injection
+
+        private readonly IGlobalResidenceManager globalResidenceManager;
+
+        public ResidenceManager(
+            IGlobalResidenceManager globalResidenceManager)
+        {
+            this.globalResidenceManager = globalResidenceManager;
+        }
+
+        #endregion
 
         /// <summary>
-        /// Create a new <see cref="IResidenceManager"/>.
+        /// Initialise a new <see cref="IResidenceManager"/> for <see cref="IPlayer"/>.
         /// </summary>
-        public ResidenceManager(IPlayer player)
+        public void Initialise(IPlayer player)
         {
-            owner     = player;
-            Residence = GlobalResidenceManager.Instance.GetResidenceByOwner(owner.CharacterId);
+            if (owner != null)
+                throw new InvalidOperationException("ResidenceManager is already initialised.");
+
+            owner = player;
+            Residence = globalResidenceManager.GetResidenceByOwner(owner.Identity);
+        }
+
+        public void CreateResidence()
+        {
+            if (Residence != null)
+                throw new InvalidOperationException();
+
+            Residence = globalResidenceManager.CreateResidence(owner);
         }
 
         /// <summary>
@@ -29,7 +52,8 @@ namespace NexusForever.Game.Housing
         /// </remarks>
         public void DecorCreate(HousingDecorInfoEntry entry, uint quantity = 1u)
         {
-            Residence ??= GlobalResidenceManager.Instance.CreateResidence(owner);
+            if (Residence == null)
+                CreateResidence();
 
             if (Residence.Map != null)
                 Residence.Map.DecorCreate(Residence, entry, quantity);
@@ -61,16 +85,16 @@ namespace NexusForever.Game.Housing
             // see Residence.GetResidencePrivacyLevel LUA function for more context
             var flags = (Residence?.PrivacyLevel ?? ResidencePrivacyLevel.Public) switch
             {
-                ResidencePrivacyLevel.Public        => ServerHousingBasics.ResidencePrivacyLevelFlags.Public,
-                ResidencePrivacyLevel.Private       => ServerHousingBasics.ResidencePrivacyLevelFlags.Private,
-                ResidencePrivacyLevel.NeighborsOnly => ServerHousingBasics.ResidencePrivacyLevelFlags.NeighborsOnly,
-                ResidencePrivacyLevel.RoommatesOnly => ServerHousingBasics.ResidencePrivacyLevelFlags.RoommatesOnly,
-                _                                   => throw new NotImplementedException()
+                ResidencePrivacyLevel.Public         => ServerHousingBasics.ResidencePrivacyLevelFlags.Public,
+                ResidencePrivacyLevel.Private        => ServerHousingBasics.ResidencePrivacyLevelFlags.Private,
+                ResidencePrivacyLevel.NeighboursOnly => ServerHousingBasics.ResidencePrivacyLevelFlags.NeighboursOnly,
+                ResidencePrivacyLevel.RoommatesOnly  => ServerHousingBasics.ResidencePrivacyLevelFlags.RoommatesOnly,
+                _                                    => throw new NotImplementedException()
             };
 
             owner.Session.EnqueueMessageEncrypted(new ServerHousingBasics
             {
-                ResidenceId     = Residence?.Id ?? 0ul,
+                ResidenceId     = Residence?.Identity.Id ?? 0ul,
                 /*NeighbourhoodId = GuildManager.GetGuild<Community>(GuildType.Community)?.Id ?? 0ul,*/
                 PrivacyLevel    = flags
             });

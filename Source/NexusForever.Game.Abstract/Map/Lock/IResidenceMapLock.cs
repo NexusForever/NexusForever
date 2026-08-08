@@ -4,11 +4,11 @@ namespace NexusForever.Game.Map.Lock
 {
     public interface IResidenceMapLock : IMapLock
     {
-        ulong ResidenceId { get; }
+        Abstract.Identity ResidenceIdentity { get; }
 
         /// <summary>
         /// Initialise residence information for <see cref="IResidenceMapLock"/>.
         /// </summary>
-        void Initialise(ulong residenceId);
+        void Initialise(Abstract.Identity residenceIdentity);
     }
 }
