@@ -20,7 +20,7 @@ using NexusForever.Game.Static.Entity.Movement.Spline;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Command;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Movement;
 
 namespace NexusForever.Game.Entity.Movement
 {
@@ -208,11 +208,11 @@ namespace NexusForever.Game.Entity.Movement
             return commands;
         }
 
-        private ServerEntityCommand BuildNetworkEntityCommands()
+        private ServerUnitCommand BuildNetworkEntityCommands()
         {
-            var serverEntityCommand = new ServerEntityCommand
+            var serverEntityCommand = new ServerUnitCommand
             {
-                Guid             = Owner.Guid,
+                UnitId             = Owner.Guid,
                 Time             = GetTime(),
                 TimeReset        = timeCommandGroup.TimeReset,
                 ServerControlled = ServerControl,

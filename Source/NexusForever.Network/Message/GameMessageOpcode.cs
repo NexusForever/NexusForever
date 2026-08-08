@@ -49,6 +49,7 @@ namespace NexusForever.Network.Message
         ServerCostumeList               = 0x00D9,
         ServerCharacterCreate           = 0x00DC,
         ServerChannelUpdateLoot         = 0x00DD,
+        ClientDash                      = 0x00DE,
         ServerDatacubeUpdateList        = 0x00E0,
         ServerDatacubeUpdate            = 0x00E1,
         ServerDatacubeVolumeUpdate      = 0x00E2,
@@ -71,6 +72,7 @@ namespace NexusForever.Network.Message
         ServerPathExplorerPowerMapFailed = 0x00F8,
         ClientPathExplorerPowerMapProgress = 0x00F9,
         ServerPathExplorerPowerMapWaiting = 0x00FA,
+        ClientGameCameraConstrained     = 0x00FC,
         ServerCharacterFlagsUpdated     = 0x00FE,
         ServerResurrectionState         = 0x0100,
         ServerGalacticArchiveRefresh    = 0x0102,
@@ -164,6 +166,7 @@ namespace NexusForever.Network.Message
         ServerSpellUpdate               = 0x017B,
         ClientSpendAttributePoints      = 0x017C,
         ClientItemSplit                 = 0x017D,
+        ClientSprint                    = 0x017E,
         ServerItemStackCountUpdate      = 0x017F,
         ClientItemMove                  = 0x0182,
         ClientItemMoveFromSupplySatchel = 0x0184,
@@ -609,13 +612,14 @@ namespace NexusForever.Network.Message
         ServerMatchingMatchOperationResult = 0x0623,
         ClientMatchingMatchCastVoteSurrender = 0x0624,
         ServerMatchingAverageWaitTimeUpdate = 0x0628,
-        Server0635                      = 0x0635,
-        ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
-        ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
-        ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
+        ServerFreeMovement              = 0x0634,
+        ClientMovementControlReturnAck  = 0x0635,
+        ServerMovementControlReturn     = 0x0636,
+        ClientUnitCommand               = 0x0637,
+        ServerUnitCommand               = 0x0638,
         ServerMovementControlRemove     = 0x0639,
         ClientZoneChange                = 0x063A,
-        ClientPlayerMovementSpeedUpdate = 0x063B,
+        ClientMovementSpeed             = 0x063B,
         ServerAuthDenied                = 0x063D,
         ServerMarketplaceStatus         = 0x0640,
         ServerPrerequisiteFailure       = 0x0642,
@@ -783,9 +787,10 @@ namespace NexusForever.Network.Message
         Server0816                      = 0x0816, // spell related: broadcast parts of 0x07FF?
         Server0817                      = 0x0817, // spell related
         Server0818                      = 0x0818,
-        Server081A                      = 0x081A, // spline related
-        Server081B                      = 0x081B, // spline related
-        Server081C                      = 0x081C, // spline related
+        ServerSplineAdd                 = 0x081A,
+        ServerSplineModify              = 0x081B,
+        ServerSplineRemove              = 0x081C,
+        ClientSplineAgeNotification     = 0x081D,
         ClientSteamAchievements         = 0x0823,
         ClientStorefrontPurchaseAccount = 0x0828,
         ClientStorefrontPurchaseCharacter = 0x082A,

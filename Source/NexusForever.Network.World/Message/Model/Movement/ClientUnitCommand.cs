@@ -2,13 +2,13 @@
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 
-namespace NexusForever.Network.World.Message.Model
+namespace NexusForever.Network.World.Message.Model.Movement
 {
-    [Message(GameMessageOpcode.ClientEntityCommand)]
-    public class ClientEntityCommand : IReadable
+    [Message(GameMessageOpcode.ClientUnitCommand)]
+    public class ClientUnitCommand : IReadable
     {
-        public uint Time { get; set; }
-        public List<INetworkEntityCommand> Commands { get; } = new();
+        public uint Time { get; private set; }
+        public List<INetworkEntityCommand> Commands { get; } = [];
 
         public void Read(GamePacketReader reader)
         {

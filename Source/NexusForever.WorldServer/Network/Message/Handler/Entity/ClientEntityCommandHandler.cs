@@ -1,12 +1,12 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Movement;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 {
-    public class ClientEntityCommandHandler : IMessageHandler<IWorldSession, ClientEntityCommand>
+    public class ClientEntityCommandHandler : IMessageHandler<IWorldSession, ClientUnitCommand>
     {
-        public void HandleMessage(IWorldSession session, ClientEntityCommand entityCommand)
+        public void HandleMessage(IWorldSession session, ClientUnitCommand entityCommand)
         {
             IWorldEntity mover = session.Player;
             if (mover == null)
