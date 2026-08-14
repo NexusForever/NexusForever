@@ -167,7 +167,7 @@ namespace NexusForever.Game.Entity
 
             player.Session.EnqueueMessageEncrypted(new ServerCombatReward
             {
-                Stat = (byte)(currency.Id - 1),
+                Stat = (ServerCombatReward.CombatRewardType)(currency.Id - 1),
                 NewValue = currency.Amount
             });
         }

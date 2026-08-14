@@ -4,9 +4,9 @@ using NexusForever.Network.Session;
 
 namespace NexusForever.Network.Message.Handler
 {
-    public class ClientPackedHandler : IMessageHandler<IGameSession, ClientPacked>
+    public class ClientPackedHandler : IMessageHandler<IGameSession, ClientCharacterCreatePacked>
     {
-        public void HandleMessage(IGameSession session, ClientPacked packed)
+        public void HandleMessage(IGameSession session, ClientCharacterCreatePacked packed)
         {
             session.HandlePacket(new ClientGamePacket
             {
