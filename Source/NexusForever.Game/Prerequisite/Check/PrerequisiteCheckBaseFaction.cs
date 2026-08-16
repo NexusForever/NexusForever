@@ -21,14 +21,14 @@ namespace NexusForever.Game.Prerequisite.Check
 
         #endregion
 
-        public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             switch (comparison)
             {
                 case PrerequisiteComparison.Equal:
-                    return player.Faction1 == (Faction)value;
+                    return subject.Faction1 == (Faction)value;
                 case PrerequisiteComparison.NotEqual:
-                    return player.Faction1 != (Faction)value;
+                    return subject.Faction1 != (Faction)value;
                 default:
                     log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.BaseFaction}!");
                     return false;

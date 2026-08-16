@@ -33,18 +33,28 @@ namespace NexusForever.Game.Prerequisite
         #endregion
 
         /// <summary>
-        /// Checks if <see cref="IPlayer"/> meets supplied prerequisite.
+        /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite.
         /// </summary>
-        public bool Meets(IPlayer player, uint prerequisiteId)
+        public bool Meets(IUnitEntity subject, uint prerequisiteId)
         {
             IPrerequisiteParameters parameters = prerequisiteParametersFactory.Resolve();
-            return Meets(player, prerequisiteId, parameters);
+            return Meets(subject, prerequisiteId, parameters);
         }
 
         /// <summary>
-        /// Checks if <see cref="IPlayer"/> meets supplied prerequisite.
+        /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite with a secondary unit context.
         /// </summary>
-        public bool Meets(IPlayer player, uint prerequisiteId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, uint prerequisiteId, IUnitEntity secondaryUnit)
+        {
+            IPrerequisiteParameters parameters = prerequisiteParametersFactory.Resolve();
+            parameters.SecondaryUnit = secondaryUnit;
+            return Meets(subject, prerequisiteId, parameters);
+        }
+
+        /// <summary>
+        /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite.
+        /// </summary>
+        public bool Meets(IUnitEntity subject, uint prerequisiteId, IPrerequisiteParameters parameters)
         {
             PrerequisiteEntry entry = gameTableManager.Prerequisite.GetEntry(prerequisiteId);
             if (entry == null)
@@ -53,16 +63,16 @@ namespace NexusForever.Game.Prerequisite
             switch (entry.Flags)
             {
                 case EvaluationMode.EvaluateAND:
-                    return MeetsEvaluateAnd(player, prerequisiteId, entry, parameters);
+                    return MeetsEvaluateAnd(subject, prerequisiteId, entry, parameters);
                 case EvaluationMode.EvaluateOR:
-                    return MeetsEvaluateOr(player, prerequisiteId, entry, parameters);
+                    return MeetsEvaluateOr(subject, prerequisiteId, entry, parameters);
                 default:
                     log.LogTrace($"Unhandled EvaluationMode {entry.Flags}");
                     return false;
             }
         }
 
-        private bool MeetsEvaluateAnd(IPlayer player, uint prerequisiteId, PrerequisiteEntry entry, IPrerequisiteParameters parameters)
+        private bool MeetsEvaluateAnd(IUnitEntity subject, uint prerequisiteId, PrerequisiteEntry entry, IPrerequisiteParameters parameters)
         {
             for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
             {
@@ -71,9 +81,9 @@ namespace NexusForever.Game.Prerequisite
                     continue;
 
                 PrerequisiteComparison comparison = entry.PrerequisiteComparisonId[i];
-                if (!Meets(player, type, comparison, entry.Value[i], entry.ObjectId[i], parameters))
+                if (!Meets(subject, type, comparison, entry.Value[i], entry.ObjectId[i], parameters))
                 {
-                    log.LogTrace($"Player {player.Name} failed prerequisite AND check ({prerequisiteId}) {type}, {comparison}, {entry.Value[i]}, {entry.ObjectId[i]}");
+                    log.LogTrace($"Unit {subject.Guid} failed prerequisite AND check ({prerequisiteId}) {type}, {comparison}, {entry.Value[i]}, {entry.ObjectId[i]}");
                     return false;
                 }
             }
@@ -81,7 +91,7 @@ namespace NexusForever.Game.Prerequisite
             return true;
         }
 
-        private bool MeetsEvaluateOr(IPlayer player, uint prerequisiteId, PrerequisiteEntry entry, IPrerequisiteParameters parameters)
+        private bool MeetsEvaluateOr(IUnitEntity subject, uint prerequisiteId, PrerequisiteEntry entry, IPrerequisiteParameters parameters)
         {
             for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
             {
@@ -89,15 +99,15 @@ namespace NexusForever.Game.Prerequisite
                 if (type == PrerequisiteType.None)
                     continue;
 
-                if (Meets(player, type, entry.PrerequisiteComparisonId[i], entry.Value[i], entry.ObjectId[i], parameters))
+                if (Meets(subject, type, entry.PrerequisiteComparisonId[i], entry.Value[i], entry.ObjectId[i], parameters))
                     return true;
             }
 
-            log.LogTrace($"Player {player.Name} failed prerequisite OR check ({prerequisiteId})");
+            log.LogTrace($"Unit {subject.Guid} failed prerequisite OR check ({prerequisiteId})");
             return false;
         }
 
-        private bool Meets(IPlayer player, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        private bool Meets(IUnitEntity subject, PrerequisiteType type, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             IPrerequisiteCheck handler = serviceProvider.GetKeyedService<IPrerequisiteCheck>(type);
             if (handler == null)
@@ -106,7 +116,7 @@ namespace NexusForever.Game.Prerequisite
                 return false;
             }
 
-            return handler.Meets(player, comparison, value, objectId, parameters);
+            return handler.Meets(subject, comparison, value, objectId, parameters);
         }
     }
 }
