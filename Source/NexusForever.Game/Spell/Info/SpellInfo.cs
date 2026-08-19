@@ -29,9 +29,9 @@ namespace NexusForever.Game.Spell.Info
         public SpellCoolDownEntry GlobalCooldown { get; private set; }
         public Spell4StackGroupEntry StackGroup { get; private set; }
         public PrerequisiteEntry CasterCastPrerequisite { get; private set; }
-        public PrerequisiteEntry TargetCastPrerequisites { get; private set; }
-        public PrerequisiteEntry CasterPersistencePrerequisites { get; private set; }
-        public PrerequisiteEntry TargetPersistencePrerequisites { get; private set; }
+        public PrerequisiteEntry TargetCastPrerequisite { get; private set; }
+        public PrerequisiteEntry CasterPersistencePrerequisite { get; private set; }
+        public PrerequisiteEntry TargetPersistencePrerequisite { get; private set; }
         public List<PrerequisiteEntry> PrerequisiteRunners { get; private set; } = [];
 
         public List<TelegraphDamageEntry> Telegraphs { get; private set; }
@@ -80,9 +80,9 @@ namespace NexusForever.Game.Spell.Info
             GlobalCooldown                 = gameTableManager.SpellCoolDown.GetEntry(spell4Entry.SpellCoolDownIdGlobal);
             StackGroup                     = gameTableManager.Spell4StackGroup.GetEntry(spell4Entry.Spell4StackGroupId);
             CasterCastPrerequisite         = gameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterCast);
-            TargetCastPrerequisites        = gameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetCast);
-            CasterPersistencePrerequisites = gameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterPersistence);
-            TargetPersistencePrerequisites = gameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetPersistence);
+            TargetCastPrerequisite         = gameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetCast);
+            CasterPersistencePrerequisite  = gameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdCasterPersistence);
+            TargetPersistencePrerequisite  = gameTableManager.Prerequisite.GetEntry(spell4Entry.PrerequisiteIdTargetPersistence);
 
             Telegraphs                     = spellInfoCache.GetTelegraphDamageEntries(spell4Entry.Id).ToList();
             Effects                        = spellInfoCache.GetSpell4EffectEntries(spell4Entry.Id).ToList();
