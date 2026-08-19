@@ -10,9 +10,9 @@ namespace NexusForever.Game.Abstract.Prerequisite
         bool Meets(IUnitEntity subject, uint prerequisiteId);
 
         /// <summary>
-        /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite with a secondary unit context.
+        /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite with a target context.
         /// </summary>
-        bool Meets(IUnitEntity subject, uint prerequisiteId, IUnitEntity secondaryUnit);
+        bool Meets(IUnitEntity subject, uint prerequisiteId, IUnitEntity target);
 
         /// <summary>
         /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite.

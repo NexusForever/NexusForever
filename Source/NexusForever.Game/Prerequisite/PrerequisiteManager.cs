@@ -42,12 +42,12 @@ namespace NexusForever.Game.Prerequisite
         }
 
         /// <summary>
-        /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite with a secondary unit context.
+        /// Checks if <see cref="IUnitEntity"/> meets supplied prerequisite with a target context.
         /// </summary>
-        public bool Meets(IUnitEntity subject, uint prerequisiteId, IUnitEntity secondaryUnit)
+        public bool Meets(IUnitEntity subject, uint prerequisiteId, IUnitEntity target)
         {
             IPrerequisiteParameters parameters = prerequisiteParametersFactory.Resolve();
-            parameters.SecondaryUnit = secondaryUnit;
+            parameters.Target = target;
             return Meets(subject, prerequisiteId, parameters);
         }
 

@@ -308,8 +308,13 @@ namespace NexusForever.Game.Spell
             // Runners override the Caster Check, allowing the Caster to Cast the spell due to this Prerequisite being met
             if (Parameters.SpellInfo.CasterCastPrerequisite != null && !CheckRunnerOverride(Caster))
             {
-                if (!PrerequisiteManager.Instance.Meets(Caster, Parameters.SpellInfo.CasterCastPrerequisite.Id, target))
-                    return CastResult.PrereqCasterCast;
+                var prerequisiteParameters = new PrerequisiteParameters
+                {
+                    Target   = target,
+                    TaxiNode = Parameters.TaxiNode
+                };
+                if (!PrerequisiteManager.Instance.Meets(Caster, Parameters.SpellInfo.CasterCastPrerequisite.Id, prerequisiteParameters))
+                    return prerequisiteParameters.CastResult ?? CastResult.PrereqCasterCast;
             }
 
             if (Parameters.SpellInfo.TargetCastPrerequisite != null)
@@ -317,8 +322,13 @@ namespace NexusForever.Game.Spell
                 if (target == null)
                     return CastResult.PrereqTargetCast;
 
-                if (!PrerequisiteManager.Instance.Meets(target, Parameters.SpellInfo.TargetCastPrerequisite.Id, Caster))
-                    return CastResult.PrereqTargetCast;
+                var prerequisiteParameters = new PrerequisiteParameters
+                {
+                    Target   = Caster,
+                    TaxiNode = Parameters.TaxiNode
+                };
+                if (!PrerequisiteManager.Instance.Meets(target, Parameters.SpellInfo.TargetCastPrerequisite.Id, prerequisiteParameters))
+                    return prerequisiteParameters.CastResult ?? CastResult.PrereqTargetCast;
             }
 
             return CastResult.Ok;
@@ -864,7 +874,12 @@ namespace NexusForever.Game.Spell
             IUnitEntity target = GetExplicitTarget();
             if (Parameters.SpellInfo.CasterPersistencePrerequisite != null)
             {
-                if (!PrerequisiteManager.Instance.Meets(Caster, Parameters.SpellInfo.CasterPersistencePrerequisite.Id, target))
+                var prerequisiteParameters = new PrerequisiteParameters
+                {
+                    Target   = target,
+                    TaxiNode = Parameters.TaxiNode
+                };
+                if (!PrerequisiteManager.Instance.Meets(Caster, Parameters.SpellInfo.CasterPersistencePrerequisite.Id, prerequisiteParameters))
                 {
                     Finish();
                     return;
@@ -879,7 +894,12 @@ namespace NexusForever.Game.Spell
                     return;
                 }
 
-                if (!PrerequisiteManager.Instance.Meets(target, Parameters.SpellInfo.TargetPersistencePrerequisite.Id, Caster))
+                var prerequisiteParameters = new PrerequisiteParameters
+                {
+                    Target   = Caster,
+                    TaxiNode = Parameters.TaxiNode
+                };
+                if (!PrerequisiteManager.Instance.Meets(target, Parameters.SpellInfo.TargetPersistencePrerequisite.Id, prerequisiteParameters))
                 {
                     Finish();
                     return;
