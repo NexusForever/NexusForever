@@ -1,7 +1,7 @@
-﻿using NexusForever.Game.Static.Spell;
+﻿using NexusForever.Game.Static.Entity;
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Spell
+namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ClientEntityInteract)]
     public class ClientEntityInteract : IReadable

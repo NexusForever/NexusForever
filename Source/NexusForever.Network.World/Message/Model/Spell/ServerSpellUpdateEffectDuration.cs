@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Message.Model.Spell
     {
         public uint ServerUniqueId { get; set; }
         public uint SpellEffectUniqueId { get; set; }
-        public uint TimeRemaining { get; set; }
+        public int TimeRemaining { get; set; }
         public uint TargetUnitId { get; set; }
 
         public void Write(GamePacketWriter writer)

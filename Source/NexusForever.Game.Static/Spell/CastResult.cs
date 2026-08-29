@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace NexusForever.Network.World.Message.Static
+namespace NexusForever.Game.Static.Spell
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum CastResult

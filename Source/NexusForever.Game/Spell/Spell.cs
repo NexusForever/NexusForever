@@ -10,7 +10,6 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Model.Spell;
-using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
@@ -416,7 +415,7 @@ namespace NexusForever.Game.Spell
                     if (targetEffectInfo.Entry.EffectType == SpellEffectType.Proxy)
                         continue;
 
-                    var networkTargetEffectInfo = new TargetInfo.EffectInfo
+                    var networkTargetEffectInfo = new EffectInfo
                     {
                         Spell4EffectId = targetEffectInfo.Entry.Id,
                         EffectUniqueId = targetEffectInfo.EffectId,
@@ -496,7 +495,7 @@ namespace NexusForever.Game.Spell
             if (!Parameters.SpellInfo.BaseInfo.HasIcon)
                 throw new InvalidOperationException();
 
-            Caster.EnqueueToVisible(new ServerSpellRemoveOneStackOfBuff
+            Caster.EnqueueToVisible(new ServerSpellBuffRemoveSingle
             {
                 ServerUniqueId = CastingId,
                 TargetUnitId  = unitId

@@ -1,4 +1,4 @@
-﻿namespace NexusForever.Game.Static.Spell
+﻿namespace NexusForever.Game.Static.Entity
 {
     public enum InteractionType
     {

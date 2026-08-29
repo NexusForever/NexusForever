@@ -2,8 +2,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Spell
 {
-    [Message(GameMessageOpcode.ServerSpellRemoveOneStackOfBuff)]
-    public class ServerSpellRemoveOneStackOfBuff : IWritable
+    [Message(GameMessageOpcode.ServerSpellBuffRemoveSingle)]
+    public class ServerSpellBuffRemoveSingle : IWritable
     {
         public uint ServerUniqueId { get; set; }
         public uint TargetUnitId { get; set; }

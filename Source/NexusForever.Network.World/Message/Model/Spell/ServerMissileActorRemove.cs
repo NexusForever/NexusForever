@@ -1,5 +1,4 @@
 ﻿using NexusForever.Network.Message;
-using System.Numerics;
 
 namespace NexusForever.Network.World.Message.Model.Spell
 {

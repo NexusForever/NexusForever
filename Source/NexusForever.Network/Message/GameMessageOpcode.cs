@@ -801,7 +801,7 @@ namespace NexusForever.Network.Message
         ServerSpellBuffsUpdate          = 0x0810,
         ServerSpellBuffRemove           = 0x0811,
         ServerSpellUpdateEffectDuration = 0x0812,
-        ServerSpellRemoveOneStackOfBuff = 0x0813,
+        ServerSpellBuffRemoveSingle     = 0x0813,
         ServerSpellThresholdClear       = 0x0814,
         ServerSpellThresholdCancel      = 0x0815,
         ServerSpellThresholdStart       = 0x0816,

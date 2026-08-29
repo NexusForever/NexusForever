@@ -8,8 +8,7 @@ namespace NexusForever.Network.World.Message.Model.Spell
         public uint UnitId { get; set; }
         public ushort Spell4VisualGroupId { get; set; }
         public uint Unknown { get; set; } // mostly 0, sometimes 1 TODO: research more
-        List<uint> SpellVisualEffectUniqueIds { get; set; } = [];
-
+        public List<uint> SpellVisualEffectUniqueIds { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

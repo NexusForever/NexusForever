@@ -1,6 +1,6 @@
 using NexusForever.Network.Message;
 
-namespace NexusForever.Network.World.Message.Model.Spell
+namespace NexusForever.Network.World.Message.Model.Abilities
 {
     [Message(GameMessageOpcode.ServerSpellAbilityCharges)]
     public class ServerSpellAbilityCharges : IWritable

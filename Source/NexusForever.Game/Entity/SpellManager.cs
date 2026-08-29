@@ -363,7 +363,7 @@ namespace NexusForever.Game.Entity
         public void SendInitialPackets()
         {
             SendServerAbilities();
-            SendServerSpellList();
+            SendServerAbilityList();
             SendServerAbilityPoints();
             SendServerActionSets();
             SendServerAmpLists();
@@ -397,7 +397,7 @@ namespace NexusForever.Game.Entity
             }
         }
 
-        private void SendServerSpellList()
+        private void SendServerAbilityList()
         {
             var serverAbilities = new ServerAbilities();
             foreach ((uint spell4BaseId, ICharacterSpell spell) in spells)

@@ -19,14 +19,13 @@ namespace NexusForever.Network.World.Message.Model.Spell
             }
         }
         public uint CastingId { get; set; }
-
-        public List<TargetSpellDodgeResult> targetDodgeResults { get; set; } = new();
+        public List<TargetSpellDodgeResult> TargetDodgeResults { get; set; } = new();
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CastingId);
-            writer.Write(targetDodgeResults.Count, 32u);
-            targetDodgeResults.ForEach(u => u.Write(writer));
+            writer.Write(TargetDodgeResults.Count, 32u);
+            TargetDodgeResults.ForEach(u => u.Write(writer));
         }
     }
 }
