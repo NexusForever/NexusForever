@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.Event;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Static.Matching;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Filter;

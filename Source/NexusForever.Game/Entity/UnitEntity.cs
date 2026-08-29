@@ -518,7 +518,7 @@ namespace NexusForever.Game.Entity
 
             InCombat   = ThreatManager.IsThreatened;
             Sheathed   = !inCombat;
-            StandState = inCombat ? StandState.Stand : StandState.State0;
+            SetStandState(inCombat ? StandState.Stand : StandState.State0);
         }
     }
 }

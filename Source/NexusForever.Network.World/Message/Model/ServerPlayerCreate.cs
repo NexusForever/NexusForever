@@ -83,7 +83,7 @@ namespace NexusForever.Network.World.Message.Model
         public ushort[] TradeskillMaterials { get; set; } = new ushort[512];
         public float GearScore { get; set; }
         public bool IsPvpServer { get; set; }
-        public uint Unknown4DC { get; set; }
+        public uint MatchingEligibilityFlagMask { get; set; } // Mask checked against matchingMapPreqrequisite.matchingEligibilityFlagEnum field. Tbl has no entries though.
         public List<CharacterEntitlement> CharacterEntitlements { set; get; } = new();
 
         public void Write(GamePacketWriter writer)
@@ -122,7 +122,7 @@ namespace NexusForever.Network.World.Message.Model
 
             writer.Write(GearScore);
             writer.Write(IsPvpServer);
-            writer.Write(Unknown4DC);
+            writer.Write(MatchingEligibilityFlagMask);
 
             writer.Write(CharacterEntitlements.Count);
             CharacterEntitlements.ForEach(u => u.Write(writer));

@@ -6,9 +6,9 @@ namespace NexusForever.Network.World.Message.Model.Shared
     public class CraftStats : IReadable, IWritable
     {
         public Property[] StatType { get; set; } = new Property[5];
-        public byte Unknown1 { get; set; }
+        public byte Unknown { get; set; }
         public byte ApSpSplit { get; set; } // Attack Power and Support Power split
-        public uint Unknown2 { get; set; }
+        public uint CircuitComplete { get; set; }
 
         public void Read(GamePacketReader reader)
         {
@@ -21,13 +21,13 @@ namespace NexusForever.Network.World.Message.Model.Shared
             }
 
             temp >>= 8;
-            Unknown1 = (byte)(temp & 0xFF);
+            Unknown = (byte)(temp & 0xFF);
 
             temp >>= 8;
             ApSpSplit = (byte)(temp & 0xFF);
 
             temp >>= 8;
-            Unknown2 = (uint)(temp & 0xFFFFFFFF);
+            CircuitComplete = (uint)(temp & 0xFFFFFFFF);
         }
 
         public void Write(GamePacketWriter writer)
@@ -40,13 +40,13 @@ namespace NexusForever.Network.World.Message.Model.Shared
                 temp <<= 8;
             }
 
-            temp |= (ulong)Unknown1;
+            temp |= (ulong)Unknown;
             temp <<= 8;
 
             temp |= (ulong)ApSpSplit;
             temp <<= 8;
 
-            temp |= (ulong)Unknown2;
+            temp |= (ulong)CircuitComplete;
             temp <<= 8;
 
             writer.Write(temp);

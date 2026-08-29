@@ -22,13 +22,13 @@ namespace NexusForever.Network.World.Message.Model
         }
 
         public uint TimeTillLogout { get; set; }
-        public bool Unknown0 { get; set; }
+        public bool CancelCamp { get; set; }
         public SignatureBonuses SignatureBonusData { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(TimeTillLogout);
-            writer.Write(Unknown0);
+            writer.Write(CancelCamp);
             SignatureBonusData.Write(writer);
         }
     }

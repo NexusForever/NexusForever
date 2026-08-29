@@ -1,5 +1,5 @@
 ﻿using NexusForever.Network.Message;
-using NetworkGuildStandard = NexusForever.Network.World.Message.Model.Shared.GuildStandard;
+using NetworkGuildStandard = NexusForever.Network.World.Message.Model.Guild.GuildStandard;
 
 namespace NexusForever.Game.Abstract.Guild
 {

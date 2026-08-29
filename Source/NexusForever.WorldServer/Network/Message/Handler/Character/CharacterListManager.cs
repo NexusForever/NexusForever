@@ -10,8 +10,11 @@ using NexusForever.Game.Abstract.Account.Reward;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Reward;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.AccountInventory;
+using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Shared.Game.Events;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Character
@@ -57,10 +60,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
 
             yield return new ServerAccountEntitlements
             {
-                Entitlements = session.Account.EntitlementManager
-                    .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
+                AccountEntitlements = session.Account.EntitlementManager
+                    .Select(e => new ServerAccountEntitlements.AccountEntitlement
                     {
-                        Entitlement = e.Type,
+                        EntitlementId = e.Type,
                         Count       = e.Amount
                     })
                     .ToList()
@@ -103,7 +106,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                 RealmId                        = realmContext.RealmId,
                 // no longer used as replaced by entitlements but retail server still used to send this
                 AdditionalCount                = (uint)characterList.Count,
-                AdditionalAllowedCharCreations = (uint)Math.Max(0, (int)characterSlots - characterList.Count),
+                MaxNumberCharacters = (uint)Math.Max(0, (int)characterSlots - characterList.Count),
                 // Free Level 50 needs(?) support. It appears to have just been a custom flag on the account that was consume when used up.
                 // FreeLevel50 = true
             };
@@ -143,7 +146,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                     if (costumeManager.CostumeIndex.HasValue)
                         costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
 
-                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+                    listCharacter.GearMask = costume?.VisibilityMask ?? 0xFFFFFFFF;
 
                     Dictionary<ItemSlot, IItemVisual> costumeVisuals =
                         costume?.GetItemVisuals().ToDictionary(c => c.Slot);

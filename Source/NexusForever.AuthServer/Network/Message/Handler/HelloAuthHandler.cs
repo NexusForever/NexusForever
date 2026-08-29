@@ -5,6 +5,7 @@ using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Server;
+using NexusForever.Game.Static.Pregame;
 using NexusForever.Network.Auth.Message.Model;
 using NexusForever.Network.Auth.Static;
 using NexusForever.Network.Message;
@@ -56,7 +57,7 @@ namespace NexusForever.AuthServer.Network.Message.Handler
             }
 
             string gameToken = Convert.ToHexString(helloAuth.GameToken.Guid.ToByteArray());
-            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(databaseManager.GetDatabase<AuthDatabase>().GetAccountByGameTokenAsync(helloAuth.Email, gameToken),
+            session.Events.EnqueueEvent(new TaskGenericEvent<AccountModel>(databaseManager.GetDatabase<AuthDatabase>().GetAccountByGameTokenAsync(helloAuth.AccountString, gameToken),
                 account =>
             {
                 if (account == null)
@@ -108,10 +109,10 @@ namespace NexusForever.AuthServer.Network.Message.Handler
                     {
                         AccountId  = account.Id,
                         SessionKey = sessionKey,
-                        Realm      = server.Model.Name,
+                        RealmName  = server.Model.Name,
                         Address    = server.Address,
                         Port       = server.Model.Port,
-                        Type       = server.Model.Type
+                        Type       = (RealmType)server.Model.Type
                     });
                 }));
             }));

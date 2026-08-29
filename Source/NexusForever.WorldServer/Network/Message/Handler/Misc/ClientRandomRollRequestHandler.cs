@@ -1,9 +1,10 @@
 ﻿using System;
+using NexusForever.Game;
 using NexusForever.Game.Abstract;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Utility;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Misc
 {
@@ -31,14 +32,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Misc
 
             session.EnqueueMessageEncrypted(new ServerRandomRollResponse
             {
-                TargetPlayerIdentity = new TargetPlayerIdentity
-                {
-                    RealmId     = realmContext.RealmId,
-                    CharacterId = session.Player.CharacterId
-                },
-                MinRandom        = randomRoll.MinRandom,
-                MaxRandom        = randomRoll.MaxRandom,
-                RandomRollResult = Random.Shared.Next((int)randomRoll.MinRandom, (int)randomRoll.MaxRandom)
+                RollerIdentity       = session.Player.Identity.ToNetworkIdentity(),
+                MinRandom            = randomRoll.MinRandom,
+                MaxRandom            = randomRoll.MaxRandom,
+                RandomRollResult     = Random.Shared.Next((int)randomRoll.MinRandom, (int)randomRoll.MaxRandom)
             });
         }
     }

@@ -1,3 +1,5 @@
+using NexusForever.GameTable.Static;
+
 namespace NexusForever.GameTable.Model
 {
     public class ChatChannelEntry
@@ -11,6 +13,6 @@ namespace NexusForever.GameTable.Model
         public uint LocalizedTextIdAbbreviation;
         public uint LocalizedTextIdAlternate00;
         public uint LocalizedTextIdAlternate01;
-        public uint Flags;
+        public ChatChannelEntryFlags Flags;
     }
 }

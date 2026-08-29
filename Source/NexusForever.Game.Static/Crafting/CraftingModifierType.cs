@@ -2,23 +2,23 @@
 {
     public enum CraftingModifierType
     {
-        MismatchPenalty             = 0x1,//additive
-        UnbuffedFailCapBase         = 0x2,//additive
-        Charge                      = 0x3,//additive
-        MaterialCost                = 0x6,//additive
-        Material2Id                 = 0x7,//fixed
-        UnbuffedFailCap             = 0x8,//additive
-        ChargeIncrement_RightShift  = 0x9,//additive
-        OutputCount                 = 0xA,//multiplier
-        AdditiveCost                = 0xE,//multiplier
-        AdditiveVector              = 0xF,//multiplier
-        AdditiveRadius              = 0x10,//multiplier
-        SchematicDiscoveryRadius1   = 0x11,//multiplier
-        SchematicDiscoveryRadius2   = 0x14,//multiplier
-        ApSpSplitMaxDelta_LeftShift = 0x15,//additive
-        Cost                        = 0x16,//multiplier
-        CraftIsCritical             = 0x19,//bool
-        AdditiveLimit               = 0x1A,//additive
-        AdditiveTier                = 0x1B,//additive        
+        MismatchPenalty             = 1,  //additive
+        UnbuffedFailCapBase         = 2,  //additive
+        Charge                      = 3,  //additive
+        MaterialCost                = 6,  //additive
+        Material2Id                 = 7,  //fixed
+        UnbuffedFailCap             = 8,  //additive
+        ChargeIncrement_RightShift  = 9,  //additive
+        OutputCount                 = 10, //multiplier
+        AdditiveCost                = 14, //multiplier
+        AdditiveVector              = 15, //multiplier
+        AdditiveRadius              = 16, //multiplier
+        SchematicDiscoveryRadius1   = 17, //multiplier
+        SchematicDiscoveryRadius2   = 20, //multiplier
+        ApSpSplitMaxDelta_LeftShift = 21, //additive
+        Cost                        = 22, //multiplier
+        CraftIsCritical             = 23, //bool
+        AdditiveLimit               = 26, //additive
+        AdditiveTier                = 27, //additive        
     }
 }

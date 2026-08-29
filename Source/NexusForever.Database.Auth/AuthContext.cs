@@ -29,6 +29,11 @@ namespace NexusForever.Database.Auth
             this.config = config;
         }
 
+        public AuthContext(DbContextOptions<AuthContext> options)
+            : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

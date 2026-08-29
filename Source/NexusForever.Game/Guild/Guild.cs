@@ -1,16 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.Social;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.Internal;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.Game.Guild
 {
-    public partial class Guild : GuildChat, IGuild
+    public partial class Guild : GuildBase, IGuild
     {
         /// <summary>
         /// Determines which fields need saving for <see cref="IGuild"/> when being saved to the database.
@@ -23,10 +24,11 @@ namespace NexusForever.Game.Guild
             AdditionalInfo  = 0x0002
         }
 
+        public override GuildType Type => GuildType.Guild;
         public override uint MaxMembers => 40u;
 
-        public IGuildStandard Standard { get; }
-        public IGuildAchievementManager AchievementManager { get; }
+        public IGuildStandard Standard { get; set; }
+        public IGuildAchievementManager AchievementManager { get; private set; }
 
         public string MessageOfTheDay
         {
@@ -52,32 +54,41 @@ namespace NexusForever.Game.Guild
 
         private GuildSaveMask saveMask;
 
+        #region Dependency Injection
+
+        public Guild(
+            IRealmContext realmContext,
+            IInternalMessagePublisher messagePublisher)
+            : base(realmContext, messagePublisher)
+        {
+        }
+
+        #endregion
+
         /// <summary>
         /// Create a new <see cref="IGuild"/> from an existing database model.
         /// </summary>
-        public Guild(GuildModel model) 
-            : base(model)
+        public override void Initialise(GuildModel model)
         {
             Standard           = new GuildStandard(model.GuildData);
             AchievementManager = new GuildAchievementManager(this, model);
             messageOfTheDay    = model.GuildData.MessageOfTheDay;
             additionalInfo     = model.GuildData.AdditionalInfo;
 
-            InitialiseChatChannels(ChatChannelType.Guild, ChatChannelType.GuildOfficer);
+            base.Initialise(model);
         }
 
         /// <summary>
         /// Create a new <see cref="IGuild"/> using the supplied parameters.
         /// </summary>
-        public Guild(string name, string leaderRankName, string councilRankName, string memberRankName, IGuildStandard standard)
-            : base(GuildType.Guild, name, leaderRankName, councilRankName, memberRankName)
+        public void Initialise(string name, string leaderRankName, string councilRankName, string memberRankName, IGuildStandard standard)
         {
             Standard           = standard;
             AchievementManager = new GuildAchievementManager(this);
             messageOfTheDay    = "";
             additionalInfo     = "";
 
-            InitialiseChatChannels(ChatChannelType.Guild, ChatChannelType.GuildOfficer);
+            Initialise(name, leaderRankName, councilRankName, memberRankName);
         }
 
         protected override void Save(CharacterContext context, GuildBaseSaveMask baseSaveMask)

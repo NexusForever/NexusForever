@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
@@ -8,6 +9,8 @@ using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Matching;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.Internal;
+using NexusForever.Network.Internal.Message.Match;
 using NexusForever.Network.Message;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
@@ -23,7 +26,7 @@ namespace NexusForever.Game.Matching.Match
         protected IContentMapInstance map;
 
         private readonly List<IMatchTeam> teams = [];
-        private readonly Dictionary<ulong, IMatchTeam> characterTeams = [];
+        private readonly Dictionary<Identity, IMatchTeam> characterTeams = [];
 
         private UpdateTimer closeTimer;
 
@@ -36,6 +39,7 @@ namespace NexusForever.Game.Matching.Match
         private readonly IFactory<IMatchTeam> matchTeamFactory;
         private readonly IGameTableManager gameTableManager;
         private readonly IPlayerManager playerManager;
+        private readonly IInternalMessagePublisher messagePublisher;
 
         public Match(
             ILogger<Match> log,
@@ -43,7 +47,8 @@ namespace NexusForever.Game.Matching.Match
             IMatchingDataManager matchingDataManager,
             IFactory<IMatchTeam> matchTeamFactory,
             IGameTableManager gameTableManager,
-            IPlayerManager playerManager)
+            IPlayerManager playerManager,
+            IInternalMessagePublisher messagePublisher)
         {
             this.log                 = log;
 
@@ -52,6 +57,7 @@ namespace NexusForever.Game.Matching.Match
             this.matchTeamFactory    = matchTeamFactory;
             this.gameTableManager    = gameTableManager;
             this.playerManager       = playerManager;
+            this.messagePublisher    = messagePublisher;
         }
 
         #endregion
@@ -68,6 +74,11 @@ namespace NexusForever.Game.Matching.Match
             MatchingMap = matchProposal.MatchingMapSelectorResult.MatchingMap;
 
             InitialiseTeams(matchProposal);
+
+            messagePublisher.PublishAsync(new MatchCreatedMessage
+            {
+                Match = this.ToInternalMatch()
+            }).FireAndForgetAsync();
         }
 
         protected virtual void InitialiseTeams(IMatchProposal matchProposal)
@@ -88,16 +99,16 @@ namespace NexusForever.Game.Matching.Match
             teams.Add(matchTeam);
 
             foreach (IMatchingQueueProposalMember matchingQueueProposalMember in matchingQueueGroupTeam.GetMembers())
-                MatchJoin(matchTeam, matchingQueueProposalMember.CharacterId);
+                MatchJoin(matchTeam, matchingQueueProposalMember.Identity, matchingQueueProposalMember.Roles);
         }
 
-        private void MatchJoin(IMatchTeam matchTeam, ulong characterId)
+        private void MatchJoin(IMatchTeam matchTeam, Identity identity, Role roles)
         {
-            matchTeam.MatchJoin(characterId);
-            characterTeams.Add(characterId, matchTeam);
-            matchManager.GetMatchCharacter(characterId).AddMatch(this);
+            matchTeam.MatchJoin(identity, roles);
+            characterTeams.Add(identity, matchTeam);
+            matchManager.GetMatchCharacter(identity).AddMatch(this);
 
-            log.LogTrace($"Added member {characterId} to match {Guid}.");
+            log.LogTrace($"Added member {identity} to match {Guid}.");
         }
 
         /// <summary>
@@ -123,7 +134,7 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public void OnLogin(IPlayer player)
         {
-            IMatchTeam matchTeam = GetTeam(player.CharacterId);
+            IMatchTeam matchTeam = GetTeam(player.Identity);
             matchTeam.OnLogin(player);
         }
 
@@ -146,19 +157,24 @@ namespace NexusForever.Game.Matching.Match
             log.LogTrace($"Cleaning up match {Guid}...");
             Status = MatchStatus.Cleanup;
 
+            messagePublisher.PublishAsync(new MatchRemovedMessage
+            {
+                Match = this.ToInternalMatch()
+            }).FireAndForgetAsync();
+
             foreach (IMatchTeam matchTeam in GetTeams())
             {
                 foreach (IMatchTeamMember matchTeamMember in matchTeam.GetMembers())
                 {
-                    log.LogTrace($"Removing member {matchTeamMember.CharacterId} from match {Guid} due to cleanup.");
+                    log.LogTrace($"Removing member {matchTeamMember.Identity} from match {Guid} due to cleanup.");
 
                     // it is possible for the player to be offline during cleanup
                     // in this case we just need to remove them from the match, no need to teleport or exit
-                    IPlayer player = playerManager.GetPlayer(matchTeamMember.CharacterId);
+                    IPlayer player = playerManager.GetPlayer(matchTeamMember.Identity);
                     if (player != null)
                         MatchExit(player, true);
 
-                    MatchLeave(matchTeamMember.CharacterId);
+                    MatchLeave(matchTeamMember.Identity);
                 }
             }
 
@@ -172,9 +188,9 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Return <see cref="IMatchTeam"/> for supplied character.
         /// </summary>
-        public IMatchTeam GetTeam(ulong characterId)
+        public IMatchTeam GetTeam(Identity identity)
         {
-            return characterTeams.TryGetValue(characterId, out IMatchTeam team) ? team : null;
+            return characterTeams.TryGetValue(identity, out IMatchTeam team) ? team : null;
         }
 
         /// <summary>
@@ -190,14 +206,14 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public virtual void MatchEnter(IPlayer player)
         {
-            IMatchTeam team = GetTeam(player.CharacterId);
+            IMatchTeam team = GetTeam(player.Identity);
             if (team == null)
                 throw new InvalidOperationException();
 
-            team.MatchEnter(player.CharacterId, MatchingMap);
+            team.MatchEnter(player.Identity, MatchingMap);
             player.SetTemporaryFaction(team.Faction);
 
-            log.LogTrace($"Member {player.CharacterId} has entered match {Guid}.");
+            log.LogTrace($"Member {player.Identity} has entered match {Guid}.");
         }
 
         /// <summary>
@@ -205,18 +221,18 @@ namespace NexusForever.Game.Matching.Match
         /// </summary>
         public void MatchExit(IPlayer player, bool teleport)
         {
-            IMatchTeam team = GetTeam(player.CharacterId);
+            IMatchTeam team = GetTeam(player.Identity);
             if (team == null)
                 return;
 
-            team.MatchExit(player.CharacterId, teleport);
+            team.MatchExit(player.Identity, teleport);
             player.RemoveTemporaryFaction();
 
-            log.LogTrace($"Member {player.CharacterId} has exited match {Guid}.");
+            log.LogTrace($"Member {player.Identity} has exited match {Guid}.");
 
             // certain match types prevent re-entry after exiting
             if (ShouldLeaveMatchOnExit())
-                MatchLeave(player.CharacterId);
+                MatchLeave(player.Identity);
         }
 
         private bool ShouldLeaveMatchOnExit()
@@ -228,18 +244,18 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Remove character from match.
         /// </summary>
-        public void MatchLeave(ulong characterId)
+        public void MatchLeave(Identity identity)
         {
-            IMatchTeam team = GetTeam(characterId);
+            IMatchTeam team = GetTeam(identity);
             if (team == null)
                 return;
 
-            team.MatchLeave(characterId);
-            characterTeams.Remove(characterId);
+            team.MatchLeave(identity);
+            characterTeams.Remove(identity);
 
-            matchManager.GetMatchCharacter(characterId).RemoveMatch();
+            matchManager.GetMatchCharacter(identity).RemoveMatch();
 
-            log.LogTrace($"Member {characterId} has left match {Guid}.");
+            log.LogTrace($"Member {identity} has left match {Guid}.");
 
             // if all members have left the match, we can cleanup early
             if (CanCleanupEarly())
@@ -275,13 +291,13 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Teleport supplied character to the match.
         /// </summary>
-        public void MatchTeleport(ulong characterId)
+        public void MatchTeleport(Identity identity)
         {
-            IMatchTeam team = GetTeam(characterId);
+            IMatchTeam team = GetTeam(identity);
             if (team == null)
                 throw new InvalidOperationException();
 
-            team.MatchTeleport(characterId);
+            team.MatchTeleport(identity);
         }
 
         /// <summary>
@@ -292,8 +308,8 @@ namespace NexusForever.Game.Matching.Match
         /// </remarks>
         public IMapPosition GetReturnPosition(IPlayer player)
         {
-            IMatchTeam team = GetTeam(player.CharacterId);
-            return team.GetReturnPosition(player.CharacterId);
+            IMatchTeam team = GetTeam(player.Identity);
+            return team.GetReturnPosition(player.Identity);
         }
 
         protected void Broadcast(IWritable message)

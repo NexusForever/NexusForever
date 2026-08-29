@@ -1,7 +1,13 @@
 {
+    "Urls": "http://0.0.0.0:5000",
     "Network": {
         "Host": "0.0.0.0",
-        "Port": 24000
+        "Port": 24000,
+        "Internal": {
+            "Broker": "RabbitMQ",
+            "ConnectionString": "amqp://nexusforever:nexusforever@localhost:5672",
+            "InputQueue": "WorldServer_1"
+        }
     },
     "Database": {
         "Auth": {
@@ -39,7 +45,7 @@
             ],
             "SynchronousUpdate": false,
             "GridActionThreshold": 100,
-            "GridActionMaxRetry": 5, 
+            "GridActionMaxRetry": 5,
             "GridUnloadTimer": 3600,
             "MaxInstances": 10
         },

@@ -1,4 +1,5 @@
-﻿using NexusForever.Network.Message;
+﻿using NexusForever.Game.Static.Pregame;
+using NexusForever.Network.Message;
 
 namespace NexusForever.Network.Auth.Message.Model
 {
@@ -9,9 +10,9 @@ namespace NexusForever.Network.Auth.Message.Model
         public ushort Port { get; set; }
         public byte[] SessionKey { get; set; }
         public uint AccountId { get; set; }
-        public string Realm { get; set; }
-        public uint Flags { get; set; }
-        public byte Type { get; set; }
+        public string RealmName { get; set; }
+        public RealmFlag Flags { get; set; }
+        public RealmType Type { get; set; }
         public uint NoteTextId { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -20,8 +21,8 @@ namespace NexusForever.Network.Auth.Message.Model
             writer.Write(Port);
             writer.WriteBytes(SessionKey, 16u);
             writer.Write(AccountId);
-            writer.WriteStringWide(Realm);
-            writer.Write(Flags);
+            writer.WriteStringWide(RealmName);
+            writer.Write(Flags, 32u);
             writer.Write(Type, 2);
             writer.Write(NoteTextId, 21u);
         }

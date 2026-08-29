@@ -4,11 +4,11 @@ using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
-using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map;
@@ -17,39 +17,46 @@ using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Abstract.Reputation;
-using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
+using NexusForever.Game.Chat;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Reputation;
-using NexusForever.Game.Social;
 using NexusForever.Game.Static;
+using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
+using NexusForever.Game.Static.Option;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Game.Static.Setting;
-using NexusForever.Game.Static.Social;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.Network.Internal;
+using NexusForever.Network.Internal.Message.Player;
 using NexusForever.Network.Session;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
+using NexusForever.Network.World.Message.Model.Chat;
+using NexusForever.Network.World.Message.Model.Info;
+using NexusForever.Network.World.Message.Model.Pregame;
+using NexusForever.Network.World.Message.Model.Housing;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
 using NexusForever.Script.Template;
+using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NexusForever.Shared.Game.Events;
 using NLog;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Game.Entity
 {
@@ -81,7 +88,10 @@ namespace NexusForever.Game.Entity
 
         public IAccount Account { get; private set; }
 
-        public ulong CharacterId { get; private set; }
+        public Abstract.Identity Identity { get; private set; }
+
+        public ulong CharacterId { get => Identity.Id; }
+
         public string Name { get; private set; }
 
         public Sex Sex
@@ -188,6 +198,11 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public uint? VanityPetGuid { get; set; }
 
+        /// <summary>
+        /// Id of the primary group that <see cref="IPlayer"/> is associated with.
+        /// </summary>
+        public ulong GroupAssociation { get; set; }
+
         public bool IsSitting => currentChairGuid != null;
         private uint? currentChairGuid;
 
@@ -197,6 +212,8 @@ namespace NexusForever.Game.Entity
         public bool SignatureEnabled => Account.RbacManager.HasPermission(Permission.Signature);
 
         public IGameSession Session { get; private set; }
+
+        public bool IsOnline { get; private set; }
 
         /// <summary>
         /// Returns if <see cref="IPlayer"/>'s client is currently in a loading screen.
@@ -219,9 +236,8 @@ namespace NexusForever.Game.Entity
         public ISupplySatchelManager SupplySatchelManager { get; private set; }
         public IXpManager XpManager { get; private set; }
         public IReputationManager ReputationManager { get; private set; }
-        public IGuildManager GuildManager { get; private set; }
-        public IChatManager ChatManager { get; private set; }
-        public IResidenceManager ResidenceManager { get; private set; }
+        public IGuildManager GuildManager { get; }
+        public IResidenceManager ResidenceManager { get; }
         public ICinematicManager CinematicManager { get; private set; }
         public ICharacterEntitlementManager EntitlementManager { get; private set; }
         public ILogoutManager LogoutManager { get; private set; }
@@ -230,31 +246,41 @@ namespace NexusForever.Game.Entity
 
         public IVendorInfo SelectedVendorInfo { get; set; } // TODO unset this when too far away from vendor
 
+        private bool forceSave;
         private UpdateTimer saveTimer = new(SaveDuration);
         private PlayerSaveMask saveMask;
 
         private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> itemProperties = new();
 
+        private UpdateTimer relocationTimer = new(TimeSpan.FromSeconds(1));
+
         #region Dependency Injection
 
+        private readonly IInternalMessagePublisher messagePublisher;
         private readonly IEntityFactory entityFactory;
         private readonly IMatchingManager matchingManager;
         private readonly IMatchManager matchManager;
 
         public Player(
             IMovementManager movementManager,
+            IInternalMessagePublisher messagePublisher,
             IEntityFactory entityFactory,
             IMatchingManager matchingManager,
             IMatchManager matchManager,
-            ICurrencyManager currencyManager)
+            ICurrencyManager currencyManager,
+            IGuildManager guildManager,
+            IResidenceManager residenceManager)
             : base(movementManager)
         {
-            this.entityFactory   = entityFactory;
-            this.matchingManager = matchingManager;
-            this.matchManager    = matchManager;
+            this.messagePublisher = messagePublisher;
+            this.entityFactory    = entityFactory;
+            this.matchingManager  = matchingManager;
+            this.matchManager     = matchManager;
 
             // managers
-            CurrencyManager = currencyManager;
+            CurrencyManager  = currencyManager;
+            GuildManager     = guildManager;
+            ResidenceManager = residenceManager;
         }
 
         #endregion
@@ -269,7 +295,7 @@ namespace NexusForever.Game.Entity
             Session           = session;
 
             Account           = account;
-            CharacterId       = model.Id;
+            Identity          = new Abstract.Identity { Id = model.Id, RealmId = RealmContext.Instance.RealmId };
             Name              = model.Name;
             sex               = (Sex)model.Sex;
             race              = (Race)model.Race;
@@ -287,8 +313,12 @@ namespace NexusForever.Game.Entity
             TimePlayedLevel   = model.TimePlayedLevel;
 
             foreach (CharacterStatModel statModel in model.Stat)
-                stats.Add((Stat)statModel.Stat, new StatValue(statModel));
+            {
+                var statValue = new StatValue(statModel);
+                stats.Add((Stat)statModel.Stat, statValue);
+            }
 
+            //SetStat(Stat.Health, 1);
             SetStat(Stat.Sheathed, 1u);
             // temp
             SetStat(Stat.Dash, 200F);
@@ -320,9 +350,8 @@ namespace NexusForever.Game.Entity
             SupplySatchelManager    = new SupplySatchelManager(this, model);
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
-            GuildManager            = new GuildManager(this, model);
-            ChatManager             = new ChatManager(this);
-            ResidenceManager        = new ResidenceManager(this);
+            GuildManager.Initialise(this, model);
+            ResidenceManager.Initialise(this);
             CinematicManager        = new CinematicManager(this);
 
             LogoutManager           = new LogoutManager(this);
@@ -363,9 +392,28 @@ namespace NexusForever.Game.Entity
             CostumeManager.Update(lastTick);
             QuestManager.Update(lastTick);
 
-            saveTimer.Update(lastTick);
-            if (saveTimer.HasElapsed)
+            relocationTimer.Update(lastTick);
+            if (relocationTimer.HasElapsed)
             {
+                messagePublisher.PublishAsync(new PlayerPositionUpdatedMessage
+                {
+                    Identity = Identity.ToInternalIdentity(),
+                    Position = new Network.Internal.Message.Shared.Position
+                    {
+                        X = Position.X,
+                        Y = Position.Y,
+                        Z = Position.Z
+                    }
+                }).FireAndForgetAsync();
+
+                relocationTimer.Reset(false);
+            }
+
+            saveTimer.Update(lastTick);
+            if (saveTimer.HasElapsed || forceSave)
+            {
+                forceSave = false;
+
                 double timeSinceLastSave = GetTimeSinceLastSave();
                 TimePlayedSession += timeSinceLastSave;
                 TimePlayedLevel += timeSinceLastSave;
@@ -413,7 +461,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         /// <remarks>
         /// This is an instant save, <see cref="AuthContext"/> changes are saved first followed by <see cref="CharacterContext"/> changes.
-        /// This will block the calling thread until the database save is complete. 
+        /// This will block the calling thread until the database save is complete.
         /// </remarks>
         public async void SaveDirect()
         {
@@ -515,8 +563,15 @@ namespace NexusForever.Game.Entity
             entity.Property(p => p.TimePlayedLevel).IsModified = true;
             model.TimePlayedTotal = (uint)TimePlayedTotal;
             entity.Property(p => p.TimePlayedTotal).IsModified = true;
-            model.LastOnline = DateTime.UtcNow;
-            entity.Property(p => p.LastOnline).IsModified = true;
+
+            model.IsOnline = IsOnline;
+            entity.Property(p => p.IsOnline).IsModified = true;
+
+            if (!IsOnline)
+            {
+                model.LastOnline = DateTime.UtcNow;
+                entity.Property(p => p.LastOnline).IsModified = true;
+            }
 
             foreach (IStatValue stat in stats.Values)
                 stat.SaveCharacter(CharacterId, context);
@@ -561,7 +616,10 @@ namespace NexusForever.Game.Entity
                     .ToList(),
                 GuildName = GuildManager.GuildAffiliation?.Name,
                 GuildType = GuildManager.GuildAffiliation?.Type ?? GuildType.None,
-                PvPFlag   = PvPFlag.Disabled
+                PvPFlag   = PvPFlag.Disabled,
+
+                // We use Group 1 as the "dominant group"
+                GroupId   = GroupAssociation
             };
         }
 
@@ -604,6 +662,12 @@ namespace NexusForever.Game.Entity
 
             if (PreviousMap == null)
                 OnLogin();
+
+            messagePublisher.PublishAsync(new PlayerWorldUpdatedMessage
+            {
+                Identity    = Identity.ToInternalIdentity(),
+                WorldId     = Map.Entry.Id
+            }).FireAndForgetAsync();
         }
 
         public override void OnRelocate(Vector3 vector)
@@ -612,6 +676,9 @@ namespace NexusForever.Game.Entity
             saveMask |= PlayerSaveMask.Location;
 
             ZoneMapManager.OnRelocate(vector);
+
+            if (!relocationTimer.IsTicking)
+                relocationTimer.Resume();
         }
 
         protected override void OnZoneUpdate()
@@ -637,6 +704,12 @@ namespace NexusForever.Game.Entity
             }
 
             ZoneMapManager.OnZoneUpdate();
+
+            messagePublisher.PublishAsync(new PlayerWorldZoneUpdatedMessage
+            {
+                Identity    = Identity.ToInternalIdentity(),
+                WorldZoneId = (ushort)Zone?.Id,
+            }).FireAndForgetAsync();
         }
 
         private void SendPacketsAfterAddToMap()
@@ -648,7 +721,7 @@ namespace NexusForever.Game.Entity
             BuybackManager.Instance.SendBuybackItems(this);
 
             ResidenceManager.SendHousingBasics();
-            Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
+            Session.EnqueueMessageEncrypted(new ServerHousingNeighbours());
             Session.EnqueueMessageEncrypted(new ServerInstanceSettings() { ClientEntitySendUpdateInterval = 125 });
 
             SetControl(this);
@@ -713,9 +786,15 @@ namespace NexusForever.Game.Entity
             Account.RewardPropertyManager.SendInitialPackets();
             ResurrectionManager.SendInitialPackets();
 
-            Session.EnqueueMessageEncrypted(new ServerPlayerInnate
+            Session.EnqueueMessageEncrypted(new ServerStanceChanged
             {
                 InnateIndex = InnateIndex
+            });
+
+            Session.EnqueueMessageEncrypted(new ServerPhaseVisibilityWorldLocation
+            {
+                PhasesIPerceive = 1,
+                PhasesThatPerceiveMe = 1
             });
 
             log.Trace($"Player {Name} took {(DateTime.UtcNow - start).TotalMilliseconds}ms to send packets after add to map.");
@@ -849,6 +928,11 @@ namespace NexusForever.Game.Entity
                         if (Map != null)
                             RemoveFromMap();
 
+                        messagePublisher.PublishAsync(new PlayerLoggedOutMessage
+                        {
+                            Identity = Identity.ToInternalIdentity()
+                        }).FireAndForgetAsync();
+
                         Dispose();
                     });
                 }
@@ -876,23 +960,30 @@ namespace NexusForever.Game.Entity
                 GlobalChatManager.Instance.SendMessage(Session, motd, "MOTD", ChatChannelType.Realm);
 
             GuildManager.OnLogin();
-            ChatManager.OnLogin();
-            GlobalChatManager.Instance.JoinDefaultChatChannels(this);
 
             ShutdownManager.Instance.OnLogin(this);
 
             matchingManager.OnLogin(this);
             matchManager.OnLogin(this);
+
+            IsOnline = true;
+            forceSave = true;
+
+            messagePublisher.PublishAsync(new PlayerLoggedInMessage
+            {
+                Identity  = Identity.ToInternalIdentity(),
+                AccountId = Account.Id
+            }).FireAndForgetAsync();
         }
 
         private void OnLogout()
         {
             GuildManager.OnLogout();
-            ChatManager.OnLogout();
-            GlobalChatManager.Instance.LeaveDefaultChatChannels(this);
 
             matchingManager.OnLogout(this);
             matchManager.OnLogout(this);
+
+            IsOnline = false;
 
             scriptCollection.Invoke<IPlayerScript>(s => s.OnLogout());
         }
@@ -1042,7 +1133,7 @@ namespace NexusForever.Game.Entity
             currentChairGuid = chair.Guid;
 
             // TODO: Emit interactive state from the entity instance itself
-            chair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            chair.EnqueueToVisible(new ServerUnitInUse
             {
                 UnitId = chair.Guid,
                 InUse  = true
@@ -1068,7 +1159,7 @@ namespace NexusForever.Game.Entity
                 throw new InvalidOperationException();
 
             // TODO: Emit interactive state from the entity instance itself
-            currentChair.EnqueueToVisible(new ServerEntityInteractiveUpdate
+            currentChair.EnqueueToVisible(new ServerUnitInUse
             {
                 UnitId = currentChair.Guid,
                 InUse  = false
@@ -1104,7 +1195,12 @@ namespace NexusForever.Game.Entity
             {
                 Channel = new Channel
                 {
-                    Type = ChatChannelType.System
+                    ChatChannelId = ChatChannelType.System
+                },
+                From = new Network.World.Message.Model.Shared.Identity
+                {
+                    Id = 0,
+                    RealmId = 0,
                 },
                 Text = text
             });
@@ -1308,6 +1404,32 @@ namespace NexusForever.Game.Entity
             if (itemProperties.TryGetValue(propertyValue.Property, out Dictionary<ItemSlot, float> properties))
                 foreach (float values in properties.Values)
                     propertyValue.Value += values;
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IPlayer"/> has a <see cref="Property"/> updated.
+        /// </summary>
+        protected override void OnPropertyUpdate(IPropertyValue propertyValue)
+        {
+            messagePublisher.PublishAsync(new PlayerPropertyUpdatedMessage
+            {
+                Identity = Identity.ToInternalIdentity(),
+                Property = propertyValue.Property,
+                Value    = propertyValue.Value
+            }).FireAndForgetAsync();
+        }
+
+        /// <summary>
+        /// Invoked when <see cref="IWorldEntity"/> has a <see cref="Stat"/> updated.
+        /// </summary>
+        protected override void OnStatUpdate(IStatValue statValue)
+        {
+            messagePublisher.PublishAsync(new PlayerStatUpdatedMessage
+            {
+                Identity = Identity.ToInternalIdentity(),
+                Stat     = statValue.Stat,
+                Value    = statValue.Value
+            }).FireAndForgetAsync();
         }
 
         /// <summary>

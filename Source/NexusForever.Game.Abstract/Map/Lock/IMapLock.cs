@@ -16,11 +16,11 @@ namespace NexusForever.Game.Abstract.Map.Lock
         /// <summary>
         /// Add a character to the map lock.
         /// </summary>
-        void AddCharacer(ulong characterId);
+        void AddCharacer(Identity identity);
 
         /// <summary>
         /// Remove a character from the map lock.
         /// </summary>
-        void RemoveCharacter(ulong characterId);
+        void RemoveCharacter(Identity identity);
     }
 }

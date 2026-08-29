@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Abstract.Map.Instance;
-using NexusForever.Game.Abstract.Text.Filter;
-using NexusForever.Game.Static.TextFilter;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.GameTable.Text.Filter;
+using NexusForever.GameTable.Text.Static;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
@@ -30,7 +31,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                 || !textFilterManager.IsTextValid(housingRenameProperty.Name, UserText.HousingResidenceName))
                 throw new InvalidPacketValueException();
 
-            residenceMap.RenameResidence(session.Player, housingRenameProperty.TargetResidence, housingRenameProperty.Name);
+            residenceMap.RenameResidence(session.Player, housingRenameProperty.TargetResidence.ToGameIdentity(), housingRenameProperty.Name);
         }
     }
 }

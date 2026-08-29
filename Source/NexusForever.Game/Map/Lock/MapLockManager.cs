@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Matching.Match;
@@ -10,9 +11,9 @@ namespace NexusForever.Game.Map.Lock
     // legacy singleton still required for guild operations which don't use dependency injection yet...
     public class MapLockManager : Singleton<IMapLockManager>, IMapLockManager
     {
-        private readonly ConcurrentDictionary<ulong, IMapLockCollection> soloLocks = [];
+        private readonly ConcurrentDictionary<Identity, IMapLockCollection> soloLocks = [];
         private readonly ConcurrentDictionary<Guid, IMapLockCollection> matchLocks = [];
-        private readonly ConcurrentDictionary<ulong, IResidenceMapLock> residenceLocks = [];
+        private readonly ConcurrentDictionary<Identity, IResidenceMapLock> residenceLocks = [];
 
         #region Dependency Injection
 
@@ -37,15 +38,15 @@ namespace NexusForever.Game.Map.Lock
         /// <summary>
         /// Create a new solo <see cref="IMapLock"/> for supplied character id and world id.
         /// </summary>
-        public IMapLock CreateSoloLock(ulong characterId, uint worldId)
+        public IMapLock CreateSoloLock(Identity identity, uint worldId)
         {
             IMapLock mapLock = CreateLock<IMapLock>(MapLockType.Solo, worldId);
-            mapLock.AddCharacer(characterId);
+            mapLock.AddCharacer(identity);
 
-            if (!soloLocks.TryGetValue(characterId, out IMapLockCollection mapLockCollection))
+            if (!soloLocks.TryGetValue(identity, out IMapLockCollection mapLockCollection))
             {
                 mapLockCollection = mapLockCollectionFactory.Resolve();
-                soloLocks[characterId] = mapLockCollection;
+                soloLocks[identity] = mapLockCollection;
             }
 
             mapLockCollection.AddMapLock(mapLock);
@@ -61,7 +62,7 @@ namespace NexusForever.Game.Map.Lock
 
             foreach (IMatchTeam matchTeam in match.GetTeams())
                 foreach (IMatchTeamMember matchTeamMember in matchTeam.GetMembers())
-                    mapLock.AddCharacer(matchTeamMember.CharacterId);
+                    mapLock.AddCharacer(matchTeamMember.Identity);
 
             if (!matchLocks.TryGetValue(match.Guid, out IMapLockCollection mapLockCollection))
             {
@@ -83,9 +84,9 @@ namespace NexusForever.Game.Map.Lock
         /// <summary>
         /// Return <see cref="IMapLock"/> for supplied character id and world id.
         /// </summary>
-        public IMapLock GetSoloLock(ulong characterId, uint worldId)
+        public IMapLock GetSoloLock(Identity identity, uint worldId)
         {
-            return soloLocks.TryGetValue(characterId, out IMapLockCollection mapLockCollection)
+            return soloLocks.TryGetValue(identity, out IMapLockCollection mapLockCollection)
                 ? mapLockCollection.GetMapLock<IMapLock>(worldId)
                 : null;
         }
@@ -105,12 +106,12 @@ namespace NexusForever.Game.Map.Lock
         /// </summary>
         public IResidenceMapLock GetResidenceLock(IResidence residence)
         {
-            if (residenceLocks.TryGetValue(residence.Id, out IResidenceMapLock mapLock))
+            if (residenceLocks.TryGetValue(residence.Identity, out IResidenceMapLock mapLock))
                 return mapLock;
 
             mapLock = CreateLock<IResidenceMapLock>(MapLockType.Residence, 0u);
-            mapLock.Initialise(residence.Id);
-            residenceLocks[residence.Id] = mapLock;
+            mapLock.Initialise(residence.Identity);
+            residenceLocks[residence.Identity] = mapLock;
             return mapLock;
         }
     }

@@ -5,11 +5,11 @@ namespace NexusForever.Network.Auth.Message.Model
     [Message(GameMessageOpcode.ServerAuthAccepted)]
     public class ServerAuthAccepted : IWritable
     {
-        public uint Unknown { get; set; }
+        public uint DisconnectedForLag { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown);
+            writer.Write(DisconnectedForLag);
         }
     }
 }

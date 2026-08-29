@@ -1,7 +1,7 @@
 using System.Numerics;
 using NexusForever.Database.World.Model;
+using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Entity.Movement;
-using NexusForever.Game.Abstract.Social;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
@@ -44,9 +44,16 @@ namespace NexusForever.Game.Abstract.Entity
         uint Shield { get; set; }
         uint MaxShieldCapacity { get; set; }
         uint Level { get; set; }
+        uint InterruptArmor { get; set; }
         bool Sheathed { get; set; }
 
-        StandState StandState { get; set; }
+        /// <summary>
+        /// The current stand state for the <see cref="IWorldEntity"/>.
+        /// </summary>
+        /// <remarks>
+        /// To set the stand state, see <see cref="SetStandState(StandState, uint)"/> or <see cref="Emote(uint)"/>.
+        /// </remarks>
+        StandState StandState { get; }
 
         /// <summary>
         /// Collection of guids currently targeting this <see cref="IWorldEntity"/>.
@@ -103,7 +110,7 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Add or update <see cref="IItemVisual"/> at <see cref="ItemSlot"/> with supplied data.
         /// </summary>
-        void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, int dyeData = 0);
+        void AddVisual(ItemSlot slot, ushort displayId, ushort colourSetId = 0, uint dyeData = 0);
 
         /// <summary>
         /// Add or update <see cref="IItemVisual"/>.
@@ -220,5 +227,21 @@ namespace NexusForever.Game.Abstract.Entity
         /// Remove <see cref="IWorldEntity"/> as a passenger on this <see cref="IWorldEntity"/>.
         /// </summary>
         void RemovePlatformPassenger(IWorldEntity passenger);
+
+        /// <summary>
+        /// Set the emote id for this <see cref="IWorldEntity"/>.
+        /// </summary>
+        /// <remarks>
+        /// If no emote id is provided, the stand state will be set to <see cref="StandState.Stand"/>.
+        /// </remarks>
+        /// <param name="emoteId">The emote id to set.</param>
+        void Emote(uint emoteId);
+
+        /// <summary>
+        /// Set the stand state for this <see cref="IWorldEntity"/>.
+        /// </summary>
+        /// <param name="standState">The stand state id to set.</param>
+        /// <param name="emoteId">The emote id to use if <paramref name="standState"/> is <see cref="StandState.Emote"/>.</param>
+        void SetStandState(StandState standState, uint emoteId = 0u);
     }
 }

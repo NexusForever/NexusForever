@@ -9,6 +9,7 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Network.World.Message.Static;
@@ -263,7 +264,7 @@ namespace NexusForever.Game.Entity
                 throw new ArgumentException();
 
             IActionSet actionSet = GetActionSet(ActiveActionSet);
-            IActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.Spell, spell4BaseId);
+            IActionSetShortcut shortcut = actionSet.GetShortcut(ShortcutType.SpellbookItem, spell4BaseId);
             return shortcut?.Tier ?? spell.Tier;
         }
 
@@ -398,7 +399,7 @@ namespace NexusForever.Game.Entity
 
         private void SendServerSpellList()
         {
-            var serverSpellList = new ServerAbilities();
+            var serverAbilities = new ServerAbilities();
             foreach ((uint spell4BaseId, ICharacterSpell spell) in spells)
             {
                 ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
@@ -407,8 +408,8 @@ namespace NexusForever.Game.Entity
 
                 for (byte i = 0; i < ActionSet.MaxActionSets; i++)
                 {
-                    IActionSetShortcut shortcut = actionSets[i].GetShortcut(ShortcutType.Spell, spell4BaseId);
-                    serverSpellList.Spells.Add(new ServerAbilities.Spell
+                    IActionSetShortcut shortcut = actionSets[i].GetShortcut(ShortcutType.SpellbookItem, spell4BaseId);
+                    serverAbilities.Spells.Add(new ServerAbilities.Spell
                     {
                         Spell4BaseId      = spell4BaseId,
                         TierIndexAchieved = shortcut?.Tier ?? spell.Tier,
@@ -421,7 +422,7 @@ namespace NexusForever.Game.Entity
                 }
             }
 
-            player.Session.EnqueueMessageEncrypted(serverSpellList);
+            player.Session.EnqueueMessageEncrypted(serverAbilities);
         }
 
         public void SendServerAbilityPoints()

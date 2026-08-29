@@ -1,33 +1,41 @@
-﻿using NexusForever.Database.Character.Model;
+﻿using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Game.Static.Social;
+using NexusForever.Network.Internal;
 
 namespace NexusForever.Game.Guild
 {
-    public partial class Community : GuildChat, ICommunity
+    public partial class Community : GuildBase, ICommunity
     {
+        public override GuildType Type => GuildType.Community;
         public override uint MaxMembers => 20u;
 
         public IResidence Residence { get; set; }
 
-        /// <summary>
-        /// Create a new <see cref="ICommunity"/> using <see cref="GuildModel"/>
-        /// </summary>
-        public Community(GuildModel baseModel)
-            : base(baseModel)
+        #region Dependency Injection
+
+        private readonly IGlobalResidenceManager globalResidenceManager;
+
+        public Community(
+            IRealmContext realmContext,
+            IInternalMessagePublisher messagePublisher,
+            IGlobalResidenceManager globalResidenceManager)
+            : base(realmContext, messagePublisher)
         {
-            InitialiseChatChannels(ChatChannelType.Community, null);
+            this.globalResidenceManager = globalResidenceManager;
         }
 
+        #endregion
+
         /// <summary>
-        /// Create a new <see cref="ICommunity"/> using the supplied parameters.
+        /// Create a new <see cref="ICommunity"/> using supplied parameters.
         /// </summary>
-        public Community(string name, string leaderRankName, string councilRankName, string memberRankName)
-            : base(GuildType.Community, name, leaderRankName, councilRankName, memberRankName)
+        public override void Initialise(string guildName, string leaderRankName, string councilRankName, string memberRankName)
         {
-            InitialiseChatChannels(ChatChannelType.Community, null);
+            Residence = globalResidenceManager.CreateCommunity(this);
+
+            base.Initialise(guildName, leaderRankName, councilRankName, memberRankName);
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using NexusForever.Game;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Abstract.Map.Instance;
@@ -8,7 +9,7 @@ using NexusForever.Game.Map;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
@@ -41,16 +42,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                 return;
 
             IResidence residence;
-            if (!string.IsNullOrEmpty(housingVisit.TargetResidenceName))
-                residence = globalResidenceManager.GetResidenceByOwner(housingVisit.TargetResidenceName);
-            else if (!string.IsNullOrEmpty(housingVisit.TargetCommunityName))
-                residence = globalResidenceManager.GetCommunityByOwner(housingVisit.TargetCommunityName);
-            else if (housingVisit.TargetResidence.ResidenceId != 0ul)
-                residence = globalResidenceManager.GetResidence(housingVisit.TargetResidence.ResidenceId);
-            else if (housingVisit.TargetCommunity.NeighbourhoodId != 0ul)
+            if (!string.IsNullOrEmpty(housingVisit.PlayerToVisitName))
+                residence = globalResidenceManager.GetResidenceByOwner(housingVisit.PlayerToVisitName);
+            else if (!string.IsNullOrEmpty(housingVisit.CommunityToVisitName))
+                residence = globalResidenceManager.GetCommunityByOwner(housingVisit.CommunityToVisitName);
+            else if (housingVisit.IdentityToVisit != null)
+                residence = globalResidenceManager.GetResidenceByOwner(housingVisit.IdentityToVisit.ToGameIdentity());
+            else if (housingVisit.CommunityToVisitIdentity != null)
             {
-                ulong residenceId = globalGuildManager.GetGuild<ICommunity>(housingVisit.TargetCommunity.NeighbourhoodId)?.Residence?.Id ?? 0ul;
-                residence = globalResidenceManager.GetResidence(residenceId);
+                Identity residenceIdentity = globalGuildManager.GetGuild<ICommunity>(housingVisit.CommunityToVisitIdentity.ToGameIdentity())?.Residence?.Identity ?? null;
+                residence = globalResidenceManager.GetResidence(residenceIdentity);
             }
             else
                 throw new NotImplementedException();
@@ -70,7 +71,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                     return;
                 }
                 // TODO: check if player is either a neighbour or roommate
-                case ResidencePrivacyLevel.NeighborsOnly:
+                case ResidencePrivacyLevel.NeighboursOnly:
                     break;
                 case ResidencePrivacyLevel.RoommatesOnly:
                     break;

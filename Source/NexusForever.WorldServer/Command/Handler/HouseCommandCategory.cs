@@ -6,9 +6,9 @@ using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map.Lock;
 using NexusForever.Game.Static.RBAC;
-using NexusForever.Game.Text.Search;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
+using NexusForever.GameTable.Text.Search;
 using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Static;
 
@@ -76,7 +76,10 @@ namespace NexusForever.WorldServer.Command.Handler
             if (residence == null)
             {
                 if (name == null)
-                    residence = GlobalResidenceManager.Instance.CreateResidence(target);
+                {
+                    target.ResidenceManager.CreateResidence();
+                    residence = target.ResidenceManager.Residence;
+                }
                 else
                 {
                     context.SendMessage("A residence for that character doesn't exist!");

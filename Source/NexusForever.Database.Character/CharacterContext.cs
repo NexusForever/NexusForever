@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NexusForever.Database.Character.Model;
 using NexusForever.Database.Configuration.Model;
+using NexusForever.Game.Static.Housing;
 
 namespace NexusForever.Database.Character
 {
@@ -51,6 +52,11 @@ namespace NexusForever.Database.Character
         public CharacterContext(IConnectionString config)
         {
             this.config = config;
+        }
+
+        public CharacterContext(DbContextOptions<CharacterContext> options)
+            : base(options)
+        {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -129,6 +135,9 @@ namespace NexusForever.Database.Character
                     .HasColumnName("inputKeySet")
                     .HasColumnType("tinyint(4)")
                     .HasDefaultValue(0);
+
+                entity.Property(e => e.IsOnline)
+                    .HasColumnName("isOnline");
 
                 entity.Property(e => e.LastOnline)
                     .HasColumnName("lastOnline")
@@ -414,8 +423,8 @@ namespace NexusForever.Database.Character
                     .HasDefaultValue(0)
                     .ValueGeneratedNever();
 
-                entity.Property(e => e.Mask)
-                    .HasColumnName("mask")
+                entity.Property(e => e.VisibilityMask)
+                    .HasColumnName("visibilityMask")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
@@ -457,11 +466,11 @@ namespace NexusForever.Database.Character
 
                 entity.Property(e => e.DyeData)
                     .HasColumnName("dyeData")
-                    .HasColumnType("int(10)")
+                    .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
-                entity.Property(e => e.ItemId)
-                    .HasColumnName("itemId")
+                entity.Property(e => e.Item2Id)
+                    .HasColumnName("item2Id")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
@@ -1468,6 +1477,11 @@ namespace NexusForever.Database.Character
                     .HasColumnType("float")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.Data)
+                    .HasColumnName("data")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
                 entity.HasOne(d => d.Character)
                     .WithMany(p => p.Stat)
                     .HasForeignKey(d => d.Id)
@@ -2274,7 +2288,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.Flags)
                     .HasColumnName("flags")
                     .HasColumnType("smallint(5) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(ResidenceFlags.None);
 
                 entity.Property(e => e.GardenSharing)
                     .HasColumnName("gardenSharing")
@@ -2310,12 +2324,12 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.PrivacyLevel)
                     .HasColumnName("privacyLevel")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(ResidencePrivacyLevel.Public);
 
                 entity.Property(e => e.PropertyInfoId)
                     .HasColumnName("propertyInfoId")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(PropertyInfoId.Residence);
 
                 entity.Property(e => e.ResourceSharing)
                     .HasColumnName("resourceSharing")
@@ -2458,7 +2472,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.BuildState)
                     .HasColumnName("buildState")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(BuildState.Initialising);
 
                 entity.Property(e => e.PlotInfoId)
                     .HasColumnName("plotInfoId")
@@ -2468,7 +2482,7 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.PlugFacing)
                     .HasColumnName("plugFacing")
                     .HasColumnType("tinyint(3) unsigned")
-                    .HasDefaultValue(0);
+                    .HasDefaultValue(HousingPlugFacing.North);
 
                 entity.Property(e => e.PlugItemId)
                     .HasColumnName("plugItemId")

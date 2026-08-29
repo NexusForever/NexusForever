@@ -5,6 +5,7 @@
         public ulong Id { get; set; }
         public byte Stat { get; set; }
         public float Value { get; set; }
+        public uint Data { get; set; }
 
         public CharacterModel Character { get; set; }
     }

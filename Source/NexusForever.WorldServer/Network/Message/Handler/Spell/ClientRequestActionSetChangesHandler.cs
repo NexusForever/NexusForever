@@ -3,7 +3,7 @@ using System.Linq;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 {
@@ -27,7 +27,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
                 {
                     IActionSetShortcut existingShortcut = shortcuts.SingleOrDefault(s => s.ObjectId == spell4BaseId);
                     byte tier = existingShortcut?.Tier ?? 1;
-                    actionSet.AddShortcut(i, ShortcutType.Spell, spell4BaseId, tier);
+                    actionSet.AddShortcut(i, ShortcutType.SpellbookItem, spell4BaseId, tier);
                 }
             }
 

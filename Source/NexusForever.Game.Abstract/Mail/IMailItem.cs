@@ -3,7 +3,7 @@ using NexusForever.Database.Character;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Mail;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Mail;
 
 namespace NexusForever.Game.Abstract.Mail
 {
@@ -26,7 +26,7 @@ namespace NexusForever.Game.Abstract.Mail
         bool HasPaidOrCollectedCurrency { get; }
 
         MailFlag Flags { get; }
-        DeliveryTime DeliveryTime { get; }
+        DeliverySpeed DeliverySpeed { get; }
         DateTime CreateTime { get; }
         float ExpiryTime { get; }
 
@@ -56,7 +56,7 @@ namespace NexusForever.Game.Abstract.Mail
         void ReturnMail();
 
         /// <summary>
-        /// Returns whether this item is ready to be delivered based on <see cref="DeliveryTime"/>.
+        /// Returns whether this item is ready to be delivered based on <see cref="DeliverySpeed"/>.
         /// </summary>
         bool IsReadyToDeliver();
 

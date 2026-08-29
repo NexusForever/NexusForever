@@ -12,7 +12,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Update deathmatch pool for the team the character is on.
         /// </summary>
-        void UpdatePool(ulong characterId);
+        void UpdatePool(Identity identity);
 
         /// <summary>
         /// Finish the match with the supplied <see cref="MatchWinner"/> and <see cref="MatchEndReason"/>

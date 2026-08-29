@@ -1,12 +1,12 @@
 ﻿using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Guild;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Guild
 {

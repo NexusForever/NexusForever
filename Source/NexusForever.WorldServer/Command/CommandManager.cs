@@ -13,7 +13,6 @@ using NexusForever.WorldServer.Command.Context;
 using NexusForever.WorldServer.Command.Convert;
 using NexusForever.WorldServer.Command.Static;
 using NLog;
-using NLog.Fluent;
 
 namespace NexusForever.WorldServer.Command
 {
@@ -47,8 +46,13 @@ namespace NexusForever.WorldServer.Command
             BuildConverters();
             InitialiseHandlers();
 
-            if (!WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService())
+            if (ShouldStartCommandThread())
                 InitialiseCommandThread();
+        }
+
+        private static bool ShouldStartCommandThread()
+        {
+            return !WindowsServiceHelpers.IsWindowsService() && !SystemdHelpers.IsSystemdService() && !Console.IsInputRedirected;
         }
 
         private void BuildConverters()

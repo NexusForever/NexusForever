@@ -1,7 +1,8 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.Game.Abstract.Guild
 {
@@ -16,6 +17,11 @@ namespace NexusForever.Game.Abstract.Guild
         /// This determines which guild name and type is shown in the nameplate.
         /// </remarks>
         IGuildBase GuildAffiliation { get; set; }
+
+        /// <summary>
+        /// Create a new <see cref="IGuildManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// </summary>
+        void Initialise(IPlayer player, CharacterModel model);
 
         /// <summary>
         /// Return guild of supplied <see cref="GuildType"/>.
@@ -72,7 +78,7 @@ namespace NexusForever.Game.Abstract.Guild
         /// <remarks>
         /// <see cref="CanInviteToGuild(ulong)"/> should be invoked before invoking this method.
         /// </remarks>
-        void InviteToGuild(ulong id, IPlayer invitee);
+        void InviteToGuild(ulong id, IPlayer invitee, IPlayer inviter);
 
         /// <summary>
         /// Return if <see cref="IPlayer"/> can accept the existing <see cref="IGuildInvite"/>.

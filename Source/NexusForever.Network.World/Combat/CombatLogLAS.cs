@@ -6,11 +6,11 @@ namespace NexusForever.Network.World.Combat
     {
         public CombatLogType Type => CombatLogType.LAS;
 
-        public uint Unknown0 { get; set; }
+        public uint UnitId { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0);
+            writer.Write(UnitId);
         }
     }
 }

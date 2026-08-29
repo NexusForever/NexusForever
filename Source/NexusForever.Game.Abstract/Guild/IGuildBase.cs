@@ -1,14 +1,16 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Guild;
 
 namespace NexusForever.Game.Abstract.Guild
 {
     public interface IGuildBase : IDatabaseCharacter, INetworkBuildable<GuildData>, IEnumerable<IGuildMember>
     {
-        ulong Id { get; }
+        Identity Identity { get; }
+        ulong Id { get => Identity.Id; }
         GuildType Type { get; }
         DateTime CreateTime { get; }
         string Name { get; set; }
@@ -21,6 +23,16 @@ namespace NexusForever.Game.Abstract.Guild
         /// Maximum number of <see cref="IGuildMember"/>'s allowed in the guild.
         /// </summary>
         uint MaxMembers { get; }
+
+        /// <summary>
+        /// Create a new <see cref="IGuildBase"/> from an existing database model.
+        /// </summary>
+        void Initialise(GuildModel model);
+
+        /// <summary>
+        /// Create a new <see cref="IGuildBase"/> using supplied parameters.
+        /// </summary>
+        void Initialise(string guildName, string leaderRankName, string councilRankName, string memberRankName);
 
         /// <summary>
         /// Add a new <see cref="GuildFlag"/>.

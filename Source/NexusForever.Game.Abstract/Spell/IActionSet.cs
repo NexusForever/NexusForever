@@ -1,8 +1,8 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Static.Abilities;
 using NexusForever.Game.Static.Spell;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.Abilities;
 
 namespace NexusForever.Game.Abstract.Spell
 {
@@ -49,7 +49,7 @@ namespace NexusForever.Game.Abstract.Spell
         void AddShortcut(CharacterActionSetShortcutModel model);
 
         /// <summary>
-        /// Update a <see cref="ShortcutType.Spell"/> shortcut with supplied tier.
+        /// Update a <see cref="ShortcutType.SpellbookItem"/> shortcut with supplied tier.
         /// </summary>
         void UpdateSpellShortcut(uint spell4BaseId, byte tier);
 

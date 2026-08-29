@@ -52,7 +52,7 @@ namespace NexusForever.Game.Customisation
                 return null;
 
             // find customisation that only has primary label and value
-            return customisationInfos.SingleOrDefault(e => e.Label[1] == 0 && e.Value[1] == 0);
+            return customisationInfos.FirstOrDefault(e => e.Label[1] == 0 && e.Value[1] == 0);
         }
 
         private IEnumerable<ICustomisationInfo> GetSecondaryCustomisations(uint label, uint value, IList<(uint Label, uint Value)> customisations)

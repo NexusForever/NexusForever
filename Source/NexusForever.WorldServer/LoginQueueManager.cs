@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Shared.Game;
 using NexusForever.WorldServer.Network;
 using NexusForever.WorldServer.Network.Message.Handler.Character;

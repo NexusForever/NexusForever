@@ -3,7 +3,7 @@
     public class Message : IWritable
     {
         public uint Index { get; set; }
-        public List<string> Messages { get; set; } = new List<string>();
+        public List<string> Messages { get; set; } = [];
 
         public void Write(GamePacketWriter writer)
         {

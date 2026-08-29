@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Guild
@@ -26,23 +26,24 @@ namespace NexusForever.Game.Abstract.Guild
         void Shutdown();
 
         /// <summary>
-        /// Validate all <see cref="ICommunity"/> to make sure they have a corresponding residence.
-        /// </summary>
-        /// <remarks>
-        /// This function is mainly here for migrating communities created before the implementation of community plots.
-        /// If this happens normally there could be a bigger issue.
-        /// </remarks>
-        void ValidateCommunityResidences();
-
-        /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
         IGuildBase GetGuild(ulong guildId);
 
         /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        IGuildBase GetGuild(Identity identity);
+
+        /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied id.
         /// </summary>
         T GetGuild<T>(ulong guildId) where T : IGuildBase;
+
+        /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        T GetGuild<T>(Identity identity) where T : IGuildBase;
 
         /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied <see cref="GuildType"> and name.

@@ -44,9 +44,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             {
                 case InteractionType.TalkTo: // Quest NPC
                 {
-                    session.EnqueueMessageEncrypted(new Server0357
+                    session.EnqueueMessageEncrypted(new ServerDialogStart
                     {
-                        UnitId = entityInteraction.UnitId
+                        DialogUnitId = entityInteraction.UnitId
                     });
                     break;
                 }

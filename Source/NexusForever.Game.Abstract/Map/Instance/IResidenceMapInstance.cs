@@ -1,8 +1,7 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.Game.Abstract.Map.Instance
 {
@@ -26,7 +25,7 @@ namespace NexusForever.Game.Abstract.Map.Instance
         /// <summary>
         /// Crate all placed <see cref="IDecor"/>.
         /// </summary>
-        void CrateAllDecor(TargetResidence targetResidence, IPlayer player);
+        void CrateAllDecor(Abstract.Identity targetResidence, IPlayer player);
 
         /// <summary>
         /// Handle <see cref="IDecor"/> update (create, move or delete).
@@ -54,7 +53,7 @@ namespace NexusForever.Game.Abstract.Map.Instance
         /// <summary>
         /// Rename <see cref="IResidence"/> with supplied name.
         /// </summary>
-        void RenameResidence(IPlayer player, TargetResidence targetResidence, string name);
+        void RenameResidence(IPlayer player, Abstract.Identity targetResidence, string name);
 
         /// <summary>
         /// Rename <see cref="IResidence"/> with supplied name.
@@ -64,11 +63,11 @@ namespace NexusForever.Game.Abstract.Map.Instance
         /// <summary>
         /// Remodel <see cref="IResidence"/>.
         /// </summary>
-        void Remodel(TargetResidence targetResidence, IPlayer player, ClientHousingRemodel housingRemodel);
+        void Remodel(Abstract.Identity targetResidence, IPlayer player, ClientHousingRemodel housingRemodel);
 
         /// <summary>
         /// UpdateResidenceFlags <see cref="IResidence"/>.
         /// </summary>
-        void UpdateResidenceFlags(TargetResidence targetResidence, IPlayer player, ClientHousingFlagsUpdate flagsUpdate);
+        void UpdateResidenceFlags(Abstract.Identity targetResidence, IPlayer player, ClientHousingFlagsUpdate flagsUpdate);
     }
 }

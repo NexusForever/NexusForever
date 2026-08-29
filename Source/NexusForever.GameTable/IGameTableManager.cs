@@ -114,7 +114,7 @@ namespace NexusForever.GameTable
         GameTable<HousingDecorTypeEntry> HousingDecorType { get; }
         GameTable<HousingMannequinPoseEntry> HousingMannequinPose { get; }
         GameTable<HousingMapInfoEntry> HousingMapInfo { get; }
-        GameTable<HousingNeighborhoodInfoEntry> HousingNeighborhoodInfo { get; }
+        GameTable<HousingNeighbourhoodInfoEntry> HousingNeighbourhoodInfo { get; }
         GameTable<HousingPlotInfoEntry> HousingPlotInfo { get; }
         GameTable<HousingPlotTypeEntry> HousingPlotType { get; }
         GameTable<HousingPlugItemEntry> HousingPlugItem { get; }
@@ -387,7 +387,8 @@ namespace NexusForever.GameTable
         TextTable TextFrench { get; }
         TextTable TextGerman { get; }
 
-        void Initialise();
+        Task Initialise();
+        Task Initialise(GameTableLoader loader);
 
         /// <summary>
         /// Return the <see cref="TextTable"/> for the specified <see cref="Game.Static.Language"/>.

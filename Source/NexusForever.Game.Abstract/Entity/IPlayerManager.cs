@@ -21,5 +21,15 @@
         /// Return <see cref="IPlayer"/> with supplied character name.
         /// </summary>
         IPlayer GetPlayer(string name);
+
+        /// <summary>
+        /// Returns <see cref="IPlayer"/> with supplied identity.
+        /// </summary>
+        IPlayer GetPlayer(Identity identity);
+
+        /// <summary>
+        /// Return <see cref="IPlayer"/> with supplied account id.
+        /// </summary>
+        IPlayer GetPlayerByAccountId(uint accountId);
     }
 }

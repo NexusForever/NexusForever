@@ -1,5 +1,5 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.PublicEvent;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Event
 {

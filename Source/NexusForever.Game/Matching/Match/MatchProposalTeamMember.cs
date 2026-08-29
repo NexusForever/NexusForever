@@ -42,7 +42,7 @@ namespace NexusForever.Game.Matching.Match
 
             Response = response;
 
-            log.LogTrace($"Character id {MatchingQueueProposalMember.CharacterId} has responded with {Response}.");
+            log.LogTrace($"Character id {MatchingQueueProposalMember.Identity} has responded with {Response}.");
         }
     }
 }

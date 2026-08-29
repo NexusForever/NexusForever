@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Matching;
@@ -6,6 +7,7 @@ using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Static.Matching;
 using NexusForever.GameTable;
+using NexusForever.Network.Internal;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
@@ -31,8 +33,9 @@ namespace NexusForever.Game.Matching.Match
             IMatchingDataManager matchingDataManager,
             IFactory<IMatchTeam> matchTeamFactory,
             IGameTableManager gameTableManager,
-            IPlayerManager playerManager)
-            : base(log, matchManager, matchingDataManager, matchTeamFactory, gameTableManager, playerManager)
+            IPlayerManager playerManager,
+            IInternalMessagePublisher messagePublisher)
+            : base(log, matchManager, matchingDataManager, matchTeamFactory, gameTableManager, playerManager, messagePublisher)
         {
         }
 
@@ -129,12 +132,12 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Update deathmatch pool for the team the character is on.
         /// </summary>
-        public void UpdatePool(ulong characterId)
+        public void UpdatePool(Abstract.Identity identity)
         {
             if (MatchingMap.GameTypeEntry.MatchingRulesEnum != MatchRules.DeathmatchPool)
                 return;
 
-            IMatchTeam team = GetTeam(characterId);
+            IMatchTeam team = GetTeam(identity);
             if (team == null)
                 throw new InvalidOperationException();
 
@@ -161,7 +164,7 @@ namespace NexusForever.Game.Matching.Match
         {
             base.MatchEnter(player);
 
-            IMatchTeam team = GetTeam(player.CharacterId);
+            IMatchTeam team = GetTeam(player.Identity);
             if (team == null)
                 throw new InvalidOperationException();
 

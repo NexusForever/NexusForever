@@ -2,7 +2,7 @@
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Achievement;
-using AchievementNetworkModel = NexusForever.Network.World.Message.Model.Shared.Achievement;
+using AchievementNetworkModel = NexusForever.Network.World.Message.Model.Achievement.Achievement;
 
 namespace NexusForever.Game.Achievement
 {
