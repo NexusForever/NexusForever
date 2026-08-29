@@ -9,6 +9,7 @@ using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.PlayerPath;
+using NexusForever.Network.World.Message.Model.Spell;
 using NetworkVehiclePassenger = NexusForever.Network.World.Message.Model.Shared.VehiclePassenger;
 
 namespace NexusForever.Game.Entity
@@ -161,7 +162,7 @@ namespace NexusForever.Game.Entity
             });
 
             // TODO: research this, something UI related
-            player.Session.EnqueueMessageEncrypted(new Server0237
+            player.Session.EnqueueMessageEncrypted(new ServerInteractionChange
             {
             });
 

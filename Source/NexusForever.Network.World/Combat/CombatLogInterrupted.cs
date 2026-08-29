@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Static.Combat;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Network.World.Combat
 {
