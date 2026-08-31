@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,6 @@ namespace NexusForever.Network.Session
 
         protected PacketCrypt encryption;
 
-        private FragmentedBuffer onDeck;
         private readonly ConcurrentQueue<ClientGamePacket> incomingPackets = new();
         private readonly ConcurrentQueue<ServerGamePacket> outgoingPackets = new();
 
@@ -116,41 +116,36 @@ namespace NexusForever.Network.Session
             encryption = new PacketCrypt(key);
         }
 
-        protected override uint OnData(byte[] data)
+        protected override SequencePosition OnData(in ReadOnlySequence<byte> buffer)
         {
-            using (var stream = new MemoryStream(data))
-            using (var reader = new GamePacketReader(stream))
+            var reader = new SequenceReader<byte>(buffer);
+
+            while (reader.Remaining >= sizeof(uint))
             {
-                while (stream.Remaining() != 0)
+                if (!reader.TryReadLittleEndian(out int sizeInt))
+                    break;
+
+                uint size = (uint)sizeInt;
+                uint payloadSize = size - sizeof(uint);
+                if (reader.Remaining < payloadSize)
                 {
-                    // no packet on deck waiting for additional information, new data will be part of a new packet
-                    if (onDeck == null)
-                    {
-                        if (stream.Remaining() < sizeof(uint))
-                        {
-                            // we don't have enough data to know the length of the next packet
-                            // return the remaining buffer so new data can be appended
-                            return stream.Remaining();
-                        }
-
-                        uint size = reader.ReadUInt();
-                        onDeck = new FragmentedBuffer(size - sizeof(uint));
-                    }
-
-                    onDeck.Populate(reader);
-                    if (onDeck.IsComplete)
-                    {
-                        incomingPackets.Enqueue(new ClientGamePacket
-                        {
-                            Data = onDeck.Data,
-                            IsEncrypted = false
-                        });
-                        onDeck = null;
-                    }
+                    // full payload not yet available — rewind past the size header and wait for more data
+                    reader.Rewind(sizeof(uint));
+                    break;
                 }
+
+                byte[] data = new byte[payloadSize];
+                reader.TryCopyTo(data.AsSpan());
+                reader.Advance(payloadSize);
+
+                incomingPackets.Enqueue(new ClientGamePacket
+                {
+                    Data        = data,
+                    IsEncrypted = false
+                });
             }
 
-            return 0u;
+            return reader.Position;
         }
 
         protected override void OnDisconnect()
