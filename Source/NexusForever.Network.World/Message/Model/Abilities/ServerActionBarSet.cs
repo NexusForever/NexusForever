@@ -3,8 +3,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Abilities
 {
-    [Message(GameMessageOpcode.ServerShowActionBar)]
-    public class ServerShowActionBar : IWritable
+    [Message(GameMessageOpcode.ServerActionBarSet)]
+    public class ServerActionBarSet : IWritable
     {
         public ShortcutSet ShortcutSet { get; set; }
         public ushort ActionBarShortcutSetId { get; set; }
