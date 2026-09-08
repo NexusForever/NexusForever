@@ -15,6 +15,7 @@ using NexusForever.Server.GroupServer.Character;
 using NexusForever.Server.GroupServer.Group;
 using NexusForever.Server.GroupServer.Job;
 using NexusForever.Server.GroupServer.Network.Internal;
+using NexusForever.Shared.Configuration;
 using NLog.Extensions.Logging;
 using Quartz;
 
@@ -43,7 +44,7 @@ namespace NexusForever.Server.GroupServer
                 .ConfigureAppConfiguration(cb =>
                 {
                     cb.SetBasePath(basePath)
-                        .AddJsonFile("GroupServer.json", false)
+                        .AddNexusForeverJson("GroupServer.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>

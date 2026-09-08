@@ -37,7 +37,7 @@ namespace NexusForever.StsServer
                 })
                 .ConfigureAppConfiguration(cb =>
                 {
-                    cb.AddJsonFile("StsServer.json", false)
+                    cb.AddNexusForeverJson("StsServer.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>

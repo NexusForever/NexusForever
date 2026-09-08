@@ -6,6 +6,8 @@
 # NexusForever generated files
 *.tbl
 *.nfmap
+/data/
+**/appsettings.Local.json
 
 # User-specific files
 *.suo

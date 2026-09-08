@@ -28,6 +28,7 @@
     <ProjectReference Include="..\NexusForever.Server.GroupServer\NexusForever.Server.GroupServer.csproj" />
     <ProjectReference Include="..\NexusForever.StsServer\NexusForever.StsServer.csproj" />
     <ProjectReference Include="..\NexusForever.WorldServer\NexusForever.WorldServer.csproj" />
+    <ProjectReference Include="..\NexusForever.MapGenerator\NexusForever.MapGenerator.csproj" />
   </ItemGroup>
 
 </Project>

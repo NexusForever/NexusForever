@@ -7,8 +7,11 @@ A server emulator for WildStar written in C# that supports build 16042.
 ### Getting Started
 [Server Setup Guide](https://www.emulator.ws/installation/server-guide)
 
+[Aspire setup](Source/NexusForever.Aspire.AppHost/README.md)
+
 ### Requirements
- * Visual Studio 2026 (.NET 10 and C# 14 support required)
+ * .NET 10 SDK
+ * Aspire CLI (installed automatically by `aspire.sh`) or Visual Studio 2026
  * MySQL Server (or equivalent, eg: MariaDB)
  * Message Broker (RabbitMQ or Azure Service Bus)
  * WildStar 16042 client
