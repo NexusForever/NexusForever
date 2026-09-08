@@ -1,0 +1,14 @@
+**
+!Source/
+!Source/**
+!docker/
+!docker/**
+**/bin/
+**/obj/
+**/logs/
+**/cache/
+**/map/
+**/tbl/
+**/*.json
+!**/*.example.json
+**/.git/

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Source/NexusForever.IO/NexusForever.IO.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Cryptography/NexusForever.Cryptography.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Database.Auth/NexusForever.Database.Auth.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Database.Character/NexusForever.Database.Character.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Database.Chat/NexusForever.Database.Chat.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Database.Friendship/NexusForever.Database.Friendship.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Database.Group/NexusForever.Database.Group.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Database.Query/NexusForever.Database.Query.csproj" />
+    <ProjectReference Include="../../Source/NexusForever.Database.World/NexusForever.Database.World.csproj" />
+  </ItemGroup>
+</Project>

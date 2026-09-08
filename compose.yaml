@@ -1,0 +1,307 @@
+name: ${COMPOSE_PROJECT_NAME:-nexusforever}
+
+x-app: &app
+  image: ${COMPOSE_PROJECT_NAME:-nexusforever}-server:local
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+    args:
+      DOTNET_VERSION: ${DOTNET_VERSION:-10.0}
+      WORLD_DATABASE_REF: ${WORLD_DATABASE_REF:-79d836576b9da8d7f7321ec3463d3673d496f090}
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 60s
+
+x-database: &database
+  MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Run ./bootstrap.sh first}
+
+x-broker: &broker
+  RABBITMQ_USER: ${RABBITMQ_USER:-nexusforever}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Run ./bootstrap.sh first}
+  API__Character__Host: http://character-api:4000
+  API__Account__Host: http://account-api:4001
+
+x-tables: &tables
+  type: bind
+  source: ${TBL_PATH:-../tbl}
+  target: /assets/tbl
+  read_only: true
+  bind:
+    create_host_path: false
+    selinux: z
+
+x-ready: &ready
+  mysql:
+    condition: service_healthy
+  rabbitmq:
+    condition: service_healthy
+  setup:
+    condition: service_completed_successfully
+
+x-worker-ready: &worker-ready
+  <<: *ready
+  character-api:
+    condition: service_healthy
+  account-api:
+    condition: service_healthy
+
+services:
+  asset-extract:
+    <<: *app
+    profiles: [tools]
+    restart: "no"
+    network_mode: none
+    user: "${ASSET_UID:-1000}:${ASSET_GID:-1000}"
+    working_dir: /tmp
+    entrypoint: ["sh", "/usr/local/bin/extract-assets"]
+    volumes:
+      - type: bind
+        source: ${CLIENT_PATH:-.}
+        target: /client
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${MAP_PATH:-../map}
+        target: /assets/map
+        bind:
+          create_host_path: false
+          selinux: z
+      - type: bind
+        source: ${TBL_PATH:-../tbl}
+        target: /assets/tbl
+        bind:
+          create_host_path: false
+          selinux: z
+
+  asset-check:
+    <<: *app
+    restart: "no"
+    network_mode: none
+    command: ["Bootstrap", "check-assets"]
+    volumes:
+      - *tables
+      - type: bind
+        source: ${MAP_PATH:-../map}
+        target: /assets/map
+        read_only: true
+        bind:
+          create_host_path: false
+          selinux: z
+
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.4}
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run ./bootstrap.sh first}
+      MYSQL_ROOT_HOST: "%"
+    command: ["--max-allowed-packet=128M"]
+    volumes:
+      - ${DATA_PATH:-./data}/mysql:/var/lib/mysql:Z
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysql -h 127.0.0.1 -u root -e 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:-rabbitmq:4.3-management}
+    hostname: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-nexusforever}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - ${DATA_PATH:-./data}/rabbitmq:/var/lib/rabbitmq:Z
+    ports:
+      - "${ADMIN_BIND_ADDRESS:-127.0.0.1}:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  phpmyadmin:
+    image: ${PHPMYADMIN_IMAGE:-phpmyadmin:5.2-apache}
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      UPLOAD_LIMIT: 128M
+    ports:
+      - "${ADMIN_BIND_ADDRESS:-127.0.0.1}:${PHPMYADMIN_PORT:-8080}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  setup:
+    <<: *app
+    restart: "no"
+    command: ["Bootstrap"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      REALM_HOST: ${REALM_HOST:-127.0.0.1}
+      REALM_NAME: ${REALM_NAME:-NexusForever}
+      WORLD_PORT: ${WORLD_PORT:-24000}
+      GAME_ACCOUNT_EMAIL: ${GAME_ACCOUNT_EMAIL:-admin@example.com}
+      GAME_ACCOUNT_PASSWORD: ${GAME_ACCOUNT_PASSWORD:-nexusforever}
+      GAME_ACCOUNT_ROLE: ${GAME_ACCOUNT_ROLE:-Administrator}
+    depends_on:
+      asset-check:
+        condition: service_completed_successfully
+      mysql:
+        condition: service_healthy
+
+  auth:
+    <<: *app
+    command: ["AuthServer"]
+    environment:
+      <<: *database
+      Network__Host: 0.0.0.0
+      Network__Port: 23115
+    ports:
+      - "${GAME_BIND_ADDRESS:-0.0.0.0}:${AUTH_PORT:-23115}:23115"
+    depends_on: *ready
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/23115"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  sts:
+    <<: *app
+    command: ["StsServer"]
+    environment:
+      <<: *database
+      Network__Host: 0.0.0.0
+      Network__Port: 6600
+    ports:
+      - "${GAME_BIND_ADDRESS:-0.0.0.0}:${STS_PORT:-6600}:6600"
+    depends_on: *ready
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/6600"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  world:
+    <<: *app
+    command: ["WorldServer"]
+    stdin_open: true
+    tty: true
+    environment:
+      <<: [*database, *broker]
+      Network__Host: 0.0.0.0
+      Network__Port: 24000
+      Network__Internal__InputQueue: WorldServer_1
+      Urls: http://0.0.0.0:5000
+      GameTable__GameTablePath: /assets/tbl
+      Realm__Map__MapPath: /assets/map
+      Realm__RealmId: 1
+      Script__Dynamic__Enable: "false"
+    volumes:
+      - *tables
+      - type: bind
+        source: ${MAP_PATH:-../map}
+        target: /assets/map
+        read_only: true
+        bind:
+          create_host_path: false
+          selinux: z
+    ports:
+      - "${GAME_BIND_ADDRESS:-0.0.0.0}:${WORLD_PORT:-24000}:24000"
+      - "${ADMIN_BIND_ADDRESS:-127.0.0.1}:${WORLD_CONSOLE_PORT:-5000}:5000"
+    depends_on: *worker-ready
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:5000/console.html >/dev/null && bash -c 'exec 3<>/dev/tcp/127.0.0.1/24000'"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+
+  account-api:
+    <<: *app
+    command: ["API.Account"]
+    environment:
+      <<: *database
+      urls: http://0.0.0.0:4001
+    depends_on: *ready
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/4001"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  character-api:
+    <<: *app
+    command: ["API.Character"]
+    environment:
+      <<: *database
+      urls: http://0.0.0.0:4000
+      Database__Character__0__RealmId: 1
+    depends_on: *ready
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/4000"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  group:
+    <<: *app
+    command: ["Server.GroupServer"]
+    environment:
+      <<: [*database, *broker]
+      Network__Internal__InputQueue: GroupServer
+    depends_on: *worker-ready
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/Bootstrap/Bootstrap.dll", "check-queue", "GroupServer"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+
+  chat:
+    <<: *app
+    command: ["Server.ChatServer"]
+    environment:
+      <<: [*database, *broker]
+      Network__Internal__InputQueue: ChatServer
+      GameTable__GameTablePath: /assets/tbl
+    volumes:
+      - *tables
+    depends_on: *worker-ready
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/Bootstrap/Bootstrap.dll", "check-queue", "ChatServer"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+
+  friendship:
+    <<: *app
+    command: ["Server.Friendship"]
+    environment:
+      <<: [*database, *broker]
+      Network__Internal__InputQueue: FriendshipServer
+      GameTable__GameTablePath: /assets/tbl
+    volumes:
+      - *tables
+    depends_on: *worker-ready
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/Bootstrap/Bootstrap.dll", "check-queue", "FriendshipServer"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+
+  character:
+    <<: *app
+    command: ["Server.Character"]
+    environment:
+      <<: [*database, *broker]
+      Network__Internal__InputQueue: CharacterServer
+    depends_on: *worker-ready
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/Bootstrap/Bootstrap.dll", "check-queue", "CharacterServer"]
+      interval: 30s
+      timeout: 10s
+      retries: 20

@@ -144,6 +144,7 @@ namespace NexusForever.MapGenerator
                 catch (Exception e)
                 {
                     log.Error(e);
+                    throw;
                 }
             }
         }

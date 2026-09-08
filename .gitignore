@@ -338,3 +338,7 @@ ASALocalRun/
 
 # Visual Studio profiling session file
 *.diagsession
+
+# Docker deployment state and local credentials
+/.env
+/data/
