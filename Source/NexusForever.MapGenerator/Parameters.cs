@@ -4,7 +4,7 @@ namespace NexusForever.MapGenerator
 {
     public class Parameters
     {
-        [Option('i', "patchPath", Required = true,
+        [Option('i', "patchPath",
             HelpText = "The location of the WildStar client patch folder.")]
         public string PatchPath { get; set; }
 
@@ -19,6 +19,9 @@ namespace NexusForever.MapGenerator
         [Option('o', "output",
             HelpText = "The base directory where output files will be created.", Default = "")]
         public string OutputDir { get; set; }
+
+        [Option("prepare", HelpText = "Reuse valid assets or extract and generate them from the client.")]
+        public bool Prepare { get; set; }
 
         [Option("debug")]
         public bool Debug { get; set; }

@@ -16,6 +16,7 @@ using NexusForever.Network.Internal.Configuration;
 using NexusForever.Server.Character.Configuration;
 using NexusForever.Server.Character.Game;
 using NexusForever.Server.Character.Network.Internal.Handler;
+using NexusForever.Shared.Configuration;
 using NLog.Extensions.Logging;
 
 namespace NexusForever.Server.Character
@@ -43,7 +44,7 @@ namespace NexusForever.Server.Character
                 .ConfigureAppConfiguration(cb =>
                 {
                     cb.SetBasePath(basePath)
-                        .AddJsonFile("CharacterServer.json", false)
+                        .AddNexusForeverJson("CharacterServer.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>

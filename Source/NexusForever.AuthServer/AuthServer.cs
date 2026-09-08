@@ -38,7 +38,7 @@ namespace NexusForever.AuthServer
                 })
                 .ConfigureAppConfiguration(cb =>
                 {
-                    cb.AddJsonFile("AuthServer.json", false)
+                    cb.AddNexusForeverJson("AuthServer.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>

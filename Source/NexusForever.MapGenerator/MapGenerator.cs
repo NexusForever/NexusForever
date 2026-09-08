@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using CommandLine;
-using CommandLine.Text;
 using Microsoft.Extensions.DependencyInjection;
 using NexusForever.MapGenerator.GameTable;
 using NexusForever.Shared;
@@ -20,7 +20,7 @@ namespace NexusForever.MapGenerator
         private const string Title = "NexusForever: Map Generator (RELEASE)";
         #endif
 
-        private static void Main(string[] args)
+        private static int Main(string[] args)
         {
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<ArchiveManager>();
@@ -33,21 +33,33 @@ namespace NexusForever.MapGenerator
             Console.Title = Title;
 
             parserResult = Parser.Default.ParseArguments<Parameters>(args);
-            parserResult.WithParsed(ParameterOk);
-
-            log.Info("Finished!");
+            return parserResult.MapResult(parameters =>
+            {
+                try
+                {
+                    if (parameters.Prepare)
+                        AssetPreparation.Run(parameters, ParameterOk);
+                    else
+                        ParameterOk(parameters);
+                    log.Info("Finished!");
+                    return 0;
+                }
+                catch (Exception exception)
+                {
+                    log.Error(exception, "Asset preparation failed.");
+                    return 1;
+                }
+            }, errors => errors.All(e => e is HelpRequestedError or VersionRequestedError) ? 0 : 1);
         }
 
         private static void ParameterOk(Parameters parameters)
         {
             if (!Directory.Exists(parameters.PatchPath))
-                throw new DirectoryNotFoundException();
+                throw new DirectoryNotFoundException($"Client Patch directory does not exist: {parameters.PatchPath}");
 
             if (!parameters.Extract && !parameters.Generate)
             {
-                log.Warn("Please specify the Extract or Generate parameter");
-                log.Info(GetHelp());
-                return;
+                throw new ArgumentException("Specify --extract, --generate, or --prepare.");
             }
 
             if ((parameters.Extract || parameters.Generate) && !string.IsNullOrEmpty(parameters.OutputDir))
@@ -74,11 +86,6 @@ namespace NexusForever.MapGenerator
                 TimeSpan span = DateTime.UtcNow - start;
                 log.Info($"Generated base maps in {span.TotalSeconds}s.");
             }
-        }
-
-        private static string GetHelp()
-        {
-            return HelpText.AutoBuild(parserResult, h => h, e => e);
         }
     }
 }
