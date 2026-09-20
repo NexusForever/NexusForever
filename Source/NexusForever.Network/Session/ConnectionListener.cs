@@ -16,7 +16,6 @@ namespace NexusForever.Network.Session
         private uint port;
 
         private Task listenerTask;
-        private readonly ManualResetEventSlim waitHandle = new();
         private volatile CancellationTokenSource cancellationToken;
 
         #region Dependency Injection
@@ -51,47 +50,57 @@ namespace NexusForever.Network.Session
             if (cancellationToken != null)
                 throw new InvalidOperationException();
 
-            cancellationToken = new CancellationTokenSource();
+            var listener = new TcpListener(host, (int)port);
+            var source = new CancellationTokenSource();
+            try
+            {
+                // Bind synchronously so startup failures reach the caller.
+                listener.Start();
+                log.LogInformation($"Started listening for connections on {host}:{port}");
 
-            listenerTask = Task.Factory.StartNew(ListenerThread, TaskCreationOptions.LongRunning);
-
-            // wait for listener task to start before continuing
-            waitHandle.Wait();
+                CancellationToken token = source.Token;
+                cancellationToken = source;
+                listenerTask = Task.Run(() => ListenerThread(listener, token));
+            }
+            catch
+            {
+                listener.Stop();
+                source.Dispose();
+                cancellationToken = null;
+                throw;
+            }
         }
 
-        private async Task ListenerThread()
+        private async Task ListenerThread(TcpListener listener, CancellationToken token)
         {
-            var listener = new TcpListener(host, (int)port);
-            listener.Start();
-
-            log.LogInformation($"Started listening for connections on {host}:{port}");
-
-            waitHandle.Set();
-
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                try
+                while (!token.IsCancellationRequested)
                 {
-                    Socket socket = await listener.AcceptSocketAsync(cancellationToken.Token);
+                    try
+                    {
+                        Socket socket = await listener.AcceptSocketAsync(token);
 
-                    T session = sessionFactory.Resolve();
-                    session.OnAccept(socket);
+                        T session = sessionFactory.Resolve();
+                        session.OnAccept(socket);
 
-                    OnNewSession?.Invoke(session);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                catch (Exception exception)
-                {
-                    log.LogError(exception, "Error accepting new connection!");
+                        OnNewSession?.Invoke(session);
+                    }
+                    catch (OperationCanceledException) when (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    catch (Exception exception)
+                    {
+                        log.LogError(exception, "Error accepting new connection!");
+                    }
                 }
             }
-
-            listener.Stop();
-
-            log.LogInformation($"Stopped listening for connections on {host}:{port}");
+            finally
+            {
+                listener.Stop();
+                log.LogInformation($"Stopped listening for connections on {host}:{port}");
+            }
         }
 
         /// <summary>
@@ -104,10 +113,16 @@ namespace NexusForever.Network.Session
 
             cancellationToken.Cancel();
 
-            listenerTask.Wait();
-            listenerTask = null;
-
-            cancellationToken = null;
+            try
+            {
+                listenerTask.Wait();
+            }
+            finally
+            {
+                cancellationToken.Dispose();
+                listenerTask = null;
+                cancellationToken = null;
+            }
         }
     }
 }
