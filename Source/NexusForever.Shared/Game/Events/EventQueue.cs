@@ -47,13 +47,15 @@ namespace NexusForever.Shared.Game.Events
             {
                 if (!pending.Event.CanExecute())
                 {
+                    // Stop processing, but still requeue events deferred earlier in this tick.
+                    if (pending.Type == ConditionalEventType.Blocking)
+                        break;
+
                     switch (pending.Type)
                     {
                         case ConditionalEventType.Standard:
                             newEvents.Add(events.Dequeue());
                             continue;
-                        case ConditionalEventType.Blocking:
-                            return;
                         default:
                             throw new NotImplementedException();
                     }
