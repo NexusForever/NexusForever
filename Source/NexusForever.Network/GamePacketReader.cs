@@ -43,12 +43,17 @@ namespace NexusForever.Network
 
         public bool ReadBit()
         {
-            currentBitPosition++;
-            if (currentBitPosition > 7)
+            if (currentBitPosition >= 7)
             {
+                int value = stream.ReadByte();
+                if (value == -1)
+                    throw new EndOfStreamException();
+
+                currentBitValue = (byte)value;
                 currentBitPosition = 0;
-                currentBitValue = (byte)stream.ReadByte();
             }
+            else
+                currentBitPosition++;
 
             return ((currentBitValue >> currentBitPosition) & 1) != 0;
         }
