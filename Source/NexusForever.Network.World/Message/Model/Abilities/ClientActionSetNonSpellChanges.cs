@@ -3,12 +3,12 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Abilities
 {
-    [Message(GameMessageOpcode.ClientNonSpellActionSetChanges)]
-    public class ClientNonSpellActionSetChanges : IReadable
+    [Message(GameMessageOpcode.ClientActionSetNonSpellChanges)]
+    public class ClientActionSetNonSpellChanges : IReadable
     {
         public UILocation ActionBarIndex { get; private set; }
         public ShortcutType ShortcutType { get; private set; }
-        public uint ObjectId { get; private set; } // depending on ShortcutType can be Spell4Id, Item2Id, GameCommandType
+        public uint ObjectId { get; private set; } // depending on ShortcutType can be Spell4Id, Item2Id, GameCommandType, etc.
         public byte SpecIndex { get; private set; }
 
         public void Read(GamePacketReader reader)

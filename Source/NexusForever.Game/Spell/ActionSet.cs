@@ -347,7 +347,7 @@ namespace NexusForever.Game.Spell
             for (UILocation i = 0; i < (UILocation)MaxActionCount; i++)
             {
                 IActionSetShortcut action = GetShortcut(i);
-                serverActionSet.Actions.Add(new ServerActionSet.Action
+                serverActionSet.Shortcuts.Add(new Shortcut
                 {
                     ShortcutType = action?.ShortcutType ?? ShortcutType.None,
                     ObjectId     = action?.ObjectId ?? 0,

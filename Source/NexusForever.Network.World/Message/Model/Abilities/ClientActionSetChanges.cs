@@ -2,8 +2,8 @@ using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model.Abilities
 {
-    [Message(GameMessageOpcode.ClientRequestActionSetChanges)]
-    public class ClientRequestActionSetChanges : IReadable
+    [Message(GameMessageOpcode.ClientActionSetChanges)]
+    public class ClientActionSetChanges : IReadable
     {
         public class ActionTier : IReadable
         {

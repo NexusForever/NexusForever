@@ -8,13 +8,13 @@ using NexusForever.Network.World.Message.Model.Abilities;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 {
-    public class ClientNonSpellActionSetChangesHandler : IMessageHandler<IWorldSession, ClientNonSpellActionSetChanges>
+    public class ClientActionSetNonSpellChangesHandler : IMessageHandler<IWorldSession, ClientActionSetNonSpellChanges>
     {
         #region Dependency Injection
 
         private readonly IGameTableManager gameTableManager;
 
-        public ClientNonSpellActionSetChangesHandler(
+        public ClientActionSetNonSpellChangesHandler(
             IGameTableManager gameTableManager)
         {
             this.gameTableManager = gameTableManager;
@@ -22,7 +22,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 
         #endregion
 
-        public void HandleMessage(IWorldSession session, ClientNonSpellActionSetChanges requestActionSetChanges)
+        public void HandleMessage(IWorldSession session, ClientActionSetNonSpellChanges requestActionSetChanges)
         {
             // TODO: validate the rest of the shortcut types when known
 
