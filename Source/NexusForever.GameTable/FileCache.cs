@@ -32,36 +32,45 @@ namespace NexusForever.GameTable
             }
             if (state == 2)
                 return;
-            DirectoryInfo cacheDirectory = lazyCacheDirectory.Value;
-            FileInfo cacheInfoFile = cacheDirectory.EnumerateFiles("cacheInfo.txt").FirstOrDefault();
-            if (cacheInfoFile != null && cacheInfoFile.Exists)
+            try
             {
-                string cacheInfo = File.ReadAllText(cacheInfoFile.FullName);
-                if (cacheInfo == lazyModuleVersion.Value)
+                DirectoryInfo cacheDirectory = lazyCacheDirectory.Value;
+                FileInfo cacheInfoFile = cacheDirectory.EnumerateFiles("cacheInfo.txt").FirstOrDefault();
+                if (cacheInfoFile != null && cacheInfoFile.Exists)
                 {
-                    Interlocked.Exchange(ref cacheCheck, 2);
-                    return;
+                    string cacheInfo = File.ReadAllText(cacheInfoFile.FullName);
+                    if (cacheInfo == lazyModuleVersion.Value)
+                    {
+                        Interlocked.Exchange(ref cacheCheck, 2);
+                        return;
+                    }
                 }
+
+                log.Info("Cache files are out of date, removing them.");
+                FileInfo[] allFiles = cacheDirectory.GetFiles();
+
+                foreach (FileInfo file in allFiles)
+                {
+                    try
+                    {
+                        log.Debug($"Deleting cache file {file.Name}");
+                        file.Delete();
+                    }
+                    catch
+                    {
+                        // Ignored.
+                    }
+                }
+
+                File.WriteAllText(Path.Combine(cacheDirectory.FullName, "cacheInfo.txt"), lazyModuleVersion.Value);
+                Interlocked.Exchange(ref cacheCheck, 2);
             }
-
-            log.Info("Cache files are out of date, removing them.");
-            FileInfo[] allFiles = cacheDirectory.GetFiles();
-
-            foreach (FileInfo file in allFiles)
+            catch
             {
-                try
-                {
-                    log.Debug($"Deleting cache file {file.Name}");
-                    file.Delete();
-                }
-                catch
-                {
-                    // Ignored.
-                }
+                // Allow another caller to retry if cache preparation failed.
+                Interlocked.Exchange(ref cacheCheck, 0);
+                throw;
             }
-
-            File.WriteAllText(Path.Combine(cacheDirectory.FullName, "cacheInfo.txt"), lazyModuleVersion.Value);
-            Interlocked.Exchange(ref cacheCheck, 2);
         }
 
         public static T LoadWithCache<T>(string fileName, Func<string, T> creator)
