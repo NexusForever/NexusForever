@@ -20,6 +20,7 @@ using NexusForever.Server.Friendship.Game.Friend;
 using NexusForever.Server.Friendship.Job;
 using NexusForever.Server.Friendship.Network.Internal;
 using NexusForever.Server.Friendship.Network.Internal.Handler;
+using NexusForever.Shared.Configuration;
 using NLog.Extensions.Logging;
 using Quartz;
 
@@ -48,7 +49,7 @@ namespace NexusForever.Server.Friendship
                 .ConfigureAppConfiguration(cb =>
                 {
                     cb.SetBasePath(basePath)
-                        .AddJsonFile("FriendshipServer.json", false)
+                        .AddNexusForeverJson("FriendshipServer.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>

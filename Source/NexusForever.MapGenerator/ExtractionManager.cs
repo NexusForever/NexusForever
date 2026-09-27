@@ -66,7 +66,7 @@ namespace NexusForever.MapGenerator
             string filePath = Path.Combine(outputDir, fileEntry.FileName);
 
             using (Stream archiveStream = archive.OpenFileStream(fileEntry))
-            using (FileStream fileStream = File.OpenWrite(filePath))
+            using (FileStream fileStream = File.Create(filePath))
             {
                 archiveStream.CopyTo(fileStream);
             }

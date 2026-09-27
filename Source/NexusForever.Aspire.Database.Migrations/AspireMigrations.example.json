@@ -1,9 +1,15 @@
 {
     "AccountCreation": {
         "Username": "nexusforever",
-        "Password": "nexusforever"
+        "Password": "",
+        "RoleId": 1
     },
     "WorldDatabase": {
         "Path": "C:\\nexusforever-database"
+    },
+    "Realm": {
+        "Host": "127.0.0.1",
+        "Name": "NexusForever",
+        "Port": 24000
     }
 }

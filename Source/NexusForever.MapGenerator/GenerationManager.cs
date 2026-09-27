@@ -143,7 +143,7 @@ namespace NexusForever.MapGenerator
                 }
                 catch (Exception e)
                 {
-                    log.Error(e);
+                    log.Error(e, $"Skipping {map.Asset} grid {gridX},{gridY}.");
                 }
             }
         }

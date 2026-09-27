@@ -13,13 +13,15 @@ using NexusForever.Database.Friendship;
 using NexusForever.Database.Group;
 using NexusForever.Database.Query;
 using NexusForever.Database.World;
+using NexusForever.Shared.Configuration;
 using NLog.Extensions.Logging;
+using MySqlConnector;
 
 namespace NexusForever.Aspire.Database.Migrations
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
@@ -27,7 +29,7 @@ namespace NexusForever.Aspire.Database.Migrations
                 .ConfigureAppConfiguration(cb =>
                 {
                     cb.SetBasePath(basePath)
-                        .AddJsonFile("AspireMigrations.json", false)
+                        .AddNexusForeverJson("AspireMigrations.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureLogging(l =>
@@ -43,9 +45,18 @@ namespace NexusForever.Aspire.Database.Migrations
                     sc.AddOptions<WorldDatabaseOptions>()
                         .Bind(hb.Configuration.GetSection("WorldDatabase"));
 
+                    sc.AddOptions<RealmOptions>()
+                        .Bind(hb.Configuration.GetSection("Realm"));
+
+                    string Connection(string name) => new MySqlConnectionStringBuilder(hb.Configuration.GetConnectionString(name))
+                    {
+                        AllowUserVariables = true
+                    }.ConnectionString;
+
                     sc.AddHostedService<DatabaseMigrationHostedService>();
-                    sc.AddHostedService<AccountCreationHostedService>();
                     sc.AddHostedService<WorldDatabaseHostedService>();
+                    sc.AddHostedService<AccountCreationHostedService>();
+                    sc.AddHostedService<RealmHostedService>();
                     sc.AddHostedService<FinishHostedService>();
 
                     sc.AddScoped(sp =>
@@ -66,43 +77,52 @@ namespace NexusForever.Aspire.Database.Migrations
 
                     sc.AddDbContext<AuthContext>(options =>
                     {
-                        var connectionString = hb.Configuration.GetConnectionString("authdb");
+                        var connectionString = Connection("authdb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                     sc.AddDbContext<CharacterContext>(options =>
                     {
-                        var connectionString = hb.Configuration.GetConnectionString("characterdb");
+                        var connectionString = Connection("characterdb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                     sc.AddDbContext<WorldContext>(options =>
                     {
-                        var connectionString = hb.Configuration.GetConnectionString("worlddb");
+                        var connectionString = Connection("worlddb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                     sc.AddDbContext<GroupContext>(options =>
                     {
-                        var connectionString = hb.Configuration.GetConnectionString("groupdb");
+                        var connectionString = Connection("groupdb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                     sc.AddDbContext<ChatContext>(options =>
                     {
-                        var connectionString = hb.Configuration.GetConnectionString("chatdb");
+                        var connectionString = Connection("chatdb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                     sc.AddDbContext<FriendshipContext>(options =>
                     {
-                        var connectionString = hb.Configuration.GetConnectionString("friendshipdb");
+                        var connectionString = Connection("friendshipdb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                     sc.AddDbContext<QueryContext>(options =>
                     {
-                        var connectionString = hb.Configuration.GetConnectionString("querydb");
+                        var connectionString = Connection("querydb");
                         options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
                     });
                 });
 
-            IHost host = builder.Build();
-            await host.RunAsync();
+            try
+            {
+                using IHost host = builder.Build();
+                await host.RunAsync();
+                return 0;
+            }
+            catch (Exception exception)
+            {
+                Console.Error.WriteLine($"Database setup failed: {exception}");
+                return 1;
+            }
         }
     }
 }
