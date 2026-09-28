@@ -48,6 +48,9 @@ namespace NexusForever.Game.Map
 
         protected readonly ConcurrentQueue<IGridAction> pendingActions = new();
 
+        // latest target of each entity with a queued movement relocation, moving entities relocate every tick
+        private readonly ConcurrentDictionary<IGridEntity, Vector3> pendingRelocations = new();
+
         private readonly QueuedCounter entityCounter = new();
         protected readonly Dictionary<uint /*guid*/, IGridEntity> entities = new();
         private IEntityCache entityCache;
@@ -125,8 +128,12 @@ namespace NexusForever.Game.Map
                         }
                         case IGridActionRelocate actionRelocate:
                         {
-                            RelocateEntity(actionRelocate.Entity, actionRelocate.Vector);
-                            actionRelocate.Callback?.Invoke(actionRelocate.Vector);
+                            Vector3 vector = actionRelocate.Vector;
+                            if (actionRelocate.Coalesce && pendingRelocations.TryRemove(actionRelocate.Entity, out Vector3 latest))
+                                vector = latest;
+
+                            RelocateEntity(actionRelocate.Entity, vector);
+                            actionRelocate.Callback?.Invoke(vector);
                             break;
                         }
                         case IGridActionRemove actionRemove:
@@ -281,13 +288,26 @@ namespace NexusForever.Game.Map
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> to be relocated in <see cref="IBaseMap"/> to <see cref="Vector3"/>.
         /// </summary>
-        public void EnqueueRelocate(IGridEntity entity, Vector3 position, OnRelocateDelegate callback = null)
+        public void EnqueueRelocate(IGridEntity entity, Vector3 position, OnRelocateDelegate callback = null, bool coalesce = false)
         {
+            // coalesce movement relocations: while one is queued for the entity only its target is updated (every moving
+            // entity relocates each tick; with more of them than GridActionThreshold the queue grew without bound and
+            // adds waited minutes behind it)
+            if (coalesce)
+            {
+                if (!pendingRelocations.TryAdd(entity, position))
+                {
+                    pendingRelocations[entity] = position;
+                    return;
+                }
+            }
+
             pendingActions.Enqueue(new GridActionRelocate
             {
                 Entity   = entity,
                 Vector   = position,
-                Callback = callback
+                Callback = callback,
+                Coalesce = coalesce
             });
         }
 
