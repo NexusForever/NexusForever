@@ -173,6 +173,17 @@ namespace NexusForever.Game.PublicEvent
         }
 
         /// <summary>
+        /// Set the dynamic max of a specific active objective for the team.
+        /// </summary>
+        public void SetObjectiveDynamicMax(uint objectiveId, uint max)
+        {
+            if (!objectives.TryGetValue(objectiveId, out IPublicEventObjective objective))
+                return;
+
+            objective.SetDynamicMax(max);
+        }
+
+        /// <summary>
         /// Activate specific objective for the team with the supplied max.
         /// </summary>
         /// <remarks>
