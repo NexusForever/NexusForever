@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Shared;
 
@@ -34,6 +35,13 @@ namespace NexusForever.Script.Template
         /// <see cref="IPublicEventTeam"/> can be null if the public event was a draw.
         /// </remarks>
         void OnPublicEventFinish(IPublicEvent publicEvent, IPublicEventTeam publicEventTeam)
+        {
+        }
+
+        /// <summary>
+        /// Invoked before <see cref="IPlayer"/> is added to the map, the entry position in <see cref="IMapPosition"/> can be changed.
+        /// </summary>
+        void OnPlayerEntering(IPlayer player, IMapPosition mapPosition)
         {
         }
     }

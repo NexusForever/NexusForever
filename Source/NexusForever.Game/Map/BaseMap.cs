@@ -623,6 +623,14 @@ namespace NexusForever.Game.Map
         }
 
         /// <summary>
+        /// Invoked before <see cref="IPlayer"/> is added to the map, the entry position in <see cref="IMapPosition"/> can be changed.
+        /// </summary>
+        public void OnPlayerEntering(IPlayer player, IMapPosition mapPosition)
+        {
+            scriptCollection?.Invoke<IMapScript>(s => s.OnPlayerEntering(player, mapPosition));
+        }
+
+        /// <summary>
         /// Return a string containing debug information about the map.
         /// </summary>
         public virtual string WriteDebugInformation()

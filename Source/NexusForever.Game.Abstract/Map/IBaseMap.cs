@@ -102,5 +102,10 @@ namespace NexusForever.Game.Abstract.Map
         /// Invoked when <see cref="IPublicEvent"/> finishes with the winning <see cref="IPublicEventTeam"/>.
         /// </summary>
         void OnPublicEventFinish(IPublicEvent publicEvent, IPublicEventTeam publicEventTeam);
+
+        /// <summary>
+        /// Invoked before <see cref="IPlayer"/> is added to the map, the entry position in <see cref="IMapPosition"/> can be changed.
+        /// </summary>
+        void OnPlayerEntering(IPlayer player, IMapPosition mapPosition);
     }
 }
