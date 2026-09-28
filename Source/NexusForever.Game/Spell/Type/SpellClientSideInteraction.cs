@@ -72,7 +72,10 @@ namespace NexusForever.Game.Spell.Type
         {
             Execute();
 
-            if (Parameters.SpellInfo.Effects.FirstOrDefault(x => x.EffectType == SpellEffectType.Activate) == null)
+            // the Activate effect reports success, but it can't apply to a target that isn't a unit
+            bool activateEffect = Parameters.SpellInfo.Effects.FirstOrDefault(x => x.EffectType == SpellEffectType.Activate) != null;
+            bool unitTarget     = Parameters.PrimaryTargetId == 0 || Caster.GetVisible<IGridEntity>(Parameters.PrimaryTargetId) is IUnitEntity;
+            if (!activateEffect || !unitTarget)
                 Parameters.ClientSideInteraction?.HandleSuccess(this);
         }
 

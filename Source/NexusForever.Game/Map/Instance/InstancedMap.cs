@@ -174,6 +174,7 @@ namespace NexusForever.Game.Map.Instance
             }
 
             UpdatePosition(pending.Player, pending.MapPosition);
+            instance.OnPlayerEntering(pending.Player, pending.MapPosition);
             instance.EnqueueAdd(pending.Player, pending.MapPosition.Position, pending.Callback, pending.Error, pending.Exception);
 
             return true;

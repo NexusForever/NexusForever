@@ -143,6 +143,14 @@ namespace NexusForever.Game.Abstract.Entity
         void TeleportTo(IMapPosition mapPosition, TeleportReason reason = TeleportReason.Relocate);
 
         /// <summary>
+        /// Position the <see cref="IPlayer"/> last left in an open world map for another world, null if unknown.
+        /// </summary>
+        /// <remarks>
+        /// Used by content instances when there is no other return location, e.g. when not entered through matching.
+        /// </remarks>
+        IMapPosition ReturnPosition { get; }
+
+        /// <summary>
         /// Show loading screen for supplied <see cref="IMapPosition"/>.
         /// </summary>
         void ShowLoadingScreen(IMapPosition position);

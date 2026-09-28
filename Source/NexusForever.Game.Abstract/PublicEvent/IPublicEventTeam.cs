@@ -54,6 +54,11 @@ namespace NexusForever.Game.Abstract.PublicEvent
         void UpdateObjective(uint objectiveId, int count);
 
         /// <summary>
+        /// Set the dynamic max of a specific active objective for the team.
+        /// </summary>
+        void SetObjectiveDynamicMax(uint objectiveId, uint max);
+
+        /// <summary>
         /// Activate specific objective for the team with the supplied max.
         /// </summary>
         /// <remarks>

@@ -1031,6 +1031,11 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool CanTeleport() => pendingTeleport == null && !pendingLocalTeleport;
 
+        /// <summary>
+        /// Position the <see cref="IPlayer"/> last left in an open world map for another world, null if unknown.
+        /// </summary>
+        public IMapPosition ReturnPosition { get; private set; }
+
         private PendingTeleport pendingTeleport;
         private bool pendingLocalTeleport;
 
@@ -1097,6 +1102,10 @@ namespace NexusForever.Game.Entity
 
             SetControl(null);
 
+            // the platform belongs to the old map
+            if (PlatformGuid != null)
+                SetPlatform(null);
+
             IMapPosition source = null;
             if (Map != null)
             {
@@ -1109,6 +1118,10 @@ namespace NexusForever.Game.Entity
                     },
                     Position = Position
                 };
+
+                // leaving the open world for another world: remember where to return to
+                if (Map is not IContentMapInstance && Map.Entry.Id != mapPosition.Info.Entry.Id)
+                    ReturnPosition = source;
             }
 
             MapManager.Instance.AddToMap(this, source, mapPosition, OnAddToMap, OnTeleportToFailed, OnTeleportToFailed);
@@ -1163,6 +1176,10 @@ namespace NexusForever.Game.Entity
         private void OnTeleportToLocal(Vector3 position)
         {
             SetControl(null);
+
+            // while on a platform the client takes the position as an offset from it
+            if (PlatformGuid != null)
+                SetPlatform(null);
 
             MovementManager.SetPosition(position, false);
             MovementManager.BroadcastNetworkEntityCommands();
@@ -1350,8 +1367,9 @@ namespace NexusForever.Game.Entity
             if (PlatformGuid == null)
                 return;
 
-            IVehicleEntity vehicle = GetVisible<IVehicleEntity>(PlatformGuid.Value);
-            vehicle?.PassengerRemove(this);
+            // the platform can also be an entity the player stands on, which isn't a vehicle
+            if (GetVisible<IGridEntity>(PlatformGuid.Value) is IVehicleEntity vehicle)
+                vehicle.PassengerRemove(this);
         }
 
         /// <summary>

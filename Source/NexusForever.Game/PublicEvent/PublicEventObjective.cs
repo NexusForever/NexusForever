@@ -36,8 +36,20 @@ namespace NexusForever.Game.PublicEvent
             Status = entry.PublicEventObjectiveFlags.HasFlag(PublicEventObjectiveFlag.InitialObjective)
                 ? PublicEventStatus.Active : PublicEventStatus.Inactive;
 
-            if (entry.FailureTimeMs > 0)
-                failureTimer = new UpdateTimer(TimeSpan.FromMilliseconds(entry.FailureTimeMs));
+            if (Status == PublicEventStatus.Active)
+                StartTimers();
+        }
+
+        /// <summary>
+        /// Start the elapsed and failure timers, invoked when the objective becomes active.
+        /// </summary>
+        /// <remarks>
+        /// Timers must not run while the objective is inactive, otherwise objectives activated later in the event time out early.
+        /// </remarks>
+        private void StartTimers()
+        {
+            elapsedTimer = 0d;
+            failureTimer = Entry.FailureTimeMs > 0 ? new UpdateTimer(TimeSpan.FromMilliseconds(Entry.FailureTimeMs)) : null;
         }
 
         /// <summary>
@@ -46,6 +58,9 @@ namespace NexusForever.Game.PublicEvent
         public void Update(double lastTick)
         {
             if (IsBusy)
+                return;
+
+            if (Status != PublicEventStatus.Active)
                 return;
 
             elapsedTimer += lastTick;
@@ -57,14 +72,28 @@ namespace NexusForever.Game.PublicEvent
             if (failureTimer.HasElapsed)
             {
                 failureTimer = null;
-                SetStatus(PublicEventStatus.Failed);
+
+                // TimedWin objectives (waits, surviving, timed collecting) are won by lasting until the timer ends, any
+                // other timed objective fails
+                SetStatus(Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.TimedWin
+                    ? PublicEventStatus.Succeeded : PublicEventStatus.Failed);
             }
         }
 
         private void SetStatus(PublicEventStatus status)
         {
             Status = status;
-            BroadcastObjectiveStatusUpdate();
+
+            if (status == PublicEventStatus.Active)
+                StartTimers();
+            else
+                failureTimer = null;
+
+            // the client restarts the objective timer from the full update, it also includes the status
+            if (status == PublicEventStatus.Active)
+                BroadcastObjectiveUpdate();
+            else
+                BroadcastObjectiveStatusUpdate();
 
             Team.PublicEvent.InvokeScriptCollection<IPublicEventScript>(s => s.OnPublicEventObjectiveStatus(this));
         }
@@ -146,6 +175,13 @@ namespace NexusForever.Game.PublicEvent
             if (Entry.PublicEventObjectiveFlags.HasFlag(PublicEventObjectiveFlag.DynamicObjective))
                 return Count >= DynamicMax;
 
+            // participant objectives without a fixed count wait for every participant, the client shows the remaining
+            // participants as "Waiting for N more" based on the dynamic max
+            if (Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.ParticipantsInTriggerVolume
+                && Entry.Count == 0
+                && DynamicMax > 0)
+                return Count >= DynamicMax;
+
             return Count >= Entry.Count;
         }
 
@@ -162,6 +198,27 @@ namespace NexusForever.Game.PublicEvent
 
             DynamicMax = max;
             SetStatus(PublicEventStatus.Active);
+        }
+
+        /// <summary>
+        /// Set the dynamic max of an active objective, for example when participants join or leave.
+        /// </summary>
+        /// <remarks>
+        /// The objective is completed immediately if the current count already meets the new max.
+        /// </remarks>
+        public void SetDynamicMax(uint max)
+        {
+            if (Status != PublicEventStatus.Active)
+                return;
+
+            if (DynamicMax == max)
+                return;
+
+            DynamicMax = max;
+            BroadcastObjectiveStatusUpdate();
+
+            if (IsComplete())
+                SetStatus(PublicEventStatus.Succeeded);
         }
 
         /// <summary>
