@@ -25,6 +25,11 @@ namespace NexusForever.Game.Abstract.Map.Lock
         IMapLock GetSoloLock(Identity identity, uint worldId);
 
         /// <summary>
+        /// Remove the solo <see cref="IMapLock"/> for supplied character id and world id, the next entry creates a new instance.
+        /// </summary>
+        void RemoveSoloLock(Identity identity, uint worldId);
+
+        /// <summary>
         /// Return <see cref="IMapLock"/> for supplied match guid and world id.
         /// </summary>
         IMapLock GetMatchLock(Guid guid, uint worldId);
