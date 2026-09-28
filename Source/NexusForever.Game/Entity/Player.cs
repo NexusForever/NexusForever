@@ -1031,6 +1031,11 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool CanTeleport() => pendingTeleport == null && !pendingLocalTeleport;
 
+        /// <summary>
+        /// Position the <see cref="IPlayer"/> last left in an open world map for another world, null if unknown.
+        /// </summary>
+        public IMapPosition ReturnPosition { get; private set; }
+
         private PendingTeleport pendingTeleport;
         private bool pendingLocalTeleport;
 
@@ -1113,6 +1118,10 @@ namespace NexusForever.Game.Entity
                     },
                     Position = Position
                 };
+
+                // leaving the open world for another world: remember where to return to
+                if (Map is not IContentMapInstance && Map.Entry.Id != mapPosition.Info.Entry.Id)
+                    ReturnPosition = source;
             }
 
             MapManager.Instance.AddToMap(this, source, mapPosition, OnAddToMap, OnTeleportToFailed, OnTeleportToFailed);
