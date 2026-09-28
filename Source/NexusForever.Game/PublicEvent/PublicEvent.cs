@@ -334,6 +334,28 @@ namespace NexusForever.Game.PublicEvent
         }
 
         /// <summary>
+        /// Set the dynamic max of a specific active objective, for example when participants join or leave.
+        /// </summary>
+        public void SetObjectiveDynamicMax<T>(T objectiveId, uint max) where T : Enum
+        {
+            SetObjectiveDynamicMax(objectiveId.As<T, uint>(), max);
+        }
+
+        /// <summary>
+        /// Set the dynamic max of a specific active objective, for example when participants join or leave.
+        /// </summary>
+        public void SetObjectiveDynamicMax(uint objectiveId, uint max)
+        {
+            if (!template.Objectives.TryGetValue(objectiveId, out PublicEventObjectiveEntry entry))
+                return;
+
+            if (!teams.TryGetValue(entry.PublicEventTeamId, out IPublicEventTeam publicEventTeam))
+                return;
+
+            publicEventTeam.SetObjectiveDynamicMax(entry.Id, max);
+        }
+
+        /// <summary>
         /// Activate objective with the supplied objectiveId and max count.
         /// </summary>
         /// <remarks>

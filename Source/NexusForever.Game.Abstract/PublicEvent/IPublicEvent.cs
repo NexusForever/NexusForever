@@ -82,6 +82,16 @@ namespace NexusForever.Game.Abstract.PublicEvent
         void UpdateObjective(uint objectiveId, int count);
 
         /// <summary>
+        /// Set the dynamic max of a specific active objective, for example when participants join or leave.
+        /// </summary>
+        void SetObjectiveDynamicMax<T>(T objectiveId, uint max) where T : Enum;
+
+        /// <summary>
+        /// Set the dynamic max of a specific active objective, for example when participants join or leave.
+        /// </summary>
+        void SetObjectiveDynamicMax(uint objectiveId, uint max);
+
+        /// <summary>
         /// Activate objective with the supplied objectiveId and max count.
         /// </summary>
         /// <remarks>
