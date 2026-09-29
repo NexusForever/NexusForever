@@ -240,7 +240,22 @@ namespace NexusForever.WorldServer.Command.Handler
                 return;
             }
 
-            context.GetTargetOrInvoker<IPlayer>().QuestManager.QuestAchieve(questId);
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
+            try
+            {
+                QuestState? before = player.QuestManager.GetQuestState(questId);
+                player.QuestManager.QuestAchieve(questId);
+                QuestState? after = player.QuestManager.GetQuestState(questId);
+                context.SendMessage($"Quest {questId}: {(before?.ToString() ?? "none")} → {(after?.ToString() ?? "none")}.");
+            }
+            catch (QuestException ex)
+            {
+                context.SendMessage($"!quest achieve {questId} failed: {ex.Message}");
+            }
+            catch (ArgumentException ex)
+            {
+                context.SendMessage($"!quest achieve {questId} failed: {ex.Message}");
+            }
         }
 
         [Command(Permission.QuestAchieveObjective, "Achieve a single objective for an existing quest for character.", "achieveobjective")]

@@ -21,6 +21,10 @@ namespace NexusForever.Script.Main.Tutorial
         private const ushort ExileCombatQuestId    = 10518;
         private const ushort DominionCombatQuestId = 10524;
 
+        // Housing hologram tutorial — granted after Face of the Enemy completes (NPE Part 2 → housing).
+        private const ushort ExileHousingQuestId    = 10525;
+        private const ushort DominionHousingQuestId = 10526;
+
         #region Dependency Injection
 
         private readonly ICinematicFactory cinematicFactory;
@@ -47,6 +51,7 @@ namespace NexusForever.Script.Main.Tutorial
 
             GrantStarterQuest(player);
             GrantCombatQuestIfReady(player);
+            GrantHousingQuestIfReady(player);
         }
 
         private static ushort GetStarterQuestId(IPlayer player)
@@ -61,6 +66,13 @@ namespace NexusForever.Script.Main.Tutorial
             return player.Faction1 == Faction.Dominion
                 ? DominionCombatQuestId
                 : ExileCombatQuestId;
+        }
+
+        private static ushort GetHousingQuestId(IPlayer player)
+        {
+            return player.Faction1 == Faction.Dominion
+                ? DominionHousingQuestId
+                : ExileHousingQuestId;
         }
 
         private void GrantStarterQuest(IPlayer player)
@@ -94,6 +106,33 @@ namespace NexusForever.Script.Main.Tutorial
                 return;
 
             // FaceOfTheEnemyQuestScript queues the combat projector cinematic on accept.
+            player.QuestManager.QuestAdd(info);
+        }
+
+        private void GrantHousingQuestIfReady(IPlayer player)
+        {
+            // After Face of the Enemy force-completes (player still in combat hologram until they
+            // activate housing projector 73741). Also covers relog while Achieved.
+            ushort combatQuestId = GetCombatQuestId(player);
+            QuestState? combatState = player.QuestManager.GetQuestState(combatQuestId);
+
+            if (combatState == QuestState.Achieved)
+            {
+                player.QuestManager.QuestForceComplete(combatQuestId);
+                combatState = player.QuestManager.GetQuestState(combatQuestId);
+            }
+
+            if (combatState != QuestState.Completed)
+                return;
+
+            ushort housingQuestId = GetHousingQuestId(player);
+            if (player.QuestManager.GetQuestState(housingQuestId) != null)
+                return;
+
+            IQuestInfo info = globalQuestManager.GetQuestInfo(housingQuestId);
+            if (info == null)
+                return;
+
             player.QuestManager.QuestAdd(info);
         }
     }

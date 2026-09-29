@@ -508,18 +508,58 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void QuestAchieve(ushort questId)
         {
-            if (GlobalQuestManager.Instance.GetQuestInfo(questId) == null)
+            IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (info == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
 
-            IQuest quest = GetQuest(questId);
+            IQuest quest = GetQuest(questId, GetQuestFlags.Active);
             if (quest == null || quest.PendingDelete)
-                throw new QuestException($"Player {player.CharacterId} tried to achieve quest {questId} which they don't have!");
+            {
+                if (GetQuest(questId, GetQuestFlags.Completed) != null)
+                    throw new QuestException($"Quest {questId} is already completed.");
+
+                // GM convenience: add the quest if it isn't in the log, then achieve it.
+                QuestAdd(info);
+                quest = GetQuest(questId, GetQuestFlags.Active);
+                if (quest == null || quest.PendingDelete)
+                    throw new QuestException($"Unable to add or find quest {questId}.");
+            }
+
+            // Already achieved — finish turn-in so NPE hand-offs (teleport / next quest) run.
+            if (quest.State == QuestState.Achieved)
+            {
+                QuestForceComplete(questId);
+                return;
+            }
 
             if (quest.State != QuestState.Accepted)
-                throw new QuestException($"Player {player.CharacterId} tried to achieve quest {questId} with invalid state!");
+                throw new QuestException($"Quest {questId} is in state {quest.State}; expected Accepted.");
 
-            foreach (IQuestObjectiveInfo info in quest.Info.Objectives)
-                quest.ObjectiveUpdate(info.Type, info.Entry.Data, info.Entry.Count);
+            // Complete by objective id in index order so sequential gates unlock correctly.
+            foreach (IQuestObjective objective in quest.OrderBy(o => o.Index))
+            {
+                if (objective.IsComplete())
+                    continue;
+
+                quest.ObjectiveUpdate(objective.ObjectiveInfo.Id, objective.ObjectiveInfo.Entry.Count);
+            }
+
+            // Fallback: force any remaining objectives (ActivateEntity edge cases, etc.).
+            if (quest.State != QuestState.Achieved)
+            {
+                foreach (IQuestObjective objective in quest.OrderBy(o => o.Index))
+                {
+                    if (objective.IsComplete())
+                        continue;
+
+                    objective.Complete();
+                }
+
+                if (quest.All(o => o.IsComplete()))
+                    quest.State = QuestState.Achieved;
+            }
+
+            // NPE scripts (Navigating Nexus / Face of the Enemy) listen for Achieved and force-complete + teleport.
         }
 
         /// <summary>

@@ -387,11 +387,11 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void TakeDamage(IUnitEntity attacker, IDamageDescription damageDescription)
         {
-            if (!IsAlive || !attacker.IsAlive)
+            if (damageDescription == null || !IsAlive || attacker == null || !attacker.IsAlive)
                 return;
 
             // TODO: Calculate Threat properly
-            ThreatManager.UpdateThreat(attacker, (int)damageDescription.RawDamage);
+            ThreatManager?.UpdateThreat(attacker, (int)damageDescription.RawDamage);
 
             Shield -= damageDescription.ShieldAbsorbAmount;
             ModifyHealth(damageDescription.AdjustedDamage, damageDescription.DamageType, attacker);

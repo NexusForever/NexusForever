@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Numerics;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Quest;
@@ -53,6 +54,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 case 73463: // Explosive Mine - Easy
                     entity.RemoveFromMap();
                     break;
+                case 73741: // Housing Hologram Projector (Part 2 → housing plot)
+                    TryTeleportToHousingPlot(session.Player);
+                    break;
             }
 
             foreach (uint targetGroupId in assetManager.GetTargetGroupsForCreatureId(entity.CreatureId) ?? Enumerable.Empty<uint>())
@@ -61,6 +65,40 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 if (entity is ISimpleEntity simple)
                     session.Player.QuestManager.ObjectiveChecklistBit(targetGroupId, simple.QuestChecklistIdx);
             }
+        }
+
+        // Housing plot pad near Protostar Sky/Music specialists.
+        private static readonly Vector3 HousingPlotPosition = new(1227.4f, -494.2f, 125f);
+
+        /// <summary>
+        /// NPE housing hologram projector (73741) — spell 87061 is Activate + fullscreen only.
+        /// Teleport into the housing plot once Face of the Enemy is done / Claim to Stake is active.
+        /// </summary>
+        private static void TryTeleportToHousingPlot(IPlayer player)
+        {
+            QuestState? exileCombat    = player.QuestManager.GetQuestState(10518);
+            QuestState? dominionCombat = player.QuestManager.GetQuestState(10524);
+            QuestState? exileHousing   = player.QuestManager.GetQuestState(10525);
+            QuestState? dominionHousing = player.QuestManager.GetQuestState(10526);
+
+            bool combatDone = exileCombat is QuestState.Completed or QuestState.Achieved
+                || dominionCombat is QuestState.Completed or QuestState.Achieved;
+            bool housingActive = exileHousing is QuestState.Accepted or QuestState.Achieved
+                || dominionHousing is QuestState.Accepted or QuestState.Achieved;
+
+            if (!combatDone && !housingActive)
+                return;
+
+            player.Dismount();
+
+            float x = HousingPlotPosition.X;
+            float y = HousingPlotPosition.Y;
+            float z = HousingPlotPosition.Z;
+            float? terrainY = player.Map?.GetTerrainHeight(x, z);
+            if (terrainY.HasValue)
+                y = terrainY.Value;
+
+            player.TeleportTo(3460, x, y, z);
         }
     }
 }
