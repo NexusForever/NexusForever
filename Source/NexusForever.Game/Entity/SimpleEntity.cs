@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
+using NexusForever.Script;
 
 namespace NexusForever.Game.Entity
 {
@@ -26,6 +27,10 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(model);
             QuestChecklistIdx = model.QuestChecklistIdx;
+
+            // Simple entities (rings, holorings, props) were previously scriptless;
+            // NPE objective rings need OnEnterRange via creature-filtered scripts.
+            scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<ISimpleEntity>(this);
         }
 
         protected override IEntityModel BuildEntityModel()
