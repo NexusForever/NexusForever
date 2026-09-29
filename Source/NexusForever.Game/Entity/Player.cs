@@ -406,6 +406,8 @@ namespace NexusForever.Game.Entity
                     }
                 }).FireAndForgetAsync();
 
+                QuestManager.CheckEnterAreaObjectives();
+
                 relocationTimer.Reset(false);
             }
 
@@ -700,7 +702,15 @@ namespace NexusForever.Game.Entity
                     });
                 }
 
-                QuestManager.ObjectiveUpdate(QuestObjectiveType.EnterZone, Zone.Id, 1);
+                // Credit EnterZone for the leaf zone and every parent (e.g. housing plot 5969 → hologram 4965).
+                WorldZoneEntry zoneEntry = Zone;
+                while (zoneEntry != null)
+                {
+                    QuestManager.ObjectiveUpdate(QuestObjectiveType.EnterZone, zoneEntry.Id, 1);
+                    zoneEntry = zoneEntry.ParentZoneId != 0u
+                        ? GameTableManager.Instance.WorldZone.GetEntry(zoneEntry.ParentZoneId)
+                        : null;
+                }
             }
 
             ZoneMapManager.OnZoneUpdate();

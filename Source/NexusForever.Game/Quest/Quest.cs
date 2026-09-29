@@ -96,6 +96,7 @@ namespace NexusForever.Game.Quest
 
         private QuestSaveMask saveMask;
 
+        public IPlayer Owner => player;
         private readonly IPlayer player;
         private readonly List<IQuestObjective> objectives = new();
 
@@ -361,6 +362,44 @@ namespace NexusForever.Game.Quest
             scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
 
             // TODO: Should you be able to complete optional objectives after required are completed?
+            if (RequiredObjectivesComplete())
+                CompleteOptionalObjectives();
+
+            if (objectives.All(o => o.IsComplete()))
+                State = QuestState.Achieved;
+        }
+
+        /// <summary>
+        /// Set a checklist slot on matching <see cref="QuestObjectiveType.ActivateTargetGroupChecklist"/> objectives.
+        /// </summary>
+        public void ObjectiveChecklistBit(uint targetGroupId, byte checklistIdx)
+        {
+            if (PendingDelete)
+                return;
+
+            if (State == QuestState.Achieved)
+                return;
+
+            foreach (IQuestObjective objective in objectives
+                .Where(o => o.ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist
+                    && o.ObjectiveInfo.Entry.Data == targetGroupId)
+                .OrderByDescending(o => o.Index))
+            {
+                if (objective.IsComplete())
+                    continue;
+
+                if (!CanUpdateObjective(objective))
+                    continue;
+
+                uint oldProgress = objective.Progress;
+                objective.ObjectiveChecklistBit(checklistIdx);
+
+                if (objective.Progress != oldProgress)
+                    SendQuestObjectiveUpdate(objective);
+
+                scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
+            }
+
             if (RequiredObjectivesComplete())
                 CompleteOptionalObjectives();
 

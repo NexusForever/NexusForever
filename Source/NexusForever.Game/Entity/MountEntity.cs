@@ -80,27 +80,34 @@ namespace NexusForever.Game.Entity
             if (seatType != VehicleSeatType.Pilot)
                 return;
 
+            // Sprint is cast on the player during SummonMount before boarding completes;
+            // copy the resolved MountSpeedMultiplier onto the mount (the controlled unit).
+            SetBaseProperty(Property.MountSpeedMultiplier, player.GetPropertyValue(Property.MountSpeedMultiplier));
+
             if (PilotDisplayInfo != null)
                 player.AddVisual(ItemSlot.Mount, (ushort)PilotDisplayInfo.Id);
 
-            IPetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(MountType, SpellEntry.Id);
-            if (customisation != null)
+            if (SpellEntry != null)
             {
-                ItemSlot slot = ItemSlot.MountFront;
-                foreach (PetFlairEntry entry in customisation)
+                IPetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(MountType, SpellEntry.Id);
+                if (customisation != null)
                 {
-                    if (entry != null)
+                    ItemSlot slot = ItemSlot.MountFront;
+                    foreach (PetFlairEntry entry in customisation)
                     {
-                        ushort displayId = (ushort)(slot != ItemSlot.MountRight ? entry.ItemDisplayId[0] : entry.ItemDisplayId[1]);
+                        if (entry != null)
+                        {
+                            ushort displayId = (ushort)(slot != ItemSlot.MountRight ? entry.ItemDisplayId[0] : entry.ItemDisplayId[1]);
 
-                        // hoverboards have their flair visuals added to the player
-                        if (MountType == PetType.HoverBoard)
-                            player.AddVisual(slot, displayId);
-                        else
-                            AddVisual(slot, displayId);
+                            // hoverboards have their flair visuals added to the player
+                            if (MountType == PetType.HoverBoard)
+                                player.AddVisual(slot, displayId);
+                            else
+                                AddVisual(slot, displayId);
+                        }
+
+                        slot++;
                     }
-
-                    slot++;
                 }
             }
         }

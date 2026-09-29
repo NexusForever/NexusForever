@@ -15,6 +15,26 @@ namespace NexusForever.WorldServer.Command.Handler
     [CommandTarget(typeof(IPlayer))]
     public class TeleportCommandCategory : CommandCategory
     {
+        // Shared novice create position for all races in world 3460 (New Player Experience).
+        private const ushort NpeWorldId = 3460;
+        private const float  NpeStartX  = 29.1286f;
+        private const float  NpeStartY  = -853.8716f;
+        private const float  NpeStartZ  = -560.188f;
+
+        [Command(Permission.TeleportCoordinates, "Teleport to the New Player Experience starter position (world 3460).", "npe", "tutorial")]
+        public void HandleTeleportNpe(ICommandContext context)
+        {
+            IPlayer target = context.GetTargetOrInvoker<IPlayer>();
+            if (!target.CanTeleport())
+            {
+                context.SendMessage("You have a pending teleport! Please wait to use this command.");
+                return;
+            }
+
+            target.TeleportTo(NpeWorldId, NpeStartX, NpeStartY, NpeStartZ);
+            context.SendMessage($"Teleported to NPE start ({NpeWorldId} {NpeStartX} {NpeStartY} {NpeStartZ}).");
+        }
+
         [Command(Permission.TeleportCoordinates, "Teleport to the specified coordinates optionally specifying the world.", "coordinates")]
         public void HandleTeleportCoordinates(ICommandContext context,
             [Parameter("X coordinate for target teleport position.")]

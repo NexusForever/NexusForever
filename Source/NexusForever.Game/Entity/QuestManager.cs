@@ -457,22 +457,109 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Remove all active, inactive, and completed quests (dev reset to a clean log).
+        /// </summary>
+        public int QuestResetAll()
+        {
+            List<IQuest> quests =
+            [
+                ..activeQuests.Values,
+                ..inactiveQuests.Values,
+                ..completedQuests.Values
+            ];
+
+            int removed = 0;
+            foreach (IQuest quest in quests)
+            {
+                if (quest.PendingDelete)
+                    continue;
+
+                foreach (IQuestObjective objective in quest)
+                    objective.Progress = 0u;
+
+                if (!quest.PendingCreate)
+                    quest.EnqueueDelete(true);
+
+                switch (quest.State)
+                {
+                    case QuestState.Accepted:
+                    case QuestState.Achieved:
+                        activeQuests.Remove(quest.Id);
+                        break;
+                    case QuestState.Completed:
+                        completedQuests.Remove(quest.Id);
+                        break;
+                    default:
+                        inactiveQuests.Remove(quest.Id);
+                        break;
+                }
+
+                // Notify client before marking abandoned so the UI clears the entry.
+                quest.State = QuestState.Abandoned;
+                removed++;
+            }
+
+            log.Trace($"Reset {removed} quest(s) for player {player.CharacterId}.");
+            return removed;
+        }
+
+        /// <summary>
         /// Complete all <see cref="IQuestObjective"/>'s for supplied active quest id.
         /// </summary>
         public void QuestAchieve(ushort questId)
         {
-            if (GlobalQuestManager.Instance.GetQuestInfo(questId) == null)
+            IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (info == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
 
-            IQuest quest = GetQuest(questId);
+            IQuest quest = GetQuest(questId, GetQuestFlags.Active);
             if (quest == null || quest.PendingDelete)
-                throw new QuestException($"Player {player.CharacterId} tried to achieve quest {questId} which they don't have!");
+            {
+                if (GetQuest(questId, GetQuestFlags.Completed) != null)
+                    throw new QuestException($"Quest {questId} is already completed.");
+
+                // GM convenience: add the quest if it isn't in the log, then achieve it.
+                QuestAdd(info);
+                quest = GetQuest(questId, GetQuestFlags.Active);
+                if (quest == null || quest.PendingDelete)
+                    throw new QuestException($"Unable to add or find quest {questId}.");
+            }
+
+            // Already achieved — finish turn-in so NPE hand-offs (teleport / next quest) run.
+            if (quest.State == QuestState.Achieved)
+            {
+                QuestForceComplete(questId);
+                return;
+            }
 
             if (quest.State != QuestState.Accepted)
-                throw new QuestException($"Player {player.CharacterId} tried to achieve quest {questId} with invalid state!");
+                throw new QuestException($"Quest {questId} is in state {quest.State}; expected Accepted.");
 
-            foreach (IQuestObjectiveInfo info in quest.Info.Objectives)
-                quest.ObjectiveUpdate(info.Type, info.Entry.Data, info.Entry.Count);
+            // Complete by objective id in index order so sequential gates unlock correctly.
+            foreach (IQuestObjective objective in quest.OrderBy(o => o.Index))
+            {
+                if (objective.IsComplete())
+                    continue;
+
+                quest.ObjectiveUpdate(objective.ObjectiveInfo.Id, objective.ObjectiveInfo.Entry.Count);
+            }
+
+            // Fallback: force any remaining objectives (ActivateEntity edge cases, etc.).
+            if (quest.State != QuestState.Achieved)
+            {
+                foreach (IQuestObjective objective in quest.OrderBy(o => o.Index))
+                {
+                    if (objective.IsComplete())
+                        continue;
+
+                    objective.Complete();
+                }
+
+                if (quest.All(o => o.IsComplete()))
+                    quest.State = QuestState.Achieved;
+            }
+
+            // NPE scripts (Navigating Nexus / Face of the Enemy) listen for Achieved and force-complete + teleport.
         }
 
         /// <summary>
@@ -538,6 +625,29 @@ namespace NexusForever.Game.Entity
                 if (!GlobalQuestManager.Instance.GetQuestReceivers(questId).Any(c => player.GetVisibleCreature<WorldEntity>(c).Any()))
                     throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} without any quest receiver!");
             }
+
+            FinishQuest(quest, reward);
+        }
+
+        /// <summary>
+        /// Complete an achieved quest without requiring a quest receiver or communicator turn-in
+        /// (used for scripted NPE / tutorial hand-offs).
+        /// </summary>
+        public void QuestForceComplete(ushort questId, ushort reward = 0)
+        {
+            if (GlobalQuestManager.Instance.GetQuestInfo(questId) == null)
+                throw new ArgumentException($"Invalid quest {questId}!");
+
+            IQuest quest = GetQuest(questId, GetQuestFlags.Active);
+            if (quest == null || quest.State != QuestState.Achieved)
+                return;
+
+            FinishQuest(quest, reward);
+        }
+
+        private void FinishQuest(IQuest quest, ushort reward)
+        {
+            ushort questId = quest.Id;
 
             // reclaim any quest specific items
             for (int i = 0; i < quest.Info.Entry.PushedItemIds.Length; i++)
@@ -710,6 +820,66 @@ namespace NexusForever.Game.Entity
         {
             foreach (IQuest quest in activeQuests.Values)
                 quest.ObjectiveUpdate(id, progress);
+        }
+
+        /// <summary>
+        /// Set a checklist slot on active <see cref="QuestObjectiveType.ActivateTargetGroupChecklist"/> objectives.
+        /// </summary>
+        public void ObjectiveChecklistBit(uint targetGroupId, byte checklistIdx)
+        {
+            foreach (IQuest quest in activeQuests.Values)
+                quest.ObjectiveChecklistBit(targetGroupId, checklistIdx);
+        }
+
+        /// <summary>
+        /// Check active <see cref="QuestObjectiveType.EnterArea"/> objectives against the player's current world position.
+        /// </summary>
+        /// <remarks>
+        /// EnterArea objectives store a shared area id in <see cref="QuestObjectiveEntry.Data"/>; the actual spheres to test are
+        /// <see cref="QuestObjectiveEntry.WorldLocationsIdIndicator00"/> through Indicator03. Matching uses 3D distance against
+        /// <see cref="WorldLocation2Entry.Radius"/> (minimum 5).
+        /// </remarks>
+        public void CheckEnterAreaObjectives()
+        {
+            if (player.Map?.Entry == null)
+                return;
+
+            uint worldId = player.Map.Entry.Id;
+            foreach (IQuest quest in activeQuests.Values)
+            {
+                foreach (IQuestObjective objective in quest)
+                {
+                    if (objective.ObjectiveInfo.Type != QuestObjectiveType.EnterArea)
+                        continue;
+
+                    if (objective.IsComplete())
+                        continue;
+
+                    QuestObjectiveEntry entry = objective.ObjectiveInfo.Entry;
+                    if (IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator00, worldId)
+                        || IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator01, worldId)
+                        || IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator02, worldId)
+                        || IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator03, worldId))
+                    {
+                        quest.ObjectiveUpdate(QuestObjectiveType.EnterArea, entry.Data, 1u);
+                    }
+                }
+            }
+        }
+
+        private bool IsInsideObjectiveLocation(uint worldLocation2Id, uint worldId)
+        {
+            if (worldLocation2Id == 0u)
+                return false;
+
+            WorldLocation2Entry location = GameTableManager.Instance.WorldLocation2.GetEntry(worldLocation2Id);
+            if (location == null || location.WorldId != worldId)
+                return false;
+
+            var target = new System.Numerics.Vector3(location.Position0, location.Position1, location.Position2);
+            // Many NPE / tutorial indicators use Radius=1, which is too tight for jump pads and mounts.
+            float radius = Math.Max(location.Radius, 5f);
+            return System.Numerics.Vector3.Distance(player.Position, target) <= radius;
         }
 
         /// <summary>

@@ -50,6 +50,12 @@ namespace NexusForever.Game.Abstract.Entity
         void QuestAbandon(ushort questId);
 
         /// <summary>
+        /// Remove all active, inactive, and completed quests (dev reset to a clean log).
+        /// </summary>
+        /// <returns>Number of quests removed.</returns>
+        int QuestResetAll();
+
+        /// <summary>
         /// Complete all <see cref="IQuestObjective"/>'s for supplied active quest id.
         /// </summary>
         void QuestAchieve(ushort questId);
@@ -63,6 +69,12 @@ namespace NexusForever.Game.Abstract.Entity
         /// Complete an achieved quest supplying an optional reward and whether the quest was completed from the communicator.
         /// </summary>
         void QuestComplete(ushort questId, ushort reward, bool communicator);
+
+        /// <summary>
+        /// Complete an achieved quest without requiring a quest receiver or communicator turn-in
+        /// (used for scripted NPE / tutorial hand-offs).
+        /// </summary>
+        void QuestForceComplete(ushort questId, ushort reward = 0);
 
         /// <summary>
         /// Ignore or acknowledge an inactive quest.
@@ -89,10 +101,20 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void ObjectiveUpdate(QuestObjectiveType type, uint data, uint progress);
 
-        // <summary>
+        /// <summary>
         /// Update any active quest <see cref="IQuestObjective"/>'s with supplied ID with progress.
         /// </summary>
         void ObjectiveUpdate(uint id, uint progress);
+
+        /// <summary>
+        /// Set a checklist slot on active <see cref="QuestObjectiveType.ActivateTargetGroupChecklist"/> objectives.
+        /// </summary>
+        void ObjectiveChecklistBit(uint targetGroupId, byte checklistIdx);
+
+        /// <summary>
+        /// Check active <see cref="QuestObjectiveType.EnterArea"/> objectives against the player's current world position.
+        /// </summary>
+        void CheckEnterAreaObjectives();
 
         /// <summary>
         /// Returns a collection of all active quests.

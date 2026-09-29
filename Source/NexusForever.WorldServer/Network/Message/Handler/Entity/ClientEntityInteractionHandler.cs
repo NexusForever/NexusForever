@@ -35,8 +35,13 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             {
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.TalkTo, entity.CreatureId, 1u);
+                session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, entity.CreatureId, 1u);
                 foreach (uint targetGroupId in assetManager.GetTargetGroupsForCreatureId(entity.CreatureId) ?? Enumerable.Empty<uint>())
+                {
                     session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.TalkToTargetGroup, targetGroupId, 1u);
+                    if (entity is ISimpleEntity simple)
+                        session.Player.QuestManager.ObjectiveChecklistBit(targetGroupId, simple.QuestChecklistIdx);
+                }
             }
 
             switch (entityInteraction.Type)
@@ -47,6 +52,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                     {
                         DialogUnitId = entityInteraction.UnitId
                     });
+
+                    // NPE housing hologram: skybox/music "upload" casts (client shows Uploading… until DialogEnd).
+                    if (entity != null)
+                        TryCastHousingTutorialSpell(session.Player, entity.CreatureId);
                     break;
                 }
                 case InteractionType.Vendor: // Handle Vendor
@@ -101,6 +110,25 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             ServerVendorItemsUpdated vendorItemsUpdated = vendorEntity.VendorInfo.Build();
             vendorItemsUpdated.Guid = vendorEntity.Guid;
             session.EnqueueMessageEncrypted(vendorItemsUpdated);
+        }
+
+        /// <summary>
+        /// NPEU Part 4 housing specialists — skybox (73663) / music (73664) change spells.
+        /// Landscape (73422) and Decor (73662) only need TalkToTargetGroup credit (count 2 each).
+        /// </summary>
+        private static void TryCastHousingTutorialSpell(IPlayer player, uint creatureId)
+        {
+            uint spellId = creatureId switch
+            {
+                73663 => 85631u, // NPEU - Part 4 - Housing - Skybox Change
+                73664 => 85632u, // NPEU - Part 4 - Housing - Music Change
+                _     => 0u
+            };
+
+            if (spellId == 0u)
+                return;
+
+            player.CastSpell(spellId);
         }
     }
 }
