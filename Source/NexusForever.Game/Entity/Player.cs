@@ -406,6 +406,8 @@ namespace NexusForever.Game.Entity
                     }
                 }).FireAndForgetAsync();
 
+                QuestManager.CheckEnterAreaObjectives();
+
                 relocationTimer.Reset(false);
             }
 

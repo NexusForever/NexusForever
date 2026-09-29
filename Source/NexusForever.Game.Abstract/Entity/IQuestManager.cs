@@ -89,10 +89,15 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void ObjectiveUpdate(QuestObjectiveType type, uint data, uint progress);
 
-        // <summary>
+        /// <summary>
         /// Update any active quest <see cref="IQuestObjective"/>'s with supplied ID with progress.
         /// </summary>
         void ObjectiveUpdate(uint id, uint progress);
+
+        /// <summary>
+        /// Check active <see cref="QuestObjectiveType.EnterArea"/> objectives against the player's current world position.
+        /// </summary>
+        void CheckEnterAreaObjectives();
 
         /// <summary>
         /// Returns a collection of all active quests.

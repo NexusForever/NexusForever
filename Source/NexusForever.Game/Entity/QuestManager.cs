@@ -713,6 +713,56 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Check active <see cref="QuestObjectiveType.EnterArea"/> objectives against the player's current world position.
+        /// </summary>
+        /// <remarks>
+        /// EnterArea objectives store a shared area id in <see cref="QuestObjectiveEntry.Data"/>; the actual spheres to test are
+        /// <see cref="QuestObjectiveEntry.WorldLocationsIdIndicator00"/> through Indicator03. Matching uses 3D distance against
+        /// <see cref="WorldLocation2Entry.Radius"/> (minimum 1).
+        /// </remarks>
+        public void CheckEnterAreaObjectives()
+        {
+            if (player.Map?.Entry == null)
+                return;
+
+            uint worldId = player.Map.Entry.Id;
+            foreach (IQuest quest in activeQuests.Values)
+            {
+                foreach (IQuestObjective objective in quest)
+                {
+                    if (objective.ObjectiveInfo.Type != QuestObjectiveType.EnterArea)
+                        continue;
+
+                    if (objective.IsComplete())
+                        continue;
+
+                    QuestObjectiveEntry entry = objective.ObjectiveInfo.Entry;
+                    if (IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator00, worldId)
+                        || IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator01, worldId)
+                        || IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator02, worldId)
+                        || IsInsideObjectiveLocation(entry.WorldLocationsIdIndicator03, worldId))
+                    {
+                        quest.ObjectiveUpdate(QuestObjectiveType.EnterArea, entry.Data, 1u);
+                    }
+                }
+            }
+        }
+
+        private bool IsInsideObjectiveLocation(uint worldLocation2Id, uint worldId)
+        {
+            if (worldLocation2Id == 0u)
+                return false;
+
+            WorldLocation2Entry location = GameTableManager.Instance.WorldLocation2.GetEntry(worldLocation2Id);
+            if (location == null || location.WorldId != worldId)
+                return false;
+
+            var target = new System.Numerics.Vector3(location.Position0, location.Position1, location.Position2);
+            float radius = Math.Max(location.Radius, 1f);
+            return System.Numerics.Vector3.Distance(player.Position, target) <= radius;
+        }
+
+        /// <summary>
         /// Returns a collection of all active quests.
         /// </summary>
         public IEnumerable<IQuest> GetActiveQuests()
