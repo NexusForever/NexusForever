@@ -80,6 +80,10 @@ namespace NexusForever.Game.Entity
             if (seatType != VehicleSeatType.Pilot)
                 return;
 
+            // Sprint is cast on the player during SummonMount before boarding completes;
+            // copy the resolved MountSpeedMultiplier onto the mount (the controlled unit).
+            SetBaseProperty(Property.MountSpeedMultiplier, player.GetPropertyValue(Property.MountSpeedMultiplier));
+
             if (PilotDisplayInfo != null)
                 player.AddVisual(ItemSlot.Mount, (ushort)PilotDisplayInfo.Id);
 

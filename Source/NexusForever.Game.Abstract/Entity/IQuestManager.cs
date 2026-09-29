@@ -50,6 +50,12 @@ namespace NexusForever.Game.Abstract.Entity
         void QuestAbandon(ushort questId);
 
         /// <summary>
+        /// Remove all active, inactive, and completed quests (dev reset to a clean log).
+        /// </summary>
+        /// <returns>Number of quests removed.</returns>
+        int QuestResetAll();
+
+        /// <summary>
         /// Complete all <see cref="IQuestObjective"/>'s for supplied active quest id.
         /// </summary>
         void QuestAchieve(ushort questId);
@@ -63,6 +69,12 @@ namespace NexusForever.Game.Abstract.Entity
         /// Complete an achieved quest supplying an optional reward and whether the quest was completed from the communicator.
         /// </summary>
         void QuestComplete(ushort questId, ushort reward, bool communicator);
+
+        /// <summary>
+        /// Complete an achieved quest without requiring a quest receiver or communicator turn-in
+        /// (used for scripted NPE / tutorial hand-offs).
+        /// </summary>
+        void QuestForceComplete(ushort questId, ushort reward = 0);
 
         /// <summary>
         /// Ignore or acknowledge an inactive quest.

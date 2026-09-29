@@ -248,6 +248,19 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Cast a <see cref="ISpell"/> with the supplied spell id using non-user-initiated defaults.
+        /// </summary>
+        public void CastSpell(uint spell4Id)
+        {
+            CastSpell(spell4Id, new SpellParameters
+            {
+                UserInitiatedSpellCast = false,
+                // NPCs/scripts usually SetTarget first; wire that into PrimaryTargetId so Damage effects hit.
+                PrimaryTargetId        = TargetGuid ?? 0u
+            });
+        }
+
+        /// <summary>
         /// Cast a <see cref="ISpell"/> with the supplied spell id and <see cref="ISpellParameters"/>.
         /// </summary>
         public void CastSpell(uint spell4Id, ISpellParameters parameters)
@@ -366,13 +379,13 @@ namespace NexusForever.Game.Entity
         public bool IsValidAttackTarget()
         {
             // TODO: Expand on this. There's bound to be flags or states that should prevent an entity from being attacked.
-            return (this is IPlayer or INonPlayerEntity);
+            return this is IPlayer or INonPlayerEntity or IAiTurretEntity;
         }
 
         /// <summary>
         /// Deal damage to this <see cref="IUnitEntity"/> from the supplied <see cref="IUnitEntity"/>.
         /// </summary>
-        public void TakeDamage(IUnitEntity attacker, IDamageDescription damageDescription)
+        public virtual void TakeDamage(IUnitEntity attacker, IDamageDescription damageDescription)
         {
             if (!IsAlive || !attacker.IsAlive)
                 return;

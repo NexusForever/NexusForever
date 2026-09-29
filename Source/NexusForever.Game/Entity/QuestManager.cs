@@ -457,6 +457,53 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Remove all active, inactive, and completed quests (dev reset to a clean log).
+        /// </summary>
+        public int QuestResetAll()
+        {
+            List<IQuest> quests =
+            [
+                ..activeQuests.Values,
+                ..inactiveQuests.Values,
+                ..completedQuests.Values
+            ];
+
+            int removed = 0;
+            foreach (IQuest quest in quests)
+            {
+                if (quest.PendingDelete)
+                    continue;
+
+                foreach (IQuestObjective objective in quest)
+                    objective.Progress = 0u;
+
+                if (!quest.PendingCreate)
+                    quest.EnqueueDelete(true);
+
+                switch (quest.State)
+                {
+                    case QuestState.Accepted:
+                    case QuestState.Achieved:
+                        activeQuests.Remove(quest.Id);
+                        break;
+                    case QuestState.Completed:
+                        completedQuests.Remove(quest.Id);
+                        break;
+                    default:
+                        inactiveQuests.Remove(quest.Id);
+                        break;
+                }
+
+                // Notify client before marking abandoned so the UI clears the entry.
+                quest.State = QuestState.Abandoned;
+                removed++;
+            }
+
+            log.Trace($"Reset {removed} quest(s) for player {player.CharacterId}.");
+            return removed;
+        }
+
+        /// <summary>
         /// Complete all <see cref="IQuestObjective"/>'s for supplied active quest id.
         /// </summary>
         public void QuestAchieve(ushort questId)
@@ -538,6 +585,29 @@ namespace NexusForever.Game.Entity
                 if (!GlobalQuestManager.Instance.GetQuestReceivers(questId).Any(c => player.GetVisibleCreature<WorldEntity>(c).Any()))
                     throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} without any quest receiver!");
             }
+
+            FinishQuest(quest, reward);
+        }
+
+        /// <summary>
+        /// Complete an achieved quest without requiring a quest receiver or communicator turn-in
+        /// (used for scripted NPE / tutorial hand-offs).
+        /// </summary>
+        public void QuestForceComplete(ushort questId, ushort reward = 0)
+        {
+            if (GlobalQuestManager.Instance.GetQuestInfo(questId) == null)
+                throw new ArgumentException($"Invalid quest {questId}!");
+
+            IQuest quest = GetQuest(questId, GetQuestFlags.Active);
+            if (quest == null || quest.State != QuestState.Achieved)
+                return;
+
+            FinishQuest(quest, reward);
+        }
+
+        private void FinishQuest(IQuest quest, ushort reward)
+        {
+            ushort questId = quest.Id;
 
             // reclaim any quest specific items
             for (int i = 0; i < quest.Info.Entry.PushedItemIds.Length; i++)

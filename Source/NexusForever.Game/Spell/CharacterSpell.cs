@@ -138,15 +138,15 @@ namespace NexusForever.Game.Spell
         /// <summary>
         /// Used for when the client does not have continuous casting enabled
         /// </summary>
-        public void Cast()
+        public void Cast(uint? targetUnitId = null)
         {
-            CastSpell();
+            CastSpell(targetUnitId);
         }
 
         /// <summary>
         /// Used for continuous casting when the client has it enabled, or spells with Cast Methods like ChargeRelease
         /// </summary>
-        public void Cast(bool buttonPressed)
+        public void Cast(bool buttonPressed, uint? targetUnitId = null)
         {
             // TODO: Handle continuous casting of spell for Player if button remains depressed
 
@@ -154,15 +154,21 @@ namespace NexusForever.Game.Spell
             if (!buttonPressed)
                 return;
 
-            CastSpell();
+            CastSpell(targetUnitId);
         }
 
-        private void CastSpell()
+        private void CastSpell(uint? targetUnitId = null)
         {
+            // Prefer the target from the cast packet; fall back to the player's current target.
+            uint primaryTargetId = targetUnitId
+                ?? Owner.TargetGuid
+                ?? 0u;
+
             Owner.CastSpell(new SpellParameters
             {
                 CharacterSpell         = this,
                 SpellInfo              = SpellInfo,
+                PrimaryTargetId        = primaryTargetId,
                 UserInitiatedSpellCast = true
             });
         }

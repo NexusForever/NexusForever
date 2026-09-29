@@ -220,6 +220,14 @@ namespace NexusForever.WorldServer.Command.Handler
             context.GetTargetOrInvoker<IPlayer>().QuestManager.QuestAdd(info);
         }
 
+        [Command(Permission.QuestAdd, "Remove all quests (active, inactive, completed) from the character.", "reset")]
+        public void HandleQuestReset(ICommandContext context)
+        {
+            IPlayer player = context.GetTargetOrInvoker<IPlayer>();
+            int removed = player.QuestManager.QuestResetAll();
+            context.SendMessage($"Reset {removed} quest(s). Teleport to NPE start (!teleport npe) to re-grant Navigating Nexus.");
+        }
+
         [Command(Permission.QuestAchieve, "Achieve an existing quest by completing all objectives for character.", "achieve")]
         public void HandleQuestAchieve(ICommandContext context,
             [Parameter("Quest entry id to achieve for character.")]
