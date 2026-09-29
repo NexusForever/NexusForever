@@ -368,6 +368,44 @@ namespace NexusForever.Game.Quest
                 State = QuestState.Achieved;
         }
 
+        /// <summary>
+        /// Set a checklist slot on matching <see cref="QuestObjectiveType.ActivateTargetGroupChecklist"/> objectives.
+        /// </summary>
+        public void ObjectiveChecklistBit(uint targetGroupId, byte checklistIdx)
+        {
+            if (PendingDelete)
+                return;
+
+            if (State == QuestState.Achieved)
+                return;
+
+            foreach (IQuestObjective objective in objectives
+                .Where(o => o.ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist
+                    && o.ObjectiveInfo.Entry.Data == targetGroupId)
+                .OrderByDescending(o => o.Index))
+            {
+                if (objective.IsComplete())
+                    continue;
+
+                if (!CanUpdateObjective(objective))
+                    continue;
+
+                uint oldProgress = objective.Progress;
+                objective.ObjectiveChecklistBit(checklistIdx);
+
+                if (objective.Progress != oldProgress)
+                    SendQuestObjectiveUpdate(objective);
+
+                scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
+            }
+
+            if (RequiredObjectivesComplete())
+                CompleteOptionalObjectives();
+
+            if (objectives.All(o => o.IsComplete()))
+                State = QuestState.Achieved;
+        }
+
         private bool CanUpdateObjective(IQuestObjective objective)
         {
             if (objective.ObjectiveInfo.IsSequential())

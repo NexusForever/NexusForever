@@ -95,6 +95,11 @@ namespace NexusForever.Game.Abstract.Entity
         void ObjectiveUpdate(uint id, uint progress);
 
         /// <summary>
+        /// Set a checklist slot on active <see cref="QuestObjectiveType.ActivateTargetGroupChecklist"/> objectives.
+        /// </summary>
+        void ObjectiveChecklistBit(uint targetGroupId, byte checklistIdx);
+
+        /// <summary>
         /// Check active <see cref="QuestObjectiveType.EnterArea"/> objectives against the player's current world position.
         /// </summary>
         void CheckEnterAreaObjectives();
