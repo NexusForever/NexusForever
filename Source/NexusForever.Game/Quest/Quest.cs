@@ -96,6 +96,7 @@ namespace NexusForever.Game.Quest
 
         private QuestSaveMask saveMask;
 
+        public IPlayer Owner => player;
         private readonly IPlayer player;
         private readonly List<IQuestObjective> objectives = new();
 

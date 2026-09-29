@@ -1,5 +1,6 @@
 ﻿using NexusForever.Database;
 using NexusForever.Database.Character;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Shared;
 
@@ -9,6 +10,12 @@ namespace NexusForever.Game.Abstract.Quest
     {
         ushort Id { get; }
         IQuestInfo Info { get; }
+
+        /// <summary>
+        /// <see cref="IPlayer"/> that owns this quest instance.
+        /// </summary>
+        IPlayer Owner { get; }
+
         QuestState State { get; set; }
         QuestStateFlags Flags { get; set; }
         uint? Timer { get; set; }
