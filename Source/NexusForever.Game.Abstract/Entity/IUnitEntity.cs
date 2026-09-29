@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Combat;
+﻿using System;
+using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
@@ -69,6 +70,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         /// <param name="castingId">Casting ID of the spell to cancel</param>
         void CancelSpellCast(uint castingId);
+
+        /// <summary>
+        /// Returns an active <see cref="ISpell"/> that matches the supplied predicate.
+        /// </summary>
+        ISpell GetActiveSpell(Func<ISpell, bool> func);
 
         /// <summary>
         /// Determine if this <see cref="IUnitEntity"/> can attack supplied <see cref="IUnitEntity"/>.
