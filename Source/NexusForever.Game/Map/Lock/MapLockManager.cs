@@ -106,6 +106,16 @@ namespace NexusForever.Game.Map.Lock
         }
 
         /// <summary>
+        /// Return the solo <see cref="IMapLock"/>s of the supplied character.
+        /// </summary>
+        public IEnumerable<IMapLock> GetSoloLocks(Identity identity)
+        {
+            return soloLocks.TryGetValue(identity, out IMapLockCollection mapLockCollection)
+                ? mapLockCollection.ToList()
+                : [];
+        }
+
+        /// <summary>
         /// Return <see cref="IMapLock"/> for supplied match guid and world id.
         /// </summary>
         public IMapLock GetMatchLock(Guid guid, uint worldId)

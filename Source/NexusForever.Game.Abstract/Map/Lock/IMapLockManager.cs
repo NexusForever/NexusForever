@@ -30,6 +30,11 @@ namespace NexusForever.Game.Abstract.Map.Lock
         void RemoveSoloLock(Identity identity, uint worldId);
 
         /// <summary>
+        /// Return the solo <see cref="IMapLock"/>s of the supplied character.
+        /// </summary>
+        IEnumerable<IMapLock> GetSoloLocks(Identity identity);
+
+        /// <summary>
         /// Return <see cref="IMapLock"/> for supplied match guid and world id.
         /// </summary>
         IMapLock GetMatchLock(Guid guid, uint worldId);
