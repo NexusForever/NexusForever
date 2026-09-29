@@ -33,9 +33,12 @@ namespace NexusForever.WorldServer.Command.Handler
             QuestObjectiveType.KillTargetGroups,
             QuestObjectiveType.ActivateEntity,
             QuestObjectiveType.ActivateTargetGroup,
+            QuestObjectiveType.ActivateTargetGroupChecklist,
             QuestObjectiveType.TalkTo,
             QuestObjectiveType.TalkToTargetGroup,
-            QuestObjectiveType.EnterZone
+            QuestObjectiveType.EnterZone,
+            QuestObjectiveType.EnterArea,
+            QuestObjectiveType.SucceedCSI
         ];
 
         [Command(Permission.QuestList, "List all active quests.", "list")]
