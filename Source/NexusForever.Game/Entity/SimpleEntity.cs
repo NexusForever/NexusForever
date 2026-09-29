@@ -76,7 +76,7 @@ namespace NexusForever.Game.Entity
                 }
             }
 
-            //TODO: cast "116,Generic Quest Spell - Activating - Activate - Tier 1" by 0x07FD
+            base.OnActivateCast(activator);
         }
     }
 }

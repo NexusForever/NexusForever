@@ -9,6 +9,7 @@ using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Chat;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
@@ -376,7 +377,29 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void OnActivateCast(IPlayer activator)
         {
-            // deliberately empty
+            // Client already played the activate cast; apply creature activate spells server-side.
+            // Caster = player so Proxy/SummonMount effects with TargetFlags.Caster hit the activator
+            // (e.g. NPE hoverboard projector 73419 → spell 86744 → SummonMount).
+            if (CreatureEntry == null)
+                return;
+
+            foreach (uint spell4Id in new[]
+            {
+                CreatureEntry.Spell4IdActivate00,
+                CreatureEntry.Spell4IdActivate01,
+                CreatureEntry.Spell4IdActivate02,
+                CreatureEntry.Spell4IdActivate03
+            })
+            {
+                if (spell4Id == 0u)
+                    continue;
+
+                activator.CastSpell(spell4Id, new SpellParameters
+                {
+                    PrimaryTargetId        = Guid,
+                    UserInitiatedSpellCast = false
+                });
+            }
         }
 
         /// <summary>
