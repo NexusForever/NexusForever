@@ -394,11 +394,16 @@ namespace NexusForever.Game.Entity
                 if (spell4Id == 0u)
                     continue;
 
-                activator.CastSpell(spell4Id, new SpellParameters
+                // Spell start resolves PrimaryTargetId via GetVisible<IUnitEntity>. Props like
+                // SimpleCollidable (NPE hoverboard projector) are WorldEntity-only, so omit them.
+                var parameters = new SpellParameters
                 {
-                    PrimaryTargetId        = Guid,
                     UserInitiatedSpellCast = false
-                });
+                };
+                if (this is IUnitEntity)
+                    parameters.PrimaryTargetId = Guid;
+
+                activator.CastSpell(spell4Id, parameters);
             }
         }
 
