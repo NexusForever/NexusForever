@@ -30,6 +30,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 
             // TODO: sanity check for range etc.
 
+            // Apply activate spells/effects first so a failure does not leave quest objectives advanced
+            // without the world side-effect (e.g. NPE hoverboard summon).
+            entity.OnActivateCast(session.Player);
+
             session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
             // SucceedCSI is often driven by activate-cast completion; many NPE activates have no CSI minigame.
             session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, entity.CreatureId, 1u);
@@ -39,8 +43,6 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 if (entity is ISimpleEntity simple)
                     session.Player.QuestManager.ObjectiveChecklistBit(targetGroupId, simple.QuestChecklistIdx);
             }
-
-            entity.OnActivateCast(session.Player);
         }
     }
 }

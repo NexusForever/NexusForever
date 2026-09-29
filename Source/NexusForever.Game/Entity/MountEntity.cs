@@ -83,24 +83,27 @@ namespace NexusForever.Game.Entity
             if (PilotDisplayInfo != null)
                 player.AddVisual(ItemSlot.Mount, (ushort)PilotDisplayInfo.Id);
 
-            IPetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(MountType, SpellEntry.Id);
-            if (customisation != null)
+            if (SpellEntry != null)
             {
-                ItemSlot slot = ItemSlot.MountFront;
-                foreach (PetFlairEntry entry in customisation)
+                IPetCustomisation customisation = player.PetCustomisationManager.GetCustomisation(MountType, SpellEntry.Id);
+                if (customisation != null)
                 {
-                    if (entry != null)
+                    ItemSlot slot = ItemSlot.MountFront;
+                    foreach (PetFlairEntry entry in customisation)
                     {
-                        ushort displayId = (ushort)(slot != ItemSlot.MountRight ? entry.ItemDisplayId[0] : entry.ItemDisplayId[1]);
+                        if (entry != null)
+                        {
+                            ushort displayId = (ushort)(slot != ItemSlot.MountRight ? entry.ItemDisplayId[0] : entry.ItemDisplayId[1]);
 
-                        // hoverboards have their flair visuals added to the player
-                        if (MountType == PetType.HoverBoard)
-                            player.AddVisual(slot, displayId);
-                        else
-                            AddVisual(slot, displayId);
+                            // hoverboards have their flair visuals added to the player
+                            if (MountType == PetType.HoverBoard)
+                                player.AddVisual(slot, displayId);
+                            else
+                                AddVisual(slot, displayId);
+                        }
+
+                        slot++;
                     }
-
-                    slot++;
                 }
             }
         }
