@@ -727,7 +727,7 @@ namespace NexusForever.Game.Entity
         /// <remarks>
         /// EnterArea objectives store a shared area id in <see cref="QuestObjectiveEntry.Data"/>; the actual spheres to test are
         /// <see cref="QuestObjectiveEntry.WorldLocationsIdIndicator00"/> through Indicator03. Matching uses 3D distance against
-        /// <see cref="WorldLocation2Entry.Radius"/> (minimum 1).
+        /// <see cref="WorldLocation2Entry.Radius"/> (minimum 5).
         /// </remarks>
         public void CheckEnterAreaObjectives()
         {
@@ -767,7 +767,8 @@ namespace NexusForever.Game.Entity
                 return false;
 
             var target = new System.Numerics.Vector3(location.Position0, location.Position1, location.Position2);
-            float radius = Math.Max(location.Radius, 1f);
+            // Many NPE / tutorial indicators use Radius=1, which is too tight for jump pads and mounts.
+            float radius = Math.Max(location.Radius, 5f);
             return System.Numerics.Vector3.Distance(player.Position, target) <= radius;
         }
 
