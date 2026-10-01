@@ -23,7 +23,7 @@ namespace NexusForever.Game.Prerequisite.Check
             this.gameTableManager = gameTableManager;
         }
 
-        public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             if (parameters.Target == null || objectId == 0)
                 return false;
@@ -36,7 +36,7 @@ namespace NexusForever.Game.Prerequisite.Check
             float z = MathF.Sin(-parameters.Target.Rotation.X);
             Vector3 forward = new Vector3(x, 0, z);
 
-            Vector3 direction = Vector3.Normalize(player.Position - parameters.Target.Position);
+            Vector3 direction = Vector3.Normalize(subject.Position - parameters.Target.Position);
             float dot = Vector3.Dot(direction, forward);
             float cross = Vector3.Cross(direction, forward).Y;
 

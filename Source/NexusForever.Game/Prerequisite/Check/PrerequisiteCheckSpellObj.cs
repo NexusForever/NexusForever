@@ -20,8 +20,11 @@ namespace NexusForever.Game.Prerequisite.Check
 
         #endregion
 
-        public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
+            if (subject is not IPlayer player)
+                return false;
+
             // TODO: Confirm how the objectId is calculated. It seems like this check always checks for a Spell that is determined by an objectId.
 
             // Error message is "Spell requirement not met"

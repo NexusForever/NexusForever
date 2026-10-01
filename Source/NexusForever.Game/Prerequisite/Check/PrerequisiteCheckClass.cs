@@ -21,8 +21,11 @@ namespace NexusForever.Game.Prerequisite.Check
 
         #endregion
 
-        public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
+            if (subject is not IPlayer player)
+                return false;
+
             switch (comparison)
             {
                 case PrerequisiteComparison.Equal:
@@ -31,7 +34,7 @@ namespace NexusForever.Game.Prerequisite.Check
                     return player.Class != (Class)value;
                 default:
                     log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Class}!");
-                    return true;
+                    return false;
             }
         }
     }
