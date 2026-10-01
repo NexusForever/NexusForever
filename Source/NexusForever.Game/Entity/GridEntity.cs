@@ -223,7 +223,7 @@ namespace NexusForever.Game.Entity
 
             foreach ((uint _, IGridEntity entity) in visibleEntities.Concat(invisibleEntities))
             {
-                RemoveVisionEntity(this);
+                RemoveVisionEntity(entity);
                 if (entity != this)
                     entity.RemoveVisionEntity(this);
             }
