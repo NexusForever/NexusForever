@@ -36,8 +36,24 @@ namespace NexusForever.Game.PublicEvent
             Status = entry.PublicEventObjectiveFlags.HasFlag(PublicEventObjectiveFlag.InitialObjective)
                 ? PublicEventStatus.Active : PublicEventStatus.Inactive;
 
+            // created once and frozen, it only runs while the objective is active
             if (entry.FailureTimeMs > 0)
-                failureTimer = new UpdateTimer(TimeSpan.FromMilliseconds(entry.FailureTimeMs));
+                failureTimer = new UpdateTimer(TimeSpan.FromMilliseconds(entry.FailureTimeMs), false);
+
+            if (Status == PublicEventStatus.Active)
+                StartTimers();
+        }
+
+        /// <summary>
+        /// Start the elapsed and failure timers, invoked when the objective becomes active.
+        /// </summary>
+        /// <remarks>
+        /// Timers must not run while the objective is inactive, otherwise objectives activated later in the event time out early.
+        /// </remarks>
+        private void StartTimers()
+        {
+            elapsedTimer = 0d;
+            failureTimer?.Reset();
         }
 
         /// <summary>
@@ -48,23 +64,38 @@ namespace NexusForever.Game.PublicEvent
             if (IsBusy)
                 return;
 
+            if (Status != PublicEventStatus.Active)
+                return;
+
             elapsedTimer += lastTick;
 
-            if (failureTimer == null)
+            if (failureTimer == null || !failureTimer.IsTicking)
                 return;
 
             failureTimer.Update(lastTick);
             if (failureTimer.HasElapsed)
             {
-                failureTimer = null;
-                SetStatus(PublicEventStatus.Failed);
+                // TimedWin objectives (waits, surviving, timed collecting) are won by lasting until the timer ends, any
+                // other timed objective fails
+                SetStatus(Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.TimedWin
+                    ? PublicEventStatus.Succeeded : PublicEventStatus.Failed);
             }
         }
 
         private void SetStatus(PublicEventStatus status)
         {
             Status = status;
-            BroadcastObjectiveStatusUpdate();
+
+            if (status == PublicEventStatus.Active)
+                StartTimers();
+            else
+                failureTimer?.Pause();
+
+            // the client restarts the objective timer from the full update, it also includes the status
+            if (status == PublicEventStatus.Active)
+                BroadcastObjectiveUpdate();
+            else
+                BroadcastObjectiveStatusUpdate();
 
             Team.PublicEvent.InvokeScriptCollection<IPublicEventScript>(s => s.OnPublicEventObjectiveStatus(this));
         }
