@@ -170,7 +170,7 @@ namespace NexusForever.Game.Entity
                 });
             }
             else
-                Map.EnqueueRelocate(this, position, OnRelocate);
+                Map.EnqueueRelocate(this, position, OnRelocate, coalesce: true);
         }
 
         /// <summary>

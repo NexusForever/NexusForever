@@ -9,6 +9,7 @@ namespace NexusForever.Game.Map
         public IGridEntity Entity { get; init; }
         public Vector3 Vector { get; init; }
         public OnRelocateDelegate Callback { get; init; }
+        public bool Coalesce { get; init; }
         public OnExceptionDelegate Exception { get; init; }
     }
 }
