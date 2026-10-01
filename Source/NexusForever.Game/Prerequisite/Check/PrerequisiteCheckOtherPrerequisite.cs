@@ -23,6 +23,7 @@ namespace NexusForever.Game.Prerequisite.Check
 
         #endregion
 
+        // This prerequisite can not be refactored into the BasePrerequisiteHandler pattern as this is used for checking other prerequisites and not for handling them.
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             switch (comparison)

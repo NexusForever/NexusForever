@@ -4,21 +4,21 @@
     public enum InventoryLocation
     {
         [InventoryLocation(30u)]
-        Equipped  = 0,
+        Equipped  = 0, // In-Client flag: 0x1
 
         [InventoryLocation(16u)]
-        Inventory = 1,
+        Inventory = 1, // In-Client flag: 0x2
 
         [InventoryLocation(32u)]
-        PlayerBank  = 2,
+        PlayerBank  = 2, // In-Client flag: 0x4
 
         [InventoryLocation(512u)]
         Ability   = 4,
 
-        Unknown5  = 5,
-        Unknown8  = 8,
-        Unknown9  = 9,
-        Unknown10 = 10,
+        Unknown5  = 5, // In-Client flag: 0x20
+        Unknown8  = 8, // In-Client flag: 0x100
+        Unknown9  = 9, // In-Client flag: 0x200
+        Unknown10 = 10, // In-Client flag: 0x400
 
         [InventoryLocation(128u)]
         GuildBankTab1 = 100,

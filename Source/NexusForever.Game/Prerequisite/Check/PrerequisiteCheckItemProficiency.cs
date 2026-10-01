@@ -7,32 +7,25 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.ItemProficiency)]
-    public class PrerequisiteCheckItemProficiency : IPrerequisiteCheck
+    public class PrerequisiteCheckItemProficiency : BasePrerequisiteHandler, IPrerequisiteCheck
     {
         #region Dependency Injection
 
-        private readonly ILogger<PrerequisiteCheckItemProficiency> log;
-
         public PrerequisiteCheckItemProficiency(
-            ILogger<PrerequisiteCheckItemProficiency> log)
+            ILogger<BasePrerequisiteHandler> log)
+            : base(log)
         {
-            this.log = log;
         }
 
         #endregion
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            switch (comparison)
-            {
-                case PrerequisiteComparison.NotEqual:
-                    return (player.GetItemProficiencies() & (ItemProficiency)value) == 0;
-                case PrerequisiteComparison.Equal:
-                    return (player.GetItemProficiencies() & (ItemProficiency)value) != 0;
-                default:
-                    log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.ItemProficiency}!");
-                    return false;
-            }
+            ItemProficiency playerProficiencies = player.GetItemProficiencies();
+            ItemProficiency requiredProficiency = (ItemProficiency)value;
+            
+            bool hasProficiency = (playerProficiencies & requiredProficiency) != 0;
+            return MatchBoolean(hasProficiency, comparison, PrerequisiteType.ItemProficiency);
         }
     }
 }
