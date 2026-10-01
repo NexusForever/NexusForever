@@ -221,8 +221,6 @@ namespace NexusForever.Game.Entity
         {
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnRemoveFromMap(Map));
 
-            // players keep their instance between maps, stale guids from the old map would block the new map's entities;
-            // both sides are removed through RemoveVisionEntity so the visibility hooks still fire
             foreach ((uint _, IGridEntity entity) in visibleEntities.Concat(invisibleEntities))
             {
                 RemoveVisionEntity(entity);
