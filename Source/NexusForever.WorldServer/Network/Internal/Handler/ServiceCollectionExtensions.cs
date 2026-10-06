@@ -49,6 +49,7 @@ namespace NexusForever.WorldServer.Network.Internal.Handler
             sc.AddRebusHandler<FriendshipTypeUpdatedHandler>();
 
             sc.AddRebusHandler<GroupActionResultHandler>();
+            sc.AddRebusHandler<GroupDisbandedHandler>();
             sc.AddRebusHandler<GroupFlagsUpdatedHandler>();
             sc.AddRebusHandler<GroupLootRulesUpdatedHandler>();
             sc.AddRebusHandler<GroupMarkerUpdatedHandler>();
