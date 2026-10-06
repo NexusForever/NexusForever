@@ -26,7 +26,7 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Player
 
         #endregion
 
-        public Task Handle(PlayerGroupAssociationUpdatedMessage message)
+        public async Task Handle(PlayerGroupAssociationUpdatedMessage message)
         {
             Identity identity = message.Identity.ToGameIdentity();
             if (message.Group != null)
@@ -36,17 +36,18 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Player
 
             IPlayer player = playerManager.GetPlayer(identity);
             if (player == null)
-                return Task.CompletedTask;
+                return;
 
-            // TODO: Rawaho: not thread safe
-            player.GroupAssociation = message.Group?.Id ?? 0;
+            await player.SynchroniseAsync(() =>
+            {
+                player.GroupAssociation = message.Group?.Id ?? 0;
+            });
+
             player.EnqueueToVisible(new ServerEntityGroupAssociation
             {
                 UnitId  = player.Guid,
                 GroupId = player.GroupAssociation
             }, true);
-
-            return Task.CompletedTask;
         }
     }
 }

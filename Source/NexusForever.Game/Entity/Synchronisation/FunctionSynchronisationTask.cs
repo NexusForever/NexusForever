@@ -2,7 +2,7 @@
 
 namespace NexusForever.Game.Entity.Synchronisation
 {
-    public class SynchronisationTask<T> : ISynchronisationTask
+    public class FunctionSynchronisationTask<T> : ISynchronisationTask
     {
         private TaskCompletionSource<T> taskCompletionSource;
         private Func<T> function;

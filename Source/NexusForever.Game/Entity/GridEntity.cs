@@ -59,9 +59,24 @@ namespace NexusForever.Game.Entity
             scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
         }
 
+        /// <summary>
+        /// Run <see cref="Action"/> on the entity in a thread-safe manner on the world thread.
+        /// </summary>
+        /// <param name="action">Action to run on the world thread.</param>
+        public Task SynchroniseAsync(Action action)
+        {
+            var synchronisationTask = new ActionSynchronisationTask();
+            synchronisationTaskQueue.Enqueue(synchronisationTask);
+            return synchronisationTask.Initialise(action);
+        }
+
+        /// <summary>
+        /// Run <see cref="Func{T}"/> on the entity in a thread-safe manner on the world thread.
+        /// </summary>
+        /// <param name="func">Function to run on the world thread.</param>
         public Task<T> SynchroniseAsync<T>(Func<T> func)
         {
-            var synchronisationTask = new SynchronisationTask<T>();
+            var synchronisationTask = new FunctionSynchronisationTask<T>();
             synchronisationTaskQueue.Enqueue(synchronisationTask);
             return synchronisationTask.Initialise(func);
         }
