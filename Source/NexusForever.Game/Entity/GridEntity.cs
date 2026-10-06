@@ -227,6 +227,11 @@ namespace NexusForever.Game.Entity
             CheckEntityInRange(entity);
         }
 
+        public IEnumerable<IGridEntity> GetVisible()
+        {
+            return visibleEntities.Values;
+        }
+
         /// <summary>
         /// Return visible <see cref="IGridEntity"/> by supplied guid.
         /// </summary>

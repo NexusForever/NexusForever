@@ -99,6 +99,8 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         T GetVisible<T>(uint guid) where T : IGridEntity;
 
+        IEnumerable<IGridEntity> GetVisible();
+
         /// <summary>
         /// Return visible <see cref="IWorldEntity"/> by supplied creature id.
         /// </summary>

@@ -10,7 +10,7 @@ namespace NexusForever.Game.Group
         private readonly ReaderWriterLockSlim mutex = new();
 
         private readonly Dictionary<ulong, IGroup> groups = [];
-        private readonly Dictionary<Identity, IGroup> groupAssociations = [];
+        private readonly Dictionary<Identity, ulong> groupAssociations = [];
 
         #region Dependency Injection
 
@@ -42,7 +42,10 @@ namespace NexusForever.Game.Group
             mutex.EnterReadLock();
             try
             {
-                return groupAssociations.TryGetValue(identity, out IGroup group) ? group : null;
+                if (!groupAssociations.TryGetValue(identity, out ulong groupId))
+                    return null;
+
+                return groups.TryGetValue(groupId, out IGroup group) ? group : null;
             }
             finally
             {
@@ -91,7 +94,7 @@ namespace NexusForever.Game.Group
             try
             {
                 IGroup group = AddOrUpdateGroup(internalGroup);
-                groupAssociations[identity] = group;
+                groupAssociations[identity] = group.Id;
             }
             finally
             {

@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Group;
 using NexusForever.Game.Static.Group;
+using NexusForever.Game.Static.Item;
 using NexusForever.Shared;
 using InternalGroup = NexusForever.Network.Internal.Message.Group.Shared.Group;
 using InternalGroupMember = NexusForever.Network.Internal.Message.Group.Shared.GroupMember;
@@ -13,7 +14,7 @@ namespace NexusForever.Game.Group
         public ulong Id { get; private set; }
         public LootRule NormalRule { get; private set; }
         public LootRule ThresholdRule { get; private set; }
-        public LootThreshold ThresholdQuality { get; private set; }
+        public Quality ThresholdQuality { get; private set; }
         public HarvestLootRule HarvestRule { get; private set; }
         public Identity Leader { get; private set; }
 
@@ -36,7 +37,7 @@ namespace NexusForever.Game.Group
             Id               = internalGroup.Id;
             NormalRule       = internalGroup.NormalRule;
             ThresholdRule    = internalGroup.ThresholdRule;
-            ThresholdQuality = internalGroup.ThresholdQuality;
+            ThresholdQuality = (Quality)internalGroup.ThresholdQuality;
             Leader           = internalGroup.Leader.ToGameIdentity();
 
             foreach (InternalGroupMember internalGroupMember in internalGroup.Members)

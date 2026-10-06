@@ -26,10 +26,12 @@ namespace NexusForever.Game.Loot.Generate
 
         public LootGroup(
             IFactory<ILootGroup> lootGroupFactory,
-            IFactory<ILootItem> lootItemFactory)
+            IFactory<ILootItem> lootItemFactory,
+            ILootGenerationConditionManager lootGenerationConditionManager)
         {
-            this.lootGroupFactory = lootGroupFactory;
-            this.lootItemFactory  = lootItemFactory;
+            this.lootGroupFactory               = lootGroupFactory;
+            this.lootItemFactory                = lootItemFactory;
+            this.lootGenerationConditionManager = lootGenerationConditionManager;
         }
 
         #endregion

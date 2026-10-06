@@ -1,11 +1,12 @@
 using System.Numerics;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Housing;
+using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Map.Lock;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Static.Housing;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -36,11 +37,13 @@ namespace NexusForever.Game.Map.Instance
         public ResidenceMapInstance(
             IEntityFactory entityFactory,
             IPublicEventManager publicEventManager,
+            IPlayerManager playerManager,
+            ILootManager lootManager,
             IMapLockManager mapLockManager,
             IGlobalResidenceManager globalResidenceManager,
             IGameTableManager gameTableManager,
             IScriptManager scriptManager)
-            : base(entityFactory, publicEventManager)
+            : base(entityFactory, publicEventManager, playerManager, lootManager)
         {
             this.entityFactory          = entityFactory;
             this.mapLockManager         = mapLockManager;

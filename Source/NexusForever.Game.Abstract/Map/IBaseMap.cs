@@ -1,7 +1,8 @@
 using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.PublicEvent;
+using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Map.Search;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Static.Entity;
 using NexusForever.IO.Map;
 using NexusForever.Network.Message;
@@ -18,6 +19,8 @@ namespace NexusForever.Game.Abstract.Map
         MapFile File { get; }
 
         IPublicEventManager PublicEventManager { get; }
+        IPlayerManager PlayerManager { get; }
+        ILootManager LootManager { get; }
 
         /// <summary>
         /// Enqueue <see cref="IGridEntity"/> to be removed from <see cref="IBaseMap"/>.

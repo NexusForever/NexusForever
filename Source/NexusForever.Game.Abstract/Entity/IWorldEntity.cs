@@ -229,8 +229,6 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void RemovePlatformPassenger(IWorldEntity passenger);
 
-        void RemoveLoot(ILootInstance lootInstance);
-
         /// <summary>
         /// Set the emote id for this <see cref="IWorldEntity"/>.
         /// </summary>

@@ -7,7 +7,7 @@ namespace NexusForever.Game.Loot.Generate
     public class LootBuilderItem : ILootBuilderItem
     {
         public LootItemType Type { get; private set; }
-        public uint Id { get; private set; }
+        public uint StaticId { get; private set; }
         public uint Count { get; private set; }
         public List<Identity> Looters { get; private set; } = [];
 
@@ -20,10 +20,10 @@ namespace NexusForever.Game.Loot.Generate
         /// <param name="looters">The player identities eligible to loot this item.</param>
         public void Initialise(LootItemType type, uint staticId, uint count, List<Identity> looters)
         {
-            Type    = type;
-            Id      = staticId;
-            Count   = count;
-            Looters = looters;
+            Type     = type;
+            StaticId = staticId;
+            Count    = count;
+            Looters  = looters;
         }
     }
 }

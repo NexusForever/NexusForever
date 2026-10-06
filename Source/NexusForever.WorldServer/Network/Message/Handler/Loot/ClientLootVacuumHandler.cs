@@ -1,14 +1,13 @@
-﻿using NexusForever.Game.Loot;
-using NexusForever.Network.Message;
+﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Loot;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Loot
 {
     public class ClientLootVacuumHandler : IMessageHandler<IWorldSession, ClientLootVacuum>
     {
-        public void HandleMessage(IWorldSession session, ClientLootVacuum packet)
+        public void HandleMessage(IWorldSession session, ClientLootVacuum lootVacuum)
         {
-            GlobalLootManager.Instance.GiveAllLootInRange(session.Player);
+            session.Player.Map.LootManager.VacuumLoot(session.Player);
         }
     }
 }

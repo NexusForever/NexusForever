@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Loot;
+using NexusForever.Game.Abstract.Loot.Generate;
 using NexusForever.Game.Static.Loot;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Loot;
+using NexusForever.Shared;
 using NexusForever.Shared.Game;
 using NetworkLootItem = NexusForever.Network.World.Message.Model.Loot.LootItem;
 
@@ -10,123 +13,171 @@ namespace NexusForever.Game.Loot
 {
     public class LootInstance : ILootInstance
     {
-        public uint Guid { get; }
-        public LootEntityType LootEntityType { get; }
-        public LooterType LooterType { get; }
-        public bool Explosion { get; set; }
+        public ILootManager LootManager { get; private set; }
+        public uint OwnerGuid { get; private set; }
+        public bool PersonalLoot { get; private set; }
+        public bool Expired => lootItems.Count == 0;
 
-        public bool HasExpired => expiryTimer.HasElapsed || lootItems.Values.FirstOrDefault(i => i.Delivered == false) == null;
+        private readonly UpdateTimer expiryTimer = new(TimeSpan.FromMinutes(10));
 
-        private Dictionary</* characterId */ ulong, /* guid */ uint> looterGuids { get; } = new Dictionary<ulong, uint>();
-        private Dictionary</*uniqueId*/ int, ILootInstanceItem> lootItems = new Dictionary<int, ILootInstanceItem>();
+        private readonly HashSet<Identity> looters = [];
+        private readonly Dictionary<uint, ILootInstanceItem> lootItems = [];
 
-        private UpdateTimer expiryTimer = new UpdateTimer(1800d);
+        #region Dependency Injection
 
-        /// <summary>
-        /// Create a new <see cref="LootInstance"/>.
-        /// </summary>
-        public LootInstance(uint unitGuid, Dictionary<ulong, uint> looterIds, LooterType looterType, LootEntityType lootEntityType)
+        private readonly IFactory<ILootInstanceItem> lootInstanceItemFactory;
+
+        public LootInstance(
+            IFactory<ILootInstanceItem> lootInstanceItemFactory)
         {
-            Guid = unitGuid;
-            LootEntityType = lootEntityType;
-            LooterType = looterType;
+            this.lootInstanceItemFactory = lootInstanceItemFactory;
+        }
 
-            foreach ((ulong characterId, uint guid) in looterIds)
-                looterGuids.Add(characterId, guid);            
+        #endregion
+
+        public void Initialise(ILootManager lootManager, IUnitEntity lootOwner)
+        {
+            LootManager  = lootManager;
+            OwnerGuid    = lootOwner.Guid;
+            PersonalLoot = lootOwner is IPlayer; // TODO: might need additional flexibility
         }
 
         /// <summary>
-        /// Updates this <see cref="LootInstance"/> expiry timer.
+        /// Invoked each world tick with the delta since the previous tick occurred.
         /// </summary>
         public void Update(double lastTick)
         {
-            if (expiryTimer.HasElapsed)
-                return;
-
             expiryTimer.Update(lastTick);
+            if (expiryTimer.HasElapsed)
+                lootItems.Clear();
+
+            foreach ((uint lootId, ILootInstanceItem lootInstanceItem) in lootItems)
+            {
+                lootInstanceItem.Update(lastTick);
+                if (lootInstanceItem.Delivered)
+                    lootItems.Remove(lootId);
+            }
         }
 
         /// <summary>
-        /// Create a new <see cref="LootInstanceItem"/> for this <see cref="LootInstance"/>.
+        /// Gets all loot items associated with this loot instance.
         /// </summary>
-        public void AddLootItem(uint staticId, LootItemType type, uint count)
+        /// <returns>
+        /// The loot items associated with this loot instance, or an empty collection if none exist.
+        /// </returns>
+        public IEnumerable<ILootInstanceItem> GetLootItems()
         {
-            ILootInstanceItem item = new LootInstanceItem(staticId, type, count);
-            lootItems.Add(item.Id, item);
-
-            if (LootEntityType == LootEntityType.Item)
-                item.SetWinner(looterGuids.First().Key, looterGuids.First().Value);
+            return lootItems.Values;
         }
 
         /// <summary>
-        /// Delivers all <see cref="LootInstanceItem"/> rewards to the given winner. Should only be used when a Player opens a Loot Bag.
+        /// Gets the loot item instance for the specified loot id.
         /// </summary>
-        private void DeliverAllItemsImmediately(IPlayer session)
+        /// <param name="lootId">The id of the loot item to retrieve.</param>
+        /// <returns>
+        /// The loot item instance, or null if not found.
+        /// </returns>
+        public ILootInstanceItem GetLootItem(uint lootId)
         {
-            foreach (ILootInstanceItem item in lootItems.Values)
-                item.DeliverItem(session, false);
+            return lootItems.TryGetValue(lootId, out ILootInstanceItem lootInstanceItem) ? lootInstanceItem : null;
         }
 
         /// <summary>
-        /// Delivers any already won Items to the <see cref="WorldSession"/> and sends a <see cref="ServerLootNotify"/> packet.
+        /// Adds a loot item to this loot instance.
         /// </summary>
-        public void SendLootNotify(IPlayer session)
+        /// <param name="lootBuilderItem">The loot builder used to create the loot item.</param>
+        /// <returns>
+        /// The created loot item instance.
+        /// </returns>
+        public ILootInstanceItem AddLootItem(ILootBuilderItem lootBuilderItem)
         {
-            if (LootEntityType == LootEntityType.Item && LooterType == LooterType.Player)
-                DeliverAllItemsImmediately(session);
+            ILootInstanceItem lootInstanceItem = lootInstanceItemFactory.Resolve();
+            lootInstanceItem.Initialise(this, lootBuilderItem);
+            lootItems.Add(lootInstanceItem.Id, lootInstanceItem);
 
-            List<NetworkLootItem> networkLootItems = new List<NetworkLootItem>();
+            foreach (Identity looter in lootBuilderItem.Looters)
+                looters.Add(looter);
+
+            return lootInstanceItem;
+        }
+
+        /// <summary>
+        /// Adds a loot item to this loot instance.
+        /// </summary>
+        /// <param name="staticId">The static id of the loot item, this will vary depending on the <paramref name="type"/>.</param>
+        /// <param name="type">The type of the loot item.</param>
+        /// <param name="count">The count of the loot item.</param>
+        /// <param name="looters">The list of players who can loot the item.</param>
+        /// <returns>
+        /// The created loot item instance.
+        /// </returns>
+        public ILootInstanceItem AddLootItem(uint staticId, LootItemType type, uint count, IEnumerable<Identity> looters)
+        {
+            ILootInstanceItem lootInstanceItem = lootInstanceItemFactory.Resolve();
+            lootInstanceItem.Initialise(this, staticId, type, count, looters);
+            lootItems.Add(lootInstanceItem.Id, lootInstanceItem);
+
+            foreach (Identity looter in looters)
+                this.looters.Add(looter);
+
+            return lootInstanceItem;
+        }
+
+        /// <summary>
+        /// Sends a loot notification to all players who can loot the items from this loot instance.
+        /// </summary>
+        public void SendLootNotify()
+        {
+            var networkLootItems = new List<NetworkLootItem>();
 
             foreach (ILootInstanceItem item in lootItems.Values)
             {
-                if (item.Type == LootItemType.AccountCurrency)
+                // TODO: there might be a better way to handle this...
+                if (item.Type == LootItemType.AccountCurrency && item.Delivered)
                 {
-                    networkLootItems.AddRange(item.BuildForAccountCurrency());
-                    continue;
-                }
-                
-                NetworkLootItem networkLootItem = item.Build();
-                networkLootItem.CanLoot = looterGuids.Keys.Contains(session.CharacterId);
-                // TODO: no idea what the replacement is after the packet changes...
-                // networkLootItem.Granted = item.Delivered;
-                if (item.Delivered)
-                    networkLootItem.LootUnitId = 0;
+                    uint remaining = item.Count;
+                    while (remaining > 0)
+                    {
+                        NetworkLootItem networkLootItem = item.Build();
+                        networkLootItem.Amount = Math.Min(remaining, 50);
+                        networkLootItems.Add(networkLootItem);
 
-                networkLootItems.Add(networkLootItem);
+                        remaining -= networkLootItem.Amount;
+                    }
+                }
+                else
+                {
+                    NetworkLootItem networkLootItem = item.Build();
+                    networkLootItems.Add(networkLootItem);
+                }
             }
 
-            session.Session.EnqueueMessageEncrypted(new ServerLootNotify
+            EnqueueMessageToLooters(new ServerLootNotify
             {
-                OwnerUnitId = Guid,
-                Explosion = Explosion,
-                LootItems = networkLootItems
+                OwnerUnitId = OwnerGuid,
+                Explosion   = PersonalLoot,
+                LootItems   = networkLootItems
             });
         }
 
         /// <summary>
-        /// Returns true if this <see cref="LootInstance"/> has a <see cref="LootInstanceItem"/> with the given ID.
+        /// Sends a loot removal message to all players who can loot the items from this loot instance.
         /// </summary>
-        public bool HasLootInstanceId(int lootInstanceId)
+        public void SendLootRemove()
         {
-            return lootItems.Keys.Contains(lootInstanceId);
+            EnqueueMessageToLooters(new ServerLootRemove
+            {
+                OwnerUnitId = OwnerGuid
+            });
         }
 
-        /// <summary>
-        /// Returns if given CharacterId is a Looter for this <see cref="LootInstance"/>.
-        /// </summary>
-        public bool HasLooter(ulong characterId)
+        private void EnqueueMessageToLooters(IWritable message)
         {
-            return looterGuids.ContainsKey(characterId);
-        }
-
-        public IEnumerator<ILootInstanceItem> GetEnumerator()
-        {
-            return lootItems.Values.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            foreach (Identity identity in looters)
+            {
+                IPlayer player = LootManager.Map.PlayerManager.GetPlayer(identity);
+                player?.Session.EnqueueMessageEncrypted(message);
+            }
         }
     }
 }

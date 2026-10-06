@@ -13,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model.Loot
         public bool CanLoot { get; set; }
         public bool RequiresRoll { get; set; }
         public bool OnlyMasterLootable { get; set; }
-        public bool Explosion { get; set; }
+        public bool Delivered { get; set; }
         public uint RollTime { get; set; }
         public ulong RandomCircuitData { get; set; }
         public uint RandomGlyphData { get; set; }
@@ -29,7 +29,7 @@ namespace NexusForever.Network.World.Message.Model.Loot
             writer.Write(CanLoot);
             writer.Write(RequiresRoll);
             writer.Write(OnlyMasterLootable);
-            writer.Write(Explosion);
+            writer.Write(Delivered);
             writer.Write(RollTime);
             writer.Write(RandomCircuitData);
             writer.Write(RandomGlyphData);

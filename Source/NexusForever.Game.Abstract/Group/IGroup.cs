@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Static.Group;
+using NexusForever.Game.Static.Item;
 using InternalGroup = NexusForever.Network.Internal.Message.Group.Shared.Group;
 
 namespace NexusForever.Game.Abstract.Group
@@ -8,7 +9,7 @@ namespace NexusForever.Game.Abstract.Group
         ulong Id { get; }
         LootRule NormalRule { get; }
         LootRule ThresholdRule { get; }
-        LootThreshold ThresholdQuality { get; }
+        Quality ThresholdQuality { get; }
         HarvestLootRule HarvestRule { get; }
         Identity Leader { get; }
 
