@@ -25,8 +25,8 @@ namespace NexusForever.Game.Loot
         {
             Id              = lootGroupModel.Id;
             Probability     = lootGroupModel.Probability;
-            minDrop         = lootGroupModel.MinDrop;
-            maxDrop         = lootGroupModel.MaxDrop;
+            minDrop         = lootGroupModel.MinCount;
+            maxDrop         = lootGroupModel.MaxCount;
             if (minDrop > maxDrop)
                 maxDrop = minDrop;
             conditionType   = (LootConditionType)lootGroupModel.ConditionType;

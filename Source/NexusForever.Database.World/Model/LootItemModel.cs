@@ -1,9 +1,11 @@
-﻿namespace NexusForever.Database.World.Model
+﻿using NexusForever.Game.Static.Loot;
+
+namespace NexusForever.Database.World.Model
 {
     public class LootItemModel
     {
         public ulong Id { get; set; }
-        public uint Type { get; set; }
+        public LootItemType Type { get; set; }
         public uint StaticId { get; set; }
         public float Probability { get; set; }
         public uint MinCount { get; set; }

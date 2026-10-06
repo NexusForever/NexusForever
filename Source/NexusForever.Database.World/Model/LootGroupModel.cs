@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using NexusForever.Game.Static.Loot;
 
 namespace NexusForever.Database.World.Model
 {
@@ -7,9 +8,9 @@ namespace NexusForever.Database.World.Model
         public ulong Id { get; set; }
         public ulong? ParentId { get; set; }
         public float Probability { get; set; }
-        public uint MinDrop { get; set; }
-        public uint MaxDrop { get; set; }
-        public uint ConditionType { get; set; }
+        public uint MinCount { get; set; }
+        public uint MaxCount { get; set; }
+        public LootConditionType ConditionType { get; set; }
         public uint Condition { get; set; }
         public string Comment { get; set; }
 

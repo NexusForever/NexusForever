@@ -4,6 +4,7 @@ using NexusForever.Database.Configuration.Model;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Entity.Movement.Spline;
+using NexusForever.Game.Static.Loot;
 
 namespace NexusForever.Database.World
 {
@@ -12,7 +13,7 @@ namespace NexusForever.Database.World
         public DbSet<DisableModel> Disable { get; set; }
         public DbSet<EntityModel> Entity { get; set; }
         public DbSet<EntityEmoteModel> Emote { get; set; }
-        public DbSet<EntityEventModel> EventEntity { get; set; }
+        public DbSet<EntityEventModel> EntityEvent { get; set; }
         public DbSet<EntityLootModel> EntityLoot { get; set; }
         public DbSet<EntitySplineModel> EntitySpline { get; set; }
         public DbSet<EntityStatModel> EntityStat { get; set; }
@@ -139,7 +140,7 @@ namespace NexusForever.Database.World
                 entity.Property(e => e.LootGroupId)
                     .HasColumnName("lootGroupId")
                     .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue(null);
+                    .HasDefaultValue(0);
 
                 entity.Property(e => e.Comment)
                     .HasColumnName("comment")
@@ -450,7 +451,7 @@ namespace NexusForever.Database.World
                 entity.Property(e => e.LootGroupId)
                     .HasColumnName("lootGroupId")
                     .HasColumnType("bigint(20) unsigned")
-                    .HasDefaultValue(null);
+                    .HasDefaultValue(0);
 
                 entity.Property(e => e.Comment)
                     .HasColumnName("comment")
@@ -477,20 +478,21 @@ namespace NexusForever.Database.World
                     .HasColumnType("float")
                     .HasDefaultValue(100);
 
-                entity.Property(e => e.MinDrop)
-                    .HasColumnName("minDrop")
+                entity.Property(e => e.MinCount)
+                    .HasColumnName("minCount")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
-                entity.Property(e => e.MaxDrop)
-                    .HasColumnName("maxDrop")
+                entity.Property(e => e.MaxCount)
+                    .HasColumnName("maxCount")
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(0);
 
                 entity.Property(e => e.ConditionType)
                     .HasColumnName("conditionType")
-                    .HasColumnType("int(10) unsigned")
-                    .HasDefaultValue(0);
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(LootConditionType.None)
+                    .HasConversion<EnumToNumberConverter<LootConditionType, byte>>();
 
                 entity.Property(e => e.Condition)
                     .HasColumnName("condition")
@@ -523,8 +525,9 @@ namespace NexusForever.Database.World
 
                 entity.Property(e => e.Type)
                     .HasColumnName("type")
-                    .HasColumnType("int(10) unsigned")
-                    .HasDefaultValue(0);
+                    .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(LootItemType.StaticItem)
+                    .HasConversion<EnumToNumberConverter<LootItemType, byte>>();
 
                 entity.Property(e => e.StaticId)
                     .HasColumnName("staticId")
