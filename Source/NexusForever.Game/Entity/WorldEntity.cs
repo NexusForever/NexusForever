@@ -4,9 +4,11 @@ using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Reputation;
 using NexusForever.Game.Chat;
+using NexusForever.Game.Loot;
 using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static.Chat;
@@ -84,6 +86,8 @@ namespace NexusForever.Game.Entity
         public Vector3 LeashPosition { get; protected set; }
         public float LeashRange { get; protected set; } = 15f;
         public IMovementManager MovementManager { get; private set; }
+
+        public List<ILootInstance> Loot { get; protected set; } = [];
 
         public virtual uint Health
         {
@@ -996,6 +1000,18 @@ namespace NexusForever.Game.Entity
         public void RemovePlatformPassenger(IWorldEntity passenger)
         {
             platformPassengerGuids.Remove(passenger.Guid);
+        }
+
+        public void RemoveLoot(ILootInstance lootInstance)
+        {
+            if (lootInstance == null)
+                throw new ArgumentNullException(nameof(lootInstance));
+
+            Loot.Remove(lootInstance);
+
+            // TODO: Set Death State when Loot is all collected
+            // if (Loot.Count == 0u)
+            //     SetDeathState(DeathState.CorpseLooted);
         }
 
         /// <summary>
