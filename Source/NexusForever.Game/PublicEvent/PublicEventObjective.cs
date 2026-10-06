@@ -146,11 +146,9 @@ namespace NexusForever.Game.PublicEvent
             if (Entry.PublicEventObjectiveFlags.HasFlag(PublicEventObjectiveFlag.DynamicObjective))
                 return Count >= DynamicMax;
 
-            // participant objectives without a fixed count wait for every participant, the client shows the remaining
-            // participants as "Waiting for N more" based on the dynamic max
-            if (Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.ParticipantsInTriggerVolume
-                && Entry.Count == 0
-                && DynamicMax > 0)
+            // as the client resolves the required count (GetRequiredCount): a participant objective uses the dynamic max
+            // whenever one is set, otherwise the table count; the DynamicObjective flag isn't consulted for it
+            if (Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.ParticipantsInTriggerVolume && DynamicMax > 0)
                 return Count >= DynamicMax;
 
             return Count >= Entry.Count;
