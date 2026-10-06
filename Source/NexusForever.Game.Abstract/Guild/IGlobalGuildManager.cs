@@ -41,6 +41,11 @@ namespace NexusForever.Game.Abstract.Guild
         T GetGuild<T>(ulong guildId) where T : IGuildBase;
 
         /// <summary>
+        /// Returns <see cref="IGuildBase"/> with supplied identity.
+        /// </summary>
+        T GetGuild<T>(Identity identity) where T : IGuildBase;
+
+        /// <summary>
         /// Returns <see cref="IGuildBase"/> with supplied <see cref="GuildType"> and name.
         /// </summary>
         IGuildBase GetGuild(GuildType guildType, string name);

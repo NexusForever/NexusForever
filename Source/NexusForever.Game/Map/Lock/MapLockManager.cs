@@ -13,7 +13,7 @@ namespace NexusForever.Game.Map.Lock
     {
         private readonly ConcurrentDictionary<Identity, IMapLockCollection> soloLocks = [];
         private readonly ConcurrentDictionary<Guid, IMapLockCollection> matchLocks = [];
-        private readonly ConcurrentDictionary<ulong, IResidenceMapLock> residenceLocks = [];
+        private readonly ConcurrentDictionary<Identity, IResidenceMapLock> residenceLocks = [];
 
         #region Dependency Injection
 
@@ -106,12 +106,12 @@ namespace NexusForever.Game.Map.Lock
         /// </summary>
         public IResidenceMapLock GetResidenceLock(IResidence residence)
         {
-            if (residenceLocks.TryGetValue(residence.Id, out IResidenceMapLock mapLock))
+            if (residenceLocks.TryGetValue(residence.Identity, out IResidenceMapLock mapLock))
                 return mapLock;
 
             mapLock = CreateLock<IResidenceMapLock>(MapLockType.Residence, 0u);
-            mapLock.Initialise(residence.Id);
-            residenceLocks[residence.Id] = mapLock;
+            mapLock.Initialise(residence.Identity);
+            residenceLocks[residence.Identity] = mapLock;
             return mapLock;
         }
     }

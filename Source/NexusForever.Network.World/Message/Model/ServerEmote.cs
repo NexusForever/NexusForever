@@ -1,20 +1,25 @@
-﻿using NexusForever.Game.Static.Entity;
-using NexusForever.Network.Message;
+﻿using NexusForever.Network.Message;
 
 namespace NexusForever.Network.World.Message.Model
 {
     [Message(GameMessageOpcode.ServerEmote)]
     public class ServerEmote : IWritable
     {
-        public uint Guid { get; set; }
-        public StandState StandState { get; set; }
-        public uint EmoteId { get; set; }
+        public ushort EmotesId { get; set; }
+        public uint Seed { get; set; }
+        public uint SourceUnitId { get; set; }
+        public uint TargetUnitId { get; set; }
+        public bool Targeted { get; set; }
+        public bool Silent { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Guid);
-            writer.Write(StandState, 4); 
-            writer.Write(EmoteId, 14);
+            writer.Write(EmotesId, 14u);
+            writer.Write(Seed);
+            writer.Write(SourceUnitId);
+            writer.Write(TargetUnitId);
+            writer.Write(Targeted);
+            writer.Write(Silent);
         }
     }
 }

@@ -4,6 +4,8 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
+using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Spell

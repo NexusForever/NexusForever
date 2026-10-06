@@ -52,8 +52,6 @@ namespace NexusForever.Shared.Game.Events
                         case ConditionalEventType.Standard:
                             newEvents.Add(events.Dequeue());
                             continue;
-                        case ConditionalEventType.Blocking:
-                            return;
                         default:
                             throw new NotImplementedException();
                     }

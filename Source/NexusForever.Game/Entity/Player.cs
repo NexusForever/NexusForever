@@ -46,6 +46,7 @@ using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Chat;
 using NexusForever.Network.World.Message.Model.Info;
 using NexusForever.Network.World.Message.Model.Pregame;
+using NexusForever.Network.World.Message.Model.Housing;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;
@@ -236,7 +237,7 @@ namespace NexusForever.Game.Entity
         public IXpManager XpManager { get; private set; }
         public IReputationManager ReputationManager { get; private set; }
         public IGuildManager GuildManager { get; }
-        public IResidenceManager ResidenceManager { get; private set; }
+        public IResidenceManager ResidenceManager { get; }
         public ICinematicManager CinematicManager { get; private set; }
         public ICharacterEntitlementManager EntitlementManager { get; private set; }
         public ILogoutManager LogoutManager { get; private set; }
@@ -267,7 +268,8 @@ namespace NexusForever.Game.Entity
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             ICurrencyManager currencyManager,
-            IGuildManager guildManager)
+            IGuildManager guildManager,
+            IResidenceManager residenceManager)
             : base(movementManager)
         {
             this.messagePublisher = messagePublisher;
@@ -276,8 +278,9 @@ namespace NexusForever.Game.Entity
             this.matchManager     = matchManager;
 
             // managers
-            CurrencyManager = currencyManager;
-            GuildManager    = guildManager;
+            CurrencyManager  = currencyManager;
+            GuildManager     = guildManager;
+            ResidenceManager = residenceManager;
         }
 
         #endregion
@@ -348,7 +351,7 @@ namespace NexusForever.Game.Entity
             XpManager               = new XpManager(this, model);
             ReputationManager       = new ReputationManager(this, model);
             GuildManager.Initialise(this, model);
-            ResidenceManager        = new ResidenceManager(this);
+            ResidenceManager.Initialise(this);
             CinematicManager        = new CinematicManager(this);
 
             LogoutManager           = new LogoutManager(this);
@@ -718,7 +721,7 @@ namespace NexusForever.Game.Entity
             BuybackManager.Instance.SendBuybackItems(this);
 
             ResidenceManager.SendHousingBasics();
-            Session.EnqueueMessageEncrypted(new ServerHousingNeighbors());
+            Session.EnqueueMessageEncrypted(new ServerHousingNeighbours());
             Session.EnqueueMessageEncrypted(new ServerInstanceSettings() { ClientEntitySendUpdateInterval = 125 });
 
             SetControl(this);

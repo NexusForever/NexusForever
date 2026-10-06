@@ -1,5 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Game.Static.Spell;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Spell

@@ -2,9 +2,9 @@
 {
     public enum ResidencePrivacyLevel
     {
-        Public,
-        NeighborsOnly,
-        RoommatesOnly,
-        Private
+        Public         = 0,
+        NeighboursOnly = 1,
+        RoommatesOnly  = 2,
+        Private        = 3
     }
 }

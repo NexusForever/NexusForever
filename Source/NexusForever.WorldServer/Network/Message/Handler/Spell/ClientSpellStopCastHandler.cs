@@ -1,5 +1,5 @@
 ﻿using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Spell;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 {
@@ -8,7 +8,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
         public void HandleMessage(IWorldSession session, ClientSpellStopCast spellStopCast)
         {
             // TODO: handle CastResult, client only sends SpellCancelled and SpellInterrupted
-            session.Player.CancelSpellCast(spellStopCast.CastingId);
+            session.Player.CancelSpellCast(spellStopCast.ServerUniqueId);
         }
     }
 }

@@ -4,7 +4,6 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
-using NexusForever.Network.World.Message.Model;
 
 namespace NexusForever.Game.Entity
 {
@@ -27,7 +26,7 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(model);
 
-            SetStat(Stat.StandState, StandState.State0); // Closed on spawn
+            SetStandState(StandState.State0); // Closed on spawn
             SetBaseProperty(Property.BaseHealth, 101f); // Sniffs showed all doors had 101hp for me.
         }
 
@@ -44,12 +43,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void OpenDoor()
         {
-            SetStat(Stat.StandState, StandState.State1);
-            EnqueueToVisible(new ServerEmote
-            {
-                Guid       = Guid,
-                StandState = StandState.State1
-            });
+            SetStandState(StandState.State1);
         }
 
         /// <summary>
@@ -57,12 +51,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CloseDoor()
         {
-            SetStat(Stat.StandState, StandState.State0);
-            EnqueueToVisible(new ServerEmote
-            {
-                Guid       = Guid,
-                StandState = StandState.State0
-            });
+            SetStandState(StandState.State0);
         }
     }
 }

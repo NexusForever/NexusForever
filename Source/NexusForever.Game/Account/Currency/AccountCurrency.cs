@@ -3,10 +3,10 @@ using NexusForever.Database.Auth;
 using NexusForever.Database.Auth.Model;
 using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Account.Currency;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using ServerAccountCurrency = NexusForever.Network.World.Message.Model.Shared.AccountCurrency;
+using ServerAccountCurrency = NexusForever.Network.World.Message.Model.AccountInventory.AccountCurrency;
 
 namespace NexusForever.Game.Account.Currency
 {
@@ -127,8 +127,8 @@ namespace NexusForever.Game.Account.Currency
         {
             return new ServerAccountCurrency
             {
-                AccountCurrencyType = (byte)CurrencyId,
-                Amount              = Amount
+                Type   = CurrencyId,
+                Amount = Amount
             };
         }
     }

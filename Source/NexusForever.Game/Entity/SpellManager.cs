@@ -11,6 +11,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Network.World.Message.Static;
 using NLog;
 
@@ -301,7 +302,7 @@ namespace NexusForever.Game.Entity
 
             if (!player.IsLoading)
             {
-                player.Session.EnqueueMessageEncrypted(new ServerCooldown
+                player.Session.EnqueueMessageEncrypted(new ServerSpellCooldownStart
                 {
                     Cooldown = new Cooldown
                     {
@@ -362,7 +363,7 @@ namespace NexusForever.Game.Entity
         public void SendInitialPackets()
         {
             SendServerAbilities();
-            SendServerSpellList();
+            SendServerAbilityList();
             SendServerAbilityPoints();
             SendServerActionSets();
             SendServerAmpLists();
@@ -396,9 +397,9 @@ namespace NexusForever.Game.Entity
             }
         }
 
-        private void SendServerSpellList()
+        private void SendServerAbilityList()
         {
-            var serverAbilityBook = new ServerAbilityBook();
+            var serverAbilities = new ServerAbilities();
             foreach ((uint spell4BaseId, ICharacterSpell spell) in spells)
             {
                 ISpellBaseInfo spellBaseInfo = GlobalSpellManager.Instance.GetSpellBaseInfo(spell4BaseId);
@@ -408,7 +409,7 @@ namespace NexusForever.Game.Entity
                 for (byte i = 0; i < ActionSet.MaxActionSets; i++)
                 {
                     IActionSetShortcut shortcut = actionSets[i].GetShortcut(ShortcutType.SpellbookItem, spell4BaseId);
-                    serverAbilityBook.Spells.Add(new ServerAbilityBook.Spell
+                    serverAbilities.Spells.Add(new ServerAbilities.Spell
                     {
                         Spell4BaseId      = spell4BaseId,
                         TierIndexAchieved = shortcut?.Tier ?? spell.Tier,
@@ -421,7 +422,7 @@ namespace NexusForever.Game.Entity
                 }
             }
 
-            player.Session.EnqueueMessageEncrypted(serverAbilityBook);
+            player.Session.EnqueueMessageEncrypted(serverAbilities);
         }
 
         public void SendServerAbilityPoints()

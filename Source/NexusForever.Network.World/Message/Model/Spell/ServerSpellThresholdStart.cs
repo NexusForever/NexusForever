@@ -1,0 +1,21 @@
+using NexusForever.Network.Message;
+
+namespace NexusForever.Network.World.Message.Model.Spell
+{
+    [Message(GameMessageOpcode.ServerSpellThresholdStart)]
+    public class ServerSpellThresholdStart : IWritable
+    {
+        public uint Spell4Id { get; set; }
+        public uint RootSpell4Id { get; set; }
+        public uint ParentSpell4Id { get; set; } = 0;
+        public uint ServerUniqueId { get; set; }
+
+        public void Write(GamePacketWriter writer)
+        {
+            writer.Write(Spell4Id, 18u);
+            writer.Write(RootSpell4Id, 18u);
+            writer.Write(ParentSpell4Id, 18u);
+            writer.Write(ServerUniqueId);
+        }
+    }
+}

@@ -1,4 +1,6 @@
-﻿namespace NexusForever.Database.Character.Model
+﻿using NexusForever.Game.Static.Housing;
+
+namespace NexusForever.Database.Character.Model
 {
     public class ResidencePlotModel
     {
@@ -6,8 +8,8 @@
         public byte Index { get; set; }
         public ushort PlotInfoId { get; set; }
         public ushort PlugItemId { get; set; }
-        public byte PlugFacing { get; set; }
-        public byte BuildState { get; set; }
+        public HousingPlugFacing PlugFacing { get; set; }
+        public BuildState BuildState { get; set; }
 
         public ResidenceModel Residence { get; set; }
     }

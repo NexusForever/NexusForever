@@ -12,7 +12,7 @@
         PvpMatch             = 0x7,
         TradeRequest         = 0x8,
         AccountFriendRequest = 0x9,
-        NeighborRequest      = 0xA,
+        NeighbourRequest     = 0xA,
         Overturn             = 0xB
     };
 }

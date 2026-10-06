@@ -62,7 +62,7 @@ namespace NexusForever.Server.GroupServer.Character
             CharacterModel characterModel = await _characterRepository.GetCharacterAsync(identity.Id, identity.RealmId);
             if (characterModel == null)
             {
-                API.Model.Character.Character apiCharacter = await _characterApiClient.GetCharacterAsync(identity.ToAPIdentity());
+                API.Model.Character.Character apiCharacter = await _characterApiClient.GetCharacterAsync(identity.ToAPIIdentity());
                 if (apiCharacter == null)
                     return null;
 
@@ -88,7 +88,7 @@ namespace NexusForever.Server.GroupServer.Character
             CharacterModel characterModel = await _characterRepository.GetCharacterAsync(identity.Name, identity.RealmName);
             if (characterModel == null)
             {
-                API.Model.Character.Character apiCharacter = await _characterApiClient.GetCharacterAsync(identity.ToAPIdentityName());
+                API.Model.Character.Character apiCharacter = await _characterApiClient.GetCharacterAsync(identity.ToAPIIdentityName());
                 if (apiCharacter == null)
                     return null;
 

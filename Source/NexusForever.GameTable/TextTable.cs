@@ -9,7 +9,7 @@ namespace NexusForever.GameTable
     {
         public TextTableEntry[] Entries { get; private set; }
 
-        private readonly TextTableHeader header;
+        private TextTableHeader header;
         private int[] lookup;
 
         [JsonConstructor]
@@ -21,8 +21,18 @@ namespace NexusForever.GameTable
 
         public TextTable(string path)
         {
-            using (FileStream fileStream = File.OpenRead(path))
-            using (var stream = new BufferedStream(fileStream, 64 * 1024))
+            using (FileStream stream = File.OpenRead(path))
+                Initialise(stream);
+        }
+
+        public TextTable(Stream stream)
+        {
+            Initialise(stream);
+        }
+
+        private void Initialise(Stream inputStream)
+        {
+            using (var stream = new BufferedStream(inputStream, 64 * 1024))
             using (var reader = new BinaryReader(stream, Encoding.Unicode))
             {
                 if (reader.BaseStream.Remaining() < Marshal.SizeOf<TextTableHeader>())

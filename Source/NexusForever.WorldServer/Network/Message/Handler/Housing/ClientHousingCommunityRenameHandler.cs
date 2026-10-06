@@ -4,15 +4,14 @@ using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
+using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Text.Filter;
 using NexusForever.GameTable.Text.Static;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
@@ -61,7 +60,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
                     return HousingResult.Failed;
 
                 bool canAfford;
-                if (housingCommunityRename.AlternativeCurrency)
+                if (housingCommunityRename.UseServiceToken)
                     canAfford = session.Player.CurrencyManager.CanAfford(CurrencyType.Renown, entry.Dataint01);
                 else
                     canAfford = session.Player.CurrencyManager.CanAfford(CurrencyType.Credits, entry.Dataint0);
@@ -77,7 +76,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             {
                 // fun fact: 2395 is the final game formula entry
                 GameFormulaEntry entry = gameTableManager.GameFormula.GetEntry(2395);
-                if (housingCommunityRename.AlternativeCurrency)
+                if (housingCommunityRename.UseServiceToken)
                     session.Player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Renown, entry.Dataint01);
                 else
                     session.Player.CurrencyManager.CurrencySubtractAmount(CurrencyType.Credits, entry.Dataint0);

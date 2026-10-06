@@ -1,5 +1,5 @@
 ﻿using NexusForever.Database.Auth;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 
 namespace NexusForever.Game.Abstract.Account.Currency
 {

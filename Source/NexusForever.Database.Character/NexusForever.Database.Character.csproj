@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NexusForever.Database\NexusForever.Database.csproj" />
+    <ProjectReference Include="..\NexusForever.Game.Static\NexusForever.Game.Static.csproj" />
   </ItemGroup>
 
 </Project>

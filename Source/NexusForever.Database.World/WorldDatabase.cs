@@ -39,6 +39,7 @@ namespace NexusForever.Database.World
         private IQueryable<EntityModel> EntitiesInclude(IQueryable<EntityModel> entities)
         {
             return entities
+                .Include(e => e.EntityEmote)
                 .Include(e => e.EntityEvent)
                 .Include(e => e.EntitySpline)
                 .Include(e => e.EntityVendor)

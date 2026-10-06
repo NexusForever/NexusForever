@@ -17,7 +17,7 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -1432,6 +1432,12 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue((byte)0)
                         .HasColumnName("stat");
 
+                    b.Property<uint>("Data")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("data");
+
                     b.Property<float>("Value")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float")
@@ -2394,7 +2400,7 @@ namespace NexusForever.Database.Character.Migrations
                     b.Property<byte>("PropertyInfoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(3) unsigned")
-                        .HasDefaultValue((byte)0)
+                        .HasDefaultValue((byte)35)
                         .HasColumnName("propertyInfoId");
 
                     b.Property<byte>("ResourceSharing")
