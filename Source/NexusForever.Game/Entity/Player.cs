@@ -80,7 +80,8 @@ namespace NexusForever.Game.Entity
             Flags       = 0x0020,
             Innate      = 0x0080,
             Sex         = 0x0100,
-            Race        = 0x0200
+            Race        = 0x0200,
+            Return      = 0x0400
         }
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
@@ -333,6 +334,15 @@ namespace NexusForever.Game.Entity
             TimePlayedTotal   = model.TimePlayedTotal;
             TimePlayedLevel   = model.TimePlayedLevel;
 
+            // where to return to from a content instance, kept over a server restart
+            WorldEntry returnWorld = model.ReturnWorldId != 0 ? GameTableManager.Instance.World.GetEntry(model.ReturnWorldId) : null;
+            if (returnWorld != null)
+                ReturnPosition = new MapPosition
+                {
+                    Info     = new MapInfo { Entry = returnWorld },
+                    Position = new Vector3(model.ReturnLocationX, model.ReturnLocationY, model.ReturnLocationZ)
+                };
+
             statUpdateManager.Initialise(this);
 
             foreach (CharacterStatModel statModel in model.Stat)
@@ -542,6 +552,21 @@ namespace NexusForever.Game.Entity
                     entity.Property(p => p.WorldZoneId).IsModified = true;
                 }
 
+                if ((saveMask & PlayerSaveMask.Return) != 0 && ReturnPosition != null)
+                {
+                    model.ReturnWorldId = (ushort)ReturnPosition.Info.Entry.Id;
+                    entity.Property(p => p.ReturnWorldId).IsModified = true;
+
+                    model.ReturnLocationX = ReturnPosition.Position.X;
+                    entity.Property(p => p.ReturnLocationX).IsModified = true;
+
+                    model.ReturnLocationY = ReturnPosition.Position.Y;
+                    entity.Property(p => p.ReturnLocationY).IsModified = true;
+
+                    model.ReturnLocationZ = ReturnPosition.Position.Z;
+                    entity.Property(p => p.ReturnLocationZ).IsModified = true;
+                }
+
                 if ((saveMask & PlayerSaveMask.Path) != 0)
                 {
                     model.ActivePath = (uint)Path;
@@ -648,6 +673,13 @@ namespace NexusForever.Game.Entity
             SendCharacterFlagsUpdated();
 
             base.OnAddToMap(map, guid, vector);
+
+            // the teleport succeeded: a failed one leaves the return position as it was
+            if (pendingTeleport?.ReturnPosition != null)
+            {
+                ReturnPosition = pendingTeleport.ReturnPosition;
+                saveMask |= PlayerSaveMask.Return;
+            }
 
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
@@ -1092,16 +1124,6 @@ namespace NexusForever.Game.Entity
                 vanityPetId = pet?.CreatureId;
             }
 
-            pendingTeleport = new PendingTeleport
-            {
-                Reason      = reason,
-                MapPosition = mapPosition,
-                VanityPetId = vanityPetId,
-                Resurrect   = reason == TeleportReason.EndMatch && !IsAlive
-            };
-
-            SetControl(null);
-
             IMapPosition source = null;
             if (Map != null)
             {
@@ -1114,11 +1136,19 @@ namespace NexusForever.Game.Entity
                     },
                     Position = Position
                 };
-
-                // leaving the open world for another world: remember where to return to
-                if (Map is not IContentMapInstance && Map.Entry.Id != mapPosition.Info.Entry.Id)
-                    ReturnPosition = source;
             }
+
+            pendingTeleport = new PendingTeleport
+            {
+                Reason         = reason,
+                MapPosition    = mapPosition,
+                VanityPetId    = vanityPetId,
+                Resurrect      = reason == TeleportReason.EndMatch && !IsAlive,
+                // leaving the open world for another world: where to return to, applied once the teleport succeeds
+                ReturnPosition = source != null && Map is not IContentMapInstance && Map.Entry.Id != mapPosition.Info.Entry.Id ? source : null
+            };
+
+            SetControl(null);
 
             MapManager.Instance.AddToMap(this, source, mapPosition, OnAddToMap, OnTeleportToFailed, OnTeleportToFailed);
 

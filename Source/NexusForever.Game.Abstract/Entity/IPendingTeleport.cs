@@ -9,5 +9,10 @@ namespace NexusForever.Game.Abstract.Entity
         IMapPosition MapPosition { get; init; }
         uint? VanityPetId { get; init; }
         bool Resurrect { get; init; }
+
+        /// <summary>
+        /// Position in the open world map being left for another world, applied as the return position once the teleport succeeds.
+        /// </summary>
+        IMapPosition ReturnPosition { get; init; }
     }
 }
