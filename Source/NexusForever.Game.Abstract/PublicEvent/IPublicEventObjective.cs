@@ -44,6 +44,14 @@ namespace NexusForever.Game.Abstract.PublicEvent
         void ActivateObjective(uint max);
 
         /// <summary>
+        /// Set the dynamic max of an active objective, for example when participants join or leave.
+        /// </summary>
+        /// <remarks>
+        /// The objective is completed immediately if the current count already meets the new max.
+        /// </remarks>
+        void SetDynamicMax(uint max);
+
+        /// <summary>
         /// Reset the objective.
         /// </summary>
         /// <remarks>

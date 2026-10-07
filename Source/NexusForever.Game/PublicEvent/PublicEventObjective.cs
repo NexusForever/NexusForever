@@ -177,6 +177,11 @@ namespace NexusForever.Game.PublicEvent
             if (Entry.PublicEventObjectiveFlags.HasFlag(PublicEventObjectiveFlag.DynamicObjective))
                 return Count >= DynamicMax;
 
+            // as the client resolves the required count (GetRequiredCount): a participant objective uses the dynamic max
+            // whenever one is set, otherwise the table count; the DynamicObjective flag isn't consulted for it
+            if (Entry.PublicEventObjectiveTypeEnum == PublicEventObjectiveType.ParticipantsInTriggerVolume && DynamicMax > 0)
+                return Count >= DynamicMax;
+
             return Count >= Entry.Count;
         }
 
@@ -193,6 +198,27 @@ namespace NexusForever.Game.PublicEvent
 
             DynamicMax = max;
             SetStatus(PublicEventStatus.Active);
+        }
+
+        /// <summary>
+        /// Set the dynamic max of an active objective, for example when participants join or leave.
+        /// </summary>
+        /// <remarks>
+        /// The objective is completed immediately if the current count already meets the new max.
+        /// </remarks>
+        public void SetDynamicMax(uint max)
+        {
+            if (Status != PublicEventStatus.Active)
+                return;
+
+            if (DynamicMax == max)
+                return;
+
+            DynamicMax = max;
+            BroadcastObjectiveStatusUpdate();
+
+            if (IsComplete())
+                SetStatus(PublicEventStatus.Succeeded);
         }
 
         /// <summary>
