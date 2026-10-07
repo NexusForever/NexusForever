@@ -9,6 +9,7 @@ using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Static;
 
+// ObjectId is not used in this check, however gametable queries for prerequisites have shown a non zero value for objectId, if it becomes a problem investigate further
 namespace NexusForever.Game.Prerequisite.Check
 {
     [PrerequisiteCheck(PrerequisiteType.RapidTransport)]
@@ -28,7 +29,7 @@ namespace NexusForever.Game.Prerequisite.Check
         }
 
         #endregion
-
+        // This handler can not be refactored to use the generic comparison logic of BasePrerequisiteHandler
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             if (!CanAffordRapidTransport(player, parameters))

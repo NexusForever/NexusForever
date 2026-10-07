@@ -45,6 +45,14 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// Determines wether the specified itemId exists in the bag.
+        /// </summary>
+        public bool HasItem(uint itemId)
+        {
+            return items.Any(i => i?.Info?.Id == itemId);
+        }
+
+        /// <summary>
         /// Returns <see cref="IItem"/> with the supplied guid.
         /// </summary>
         public IItem GetItem(ulong guid)

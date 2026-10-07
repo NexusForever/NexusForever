@@ -14,8 +14,8 @@
         EpisodeState                = 9, // Episode requirement not met
         Gender                      = 10, // Gender requirement not met
         OtherPrerequisite           = 11, // Other requirement not met
-        DeadState                   = 12, // Player death state not correct
-        ItemEquipped                = 13, // Item equipment requirement not met
+        DeathState                  = 12, // Player death state not correct
+        Item2IdIsEquipped           = 13, // Item equipment requirement not met
         ItemOnCharacter             = 14, // Inventory requirement not met
         /// <summary>
         /// Checks for whether or not the Player is affected by this spell. Used in cases to check for if player has AMP.
