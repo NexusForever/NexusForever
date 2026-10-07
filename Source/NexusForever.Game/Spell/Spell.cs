@@ -517,20 +517,24 @@ namespace NexusForever.Game.Spell
             }
         }
 
+        private IUnitEntity GetExplicitTarget()
+        {
+            if (Parameters.PrimaryTargetId == 0)
+                return Caster;
+
+            // the explicit target can be an entity that isn't a unit, e.g. an instance portal
+            return Caster.GetVisible<IGridEntity>(Parameters.PrimaryTargetId) as IUnitEntity;
+        }
+
         protected virtual void SelectTargets(ISpellExecutionContext executionContext)
         {
             // Add Caster Entity with the appropriate SpellEffectTargetFlags.
             executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.Caster, Caster);
 
             // Add Targeted Entity with the appropriate SpellEffectTargetFlags.
-            if (Parameters.PrimaryTargetId > 0)
-            {
-                IUnitEntity explicitTargetEntity = Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
-                if (explicitTargetEntity != null)
-                    executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, explicitTargetEntity);
-            }
-            else
-                executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, Caster);
+            IUnitEntity explicitTarget = GetExplicitTarget();
+            if (explicitTarget != null)
+                executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, explicitTarget);
 
             // TODO: this might not be entirely correct, research this more...
             if (Parameters.SpellInfo.BaseInfo.TargetMechanics.TargetType
