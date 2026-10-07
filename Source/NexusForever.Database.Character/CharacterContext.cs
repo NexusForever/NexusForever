@@ -152,6 +152,26 @@ namespace NexusForever.Database.Character
                     .HasColumnType("float")
                     .HasDefaultValue(0);
 
+                entity.Property(e => e.ReturnWorldId)
+                    .HasColumnName("returnWorldId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ReturnLocationX)
+                    .HasColumnName("returnLocationX")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ReturnLocationY)
+                    .HasColumnName("returnLocationY")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ReturnLocationZ)
+                    .HasColumnName("returnLocationZ")
+                    .HasColumnType("float")
+                    .HasDefaultValue(0);
+
                 entity.Property(e => e.LocationY)
                     .HasColumnName("locationY")
                     .HasColumnType("float")

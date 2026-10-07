@@ -23,6 +23,10 @@ namespace NexusForever.Database.Character.Model
         public float RotationZ { get; set; }
         public ushort WorldId { get; set; }
         public ushort WorldZoneId { get; set; }
+        public ushort ReturnWorldId { get; set; }
+        public float ReturnLocationX { get; set; }
+        public float ReturnLocationY { get; set; }
+        public float ReturnLocationZ { get; set; }
         public ushort Title { get; set; }
         public uint ActivePath { get; set; }
         public DateTime PathActivatedTimestamp { get; set; }

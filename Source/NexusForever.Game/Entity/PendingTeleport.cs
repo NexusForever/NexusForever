@@ -10,5 +10,6 @@ namespace NexusForever.Game.Entity
         public IMapPosition MapPosition { get; init; }
         public uint? VanityPetId { get; init; }
         public bool Resurrect { get; init; }
+        public IMapPosition ReturnPosition { get; init; }
     }
 }
