@@ -21,22 +21,22 @@ namespace NexusForever.Game.Prerequisite.Check
 
         #endregion
 
-        public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             switch (comparison)
             {
                 case PrerequisiteComparison.Equal:
-                    return player.GetVitalValue((Vital)objectId) == value;
+                    return subject.GetVitalValue((Vital)objectId) == value;
                 case PrerequisiteComparison.NotEqual:
-                    return player.GetVitalValue((Vital)objectId) != value;
+                    return subject.GetVitalValue((Vital)objectId) != value;
                 case PrerequisiteComparison.GreaterThanOrEqual:
-                    return player.GetVitalValue((Vital)objectId) >= value;
+                    return subject.GetVitalValue((Vital)objectId) >= value;
                 case PrerequisiteComparison.GreaterThan:
-                    return player.GetVitalValue((Vital)objectId) > value;
+                    return subject.GetVitalValue((Vital)objectId) > value;
                 case PrerequisiteComparison.LessThanOrEqual:
-                    return player.GetVitalValue((Vital)objectId) <= value;
+                    return subject.GetVitalValue((Vital)objectId) <= value;
                 case PrerequisiteComparison.LessThan:
-                    return player.GetVitalValue((Vital)objectId) < value;
+                    return subject.GetVitalValue((Vital)objectId) < value;
                 default:
                     log.LogWarning($"Unhandled {comparison} for {PrerequisiteType.Vital}!");
                     return false;

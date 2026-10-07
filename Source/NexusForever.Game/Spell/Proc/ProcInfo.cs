@@ -15,6 +15,7 @@ namespace NexusForever.Game.Spell.Proc
         public ProcType Type { get; private set; }
 
         private UpdateTimer triggerTimer;
+        private uint pendingTargetId;
 
         #region Dependency Injection
 
@@ -57,11 +58,16 @@ namespace NexusForever.Game.Spell.Proc
 
             triggerTimer.Reset(false);
 
+            // grab stored target and clear
+            uint targetId = pendingTargetId;
+            pendingTargetId = 0;
+
             log.LogTrace($"Triggering Proc {Data.Entry.Id} of {Type}.");
 
             Owner.CastSpell(Data.SpellId, new SpellParameters
             {
-                UserInitiatedSpellCast = false
+                UserInitiatedSpellCast = false,
+                PrimaryTargetId        = targetId
             });
         }
 
@@ -73,21 +79,24 @@ namespace NexusForever.Game.Spell.Proc
             log.LogWarning($"Attempting to trigger proc {Data.Entry.Id} of {Type}.");
 
             if (CanTrigger(parameters))
+            {
+                // store target for next trigger
+                pendingTargetId = parameters.Target?.Guid ?? 0;
                 triggerTimer.Reset(true);
+            }
         }
 
         private bool CanTrigger(IProcParameters parameters)
         {
             if (Data.TargetPrerequisiteId != 0)
             {
-                // TODO: once the prerequisite system is updated to handle IUnitEntity, this needs to be updated
-                if (parameters.Target is IPlayer player && !prerequisiteManager.Meets(player, Data.TargetPrerequisiteId))
+                if (parameters.Target == null || !prerequisiteManager.Meets(parameters.Target, Data.TargetPrerequisiteId, Owner))
                     return false;
             }
 
             if (Data.CasterPrerequisiteId != 0)
             {
-                if (Owner is IPlayer player && !prerequisiteManager.Meets(player, Data.CasterPrerequisiteId))
+                if (!prerequisiteManager.Meets(Owner, Data.CasterPrerequisiteId, parameters.Target))
                     return false;
             }
 
