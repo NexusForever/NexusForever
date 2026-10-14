@@ -1,30 +1,46 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.GalacticArchive;
+using NexusForever.Game.Abstract.GalacticArchive;
 using NexusForever.Game.Static.GalacticArchive;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NLog;
+using NexusForever.Network;
 
 namespace NexusForever.Game.Entity
 {
     public class GalacticArchiveManager : IGalacticArchiveManager
     {
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
-
-        private readonly IPlayer player;
+        private IPlayer player;
         private readonly Dictionary<ushort, IArchiveArticle> articles = [];
 
-        /// <summary>
-        /// Create a new <see cref="IGalacticArchiveManager"/> from an existing database model.
-        /// </summary>
-        public GalacticArchiveManager(IPlayer owner, CharacterModel characterModel)
+        #region Dependency Injection
+
+        private readonly IGameTableManager gameTableManager;
+        private readonly IGlobalGalacticArchiveManager globalArchiveManager;
+
+        public GalacticArchiveManager(
+            IGameTableManager gameTableManager,
+            IGlobalGalacticArchiveManager globalArchiveManager)
         {
+            this.gameTableManager     = gameTableManager;
+            this.globalArchiveManager = globalArchiveManager;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Initialise <see cref="IGalacticArchiveManager"/> from <see cref="CharacterModel"/> database model.
+        /// </summary>
+        public void Initialise(IPlayer owner, CharacterModel model)
+        {
+            if (player != null)
+                throw new InvalidOperationException("GalacticArchiveManager has already been initialised!");
+
             player = owner;
 
-            foreach (CharacterArchiveArticleModel model in characterModel.ArchiveArticle)
-                articles.Add(model.ArticleId, new ArchiveArticle(player, model));
+            foreach (CharacterArchiveArticleModel articleModel in model.ArchiveArticle)
+                articles.Add(articleModel.ArticleId, new ArchiveArticle(player, articleModel));
         }
 
         /// <summary>
@@ -49,12 +65,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void UnlockArticle(ushort id)
         {
-            ArchiveArticleEntry entry = GameTableManager.Instance.ArchiveArticle.GetEntry(id);
+            ArchiveArticleEntry entry = gameTableManager.ArchiveArticle.GetEntry(id);
             if (entry is null)
-            {
-                log.Trace($"Player {player.CharacterId} tried to unlock archive article {id} which doesn't exist!");
-                return;
-            }
+                throw new InvalidPacketValueException();
 
             if (((ArchiveArticleFlags)entry.ArchiveArticleFlags).HasFlag(ArchiveArticleFlags.NoClientUnlock))
                 return;
@@ -86,36 +99,8 @@ namespace NexusForever.Game.Entity
         /// </remarks>
         public void UpdateUnlockRule(ArchiveEntryUnlockRuleType type, uint objectId)
         {
-            foreach ((ushort articleId, uint entryMask) in GlobalGalacticArchiveManager.Instance.GetUnlockedEntries(type, objectId))
+            foreach ((ushort articleId, uint entryMask) in globalArchiveManager.GetUnlockedEntries(type, objectId))
                 Unlock(articleId, entryMask, sendUpdate: true);
-        }
-
-        private void Unlock(ushort id, uint entryMask, bool sendUpdate)
-        {
-            if (!articles.TryGetValue(id, out IArchiveArticle article))
-            {
-                article = new ArchiveArticle(player, id);
-                articles.Add(id, article);
-            }
-
-            uint articleEntryMask = GlobalGalacticArchiveManager.Instance.GetEntryMask(id);
-            bool wasComplete      = article.IsUnlocked && article.HasEntries(articleEntryMask);
-
-            if (!article.IsUnlocked)
-                entryMask |= GlobalGalacticArchiveManager.Instance.GetInitialEntryMask(id);
-
-            if (!article.Unlock(entryMask))
-                return;
-
-            if (sendUpdate)
-                player.Session.EnqueueMessageEncrypted(article.Build());
-
-            if (!wasComplete && article.HasEntries(articleEntryMask))
-            {
-                ArchiveArticleEntry entry = GameTableManager.Instance.ArchiveArticle.GetEntry(id);
-                if (entry.CharacterTitleIdReward != 0u)
-                    player.TitleManager.AddTitle((ushort)entry.CharacterTitleIdReward);
-            }
         }
 
         /// <summary>
@@ -126,6 +111,34 @@ namespace NexusForever.Game.Entity
             // client discards all articles when it changes world, each must be sent again
             foreach (IArchiveArticle article in articles.Values)
                 player.Session.EnqueueMessageEncrypted(article.Build());
+        }
+
+        private void Unlock(ushort id, uint entryMask, bool sendUpdate)
+        {
+            if (!articles.TryGetValue(id, out IArchiveArticle article))
+            {
+                article = new ArchiveArticle(player, id);
+                articles.Add(id, article);
+            }
+
+            uint articleEntryMask = globalArchiveManager.GetEntryMask(id);
+            bool wasComplete      = article.IsUnlocked && article.HasEntries(articleEntryMask);
+
+            if (!article.IsUnlocked)
+                entryMask |= globalArchiveManager.GetInitialEntryMask(id);
+
+            if (!article.Unlock(entryMask))
+                return;
+
+            if (sendUpdate)
+                player.Session.EnqueueMessageEncrypted(article.Build());
+
+            if (!wasComplete && article.HasEntries(articleEntryMask))
+            {
+                ArchiveArticleEntry entry = gameTableManager.ArchiveArticle.GetEntry(id);
+                if (entry.CharacterTitleIdReward != 0u)
+                    player.TitleManager.AddTitle((ushort)entry.CharacterTitleIdReward);
+            }
         }
     }
 }

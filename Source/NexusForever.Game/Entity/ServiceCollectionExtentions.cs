@@ -57,6 +57,7 @@ namespace NexusForever.Game.Entity
             sc.AddSingletonLegacy<IPlayerManager, PlayerManager>();
 
             sc.AddTransient<ICurrencyManager, CurrencyManager>();
+            sc.AddTransient<IGalacticArchiveManager, GalacticArchiveManager>();
             sc.AddTransient<IGuildManager, GuildManager>();
         }
     }

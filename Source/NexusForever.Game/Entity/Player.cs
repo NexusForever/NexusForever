@@ -229,7 +229,7 @@ namespace NexusForever.Game.Entity
         public IPetCustomisationManager PetCustomisationManager { get; private set; }
         public ICharacterKeybindingManager KeybindingManager { get; private set; }
         public IDatacubeManager DatacubeManager { get; private set; }
-        public IGalacticArchiveManager GalacticArchiveManager { get; private set; }
+        public IGalacticArchiveManager GalacticArchiveManager { get; }
         public IMailManager MailManager { get; private set; }
         public IZoneMapManager ZoneMapManager { get; private set; }
         public IQuestManager QuestManager { get; private set; }
@@ -269,6 +269,7 @@ namespace NexusForever.Game.Entity
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             ICurrencyManager currencyManager,
+            IGalacticArchiveManager galacticArchiveManager,
             IGuildManager guildManager,
             IResidenceManager residenceManager)
             : base(movementManager)
@@ -279,9 +280,10 @@ namespace NexusForever.Game.Entity
             this.matchManager     = matchManager;
 
             // managers
-            CurrencyManager  = currencyManager;
-            GuildManager     = guildManager;
-            ResidenceManager = residenceManager;
+            CurrencyManager        = currencyManager;
+            GalacticArchiveManager = galacticArchiveManager;
+            GuildManager           = guildManager;
+            ResidenceManager       = residenceManager;
         }
 
         #endregion
@@ -344,7 +346,7 @@ namespace NexusForever.Game.Entity
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new CharacterKeybindingManager(this, model);
             DatacubeManager         = new DatacubeManager(this, model);
-            GalacticArchiveManager  = new GalacticArchiveManager(this, model);
+            GalacticArchiveManager.Initialise(this, model);
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);

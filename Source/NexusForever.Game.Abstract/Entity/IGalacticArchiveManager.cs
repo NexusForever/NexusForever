@@ -1,10 +1,16 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Static.GalacticArchive;
 
 namespace NexusForever.Game.Abstract.Entity
 {
     public interface IGalacticArchiveManager : IDatabaseCharacter
     {
+        /// <summary>
+        /// Initialise <see cref="IGalacticArchiveManager"/> from <see cref="CharacterModel"/> database model.
+        /// </summary>
+        void Initialise(IPlayer owner, CharacterModel model);
+
         /// <summary>
         /// Return <see cref="IArchiveArticle"/> with supplied id.
         /// </summary>

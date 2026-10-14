@@ -1,30 +1,37 @@
 ﻿using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract.GalacticArchive;
 using NexusForever.Game.Static.GalacticArchive;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Shared;
-using NLog;
 
 namespace NexusForever.Game.GalacticArchive
 {
-    public sealed class GlobalGalacticArchiveManager : Singleton<GlobalGalacticArchiveManager>, IGlobalGalacticArchiveManager
+    public class GlobalGalacticArchiveManager : IGlobalGalacticArchiveManager
     {
-        /// <summary>
-        /// The slot an entry is in for a single article.
-        /// </summary>
-        private readonly record struct ArticleSlot(ushort ArticleId, int Slot);
-
         // rule is only satisfied once every object is complete, no rule in the game table sets it
         private const uint UnlockRuleFlagAllObjects = 0x01;
-
-        private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         private FrozenDictionary<ushort, uint> entryMasks;
         private FrozenDictionary<ushort, uint> initialEntryMasks;
         private FrozenDictionary<(ArchiveEntryUnlockRuleType Type, uint ObjectId), ImmutableArray<(ushort ArticleId, uint EntryMask)>> unlockRules;
+
+        #region Dependency Injection
+
+        private readonly ILogger<GlobalGalacticArchiveManager> log;
+        private readonly IGameTableManager gameTableManager;
+
+        public GlobalGalacticArchiveManager(
+            ILogger<GlobalGalacticArchiveManager> log,
+            IGameTableManager gameTableManager)
+        {
+            this.log              = log;
+            this.gameTableManager = gameTableManager;
+        }
+
+        #endregion
 
         /// <summary>
         /// Initialise <see cref="IGlobalGalacticArchiveManager"/> and build the unlock rule index from the game tables.
@@ -34,10 +41,34 @@ namespace NexusForever.Game.GalacticArchive
             long start = Stopwatch.GetTimestamp();
 
             Dictionary<uint, List<ArticleSlot>> entrySlots = InitialiseArticles();
-            int ruleCount = InitialiseUnlockRules(entrySlots);
+            (int ruleCount, int unplacedCount) = InitialiseUnlockRules(entrySlots);
 
             TimeSpan span = Stopwatch.GetElapsedTime(start);
-            log.Info($"Initialised {entryMasks.Count} archive articles and {ruleCount} archive entry unlock rules in {span.TotalMilliseconds}ms.");
+            log.LogInformation($"Initialised {entryMasks.Count} archive articles and {ruleCount} archive entry unlock rules in {span.TotalMilliseconds:0}ms, skipped {unplacedCount} rules for entries that aren't in any article.");
+        }
+
+        /// <summary>
+        /// Return a mask of the slots that contain an entry for the article with supplied id.
+        /// </summary>
+        public uint GetEntryMask(ushort articleId)
+        {
+            return entryMasks.GetValueOrDefault(articleId);
+        }
+
+        /// <summary>
+        /// Return a mask of the slots that contain an entry that is unlocked together with the article with supplied id.
+        /// </summary>
+        public uint GetInitialEntryMask(ushort articleId)
+        {
+            return initialEntryMasks.GetValueOrDefault(articleId);
+        }
+
+        /// <summary>
+        /// Return each article and mask of slots that contain an entry with an unlock rule of <see cref="ArchiveEntryUnlockRuleType"/> for the supplied object id.
+        /// </summary>
+        public ImmutableArray<(ushort ArticleId, uint EntryMask)> GetUnlockedEntries(ArchiveEntryUnlockRuleType type, uint objectId)
+        {
+            return unlockRules.TryGetValue((type, objectId), out ImmutableArray<(ushort ArticleId, uint EntryMask)> articles) ? articles : [];
         }
 
         /// <summary>
@@ -52,7 +83,7 @@ namespace NexusForever.Game.GalacticArchive
             var initialMasks = new Dictionary<ushort, uint>();
             var entrySlots   = new Dictionary<uint, List<ArticleSlot>>();
 
-            foreach (ArchiveArticleEntry article in GameTableManager.Instance.ArchiveArticle.Entries)
+            foreach (ArchiveArticleEntry article in gameTableManager.ArchiveArticle.Entries)
             {
                 ushort articleId      = (ushort)article.Id;
                 uint entryMask        = 0u;
@@ -61,7 +92,7 @@ namespace NexusForever.Game.GalacticArchive
                 uint[] entryIds = GetEntryIds(article);
                 for (int slot = 0; slot < entryIds.Length; slot++)
                 {
-                    ArchiveEntryEntry entry = GameTableManager.Instance.ArchiveEntry.GetEntry(entryIds[slot]);
+                    ArchiveEntryEntry entry = gameTableManager.ArchiveEntry.GetEntry(entryIds[slot]);
                     if (entry is null)
                         continue;
 
@@ -89,15 +120,15 @@ namespace NexusForever.Game.GalacticArchive
         }
 
         /// <summary>
-        /// Build the slot masks unlocked by every object with an unlock rule, returning the number of rules used.
+        /// Build the slot masks unlocked by every object with an unlock rule, returning the number of rules used and the number skipped because their entry isn't in any article.
         /// </summary>
-        private int InitialiseUnlockRules(Dictionary<uint, List<ArticleSlot>> entrySlots)
+        private (int RuleCount, int UnplacedCount) InitialiseUnlockRules(Dictionary<uint, List<ArticleSlot>> entrySlots)
         {
             var rules = new Dictionary<(ArchiveEntryUnlockRuleType Type, uint ObjectId), Dictionary<ushort, uint>>();
 
             int ruleCount     = 0;
             int unplacedCount = 0;
-            foreach (ArchiveEntryUnlockRuleEntry rule in GameTableManager.Instance.ArchiveEntryUnlockRule.Entries)
+            foreach (ArchiveEntryUnlockRuleEntry rule in gameTableManager.ArchiveEntryUnlockRule.Entries)
             {
                 if (!entrySlots.TryGetValue(rule.ArchiveEntryId, out List<ArticleSlot> slots))
                 {
@@ -107,11 +138,11 @@ namespace NexusForever.Game.GalacticArchive
 
                 if ((rule.ArchiveEntryUnlockRuleFlags & UnlockRuleFlagAllObjects) != 0u)
                 {
-                    log.Warn($"Archive entry unlock rule {rule.Id} requires all objects to be complete which is not supported, skipping.");
+                    log.LogWarning($"Archive entry unlock rule {rule.Id} requires all objects to be complete which is not supported, skipping.");
                     continue;
                 }
 
-                var type = (ArchiveEntryUnlockRuleType)rule.ArchiveEntryUnlockRuleEnum;
+                ArchiveEntryUnlockRuleType type = (ArchiveEntryUnlockRuleType)rule.ArchiveEntryUnlockRuleEnum;
                 foreach (uint objectId in GetObjectIds(rule))
                 {
                     if (objectId == 0u)
@@ -124,7 +155,7 @@ namespace NexusForever.Game.GalacticArchive
                     }
 
                     foreach (ArticleSlot slot in slots)
-                        articleMasks[slot.ArticleId] = articleMasks.GetValueOrDefault(slot.ArticleId) | 1u << slot.Slot;
+                        articleMasks[slot.ArticleId] = articleMasks.GetValueOrDefault(slot.ArticleId) | (1u << slot.Slot);
                 }
 
                 ruleCount++;
@@ -136,10 +167,7 @@ namespace NexusForever.Game.GalacticArchive
                     .Select(a => (ArticleId: a.Key, EntryMask: a.Value))
                     .ToImmutableArray());
 
-            if (unplacedCount != 0)
-                log.Debug($"Skipped {unplacedCount} archive entry unlock rules for entries that aren't in any article.");
-
-            return ruleCount;
+            return (ruleCount, unplacedCount);
         }
 
         private static uint[] GetEntryIds(ArchiveArticleEntry article)
@@ -179,27 +207,8 @@ namespace NexusForever.Game.GalacticArchive
         }
 
         /// <summary>
-        /// Return a mask of the slots that contain an entry for the article with supplied id.
+        /// The slot an entry is in for a single article.
         /// </summary>
-        public uint GetEntryMask(ushort articleId)
-        {
-            return entryMasks.GetValueOrDefault(articleId);
-        }
-
-        /// <summary>
-        /// Return a mask of the slots that contain an entry that is unlocked together with the article with supplied id.
-        /// </summary>
-        public uint GetInitialEntryMask(ushort articleId)
-        {
-            return initialEntryMasks.GetValueOrDefault(articleId);
-        }
-
-        /// <summary>
-        /// Return each article and mask of slots that contain an entry with an unlock rule of <see cref="ArchiveEntryUnlockRuleType"/> for the supplied object id.
-        /// </summary>
-        public ImmutableArray<(ushort ArticleId, uint EntryMask)> GetUnlockedEntries(ArchiveEntryUnlockRuleType type, uint objectId)
-        {
-            return unlockRules.TryGetValue((type, objectId), out ImmutableArray<(ushort ArticleId, uint EntryMask)> articles) ? articles : [];
-        }
+        private readonly record struct ArticleSlot(ushort ArticleId, int Slot);
     }
 }

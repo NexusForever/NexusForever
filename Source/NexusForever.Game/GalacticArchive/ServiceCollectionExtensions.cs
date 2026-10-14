@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract.GalacticArchive;
-using NexusForever.Shared;
 
 namespace NexusForever.Game.GalacticArchive
 {
@@ -11,7 +10,7 @@ namespace NexusForever.Game.GalacticArchive
         /// </summary>
         public static void AddGameGalacticArchive(this IServiceCollection sc)
         {
-            sc.AddSingletonLegacy<IGlobalGalacticArchiveManager, GlobalGalacticArchiveManager>();
+            sc.AddSingleton<IGlobalGalacticArchiveManager, GlobalGalacticArchiveManager>();
         }
     }
 }
