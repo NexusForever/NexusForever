@@ -5,6 +5,9 @@
     {
         None      = 0,
         Character = 1,
-        Disabled  = 2
+        /// <summary>
+        /// Entitlement isn't shown by the client, it is still granted and counted.
+        /// </summary>
+        Hidden    = 2
     }
 }

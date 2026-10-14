@@ -41,7 +41,7 @@ namespace NexusForever.Game.Entitlement
         protected Entitlement(EntitlementEntry entry, uint value)
         {
             if (value > entry.MaxCount)
-                throw new DatabaseDataException($"Invalid value {value} for entitlement {Entry.Id}, expected max is {Entry.MaxCount}!");
+                throw new DatabaseDataException($"Invalid value {value} for entitlement {entry.Id}, expected max is {entry.MaxCount}!");
 
             Entry  = entry;
             amount = value;
