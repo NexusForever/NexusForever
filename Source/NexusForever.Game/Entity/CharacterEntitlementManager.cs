@@ -13,7 +13,7 @@ namespace NexusForever.Game.Entity
     public class CharacterEntitlementManager : EntitlementManager<ICharacterEntitlement>, ICharacterEntitlementManager
     {
         // without these the client treats the player as a trial account: trading.lua and the marketplace refuse to open,
-        // level is capped at 20 and currency 1 and 2 are capped at 500,000 and 5,000
+        // level is capped at 20 and credits and renown are capped at 500,000 and 5,000
         private static readonly EntitlementType[] baseEntitlements =
         [
             EntitlementType.BaseCharacterProgressionCaps,
@@ -30,6 +30,9 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Create a new <see cref="ICharacterEntitlementManager"/> from existing database model.
         /// </summary>
+        /// <remarks>
+        /// Any base entitlement the character doesn't already have is granted.
+        /// </remarks>
         public CharacterEntitlementManager(IPlayer player, CharacterModel model)
         {
             this.player = player;
@@ -49,8 +52,9 @@ namespace NexusForever.Game.Entity
                 if (entitlements.ContainsKey(type))
                     continue;
 
-                EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type)
-                    ?? throw new InvalidOperationException($"Base entitlement {type} is missing from the Entitlement table!");
+                EntitlementEntry entry = GameTableManager.Instance.Entitlement.GetEntry((ulong)type);
+                if (entry == null)
+                    throw new InvalidOperationException($"Base entitlement {type} is missing from the Entitlement table!");
 
                 entitlements.Add(type, new CharacterEntitlement(player, entry, 1u));
             }

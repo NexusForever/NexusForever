@@ -5,9 +5,6 @@
     {
         None      = 0,
         Character = 1,
-        /// <summary>
-        /// Entitlement isn't shown by the client, it is still granted and counted.
-        /// </summary>
-        Hidden    = 2
+        Hidden    = 2  // not shown by the client, still granted and counted
     }
 }
