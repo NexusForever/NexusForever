@@ -28,6 +28,9 @@ namespace NexusForever.Game.Abstract.Entity
         /// </remarks>
         void UpdateUnlockRule(ArchiveEntryUnlockRuleType type, uint objectId);
 
+        /// <summary>
+        /// Send every article to the owner <see cref="IPlayer"/> after entering a world.
+        /// </summary>
         void SendInitialPackets();
     }
 }

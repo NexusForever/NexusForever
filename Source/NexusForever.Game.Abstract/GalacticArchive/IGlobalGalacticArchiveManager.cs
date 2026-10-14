@@ -5,6 +5,9 @@ namespace NexusForever.Game.Abstract.GalacticArchive
 {
     public interface IGlobalGalacticArchiveManager
     {
+        /// <summary>
+        /// Initialise <see cref="IGlobalGalacticArchiveManager"/> and build the unlock rule index from the game tables.
+        /// </summary>
         void Initialise();
 
         /// <summary>

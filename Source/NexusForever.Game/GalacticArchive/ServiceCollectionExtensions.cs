@@ -6,6 +6,9 @@ namespace NexusForever.Game.GalacticArchive
 {
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Register the Galactic Archive services.
+        /// </summary>
         public static void AddGameGalacticArchive(this IServiceCollection sc)
         {
             sc.AddSingletonLegacy<IGlobalGalacticArchiveManager, GlobalGalacticArchiveManager>();

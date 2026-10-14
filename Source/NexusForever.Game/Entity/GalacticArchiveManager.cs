@@ -27,6 +27,9 @@ namespace NexusForever.Game.Entity
                 articles.Add(model.ArticleId, new ArchiveArticle(player, model));
         }
 
+        /// <summary>
+        /// Save any changes to the articles to the <see cref="CharacterContext"/>.
+        /// </summary>
         public void Save(CharacterContext context)
         {
             foreach (IArchiveArticle article in articles.Values)
@@ -115,6 +118,9 @@ namespace NexusForever.Game.Entity
             }
         }
 
+        /// <summary>
+        /// Send every article to the owner <see cref="IPlayer"/> after entering a world.
+        /// </summary>
         public void SendInitialPackets()
         {
             // client discards all articles when it changes world, each must be sent again

@@ -26,6 +26,9 @@ namespace NexusForever.Game.GalacticArchive
         private FrozenDictionary<ushort, uint> initialEntryMasks;
         private FrozenDictionary<(ArchiveEntryUnlockRuleType Type, uint ObjectId), ImmutableArray<(ushort ArticleId, uint EntryMask)>> unlockRules;
 
+        /// <summary>
+        /// Initialise <see cref="IGlobalGalacticArchiveManager"/> and build the unlock rule index from the game tables.
+        /// </summary>
         public void Initialise()
         {
             long start = Stopwatch.GetTimestamp();

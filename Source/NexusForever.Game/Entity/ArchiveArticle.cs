@@ -76,6 +76,9 @@ namespace NexusForever.Game.Entity
             saveMask      = ArchiveArticleSaveMask.None;
         }
 
+        /// <summary>
+        /// Save any changes to the article to the <see cref="CharacterContext"/>.
+        /// </summary>
         public void Save(CharacterContext context)
         {
             if (saveMask == ArchiveArticleSaveMask.None)
@@ -159,6 +162,9 @@ namespace NexusForever.Game.Entity
                 UnlockedFlags = unlocked;
         }
 
+        /// <summary>
+        /// Build a <see cref="ServerGalacticArchiveUpdate"/> holding the current state of the article.
+        /// </summary>
         public ServerGalacticArchiveUpdate Build()
         {
             return new ServerGalacticArchiveUpdate
