@@ -45,6 +45,7 @@ namespace NexusForever.Database.Character.Model
         public ICollection<CharacterActionSetAmpModel> ActionSetAmp { get; set; } = new HashSet<CharacterActionSetAmpModel>();
         public ICollection<CharacterActionSetShortcutModel> ActionSetShortcut { get; set; } = new HashSet<CharacterActionSetShortcutModel>();
         public ICollection<CharacterAppearanceModel> Appearance { get; set; } = new HashSet<CharacterAppearanceModel>();
+        public ICollection<CharacterArchiveArticleModel> ArchiveArticle { get; set; } = new HashSet<CharacterArchiveArticleModel>();
         public ICollection<CharacterBoneModel> Bone { get; set; } = new HashSet<CharacterBoneModel>();
         public ICollection<CharacterCostumeModel> Costume { get; set; } = new HashSet<CharacterCostumeModel>();
         public ICollection<CharacterCurrencyModel> Currency { get; set; } = new HashSet<CharacterCurrencyModel>();

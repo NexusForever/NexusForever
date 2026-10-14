@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Achievement;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Static.Achievement;
+using NexusForever.Game.Static.GalacticArchive;
 
 namespace NexusForever.Game.Achievement
 {
@@ -52,6 +53,8 @@ namespace NexusForever.Game.Achievement
 
             if (achievement.Info.Entry.CharacterTitleId != 0u)
                 owner.TitleManager.AddTitle((ushort)achievement.Info.Entry.CharacterTitleId);
+
+            owner.GalacticArchiveManager.UpdateUnlockRule(ArchiveEntryUnlockRuleType.Achievement, achievement.Id);
 
             // TODO
             /*if (isRealmFirst)

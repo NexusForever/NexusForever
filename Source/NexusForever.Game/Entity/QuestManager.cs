@@ -7,6 +7,7 @@ using NexusForever.Game.Quest;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Achievement;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.GalacticArchive;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable;
@@ -565,6 +566,7 @@ namespace NexusForever.Game.Entity
             completedQuests.Add(questId, quest);
 
             player.AchievementManager.CheckAchievements(player, AchievementType.QuestComplete, questId);
+            player.GalacticArchiveManager.UpdateUnlockRule(ArchiveEntryUnlockRuleType.Quest, questId);
         }
 
         private void RewardQuest(IQuestInfo info, ushort reward)

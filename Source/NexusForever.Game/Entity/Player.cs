@@ -229,6 +229,7 @@ namespace NexusForever.Game.Entity
         public IPetCustomisationManager PetCustomisationManager { get; private set; }
         public ICharacterKeybindingManager KeybindingManager { get; private set; }
         public IDatacubeManager DatacubeManager { get; private set; }
+        public IGalacticArchiveManager GalacticArchiveManager { get; private set; }
         public IMailManager MailManager { get; private set; }
         public IZoneMapManager ZoneMapManager { get; private set; }
         public IQuestManager QuestManager { get; private set; }
@@ -343,6 +344,7 @@ namespace NexusForever.Game.Entity
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new CharacterKeybindingManager(this, model);
             DatacubeManager         = new DatacubeManager(this, model);
+            GalacticArchiveManager  = new GalacticArchiveManager(this, model);
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
@@ -585,6 +587,7 @@ namespace NexusForever.Game.Entity
             KeybindingManager.Save(context);
             SpellManager.Save(context);
             DatacubeManager.Save(context);
+            GalacticArchiveManager.Save(context);
             MailManager.Save(context);
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
@@ -778,6 +781,7 @@ namespace NexusForever.Game.Entity
             SpellManager.SendInitialPackets();
             PetCustomisationManager.SendInitialPackets();
             DatacubeManager.SendInitialPackets();
+            GalacticArchiveManager.SendInitialPackets();
             MailManager.SendInitialPackets();
             ZoneMapManager.SendInitialPackets();
             Account.CurrencyManager.SendInitialPackets();

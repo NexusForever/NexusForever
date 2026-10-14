@@ -15,6 +15,7 @@ using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
+using NexusForever.Game.GalacticArchive;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -126,6 +127,7 @@ namespace NexusForever.WorldServer.Service
             ItemManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
             GlobalQuestManager.Instance.Initialise();
+            GlobalGalacticArchiveManager.Instance.Initialise();
 
             GlobalStorefrontManager.Instance.Initialise();
             ServerManager.Instance.Initialise(RealmContext.Instance.RealmId);

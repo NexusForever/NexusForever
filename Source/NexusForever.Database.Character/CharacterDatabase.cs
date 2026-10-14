@@ -134,6 +134,7 @@ namespace NexusForever.Database.Character
                 .Include(c => c.ActionSetShortcut)
                 .Include(c => c.ActionSetAmp)
                 .Include(c => c.Datacube)
+                .Include(c => c.ArchiveArticle)
                 .Include(c => c.Mail)
                     .ThenInclude(c => c.Attachment)
                         .ThenInclude(c => c.Item)

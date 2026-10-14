@@ -12,6 +12,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterActionSetAmpModel> CharacterActionSetAmp { get; set; }
         public DbSet<CharacterActionSetShortcutModel> CharacterActionSetShortcut { get; set; }
         public DbSet<CharacterAppearanceModel> CharacterAppearance { get; set; }
+        public DbSet<CharacterArchiveArticleModel> CharacterArchiveArticle { get; set; }
         public DbSet<CharacterBoneModel> CharacterBone { get; set; }
         public DbSet<CharacterCostumeModel> CharacterCostume { get; set; }
         public DbSet<CharacterCostumeItemModel> CharacterCostumeItem { get; set; }
@@ -377,6 +378,40 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.Appearance)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_appearance_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterArchiveArticleModel>(entity =>
+            {
+                entity.ToTable("character_archive_article");
+
+                entity.HasKey(e => new { e.Id, e.ArticleId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ArticleId)
+                    .HasColumnName("articleId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.UnlockedFlags)
+                    .HasColumnName("unlockedFlags")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.ViewedFlags)
+                    .HasColumnName("viewedFlags")
+                    .HasColumnType("int(10) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.ArchiveArticle)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_archive_article_id__character_id");
             });
 
             modelBuilder.Entity<CharacterBoneModel>(entity =>
