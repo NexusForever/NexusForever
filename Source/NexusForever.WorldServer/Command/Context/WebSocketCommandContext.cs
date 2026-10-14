@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.RBAC;
+using NexusForever.Game.Entity;
 using NexusForever.Game.RBAC;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.RBAC;
@@ -19,20 +20,26 @@ namespace NexusForever.WorldServer.Command.Context
     {
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
-        public IWorldEntity Invoker { get; }
+        // commands are invoked on the world thread, the character can only be resolved to an online player from there
+        public IWorldEntity Invoker => characterName != null ? PlayerManager.Instance.GetPlayer(characterName) : null;
         public IWorldEntity Target { get; }
 
         public Language Language { get; } = Language.English;
         public ImmutableHashSet<Permission> Permissions { get; }
 
         private readonly WebSocket webSocket;
+        private readonly string characterName;
 
         /// <summary>
         /// Create a new <see cref="WebSocketCommandContext"/> with the <see cref="Permission"/>'s from the WebSocket <see cref="Role"/>.
         /// </summary>
-        public WebSocketCommandContext(WebSocket webSocket)
+        /// <remarks>
+        /// Commands will be invoked as the online <see cref="IPlayer"/> with the supplied character name, if one is supplied.
+        /// </remarks>
+        public WebSocketCommandContext(WebSocket webSocket, string characterName)
         {
-            this.webSocket = webSocket;
+            this.webSocket     = webSocket;
+            this.characterName = string.IsNullOrWhiteSpace(characterName) ? null : characterName;
 
             // console role needs to exist in order for the websocket command context to work
             IRBACRole role = RBACManager.Instance.GetRole(Role.WebSocket);
@@ -63,7 +70,7 @@ namespace NexusForever.WorldServer.Command.Context
         /// </summary>
         public T GetTargetOrInvoker<T>() where T : IWorldEntity
         {
-            return default;
+            return (T)(Target ?? Invoker);
         }
 
         private async void SendWebSocketMessage(string text, string type)
