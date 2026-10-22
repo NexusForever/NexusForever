@@ -103,9 +103,64 @@ namespace NexusForever.Game.Combat
         }
 
         /// <summary>
+        /// Calculates the healing amount and updates the referenced <see cref="ISpellTargetEffectInfo"/>
+        /// appropriately.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="SpellEffectType.Heal"/> and <see cref="SpellEffectType.HealShields"/> share the amount
+        /// case of <see cref="SpellEffectType.Damage"/> in <see cref="CalculateBaseAmount"/>, so only that
+        /// part is reused. None of the attack-side steps apply: a heal is not deflected, not mitigated by
+        /// the target's armour and not absorbed by the target's shield.
+        ///
+        /// The damage type is forced to <see cref="DamageType.Heal"/> / <see cref="DamageType.HealShields"/>
+        /// rather than taken from the row: the shipped data carries damageType 0 on 2,843 of 3,098
+        /// <see cref="SpellEffectType.Heal"/> rows and on 201 of 262 <see cref="SpellEffectType.HealShields"/>
+        /// rows, and neither 4 nor 5 occurs in that column at all.
+        ///
+        /// TODO: no outgoing/incoming healing multiplier is applied. The damage path multiplies by
+        /// (Property)(damageType + 140), which for a heal row's damageType 0 is
+        /// <see cref="Property.DamageDealtMultiplierSpell"/> and plainly wrong;
+        /// <see cref="Property.HealingMultiplierOutgoing"/> and <see cref="Property.HealingMultiplierIncoming"/>
+        /// are the obvious candidates but require more RE.
+        /// </remarks>
+        public void CalculateHeal(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            damageDescription.DamageType   = info.Entry.EffectType == SpellEffectType.HealShields
+                ? DamageType.HealShields
+                : DamageType.Heal;
+            damageDescription.CombatResult = CombatResult.Hit;
+
+            uint amount = (uint)CalculateBaseAmount(executionContext.Spell.Caster, target, info.Entry);
+            damageDescription.RawDamage       = amount;
+            damageDescription.RawScaledDamage = amount;
+
+            amount = CalculateBaseDamageVariance(amount);
+
+            if (CalculateCrit(ref amount, executionContext.Spell.Caster, target))
+                damageDescription.CombatResult = CombatResult.Critical;
+
+            damageDescription.AdjustedDamage = amount;
+
+            info.AddDamage(damageDescription);
+        }
+
+        /// <summary>
         /// Get base damage value for the given <see cref="IUnitEntity"/> with the provided parameter data from the <see cref="Spell4EffectsEntry"/>.
         /// </summary>
         private uint CalculateBaseDamage(IUnitEntity caster, IUnitEntity target, Spell4EffectsEntry entry)
+        {
+            float baseDamage = CalculateBaseAmount(caster, target, entry);
+
+            float propertyMultiplier = caster.GetProperty((Property)(entry.DamageType + 140)).Value;
+
+            return (uint)(propertyMultiplier * baseDamage);
+        }
+
+        /// <summary>
+        /// Get the base amount for the given <see cref="IUnitEntity"/> with the provided parameter data from
+        /// the <see cref="Spell4EffectsEntry"/>, before any damage type multiplier is applied.
+        /// </summary>
+        private float CalculateBaseAmount(IUnitEntity caster, IUnitEntity target, Spell4EffectsEntry entry)
         {
             float basePropertyDamage = CalculateBasePropertyDamage(caster, entry);
             float baseEntityDamage   = CalculateBaseEntityDamage(caster, target, entry);
@@ -138,11 +193,7 @@ namespace NexusForever.Game.Combat
                 // TODO: some client code specific to non player entities
             }
 
-            float baseDamage = basePropertyDamage + ((typeBaseDamage + baseEntityDamage) * typeMultiplier);
-
-            float propertyMultiplier = caster.GetProperty((Property)(entry.DamageType + 140)).Value;
-
-            return (uint)(propertyMultiplier * baseDamage);
+            return basePropertyDamage + ((typeBaseDamage + baseEntityDamage) * typeMultiplier);
         }
 
         private float CalculateBasePropertyDamage(IUnitEntity caster, Spell4EffectsEntry entry)
