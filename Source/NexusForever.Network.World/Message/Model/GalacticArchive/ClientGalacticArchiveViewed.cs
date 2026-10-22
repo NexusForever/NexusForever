@@ -11,7 +11,7 @@ namespace NexusForever.Network.World.Message.Model.GalacticArchive
 
         public void Read(GamePacketReader reader)
         {
-            ArchiveArticleId = reader.ReadUInt();
+            ArchiveArticleId = reader.ReadUInt(14u);
         }
     }
 }

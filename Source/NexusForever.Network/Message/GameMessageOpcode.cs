@@ -502,7 +502,7 @@ namespace NexusForever.Network.Message
         ClientHousingChangeInteriorWallpaper = 0x050D,
         ClientHousingFlagsUpdate        = 0x050E,
         ClientHousingPlugUpdate         = 0x0510,
-        ClientHousingNeighbourInviteResponse = 0x0511,
+        ClientHousingNeighbourInviteResponse = 0x0513,
         ServerHousingNeighbourInviteReceived = 0x0514,
         ClientHousingNeighbourEvict      = 0x0515,
         ClientHousingNeighbourSetPermission = 0x0518,
@@ -623,7 +623,7 @@ namespace NexusForever.Network.Message
         ServerMatchingMatchOperationResult = 0x0623,
         ClientMatchingMatchCastVoteSurrender = 0x0624,
         ServerMatchingAverageWaitTimeUpdate = 0x0628,
-        Server0635                      = 0x0635,
+        ServerClient0635                = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers

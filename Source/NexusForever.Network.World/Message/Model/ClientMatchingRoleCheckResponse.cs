@@ -13,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model
         public void Read(GamePacketReader reader)
         {
             Type = reader.ReadEnum<Game.Static.Matching.MatchType>(5u);
-            Roles    = reader.ReadEnum<Role>();
+            Roles    = reader.ReadEnum<Role>(32u);
             Response = reader.ReadBit();
         }
     }

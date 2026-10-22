@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            Credits = reader.ReadUInt();
+            Credits = reader.ReadULong();
         }
     }
 }
