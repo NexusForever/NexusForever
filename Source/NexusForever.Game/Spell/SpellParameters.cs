@@ -13,6 +13,7 @@ namespace NexusForever.Game.Spell
         public ISpellInfo RootSpellInfo { get; set; }
         public bool UserInitiatedSpellCast { get; set; } = true;
         public uint PrimaryTargetId { get; set; }
+        public uint ClientSpellCastUniqueId { get; set; }
         public Position TargetPosition { get; set; }
         public uint PositionalUnitId { get; set; }
         public ushort? TaxiNode { get; set; }

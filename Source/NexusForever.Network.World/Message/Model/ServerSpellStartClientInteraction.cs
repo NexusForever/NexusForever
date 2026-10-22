@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model
         public uint CastingId { get; set; }
         public uint CasterId { get; set; }
         public Position Position { get; set; } = new Position();
-        public uint Yaw { get; set; }
+        public float Yaw { get; set; }
 
         public List<InitialPosition> InitialPositionData { get; set; } = new List<InitialPosition>();
         public List<TelegraphPosition> TelegraphPositionData { get; set; } = new List<TelegraphPosition>();
