@@ -45,7 +45,7 @@
         RandomPercent               = 37, // Random check: Failed
         IsCreature                  = 38, // Incorrect creature
         IsPlayer                    = 39, // Incorrect player
-        Health                      = 40, // Incorrect health
+        Health                      = 40, // health as a percentage of base health
         ZoneExplored                = 41, // Zone exploration criteria not met
         IsGroupLeader               = 42, // You cannot do that
         IsObjectiveActive           = 43, // You cannot do that right now
