@@ -2089,7 +2089,9 @@ namespace NexusForever.Database.Character
                         Subtype = 0,
                         Property = 107,
                         ModType = 0,
-                        Value = 0,
+                        // believed from gameplay videos, not captured from a live server.
+                        // TODO: verify recovery rates with packet captures
+                        Value = 0.005f,
                         Note = "Player - Base Focus Recovery In Combat"
                     },
                     new PropertyBaseModel
@@ -2098,7 +2100,9 @@ namespace NexusForever.Database.Character
                         Subtype = 0,
                         Property = 108,
                         ModType = 0,
-                        Value = 0,
+                        // believed from gameplay videos, not captured from a live server.
+                        // TODO: verify recovery rates with packet captures
+                        Value = 0.02f,
                         Note = "Player - Base Focus Recovery Out of Combat"
                     },
                     new PropertyBaseModel
@@ -2221,11 +2225,33 @@ namespace NexusForever.Database.Character
                     new PropertyBaseModel
                     {
                         Type = 1,
+                        Subtype = 3,
+                        Property = 5,
+                        ModType = 0,
+                        // pool observed in gameplay videos; no shipped table in build 16042 carries a player Focus pool.
+                        // TODO: verify recovery rates with packet captures
+                        Value = 1000,
+                        Note = "Class - Esper - Base Focus Pool"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
                         Subtype = 4,
                         Property = 10,
                         ModType = 0,
                         Value = 4,
                         Note = "Class - Medic - Base Medic Core Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 4,
+                        Property = 5,
+                        ModType = 0,
+                        // pool observed in gameplay videos; no shipped table in build 16042 carries a player Focus pool.
+                        // TODO: verify recovery rates with packet captures
+                        Value = 1000,
+                        Note = "Class - Medic - Base Focus Pool"
                     },
                     new PropertyBaseModel
                     {
@@ -2253,6 +2279,17 @@ namespace NexusForever.Database.Character
                         ModType = 0,
                         Value = 100,
                         Note = "Class - Spellslinger - Base Spell Power Cap"
+                    },
+                    new PropertyBaseModel
+                    {
+                        Type = 1,
+                        Subtype = 7,
+                        Property = 5,
+                        ModType = 0,
+                        // pool observed in gameplay videos; no shipped table in build 16042 carries a player Focus pool.
+                        // TODO: verify recovery rates with packet captures
+                        Value = 1000,
+                        Note = "Class - Spellslinger - Base Focus Pool"
                     });
             });
 

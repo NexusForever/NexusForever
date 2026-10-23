@@ -348,6 +348,14 @@ namespace NexusForever.Game.Entity
             CalculateDefaultProperties();
             SetBaseCharacterProperties();
 
+            // Focus is a pool, not a builder: a character that has never had a Focus stat starts
+            // full. A saved value is never overridden, and a class with no Focus pool (property 5
+            // BaseFocusPool stays 0 for Warrior, Engineer and Stalker) gets no Focus stat at all.
+            // TODO: verify recovery rates with packet captures
+            float baseFocusPool = GetPropertyValue(Property.BaseFocusPool);
+            if (baseFocusPool > 0f && !stats.ContainsKey(Static.Entity.Stat.Focus))
+                Focus = baseFocusPool;
+
             MaxInterruptArmour = 0;
 
             scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<IPlayer>(this);
