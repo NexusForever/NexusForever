@@ -117,11 +117,17 @@ namespace NexusForever.Game.Combat
         /// <see cref="SpellEffectType.Heal"/> rows and on 201 of 262 <see cref="SpellEffectType.HealShields"/>
         /// rows, and neither 4 nor 5 occurs in that column at all.
         ///
-        /// TODO: no outgoing/incoming healing multiplier is applied. The damage path multiplies by
-        /// (Property)(damageType + 140), which for a heal row's damageType 0 is
+        /// The personal healing modifier of <see cref="SpellEffectType.PersonalDmgHealMod"/> is applied
+        /// here, in the same place the damage path applies its damage type multiplier - that is, to the
+        /// base amount, before variance and crit. Where retail applies it relative to crit is unknown.
+        ///
+        /// TODO: no whole-entity outgoing/incoming healing multiplier is applied. The damage path
+        /// multiplies by (Property)(damageType + 140), which for a heal row's damageType 0 is
         /// <see cref="Property.DamageDealtMultiplierSpell"/> and plainly wrong;
         /// <see cref="Property.HealingMultiplierOutgoing"/> and <see cref="Property.HealingMultiplierIncoming"/>
-        /// are the obvious candidates but require more RE.
+        /// are the obvious candidates but require more RE. Those two properties are a separate mechanic
+        /// from the personal modifier above: the shipped data drives them with
+        /// <see cref="SpellEffectType.UnitPropertyModifier"/> rows (128 and 206 of them).
         /// </remarks>
         public void CalculateHeal(ISpellExecutionContext executionContext, IUnitEntity target, ISpellTargetEffectInfo info)
         {
@@ -130,7 +136,9 @@ namespace NexusForever.Game.Combat
                 : DamageType.Heal;
             damageDescription.CombatResult = CombatResult.Hit;
 
-            uint amount = (uint)CalculateBaseAmount(executionContext.Spell.Caster, target, info.Entry);
+            float baseAmount = CalculateBaseAmount(executionContext.Spell.Caster, target, info.Entry);
+
+            uint amount = (uint)(baseAmount * target.GetPersonalHealingMultiplier(executionContext.Spell.Caster.Guid));
             damageDescription.RawDamage       = amount;
             damageDescription.RawScaledDamage = amount;
 

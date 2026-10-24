@@ -97,6 +97,8 @@ namespace NexusForever.Game.Entity
 
         private readonly Dictionary<Property, Dictionary</*spell4Id*/uint, ISpellPropertyModifier>> spellProperties = [];
 
+        private readonly Dictionary<(uint CasterGuid, uint Kind), Dictionary</*spell4Id*/uint, float>> personalSpellModifiers = [];
+
         #region Dependency Injection
 
         private readonly ISpellFactory spellFactory;
@@ -230,6 +232,62 @@ namespace NexusForever.Game.Entity
                 spellDict.Remove(spell4Id);
 
             CalculateProperty(property);
+        }
+
+        /// <summary>
+        /// Add a personal damage or healing modifier from the supplied caster, kind and Spell4Id.
+        /// </summary>
+        /// <remarks>
+        /// See <see cref="PersonalDmgHealModKind"/> for why these are not <see cref="Property"/>
+        /// modifiers: the modifier belongs to the pair (caster, this unit), so two casters affecting the
+        /// same unit hold independent entries, and the same caster re-applying the same spell replaces
+        /// its own entry rather than stacking with itself.
+        /// </remarks>
+        public void AddPersonalSpellModifier(uint casterGuid, uint kind, uint spell4Id, float magnitude)
+        {
+            if (!personalSpellModifiers.TryGetValue((casterGuid, kind), out Dictionary<uint, float> spellDict))
+            {
+                spellDict = [];
+                personalSpellModifiers.Add((casterGuid, kind), spellDict);
+            }
+
+            spellDict[spell4Id] = magnitude;
+        }
+
+        /// <summary>
+        /// Remove a personal damage or healing modifier from the supplied caster, kind and Spell4Id.
+        /// </summary>
+        public void RemovePersonalSpellModifier(uint casterGuid, uint kind, uint spell4Id)
+        {
+            if (!personalSpellModifiers.TryGetValue((casterGuid, kind), out Dictionary<uint, float> spellDict))
+                return;
+
+            spellDict.Remove(spell4Id);
+
+            if (spellDict.Count == 0)
+                personalSpellModifiers.Remove((casterGuid, kind));
+        }
+
+        /// <summary>
+        /// Return the combined multiplier for healing the supplied caster performs on this
+        /// <see cref="IUnitEntity"/>, or 1 when no personal modifier is active.
+        /// </summary>
+        /// <remarks>
+        /// Several spells of the same caster can hold a modifier at once; they are combined
+        /// multiplicatively, which matches how the percentage modifiers of
+        /// <see cref="SpellEffectType.UnitPropertyModifier"/> compose. Nothing in the client says what
+        /// retail does with two such modifiers, so this is a choice, not a measurement.
+        /// </remarks>
+        public float GetPersonalHealingMultiplier(uint casterGuid)
+        {
+            if (!personalSpellModifiers.TryGetValue((casterGuid, (uint)PersonalDmgHealModKind.HealingFromCaster), out Dictionary<uint, float> spellDict))
+                return 1f;
+
+            float multiplier = 1f;
+            foreach (float magnitude in spellDict.Values)
+                multiplier *= magnitude;
+
+            return multiplier;
         }
 
         /// <summary>
