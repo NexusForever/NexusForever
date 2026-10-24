@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
@@ -241,7 +241,53 @@ namespace NexusForever.Game.Spell
 
             // TODO: Fire Script's OnCast
 
+            SendSpellConfirmCast();
+
             return true;
+        }
+
+        /// <summary>
+        /// Tell the client that the cast it asked for was accepted, and which server cast id it got.
+        /// </summary>
+        /// <remarks>
+        /// Only sent for a cast that came from a client message and therefore carries the client's own
+        /// cast id: the client looks the pending cast up by that id and raises an exception if it does not
+        /// know it. <see cref="Type.SpellClientSideInteraction"/> sends this message itself for the
+        /// client-side-interaction path, which has its own id.
+        /// </remarks>
+        protected void SendSpellConfirmCast()
+        {
+            if (Parameters.ClientSpellCastUniqueId == 0 || Parameters.IsProxy)
+                return;
+
+            if (Caster is not IPlayer player || player.IsLoading)
+                return;
+
+            var confirm = new ServerSpellStartClientInteraction
+            {
+                ClientUniqueId = Parameters.ClientSpellCastUniqueId,
+                CastingId      = CastingId,
+                // third u32 of the record; the one existing sender fills it with the primary target too
+                CasterId       = GetPrimaryTargetId(),
+                Position       = new Position(Caster.Position),
+                Yaw            = Caster.Rotation.X
+            };
+
+            // a player's telegraphs are only built later, in SelectTargets, so this list is empty for the
+            // casts that reach here today; a non-player cast has them from InitialiseTelegraphs above
+            foreach (ITelegraph telegraph in telegraphs)
+            {
+                confirm.TelegraphPositionData.Add(new TelegraphPosition
+                {
+                    TelegraphId    = (ushort)telegraph.TelegraphDamage.Id,
+                    AttachedUnitId = Caster.Guid,
+                    TargetFlags    = 3,
+                    Position       = new Position(telegraph.Position),
+                    Yaw            = telegraph.Rotation.X
+                });
+            }
+
+            player.Session.EnqueueMessageEncrypted(confirm);
         }
 
         /// <summary>
@@ -700,6 +746,9 @@ namespace NexusForever.Game.Spell
             {
                 player.Session.EnqueueMessageEncrypted(new ServerSpellCastResult
                 {
+                    // the client's own cast id; it matches the reply against its pending cast list and
+                    // ignores a reply whose id it does not know, leaving the cast pending for ever
+                    Unknown0   = Parameters.ClientSpellCastUniqueId,
                     Spell4Id   = Parameters.SpellInfo.Entry.Id,
                     CastResult = castResult
                 });

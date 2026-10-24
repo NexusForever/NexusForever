@@ -17,7 +17,7 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -2063,7 +2063,7 @@ namespace NexusForever.Database.Character.Migrations
                             Property = 107u,
                             ModType = (ushort)0,
                             Note = "Player - Base Focus Recovery In Combat",
-                            Value = 0f
+                            Value = 0.005f
                         },
                         new
                         {
@@ -2072,7 +2072,7 @@ namespace NexusForever.Database.Character.Migrations
                             Property = 108u,
                             ModType = (ushort)0,
                             Note = "Player - Base Focus Recovery Out of Combat",
-                            Value = 0f
+                            Value = 0.02f
                         },
                         new
                         {
@@ -2194,11 +2194,29 @@ namespace NexusForever.Database.Character.Migrations
                         new
                         {
                             Type = 1u,
+                            Subtype = 3u,
+                            Property = 5u,
+                            ModType = (ushort)0,
+                            Note = "Class - Esper - Base Focus Pool",
+                            Value = 1000f
+                        },
+                        new
+                        {
+                            Type = 1u,
                             Subtype = 4u,
                             Property = 10u,
                             ModType = (ushort)0,
                             Note = "Class - Medic - Base Medic Core Cap",
                             Value = 4f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 4u,
+                            Property = 5u,
+                            ModType = (ushort)0,
+                            Note = "Class - Medic - Base Focus Pool",
+                            Value = 1000f
                         },
                         new
                         {
@@ -2226,6 +2244,15 @@ namespace NexusForever.Database.Character.Migrations
                             ModType = (ushort)0,
                             Note = "Class - Spellslinger - Base Spell Power Cap",
                             Value = 100f
+                        },
+                        new
+                        {
+                            Type = 1u,
+                            Subtype = 7u,
+                            Property = 5u,
+                            ModType = (ushort)0,
+                            Note = "Class - Spellslinger - Base Focus Pool",
+                            Value = 1000f
                         });
                 });
 

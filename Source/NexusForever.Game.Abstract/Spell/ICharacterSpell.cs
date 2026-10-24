@@ -25,7 +25,7 @@ namespace NexusForever.Game.Abstract.Spell
         /// <summary>
         /// Used for when the client does not have continuous casting enabled
         /// </summary>
-        void Cast();
+        void Cast(uint clientSpellCastUniqueId = 0);
 
         /// <summary>
         /// Used for continuous casting when the client has it enabled, or spells with Cast Methods like ChargeRelease

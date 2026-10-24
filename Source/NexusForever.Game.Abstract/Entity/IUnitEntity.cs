@@ -43,6 +43,28 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void RemoveSpellProperty(Property property, uint spell4Id);
 
+        /// <summary>
+        /// Add a personal damage or healing modifier from the supplied caster, kind and Spell4Id.
+        /// </summary>
+        /// <remarks>
+        /// Personal modifiers come from SpellEffectType.PersonalDmgHealMod (151) and apply to the pair
+        /// (caster, this unit) rather than to this unit as a whole, which is why they are not
+        /// <see cref="Property"/> modifiers. The kind is the effect row's DataBits00 and is not a
+        /// <see cref="Property"/> id; see PersonalDmgHealModKind.
+        /// </remarks>
+        void AddPersonalSpellModifier(uint casterGuid, uint kind, uint spell4Id, float magnitude);
+
+        /// <summary>
+        /// Remove a personal damage or healing modifier from the supplied caster, kind and Spell4Id.
+        /// </summary>
+        void RemovePersonalSpellModifier(uint casterGuid, uint kind, uint spell4Id);
+
+        /// <summary>
+        /// Return the combined multiplier for healing the supplied caster performs on this
+        /// <see cref="IUnitEntity"/>, or 1 when no personal modifier is active.
+        /// </summary>
+        float GetPersonalHealingMultiplier(uint casterGuid);
+
         /// Checks if this <see cref="IUnitEntity"/> is currently casting a spell.
         /// </summary>
         /// <returns></returns>

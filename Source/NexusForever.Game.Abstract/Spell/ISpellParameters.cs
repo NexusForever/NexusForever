@@ -12,6 +12,16 @@ namespace NexusForever.Game.Abstract.Spell
         ISpellInfo RootSpellInfo { get; set; }
         bool UserInitiatedSpellCast { get; set; }
         uint PrimaryTargetId { get; set; }
+
+        /// <summary>
+        /// Unique id the client assigned to this cast request, 0 if the cast did not come from a client
+        /// message.
+        /// </summary>
+        /// <remarks>
+        /// The client keys its own pending cast by this id and matches the server's confirm (0x07FD) and
+        /// reject (0x07FC) replies against it.
+        /// </remarks>
+        uint ClientSpellCastUniqueId { get; set; }
         Position TargetPosition { get; set; }
         uint PositionalUnitId { get; set; }
         ushort? TaxiNode { get; set; }

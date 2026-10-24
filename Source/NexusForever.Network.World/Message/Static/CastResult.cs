@@ -55,6 +55,7 @@ namespace NexusForever.Network.World.Message.Static
         CasterVitalCostCurrency1              = 0x002F,
         CasterVitalCostCurrency2              = 0x0030,
         CasterVitalCostCurrency3              = 0x0031,
+        [CastResultVital(Vital.Endurance)]
         CasterVitalCostResource0              = 0x0032,
         [CastResultVital(Vital.Resource1)]
         [CastResultVital(Vital.Volatility)]
@@ -180,6 +181,7 @@ namespace NexusForever.Network.World.Message.Static
         MissingReagentItemCategory            = 0x00A4,
         MissingReagentItemType                = 0x00A5,
         CasterNeedsLoS                        = 0x00A6,
+        [CastResultVital(Vital.Focus)]
         CasterVitalCostFocus                  = 0x00A7,
         TargetImmuneToSpellEffect             = 0x00A8,
         WeaponSlot                            = 0x00A9,
@@ -189,7 +191,9 @@ namespace NexusForever.Network.World.Message.Static
         TargetMustBeJumping                   = 0x00AD,
         InvalidPosition                       = 0x00AE,
         CasterVitalCost                       = 0x00AF,
+        [CastResultVital(Vital.ShieldCapacity)]
         CasterVitalCostShieldCapacity         = 0x00B0,
+        [CastResultVital(Vital.Dash)]
         CasterVitalCostResource7              = 0x00B1,
         FailSpecialRestrictions               = 0x00B2,
         NoValidActivateSpell                  = 0x00B3,
@@ -263,10 +267,12 @@ namespace NexusForever.Network.World.Message.Static
         TargetMustBeSnare                     = 0x00F7,
         CasterCannotBeSnare                   = 0x00F8,
         TargetCannotBeSnare                   = 0x00F9,
+        [CastResultVital(Vital.InterruptArmor)]
         CasterVitalCostInterruptArmor         = 0x00FA,
         CCNoAbilities                         = 0x00FB,
         Blacklisted                           = 0x00FC,
         TargetCannotBePickup                  = 0x00FD,
+        [CastResultVital(Vital.Absorption)]
         CasterVitalCostAbsorption             = 0x00FE,
         TargetMustBeCastersPet                = 0x00FF,
         TargetMustBeCastersMaster             = 0x0100,
@@ -288,8 +294,11 @@ namespace NexusForever.Network.World.Message.Static
         TargetCannotBeSubdue                  = 0x0110,
         TargetCannotBeEvading                 = 0x0111,
         TargetStructuredPlugBenefitRestricted = 0x0112,
+        [CastResultVital(Vital.PublicResource0)]
         CasterVitalCostPublicResource0        = 0x0113,
+        [CastResultVital(Vital.PublicResource1)]
         CasterVitalCostPublicRes              = 0x0114,
+        [CastResultVital(Vital.PublicResource2)]
         CasterVitalCostPublicResource2        = 0x0115,
         InactiveInnateAbilitySpell            = 0x0116,
         CasterCannotBeSwimming                = 0x0117,
@@ -339,8 +348,11 @@ namespace NexusForever.Network.World.Message.Static
         CasterMustBePvpFlagged                = 0x0143,
         TargetOutsideTelegraph                = 0x0145,
         ShieldsOverloaded                     = 0x0146,
+        [CastResultVital(Vital.Resource8)]
         CasterVitalCostResource8              = 0x0147,
+        [CastResultVital(Vital.Resource9)]
         CasterVitalCostResource9              = 0x0148,
+        [CastResultVital(Vital.Resource10)]
         CasterVitalCostResource10             = 0x0149,
         RapidTransportInvalid                 = 0x014A,
         ServiceTokensInsufficentFunds         = 0x014B
