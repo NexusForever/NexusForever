@@ -76,7 +76,7 @@
         QuestObjective              = 68, // Quest objective requirement not met
         ChallengeRequirement        = 69, // Challenge requirement not met
         ChallengeTier               = 70, // Challenge tier requirement not met
-        Unknown71                   = 71, // Requirements not met
+        VitalPercent                = 71, // Requirements not met
         // 72 is unused in PrerequisiteType.tbl
         Vital                       = 73, // Requirements not met - Part of Vital
         ChallengeLocked             = 74, // The specified challenge is locked
@@ -223,7 +223,7 @@
         Personal5V5ArenaRating212   = 212, // Personal arena 5v5 rating requirement not met
         PersonalWarplotRating       = 213, // Personal warplots rating requirement not met
         SpellBaseId                 = 214, // Spell requirement not met
-        Shield215                   = 215, // Shield requirement not met
+        ShieldCapacityPercent       = 215, // Shield requirement not met
         Shield216                   = 216, // Shield requirement not met
         PvpFlag                     = 217, // Target is not flagged for PvP.
         Datacube                    = 218, // Datacube requirement not met
