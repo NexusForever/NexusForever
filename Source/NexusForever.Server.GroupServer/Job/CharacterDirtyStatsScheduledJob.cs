@@ -14,21 +14,12 @@ namespace NexusForever.Server.GroupServer.Job
     {
         #region Dependency Injection
 
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IInternalMessagePublisher _messagePublisher;
-        private readonly CharacterRepository _repository;
-        private readonly GroupContext _context;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public CharacterDirtyStatsScheduledJob(
-            IServiceProvider serviceProvider,
-            IInternalMessagePublisher messagePublisher,
-            CharacterRepository repository,
-            GroupContext context)
+            IServiceScopeFactory scopeFactory)
         {
-            _serviceProvider  = serviceProvider;
-            _messagePublisher = messagePublisher;
-            _repository       = repository;
-            _context          = context;
+            _scopeFactory = scopeFactory;
         }
 
         #endregion
@@ -37,11 +28,18 @@ namespace NexusForever.Server.GroupServer.Job
         {
             while (!context.CancellationToken.IsCancellationRequested)
             {
-                CharacterModel model = await _repository.GetNextCharacterWithDirtyStats();
+                // each character is processed in its own scope, a single context for the whole run would return stale tracked
+                // characters that were marked dirty again by another context, the flag would never be cleared and the job would never end
+                await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
+                var repository       = scope.ServiceProvider.GetRequiredService<CharacterRepository>();
+                var groupContext     = scope.ServiceProvider.GetRequiredService<GroupContext>();
+                var messagePublisher = scope.ServiceProvider.GetRequiredService<IInternalMessagePublisher>();
+
+                CharacterModel model = await repository.GetNextCharacterWithDirtyStats();
                 if (model == null)
                     break;
 
-                var character = _serviceProvider.GetRequiredService<Character.Character>();
+                var character = scope.ServiceProvider.GetRequiredService<Character.Character>();
                 character.Initialise(model);
 
                 foreach (Character.CharacterGroup characterGroup in character.GetGroups())
@@ -54,7 +52,7 @@ namespace NexusForever.Server.GroupServer.Job
                     if (member == null)
                         continue;
 
-                    await _messagePublisher.PublishAsync(new GroupMemberStatsUpdatedMessage
+                    await messagePublisher.PublishAsync(new GroupMemberStatsUpdatedMessage
                     {
                         Group  = await group.ToInternalGroup(),
                         Member = await member.ToInternalGroupMember(),
@@ -63,7 +61,7 @@ namespace NexusForever.Server.GroupServer.Job
 
                 character.StatsDirty = false;
 
-                await _context.SaveChangesAsync();
+                await groupContext.SaveChangesAsync();
             }
         }
     }
