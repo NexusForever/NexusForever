@@ -229,7 +229,7 @@ namespace NexusForever.Game.Spell
             if (Caster is IPlayer player)
             {
                 if (Parameters.SpellInfo.GlobalCooldown != null && !Parameters.IsProxy)
-                    player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.Entry.GlobalCooldownEnum, Parameters.SpellInfo.GlobalCooldown.CooldownTime / 1000d);
+                    player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.Entry.GlobalCooldownEnum, Parameters.SpellInfo.GlobalCooldown.CooldownTime / 1000d, Parameters.SpellInfo.Entry.SpellCoolDownIdGlobal, true);
                 else if (Parameters.IsProxy)
                     player.SpellManager.SetSpellCooldown(Parameters.SpellInfo, Parameters.CooldownOverride / 1000d);
             }
@@ -428,7 +428,7 @@ namespace NexusForever.Game.Spell
                 });
 
                 if (result == CastResult.CasterMovement)
-                    player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.Entry.GlobalCooldownEnum, 0d);
+                    player.SpellManager.SetGlobalSpellCooldown(Parameters.SpellInfo.Entry.GlobalCooldownEnum, 0d, Parameters.SpellInfo.Entry.SpellCoolDownIdGlobal, true);
 
                 player.SpellManager.SetAsContinuousCast(null);
 
@@ -498,8 +498,13 @@ namespace NexusForever.Game.Spell
             if (Caster is not IPlayer player)
                 return;
 
-            if (Parameters.SpellInfo.Entry.SpellCoolDown != 0u)
-                player.SpellManager.SetSpellCooldown(Parameters.SpellInfo, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d, true);
+            if (Parameters.SpellInfo.Entry.SpellCoolDown == 0u)
+                return;
+
+            // the client applies CooldownReductionModifier to the cooldown it starts itself, and it does not apply it
+            // to a duration the server sends, so the server has to apply it for the two to agree
+            double cooldown = player.SpellManager.GetReducedCooldown(Parameters.SpellInfo, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
+            player.SpellManager.SetSpellCooldown(Parameters.SpellInfo, cooldown, true);
         }
 
         protected void CostSpell()

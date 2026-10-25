@@ -1,6 +1,8 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Abstract.Spell.Info;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
 
@@ -71,16 +73,37 @@ namespace NexusForever.Game.Abstract.Entity
         /// <summary>
         /// Update all spell cooldowns that share a given group ID
         /// </summary>
-        void SetSpellCooldownByGroupId(uint groupId, double cooldown);
+        void SetSpellCooldownByGroupId(uint groupId, double cooldown, bool emit = false);
 
         /// <summary>
         /// Update all spell cooldowns that share a base spell ID
         /// </summary>
-        void SetSpellCooldownByBaseSpell(uint spell4BaseId, uint type, double cooldown);
+        void SetSpellCooldownByBaseSpell(uint spell4BaseId, uint mode, double magnitude, bool emit = false);
+
+        /// <summary>
+        /// Apply the supplied <see cref="ISpellCooldownModifier"/> to every cooldown that is currently running.
+        /// </summary>
+        void ApplySpellCooldownModifier(ISpellCooldownModifier modifier, bool emit = false);
+
+        /// <summary>
+        /// Hold the supplied <see cref="ISpellCooldownModifier"/> until the effect that applied it is removed.
+        /// </summary>
+        void AddSpellCooldownModifier(ISpellTargetEffectInfo info, ISpellCooldownModifier modifier);
+
+        /// <summary>
+        /// Stop holding the <see cref="ISpellCooldownModifier"/> applied by the supplied
+        /// <see cref="ISpellTargetEffectInfo"/>.
+        /// </summary>
+        void RemoveSpellCooldownModifier(ISpellTargetEffectInfo info);
+
+        /// <summary>
+        /// Return the supplied cooldown in seconds with <see cref="Property.CooldownReductionModifier"/> applied.
+        /// </summary>
+        double GetReducedCooldown(ISpellInfo spellInfo, double cooldown);
 
         void ResetAllSpellCooldowns();
         double GetGlobalSpellCooldown(uint globalEnum);
-        void SetGlobalSpellCooldown(uint globalEnum, double cooldown);
+        void SetGlobalSpellCooldown(uint globalEnum, double cooldown, uint spellCoolDownIdGlobal = 0u, bool emit = false);
 
         /// <summary>
         /// Return <see cref="IActionSet"/> at supplied index.
