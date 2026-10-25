@@ -5,10 +5,12 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Info;
+using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -67,6 +69,7 @@ namespace NexusForever.Game.Entity
         private readonly Dictionary<uint /*spell4Id*/, double /*cooldown*/> spellCooldowns = new();
         private readonly Dictionary<uint /*cooldownId*/, double /*cooldown*/> cooldownIds = new();
         private readonly Dictionary<uint /*globalCooldownEnum*/, double /*cooldown*/> globalSpellCooldowns = new();
+        private readonly List<(ISpellTargetEffectInfo Info, ISpellCooldownModifier Modifier)> cooldownModifiers = new();
         private uint maxGlobalSpellCooldownEnum = 3; // TODO: Read value from GameTables?
 
         private readonly IActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
@@ -360,8 +363,8 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetSpellCooldownByCooldownId(uint spell4CooldownId, double newCooldown)
         {
-            if (newCooldown < 0d)
-                throw new ArgumentOutOfRangeException();
+            // a cooldown modifier can reduce a cooldown past zero, the client floors it rather than failing
+            newCooldown = Math.Max(0d, newCooldown);
 
             if (cooldownIds.TryGetValue(spell4CooldownId, out double cooldown))
                 cooldownIds[spell4CooldownId] = newCooldown;
@@ -380,10 +383,15 @@ namespace NexusForever.Game.Entity
         /// <summary>
         /// Set spell cooldown in seconds for supplied spell id.
         /// </summary>
-        private void _SetSpellCooldown(uint spell4Id, double cooldown, bool emit)
+        /// <remarks>
+        /// <paramref name="emitCooldown"/> overrides the cooldown sent to the client. The client folds its own
+        /// <see cref="SpellEffectType.ModifySpellCooldown"/> modifiers into the duration of a cooldown it does not yet
+        /// know about, so a cooldown this server has already folded is sent unfolded to stop it being reduced twice.
+        /// </remarks>
+        private void _SetSpellCooldown(uint spell4Id, double cooldown, bool emit, double? emitCooldown = null)
         {
-            if (cooldown < 0d)
-                throw new ArgumentOutOfRangeException();
+            // a cooldown modifier can reduce a cooldown past zero, the client floors it rather than failing
+            cooldown = Math.Max(0d, cooldown);
 
             if (spellCooldowns.ContainsKey(spell4Id))
                 spellCooldowns[spell4Id] = cooldown;
@@ -401,7 +409,7 @@ namespace NexusForever.Game.Entity
                         Type          = 1,
                         TypeId        = spell4Id,
                         SpellId       = spell4Id,
-                        TimeRemaining = (uint)(cooldown * 1000u)
+                        TimeRemaining = (uint)(Math.Max(0d, emitCooldown ?? cooldown) * 1000u)
                     }
                 });
             }
@@ -412,13 +420,19 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetSpellCooldown(ISpellInfo spellInfo, double cooldown, bool emit = false)
         {
-            if (cooldown < 0d)
-                throw new ArgumentOutOfRangeException();
+            cooldown = Math.Max(0d, cooldown);
 
-            _SetSpellCooldown(spellInfo.Entry.Id, cooldown, emit);
+            // held cooldown modifiers are folded into a cooldown that starts, not into one that is already running;
+            // the client makes the same distinction, it only folds for a cooldown node it has to create
+            double emitCooldown = cooldown;
+            if (cooldown > 0d && GetSpellCooldown(spellInfo.Entry.Id) <= 0d)
+                cooldown = FoldSpellCooldownModifiers(spellInfo, cooldown);
+
+            _SetSpellCooldown(spellInfo.Entry.Id, cooldown, emit, emitCooldown);
 
             foreach (SpellCoolDownEntry coolDownEntry in spellInfo.Cooldowns)
-                SetSpellCooldownByCooldownId(coolDownEntry.Id, cooldown);
+                if (coolDownEntry != null)
+                    SetSpellCooldownByCooldownId(coolDownEntry.Id, cooldown);
         }
 
         /// <summary>
@@ -426,65 +440,133 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void SetSpellCooldown(uint spell4Id, double cooldown, bool emit = false)
         {
-            if (cooldown < 0d)
-                throw new ArgumentOutOfRangeException();
+            // spell and effect data can name a spell that has no row; the client matches nothing and carries on
+            ISpellInfo spellInfo = GetSpellInfo(spell4Id);
+            if (spellInfo == null)
+                return;
 
+            SetSpellCooldown(spellInfo, cooldown, emit);
+        }
+
+        /// <summary>
+        /// Return <see cref="ISpellInfo"/> for the supplied spell id, or <c>null</c> if the spell cannot be resolved.
+        /// </summary>
+        private static ISpellInfo GetSpellInfo(uint spell4Id)
+        {
             Spell4Entry entry = GameTableManager.Instance.Spell4.GetEntry(spell4Id);
             if (entry == null)
-                throw new InvalidOperationException($"Spell4 with ID ({spell4Id}) does not exist.");
+            {
+                log.Trace($"Spell4 with ID ({spell4Id}) does not exist.");
+                return null;
+            }
 
             ISpellBaseInfo baseInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(entry.Spell4BaseIdBaseSpell);
             if (baseInfo == null)
-                throw new InvalidOperationException($"BaseInfo with ID ({entry.Spell4BaseIdBaseSpell}) does not exist.");
+            {
+                log.Trace($"BaseInfo with ID ({entry.Spell4BaseIdBaseSpell}) does not exist.");
+                return null;
+            }
 
-            SetSpellCooldown(baseInfo.GetSpellInfo((byte)entry.TierIndex), cooldown, emit);
+            return baseInfo.GetSpellInfo((byte)entry.TierIndex);
         }
 
         /// <summary>
         /// Update all spell cooldowns that share a given group ID
         /// </summary>
-        public void SetSpellCooldownByGroupId(uint groupId, double cooldown)
+        public void SetSpellCooldownByGroupId(uint groupId, double cooldown, bool emit = false)
         {
-            if (cooldown < 0d)
-                throw new ArgumentOutOfRangeException();
-
             foreach (uint spell4 in spellCooldowns.Keys.ToList())
             {
-                Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spell4);
-                if (spell4Entry == null)
-                    throw new InvalidOperationException($"Spell4 with ID ({spell4}) does not exist.");
-
-                if (spell4Entry.Spell4GroupListId == 0u)
+                // a spell with no row, or with a dangling group list, is skipped; it says nothing about this group
+                ISpellInfo spellInfo = GetSpellInfo(spell4);
+                if (spellInfo == null)
                     continue;
 
-                Spell4GroupListEntry spell4GroupListEntry = GameTableManager.Instance.Spell4GroupList.GetEntry(spell4Entry.Spell4GroupListId);
-                if (spell4GroupListEntry == null)
-                    throw new InvalidOperationException($"Spell4 Group List with ID ({spell4Entry.Spell4GroupListId}) does not exist.");
-
-                if (spell4GroupListEntry.SpellGroupIds.Contains(groupId))
-                    SetSpellCooldown(spell4, cooldown);
+                if (spellInfo.SpellGroups.Contains(groupId))
+                    SetSpellCooldown(spellInfo, cooldown, emit);
             }
         }
 
         /// <summary>
         /// Update all spell cooldowns that share a base spell ID
         /// </summary>
-        public void SetSpellCooldownByBaseSpell(uint spell4BaseId, uint type, double cooldown)
+        /// <remarks>
+        /// <paramref name="mode"/> is a <see cref="SpellEffectModifyCooldownMode"/> and <paramref name="magnitude"/>
+        /// its magnitude: milliseconds for the two modes that carry a time, a factor for the two that multiply.
+        /// </remarks>
+        public void SetSpellCooldownByBaseSpell(uint spell4BaseId, uint mode, double magnitude, bool emit = false)
         {
-            ISpellBaseInfo baseSpellInfo = LegacyServiceProvider.Provider.GetService<ISpellInfoManager>().GetSpellBaseInfo(spell4BaseId);
-            if (baseSpellInfo == null)
-                throw new ArgumentNullException();
+            ApplySpellCooldownModifier(new SpellCooldownModifier(0u, 0u, SpellEffectModifyCooldownScope.BaseSpell,
+                spell4BaseId, (SpellEffectModifyCooldownMode)mode, (float)magnitude), emit);
+        }
 
-            foreach (ISpellInfo spellInfo in baseSpellInfo)
+        /// <summary>
+        /// Apply the supplied <see cref="ISpellCooldownModifier"/> to every cooldown that is currently running.
+        /// </summary>
+        /// <remarks>
+        /// This mirrors what the client does when the modifier is applied: it walks the cooldowns it is running, not
+        /// the spells the key could match, so a spell that is not on cooldown is left alone.
+        /// </remarks>
+        public void ApplySpellCooldownModifier(ISpellCooldownModifier modifier, bool emit = false)
+        {
+            foreach ((uint spell4Id, double cooldown) in spellCooldowns.ToArray())
             {
-                if (spellCooldowns.TryGetValue(spellInfo.Entry.Id, out double currentCd))
-                {
-                    if (type == 3)
-                        SetSpellCooldown(spellInfo.Entry.Id, cooldown / 1000d);
-                    else
-                        SetSpellCooldown(spellInfo.Entry.Id, currentCd * cooldown);
-                }
+                if (cooldown <= 0d)
+                    continue;
+
+                ISpellInfo spellInfo = GetSpellInfo(spell4Id);
+                if (!modifier.Matches(spellInfo))
+                    continue;
+
+                double newCooldown = modifier.Apply(cooldown, cooldown);
+                if (newCooldown == cooldown)
+                    continue;
+
+                log.Trace($"Spell {spell4Id} cooldown modified from {cooldown} to {newCooldown} seconds.");
+                _SetSpellCooldown(spell4Id, newCooldown, emit);
+
+                foreach (SpellCoolDownEntry coolDownEntry in spellInfo.Cooldowns)
+                    if (coolDownEntry != null)
+                        SetSpellCooldownByCooldownId(coolDownEntry.Id, newCooldown);
             }
+        }
+
+        /// <summary>
+        /// Hold the supplied <see cref="ISpellCooldownModifier"/> until the effect that applied it is removed.
+        /// </summary>
+        public void AddSpellCooldownModifier(ISpellTargetEffectInfo info, ISpellCooldownModifier modifier)
+        {
+            cooldownModifiers.Add((info, modifier));
+            log.Trace($"Added cooldown modifier for spell effect {modifier.Spell4EffectId} of spell {modifier.Spell4Id}.");
+        }
+
+        /// <summary>
+        /// Stop holding the <see cref="ISpellCooldownModifier"/> applied by the supplied
+        /// <see cref="ISpellTargetEffectInfo"/>.
+        /// </summary>
+        /// <remarks>
+        /// Cooldowns the modifier has already changed are not restored; the client does not restore them either.
+        /// </remarks>
+        public void RemoveSpellCooldownModifier(ISpellTargetEffectInfo info)
+        {
+            cooldownModifiers.RemoveAll(i => i.Info == info);
+        }
+
+        /// <summary>
+        /// Fold every held <see cref="ISpellCooldownModifier"/> that matches the supplied <see cref="ISpellInfo"/> into
+        /// the supplied cooldown, in the order the modifiers were applied.
+        /// </summary>
+        private double FoldSpellCooldownModifiers(ISpellInfo spellInfo, double cooldown)
+        {
+            double accumulator = cooldown;
+            foreach ((_, ISpellCooldownModifier modifier) in cooldownModifiers)
+                if (modifier.Matches(spellInfo))
+                    accumulator = modifier.Apply(cooldown, accumulator);
+
+            if (accumulator != cooldown)
+                log.Trace($"Spell {spellInfo.Entry.Id} cooldown folded from {cooldown} to {accumulator} seconds.");
+
+            return accumulator;
         }
 
         public void ResetAllSpellCooldowns()
