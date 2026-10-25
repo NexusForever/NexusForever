@@ -76,6 +76,11 @@ namespace NexusForever.Game.Entity
 
         private SpellManagerSaveMask saveMask;
 
+        /// <summary>
+        /// Spell tags that make <see cref="Property.CooldownReductionModifier"/> apply to a spell's cooldown.
+        /// </summary>
+        private static readonly HashSet<uint> cooldownReductionSpellTags = [1u, 2u, 7u];
+
         private readonly Dictionary<Class, List<uint> /* spell4Id*/> classPassives = new Dictionary<Class, List<uint>>
         {
             { Class.Warrior, new List<uint> { 46707 } },
@@ -431,8 +436,83 @@ namespace NexusForever.Game.Entity
             _SetSpellCooldown(spellInfo.Entry.Id, cooldown, emit, emitCooldown);
 
             foreach (SpellCoolDownEntry coolDownEntry in spellInfo.Cooldowns)
-                if (coolDownEntry != null)
-                    SetSpellCooldownByCooldownId(coolDownEntry.Id, cooldown);
+            {
+                if (coolDownEntry == null)
+                    continue;
+
+                // the client gives a shared cooldown the duration of its own SpellCoolDown row, reduced the same way
+                // as the spell's own cooldown, and falls back to the spell's cooldown when the row carries none
+                double sharedCooldown = coolDownEntry.CooldownTime > 0u
+                    ? GetReducedCooldown(spellInfo, coolDownEntry.CooldownTime / 1000d)
+                    : emitCooldown;
+
+                double sharedEmitCooldown = sharedCooldown;
+                if (sharedCooldown > 0d && GetSpellCooldownByCooldownId(coolDownEntry.Id) <= 0d)
+                    sharedCooldown = FoldSpellCooldownModifiers(spellInfo, sharedCooldown);
+
+                _SetSpellCooldownByCooldownId(coolDownEntry.Id, sharedCooldown, spellInfo.Entry.Id, emit, sharedEmitCooldown);
+            }
+        }
+
+        /// <summary>
+        /// Set the cooldown shared by every spell that carries the supplied cooldown id, in seconds.
+        /// </summary>
+        /// <remarks>
+        /// The client tracks this as a cooldown node of its own, keyed by the cooldown id and carrying the id of the
+        /// spell it was reached through. See <see cref="_SetSpellCooldown"/> for <paramref name="emitCooldown"/>.
+        /// </remarks>
+        private void _SetSpellCooldownByCooldownId(uint spell4CooldownId, double cooldown, uint spell4Id, bool emit,
+            double? emitCooldown = null)
+        {
+            SetSpellCooldownByCooldownId(spell4CooldownId, cooldown);
+
+            if (!player.IsLoading && emit)
+            {
+                player.Session.EnqueueMessageEncrypted(new ServerCooldown
+                {
+                    Cooldown = new Cooldown
+                    {
+                        Type          = 2,
+                        TypeId        = spell4CooldownId,
+                        SpellId       = spell4Id,
+                        TimeRemaining = (uint)(Math.Max(0d, emitCooldown ?? cooldown) * 1000u)
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Return the supplied cooldown in seconds with <see cref="Property.CooldownReductionModifier"/> applied.
+        /// </summary>
+        /// <remarks>
+        /// The client multiplies a cooldown it starts by this property, but only for a spell that carries one of three
+        /// spell tags, and it truncates the product to whole milliseconds. A modifier of zero or less is treated as no
+        /// modifier: it means this server has no value for the property rather than a cooldown of nothing.
+        /// </remarks>
+        public double GetReducedCooldown(ISpellInfo spellInfo, double cooldown)
+        {
+            if (cooldown <= 0d || !HasCooldownReductionTag(spellInfo))
+                return cooldown;
+
+            float modifier = player.GetPropertyValue(Property.CooldownReductionModifier);
+            if (modifier <= 0f)
+                return cooldown;
+
+            return (int)((int)Math.Round(cooldown * 1000d) * modifier) / 1000d;
+        }
+
+        /// <summary>
+        /// Return whether <see cref="Property.CooldownReductionModifier"/> applies to the supplied
+        /// <see cref="ISpellInfo"/>.
+        /// </summary>
+        private static bool HasCooldownReductionTag(ISpellInfo spellInfo)
+        {
+            Spell4Entry entry = spellInfo.Entry;
+            return cooldownReductionSpellTags.Contains(entry.Spell4TagId00)
+                || cooldownReductionSpellTags.Contains(entry.Spell4TagId01)
+                || cooldownReductionSpellTags.Contains(entry.Spell4TagId02)
+                || cooldownReductionSpellTags.Contains(entry.Spell4TagId03)
+                || cooldownReductionSpellTags.Contains(entry.Spell4TagId04);
         }
 
         /// <summary>
@@ -580,10 +660,50 @@ namespace NexusForever.Game.Entity
             return globalSpellCooldowns[globalEnum];
         }
 
-        public void SetGlobalSpellCooldown(uint globalEnum, double cooldown)
+        public void SetGlobalSpellCooldown(uint globalEnum, double cooldown, uint spellCoolDownIdGlobal = 0u, bool emit = false)
         {
+            cooldown = Math.Max(0d, cooldown);
+
+            // the client folds held cooldown modifiers keyed on this cooldown id into the global cooldown itself
+            if (cooldown > 0d && spellCoolDownIdGlobal != 0u)
+                cooldown = FoldGlobalSpellCooldownModifiers(spellCoolDownIdGlobal, cooldown);
+
             globalSpellCooldowns[globalEnum] = cooldown;
             log.Trace($"Global spell cooldown {globalEnum} set to {cooldown} seconds.");
+
+            if (spellCoolDownIdGlobal == 0u || player.IsLoading || !emit)
+                return;
+
+            // the client keys its global cooldown node by the SpellCoolDown id rather than by the global cooldown enum
+            // and carries no spell id with it. It never shortens a running node; a longer value and a reset do apply.
+            // It also cannot fold the modifiers into a node that carries no spell id, so this value is sent folded.
+            player.Session.EnqueueMessageEncrypted(new ServerCooldown
+            {
+                Cooldown = new Cooldown
+                {
+                    Type          = 0,
+                    TypeId        = spellCoolDownIdGlobal,
+                    SpellId       = 0u,
+                    TimeRemaining = (uint)(cooldown * 1000u)
+                }
+            });
+        }
+
+        /// <summary>
+        /// Fold every held <see cref="ISpellCooldownModifier"/> keyed on the supplied cooldown id into the supplied
+        /// global cooldown, in the order the modifiers were applied.
+        /// </summary>
+        private double FoldGlobalSpellCooldownModifiers(uint spell4CooldownId, double cooldown)
+        {
+            double accumulator = cooldown;
+            foreach ((_, ISpellCooldownModifier modifier) in cooldownModifiers)
+                if (modifier.Scope == SpellEffectModifyCooldownScope.SpellCooldownId && modifier.Key == spell4CooldownId)
+                    accumulator = modifier.Apply(cooldown, accumulator);
+
+            if (accumulator != cooldown)
+                log.Trace($"Global spell cooldown {spell4CooldownId} folded from {cooldown} to {accumulator} seconds.");
+
+            return accumulator;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Spell;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Network.World.Message.Static;
@@ -95,9 +96,14 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         void RemoveSpellCooldownModifier(ISpellTargetEffectInfo info);
 
+        /// <summary>
+        /// Return the supplied cooldown in seconds with <see cref="Property.CooldownReductionModifier"/> applied.
+        /// </summary>
+        double GetReducedCooldown(ISpellInfo spellInfo, double cooldown);
+
         void ResetAllSpellCooldowns();
         double GetGlobalSpellCooldown(uint globalEnum);
-        void SetGlobalSpellCooldown(uint globalEnum, double cooldown);
+        void SetGlobalSpellCooldown(uint globalEnum, double cooldown, uint spellCoolDownIdGlobal = 0u, bool emit = false);
 
         /// <summary>
         /// Return <see cref="IActionSet"/> at supplied index.
