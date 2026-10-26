@@ -16,6 +16,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Misc
             uint spell4Id = stuck.UnstickingType switch
             {
                 UnstickType.RecallTransmat => 49881u,
+                UnstickType.RecallHouse    => 49882u,
                 _                          => 0u
             };
 
