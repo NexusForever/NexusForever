@@ -8,7 +8,7 @@ namespace NexusForever.Network.Message
         ServerMaxCharacterLevelAchieved = 0x0036,
         ServerPlayerEnteredWorld        = 0x0061,
         ServerPetSpawned                = 0x0068,
-        ServerClientEntityUpdateInterval = 0x0070,
+        BiEntityUpdateInterval          = 0x0070,
         ServerAuthEncrypted             = 0x0076,
         ServerGameCameraRotation        = 0x0091,
         ServerLogoutUpdate              = 0x0092,
@@ -623,7 +623,7 @@ namespace NexusForever.Network.Message
         ServerMatchingMatchOperationResult = 0x0623,
         ClientMatchingMatchCastVoteSurrender = 0x0624,
         ServerMatchingAverageWaitTimeUpdate = 0x0628,
-        ServerClient0635                = 0x0635,
+        Bi0635                          = 0x0635,
         ServerMovementControl           = 0x0636, // handler sends 0x0635 and 0x063A
         ClientEntityCommand             = 0x0637, // bidirectional? packet has both read and write handlers 
         ServerEntityCommand             = 0x0638, // bidirectional? packet has both read and write handlers
