@@ -8,7 +8,7 @@ namespace NexusForever.Network.Message
         ServerMaxCharacterLevelAchieved = 0x0036,
         ServerPlayerEnteredWorld        = 0x0061,
         ServerPetSpawned                = 0x0068,
-        BiEntityUpdateInterval          = 0x0070,
+        ServerClientEntityUpdateInterval = 0x0070,
         ServerAuthEncrypted             = 0x0076,
         ServerGameCameraRotation        = 0x0091,
         ServerLogoutUpdate              = 0x0092,
