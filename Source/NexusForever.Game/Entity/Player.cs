@@ -256,6 +256,10 @@ namespace NexusForever.Game.Entity
         private bool bindExists;
         private bool bindDirty;
 
+        private readonly HashSet<ushort> taxiNodes = [];
+        private readonly HashSet<ushort> unsavedTaxiNodes = [];
+        private UpdateTimer taxiDiscoveryTimer = new(TimeSpan.FromSeconds(2));
+
         private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> itemProperties = new();
 
         private UpdateTimer relocationTimer = new(TimeSpan.FromSeconds(1));
@@ -321,6 +325,9 @@ namespace NexusForever.Game.Entity
                 bindPosition = new Vector3(model.Bind.X, model.Bind.Y, model.Bind.Z);
                 bindExists   = true;
             }
+
+            foreach (CharacterTaxiNodeModel taxiNodeModel in model.TaxiNode)
+                taxiNodes.Add(taxiNodeModel.TaxiNodeId);
 
             CreateTime        = model.CreateTime;
             TimePlayedTotal   = model.TimePlayedTotal;
@@ -405,6 +412,13 @@ namespace NexusForever.Game.Entity
             SpellManager.Update(lastTick);
             CostumeManager.Update(lastTick);
             QuestManager.Update(lastTick);
+
+            taxiDiscoveryTimer.Update(lastTick);
+            if (taxiDiscoveryTimer.HasElapsed)
+            {
+                DiscoverNearbyTaxiNodes();
+                taxiDiscoveryTimer.Reset();
+            }
 
             relocationTimer.Update(lastTick);
             if (relocationTimer.HasElapsed)
@@ -497,6 +511,7 @@ namespace NexusForever.Game.Entity
         public void Save(CharacterContext context)
         {
             SaveBindPoint(context);
+            SaveTaxiNodes(context);
 
             var model = new CharacterModel
             {
@@ -642,6 +657,78 @@ namespace NexusForever.Game.Entity
 
             bindExists = true;
             bindDirty  = false;
+        }
+
+        private void SaveTaxiNodes(CharacterContext context)
+        {
+            foreach (ushort taxiNodeId in unsavedTaxiNodes)
+            {
+                context.Add(new CharacterTaxiNodeModel
+                {
+                    Id         = CharacterId,
+                    TaxiNodeId = taxiNodeId
+                });
+            }
+
+            unsavedTaxiNodes.Clear();
+        }
+
+        /// <summary>
+        /// Discover the supplied taxi node, the taxi map offers routes through it from now on.
+        /// </summary>
+        public void DiscoverTaxiNode(uint taxiNodeId)
+        {
+            TaxiNodeEntry entry = GameTableManager.Instance.TaxiNode.GetEntry(taxiNodeId);
+            if (entry == null)
+                return;
+
+            // TaxiNode.taxiNodeFactionEnum: 0 neutral, 1 Exile, 2 Dominion
+            uint faction = Faction1 switch
+            {
+                Faction.Exile    => 1u,
+                Faction.Dominion => 2u,
+                _                => 0u
+            };
+            if (entry.TaxiNodeFactionEnum != 0u && faction != 0u && entry.TaxiNodeFactionEnum != faction)
+                return;
+
+            if (!taxiNodes.Add((ushort)taxiNodeId))
+                return;
+
+            unsavedTaxiNodes.Add((ushort)taxiNodeId);
+            Session.EnqueueMessageEncrypted(new ServerTaxiNodeUnlock
+            {
+                TaxiNodeId = (ushort)taxiNodeId
+            });
+        }
+
+        /// <summary>
+        /// Return true if a kiosk of the supplied taxi node is visible and within range of <see cref="IPlayer"/>.
+        /// </summary>
+        public bool IsNearTaxiNode(uint taxiNodeId, float range)
+        {
+            return visibleEntities.Values
+                .OfType<IWorldEntity>()
+                .Any(e => e.CreatureEntry?.TaxiNodeId == taxiNodeId
+                    && Vector3.DistanceSquared(e.Position, Position) <= range * range);
+        }
+
+        /// <summary>
+        /// Discover the taxi kiosks (Creature2.taxiNodeId) <see cref="IPlayer"/> is standing near.
+        /// </summary>
+        private void DiscoverNearbyTaxiNodes()
+        {
+            const float discoveryRange = 30f;
+
+            foreach (IWorldEntity kiosk in visibleEntities.Values.OfType<IWorldEntity>().ToList())
+            {
+                uint taxiNodeId = kiosk.CreatureEntry?.TaxiNodeId ?? 0u;
+                if (taxiNodeId == 0u || taxiNodes.Contains((ushort)taxiNodeId))
+                    continue;
+
+                if (Vector3.DistanceSquared(kiosk.Position, Position) <= discoveryRange * discoveryRange)
+                    DiscoverTaxiNode(taxiNodeId);
+            }
         }
 
         /// <summary>
@@ -801,6 +888,11 @@ namespace NexusForever.Game.Entity
 
             CostumeManager.SendInitialPackets();
             Account.CostumeManager.SendInitialPackets();
+
+            Session.EnqueueMessageEncrypted(new ServerFlightPathUpdate
+            {
+                TaxiNodeIds = taxiNodes.Select(t => (uint)t).ToList()
+            });
 
             var playerCreate = new ServerPlayerCreate
             {

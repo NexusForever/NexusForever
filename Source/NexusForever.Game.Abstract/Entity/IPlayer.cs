@@ -136,6 +136,16 @@ namespace NexusForever.Game.Abstract.Entity
         bool TryGetBindPoint(out ushort worldId, out Vector3 position);
 
         /// <summary>
+        /// Discover the supplied taxi node, the taxi map offers routes through it from now on.
+        /// </summary>
+        void DiscoverTaxiNode(uint taxiNodeId);
+
+        /// <summary>
+        /// Return true if a kiosk of the supplied taxi node is visible and within range of <see cref="IPlayer"/>.
+        /// </summary>
+        bool IsNearTaxiNode(uint taxiNodeId, float range);
+
+        /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
         void TeleportTo(ushort worldId, float x, float y, float z, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate);
