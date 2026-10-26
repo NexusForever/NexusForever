@@ -2,6 +2,8 @@ using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Housing;
+using NexusForever.Game.Abstract.Map.Lock;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Entity;
@@ -127,6 +129,24 @@ namespace NexusForever.Game.Spell
             if (target is IPlayer player)
                 if (player.CanTeleport())
                     player.TeleportTo((ushort)locationEntry.WorldId, locationEntry.Position0, locationEntry.Position1, locationEntry.Position2);
+        }
+
+        [SpellEffectHandler(SpellEffectType.HousingTeleport)]
+        public static void HandleEffectHousingTeleport(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            // Recall - House (38408) and the stuck window recall (49882): the entrance of the player's own residence
+            if (target is not IPlayer player || !player.CanTeleport())
+                return;
+
+            IResidence residence = player.ResidenceManager.Residence;
+            if (residence == null)
+                return;
+
+            IResidenceEntrance entrance = LegacyServiceProvider.Provider.GetService<IGlobalResidenceManager>().GetResidenceEntrance(residence.PropertyInfoId);
+            IMapLock mapLock = LegacyServiceProvider.Provider.GetService<IMapLockManager>().GetResidenceLock(residence.Parent ?? residence);
+
+            player.Rotation = entrance.Rotation.ToEuler();
+            player.TeleportTo(entrance.Entry, entrance.Position, mapLock);
         }
 
         [SpellEffectHandler(SpellEffectType.FullScreenEffect)]
