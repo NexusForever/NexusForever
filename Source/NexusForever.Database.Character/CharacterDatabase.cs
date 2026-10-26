@@ -144,6 +144,7 @@ namespace NexusForever.Database.Character
                 .Include(c => c.Achievement)
                 .Include(c => c.TradeskillMaterials)
                 .Include(c => c.Reputation)
+                .Include(c => c.TaxiNode)
                 .ToListAsync();
         }
 

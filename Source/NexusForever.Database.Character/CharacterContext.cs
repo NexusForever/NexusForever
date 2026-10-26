@@ -13,6 +13,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterActionSetShortcutModel> CharacterActionSetShortcut { get; set; }
         public DbSet<CharacterAppearanceModel> CharacterAppearance { get; set; }
         public DbSet<CharacterBoneModel> CharacterBone { get; set; }
+        public DbSet<CharacterTaxiNodeModel> CharacterTaxiNode { get; set; }
         public DbSet<CharacterCostumeModel> CharacterCostume { get; set; }
         public DbSet<CharacterCostumeItemModel> CharacterCostumeItem { get; set; }
         public DbSet<CharacterCreateModel> CharacterCreate { get; set; }
@@ -349,6 +350,31 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.ActionSetShortcut)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_action_set_shortcut_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterTaxiNodeModel>(entity =>
+            {
+                entity.ToTable("character_taxi_node");
+
+                entity.HasKey(e => new { e.Id, e.TaxiNodeId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.TaxiNodeId)
+                    .HasColumnName("taxiNodeId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0)
+                    .ValueGeneratedNever();
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.TaxiNode)
+                    .HasForeignKey(d => d.Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK__character_taxi_node_id__character_id");
             });
 
             modelBuilder.Entity<CharacterAppearanceModel>(entity =>

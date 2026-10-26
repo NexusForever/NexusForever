@@ -64,6 +64,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 case InteractionType.FlightPathSettler:
                 case InteractionType.FlightPathNew:
                 case InteractionType.FlightPath: // "InvokeTaxiWindow"
+                    // talking to a taxi kiosk discovers its node
+                    if (entity?.CreatureEntry?.TaxiNodeId is uint taxiNodeId and not 0u)
+                        session.Player.DiscoverTaxiNode(taxiNodeId);
+                    break;
                 case InteractionType.Mannequin: // "MannequinWindowOpen"
                 case InteractionType.Bank: // "ShowBank"
                 case InteractionType.SharedRealmBank: // "ShowRealmBank"
