@@ -125,7 +125,9 @@ namespace NexusForever.Game.Spell
                     return CastResult.SpellCooldown;
 
                 // this isn't entirely correct, research GlobalCooldownEnum
-                if (Parameters.SpellInfo.Entry.GlobalCooldownEnum == 0
+                // the global cooldown only gates what the player casts, not the casts the server triggers from another spell
+                if (Parameters.UserInitiatedSpellCast
+                    && Parameters.SpellInfo.Entry.GlobalCooldownEnum == 0
                     && player.SpellManager.GetGlobalSpellCooldown() > 0d)
                     return CastResult.SpellGlobalCooldown;
 
