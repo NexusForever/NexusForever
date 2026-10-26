@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Tests/">
+    <Project Path="NexusForever.GameTable.Tests/NexusForever.GameTable.Tests.csproj" />
+  </Folder>
   <Folder Name="/Client/">
     <Project Path="NexusForever.ClientConnector/NexusForever.ClientConnector.csproj" />
     <Project Path="NexusForever.MapGenerator/NexusForever.MapGenerator.csproj" />
