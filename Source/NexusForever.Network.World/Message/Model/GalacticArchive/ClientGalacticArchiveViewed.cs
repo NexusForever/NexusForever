@@ -2,16 +2,16 @@
 
 namespace NexusForever.Network.World.Message.Model.GalacticArchive
 {
-    // Sent when SetViewed function is called on an archiveEntry that is unlocked but unviewed
-    // Relies on bit flags sent in ServerGalacticArchiveUpdate to determine which archiveEntry was viewed for the given ArchiveArticleId
+    // Sent when SetViewed function is called on an archiveArticle that is unlocked and is unviewed or has an unlocked archiveEntry that is unviewed
+    // The client has already marked the archiveArticle and every unlocked archiveEntry as viewed, relies on bit flags sent in ServerGalacticArchiveUpdate
     [Message(GameMessageOpcode.ClientGalacticArchiveViewed)]
     public class ClientGalacticArchiveViewed : IReadable
     {
-        public uint ArchiveArticleId { get; private set; }
+        public ushort ArchiveArticleId { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            ArchiveArticleId = reader.ReadUInt();
+            ArchiveArticleId = reader.ReadUShort(14u);
         }
     }
 }
