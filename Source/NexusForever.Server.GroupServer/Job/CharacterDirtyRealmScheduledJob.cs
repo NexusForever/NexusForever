@@ -2,9 +2,9 @@
 using NexusForever.Database.Group;
 using NexusForever.Database.Group.Model;
 using NexusForever.Database.Group.Repository;
-using NexusForever.Network.Internal;
 using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Server.GroupServer.Group;
+using NexusForever.Server.GroupServer.Network.Internal;
 using Quartz;
 
 namespace NexusForever.Server.GroupServer.Job
@@ -30,10 +30,11 @@ namespace NexusForever.Server.GroupServer.Job
             {
                 // each character is processed in its own scope, a single context for the whole run would return stale tracked
                 // characters that were marked dirty again by another context, the flag would never be cleared and the job would never end
+                // messages go through the outbox so they are committed together with the cleared flag
                 await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
                 var repository       = scope.ServiceProvider.GetRequiredService<CharacterRepository>();
                 var groupContext     = scope.ServiceProvider.GetRequiredService<GroupContext>();
-                var messagePublisher = scope.ServiceProvider.GetRequiredService<IInternalMessagePublisher>();
+                var messagePublisher = scope.ServiceProvider.GetRequiredService<OutboxMessagePublisher>();
 
                 CharacterModel model = await repository.GetNextCharacterWithDirtyRealm();
                 if (model == null)
