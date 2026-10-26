@@ -367,6 +367,49 @@ namespace NexusForever.Game.Entity
             return SpecError.Ok;
         }
 
+        private static HashSet<uint> learnedPassives;
+
+        /// <summary>
+        /// Return true if the spell is a passive taught by an AddSpell effect where every effect is a UnitPropertyModifier.
+        /// </summary>
+        /// <remarks>
+        /// These are the Riding Skill passives 75441 and 75442 of the riding licenses, which raise MountSpeedMultiplier.
+        /// </remarks>
+        public static bool IsLearnedPassive(uint spell4Id)
+        {
+            if (learnedPassives == null)
+            {
+                HashSet<uint> taught = GameTableManager.Instance.Spell4Effects.Entries
+                    .Where(e => e.EffectType == SpellEffectType.AddSpell)
+                    .Select(e => e.DataBits00)
+                    .ToHashSet();
+
+                learnedPassives = GameTableManager.Instance.Spell4Effects.Entries
+                    .Where(e => taught.Contains(e.SpellId))
+                    .GroupBy(e => e.SpellId)
+                    .Where(g => g.All(e => e.EffectType == SpellEffectType.UnitPropertyModifier))
+                    .Select(g => g.Key)
+                    .ToHashSet();
+            }
+
+            return learnedPassives.Contains(spell4Id);
+        }
+
+        /// <summary>
+        /// Cast the learned passives of known spells, property modifiers are not saved so they are applied again at login.
+        /// </summary>
+        private void CastLearnedPassives()
+        {
+            foreach (ICharacterSpell spell in spells.Values.ToList())
+            {
+                uint spell4Id = spell.SpellInfo?.Entry?.Id ?? 0u;
+                if (spell4Id == 0u || !IsLearnedPassive(spell4Id))
+                    continue;
+
+                player.CastSpell(spell4Id, new SpellParameters());
+            }
+        }
+
         public void SendInitialPackets()
         {
             SendServerAbilities();
@@ -374,6 +417,7 @@ namespace NexusForever.Game.Entity
             SendServerAbilityPoints();
             SendServerActionSets();
             SendServerAmpLists();
+            CastLearnedPassives();
 
             player.Session.EnqueueMessageEncrypted(new ServerCooldownList
             {
