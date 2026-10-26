@@ -96,12 +96,50 @@ namespace NexusForever.Game
                 if ((TargetGroupType)entry.Type != TargetGroupType.CreatureIdGroup)
                     continue;
 
-                foreach (uint creatureId in entry.DataEntries)
+                foreach (uint creatureId in entry.DataEntries.Where(id => id != 0u))
                 {
                     if (!entries.ContainsKey(creatureId))
                         entries.Add(creatureId, new List<uint>());
 
                     entries[creatureId].Add(entry.Id);
+                }
+            }
+
+            // Include parent target groups (OtherTargetGroup / Unknown11) so checklist objectives
+            // that reference a nested group still match creature activations.
+            var nestedParents = new Dictionary<uint, List<uint>>();
+            foreach (TargetGroupEntry entry in GameTableManager.Instance.TargetGroup.Entries)
+            {
+                if ((TargetGroupType)entry.Type is not (TargetGroupType.OtherTargetGroup or TargetGroupType.Unknown11))
+                    continue;
+
+                foreach (uint childGroupId in entry.DataEntries.Where(id => id != 0u))
+                {
+                    if (!nestedParents.ContainsKey(childGroupId))
+                        nestedParents.Add(childGroupId, new List<uint>());
+
+                    nestedParents[childGroupId].Add(entry.Id);
+                }
+            }
+
+            foreach ((uint creatureId, List<uint> groups) in entries)
+            {
+                var queue = new Queue<uint>(groups);
+                var seen = new HashSet<uint>(groups);
+                while (queue.Count > 0)
+                {
+                    uint groupId = queue.Dequeue();
+                    if (!nestedParents.TryGetValue(groupId, out List<uint> parents))
+                        continue;
+
+                    foreach (uint parentId in parents)
+                    {
+                        if (!seen.Add(parentId))
+                            continue;
+
+                        groups.Add(parentId);
+                        queue.Enqueue(parentId);
+                    }
                 }
             }
 

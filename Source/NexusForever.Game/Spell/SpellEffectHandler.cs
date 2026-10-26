@@ -43,7 +43,13 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Proxy)]
         public static void HandleEffectProxy(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
-            target.CastSpell(info.Entry.DataBits00, new SpellParameters
+            // Some Proxy rows leave DataBits00=0 (e.g. Engineer ExoSuit stance 47860).
+            // Casting spell 0 throws and re-runs Execute every tick, locking the caster.
+            uint proxySpellId = info.Entry.DataBits00;
+            if (proxySpellId == 0u || GameTableManager.Instance.Spell4.GetEntry(proxySpellId) == null)
+                return;
+
+            target.CastSpell(proxySpellId, new SpellParameters
             {
                 ParentSpellInfo        = spell.Parameters.SpellInfo,
                 RootSpellInfo          = spell.Parameters.RootSpellInfo,
@@ -63,6 +69,12 @@ namespace NexusForever.Game.Spell
                 return;
 
             target.DisplayInfo = displayGroupEntry.Creature2DisplayInfoId;
+        }
+
+        [SpellEffectHandler(SpellEffectType.DisguiseOutfit)]
+        public static void HandleEffectDisguiseOutfit(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            // TODO: outfit/costume disguise (e.g. Engineer Eradication ExoSuit). Visual-only for now.
         }
 
         [SpellEffectHandler(SpellEffectType.SummonMount)]
@@ -100,11 +112,17 @@ namespace NexusForever.Game.Spell
             if (player.Map.CanEnter(mount, position))
                 player.Map.EnqueueAdd(mount, position);
 
-            // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464
-            // FIXME: also cast 80530,Mount Sprint  - Tier 2,36122
-
-            player.CastSpell(52539, new SpellParameters());
-            player.CastSpell(80530, new SpellParameters());
+            // Riding License + sprint (Hoverboard Sprint for vehicle 411, Mount Sprint otherwise).
+            // Both apply MountSpeedMultiplier 1.5x; hoverboard also has visual procs.
+            player.CastSpell(52539, new SpellParameters
+            {
+                UserInitiatedSpellCast = false
+            });
+            uint sprintSpellId = info.Entry.DataBits01 == 411u ? 80531u : 80530u;
+            player.CastSpell(sprintSpellId, new SpellParameters
+            {
+                UserInitiatedSpellCast = false
+            });
         }
 
         [SpellEffectHandler(SpellEffectType.Teleport)]
@@ -243,13 +261,23 @@ namespace NexusForever.Game.Spell
         public static void HandleEffectPropertyModifier(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
             // TODO: I suppose these could be cached somewhere instead of generating them every single effect?
+            var property = (Property)info.Entry.DataBits00;
             SpellPropertyModifier modifier = 
-                new SpellPropertyModifier((Property)info.Entry.DataBits00, 
+                new SpellPropertyModifier(property, 
                     info.Entry.DataBits01, 
                     BitConverter.UInt32BitsToSingle(info.Entry.DataBits02), 
                     BitConverter.UInt32BitsToSingle(info.Entry.DataBits03), 
                     BitConverter.UInt32BitsToSingle(info.Entry.DataBits04));
             target.AddSpellModifierProperty(modifier, spell.Parameters.SpellInfo.Entry.Id);
+
+            // Pilot movement controls the vehicle entity; mirror MountSpeedMultiplier onto it
+            // so the client sees the boosted speed on the unit it is actually moving.
+            if (property == Property.MountSpeedMultiplier && target is IPlayer player && player.PlatformGuid != null)
+            {
+                IWorldEntity platform = player.GetVisible<IWorldEntity>(player.PlatformGuid.Value)
+                    ?? player.Map?.GetEntity<IWorldEntity>(player.PlatformGuid.Value);
+                platform?.SetBaseProperty(Property.MountSpeedMultiplier, player.GetPropertyValue(Property.MountSpeedMultiplier));
+            }
 
             // TODO: Handle removing spell modifiers
 

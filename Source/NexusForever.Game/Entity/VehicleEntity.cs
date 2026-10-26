@@ -148,8 +148,9 @@ namespace NexusForever.Game.Entity
 
         private void PassengerAdd(IVehiclePassenger passenger)
         {
-            // possible for a player to no longer be visible due to delayed add
-            IPlayer player = GetVisible<IPlayer>(passenger.Guid);
+            // delayed add can race vision; fall back to map lookup so boarding still works
+            IPlayer player = GetVisible<IPlayer>(passenger.Guid)
+                ?? Map?.GetEntity<IPlayer>(passenger.Guid);
             if (player == null)
                 return;
 

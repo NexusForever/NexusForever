@@ -69,8 +69,9 @@ namespace NexusForever.Game.Spell
                 status = SpellStatus.Finished;
                 log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has finished.");
 
-                // TODO: add a timer to count down on the Effect before sending the finish - sending the finish will e.g. wear off the buff
-                //SendSpellFinish();
+                // Tell the client the cast is done; without this the cast bar / stance
+                // animation can stay locked forever (e.g. ExoSuit stance proxies).
+                SendSpellFinish();
             }
         }
 
@@ -319,7 +320,7 @@ namespace NexusForever.Game.Spell
             {
                 ServerUniqueId         = CastingId,
                 CasterId               = Caster.Guid,
-                PrimaryTargetId        = Caster.Guid,
+                PrimaryTargetId        = Parameters.PrimaryTargetId != 0u ? Parameters.PrimaryTargetId : Caster.Guid,
                 Spell4Id               = Parameters.SpellInfo.Entry.Id,
                 RootSpell4Id           = Parameters.RootSpellInfo?.Entry.Id ?? 0,
                 ParentSpell4Id         = Parameters.ParentSpellInfo?.Entry.Id ?? 0,

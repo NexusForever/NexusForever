@@ -53,7 +53,10 @@ namespace NexusForever.WorldServer.Command.Context
         /// </summary>
         public T GetTargetOrInvoker<T>() where T : IWorldEntity
         {
-            return (T)(Target ?? Invoker);
+            if (Target is T typedTarget)
+                return typedTarget;
+
+            return (T)Invoker;
         }
 
         private void SendText(string text, string name = "")

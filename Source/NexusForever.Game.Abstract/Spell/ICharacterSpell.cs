@@ -17,12 +17,12 @@ namespace NexusForever.Game.Abstract.Spell
         /// <summary>
         /// Used for when the client does not have continuous casting enabled
         /// </summary>
-        void Cast();
+        void Cast(uint? targetUnitId = null);
 
         /// <summary>
         /// Used for continuous casting when the client has it enabled, or spells with Cast Methods like ChargeRelease
         /// </summary>
-        void Cast(bool buttonPressed);
+        void Cast(bool buttonPressed, uint? targetUnitId = null);
 
         void UseCharge();
     }

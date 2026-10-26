@@ -127,11 +127,13 @@ namespace NexusForever.WorldServer.Command
 
             if (targetType != null)
             {
+                // Non-player selected (turret/NPC): fall back to the invoker for player commands.
                 if (context.Target != null && !targetType.IsInstanceOfType(context.Target))
-                    return CommandResult.InvalidTarget;
-
-                // invoker will always exist
-                if (!targetType.IsInstanceOfType(context.Invoker))
+                {
+                    if (!targetType.IsInstanceOfType(context.Invoker))
+                        return CommandResult.InvalidTarget;
+                }
+                else if (!targetType.IsInstanceOfType(context.Target ?? context.Invoker))
                     return CommandResult.InvalidTarget;
             }
 

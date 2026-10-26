@@ -147,11 +147,23 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public bool IsComplete()
         {
+            // Checklist progress is a bitfield (see ServerQuestObjectiveUpdate.Completed).
+            if (ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist)
+                return System.Numerics.BitOperations.PopCount(progress) >= ObjectiveInfo.Entry.Count;
+
             return progress >= GetMaxValue();
         }
 
         private uint GetMaxValue()
         {
+            if (ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist)
+            {
+                // Bits 0..(Count-1) set; used by Complete().
+                if (ObjectiveInfo.Entry.Count >= 32)
+                    return uint.MaxValue;
+                return (1u << (int)ObjectiveInfo.Entry.Count) - 1u;
+            }
+
             return IsDynamic() ? 1000u : ObjectiveInfo.Entry.Count;
         }
 
@@ -160,13 +172,34 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(uint update)
         {
+            // Checklist objectives must use ObjectiveChecklistBit so the same slot cannot be farmed.
+            if (ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist)
+                return;
+
             if (IsDynamic())
                 update = (uint)(((float)update / ObjectiveInfo.Entry.Count) * 1000f);
 
             Progress = Math.Min(progress + update, GetMaxValue());
         }
 
-       
+        /// <summary>
+        /// Set a checklist slot bit. No-op if the bit is already set or the index is out of range.
+        /// </summary>
+        public void ObjectiveChecklistBit(byte checklistIdx)
+        {
+            if (ObjectiveInfo.Type != QuestObjectiveType.ActivateTargetGroupChecklist)
+                return;
+
+            if (checklistIdx >= 32)
+                return;
+
+            uint bit = 1u << checklistIdx;
+            if ((progress & bit) != 0u)
+                return;
+
+            Progress = progress | bit;
+        }
+
         public void Complete()
         {
             Progress = GetMaxValue();
