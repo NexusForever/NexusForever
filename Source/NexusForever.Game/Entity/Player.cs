@@ -1411,8 +1411,30 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public bool CanMount()
         {
+            if (pendingMount != null)
+            {
+                // the map adds the mount on its next update and PlatformGuid is only set once the player is seated,
+                // until then every summon cast would add another mount; give up on a mount that never arrives
+                if (pendingMount.Map == null && DateTime.UtcNow - pendingMountTime < TimeSpan.FromSeconds(10))
+                    return false;
+
+                pendingMount = null;
+            }
+
             return PlatformGuid == null && pendingTeleport == null;
         }
+
+        /// <summary>
+        /// Remember a mount that was summoned but is not on the map yet, <see cref="CanMount"/> refuses another summon until it is.
+        /// </summary>
+        public void SetPendingMount(IMountEntity mount)
+        {
+            pendingMount     = mount;
+            pendingMountTime = DateTime.UtcNow;
+        }
+
+        private IMountEntity pendingMount;
+        private DateTime pendingMountTime;
 
         /// <summary>
         /// Dismounts this <see cref="IPlayer"/> from a vehicle that it's attached to
@@ -1423,7 +1445,17 @@ namespace NexusForever.Game.Entity
                 return;
 
             IVehicleEntity vehicle = GetVisible<IVehicleEntity>(PlatformGuid.Value);
-            vehicle?.PassengerRemove(this);
+            if (vehicle?.GetPassenger(Guid) != null)
+            {
+                vehicle.PassengerRemove(this);
+                return;
+            }
+
+            // the vehicle is gone or no longer carries the player, without this the player stays mounted on nothing
+            // and the client refuses to resurrect a dead player that is still mounted
+            log.Debug($"{Name} dismounted from vehicle {PlatformGuid.Value}, which is gone or no longer carries them.");
+            SetPlatform(null);
+            SetControl(this);
         }
 
         /// <summary>

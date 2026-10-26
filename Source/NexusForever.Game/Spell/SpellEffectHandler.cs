@@ -100,13 +100,15 @@ namespace NexusForever.Game.Spell
             };
 
             if (player.Map.CanEnter(mount, position))
+            {
                 player.Map.EnqueueAdd(mount, position);
+                player.SetPendingMount(mount);
+            }
 
-            // FIXME: also cast 52539,Riding License - Riding Skill 1 - SWC - Tier 1,34464
-            // FIXME: also cast 80530,Mount Sprint  - Tier 2,36122
-
-            player.CastSpell(52539, new SpellParameters());
-            player.CastSpell(80530, new SpellParameters());
+            // 52539 Riding License (Riding Skill 1, tier 1) and 80530 Mount Sprint (tier 2) are triggered by the summon, not by the player,
+            // the global cooldown of the summon must not refuse them
+            player.CastSpell(52539, new SpellParameters { UserInitiatedSpellCast = false });
+            player.CastSpell(80530, new SpellParameters { UserInitiatedSpellCast = false });
         }
 
         [SpellEffectHandler(SpellEffectType.Teleport)]
