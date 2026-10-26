@@ -12,7 +12,7 @@ namespace NexusForever.Network.World.Message.Model.Pet
         public void Read(GamePacketReader reader)
         {
             PetUnitId = reader.ReadUInt();
-            Stance = reader.ReadEnum<PetStance>(8u);
+            Stance = reader.ReadEnum<PetStance>(5u);
         }
     }
 }

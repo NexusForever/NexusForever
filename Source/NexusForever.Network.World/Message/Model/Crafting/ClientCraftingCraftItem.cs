@@ -8,6 +8,7 @@ namespace NexusForever.Network.World.Message.Model.Crafting
         public uint ClientSpellcastUniqueId { get; private set; }
         public uint CraftingStationUnitId { get; private set; }
         public uint TradeskillSchematic2Id { get; private set; }
+        public uint Unknown4 { get; private set; }
         public uint SchematicCount { get; private set; }
 
         public void Read(GamePacketReader reader)
@@ -15,6 +16,7 @@ namespace NexusForever.Network.World.Message.Model.Crafting
             ClientSpellcastUniqueId = reader.ReadUInt();
             CraftingStationUnitId = reader.ReadUInt();
             TradeskillSchematic2Id = reader.ReadUInt();
+            Unknown4 = reader.ReadUInt();
             SchematicCount = reader.ReadUInt(18);
         }
     }

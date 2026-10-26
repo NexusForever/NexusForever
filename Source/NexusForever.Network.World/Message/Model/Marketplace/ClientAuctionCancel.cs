@@ -10,8 +10,8 @@ namespace NexusForever.Network.World.Message.Model.Marketplace
 
         public void Read(GamePacketReader reader)
         {
-            AuctionId = reader.ReadULong();
             Item2Id = reader.ReadUInt(18u);
+            AuctionId = reader.ReadULong();
         }
     }
 }
