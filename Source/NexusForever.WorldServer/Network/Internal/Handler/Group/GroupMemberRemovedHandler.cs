@@ -1,6 +1,9 @@
 ﻿using System.Threading.Tasks;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map.Instance;
+using NexusForever.Game.Static.Map;
+using NexusForever.Game.Static.Map.Lock;
 using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Network.Internal.Message.Group.Shared;
 using NexusForever.Network.World.Message.Model;
@@ -36,6 +39,11 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Group
                 IPlayer player = playerManager.GetPlayer(member.Identity.ToGameIdentity());
                 player?.Session.EnqueueMessageEncrypted(groupRemove);
             }
+
+            // a player who leaves the group inside its dungeon or raid gets the removal warning with the Leave button
+            IPlayer removed = playerManager.GetPlayer(message.RemovedMember.Identity.ToGameIdentity());
+            if (removed?.Map is IContentMapInstance instance && instance.MapLock?.Type is MapLockType.Group or MapLockType.Raid)
+                instance.RequestPendingRemoval(removed, WorldRemovalReason.GroupMembership);
 
             return Task.CompletedTask;
         }

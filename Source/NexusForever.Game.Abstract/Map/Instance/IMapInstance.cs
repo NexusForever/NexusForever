@@ -48,5 +48,21 @@ namespace NexusForever.Game.Abstract.Map.Instance
         /// Cancel any pending removal for <see cref="IPlayer"/>.
         /// </summary>
         void CancelPendingRemoval(IPlayer player);
+
+        /// <summary>
+        /// Remove <see cref="IPlayer"/> now instead of when the pending removal timer runs out.
+        /// </summary>
+        /// <remarks>
+        /// Can be called from outside the map update.
+        /// </remarks>
+        void LeavePendingRemoval(IPlayer player);
+
+        /// <summary>
+        /// Enqueue <see cref="IPlayer"/> to be removed from map for <see cref="WorldRemovalReason"/>.
+        /// </summary>
+        /// <remarks>
+        /// Can be called from outside the map update.
+        /// </remarks>
+        void RequestPendingRemoval(IPlayer player, WorldRemovalReason reason);
     }
 }

@@ -62,10 +62,8 @@ namespace NexusForever.Game.Map.Instance
                     return mapPosition;
             }
 
-            // TODO: fallback to default return location
-            // maybe recall position?
-
-            return null;
+            // entered through a portal or a teleport, return to where the player left the open world, else the bind point
+            return player.GetOpenWorldReturnPosition();
         }
 
         protected override void AddEntity(IGridEntity entity, Vector3 vector)

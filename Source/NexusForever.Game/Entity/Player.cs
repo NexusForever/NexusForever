@@ -256,6 +256,8 @@ namespace NexusForever.Game.Entity
         private bool bindExists;
         private bool bindDirty;
 
+        private IMapPosition lastOpenWorldPosition;
+
         private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> itemProperties = new();
 
         private UpdateTimer relocationTimer = new(TimeSpan.FromSeconds(1));
@@ -658,6 +660,28 @@ namespace NexusForever.Game.Entity
             {
                 BindPointId = bindPointId
             });
+        }
+
+        /// <summary>
+        /// Return where leaving an instance takes <see cref="IPlayer"/>, where they left the open world, else their bind point, else null.
+        /// </summary>
+        public IMapPosition GetOpenWorldReturnPosition()
+        {
+            if (lastOpenWorldPosition != null)
+                return lastOpenWorldPosition;
+
+            if (!TryGetBindPoint(out ushort worldId, out Vector3 position))
+                return null;
+
+            WorldEntry entry = GameTableManager.Instance.World.GetEntry(worldId);
+            if (entry == null)
+                return null;
+
+            return new MapPosition
+            {
+                Info     = new MapInfo { Entry = entry },
+                Position = position
+            };
         }
 
         /// <summary>
@@ -1129,6 +1153,16 @@ namespace NexusForever.Game.Entity
             };
 
             SetControl(null);
+
+            // where leaving an instance returns the player to, see GetOpenWorldReturnPosition
+            if (Map != null && Map is not IMapInstance)
+            {
+                lastOpenWorldPosition = new MapPosition
+                {
+                    Info     = new MapInfo { Entry = Map.Entry },
+                    Position = Position
+                };
+            }
 
             MapManager.Instance.AddToMap(this, mapPosition);
             log.Trace($"Teleporting {Name}({CharacterId}) to map: {mapPosition.Info.Entry.Id}, instance: {mapPosition.Info.MapLock?.InstanceId ?? null}.");
