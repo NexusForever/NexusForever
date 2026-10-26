@@ -250,6 +250,12 @@ namespace NexusForever.Game.Entity
         private UpdateTimer saveTimer = new(SaveDuration);
         private PlayerSaveMask saveMask;
 
+        private ushort bindPointId;
+        private ushort bindWorldId;
+        private Vector3 bindPosition;
+        private bool bindExists;
+        private bool bindDirty;
+
         private Dictionary<Property, Dictionary<ItemSlot, /*value*/float>> itemProperties = new();
 
         private UpdateTimer relocationTimer = new(TimeSpan.FromSeconds(1));
@@ -307,6 +313,14 @@ namespace NexusForever.Game.Entity
             Faction2          = (Faction)model.FactionId;
             innateIndex       = model.InnateIndex;
             flags             = (CharacterFlag)model.Flags;
+
+            if (model.Bind != null)
+            {
+                bindPointId  = model.Bind.BindPointId;
+                bindWorldId  = model.Bind.WorldId;
+                bindPosition = new Vector3(model.Bind.X, model.Bind.Y, model.Bind.Z);
+                bindExists   = true;
+            }
 
             CreateTime        = model.CreateTime;
             TimePlayedTotal   = model.TimePlayedTotal;
@@ -482,6 +496,8 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void Save(CharacterContext context)
         {
+            SaveBindPoint(context);
+
             var model = new CharacterModel
             {
                 Id = CharacterId
@@ -595,6 +611,63 @@ namespace NexusForever.Game.Entity
             GuildManager.Save(context);
             EntitlementManager.Save(context);
             AppearanceManager.Save(context);
+        }
+
+        private void SaveBindPoint(CharacterContext context)
+        {
+            if (!bindDirty)
+                return;
+
+            var model = new CharacterBindModel
+            {
+                Id          = CharacterId,
+                BindPointId = bindPointId,
+                WorldId     = bindWorldId,
+                X           = bindPosition.X,
+                Y           = bindPosition.Y,
+                Z           = bindPosition.Z
+            };
+
+            if (!bindExists)
+                context.Add(model);
+            else
+            {
+                EntityEntry<CharacterBindModel> entity = context.Attach(model);
+                entity.Property(p => p.BindPointId).IsModified = true;
+                entity.Property(p => p.WorldId).IsModified     = true;
+                entity.Property(p => p.X).IsModified           = true;
+                entity.Property(p => p.Y).IsModified           = true;
+                entity.Property(p => p.Z).IsModified           = true;
+            }
+
+            bindExists = true;
+            bindDirty  = false;
+        }
+
+        /// <summary>
+        /// Bind <see cref="IPlayer"/> to the supplied bind point (transmat terminal), Recall - Transmat returns here.
+        /// </summary>
+        public void SetBindPoint(ushort bindPointId, ushort worldId, Vector3 position)
+        {
+            this.bindPointId = bindPointId;
+            bindWorldId      = worldId;
+            bindPosition     = position;
+            bindDirty        = true;
+
+            Session.EnqueueMessageEncrypted(new ServerBindPointSet
+            {
+                BindPointId = bindPointId
+            });
+        }
+
+        /// <summary>
+        /// Return the world and position of the bind point, false if <see cref="IPlayer"/> has never bound.
+        /// </summary>
+        public bool TryGetBindPoint(out ushort worldId, out Vector3 position)
+        {
+            worldId  = bindWorldId;
+            position = bindPosition;
+            return bindExists || bindDirty;
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -744,6 +817,7 @@ namespace NexusForever.Game.Entity
                         .ToList()
                 },
                 ActiveCostumeIndex    = CostumeManager.CostumeIndex ?? -1,
+                BindPointId           = bindPointId,
                 InputKeySet           = (uint)InputKeySet,
                 CharacterEntitlements = EntitlementManager
                     .Select(e => new ServerPlayerCreate.CharacterEntitlement
