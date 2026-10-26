@@ -136,6 +136,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool TryGetBindPoint(out ushort worldId, out Vector3 position);
 
         /// <summary>
+        /// Return where leaving an instance takes <see cref="IPlayer"/>, where they left the open world, else their bind point, else null.
+        /// </summary>
+        IMapPosition GetOpenWorldReturnPosition();
+
+        /// <summary>
         /// Discover the supplied taxi node, the taxi map offers routes through it from now on.
         /// </summary>
         void DiscoverTaxiNode(uint taxiNodeId);
