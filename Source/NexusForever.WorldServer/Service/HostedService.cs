@@ -7,6 +7,7 @@ using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Chat.Format;
+using NexusForever.Game.Abstract.GalacticArchive;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
 using NexusForever.Game.Abstract.PublicEvent;
@@ -53,6 +54,7 @@ namespace NexusForever.WorldServer.Service
         private readonly IMatchManager matchManager;
         private readonly IPublicEventTemplateManager publicEventManager;
         private readonly IChatFormatManager chatFormatManager;
+        private readonly IGlobalGalacticArchiveManager archiveManager;
         private readonly IWorldManager worldManager;
 
         public HostedService(
@@ -66,6 +68,7 @@ namespace NexusForever.WorldServer.Service
             IMatchManager matchManager,
             IPublicEventTemplateManager publicEventManager,
             IChatFormatManager chatFormatManager,
+            IGlobalGalacticArchiveManager archiveManager,
             IWorldManager worldManager)
         {
             this.log               = log;
@@ -80,6 +83,7 @@ namespace NexusForever.WorldServer.Service
             this.matchManager       = matchManager;
             this.publicEventManager = publicEventManager;
             this.chatFormatManager  = chatFormatManager;
+            this.archiveManager     = archiveManager;
             this.worldManager       = worldManager;
         }
 
@@ -126,6 +130,7 @@ namespace NexusForever.WorldServer.Service
             ItemManager.Instance.Initialise();
             GlobalSpellManager.Instance.Initialise();
             GlobalQuestManager.Instance.Initialise();
+            archiveManager.Initialise();
 
             GlobalStorefrontManager.Instance.Initialise();
             ServerManager.Instance.Initialise(RealmContext.Instance.RealmId);

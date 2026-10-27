@@ -7,6 +7,7 @@ using NexusForever.Game.Cinematic;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
+using NexusForever.Game.GalacticArchive;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -43,6 +44,7 @@ namespace NexusForever.Game
             sc.AddGameCustomisation();
             sc.AddGameEntity();
             sc.AddGameEvent();
+            sc.AddGameGalacticArchive();
             sc.AddGameGuild();
             sc.AddGameHousing();
             sc.AddGameMap();
