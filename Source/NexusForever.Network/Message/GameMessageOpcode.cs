@@ -197,6 +197,7 @@ namespace NexusForever.Network.Message
         ServerP2PTradeUpdateMoney       = 0x0198,
         ServerSupplySatchelUpdate       = 0x0199,
         ServerPlayerChanged             = 0x019B,
+        ServerUnlockedInlaidEldanAugmentations = 0x019C,
         ServerActionSet                 = 0x019D,
         ServerAttributePoints           = 0x019E,
         ServerStanceChanged             = 0x019F,

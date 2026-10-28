@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model.Abilities
     {
         public class AmpResult
         {
-            public ushort SpecIndex { get; set; }
+            public byte SpecIndex { get; set; }
             public LimitedActionSetResult Result { get; set; }
         }
 
@@ -17,9 +17,11 @@ namespace NexusForever.Network.World.Message.Model.Abilities
 
         public void Write(GamePacketWriter writer)
         {
+            // the client reads the count as 7 bits and then each array with the byte array primitive,
+            // so every spec index and every result is a whole byte, not a 3 bit field.
             writer.Write(Results.Count, 7u);
-            Results.ForEach(Results => writer.Write(Results.SpecIndex, 3u));
-            Results.ForEach(Results => writer.Write(Results.Result, 3u));
+            Results.ForEach(result => writer.Write(result.SpecIndex, 8u));
+            Results.ForEach(result => writer.Write(result.Result, 8u));
         }
     }
 }

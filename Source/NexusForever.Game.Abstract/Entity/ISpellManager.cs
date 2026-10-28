@@ -93,6 +93,41 @@ namespace NexusForever.Game.Abstract.Entity
         SpecError SetActiveActionSet(byte value);
 
         /// <summary>
+        /// Validate the supplied AMP ids against the <see cref="IActionSet"/> at supplied index.
+        /// </summary>
+        LimitedActionSetResult ValidateAmps(byte specIndex, IEnumerable<ushort> newAmps);
+
+        /// <summary>
+        /// AMP points granted to this character by <c>AMP Power Upgrade</c> items, 0..10.
+        /// </summary>
+        short BonusAmpPower { get; }
+
+        /// <summary>
+        /// Grant supplied amount of bonus AMP power, clamped to the range the client accepts.
+        /// </summary>
+        void GrantBonusAmpPower(int amount);
+
+        /// <summary>
+        /// Send the item granted bonus AMP power to the client.
+        /// </summary>
+        void SendAmpPowerUpdate();
+
+        /// <summary>
+        /// Returns if the supplied Eldan augmentation id is an unlocked inlaid augmentation.
+        /// </summary>
+        bool HasUnlockedInlaidEldanAugmentation(ushort eldanAugmentationId);
+
+        /// <summary>
+        /// Unlock the inlaid Eldan augmentation with supplied id.
+        /// </summary>
+        void UnlockInlaidEldanAugmentation(ushort eldanAugmentationId);
+
+        /// <summary>
+        /// Send the complete unlocked inlaid augmentation set to the client.
+        /// </summary>
+        void SendUnlockedInlaidEldanAugmentations();
+
+        /// <summary>
         /// Set the supplied spell as the spell to Continuously Cast when GCD expires. Should only be called by a <see cref="ICharacterSpell"/>.
         /// </summary>
         void SetAsContinuousCast(ICharacterSpell spell);

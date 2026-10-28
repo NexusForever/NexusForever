@@ -11,6 +11,15 @@ namespace NexusForever.Game.Abstract.Spell
         ulong Owner { get; }
         byte Index { get; }
         byte TierPoints { get; }
+
+        /// <summary>
+        /// Total AMP points the <see cref="IActionSet"/> owner may spend.
+        /// </summary>
+        byte AmpPointLimit { get; }
+
+        /// <summary>
+        /// AMP points the <see cref="IActionSet"/> owner has left to spend.
+        /// </summary>
         byte AmpPoints { get; }
 
         /// <summary>
@@ -72,6 +81,16 @@ namespace NexusForever.Game.Abstract.Spell
         /// Remove one or more AMP's from <see cref="IActionSet"/> depending on supplied <see cref="AmpRespecType"/>.
         /// </summary>
         void RemoveAmp(AmpRespecType type, uint value);
+
+        /// <summary>
+        /// Cast the spell of every <see cref="IActionSetAmp"/> in the <see cref="IActionSet"/>.
+        /// </summary>
+        void CastAmps();
+
+        /// <summary>
+        /// Finish the spell of every <see cref="IActionSetAmp"/> in the <see cref="IActionSet"/>.
+        /// </summary>
+        void FinishAmps();
 
         /// <summary>
         /// Build a network representation of the <see cref="IActionSetShortcut"/>'s in the <see cref="IActionSet"/>.

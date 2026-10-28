@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Abilities;
+using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 {
@@ -46,12 +47,16 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 
             if (newAmps.Count > 0)
             {
-                // TODO: Look into AMP Support
+                LimitedActionSetResult result = session.Player.SpellManager.ValidateAmps(
+                    requestActionSetChanges.ActionSetIndex, newAmps);
 
-                // foreach (ushort id in newAmps)
-                //     actionSet.AddAmp(id);
+                if (result == LimitedActionSetResult.Ok)
+                {
+                    foreach (ushort id in newAmps)
+                        actionSet.AddAmp(id);
 
-                //session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
+                    session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
+                }
             }
         }
     }
