@@ -791,7 +791,8 @@ namespace NexusForever.Game.Entity
                     });
                 }
 
-                playerCreate.SpecIndex = SpellManager.ActiveActionSet;
+                playerCreate.SpecIndex  = SpellManager.ActiveActionSet;
+                playerCreate.BonusPower = SpellManager.BonusAmpPower;
                 Session.EnqueueMessageEncrypted(playerCreate);
             }
 
