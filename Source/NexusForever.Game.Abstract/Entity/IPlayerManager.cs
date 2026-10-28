@@ -31,5 +31,7 @@
         /// Return <see cref="IPlayer"/> with supplied account id.
         /// </summary>
         IPlayer GetPlayerByAccountId(uint accountId);
+
+        uint GetPlayerCount();
     }
 }

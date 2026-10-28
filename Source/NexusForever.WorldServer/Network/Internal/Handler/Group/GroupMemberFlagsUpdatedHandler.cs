@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Group;
 using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Network.Internal.Message.Group.Shared;
 using NexusForever.Network.World.Message.Model;
@@ -13,17 +14,22 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Group
         #region Dependency Injection
 
         private readonly IPlayerManager playerManager;
+        private readonly IGroupManager groupManager;
 
         public GroupMemberFlagsUpdatedHandler(
-            IPlayerManager playerManager)
+            IPlayerManager playerManager,
+            IGroupManager groupManager)
         {
             this.playerManager = playerManager;
+            this.groupManager  = groupManager;
         }
 
         #endregion
 
         public Task Handle(GroupMemberFlagsUpdatedMessage message)
         {
+            groupManager.AddGroup(message.Group);
+
             var groupMemberFlagsChanged = new ServerGroupMemberFlagsChanged
             {
                 GroupId         = message.Group.Id,

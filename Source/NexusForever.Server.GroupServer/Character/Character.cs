@@ -357,7 +357,20 @@ namespace NexusForever.Server.GroupServer.Character
                     PrimaryGroup = null;
             }
 
-            await SendGroupAssociationUpdated(null);
+            if (PrimaryGroup != null)
+            {
+                CharacterGroup primaryCharacterGroup = GetGroup(PrimaryGroup.GroupId);
+                if (primaryCharacterGroup == null)
+                    return;
+
+                Group.Group primaryGroup = await primaryCharacterGroup.GetGroupAsync();
+                if (primaryGroup == null)
+                    return;
+
+                await SendGroupAssociationUpdated(primaryGroup);
+            }
+            else
+                await SendGroupAssociationUpdated(null);
         }
 
         private async Task SendGroupAssociationUpdated(Group.Group group)

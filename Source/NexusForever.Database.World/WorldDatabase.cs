@@ -135,5 +135,61 @@ namespace NexusForever.Database.World
                 .AsNoTracking()
                 .ToImmutableList();
         }
+
+        public ImmutableList<ItemLootModel> GetAllItemLootTables()
+        {
+            using var context = new WorldContext(config);
+            return context.ItemLoot
+                .Include(e => e.LootGroup)
+                    .ThenInclude(e => e.Item)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<EntityLootModel> GetAllEntityLootTables()
+        {
+            using var context = new WorldContext(config);
+            return context.EntityLoot
+                .Include(e => e.LootGroup)
+                    .ThenInclude(e => e.Item)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<LootGroupModel> GetLootGroupChildren(ulong parentId)
+        {
+            using var context = new WorldContext(config);
+            return context.LootGroup.Where(i => i.ParentId == parentId)
+                .Include(e => e.ChildGroup)
+                    .ThenInclude(e => e.Item)
+                .Include(e => e.Item)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<LootGroupModel> GetLootGroups()
+        {
+            using var context = new WorldContext(config);
+            return context.LootGroup
+                .Include(g => g.Item)
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<ItemLootModel> GetItemLoot()
+        {
+            using var context = new WorldContext(config);
+            return context.ItemLoot
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
+        public ImmutableList<EntityLootModel> GetEntityLoot()
+        {
+            using var context = new WorldContext(config);
+            return context.EntityLoot
+                .AsNoTracking()
+                .ToImmutableList();
+        }
     }
 }

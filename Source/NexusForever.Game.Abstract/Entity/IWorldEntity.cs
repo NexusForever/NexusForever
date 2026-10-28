@@ -2,6 +2,7 @@ using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Chat;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;

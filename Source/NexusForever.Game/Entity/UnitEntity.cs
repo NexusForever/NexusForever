@@ -422,7 +422,7 @@ namespace NexusForever.Game.Entity
             deathState = EntityDeathState.Dead;
         }
 
-        private void GenerateRewards()
+        protected virtual void GenerateRewards()
         {
             foreach (IHostileEntity hostile in ThreatManager)
             {

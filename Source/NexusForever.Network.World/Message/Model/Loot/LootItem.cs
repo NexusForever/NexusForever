@@ -8,12 +8,12 @@ namespace NexusForever.Network.World.Message.Model.Loot
     {
         public uint LootUnitId { get; set; }
         public LootItemType Type { get; set; }
-        public uint ItemId { get; set; }
+        public uint StaticId { get; set; }
         public uint Amount { get; set; }
         public bool CanLoot { get; set; }
         public bool RequiresRoll { get; set; }
         public bool OnlyMasterLootable { get; set; }
-        public bool Explosion { get; set; }
+        public bool Delivered { get; set; }
         public uint RollTime { get; set; }
         public ulong RandomCircuitData { get; set; }
         public uint RandomGlyphData { get; set; }
@@ -24,12 +24,12 @@ namespace NexusForever.Network.World.Message.Model.Loot
         {
             writer.Write(LootUnitId);
             writer.Write(Type, 32u);
-            writer.Write(ItemId); // Can be Item2Id, LootSpellId, VirtualItemId, AccountItemId
+            writer.Write(StaticId); // Can be Item2Id, LootSpellId, VirtualItemId, AccountItemId
             writer.Write(Amount);
             writer.Write(CanLoot);
             writer.Write(RequiresRoll);
             writer.Write(OnlyMasterLootable);
-            writer.Write(Explosion);
+            writer.Write(Delivered);
             writer.Write(RollTime);
             writer.Write(RandomCircuitData);
             writer.Write(RandomGlyphData);

@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Loot.Distribute;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
 
@@ -14,9 +15,14 @@ namespace NexusForever.Game.Entity
     {
         #region Dependency Injection
 
-        public CreatureEntity(IMovementManager movementManager)
+        private readonly ILootDistributor lootDistributor;
+
+        public CreatureEntity(
+            IMovementManager movementManager,
+            ILootDistributor lootDistributor)
             : base(movementManager)
         {
+            this.lootDistributor = lootDistributor;
         }
 
         #endregion
@@ -26,6 +32,13 @@ namespace NexusForever.Game.Entity
             base.Initialise(model);
 
             scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<ICreatureEntity>(this);
+        }
+
+        protected override void GenerateRewards()
+        {
+            base.GenerateRewards();
+
+            lootDistributor.Distribute(this);
         }
 
         /// <summary>

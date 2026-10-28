@@ -1,9 +1,10 @@
 ﻿using System.Numerics;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Abstract.PublicEvent;
+using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Matching.Match;
+using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 
@@ -25,8 +26,10 @@ namespace NexusForever.Game.Map.Instance
         public ContentMapInstance(
             IEntityFactory entityFactory,
             IPublicEventManager publicEventManager,
+            IPlayerManager playerManager,
+            ILootManager lootManager,
             IScriptManager scriptManager)
-            : base(entityFactory, publicEventManager)
+            : base(entityFactory, publicEventManager, playerManager, lootManager)
         {
             this.scriptManager = scriptManager;
         }

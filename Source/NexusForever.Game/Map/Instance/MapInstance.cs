@@ -16,6 +16,7 @@ using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NLog;
+using NexusForever.Game.Abstract.Loot;
 
 namespace NexusForever.Game.Map.Instance
 {
@@ -57,15 +58,16 @@ namespace NexusForever.Game.Map.Instance
         private readonly UpdateTimer unloadTimer
             = new(SharedConfiguration.Instance.Get<MapConfig>().GridUnloadTimer ?? 600d);
 
-        private readonly HashSet<uint> playerEntities = new();
         private readonly Dictionary<uint, IMapInstanceRemoval> instanceRemovals = new();
 
         #region Dependency Injection
 
         public MapInstance(
             IEntityFactory entityFactory,
-            IPublicEventManager publicEventManager)
-            : base(entityFactory, publicEventManager)
+            IPublicEventManager publicEventManager,
+            IPlayerManager playerManager,
+            ILootManager lootManager)
+            : base(entityFactory, publicEventManager, playerManager, lootManager)
         {
         }
 
@@ -161,14 +163,10 @@ namespace NexusForever.Game.Map.Instance
         private void ProcessUnloadAwaitingUnloadPlayers()
         {
             // unload players from instance and move them to return positions
-            foreach (uint guid in playerEntities)
+            foreach (IPlayer player in PlayerManager)
             {
-                IPlayer player = GetEntity<IPlayer>(guid);
-                if (player != null)
-                {
-                    IMapPosition position = unloadPosition ?? GetPlayerReturnLocation(player);
-                    player.TeleportTo(position, TeleportReason.Unload);
-                }
+                IMapPosition position = unloadPosition ?? GetPlayerReturnLocation(player);
+                player.TeleportTo(position, TeleportReason.Unload);
             }
 
             unloadPosition = null;
@@ -178,7 +176,7 @@ namespace NexusForever.Game.Map.Instance
         private void ProcessUnloadUnloadingPlayers()
         {
             // waiting for players to be removed from instance
-            if (playerEntities.Count == 0)
+            if (PlayerManager.GetPlayerCount() == 0)
                 UnloadStatus = MapUnloadStatus.AwaitingUnloadEntities;
         }
 
@@ -206,9 +204,8 @@ namespace NexusForever.Game.Map.Instance
             // elevated users bypass instance player limits
             if (!player.Account.RbacManager.HasPermission(Permission.BypassInstanceLimits))
             {
-                int count = playerEntities
+                int count = PlayerManager
                     // include players without bypass permission
-                    .Select(GetEntity<IPlayer>)
                     .Count(p => !p.Account.RbacManager.HasPermission(Permission.BypassInstanceLimits))
                     // include players pending add to instance
                     + pendingActions.Count(a => a is IGridActionAdd or IGridActionPending);
@@ -225,8 +222,6 @@ namespace NexusForever.Game.Map.Instance
             base.AddEntity(entity, vector);
             if (entity is IPlayer player)
             {
-                playerEntities.Add(player.Guid);
-
                 // stop map unload timer when a player is added to map
                 if (unloadTimer.IsTicking)
                     unloadTimer.Pause();
@@ -239,10 +234,9 @@ namespace NexusForever.Game.Map.Instance
             {
                 // cancel any pending removals if the player is removed from the map prematurely
                 instanceRemovals.Remove(player.Guid);
-                playerEntities.Remove(player.Guid);
 
                 // start map unload timer when the last player is removed
-                if (playerEntities.Count == 0)
+                if (PlayerManager.GetPlayerCount() == 0)
                     unloadTimer.Reset();
             }
 
@@ -328,7 +322,7 @@ namespace NexusForever.Game.Map.Instance
             if (unloadTimer.IsTicking)
                 sb.AppendLine($"Unload Timer: {TimeSpan.FromSeconds(unloadTimer.Time)}");
 
-            sb.Append($"Player Count: {playerEntities.Count}");
+            sb.Append($"Player Count: {PlayerManager.GetPlayerCount()}");
             return sb.ToString();
         }
     }

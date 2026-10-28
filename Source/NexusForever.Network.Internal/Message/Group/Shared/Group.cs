@@ -10,6 +10,7 @@ namespace NexusForever.Network.Internal.Message.Group.Shared
         public GroupFlags Flags { get; set; }
         public LootRule NormalRule { get; set; }
         public LootRule ThresholdRule { get; set; }
+        // TODO: fix me, change to Quality 
         public LootThreshold ThresholdQuality { get; set; }
         public HarvestLootRule HarvestRule { get; set; }
         public Identity Leader { get; set; }

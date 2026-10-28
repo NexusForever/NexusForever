@@ -1,7 +1,8 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using System.Collections.Immutable;
+using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Item;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;
-using System.Collections.Immutable;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -16,6 +17,8 @@ namespace NexusForever.Game.Abstract.Entity
         ItemBudgetEntry BudgetEntry { get; }
         ItemStatEntry StatEntry { get; }
         SecondaryItemFlags SecondaryItemFlags { get; }
+
+        Quality Quality { get; }
 
         float ItemPower { get; }
         ImmutableDictionary<Property, float> Properties { get; }

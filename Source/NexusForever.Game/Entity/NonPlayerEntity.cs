@@ -1,6 +1,7 @@
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Loot.Distribute;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -17,8 +18,10 @@ namespace NexusForever.Game.Entity
 
         #region Dependency Injection
 
-        public NonPlayerEntity(IMovementManager movementManager)
-            : base(movementManager)
+        public NonPlayerEntity(
+            IMovementManager movementManager,
+            ILootDistributor lootDistributor)
+            : base(movementManager, lootDistributor)
         {
         }
 
