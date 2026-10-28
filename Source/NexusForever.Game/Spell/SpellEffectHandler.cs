@@ -157,6 +157,32 @@ namespace NexusForever.Game.Spell
             player.Account.GenericUnlockManager.Unlock((ushort)info.Entry.DataBits00);
         }
 
+        [SpellEffectHandler(SpellEffectType.AddSpell)]
+        public static void HandleEffectAddSpell(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            // the Advanced and Expert Riding Licenses (60333, 60338) teach the Riding Skill passives 75441 and 75442
+            if (target is not IPlayer player)
+                return;
+
+            Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(info.Entry.DataBits00);
+            if (spell4Entry == null)
+                return;
+
+            if (player.SpellManager.GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
+                player.SpellManager.AddSpell(spell4Entry.Spell4BaseIdBaseSpell, (byte)Math.Max(1u, spell4Entry.TierIndex));
+
+            if (SpellManager.IsLearnedPassive(spell4Entry.Id))
+                player.CastSpell(spell4Entry.Id, new SpellParameters());
+        }
+
+        [SpellEffectHandler(SpellEffectType.Disembark)]
+        public static void HandleEffectDisembark(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
+        {
+            // the riding licenses end with it, the next summon uses the new speed
+            if (target is IPlayer player)
+                player.Dismount();
+        }
+
         [SpellEffectHandler(SpellEffectType.UnlockMount)]
         public static void HandleEffectUnlockMount(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
