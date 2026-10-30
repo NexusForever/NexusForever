@@ -241,7 +241,68 @@ namespace NexusForever.Game.Spell
 
             // TODO: Fire Script's OnCast
 
+            SendSpellConfirmCast();
+
             return true;
+        }
+
+        /// <summary>
+        /// Tell the client that the cast it requested was accepted, and which casting id it was given.
+        /// </summary>
+        /// <remarks>
+        /// Only sent for a cast that came from a client message and therefore carries the client's own
+        /// cast id. The client looks its pending cast up by that id and raises an exception if it does
+        /// not hold it, so every guard below is load-bearing: the message goes out only for an id the
+        /// client itself supplied.
+        ///
+        /// <see cref="SpellClientSideInteraction"/> sends this same opcode from its own status change,
+        /// with the id that arrived on the interaction message rather than on a cast message. That path
+        /// never sets <see cref="ISpellParameters.ClientSpellCastUniqueId"/>, and the explicit
+        /// <see cref="ISpellParameters.ClientSideInteraction"/> guard keeps it that way, so a cast is
+        /// never confirmed twice.
+        /// </remarks>
+        protected void SendSpellConfirmCast()
+        {
+            if (Parameters.ClientSpellCastUniqueId == 0 || Parameters.IsProxy)
+                return;
+
+            // the client-side-interaction path confirms itself; see the remarks above
+            if (Parameters.ClientSideInteraction != null)
+                return;
+
+            if (Caster is not IPlayer player || player.IsLoading)
+                return;
+
+            var confirm = new ServerSpellStartClientInteraction
+            {
+                ClientUniqueId = Parameters.ClientSpellCastUniqueId,
+                CastingId      = CastingId,
+                // the third field carries the primary target, not the caster; the existing sender of
+                // this opcode fills it the same way
+                CasterId       = GetPrimaryTargetId(),
+                Position       = new Position(Caster.Position),
+                Yaw            = Caster.Rotation.X
+            };
+
+            // InitialPositionData is left empty on purpose: SendSpellStart only fills it for non-player
+            // units, and this message is only ever sent for a player's own cast.
+            //
+            // A player's telegraphs are built later, in SelectTargets, so this list is still empty for
+            // every cast that reaches here today. The loop is here so that a future reordering fills it
+            // instead of silently dropping it.
+            foreach (ITelegraph telegraph in telegraphs)
+            {
+                confirm.TelegraphPositionData.Add(new TelegraphPosition
+                {
+                    TelegraphId    = (ushort)telegraph.TelegraphDamage.Id,
+                    AttachedUnitId = Caster.Guid,
+                    TargetFlags    = 3,
+                    Position       = new Position(telegraph.Position),
+                    Yaw            = telegraph.Rotation.X
+                });
+            }
+
+            player.Session.EnqueueMessageEncrypted(confirm);
         }
 
         /// <summary>
@@ -700,8 +761,11 @@ namespace NexusForever.Game.Spell
             {
                 player.Session.EnqueueMessageEncrypted(new ServerSpellCastResult
                 {
-                    Spell4Id   = Parameters.SpellInfo.Entry.Id,
-                    CastResult = castResult
+                    // without the client's own cast id the client shows the failure text but keeps the
+                    // cast pending for the rest of the session
+                    ClientSpellCastUniqueId = Parameters.ClientSpellCastUniqueId,
+                    Spell4Id                = Parameters.SpellInfo.Entry.Id,
+                    CastResult              = castResult
                 });
             }
         }

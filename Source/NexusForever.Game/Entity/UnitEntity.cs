@@ -406,16 +406,24 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CastSpell(ISpellParameters parameters)
         {
-            if (!IsAlive)
-                return;
-
             if (parameters == null)
                 throw new ArgumentNullException();
+
+            // Each refusal below happens before any ISpell exists to report it, so it has to answer the
+            // client itself. Without an answer the cast the client is waiting on stays pending on it for
+            // the rest of the session, and the ability stays visually unavailable.
+            if (!IsAlive)
+            {
+                SendSpellCastResult(parameters, CastResult.CasterCannotBeDead);
+                return;
+            }
 
             if (DisableManager.Instance.IsDisabled(DisableType.BaseSpell, parameters.SpellInfo.BaseInfo.Entry.Id))
             {
                 if (this is IPlayer player)
                     player.SendSystemMessage($"Unable to cast base spell {parameters.SpellInfo.BaseInfo.Entry.Id} because it is disabled.");
+
+                SendSpellCastResult(parameters, CastResult.SpellBad);
                 return;
             }
 
@@ -423,6 +431,8 @@ namespace NexusForever.Game.Entity
             {
                 if (this is IPlayer player)
                     player.SendSystemMessage($"Unable to cast spell {parameters.SpellInfo.Entry.Id} because it is disabled.");
+
+                SendSpellCastResult(parameters, CastResult.SpellBad);
                 return;
             }
 
@@ -438,7 +448,16 @@ namespace NexusForever.Game.Entity
 
             ISpell spell = spellFactory.CreateSpell(castMethod);
             if (spell == null)
-                throw new ArgumentNullException();
+            {
+                // No ISpell is registered for this cast method. Answering the client is what keeps the
+                // cast from staying pending on it, and the message says plainly that this is a gap on
+                // the server rather than something the player did.
+                if (this is IPlayer player)
+                    player.SendSystemMessage($"Unable to cast spell {parameters.SpellInfo.Entry.Id}: cast method {castMethod} is not implemented.");
+
+                SendSpellCastResult(parameters, CastResult.IllegalSpellCast);
+                return;
+            }
 
             spell.Initialise(this, parameters);
             if (!spell.Cast())
@@ -449,6 +468,53 @@ namespace NexusForever.Game.Entity
                 return;
 
             pendingSpells.Add(spell);
+        }
+
+        /// <summary>
+        /// Tell the client a cast was refused before any <see cref="ISpell"/> existed to report it.
+        /// </summary>
+        /// <remarks>
+        /// A no-op unless the cast came from a client message, which is what
+        /// <see cref="ISpellParameters.ClientSpellCastUniqueId"/> records. A refusal carrying 0 would
+        /// match no pending cast on the client.
+        /// </remarks>
+        private void SendSpellCastResult(ISpellParameters parameters, CastResult castResult)
+        {
+            // The id check stays ahead of the SpellInfo read: a server-initiated cast reaches this with
+            // no client to answer, and some of those paths have no ISpellInfo either.
+            if (parameters.ClientSpellCastUniqueId == 0)
+                return;
+
+            SendSpellCastResult(parameters.ClientSpellCastUniqueId, parameters.SpellInfo.Entry.Id, castResult);
+        }
+
+        /// <summary>
+        /// Tell the client that a cast it is waiting on was refused.
+        /// </summary>
+        /// <remarks>
+        /// A no-op when <paramref name="clientSpellCastUniqueId"/> is 0: that is a cast the server
+        /// started itself, and a refusal carrying 0 matches no pending cast on the client.
+        /// <para>
+        /// A <paramref name="spell4Id"/> of 0 still clears the pending cast and releases the client's
+        /// predicted global cooldown, but shows the player no text: the client resolves no spell object
+        /// for spell id 0 and its failure notifier returns immediately. Pass the spell id whenever one
+        /// is known.
+        /// </para>
+        /// </remarks>
+        public void SendSpellCastResult(uint clientSpellCastUniqueId, uint spell4Id, CastResult castResult)
+        {
+            if (clientSpellCastUniqueId == 0)
+                return;
+
+            if (this is not IPlayer player || player.IsLoading)
+                return;
+
+            player.Session.EnqueueMessageEncrypted(new ServerSpellCastResult
+            {
+                ClientSpellCastUniqueId = clientSpellCastUniqueId,
+                Spell4Id                = spell4Id,
+                CastResult              = castResult
+            });
         }
 
         /// <summary>
