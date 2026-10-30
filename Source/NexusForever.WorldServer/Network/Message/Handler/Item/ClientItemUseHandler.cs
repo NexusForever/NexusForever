@@ -7,6 +7,7 @@ using NexusForever.GameTable.Model;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Item
 {
@@ -65,6 +66,28 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Item
                     return;
                 }
 
+                // A transactional cast owns the item: it is taken in the execute step, after everything
+                // that can refuse the cast has run, so that a refusal costs the player nothing. Any other
+                // cast method keeps the existing order, where the item is consumed up front.
+                if (GetCastMethod(itemSpecial.Spell4IdOnActivate) == CastMethod.Transactional)
+                {
+                    session.Player.CastSpell(itemSpecial.Spell4IdOnActivate, new SpellParameters
+                    {
+                        PrimaryTargetId         = itemUse.TargetUnitId,
+                        TargetPosition          = itemUse.Position,
+                        // ClientItemUse.CastingId is the client's own cast id, not a server casting id
+                        ClientSpellCastUniqueId = itemUse.CastingId,
+                        ConsumeItemGuid         = item.Guid,
+                        ConsumeItemLocation     = new ItemLocation
+                        {
+                            Location = item.Location,
+                            BagIndex = item.BagIndex
+                        }
+                    });
+
+                    return;
+                }
+
                 if (!session.Player.Inventory.ItemUse(item))
                 {
                     // ItemUse only returns false when there is nothing left to consume: no charges on a
@@ -84,6 +107,22 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Item
             }
             else
                 session.Player.SendSpellCastResult(itemUse.CastingId, 0, CastResult.ItemNoSpellId);
+        }
+
+        /// <summary>
+        /// Return the <see cref="CastMethod"/> of the base spell behind the supplied spell id.
+        /// </summary>
+        private CastMethod GetCastMethod(uint spell4Id)
+        {
+            Spell4Entry spell4Entry = gameTableManager.Spell4.GetEntry(spell4Id);
+            if (spell4Entry == null)
+                throw new InvalidPacketValueException();
+
+            Spell4BaseEntry spell4BaseEntry = gameTableManager.Spell4Base.GetEntry(spell4Entry.Spell4BaseIdBaseSpell);
+            if (spell4BaseEntry == null)
+                throw new InvalidPacketValueException();
+
+            return spell4BaseEntry.CastMethod;
         }
     }
 }
