@@ -1,6 +1,7 @@
 ﻿using NexusForever.Game.Abstract.CSI;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Network.World.Entity;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Game.Abstract.Spell
 {
@@ -37,5 +38,17 @@ namespace NexusForever.Game.Abstract.Spell
         Action<ISpellParameters> CompleteAction { get; set; }
         int CastTimeOverride { get; set; }
         double CooldownOverride { get; set; }
+
+        /// <summary>
+        /// Inventory slot of the <see cref="Entity.IItem"/> this cast consumes, or <c>null</c> when the cast
+        /// consumes no item.
+        /// </summary>
+        ItemLocation ConsumeItemLocation { get; set; }
+
+        /// <summary>
+        /// Guid the <see cref="Entity.IItem"/> at <see cref="ConsumeItemLocation"/> had when the cast was
+        /// requested, so that the slot can be re-checked before the item is taken.
+        /// </summary>
+        ulong ConsumeItemGuid { get; set; }
     }
 }
