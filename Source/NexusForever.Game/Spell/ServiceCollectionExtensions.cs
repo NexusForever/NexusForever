@@ -34,6 +34,7 @@ namespace NexusForever.Game.Spell
             sc.AddKeyedTransient<ISpell, SpellRapidTap>(CastMethod.RapidTap);
             sc.AddKeyedTransient<ISpell, SpellChargeRelease>(CastMethod.ChargeRelease);
             sc.AddKeyedTransient<ISpell, SpellMultiphase>(CastMethod.Multiphase);
+            sc.AddKeyedTransient<ISpell, SpellTransactional>(CastMethod.Transactional);
             sc.AddKeyedTransient<ISpell, SpellAura>(CastMethod.Aura);
 
             sc.AddTransient<IProcManager,  ProcManager>();
