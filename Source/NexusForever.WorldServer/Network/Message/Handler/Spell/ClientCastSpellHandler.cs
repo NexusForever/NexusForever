@@ -10,7 +10,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
     public class ClientCastSpellHandler : IMessageHandler<IWorldSession, ClientCastSpell>
     {
         /// <summary>
-        /// This Handler is ued when a player has disabled continuous casting in Settings > Controls
+        /// This Handler is used when a player has disabled continuous casting in Settings > Controls
         /// </summary>
         public void HandleMessage(IWorldSession session, ClientCastSpell castSpell)
         {
@@ -22,7 +22,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
             if (characterSpell == null)
                 throw new InvalidPacketValueException();
 
-            characterSpell.Cast();
+            // TODO: ClientCastSpell also carries the client's primary target (CasterId, which is really
+            // the primary target unit id) and the button flag; neither is read here yet.
+            characterSpell.Cast(castSpell.ClientUniqueId);
         }
     }
 }

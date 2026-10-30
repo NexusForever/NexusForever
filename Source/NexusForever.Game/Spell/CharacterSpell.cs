@@ -171,12 +171,15 @@ namespace NexusForever.Game.Spell
         /// <summary>
         /// Used for when the client does not have continuous casting enabled
         /// </summary>
-        public void Cast()
+        /// <param name="clientSpellCastUniqueId">
+        /// Unique id the client sent with the cast request, or 0 for a cast the server started itself.
+        /// </param>
+        public void Cast(uint clientSpellCastUniqueId = 0)
         {
             Owner.SpellManager.SetAsContinuousCast(null);
 
             buttonPressed = true;
-            CastSpell();
+            CastSpell(clientSpellCastUniqueId);
             buttonPressed = false;
         }
 
@@ -202,7 +205,7 @@ namespace NexusForever.Game.Spell
             CastSpell();
         }
 
-        private void CastSpell()
+        private void CastSpell(uint clientSpellCastUniqueId = 0)
         {
             var spellInfoToCast = SpellInfo;
             if (AlternateSpellInfo != null && CheckRunnerOverride())
@@ -223,10 +226,11 @@ namespace NexusForever.Game.Spell
 
             Owner.CastSpell(new SpellParameters
             {
-                CharacterSpell         = this,
-                RootSpellInfo          = SpellInfo,
-                SpellInfo              = spellInfoToCast,
-                UserInitiatedSpellCast = true
+                CharacterSpell          = this,
+                RootSpellInfo           = SpellInfo,
+                SpellInfo               = spellInfoToCast,
+                UserInitiatedSpellCast  = true,
+                ClientSpellCastUniqueId = clientSpellCastUniqueId
             });
         }
 
