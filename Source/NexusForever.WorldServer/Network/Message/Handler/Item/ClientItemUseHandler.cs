@@ -49,8 +49,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Item
                 {
                     session.Player.CastSpell(itemSpecial.Spell4IdOnActivate, new SpellParameters
                     {
-                        PrimaryTargetId = itemUse.TargetUnitId,
-                        TargetPosition  = itemUse.Position
+                        PrimaryTargetId         = itemUse.TargetUnitId,
+                        TargetPosition          = itemUse.Position,
+                        // ClientItemUse.CastingId is the client's own cast id, not a server casting id
+                        ClientSpellCastUniqueId = itemUse.CastingId
                     });
                 }
             }
