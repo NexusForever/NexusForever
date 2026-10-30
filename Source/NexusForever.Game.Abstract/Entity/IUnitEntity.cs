@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Spell.Proc;
 using NexusForever.Game.Combat.CrowdControl;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Network.World.Message.Static;
 
 namespace NexusForever.Game.Abstract.Entity
 {
@@ -107,6 +108,15 @@ namespace NexusForever.Game.Abstract.Entity
         /// Cast a <see cref="ISpell"/> with the supplied <see cref="ISpellParameters"/>.
         /// </summary>
         void CastSpell(ISpellParameters parameters);
+
+        /// <summary>
+        /// Tell the client that a cast it is waiting on was refused.
+        /// </summary>
+        /// <remarks>
+        /// A no-op when <paramref name="clientSpellCastUniqueId"/> is 0: that is a cast the server
+        /// started itself, and a refusal carrying 0 matches no pending cast on the client.
+        /// </remarks>
+        void SendSpellCastResult(uint clientSpellCastUniqueId, uint spell4Id, CastResult castResult);
 
         /// <summary>
         /// Cancel any <see cref="ISpell"/>'s that are interrupted by movement.

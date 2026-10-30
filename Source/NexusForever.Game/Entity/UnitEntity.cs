@@ -480,7 +480,30 @@ namespace NexusForever.Game.Entity
         /// </remarks>
         private void SendSpellCastResult(ISpellParameters parameters, CastResult castResult)
         {
+            // The id check stays ahead of the SpellInfo read: a server-initiated cast reaches this with
+            // no client to answer, and some of those paths have no ISpellInfo either.
             if (parameters.ClientSpellCastUniqueId == 0)
+                return;
+
+            SendSpellCastResult(parameters.ClientSpellCastUniqueId, parameters.SpellInfo.Entry.Id, castResult);
+        }
+
+        /// <summary>
+        /// Tell the client that a cast it is waiting on was refused.
+        /// </summary>
+        /// <remarks>
+        /// A no-op when <paramref name="clientSpellCastUniqueId"/> is 0: that is a cast the server
+        /// started itself, and a refusal carrying 0 matches no pending cast on the client.
+        /// <para>
+        /// A <paramref name="spell4Id"/> of 0 still clears the pending cast and releases the client's
+        /// predicted global cooldown, but shows the player no text: the client resolves no spell object
+        /// for spell id 0 and its failure notifier returns immediately. Pass the spell id whenever one
+        /// is known.
+        /// </para>
+        /// </remarks>
+        public void SendSpellCastResult(uint clientSpellCastUniqueId, uint spell4Id, CastResult castResult)
+        {
+            if (clientSpellCastUniqueId == 0)
                 return;
 
             if (this is not IPlayer player || player.IsLoading)
@@ -488,8 +511,8 @@ namespace NexusForever.Game.Entity
 
             player.Session.EnqueueMessageEncrypted(new ServerSpellCastResult
             {
-                ClientSpellCastUniqueId = parameters.ClientSpellCastUniqueId,
-                Spell4Id                = parameters.SpellInfo.Entry.Id,
+                ClientSpellCastUniqueId = clientSpellCastUniqueId,
+                Spell4Id                = spell4Id,
                 CastResult              = castResult
             });
         }
