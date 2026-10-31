@@ -40,5 +40,10 @@ namespace NexusForever.Game.Abstract.Quest
         /// Update any <see cref="IQuestObjective"/>'s with supplied ID with progress.
         /// </summary>
         void ObjectiveUpdate(uint id, uint progress);
+
+        /// <summary>
+        /// Return a mask with bit i set for each complete objective with index i below 8.
+        /// </summary>
+        byte GetObjectiveCompletionMask();
     }
 }

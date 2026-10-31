@@ -37,12 +37,21 @@ namespace NexusForever.Game.Entity
         private readonly Dictionary<ushort, IQuest> inactiveQuests = new();
         private readonly Dictionary<ushort, IQuest> activeQuests = new();
 
+        private readonly CommunicatorTracker communicatorTracker;
+
+        /// <summary>
+        /// The player's communicator calls.
+        /// </summary>
+        public ICommunicatorTracker Communicator => communicatorTracker;
+
         /// <summary>
         /// Create a new <see cref="IQuestManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
         public QuestManager(IPlayer owner, CharacterModel model)
         {
             player = owner;
+            communicatorTracker = new CommunicatorTracker(new PlayerCommunicatorView(player, this),
+                GlobalQuestManager.Instance.CommunicatorIndex, DeliverCommunicator);
 
             foreach (CharacterQuestModel questModel in model.Quest)
             {
@@ -119,6 +128,24 @@ namespace NexusForever.Game.Entity
 
                 log.Trace($"Failed to complete quest {quest.Id} before the timer expired!");
             }
+
+            // Zone and world gates read the map, which isn't there while loading.
+            if (!player.IsLoading && player.Map != null)
+                communicatorTracker.Update(lastTick);
+        }
+
+        /// <summary>
+        /// Deliver a communicator call whose conditions hold: push it if the server sends it, then mention its quest.
+        /// </summary>
+        private void DeliverCommunicator(ICommunicatorMessage message, string reason)
+        {
+            if (message.ServerPushed)
+                message.Send(player.Session);
+
+            if (message.Delivers)
+                QuestMention(message.QuestId);
+
+            log.Trace($"Communicator {message.Id} {(message.ServerPushed ? "pushed" : "mentioned")} to player {player.CharacterId} ({reason}).");
         }
 
         public void SendInitialPackets()
@@ -168,6 +195,59 @@ namespace NexusForever.Game.Entity
         public QuestState? GetQuestState(ushort questId)
         {
             return GetQuest(questId)?.State;
+        }
+
+        /// <summary>
+        /// Return the player's record of the quest as communicator conditions read it, or null when there is none.
+        /// </summary>
+        public CommunicatorQuestSnapshot? GetCommunicatorSnapshot(ushort questId)
+        {
+            IQuest quest = GetQuest(questId);
+            if (quest == null || quest.PendingDelete)
+                return null;
+
+            bool native = quest.State is QuestState.Accepted or QuestState.Achieved && activeQuests.ContainsKey(questId);
+            return new CommunicatorQuestSnapshot(quest.State, native, native ? quest.GetObjectiveCompletionMask() : (byte)0);
+        }
+
+        /// <summary>
+        /// Return why a call can't offer the quest, or <see cref="CommunicatorOfferBlock.None"/> when it can: the client
+        /// offers a quest it has no record of, can start, and that can be called back.
+        /// </summary>
+        public CommunicatorOfferBlock GetCallOfferBlock(ushort questId)
+        {
+            if (DisableManager.Instance.IsDisabled(DisableType.Quest, questId))
+                return CommunicatorOfferBlock.Disabled;
+
+            IQuest quest = GetQuest(questId);
+            return CommunicatorConditions.Offer(quest == null || quest.PendingDelete ? null : quest.State, CanStartQuest(questId),
+                GlobalQuestManager.Instance.GetQuestInfo(questId)?.Entry.Flags ?? 0u);
+        }
+
+        /// <summary>
+        /// Returns if the player could start the quest now, by the checks of a quest accept that don't depend on where the
+        /// quest is offered from.
+        /// </summary>
+        private bool CanStartQuest(ushort questId)
+        {
+            IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (info == null || DisableManager.Instance.IsDisabled(DisableType.Quest, questId))
+                return false;
+
+            IQuest quest = GetQuest(questId);
+            if (quest?.State is QuestState.Accepted or QuestState.Achieved)
+                return false;
+
+            if (quest?.State == QuestState.Completed)
+            {
+                if (info.Entry.QuestRepeatPeriodEnum == 0u)
+                    return false;
+
+                if (DateTime.UtcNow < quest.Reset)
+                    return false;
+            }
+
+            return MeetsPrerequisites(info);
         }
 
         private IQuest GetQuest(ushort questId, GetQuestFlags flags = GetQuestFlags.All)
@@ -270,10 +350,7 @@ namespace NexusForever.Game.Entity
             else
             {
                 // make sure the player is in range of a quest giver or they are eligible for a communicator message that starts the quest
-                if (!GlobalQuestManager.Instance.GetQuestGivers((ushort)info.Entry.Id)
-                        .Any(c => player.GetVisibleCreature<WorldEntity>(c).Any())
-                    && !GlobalQuestManager.Instance.GetQuestCommunicatorMessages((ushort)info.Entry.Id)
-                        .Any(m => m.Meets(player)))
+                if (!IsOfferedByGiverOrCall(info, quest))
                     throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without quest giver!");
             }
 
@@ -283,6 +360,26 @@ namespace NexusForever.Game.Entity
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without meeting the prerequisites!");
 
             QuestAdd(info);
+        }
+
+        /// <summary>
+        /// Returns if the player is in range of a quest giver, holds the quest as a mentioned call, or a call that starts
+        /// the quest could be showing now.
+        /// </summary>
+        private bool IsOfferedByGiverOrCall(IQuestInfo info, IQuest quest)
+        {
+            ushort questId = (ushort)info.Entry.Id;
+            if (GlobalQuestManager.Instance.GetQuestGivers(questId).Any(c => player.GetVisibleCreature<WorldEntity>(c).Any()))
+                return true;
+
+            // A call that was delivered stays acceptable from the datachron's missed call list.
+            if (quest?.State == QuestState.Mentioned && info.IsQuestMentioned)
+                return true;
+
+            // The client may accept after leaving the call's zone, so the zone gate is skipped. The offer check is too: the
+            // quest has no record only the first time, and a mentioned call is covered above.
+            return CommunicatorConditions.OfferedByCall(GlobalQuestManager.Instance.GetQuestCommunicatorMessages(questId),
+                communicatorTracker.View, CommunicatorGates.Zone | CommunicatorGates.Offer);
         }
 
         private bool MeetsPrerequisites(IQuestInfo info)

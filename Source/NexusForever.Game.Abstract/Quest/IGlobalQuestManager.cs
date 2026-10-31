@@ -1,5 +1,4 @@
-﻿using NexusForever.Game.Static.Quest;
-using NexusForever.Shared;
+﻿using NexusForever.Shared;
 
 namespace NexusForever.Game.Abstract.Quest
 {
@@ -38,8 +37,8 @@ namespace NexusForever.Game.Abstract.Quest
         IEnumerable<ICommunicatorMessage> GetQuestCommunicatorMessages(ushort questId);
 
         /// <summary>
-        /// Return a collection of <see cref="ICommunicatorMessage"/>'s that are triggered when a quest hits a certain state.
+        /// Returns if any communicator message starts the supplied quest.
         /// </summary>
-        IEnumerable<ICommunicatorMessage> GetQuestCommunicatorQuestStateTriggers(ushort questId, QuestState state);
+        bool HasQuestCommunicatorMessages(ushort questId);
     }
 }

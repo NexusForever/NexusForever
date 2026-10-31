@@ -7,6 +7,11 @@ namespace NexusForever.Game.Abstract.Entity
 {
     public interface IQuestManager : IDisposable, IDatabaseCharacter, IUpdate
     {
+        /// <summary>
+        /// The player's communicator calls.
+        /// </summary>
+        ICommunicatorTracker Communicator { get; }
+
         void SendInitialPackets();
 
         /// <summary>

@@ -27,9 +27,12 @@ namespace NexusForever.Game.Quest
         private ImmutableDictionary<ushort, ImmutableList<uint>> questGiverStore;
         private ImmutableDictionary<ushort, ImmutableList<uint>> questReceiverStore;
 
-        private ImmutableDictionary<uint, ICommunicatorMessage> communicatorStore;
+        /// <summary>
+        /// Communicator messages classified with the quest events that arm them; each player's tracker reads it.
+        /// </summary>
+        public CommunicatorIndex CommunicatorIndex { get; private set; } = CommunicatorIndex.Empty;
+
         private ImmutableDictionary<ushort, ImmutableList<ICommunicatorMessage>> communicatorQuestStore;
-        private ImmutableDictionary<(ushort /*questId*/, QuestState), ImmutableList<ICommunicatorMessage>> communicatorQuestStateTriggerStore;
 
         public void Initialise()
         {
@@ -41,7 +44,6 @@ namespace NexusForever.Game.Quest
 
             InitialiseCommunicatorEntries();
             InitialiseCommunicatorQuests();
-            InitialiseCommunicatorQuestStateTriggers();
 
             log.Info($"Cached {questInfoStore.Count} quests in {sw.ElapsedMilliseconds}ms.");
         }
@@ -99,14 +101,18 @@ namespace NexusForever.Game.Quest
 
         private void InitialiseCommunicatorEntries()
         {
-            var builder = ImmutableDictionary.CreateBuilder<uint, ICommunicatorMessage>();
-            foreach (CommunicatorMessagesEntry entry in GameTableManager.Instance.CommunicatorMessages.Entries)
-            {
-                var communicator = new CommunicatorMessage(entry);
-                builder.Add(communicator.Id, communicator);
-            }
+            CommunicatorIndex = CommunicatorIndex.Build(GameTableManager.Instance.CommunicatorMessages.Entries, GetCommunicatorQuestInfo);
+            log.Info($"Cached {CommunicatorIndex.Messages.Count} communicator messages, armed by events on {CommunicatorIndex.Triggers.Count} quests.");
+        }
 
-            communicatorStore = builder.ToImmutable();
+        private CommunicatorQuestInfo? GetCommunicatorQuestInfo(ushort questId)
+        {
+            IQuestInfo info = GetQuestInfo(questId);
+            if (info == null)
+                return null;
+
+            bool repeatable = (info.Entry.Flags & 0x20u) != 0u || info.Entry.QuestRepeatPeriodEnum != 0u;
+            return new CommunicatorQuestInfo((byte)info.Objectives.Count, repeatable, info.Entry.Flags);
         }
 
         private void InitialiseCommunicatorQuests()
@@ -115,7 +121,7 @@ namespace NexusForever.Game.Quest
             foreach (CommunicatorMessagesEntry entry in GameTableManager.Instance.CommunicatorMessages.Entries
                 .Where(e => e.QuestIdDelivered != 0u))
             {
-                ICommunicatorMessage communicator = communicatorStore[entry.Id];
+                ICommunicatorMessage communicator = CommunicatorIndex.Messages[entry.Id];
                 if (!builder.ContainsKey(communicator.QuestId))
                     builder.Add(communicator.QuestId, new List<ICommunicatorMessage>());
 
@@ -123,32 +129,6 @@ namespace NexusForever.Game.Quest
             }
 
             communicatorQuestStore = builder.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
-        }
-
-        private void InitialiseCommunicatorQuestStateTriggers()
-        {
-            var builder = new Dictionary<(ushort, QuestState), List<ICommunicatorMessage>>();
-            foreach (CommunicatorMessagesEntry entry in GameTableManager.Instance.CommunicatorMessages.Entries
-                .Where(e => e.QuestIdDelivered != 0u))
-            {
-                foreach ((ushort QuestId, QuestState QuestState) p in
-                    entry.Quests.Zip(entry.States, (a, b) => ((ushort)a, (QuestState)b)))
-                {
-                    if (p.QuestId == 0)
-                        continue;
-
-                    if (p.QuestId == entry.QuestIdDelivered)
-                        continue;
-
-                    if (!builder.ContainsKey(p))
-                        builder.Add(p, new List<ICommunicatorMessage>());
-
-                    ICommunicatorMessage communicator = communicatorStore[entry.Id];
-                    builder[p].Add(communicator);
-                }
-            }
-
-            communicatorQuestStateTriggerStore = builder.ToImmutableDictionary(e => e.Key, e => e.Value.ToImmutableList());
         }
 
         public void Update(double lastTick)
@@ -195,12 +175,11 @@ namespace NexusForever.Game.Quest
         }
 
         /// <summary>
-        /// Return a collection of <see cref="ICommunicatorMessage"/>'s that are triggered when a quest hits a certain state.
+        /// Returns if any communicator message starts the supplied quest.
         /// </summary>
-        public IEnumerable<ICommunicatorMessage> GetQuestCommunicatorQuestStateTriggers(ushort questId, QuestState state)
+        public bool HasQuestCommunicatorMessages(ushort questId)
         {
-            return communicatorQuestStateTriggerStore.TryGetValue((questId, state), out ImmutableList<ICommunicatorMessage> triggers)
-                ? triggers : Enumerable.Empty<ICommunicatorMessage>();
+            return communicatorQuestStore.ContainsKey(questId);
         }
     }
 }

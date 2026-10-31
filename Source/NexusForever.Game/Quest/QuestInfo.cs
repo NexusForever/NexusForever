@@ -15,7 +15,7 @@ namespace NexusForever.Game.Quest
         public ImmutableList<IQuestObjectiveInfo> Objectives { get; private set; }
         public ImmutableDictionary<uint, Quest2RewardEntry> Rewards { get; private set; }
 
-        public bool IsQuestMentioned => GlobalQuestManager.Instance.GetQuestCommunicatorMessages((ushort)Entry.Id).ToList().Count > 0u;
+        public bool IsQuestMentioned => GlobalQuestManager.Instance.HasQuestCommunicatorMessages((ushort)Entry.Id);
 
         /// <summary>
         /// Create a new <see cref="IQuestInfo"/> using supplied <see cref="Quest2Entry"/>.
