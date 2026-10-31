@@ -75,6 +75,12 @@ namespace NexusForever.Game.Abstract.Entity
         void QuestIgnore(ushort questId, bool ignored);
 
         /// <summary>
+        /// The client fired a communicator call for a quest itself (engaged) or found a mentioned call's quest can no longer
+        /// be started (not engaged).
+        /// </summary>
+        void QuestCommunicatorAction(ushort questId, bool engaged);
+
+        /// <summary>
         /// Track or hide an active quest.
         /// </summary>
         void QuestTrack(ushort questId, bool tracked);

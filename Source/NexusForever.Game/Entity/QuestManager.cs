@@ -733,6 +733,38 @@ namespace NexusForever.Game.Entity
         }
 
         /// <summary>
+        /// The client checks the CommunicatorMessages rows itself on quest, zone and level events. When one offers a quest it
+        /// has no record of, it shows the call, sets the quest Mentioned and reports it engaged (0x14043c1a0). At login it
+        /// reports each mentioned call whose quest fails its start check now, not engaged (0x1405fccb0), and keeps it
+        /// Mentioned. An engaged report is recorded when a call could offer the quest now, the gate an accept from that call
+        /// passes, so the mention lasts across logins and the server doesn't push the call again.
+        /// </summary>
+        public void QuestCommunicatorAction(ushort questId, bool engaged)
+        {
+            IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (info == null)
+                return;
+
+            string result;
+            if (!engaged)
+                result = "cannot-start";
+            else if (GetQuest(questId) != null)
+                result = "known";
+            else if (!info.IsQuestMentioned
+                || GetCallOfferBlock(questId) != CommunicatorOfferBlock.None
+                || !CommunicatorConditions.OfferedByCall(GlobalQuestManager.Instance.GetQuestCommunicatorMessages(questId),
+                    communicatorTracker.View, CommunicatorGates.Zone | CommunicatorGates.Offer))
+                result = "refused";
+            else
+            {
+                QuestMention(info);
+                result = "mentioned";
+            }
+
+            log.Trace($"Player {player.CharacterId} reported communicator call for quest {questId}: {result}.");
+        }
+
+        /// <summary>
         /// Track or hide an active quest.
         /// </summary>
         public void QuestTrack(ushort questId, bool tracked)
