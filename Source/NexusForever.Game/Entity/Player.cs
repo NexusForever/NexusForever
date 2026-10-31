@@ -701,6 +701,7 @@ namespace NexusForever.Game.Entity
                 }
 
                 QuestManager.ObjectiveUpdate(QuestObjectiveType.EnterZone, Zone.Id, 1);
+                QuestManager.Communicator.OnZone(Zone.Id);
             }
 
             ZoneMapManager.OnZoneUpdate();
@@ -1102,6 +1103,8 @@ namespace NexusForever.Game.Entity
 
             pendingTeleport = null;
             IsLoading = false;
+
+            QuestManager.Communicator.OnEnteredWorld();
         }
 
         /// <summary>

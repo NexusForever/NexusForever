@@ -14,11 +14,11 @@ namespace NexusForever.Game.Quest
         public ushort QuestId => (ushort)Entry.QuestIdDelivered;
         public CommunicatorMessagesEntry Entry { get; }
         public CommunicatorKind Kind { get; }
-        public bool ServerPushed => Kind is CommunicatorKind.PushedScheduled;
+        public bool ServerPushed => Kind is CommunicatorKind.PushedScheduled or CommunicatorKind.WorldArmed;
         // Unconditioned server-pushed rows wait on a script: nothing sends them, and the client drops them, so no player
         // can have seen one.
         public bool Reachable => Kind is CommunicatorKind.PushedScheduled or CommunicatorKind.ClientScheduled
-            or CommunicatorKind.ClientUnscheduled;
+            or CommunicatorKind.ClientUnscheduled or CommunicatorKind.WorldArmed;
         public bool Delivers => Entry.QuestIdDelivered != 0u;
         public ImmutableArray<CommunicatorCondition> Conditions { get; }
         public ImmutableArray<CommunicatorTrigger> Triggers { get; }

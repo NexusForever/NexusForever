@@ -70,6 +70,57 @@ namespace NexusForever.Game.Quest
             events.Add(new Event(questId, CommunicatorTriggerKind.Objective, objectiveIndex));
         }
 
+        // World-armed rows: a zone row is checked when the player enters a world or a zone (or levels up in it), a
+        // level row only when a level-up crosses its minimum, so a login never pushes the calls of every level the player
+        // has passed. A quest record (the delivered call mentions its quest) keeps each one to a single delivery.
+        public void OnZone(uint worldZoneId)
+        {
+            QueueWorldCheck("zone", 0u, 0u);
+        }
+
+        public void OnLevel(uint oldLevel, uint newLevel)
+        {
+            if (newLevel > oldLevel)
+                QueueWorldCheck("level", oldLevel, newLevel);
+        }
+
+        public void OnEnteredWorld()
+        {
+            QueueWorldCheck("world", 0u, 0u);
+        }
+
+        private string worldCheck;
+        private uint levelFrom, levelTo;
+
+        private void QueueWorldCheck(string reason, uint fromLevel, uint toLevel)
+        {
+            if (index.WorldArmed.IsEmpty)
+                return;
+            worldCheck = reason;
+            if (toLevel > fromLevel)
+            {
+                levelFrom = levelTo == 0u ? fromLevel : Math.Min(levelFrom, fromLevel);
+                levelTo = Math.Max(levelTo, toLevel);
+            }
+        }
+
+        private void CheckWorldArmed(string reason)
+        {
+            (uint from, uint to) = (levelFrom, levelTo);
+            levelFrom = levelTo = 0u;
+            foreach (ICommunicatorMessage message in index.WorldArmed)
+            {
+                bool zoneRow = message.Entry.WorldZoneId != 0u;
+                bool levelCrossed = message.Entry.MinLevel > from && message.Entry.MinLevel <= to;
+                if (!zoneRow && !levelCrossed)
+                    continue;
+                if (deliveredThisDrain.Contains(message.Id) || View.GetQuest(message.QuestId) != null)
+                    continue;
+                if (message.Evaluate(View) == CommunicatorResult.Eligible)
+                    Deliver(message, $"world-armed-{reason}");
+            }
+        }
+
         /// <summary>
         /// Handle queued events, and re-check waiting rows once a second.
         /// </summary>
@@ -77,7 +128,7 @@ namespace NexusForever.Game.Quest
         {
             time += lastTick;
             sincePoll += lastTick;
-            if (events.Count == 0 && (pending.Count == 0 || sincePoll < PollInterval))
+            if (events.Count == 0 && worldCheck == null && (pending.Count == 0 || sincePoll < PollInterval))
                 return;
 
             Drain();
@@ -104,6 +155,12 @@ namespace NexusForever.Game.Quest
                         Dispatch(e);
 
                     EvaluatePending();
+                    if (worldCheck != null)
+                    {
+                        string reason = worldCheck;
+                        worldCheck = null;
+                        CheckWorldArmed(reason);
+                    }
                     round++;
                 }
                 while (events.Count > 0 && round < MaxRounds);

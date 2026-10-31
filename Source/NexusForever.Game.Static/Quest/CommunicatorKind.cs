@@ -8,6 +8,8 @@
     {
         /// <summary>Bit 0, armed by a quest state or objective: the server pushes it.</summary>
         PushedScheduled,
+        /// <summary>Bit 0, delivers a quest, no trigger but a zone or level: pushed on zone, level or world entry.</summary>
+        WorldArmed,
         /// <summary>Bit 0, delivers a quest, nothing to arm it: needs a script.</summary>
         PushedUnconditioned,
         /// <summary>Bit 0, delivers nothing and has no trigger: only a script can send it.</summary>

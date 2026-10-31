@@ -189,6 +189,7 @@ namespace NexusForever.Game.Entity
                 return;
 
             player.Level = newLevel;
+            player.QuestManager.Communicator.OnLevel(oldLevel, newLevel);
 
             // Grant Rewards for level up
             player.SpellManager.GrantSpells();

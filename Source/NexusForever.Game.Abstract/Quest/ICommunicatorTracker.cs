@@ -19,5 +19,20 @@ namespace NexusForever.Game.Abstract.Quest
         /// A quest objective was completed.
         /// </summary>
         void OnObjectiveComplete(ushort questId, byte objectiveIndex);
+
+        /// <summary>
+        /// The player entered a zone: deliver the calls that zone arms.
+        /// </summary>
+        void OnZone(uint worldZoneId);
+
+        /// <summary>
+        /// The player levelled up: deliver the calls whose minimum level was crossed.
+        /// </summary>
+        void OnLevel(uint oldLevel, uint newLevel);
+
+        /// <summary>
+        /// The player entered a world (login or map change): deliver the calls the current zone arms.
+        /// </summary>
+        void OnEnteredWorld();
     }
 }

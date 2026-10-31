@@ -18,6 +18,15 @@ namespace NexusForever.Game.Quest
         public ImmutableDictionary<uint, ICommunicatorMessage> Messages { get; }
         public ImmutableHashSet<uint> ChainTargets { get; }
         public ImmutableDictionary<ushort, ImmutableArray<CommunicatorArm>> Triggers { get; }
+        /// <summary>
+        /// Server-pushed rows with no quest trigger that a zone or a level arms: the tracker delivers a zone row when
+        /// the player is in its zone (the 2015-09-29 patch made adventure breadcrumbs arrive "upon entering the vicinity"
+        /// instead of on level-up) and a level row when a level-up crosses its minimum. A row with only a world, or nothing,
+        /// isn't sent: no source shows what armed it, and some are older copies of a triggered row (Biting Back 3275 and 7783).
+        /// Nothing is pushed for the levels a player has already passed.
+        /// </summary>
+        public ImmutableArray<ICommunicatorMessage> WorldArmed { get; }
+
         public static readonly CommunicatorIndex Empty = new(ImmutableDictionary<uint, ICommunicatorMessage>.Empty,
             ImmutableHashSet<uint>.Empty, ImmutableDictionary<ushort, ImmutableArray<CommunicatorArm>>.Empty);
 
@@ -27,6 +36,7 @@ namespace NexusForever.Game.Quest
             Messages     = messages;
             ChainTargets = chainTargets;
             Triggers     = triggers;
+            WorldArmed   = [.. messages.Values.Where(m => m.Kind == CommunicatorKind.WorldArmed).OrderBy(m => m.Id)];
         }
 
         /// <summary>
@@ -88,6 +98,8 @@ namespace NexusForever.Game.Quest
                     return CommunicatorKind.ChainTarget;
                 if (hasTriggers)
                     return CommunicatorKind.PushedScheduled;
+                if (delivers && (entry.WorldZoneId != 0u || entry.MinLevel != 0u))
+                    return CommunicatorKind.WorldArmed;
                 return delivers ? CommunicatorKind.PushedUnconditioned : CommunicatorKind.PushedScript;
             }
 
