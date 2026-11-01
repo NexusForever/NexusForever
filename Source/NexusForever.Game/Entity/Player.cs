@@ -229,6 +229,7 @@ namespace NexusForever.Game.Entity
         public IPetCustomisationManager PetCustomisationManager { get; private set; }
         public ICharacterKeybindingManager KeybindingManager { get; private set; }
         public IDatacubeManager DatacubeManager { get; private set; }
+        public ITaxiManager TaxiManager { get; private set; }
         public IMailManager MailManager { get; private set; }
         public IZoneMapManager ZoneMapManager { get; private set; }
         public IQuestManager QuestManager { get; private set; }
@@ -343,6 +344,7 @@ namespace NexusForever.Game.Entity
             PetCustomisationManager = new PetCustomisationManager(this, model);
             KeybindingManager       = new CharacterKeybindingManager(this, model);
             DatacubeManager         = new DatacubeManager(this, model);
+            TaxiManager             = new TaxiManager(this, model);
             MailManager             = new MailManager(this, model);
             ZoneMapManager          = new ZoneMapManager(this, model);
             QuestManager            = new QuestManager(this, model);
@@ -388,6 +390,7 @@ namespace NexusForever.Game.Entity
             base.Update(lastTick);
 
             TitleManager.Update(lastTick);
+            TaxiManager.Update(lastTick);
             SpellManager.Update(lastTick);
             CostumeManager.Update(lastTick);
             QuestManager.Update(lastTick);
@@ -585,6 +588,7 @@ namespace NexusForever.Game.Entity
             KeybindingManager.Save(context);
             SpellManager.Save(context);
             DatacubeManager.Save(context);
+            TaxiManager.Save(context);
             MailManager.Save(context);
             ZoneMapManager.Save(context);
             QuestManager.Save(context);
@@ -728,6 +732,8 @@ namespace NexusForever.Game.Entity
 
             CostumeManager.SendInitialPackets();
             Account.CostumeManager.SendInitialPackets();
+
+            TaxiManager.SendInitialPackets();
 
             var playerCreate = new ServerPlayerCreate
             {
