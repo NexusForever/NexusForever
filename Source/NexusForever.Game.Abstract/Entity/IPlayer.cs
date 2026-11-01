@@ -78,6 +78,7 @@ namespace NexusForever.Game.Abstract.Entity
         IPetCustomisationManager PetCustomisationManager { get; }
         ICharacterKeybindingManager KeybindingManager { get; }
         IDatacubeManager DatacubeManager { get; }
+        ITaxiManager TaxiManager { get; }
         IMailManager MailManager { get; }
         IZoneMapManager ZoneMapManager { get; }
         IQuestManager QuestManager { get; }
