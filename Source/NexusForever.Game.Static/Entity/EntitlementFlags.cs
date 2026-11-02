@@ -5,6 +5,6 @@
     {
         None      = 0,
         Character = 1,
-        Disabled  = 2
+        Hidden    = 2  // not shown by the client, still granted and counted
     }
 }
