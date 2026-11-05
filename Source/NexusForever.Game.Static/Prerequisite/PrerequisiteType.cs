@@ -274,7 +274,7 @@
         Unknown266                  = 266, // Exist in PrerequisiteType.tbl but does not have a description
         Unknown267                  = 267, // Exist in PrerequisiteType.tbl but does not have a description
         Unknown268                  = 268, // Exist in PrerequisiteType.tbl but does not have a description
-        Unknown269                  = 269, // Exist in PrerequisiteType.tbl but does not have a description
+        UnhealthyTime               = 269, // No description, its only prerequisite 37806 fails with "You cannot recall while in Unhealthy Time"
         LoyaltyRewards              = 270, // Loyalty requirement not met
         Unknown271                  = 271, // Exist in PrerequisiteType.tbl but does not have a description
         Unknown272                  = 272, // Exist in PrerequisiteType.tbl but does not have a description

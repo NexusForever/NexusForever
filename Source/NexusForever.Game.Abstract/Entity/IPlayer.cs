@@ -126,6 +126,16 @@ namespace NexusForever.Game.Abstract.Entity
         bool CanTeleport();
 
         /// <summary>
+        /// Bind <see cref="IPlayer"/> to the supplied bind point (transmat terminal), Recall - Transmat returns here.
+        /// </summary>
+        void SetBindPoint(ushort bindPointId, ushort worldId, Vector3 position);
+
+        /// <summary>
+        /// Return the world and position of the bind point, false if <see cref="IPlayer"/> has never bound.
+        /// </summary>
+        bool TryGetBindPoint(out ushort worldId, out Vector3 position);
+
+        /// <summary>
         /// Teleport <see cref="IPlayer"/> to supplied location.
         /// </summary>
         void TeleportTo(ushort worldId, float x, float y, float z, IMapLock mapLock = null, TeleportReason reason = TeleportReason.Relocate);
