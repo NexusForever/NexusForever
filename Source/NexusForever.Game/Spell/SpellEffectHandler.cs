@@ -110,6 +110,16 @@ namespace NexusForever.Game.Spell
         [SpellEffectHandler(SpellEffectType.Teleport)]
         public static void HandleEffectTeleport(ISpell spell, IUnitEntity target, ISpellTargetEffectInfo info)
         {
+            // a teleport without a location goes to the bind point, Recall - Transmat (8568) and the stuck window recall (49881)
+            if (info.Entry.DataBits00 == 0u)
+            {
+                if (target is IPlayer bindPlayer
+                    && bindPlayer.CanTeleport()
+                    && bindPlayer.TryGetBindPoint(out ushort worldId, out Vector3 position))
+                    bindPlayer.TeleportTo(worldId, position.X, position.Y, position.Z);
+                return;
+            }
+
             WorldLocation2Entry locationEntry = GameTableManager.Instance.WorldLocation2.GetEntry(info.Entry.DataBits00);
             if (locationEntry == null)
                 return;
