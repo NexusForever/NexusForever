@@ -14,23 +14,10 @@ namespace NexusForever.Aspire.AppHost
             return builder;
         }
 
-        public static IResourceBuilder<T> WithNexusForeverHttp<T>(this IResourceBuilder<T> builder, int port) where T : IResourceWithEnvironment, IResourceWithEndpoints
+        public static IResourceBuilder<T> WithNexusForeverHttp<T>(this IResourceBuilder<T> builder) where T : IResourceWithEnvironment, IResourceWithEndpoints
         {
-            builder.WithHttpEndpoint(targetPort: port);
-
-            builder.WithEnvironment(c =>
-            {
-                if (!c.Resource.TryGetEndpoints(out var endpoints))
-                    return;
-
-                foreach (EndpointAnnotation endpoint in endpoints)
-                {
-                    if (endpoint.Name != "http")
-                        continue;
-
-                    c.EnvironmentVariables["urls"] = $"{endpoint.UriScheme}://{endpoint.TargetHost}:{endpoint.TargetPort}";
-                }
-            });
+            builder.WithHttpEndpoint();
+            builder.WithEnvironment("urls", ReferenceExpression.Create($"http://127.0.0.1:{builder.GetEndpoint("http").Property(EndpointProperty.TargetPort)}"));
 
             return builder;
         }

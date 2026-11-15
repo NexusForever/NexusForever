@@ -44,13 +44,13 @@ namespace NexusForever.Aspire.Database.Migrations.Service
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await _authContext.Database.MigrateAsync();
-            await _characterContext.Database.MigrateAsync();
-            await _worldContext.Database.MigrateAsync();
-            await _groupContext.Database.MigrateAsync();
-            await _chatContext.Database.MigrateAsync();
-            await _friendshipContext.Database.MigrateAsync();
-            await _queryContext.Database.MigrateAsync();
+            await _authContext.Database.MigrateAsync(cancellationToken);
+            await _characterContext.Database.MigrateAsync(cancellationToken);
+            await _worldContext.Database.MigrateAsync(cancellationToken);
+            await _groupContext.Database.MigrateAsync(cancellationToken);
+            await _chatContext.Database.MigrateAsync(cancellationToken);
+            await _friendshipContext.Database.MigrateAsync(cancellationToken);
+            await _queryContext.Database.MigrateAsync(cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

@@ -16,6 +16,7 @@ using NexusForever.Server.ChatServer.Character;
 using NexusForever.Server.ChatServer.Chat;
 using NexusForever.Server.ChatServer.Job;
 using NexusForever.Server.ChatServer.Network.Internal.Handler;
+using NexusForever.Shared.Configuration;
 using NLog.Extensions.Logging;
 using Quartz;
 
@@ -44,7 +45,7 @@ namespace NexusForever.Server.ChatServer
                 .ConfigureAppConfiguration(cb =>
                 {
                     cb.SetBasePath(basePath)
-                        .AddJsonFile("ChatServer.json", false)
+                        .AddNexusForeverJson("ChatServer.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>

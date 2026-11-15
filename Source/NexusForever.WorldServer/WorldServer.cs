@@ -50,7 +50,7 @@ namespace NexusForever.WorldServer
                 })
                 .ConfigureAppConfiguration(cb =>
                 {
-                    cb.AddJsonFile("WorldServer.json", false)
+                    cb.AddNexusForeverJson("WorldServer.json")
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((hb, sc) =>

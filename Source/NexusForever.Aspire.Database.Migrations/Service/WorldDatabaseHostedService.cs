@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -33,54 +33,56 @@ namespace NexusForever.Aspire.Database.Migrations.Service
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            if (_options.Path == null)
-            {
-                _log.LogWarning("World database options are not configured. Skipping migration.");
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(_options.Path) || !Directory.Exists(_options.Path))
+                throw new DirectoryNotFoundException($"World database directory does not exist: {_options.Path}");
 
-            if (!Directory.Exists(_options.Path))
-            {
-                _log.LogWarning("World database migrations path does not exist. Skipping migration.");
-                return;
-            }
+            string[] files = Directory.GetFiles(_options.Path, "*.sql", SearchOption.AllDirectories)
+                .Order(StringComparer.Ordinal).ToArray();
+            if (files.Length == 0)
+                throw new InvalidOperationException($"No world SQL files found in {_options.Path}.");
 
-            foreach (string filePath in Directory.GetFiles(_options.Path, "*.sql", SearchOption.AllDirectories))
+            var nameCounts = files.GroupBy(Path.GetFileName).ToDictionary(g => g.Key, g => g.Count());
+            foreach (string filePath in files)
             {
-                string fileName    = Path.GetFileName(filePath);
-                string fileContent = File.ReadAllText(filePath);
+                string fileName    = Path.GetRelativePath(_options.Path, filePath).Replace('\\', '/');
+                string legacyName  = nameCounts[Path.GetFileName(filePath)] == 1 ? Path.GetFileName(filePath) : fileName;
+                string fileContent = await File.ReadAllTextAsync(filePath, cancellationToken);
                 string fileHash    = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(fileContent)));
 
-                if (_context.Version.Any(v => v.FileName == fileName && v.FileHash == fileHash))
+                var versions = _context.Version.Where(v => v.FileName == fileName || v.FileName == legacyName);
+                var latest = await versions.OrderByDescending(v => v.AppliedOn).FirstOrDefaultAsync(cancellationToken);
+                if (latest?.FileHash == fileHash)
                 {
                     _log.LogInformation("Skipping already applied world database migration: {FileName}", fileName);
                     continue;
                 }
 
-                fileContent = Regex.Replace(fileContent, @"/\*.*?\*/", "", RegexOptions.Singleline);
-                fileContent = Regex.Replace(fileContent, @"--.*?$", "", RegexOptions.Multiline);
-                fileContent = fileContent.Trim();
-
                 _log.LogInformation("Applying world database migration: {FileName}", fileName);
+                await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
                 try
                 {
-                    await _context.Database.ExecuteSqlRawAsync(fileContent);
+                    await using var command = _context.Database.GetDbConnection().CreateCommand();
+                    command.Transaction = transaction.GetDbTransaction();
+                    command.CommandTimeout = 600;
+                    command.CommandText = fileContent;
+                    await command.ExecuteNonQueryAsync(cancellationToken);
+
+                    await versions.ExecuteDeleteAsync(cancellationToken);
+                    _context.Version.Add(new VersionModel
+                    {
+                        FileName = fileName,
+                        FileHash = fileHash,
+                        AppliedOn = DateTime.UtcNow
+                    });
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
                     _log.LogError(ex, "Failed to apply world database migration: {FileName}", fileName);
-                    continue;
+                    throw;
                 }
                 _log.LogInformation("Applied world database migration: {FileName}", fileName);
-
-                _context.Version.Add(new VersionModel
-                {
-                    FileName = fileName,
-                    FileHash = fileHash,
-                    AppliedOn = DateTime.UtcNow
-                });
-
-                await _context.SaveChangesAsync(cancellationToken);
             }
         }
 

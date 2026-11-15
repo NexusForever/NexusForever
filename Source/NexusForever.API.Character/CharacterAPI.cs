@@ -8,6 +8,7 @@ using NexusForever.Database;
 using NexusForever.Database.Auth;
 using NexusForever.Database.Character;
 using NexusForever.Database.Configuration.Model;
+using NexusForever.Shared.Configuration;
 using NLog.Extensions.Logging;
 
 namespace NexusForever.API.Character
@@ -25,7 +26,7 @@ namespace NexusForever.API.Character
             string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             builder.Configuration
                 .SetBasePath(basePath)
-                .AddJsonFile("CharacterAPI.json", false)
+                .AddNexusForeverJson("CharacterAPI.json")
                 .AddEnvironmentVariables();
 
             builder.Services
@@ -50,6 +51,7 @@ namespace NexusForever.API.Character
             WebApplication app = builder.Build();
 
             app.MapGetCharacterEndpoint();
+            app.MapGet("/health", () => Results.Ok());
 
             app.Run();
         }
