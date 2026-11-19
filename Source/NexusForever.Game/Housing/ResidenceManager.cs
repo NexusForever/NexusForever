@@ -34,6 +34,9 @@ namespace NexusForever.Game.Housing
 
             owner = player;
             Residence = globalResidenceManager.GetResidenceByOwner(owner.Identity);
+
+            if (Residence != null)
+                GrantHouseRecall();
         }
 
         public void CreateResidence()
@@ -42,6 +45,17 @@ namespace NexusForever.Game.Housing
                 throw new InvalidOperationException();
 
             Residence = globalResidenceManager.CreateResidence(owner);
+            GrantHouseRecall();
+        }
+
+        /// <summary>
+        /// Residence owners know Recall - House (38408, base 22919), the spell the recall button casts for the residence.
+        /// </summary>
+        private void GrantHouseRecall()
+        {
+            const uint recallHouseSpell4BaseId = 22919u;
+            if (owner.SpellManager.GetSpell(recallHouseSpell4BaseId) == null)
+                owner.SpellManager.AddSpell(recallHouseSpell4BaseId);
         }
 
         /// <summary>
