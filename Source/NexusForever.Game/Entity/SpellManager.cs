@@ -120,6 +120,13 @@ namespace NexusForever.Game.Entity
                 if (GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
             }
+
+            // Recall - Transmat (8568), the spell the recall button casts for the bind point (GameFormula 777)
+            // the only reward that teaches it is from quest 4891, which no longer exists
+            uint recallSpell4Id = GameTableManager.Instance.GameFormula.GetEntry(777)?.Dataint0 ?? 0u;
+            Spell4Entry recallEntry = GameTableManager.Instance.Spell4.GetEntry(recallSpell4Id);
+            if (recallEntry != null && GetSpell(recallEntry.Spell4BaseIdBaseSpell) == null)
+                AddSpell(recallEntry.Spell4BaseIdBaseSpell);
         }
 
         public void Update(double lastTick)

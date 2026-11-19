@@ -12,6 +12,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterActionSetAmpModel> CharacterActionSetAmp { get; set; }
         public DbSet<CharacterActionSetShortcutModel> CharacterActionSetShortcut { get; set; }
         public DbSet<CharacterAppearanceModel> CharacterAppearance { get; set; }
+        public DbSet<CharacterBindModel> CharacterBind { get; set; }
         public DbSet<CharacterBoneModel> CharacterBone { get; set; }
         public DbSet<CharacterCostumeModel> CharacterCostume { get; set; }
         public DbSet<CharacterCostumeItemModel> CharacterCostumeItem { get; set; }
@@ -349,6 +350,46 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.ActionSetShortcut)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_action_set_shortcut_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterBindModel>(entity =>
+            {
+                entity.ToTable("character_bind");
+
+                entity.HasKey(e => e.Id)
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.BindPointId)
+                    .HasColumnName("bindPointId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.WorldId)
+                    .HasColumnName("worldId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.X)
+                    .HasColumnName("x")
+                    .HasDefaultValue(0f);
+
+                entity.Property(e => e.Y)
+                    .HasColumnName("y")
+                    .HasDefaultValue(0f);
+
+                entity.Property(e => e.Z)
+                    .HasColumnName("z")
+                    .HasDefaultValue(0f);
+
+                entity.HasOne(d => d.Character)
+                    .WithOne(p => p.Bind)
+                    .HasForeignKey<CharacterBindModel>(d => d.Id)
+                    .HasConstraintName("FK__character_bind_id__character_id");
             });
 
             modelBuilder.Entity<CharacterAppearanceModel>(entity =>
