@@ -37,7 +37,7 @@
     <PackageVersion Include="Nexus.Archive" Version="1.0.1" />
     <PackageVersion Include="NLog" Version="6.1.4" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.4" />
-    <PackageVersion Include="Quartz" Version="3.18.2" />
+    <PackageVersion Include="Quartz" Version="4.7.3" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.18.2" />
     <PackageVersion Include="Rebus" Version="8.10.0" />
     <PackageVersion Include="Rebus.AzureServiceBus" Version="10.7.0" />

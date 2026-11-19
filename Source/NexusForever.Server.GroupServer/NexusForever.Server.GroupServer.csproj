@@ -30,7 +30,6 @@
     <PackageReference Include="NLog" />
     <PackageReference Include="NLog.Extensions.Logging" />
     <PackageReference Include="Quartz" />
-    <PackageReference Include="Quartz.Extensions.Hosting" />
   </ItemGroup>
 
   <ItemGroup>
