@@ -41,6 +41,7 @@ namespace NexusForever.Database.Character.Model
         public bool IsOnline { get; set; }
 
         public ResidenceModel Residence { get; set; }
+        public CharacterBindModel Bind { get; set; }
         public ICollection<CharacterAchievementModel> Achievement { get; set; } = new HashSet<CharacterAchievementModel>();
         public ICollection<CharacterActionSetAmpModel> ActionSetAmp { get; set; } = new HashSet<CharacterActionSetAmpModel>();
         public ICollection<CharacterActionSetShortcutModel> ActionSetShortcut { get; set; } = new HashSet<CharacterActionSetShortcutModel>();

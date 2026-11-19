@@ -75,7 +75,7 @@ namespace NexusForever.Network.World.Message.Model
         public Faction FactionData { get; set; }
         public List<Pet> Pets { get; } = new();
         public uint InputKeySet { get; set; }
-        public ushort UnknownBC { get; set; }
+        public ushort BindPointId { get; set; }
         public int ActiveCostumeIndex { get; set; }
         public uint UnknownC4 { get; set; }
         public uint UnknownC8 { get; set; }
@@ -109,7 +109,7 @@ namespace NexusForever.Network.World.Message.Model
             Pets.ForEach(p => p.Write(writer));
 
             writer.Write(InputKeySet);
-            writer.Write(UnknownBC);
+            writer.Write(BindPointId);
             writer.Write(ActiveCostumeIndex);
             writer.Write(UnknownC4);
             writer.Write(UnknownC8);
