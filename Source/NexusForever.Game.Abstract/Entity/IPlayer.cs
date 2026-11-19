@@ -169,6 +169,11 @@ namespace NexusForever.Game.Abstract.Entity
         bool CanMount();
 
         /// <summary>
+        /// Remember a mount that was summoned but is not on the map yet, <see cref="CanMount"/> refuses another summon until it is.
+        /// </summary>
+        void SetPendingMount(IMountEntity mount);
+
+        /// <summary>
         /// Dismounts this <see cref="IPlayer"/> from a vehicle that it's attached to
         /// </summary>
         void Dismount();
