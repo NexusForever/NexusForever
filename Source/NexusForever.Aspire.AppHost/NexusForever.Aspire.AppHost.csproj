@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.6.5">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,13 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
-	<AspireUseCliBundle>false</AspireUseCliBundle>
-	<NoWarn>$(NoWarn);ASPIRE010</NoWarn>
     <UserSecretsId>27008a3f-0ceb-4ca3-acbf-eab661b470e0</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.Docker" />
+    <PackageReference Include="Aspire.Hosting.Dotnet" />
     <PackageReference Include="Aspire.Hosting.MySql" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" />
   </ItemGroup>
