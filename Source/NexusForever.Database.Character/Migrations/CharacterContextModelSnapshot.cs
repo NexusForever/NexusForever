@@ -1126,6 +1126,30 @@ namespace NexusForever.Database.Character.Migrations
                         .HasDefaultValue(0u)
                         .HasColumnName("restBonusXp");
 
+                    b.Property<float>("ReturnLocationX")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("returnLocationX");
+
+                    b.Property<float>("ReturnLocationY")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("returnLocationY");
+
+                    b.Property<float>("ReturnLocationZ")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f)
+                        .HasColumnName("returnLocationZ");
+
+                    b.Property<ushort>("ReturnWorldId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0)
+                        .HasColumnName("returnWorldId");
+
                     b.Property<float>("RotationX")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float")
