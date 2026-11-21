@@ -2,7 +2,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Character;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Game.Character
 {

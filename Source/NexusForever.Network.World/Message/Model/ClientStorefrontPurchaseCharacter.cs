@@ -8,6 +8,7 @@ namespace NexusForever.Network.World.Message.Model
     {
         public uint OfferId { get; set; } // OfferId
         public byte Unknown1 { get; set; }
+        public float Unknown2 { get; set; } // the client writes this slot with movss, so it is a float
         public ushort CurrencyId { get; set; } // CurrencyId - 1408 == NCCoin, 768 == Omnibits
         public uint Unknown3 { get; set; }
         public Identity Target { get; set; } = new();
@@ -15,12 +16,13 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            OfferId    = reader.ReadUInt(20);
+            OfferId    = reader.ReadUInt();
             Unknown1   = reader.ReadByte(5);
+            Unknown2   = reader.ReadSingle();
             CurrencyId = reader.ReadUShort(14);
-            Unknown3   = reader.ReadUInt(20);
+            Unknown3   = reader.ReadUInt();
             Target.Read(reader);
-            Unknown6   = reader.ReadUInt(20);
+            Unknown6   = reader.ReadUInt();
         }
     }
 }

@@ -24,5 +24,6 @@ namespace NexusForever.Network.World.Message.Model.Shared
             writer.Write(EffectInfoData.Count, 8u);
             EffectInfoData.ForEach(u => u.Write(writer));
         }
+
     }
 }

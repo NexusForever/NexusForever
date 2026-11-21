@@ -9,7 +9,7 @@ namespace NexusForever.Network.World.Message.Model.Who
     public class ClientWhoRequest : IReadable
     {
         public List<WhoParameter> Parameters { get; private set; } = [];
-        public List<int> ParameterGroupCounts { get; private set; } = []; // Number of ANDed parameters in each parameter group
+        public List<uint> ParameterGroupCounts { get; private set; } = []; // Number of ANDed parameters in each parameter group
                                                                   // Each new group count is another set of ANDed parameters
                                                                   // Collectively each parameter group gets ORed with the other groups
 
@@ -26,7 +26,7 @@ namespace NexusForever.Network.World.Message.Model.Who
             count = reader.ReadUInt();
             for (uint i = 0; i < count; i++)
             {
-                ParameterGroupCounts.Add(reader.ReadInt());
+                ParameterGroupCounts.Add(reader.ReadUInt());
             }
         }
     }

@@ -20,7 +20,7 @@ namespace NexusForever.Network.World.Message.Model.Guild
             GuildIdentity.Read(reader);
             SourceItemGuid = reader.ReadULong();
             DestinationItemGuid = reader.ReadULong();
-            SourceItem2Id = reader.ReadUInt();
+            SourceItem2Id = reader.ReadUInt(18u);
             Destination.Read(reader);
             Source.Read(reader);
             UseFirstFreeSlot = reader.ReadBit();

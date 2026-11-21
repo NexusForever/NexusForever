@@ -9,7 +9,7 @@ using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Abilities;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
 

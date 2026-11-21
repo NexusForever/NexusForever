@@ -2,7 +2,7 @@
 using System.Reflection;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Network.World.Message;
+using NexusForever.Game.Static.Spell;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Shared;
 

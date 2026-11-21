@@ -9,6 +9,6 @@ namespace NexusForever.Game.Abstract.Entity
         ItemSlot Slot { get; init; }
         ushort? DisplayId { get; set; }
         ushort ColourSetId { get; set; }
-        int DyeData { get; set; }
+        uint DyeData { get; set; }
     }
 }

@@ -108,7 +108,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
                 return;
 
             ICommunicatorMessage message = globalQuestManager.GetCommunicatorMessage(CommunicatorMessage.CaptainWeir6);
-            foreach (IPlayer player in mapInstance.GetPlayers())
+            foreach (IPlayer player in mapInstance.PlayerManager)
                 message?.Send(player.Session);
         }
     }

@@ -5,7 +5,7 @@ using NexusForever.Game.Abstract.Account;
 using NexusForever.Game.Abstract.Account.Entitlement;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.AccountInventory;
 
 namespace NexusForever.Game.Account.Entitlement
 {
@@ -59,7 +59,7 @@ namespace NexusForever.Game.Account.Entitlement
         {
             return new ServerAccountEntitlement
             {
-                Entitlement = Type,
+                EntitlementId = Type,
                 Count       = Amount
             };
         }

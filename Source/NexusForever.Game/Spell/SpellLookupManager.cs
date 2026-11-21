@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static;
-using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell
@@ -12,7 +12,7 @@ namespace NexusForever.Game.Spell
             { DashDirection.Left, SpellGeneric.DashLeft },
             { DashDirection.Right, SpellGeneric.DashRight },
             { DashDirection.Forward, SpellGeneric.DashForward },
-            { DashDirection.Backward, SpellGeneric.DashBackward }
+            { DashDirection.Back, SpellGeneric.DashBackward }
         };
 
         /// <summary>

@@ -8,7 +8,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
     {
         public void HandleMessage(IWorldSession session, ClientDash clientDash)
         {
-            if (!SpellLookupManager.Instance.TryGetDashSpell(clientDash.Direction, out uint dashSpell4Id))
+            if (!SpellLookupManager.Instance.TryGetDashSpell(clientDash.DashDirection, out uint dashSpell4Id))
                 return;
 
             session.Player.CastSpell(dashSpell4Id, new SpellParameters

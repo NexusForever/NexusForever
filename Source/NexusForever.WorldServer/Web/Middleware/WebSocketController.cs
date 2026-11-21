@@ -25,6 +25,9 @@ namespace NexusForever.WorldServer.Web.Middleware
         {
             [JsonProperty("message")]
             public string Message { get; set; }
+
+            [JsonProperty("character")]
+            public string Character { get; set; }
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -40,7 +43,7 @@ namespace NexusForever.WorldServer.Web.Middleware
                         if (result.CloseStatus != null)
                             continue;
 
-                        CommandManager.Instance.HandleCommandDelay(new WebSocketCommandContext(webSocket), clientMessage.Message);
+                        CommandManager.Instance.HandleCommandDelay(new WebSocketCommandContext(webSocket, clientMessage.Character), clientMessage.Message);
                     }
                 }
                 else

@@ -25,7 +25,7 @@ namespace NexusForever.Game.Prerequisite.Check
             switch (comparison)
             {
                 case PrerequisiteComparison.Equal:
-                    return player.PathManager.IsPathActive((Static.Entity.Path)value);
+                    return player.PathManager.IsPathActive((Static.PlayerPath.Path)value);
                 default:
                     log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.Path}!");
                     return false;

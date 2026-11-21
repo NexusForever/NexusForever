@@ -16,7 +16,7 @@ namespace NexusForever.Network.World.Message.Model.Abilities
             ActionBarIndex = reader.ReadEnum<UILocation>(6u);
             ShortcutType   = reader.ReadEnum<ShortcutType>(4u);
             ObjectId       = reader.ReadUInt();
-            SpecIndex      = reader.ReadByte(4u);
+            SpecIndex      = reader.ReadByte(3u);
         }
     }
 }

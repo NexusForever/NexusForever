@@ -32,6 +32,16 @@ namespace NexusForever.Game.Abstract.Entity
 
         float? RangeCheck { get; }
 
+        /// <summary>
+        /// Run <see cref="Action"/> on the entity in a thread-safe manner on the world thread.
+        /// </summary>
+        /// <param name="action">Action to run on the world thread.</param>
+        Task SynchroniseAsync(Action action);
+
+        /// <summary>
+        /// Run <see cref="Func{T}"/> on the entity in a thread-safe manner on the world thread.
+        /// </summary>
+        /// <param name="func">Function to run on the world thread.</param>
         Task<T> SynchroniseAsync<T>(Func<T> func);
 
         /// <summary>
@@ -87,6 +97,8 @@ namespace NexusForever.Game.Abstract.Entity
         /// Return visible <see cref="IGridEntity"/> by supplied guid.
         /// </summary>
         T GetVisible<T>(uint guid) where T : IGridEntity;
+
+        IEnumerable<IGridEntity> GetVisible();
 
         /// <summary>
         /// Return visible <see cref="IWorldEntity"/> by supplied creature id.

@@ -7,16 +7,16 @@ namespace NexusForever.Network.World.Combat
         public CombatLogType Type => CombatLogType.Modifying;
 
         public uint CasterId { get; set; }
-        public uint HostItemId { get; set; } // 18u
-        public uint SocketedItemId { get; set; }
-        public uint UnsocketedItemId { get; set; }
+        public uint HostItem2Id { get; set; } // 18u
+        public uint ItemRemovedItem2Id { get; set; }
+        public uint ItemAddedItem2Id { get; set; }
 
         public void Write(GamePacketWriter writer)
         {
             writer.Write(CasterId);
-            writer.Write(HostItemId, 18u);
-            writer.Write(SocketedItemId);
-            writer.Write(UnsocketedItemId);
+            writer.Write(HostItem2Id, 18u);
+            writer.Write(ItemRemovedItem2Id);
+            writer.Write(ItemAddedItem2Id);
         }
     }
 }

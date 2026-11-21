@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Spell;
-using NetworkDamageDescription = NexusForever.Network.World.Message.Model.Shared.DamageDescription;
+using NexusForever.Network.World.Message.Model.Spell;
 
 namespace NexusForever.Game.Spell
 {
@@ -16,9 +16,9 @@ namespace NexusForever.Game.Spell
         public CombatResult CombatResult { get; set; }
         public DamageType DamageType { get; set; }
 
-        public NetworkDamageDescription Build()
+        public SpellEffectResult Build()
         {
-            return new NetworkDamageDescription
+            return new SpellEffectResult
             {
                 RawDamage          = RawDamage,
                 RawScaledDamage    = RawScaledDamage,

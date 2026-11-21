@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.PublicEvent;
@@ -21,8 +22,10 @@ namespace NexusForever.Game.Map.Instance
         public TutorialMapInstance(
             IEntityFactory entityFactory,
             IPublicEventManager publicEventManager,
+            IPlayerManager playerManager,
+            ILootManager lootManager,
             IScriptManager scriptManager)
-            : base(entityFactory, publicEventManager)
+            : base(entityFactory, publicEventManager, playerManager, lootManager)
         {
             this.scriptManager = scriptManager;
         }

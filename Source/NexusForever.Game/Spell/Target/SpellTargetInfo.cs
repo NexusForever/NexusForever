@@ -5,8 +5,8 @@ using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Spell.Target
@@ -177,10 +177,10 @@ namespace NexusForever.Game.Spell.Target
             if (unitIds.Count == 0)
                 return;
 
-            Collection.Spell.Caster.EnqueueToVisible(new ServerSpellBuffsRemoved
+            Collection.Spell.Caster.EnqueueToVisible(new ServerSpellBuffRemove
             {
-                CastingId    = Collection.Spell.CastingId,
-                SpellTargets = unitIds
+                ServerUniqueId = Collection.Spell.CastingId,
+                Targets        = unitIds
             }, true);
         }
     }

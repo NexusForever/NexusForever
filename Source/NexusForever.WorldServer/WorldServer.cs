@@ -84,6 +84,7 @@ namespace NexusForever.WorldServer
                     sc.AddHostedService<NetworkInternalHandlerHostedService>();
                     sc.AddHostedService<OnlineHostedService>();
                     sc.AddHostedService<HostedService>();
+                    sc.AddHostedService<LootHostedService>();
 
                     sc.AddOptions<NetworkConfig>()
                         .Bind(hb.Configuration.GetSection("Network"));
@@ -92,7 +93,6 @@ namespace NexusForever.WorldServer
                     sc.AddOptions<ScriptConfig>()
                         .Bind(hb.Configuration.GetSection("Script"));
 
-                    sc.AddNetworkInternal();
                     sc.AddNetworkInternalBroker(hb.Configuration.GetSection("Network:Internal").Get<BrokerConfig>());
                     sc.AddNetworkInternalHandlers();
 

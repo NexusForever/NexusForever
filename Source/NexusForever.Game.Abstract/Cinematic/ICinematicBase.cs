@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Cinematic;
 
 namespace NexusForever.Game.Abstract.Cinematic
 {
@@ -6,11 +7,11 @@ namespace NexusForever.Game.Abstract.Cinematic
     {
         ushort CinematicId { get; set; }
         uint Duration { get; set; }
-        ushort InitialFlags { get; set; }
-        ushort InitialCancelMode { get; set; }
+        CinematicFlags InitialFlags { get; set; }
+        CancelType InitialCancelMode { get; set; }
         Dictionary<uint, IActor> Actors { get; }
         Dictionary<uint, uint> Texts { get; }
-        Dictionary<string, List<IKeyframeAction>> Keyframes { get; }
+        List<IKeyframeAction> Keyframes { get; }
         List<ICamera> Cameras { get; }
         ITransition StartTransition { get; }
         ITransition EndTransition { get; }

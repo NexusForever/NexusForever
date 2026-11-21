@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Database.Group.Model
 {

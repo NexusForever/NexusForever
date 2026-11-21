@@ -15,7 +15,8 @@ namespace NexusForever.Game.Entity
         {
             None   = 0x00,
             Create = 0x01,
-            Value  = 0x02
+            Value  = 0x02,
+            Data   = 0x04
         }
 
         public Static.Entity.Stat Stat { get; }
@@ -33,7 +34,15 @@ namespace NexusForever.Game.Entity
 
         private float value;
 
-        public uint Data { get; set; }
+        public uint Data
+        {
+            get;
+            set
+            {
+                field = value;
+                saveMask |= StatSaveMask.Data;
+            }
+        }
 
         private StatSaveMask saveMask;
 
@@ -45,6 +54,7 @@ namespace NexusForever.Game.Entity
             Stat  = (Static.Entity.Stat)model.Stat;
             Type  = EntityManager.Instance.GetStatAttribute(Stat).Type;
             Value = model.Value;
+            Data  = model.Data;
         }
 
         /// <summary>
@@ -89,6 +99,14 @@ namespace NexusForever.Game.Entity
             saveMask = StatSaveMask.Create;
         }
 
+        public StatValue(Static.Entity.Stat stat, uint value, uint data)
+        {
+            Stat     = stat;
+            Type     = StatType.Data;
+            Value    = value;
+            saveMask = StatSaveMask.Create;
+        }
+
         public void SaveCharacter(ulong characterId, CharacterContext context)
         {
             if (saveMask == StatSaveMask.None)
@@ -116,6 +134,12 @@ namespace NexusForever.Game.Entity
                 {
                     statModel.Value = Value;
                     statEntity.Property(p => p.Value).IsModified = true;
+                }
+
+                if ((saveMask & StatSaveMask.Data) != 0)
+                {
+                    statModel.Data = Data;
+                    statEntity.Property(p => p.Data).IsModified = true;
                 }
             }
 

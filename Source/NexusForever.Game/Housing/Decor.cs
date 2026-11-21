@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Housing;
 using NexusForever.Game.Static.Housing;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.Game.Housing
 {
@@ -30,7 +31,7 @@ namespace NexusForever.Game.Housing
             PlotIndex          = 0x0100
         }
 
-        public ulong Id => Residence.Id;
+        public Identity ResidenceIdentity => Residence.Identity;
         public ulong DecorId { get; }
         public HousingDecorInfoEntry Entry { get; }
 
@@ -206,7 +207,7 @@ namespace NexusForever.Game.Housing
                 // decor doesn't exist in database, all infomation must be saved
                 context.Add(new ResidenceDecor
                 {
-                    Id            = Id,
+                    Id            = ResidenceIdentity.Id,
                     DecorId       = DecorId,
                     DecorInfoId   = Entry.Id,
                     DecorType     = (uint)Type,
@@ -227,7 +228,7 @@ namespace NexusForever.Game.Housing
             {
                 var model = new ResidenceDecor
                 {
-                    Id      = Id,
+                    Id      = ResidenceIdentity.Id,
                     DecorId = DecorId
                 };
 
@@ -238,7 +239,7 @@ namespace NexusForever.Game.Housing
                 // decor already exists in database, save only data that has been modified
                 var model = new ResidenceDecor
                 {
-                    Id      = Id,
+                    Id      = ResidenceIdentity.Id,
                     DecorId = DecorId
                 };
 
@@ -319,15 +320,14 @@ namespace NexusForever.Game.Housing
         {
             return new()
             {
-                RealmId       = RealmContext.Instance.RealmId,
+                ResidenceIdentity = Residence.Identity.ToNetworkIdentity(),
                 DecorId       = DecorId,
-                ResidenceId   = Residence.Id,
                 DecorType     = Type,
                 PlotIndex     = PlotIndex,
                 Scale         = Scale,
                 Position      = Position,
                 Rotation      = Rotation,
-                DecorInfoId   = Entry.Id,
+                HousingDecorInfoId   = Entry.Id,
                 ParentDecorId = DecorParentId,
                 ColourShift   = ColourShiftId
             };

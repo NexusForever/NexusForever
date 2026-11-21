@@ -80,7 +80,6 @@ namespace NexusForever.Server.ChatServer
                         hb.Configuration.GetSection("API:Character")
                         .Get<APIConfig>());
 
-                    sc.AddNetworkInternal();
                     sc.AddScoped<OutboxMessagePublisher>();
                     sc.AddSingleton<OutboxUrgentSignal>();
                     sc.AddHostedService<OutboxUrgentHostedService>();

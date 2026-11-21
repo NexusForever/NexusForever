@@ -3,6 +3,7 @@ using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Spell;
 
 namespace NexusForever.Network.World.Message.Model
 {

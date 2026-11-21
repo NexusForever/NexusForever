@@ -10,8 +10,10 @@ using NexusForever.Game.Abstract.Account.Reward;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Reward;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.AccountInventory;
 using NexusForever.Network.World.Message.Model.Pregame;
 using NexusForever.Shared.Game.Events;
 
@@ -58,10 +60,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
 
             yield return new ServerAccountEntitlements
             {
-                Entitlements = session.Account.EntitlementManager
-                    .Select(e => new ServerAccountEntitlements.AccountEntitlementInfo
+                AccountEntitlements = session.Account.EntitlementManager
+                    .Select(e => new ServerAccountEntitlements.AccountEntitlement
                     {
-                        Entitlement = e.Type,
+                        EntitlementId = e.Type,
                         Count       = e.Amount
                     })
                     .ToList()
@@ -144,7 +146,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Character
                     if (costumeManager.CostumeIndex.HasValue)
                         costume = costumeManager.GetCostume((byte)character.ActiveCostumeIndex);
 
-                    listCharacter.GearMask = costume?.Mask ?? 0xFFFFFFFF;
+                    listCharacter.GearMask = costume?.VisibilityMask ?? 0xFFFFFFFF;
 
                     Dictionary<ItemSlot, IItemVisual> costumeVisuals =
                         costume?.GetItemVisuals().ToDictionary(c => c.Slot);

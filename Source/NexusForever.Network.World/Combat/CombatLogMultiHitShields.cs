@@ -7,12 +7,12 @@ namespace NexusForever.Network.World.Combat
     {
         public CombatLogType Type => CombatLogType.MultiHitShields;
 
-        public uint MitigatedDamage { get; set; }
+        public uint DamageAmount { get; set; }
         public uint RawDamage { get; set; }
         public uint Shield { get; set; }
         public uint Absorption { get; set; }
         public uint Overkill { get; set; }
-        public uint Unknown0 { get; set; }
+        public uint GlanceAmount { get; set; }
         public bool BTargetVulnerable { get; set; }
         public bool BKilled { get; set; }
         public bool BPeriodic { get; set; }
@@ -22,12 +22,12 @@ namespace NexusForever.Network.World.Combat
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(MitigatedDamage);
+            writer.Write(DamageAmount);
             writer.Write(RawDamage);
             writer.Write(Shield);
             writer.Write(Absorption);
             writer.Write(Overkill);
-            writer.Write(Unknown0);
+            writer.Write(GlanceAmount);
             writer.Write(BTargetVulnerable);
             writer.Write(BKilled);
             writer.Write(BPeriodic);

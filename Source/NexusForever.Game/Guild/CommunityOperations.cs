@@ -28,7 +28,7 @@ namespace NexusForever.Game.Guild
             if (residence == null)
                 throw new InvalidPacketValueException();
 
-            IResidenceChild sourceResidence = Residence.GetChild(member.CharacterId);
+            IResidenceChild sourceResidence = Residence.GetChild(member.PlayerIdentity);
 
             if (operation.Data.Int32Data != -1)
             {
@@ -126,7 +126,7 @@ namespace NexusForever.Game.Guild
             if (targetMember == null)
                 throw new InvalidPacketValueException();
 
-            IResidenceChild child = Residence.GetChild(targetMember.CharacterId);
+            IResidenceChild child = Residence.GetChild(targetMember.PlayerIdentity);
             if (child == null)
                 throw new InvalidPacketValueException();
 

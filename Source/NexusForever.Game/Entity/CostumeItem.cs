@@ -2,10 +2,11 @@
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Costume;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Costume;
 
 namespace NexusForever.Game.Entity
 {
@@ -26,28 +27,28 @@ namespace NexusForever.Game.Entity
         public const byte MaxCostumeItemDyes = 3;
 
         /// <summary>
-        /// Return dye ramp mask generated from supplied dyes.
+        /// Returns packed dye RampIndexes generated from supplied dyeColorRampIds.
         /// </summary>
-        public static int GenerateDyeMask(uint[] dyes)
+        public static uint GenerateDyeData(uint[] dyeColorRampIds)
         {
-            int[] ramps = new int[MaxCostumeItemDyes];
-            for (var i = 0; i < dyes.Length; i++)
+            uint[] ramps = new uint[MaxCostumeItemDyes];
+            for (var i = 0; i < dyeColorRampIds.Length; i++)
             {
-                if (dyes[i] == 0)
+                if (dyeColorRampIds[i] == 0)
                     continue;
 
-                DyeColorRampEntry entry = GameTableManager.Instance.DyeColorRamp.GetEntry(dyes[i]);
-                ramps[i] = (int)entry.RampIndex;
+                DyeColorRampEntry entry = GameTableManager.Instance.DyeColorRamp.GetEntry(dyeColorRampIds[i]);
+                ramps[i] = (uint)entry.RampIndex;
             }
 
-            return (int)((ramps[2] & 0x3FF | 0xFFFFF800) << 20) | (ramps[1] & 0x3FF) << 10 | ramps[0] & 0x3FF;
+            return (uint)((ramps[2] & 0x3FF | 0xFFFFF800) << 20) | (ramps[1] & 0x3FF) << 10 | ramps[0] & 0x3FF;
         }
 
         public CostumeItemSlot Slot { get; }
         public ItemSlot ItemSlot { get; }
         public IItemInfo ItemInfo { get; private set; }
 
-        public uint? ItemId
+        public uint? Item2Id
         {
             get => ItemInfo?.Id;
             set
@@ -62,7 +63,7 @@ namespace NexusForever.Game.Entity
 
         public ushort? DisplayId => ItemInfo?.GetDisplayId();
 
-        public int DyeData
+        public uint DyeData
         {
             get => dyeData;
             set
@@ -75,7 +76,7 @@ namespace NexusForever.Game.Entity
             }
         }
 
-        private int dyeData;
+        private uint dyeData;
 
         private readonly ICostume costume;
 
@@ -89,7 +90,7 @@ namespace NexusForever.Game.Entity
             this.costume = costume;
             Slot         = (CostumeItemSlot)model.Slot;
             ItemSlot     = GetSlot(Slot);
-            ItemId       = model.ItemId > 0 ? model.ItemId : null;
+            Item2Id      = model.Item2Id > 0 ? model.Item2Id : null;
             dyeData      = model.DyeData;
 
             saveMask     = CostumeItemSaveMask.None;
@@ -103,8 +104,8 @@ namespace NexusForever.Game.Entity
             this.costume = costume;
             Slot         = slot;
             ItemSlot     = GetSlot(Slot);
-            ItemId       = item.ItemId > 0 ? item.ItemId : null;
-            dyeData      = GenerateDyeMask(item.Dyes);
+            Item2Id      = item.Item2Id > 0 ? item.Item2Id : null;
+            dyeData      = GenerateDyeData(item.DyeColorRampIds);
 
             saveMask     = CostumeItemSaveMask.Create;
         }
@@ -137,7 +138,7 @@ namespace NexusForever.Game.Entity
                     Id      = costume.Owner,
                     Index   = costume.Index,
                     Slot    = (byte)Slot,
-                    ItemId  = ItemId ?? 0,
+                    Item2Id = Item2Id ?? 0,
                     DyeData = dyeData
                 });
             }
@@ -154,8 +155,8 @@ namespace NexusForever.Game.Entity
                 EntityEntry<CharacterCostumeItemModel> entity = context.Attach(model);
                 if ((saveMask & CostumeItemSaveMask.ItemId) != 0)
                 {
-                    model.ItemId = ItemId ?? 0;
-                    entity.Property(p => p.ItemId).IsModified = true;
+                    model.Item2Id = Item2Id ?? 0;
+                    entity.Property(p => p.Item2Id).IsModified = true;
                 }
                 if ((saveMask & CostumeItemSaveMask.DyeData) != 0)
                 {

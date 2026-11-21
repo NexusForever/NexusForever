@@ -5,13 +5,13 @@ namespace NexusForever.Network.World.Message.Model.GalacticArchive
     [Message(GameMessageOpcode.ServerGalacticArchiveUpdate)]
     public class ServerGalacticArchiveUpdate : IWritable
     {
-        public uint ArchiveArticleId { get; set; }
-        public uint UnlockedFlags { get; set; } // Corresponds to the archiveEntry index not archiveEntryId, see archiveArticle tbl
-        public uint ViewedFlags { get; set; } // Corresponds to the archiveEntry index not archiveEntryId, see archiveArticle tbl
+        public ushort ArchiveArticleId { get; set; }
+        public uint UnlockedFlags { get; set; } // Bits 0-15 correspond to the archiveEntry index not archiveEntryId, see archiveArticle tbl. Bit 30 is article viewed, bit 31 is article unlocked
+        public uint ViewedFlags { get; set; } // Bits 0-15 correspond to the archiveEntry index not archiveEntryId, see archiveArticle tbl
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(ArchiveArticleId);
+            writer.Write(ArchiveArticleId, 14u);
             writer.Write(UnlockedFlags);
             writer.Write(ViewedFlags);
         }

@@ -39,8 +39,19 @@ namespace NexusForever.Game.Entity
 
         public override void OnActivate(IPlayer activator)
         {
+
             if (CreatureInfo.Entry.DatacubeId != 0u)
                 activator.DatacubeManager.AddDatacube((ushort)CreatureInfo.Entry.DatacubeId, int.MaxValue);
+
+            if (CreatureInfo.Entry.DatacubeId != 0u)
+            {
+                // datacube is already known, resend it instead of adding it again which would throw
+                IDatacube datacube = activator.DatacubeManager.GetDatacube((ushort)CreatureInfo.Entry.DatacubeId, DatacubeType.Datacube);
+                if (datacube == null)
+                    activator.DatacubeManager.AddDatacube((ushort)CreatureInfo.Entry.DatacubeId, int.MaxValue);
+                else
+                    activator.DatacubeManager.SendDatacube(datacube);
+            }
         }
 
         public override void OnActivateSuccess(IPlayer activator)

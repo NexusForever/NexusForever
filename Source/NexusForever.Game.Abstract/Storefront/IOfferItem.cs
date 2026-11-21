@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Account;
+﻿using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Storefront;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;

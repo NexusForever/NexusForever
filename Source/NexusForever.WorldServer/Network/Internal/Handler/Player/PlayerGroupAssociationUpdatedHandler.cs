@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using NexusForever.Game;
+using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Group;
 using NexusForever.Network.Internal.Message.Player;
 using NexusForever.Network.World.Message.Model;
 using Rebus.Handlers;
@@ -12,30 +14,40 @@ namespace NexusForever.WorldServer.Network.Internal.Handler.Player
         #region Dependency Injection
 
         private readonly IPlayerManager playerManager;
+        private readonly IGroupManager groupManager;
 
         public PlayerGroupAssociationUpdatedHandler(
-            IPlayerManager playerManager)
+            IPlayerManager playerManager,
+            IGroupManager groupManager)
         {
             this.playerManager = playerManager;
+            this.groupManager  = groupManager;
         }
 
         #endregion
 
-        public Task Handle(PlayerGroupAssociationUpdatedMessage message)
+        public async Task Handle(PlayerGroupAssociationUpdatedMessage message)
         {
-            IPlayer player = playerManager.GetPlayer(message.Identity.ToGameIdentity());
-            if (player == null)
-                return Task.CompletedTask;
+            Identity identity = message.Identity.ToGameIdentity();
+            if (message.Group != null)
+                groupManager.AddGroupAssociation(message.Group, identity);
+            else
+                groupManager.RemoveGroupAssociation(identity);
 
-            // TODO: Rawaho: not thread safe
-            player.GroupAssociation = message.Group?.Id ?? 0;
+            IPlayer player = playerManager.GetPlayer(identity);
+            if (player == null)
+                return;
+
+            await player.SynchroniseAsync(() =>
+            {
+                player.GroupAssociation = message.Group?.Id ?? 0;
+            });
+
             player.EnqueueToVisible(new ServerEntityGroupAssociation
             {
                 UnitId  = player.Guid,
                 GroupId = player.GroupAssociation
             }, true);
-
-            return Task.CompletedTask;
         }
     }
 }

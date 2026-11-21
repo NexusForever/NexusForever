@@ -2,8 +2,8 @@
 {
     public enum LootRollAction
     {
-        Need    = 0,
-        Greed   = 1,
-        Pass    = 2,
+        Need  = 0,
+        Greed = 1,
+        Pass  = 2
     }
 }

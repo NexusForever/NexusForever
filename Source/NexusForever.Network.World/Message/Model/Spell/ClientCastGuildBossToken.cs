@@ -13,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model.Spell
         public void Read(GamePacketReader reader)
         {
             GuildIdentity.Read(reader);
-            Item2Id = reader.ReadUInt();
+            Item2Id = reader.ReadUInt(18u);
             ClientSpellCastUniqueId = reader.ReadUInt();
         }
     }

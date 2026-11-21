@@ -11,12 +11,6 @@ namespace NexusForever.Network.Internal
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddNetworkInternal(this IServiceCollection sc)
-        {
-            sc.AddTransient<IInternalMessagePublisher, RebusMessagePublisher>();
-            return sc;
-        }
-
         public static IServiceCollection AddNetworkInternalBroker(this IServiceCollection sc, BrokerConfig config)
         {
             sc.AddRebus(b => b
@@ -47,6 +41,8 @@ namespace NexusForever.Network.Internal
                             .OnReceive(incomingStep, PipelineRelativePosition.After, typeof(DeserializeIncomingMessageStep));
                     });
                 }));
+
+            sc.AddTransient<IInternalMessagePublisher, RebusMessagePublisher>();
 
             return sc;
         }

@@ -2,10 +2,12 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Trigger;
+using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Entity.Creature;
 using NexusForever.Game.Entity.Movement;
 using NexusForever.Game.Entity.Stat;
 using NexusForever.Game.Entity.Trigger;
+using NexusForever.Game.Guild;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
@@ -74,6 +76,7 @@ namespace NexusForever.Game.Entity
 
             sc.AddTransient<ICurrencyManager, CurrencyManager>();
             sc.AddTransient<IResurrectionManager, ResurrectionManager>();
+            sc.AddTransient<IGuildManager, GuildManager>();
         }
     }
 }

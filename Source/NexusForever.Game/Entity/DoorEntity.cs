@@ -5,7 +5,6 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
-using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
@@ -37,7 +36,7 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(creatureInfo, model);
 
-            SetStat(Static.Entity.Stat.StandState, StandState.State0); // Closed on spawn
+            SetStandState(StandState.State0); // Closed on spawn
             SetBaseProperty(Property.BaseHealth, 101f); // Sniffs showed all doors had 101hp for me.
         }
 
@@ -63,12 +62,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void OpenDoor()
         {
-            SetStat(Static.Entity.Stat.StandState, StandState.State1);
-            EnqueueToVisible(new ServerEmote
-            {
-                Guid       = Guid,
-                StandState = StandState.State1
-            });
+            SetStandState(StandState.State1);
 
             scriptCollection.Invoke<IDoorEntityScript>(script => script.OnOpenDoor());
         }
@@ -78,12 +72,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void CloseDoor()
         {
-            SetStat(Static.Entity.Stat.StandState, StandState.State0);
-            EnqueueToVisible(new ServerEmote
-            {
-                Guid       = Guid,
-                StandState = StandState.State0
-            });
+            SetStandState(StandState.State0);
 
             scriptCollection.Invoke<IDoorEntityScript>(script => script.OnDoorClose());
         }

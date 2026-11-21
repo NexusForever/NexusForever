@@ -2,12 +2,13 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Loot.Distribute;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Combat.CrowdControl;
 using NexusForever.Game.Static.Reputation;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Combat.CrowdControl;
 using NexusForever.Shared;
 
 namespace NexusForever.Game.Entity
@@ -27,8 +28,9 @@ namespace NexusForever.Game.Entity
             IEntitySummonFactory entitySummonFactory,
             IStatUpdateManager<IUnitEntity> statUpdateManager,
             ISpellFactory spellFactory,
+            ILootDistributor lootDistributor,
             IFactory<ISpellParameters> spellParameterFactory)
-            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
+            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory, lootDistributor)
         {
             this.spellParameterFactory = spellParameterFactory;
         }
@@ -55,7 +57,7 @@ namespace NexusForever.Game.Entity
 
             summoner.Session.EnqueueMessageEncrypted(new ServerEntityCCTetherUnit
             {
-                Guid = guid
+                UnitId = guid
             });
         }
 

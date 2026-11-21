@@ -3,7 +3,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell.Effect.Data;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Combat.CrowdControl;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Combat.CrowdControl;
 
 namespace NexusForever.Game.Combat.CrowdControl
 {

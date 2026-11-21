@@ -250,7 +250,7 @@ namespace NexusForever.GameTable
         public GameTable<HousingDecorTypeEntry> HousingDecorType { get; private set; }
         public GameTable<HousingMannequinPoseEntry> HousingMannequinPose { get; private set; }
         public GameTable<HousingMapInfoEntry> HousingMapInfo { get; private set; }
-        public GameTable<HousingNeighborhoodInfoEntry> HousingNeighborhoodInfo { get; private set; }
+        public GameTable<HousingNeighbourhoodInfoEntry> HousingNeighbourhoodInfo { get; private set; }
 
         [GameData]
         public GameTable<HousingPlotInfoEntry> HousingPlotInfo { get; private set; }
@@ -677,6 +677,8 @@ namespace NexusForever.GameTable
         public GameTable<UnitVehicleEntry> UnitVehicle { get; private set; }
 
         public GameTable<VeteranTierEntry> VeteranTier { get; private set; }
+
+        [GameData]
         public GameTable<VirtualItemEntry> VirtualItem { get; private set; }
         public GameTable<VisualEffectEntry> VisualEffect { get; private set; }
 

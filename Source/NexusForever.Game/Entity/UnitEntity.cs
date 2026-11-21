@@ -18,8 +18,7 @@ using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Model.Shared;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
@@ -560,7 +559,7 @@ namespace NexusForever.Game.Entity
             deathState = EntityDeathState.Dead;
         }
 
-        private void GenerateRewards(IUnitEntity killer)
+        protected virtual void GenerateRewards(IUnitEntity killer)
         {
             foreach (uint targetGroupId in AssetManager.Instance.GetTargetGroupsForCreatureId(CreatureId))
                 Map.PublicEventManager.UpdateObjective(PublicEventObjectiveType.KillTargetGroup, targetGroupId, 1);
@@ -669,7 +668,7 @@ namespace NexusForever.Game.Entity
                 scriptCollection?.Invoke<IUnitScript>(s => s.OnLeaveCombat());
 
             Sheathed   = !InCombat;
-            StandState = InCombat ? StandState.Stand : StandState.State0;
+            SetStandState(inCombat ? StandState.Stand : StandState.State0);
 
             statUpdateManager.OnCombatStateUpdate(InCombat);
         }

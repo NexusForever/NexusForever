@@ -8,7 +8,6 @@ namespace NexusForever.Game.Abstract.Cinematic
         uint UnitId { get; }
         uint VisualEffectId { get; }
         Position Position { get; }
-        uint InitialDelay { get; }
         uint Duration { get; }
         bool RemoveOnCameraEnd { get; }
 

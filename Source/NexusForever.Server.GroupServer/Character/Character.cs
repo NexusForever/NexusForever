@@ -9,7 +9,7 @@ using NexusForever.Network.Internal.Message.Group;
 using NexusForever.Network.Internal.Message.Player;
 using NexusForever.Server.GroupServer.Group;
 using NexusForever.Server.GroupServer.Network.Internal;
-using Path = NexusForever.Game.Static.Entity.Path;
+using Path = NexusForever.Game.Static.PlayerPath.Path;
 
 namespace NexusForever.Server.GroupServer.Character
 {
@@ -357,7 +357,20 @@ namespace NexusForever.Server.GroupServer.Character
                     PrimaryGroup = null;
             }
 
-            await SendGroupAssociationUpdated(null);
+            if (PrimaryGroup != null)
+            {
+                CharacterGroup primaryCharacterGroup = GetGroup(PrimaryGroup.GroupId);
+                if (primaryCharacterGroup == null)
+                    return;
+
+                Group.Group primaryGroup = await primaryCharacterGroup.GetGroupAsync();
+                if (primaryGroup == null)
+                    return;
+
+                await SendGroupAssociationUpdated(primaryGroup);
+            }
+            else
+                await SendGroupAssociationUpdated(null);
         }
 
         private async Task SendGroupAssociationUpdated(Group.Group group)

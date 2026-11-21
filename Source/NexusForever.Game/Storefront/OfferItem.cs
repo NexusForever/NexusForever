@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Storefront;
 using NexusForever.Game.Static;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Storefront;
 using NexusForever.Network.World.Message.Model;
 
@@ -66,9 +66,9 @@ namespace NexusForever.Game.Storefront
             float pricePremium = 0f;
             float priceAlternative = 0;
 
-            if (prices.TryGetValue(AccountCurrencyType.Protobuck, out IOfferItemPrice protobucksItemPrice))
+            if (prices.TryGetValue(AccountCurrencyType.Protobucks, out IOfferItemPrice protobucksItemPrice))
                 pricePremium = protobucksItemPrice.GetCurrencyValue();
-            if (prices.TryGetValue(AccountCurrencyType.Omnibit, out IOfferItemPrice omnibitsItemPrice))
+            if (prices.TryGetValue(AccountCurrencyType.Omnibits, out IOfferItemPrice omnibitsItemPrice))
                 priceAlternative = omnibitsItemPrice.GetCurrencyValue();
 
             return new ServerStoreOffers.OfferGroup.Offer

@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Cinematic;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Cinematic;
 
 namespace NexusForever.Game.Cinematic
 {
@@ -28,7 +28,7 @@ namespace NexusForever.Game.Cinematic
             session.EnqueueMessageEncrypted(new ServerCinematicCameraSpline
             {
                 Delay       = Delay,
-                Spline      = Spline,
+                SplineId    = Spline,
                 SplineMode  = SplineMode,
                 Speed       = Speed,
                 Target      = Target,

@@ -1,4 +1,5 @@
 ﻿using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Spell;
 
 namespace NexusForever.Network.World.Message.Model.Shared
 {
@@ -10,7 +11,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public int TimeRemaining { get; set; }
         public byte InfoType { get; set; }
 
-        public DamageDescription DamageDescriptionData { get; set; } = new DamageDescription();
+        public SpellEffectResult EffectResultData { get; set; } = new();
 
         public void Write(GamePacketWriter writer)
         {
@@ -21,7 +22,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
             writer.Write(InfoType, 2u);
 
             if (InfoType == 1)
-                DamageDescriptionData.Write(writer);
+                EffectResultData.Write(writer);
             else
                 writer.Write(0u, 1u);
         }

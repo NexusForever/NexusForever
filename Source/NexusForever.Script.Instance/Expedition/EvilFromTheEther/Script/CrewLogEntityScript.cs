@@ -52,7 +52,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther.Script
             };
 
             ICommunicatorMessage communicatorMessage = globalQuestManager.GetCommunicatorMessage(communicatorMessageId);
-            foreach (IPlayer player in mapInstance.GetPlayers())
+            foreach (IPlayer player in mapInstance.PlayerManager)
                 communicatorMessage?.Send(player.Session);
         }
     }

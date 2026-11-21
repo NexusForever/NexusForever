@@ -31,7 +31,7 @@ namespace NexusForever.Server.GroupServer.Job
 
         #endregion
 
-        public async Task Execute(IJobExecutionContext context)
+        public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken = default)
         {
             while (!context.CancellationToken.IsCancellationRequested)
             {

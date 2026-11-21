@@ -7,7 +7,7 @@ namespace NexusForever.Database.Character.Model
     {
         public ulong Id { get; set; }
         public byte Index { get; set; }
-        public uint Mask { get; set; }
+        public uint VisibilityMask { get; set; }
         public DateTime Timestamp { get; set; }
 
         public CharacterModel Character { get; set; }

@@ -7,7 +7,7 @@ namespace NexusForever.Network.World.Combat
         public CombatLogType Type => CombatLogType.KillStreak;
 
         public uint UnitId { get; set; }
-        public byte StatType { get; set; } // 5u
+        public CombatMomentumStat StatType { get; set; } // 5u
         public uint StreakAmount { get; set; }
 
         public void Write(GamePacketWriter writer)

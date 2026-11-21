@@ -1,0 +1,11 @@
+﻿using NexusForever.Database.Auth;
+using NexusForever.Network.Message;
+using NexusForever.Network.World.Message.Model.Option;
+
+namespace NexusForever.Game.Abstract.Account.Option
+{
+    public interface IAccountKeybindingManager : IDatabaseAuth, INetworkBuildable<BiInputKeySet>
+    {
+        void Update(BiInputKeySet inputKeySet);
+    }
+}

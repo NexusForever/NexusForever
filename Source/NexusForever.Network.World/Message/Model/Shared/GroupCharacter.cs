@@ -37,7 +37,7 @@ namespace NexusForever.Network.World.Message.Model.Shared
         public Sex Sex { get; set; }
         public byte Level { get; set; }
         public byte EffectiveLevel { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
         public uint Unknown4 { get; set; }
         public ushort GroupMemberId { get; set; }
 

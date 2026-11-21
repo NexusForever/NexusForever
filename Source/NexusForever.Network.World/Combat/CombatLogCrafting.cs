@@ -6,13 +6,13 @@ namespace NexusForever.Network.World.Combat
     {
         public CombatLogType Type => CombatLogType.Crafting;
 
-        public uint Unknown0 { get; set; }
-        public uint Unknown1 { get; set; } // 18u
+        public uint CasterUnitId { get; set; }
+        public uint Item2Id { get; set; } // 18u
 
         public void Write(GamePacketWriter writer)
         {
-            writer.Write(Unknown0);
-            writer.Write(Unknown1, 18u);
+            writer.Write(CasterUnitId);
+            writer.Write(Item2Id, 18u);
         }
     }
 }

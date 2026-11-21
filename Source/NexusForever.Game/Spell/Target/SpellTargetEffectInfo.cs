@@ -6,8 +6,8 @@ using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Spell;
 using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Spell.Target
@@ -102,8 +102,8 @@ namespace NexusForever.Game.Spell.Target
 
             if (Damage != null)
             {
-                effectInfo.InfoType              = 1;
-                effectInfo.DamageDescriptionData = Damage.Build();
+                effectInfo.InfoType         = 1;
+                effectInfo.EffectResultData = Damage.Build();
             }
 
             return effectInfo;
@@ -134,7 +134,7 @@ namespace NexusForever.Game.Spell.Target
                         target.EnqueueToVisible(new ServerSpellEffectExecute()
                         {
                             CastingId           = executionContext.Spell.CastingId,
-                            TargetGuid          = target.Guid,
+                            CasterUnitId        = target.Guid,
                             SpellEffectUniqueId = EffectId
                         }, true);
                     }
@@ -225,10 +225,10 @@ namespace NexusForever.Game.Spell.Target
 
                 target.EnqueueToVisible(new ServerSpellUpdateEffectDuration
                 {
-                    CastingId           = Target.Collection.Spell.CastingId,
-                    TargetId            = target.Guid,
+                    ServerUniqueId      = Target.Collection.Spell.CastingId,
+                    TargetUnitId        = target.Guid,
                     SpellEffectUniqueId = EffectId,
-                    Duration            = duration != null ? (int)TimeSpan.FromSeconds(duration.Duration).TotalMilliseconds : -1
+                    TimeRemaining       = duration != null ? (int)TimeSpan.FromSeconds(duration.Duration).TotalMilliseconds : -1
                 }, true);
             }
         }

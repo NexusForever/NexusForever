@@ -43,6 +43,7 @@
         <tbody id="commsLog"></tbody>
     </table>
     <div>
+        <input id="sendCharacter" placeholder="Character (optional)" disabled />
         <input id="sendMessage" disabled />
         <button id="sendButton" type="submit" disabled>Send</button>
         <button id="closeButton" disabled>Close Socket</button>
@@ -53,6 +54,7 @@
         var connectionUrl = document.getElementById("connectionUrl");
         var connectButton = document.getElementById("connectButton");
         var stateLabel = document.getElementById("stateLabel");
+        var sendCharacter = document.getElementById("sendCharacter");
         var sendMessage = document.getElementById("sendMessage");
         var sendButton = document.getElementById("sendButton");
         var sendForm = document.getElementById("sendForm");
@@ -64,12 +66,14 @@
 
         function updateState() {
             function disable() {
+                sendCharacter.disabled = true;
                 sendMessage.disabled = true;
                 sendButton.disabled = true;
                 closeButton.disabled = true;
             }
 
             function enable() {
+                sendCharacter.disabled = false;
                 sendMessage.disabled = false;
                 sendButton.disabled = false;
                 closeButton.disabled = false;
@@ -120,7 +124,7 @@
                 alert("socket not connected");
             }
             var data = sendMessage.value;
-            socket.send(JSON.stringify({ message: data }));
+            socket.send(JSON.stringify({ message: data, character: sendCharacter.value }));
             commsLog.innerHTML += '<tr>' +
                 '<td class="commslog-data">' +
                 data +

@@ -5,7 +5,7 @@ namespace NexusForever.Network.World.Message.Model
     [Message(GameMessageOpcode.ClientEmote)]
     public class ClientEmote : IReadable
     {
-        public uint EmoteId { get; private set; }
+        public ushort EmoteId { get; private set; }
         public uint Seed { get; set; }
         public uint TargetUnitId { get; set; }
         public bool Targeted { get; set; }
@@ -13,7 +13,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public void Read(GamePacketReader reader)
         {
-            EmoteId      = reader.ReadUInt(14u);
+            EmoteId      = reader.ReadUShort(14u);
             Seed         = reader.ReadUInt();
             TargetUnitId = reader.ReadUInt();
             Targeted     = reader.ReadBit();

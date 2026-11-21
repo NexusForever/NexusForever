@@ -2,9 +2,9 @@
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Target;
 using NexusForever.Game.Static.Combat.CrowdControl;
-using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Entity.Movement;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Combat.CrowdControl;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Combat
 {
@@ -33,7 +33,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Combat
                 DashDirection.Left     => 28770,
                 DashDirection.Right    => 28771,
                 DashDirection.Forward  => 28772,
-                DashDirection.Backward => 28773,
+                DashDirection.Back     => 28773,
                 _                      => throw new NotImplementedException()
             };
 

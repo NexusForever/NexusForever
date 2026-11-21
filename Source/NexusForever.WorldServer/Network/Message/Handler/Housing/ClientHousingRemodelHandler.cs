@@ -1,7 +1,8 @@
-﻿using NexusForever.Game.Abstract.Map.Instance;
+﻿using NexusForever.Game;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Network;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Housing;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Housing
 {
@@ -12,7 +13,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Housing
             if (session.Player.Map is not IResidenceMapInstance residenceMap)
                 throw new InvalidPacketValueException();
 
-            residenceMap.Remodel(housingRemodel.TargetResidence, session.Player, housingRemodel);
+            residenceMap.Remodel(housingRemodel.TargetResidence.ToGameIdentity(), session.Player, housingRemodel);
         }
     }
 }

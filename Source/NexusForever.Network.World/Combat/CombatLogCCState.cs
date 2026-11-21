@@ -11,7 +11,8 @@ namespace NexusForever.Network.World.Combat
         public bool BRemoved { get; set; }
         public uint InterruptArmorTaken { get; set; }
         public CCStateApplyRulesResult Result { get; set; } // 4u
-        public ushort DiminishingReturnsId { get; set; } // 14u
+        public ushort CcStateDiminishingReturnsId { get; set; } // 14u
+
         public CombatLogCastData CastData { get; set; }
 
         public void Write(GamePacketWriter writer)
@@ -20,7 +21,7 @@ namespace NexusForever.Network.World.Combat
             writer.Write(BRemoved);
             writer.Write(InterruptArmorTaken);
             writer.Write(Result, 4u);
-            writer.Write(DiminishingReturnsId, 14u);
+            writer.Write(CcStateDiminishingReturnsId, 14u);
             CastData.Write(writer);
         }
     }

@@ -22,7 +22,7 @@ using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Script;
 using NexusForever.Script.Template.Collection;
 using NexusForever.Shared;
@@ -420,7 +420,7 @@ namespace NexusForever.Game.Spell
 
             if (Caster is IPlayer player && !player.IsLoading)
             {
-                player.Session.EnqueueMessageEncrypted(new Server07F9
+                player.Session.EnqueueMessageEncrypted(new ServerSpellInterrupted1
                 {
                     ServerUniqueId = CastingId,
                     CastResult     = result,
@@ -721,7 +721,7 @@ namespace NexusForever.Game.Spell
         {
             var spellStart = new ServerSpellStart
             {
-                CastingId              = CastingId,
+                ServerUniqueId         = CastingId,
                 CasterId               = Caster.Guid,
                 PrimaryTargetId        = GetPrimaryTargetId(),
                 Spell4Id               = Parameters.SpellInfo.Entry.Id,

@@ -9,8 +9,11 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.GameTable.Text.Filter;
 using NexusForever.GameTable.Text.Static;
+using NexusForever.Network.Internal;
+using NexusForever.Network.Internal.Message.Player;
 using NexusForever.Network.World.Message.Model.Guild;
 using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Shared;
 using NLog;
 using NetworkGuildMember = NexusForever.Network.World.Message.Model.Guild.GuildMember;
 
@@ -94,15 +97,27 @@ namespace NexusForever.Game.Guild
 
         private SaveMask saveMask;
 
-        private readonly IPlayer owner;
+        private IPlayer owner;
 
         private readonly Dictionary<ulong, IGuildBase> guilds = new();
         private IGuildInvite pendingInvite;
 
+        #region Dependency Injection
+
+        private readonly IInternalMessagePublisher messagePublisher;
+
+        public GuildManager(
+            IInternalMessagePublisher messagePublisher)
+        {
+            this.messagePublisher = messagePublisher;
+        }
+
+        #endregion
+
         /// <summary>
         /// Create a new <see cref="IGuildManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
-        public GuildManager(IPlayer player, CharacterModel model)
+        public void Initialise(IPlayer player, CharacterModel model)
         {
             owner = player;
 
@@ -480,6 +495,12 @@ namespace NexusForever.Game.Guild
             }, true);
 
             GuildAffiliation = guild;
+
+            messagePublisher.PublishAsync(new PlayerGuildAssociationUpdatedMessage
+            {
+                Identity  = owner.Identity.ToInternalIdentity(),
+                GuildName = guild.Name
+            }).FireAndForgetAsync();
         }
 
         /// <summary>
@@ -504,6 +525,12 @@ namespace NexusForever.Game.Guild
             }, true);
 
             GuildAffiliation = null;
+
+            messagePublisher.PublishAsync(new PlayerGuildAssociationUpdatedMessage
+            {
+                Identity  = owner.Identity.ToInternalIdentity(),
+                GuildName = null
+            }).FireAndForgetAsync();
         }
 
         /// <summary>

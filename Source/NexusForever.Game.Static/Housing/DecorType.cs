@@ -1,14 +1,14 @@
 ﻿namespace NexusForever.Game.Static.Housing
 {
-    // TODO: research this more
+    // related to but completely different values from HousingLib_CodeEnumDecorHookType
     public enum DecorType
     {
-        Crate    = 0, // 8
-        Unknown2 = 2, // 7
-        Unknown3 = 3, // 4
-        Unknown4 = 4, // 5
-        Unknown6 = 6, // 9
-        Unknown7 = 7, // 6
-        Unknown8 = 8  // 10
+        Crate            = 0,
+        DefaultHook      = 2,
+        Wallpaper        = 3,
+        FreePlace        = 4,
+        Landscape        = 6,
+        WarplotFreePlace = 7,
+        Mannequin        = 8 
     }
 }

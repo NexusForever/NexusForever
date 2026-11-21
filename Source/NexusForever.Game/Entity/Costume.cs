@@ -3,9 +3,10 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Static.Costume;
 using NexusForever.Game.Static.Entity;
-using NexusForever.Network.World.Message.Model;
-using NetworkCostume = NexusForever.Network.World.Message.Model.Shared.Costume;
+using NexusForever.Network.World.Message.Model.Costume;
+using NetworkCostume = NexusForever.Network.World.Message.Model.Costume.Costume;
 
 namespace NexusForever.Game.Entity
 {
@@ -27,20 +28,20 @@ namespace NexusForever.Game.Entity
         public ulong Owner { get; }
         public byte Index { get; }
 
-        public uint Mask
+        public uint VisibilityMask
         {
-            get => mask;
+            get => visibilityMask;
             set
             {
-                if (mask == value)
+                if (visibilityMask == value)
                     return;
 
-                mask = value;
+                visibilityMask = value;
                 saveMask |= CostumeSaveMask.Mask;
             }
         }
 
-        private uint mask;
+        private uint visibilityMask;
 
         private readonly ICostumeItem[] items = new CostumeItem[MaxCostumeItems];
 
@@ -53,7 +54,7 @@ namespace NexusForever.Game.Entity
         {
             Owner = model.Id;
             Index = model.Index;
-            mask  = model.Mask;
+            visibilityMask  = model.VisibilityMask;
 
             foreach (CharacterCostumeItemModel costumeItemModel in model.CostumeItem)
                 items[costumeItemModel.Slot] = new CostumeItem(this, costumeItemModel);
@@ -66,7 +67,7 @@ namespace NexusForever.Game.Entity
         {
             Owner = player.CharacterId;
             Index = (byte)costumeSave.Index;
-            mask  = costumeSave.Mask;
+            visibilityMask  = costumeSave.VisibilityMask;
 
             for (byte i = 0; i < costumeSave.Items.Count; i++)
                 items[i] = new CostumeItem(this, costumeSave.Items[i], (CostumeItemSlot)i);
@@ -85,7 +86,7 @@ namespace NexusForever.Game.Entity
                     {
                         Id    = Owner,
                         Index = Index,
-                        Mask  = Mask
+                        VisibilityMask  = VisibilityMask
                     };
 
                     context.Add(model);
@@ -102,8 +103,8 @@ namespace NexusForever.Game.Entity
                     EntityEntry<CharacterCostumeModel> entity = context.Attach(model);
                     if ((saveMask & CostumeSaveMask.Mask) != 0)
                     {
-                        model.Mask = mask;
-                        entity.Property(p => p.Mask).IsModified = true;
+                        model.VisibilityMask = visibilityMask;
+                        entity.Property(p => p.VisibilityMask).IsModified = true;
                     }
                 }
 
@@ -144,7 +145,7 @@ namespace NexusForever.Game.Entity
             IItemVisual visual = item.GetItemVisual();
 
             // remove visual if slot is hidden
-            if ((Mask & 1 << (int)item.Slot) == 0)
+            if ((VisibilityMask & 1 << (int)item.Slot) == 0)
                 visual.DisplayId = 0;
 
             return visual;
@@ -163,12 +164,12 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void Update(ClientCostumeSave costumeSave)
         {
-            Mask = costumeSave.Mask;
+            VisibilityMask = costumeSave.VisibilityMask;
 
             for (int i = 0; i < costumeSave.Items.Count; i++)
             {
-                items[i].ItemId  = costumeSave.Items[i].ItemId;
-                items[i].DyeData = CostumeItem.GenerateDyeMask(costumeSave.Items[i].Dyes);
+                items[i].Item2Id  = costumeSave.Items[i].Item2Id;
+                items[i].DyeData = CostumeItem.GenerateDyeData(costumeSave.Items[i].DyeColorRampIds);
             }
         }
 
@@ -177,12 +178,12 @@ namespace NexusForever.Game.Entity
             var networkCostume = new NetworkCostume
             {
                 Index = Index,
-                Mask  = Mask
+                VisibilityMask = VisibilityMask
             };
 
             foreach (ICostumeItem costumeItem in items)
             {
-                networkCostume.ItemIds[(byte)costumeItem.Slot] = costumeItem.ItemId ?? 0;
+                networkCostume.Item2Ids[(byte)costumeItem.Slot] = costumeItem.Item2Id ?? 0;
                 networkCostume.DyeData[(byte)costumeItem.Slot] = costumeItem.DyeData;
             }
 

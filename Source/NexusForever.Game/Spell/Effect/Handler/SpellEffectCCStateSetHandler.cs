@@ -10,7 +10,7 @@ using NexusForever.Game.Static.Spell.Effect;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Combat;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Network.World.Message.Model.Combat.CrowdControl;
 
 namespace NexusForever.Game.Spell.Effect.Handler
 {
@@ -75,9 +75,9 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             target.EnqueueToVisible(new ServerEntityCCStateSet
             {
-                Guid           = target.Guid,
-                CCState        = data.CCState.Id,
-                EffectUniqueId = info.EffectId
+                UnitId              = target.Guid,
+                CCType              = data.CCState.Id,
+                SpellEffectUniqueId = info.EffectId
             }, true);
 
             return BuildCombatLog(data.CCState, CCStateApplyRulesResult.Ok, executionContext.Spell, target, reduction - remainder);
@@ -100,11 +100,11 @@ namespace NexusForever.Game.Spell.Effect.Handler
 
             target.EnqueueToVisible(new ServerEntityCCStateRemove
             {
-                Guid           = target.Guid,
-                CCState        = data.CCState.Id,
-                CastingId      = spell.CastingId,
-                EffectUniqueId = info.EffectId,
-                Removed        = true
+                UnitId              = target.Guid,
+                CCType              = data.CCState.Id,
+                SpellCastUniqueId   = spell.CastingId,
+                SpellEffectUniqueId = info.EffectId,
+                Removed             = true
             }, true);
         }
 
@@ -112,12 +112,12 @@ namespace NexusForever.Game.Spell.Effect.Handler
         {
             return new CombatLogCCState
             {
-                State                = ccStateEntry.Id,
-                Result               = result,
-                DiminishingReturnsId = (ushort)ccStateEntry.CcStateDiminishingReturnsId,
-                InterruptArmorTaken  = interruptArmorTaken,
-                BRemoved             = removed,
-                CastData             = new CombatLogCastData
+                State                       = ccStateEntry.Id,
+                Result                      = result,
+                CcStateDiminishingReturnsId = (ushort)ccStateEntry.CcStateDiminishingReturnsId,
+                InterruptArmorTaken         = interruptArmorTaken,
+                BRemoved                    = removed,
+                CastData                    = new CombatLogCastData
                 {
                     CasterId     = spell.Caster.Guid,
                     TargetId     = target.Guid,

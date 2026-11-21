@@ -32,7 +32,7 @@ namespace NexusForever.Network.World.Message.Model
 
         public uint PhaseFlags1 { get; set; }
         public uint PhaseFlags2 { get; set; }
-        public Game.Static.Entity.Path Path { get; set; }
+        public Game.Static.PlayerPath.Path Path { get; set; }
 
         public void Write(GamePacketWriter writer)
         {

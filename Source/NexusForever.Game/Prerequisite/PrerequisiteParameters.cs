@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Prerequisite;
-using NexusForever.Network.World.Message.Static;
+using NexusForever.Game.Static.Spell;
 
 namespace NexusForever.Game.Prerequisite
 {

@@ -26,6 +26,7 @@ namespace NexusForever.Database.World.Model
         public ushort WorldSocketId { get; set; }
         public ModeType? Mode { get; set; }
 
+        public EntityEmoteModel EntityEmote { get; set; }
         public EntityEventModel EntityEvent { get; set; }
         public ICollection<EntityPropertyModel> EntityProperty { get; set; } = [];
         public ICollection<EntityScriptModel> EntityScript { get; set; } = [];

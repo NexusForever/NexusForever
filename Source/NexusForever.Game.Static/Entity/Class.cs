@@ -2,6 +2,7 @@
 {
     public enum Class : byte
     {
+        None = 0,
         Warrior      = 1,
         Engineer     = 2,
         Esper        = 3,

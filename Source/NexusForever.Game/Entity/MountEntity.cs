@@ -45,7 +45,7 @@ namespace NexusForever.Game.Entity
             Rotation         = owner.Rotation;
             Position         = owner.Position;
 
-            CreateFlags |= EntityCreateFlag.SpawnAnimation;
+            CreateFlags |= EntityCreateFlag.UseDefaultBirthSequence;
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -70,8 +70,8 @@ namespace NexusForever.Game.Entity
         {
             base.OnAddToMap(map, guid, vector);
 
-            CreateFlags &= ~EntityCreateFlag.SpawnAnimation;
-            CreateFlags |= EntityCreateFlag.NoSpawnAnimation;
+            CreateFlags &= ~EntityCreateFlag.UseDefaultBirthSequence;
+            CreateFlags |= EntityCreateFlag.Immediate;
         }
 
         protected override void OnPassengerAdd(IPlayer player, VehicleSeatType seatType, byte seatPosition)

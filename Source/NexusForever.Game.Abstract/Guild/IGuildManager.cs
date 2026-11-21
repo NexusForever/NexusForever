@@ -1,4 +1,5 @@
 ﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.Network.World.Message.Model.Guild;
@@ -16,6 +17,11 @@ namespace NexusForever.Game.Abstract.Guild
         /// This determines which guild name and type is shown in the nameplate.
         /// </remarks>
         IGuildBase GuildAffiliation { get; set; }
+
+        /// <summary>
+        /// Create a new <see cref="IGuildManager"/> from existing <see cref="CharacterModel"/> database model.
+        /// </summary>
+        void Initialise(IPlayer player, CharacterModel model);
 
         /// <summary>
         /// Return guild of supplied <see cref="GuildType"/>.

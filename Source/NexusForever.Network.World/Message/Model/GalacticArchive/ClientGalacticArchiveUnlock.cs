@@ -6,11 +6,11 @@ namespace NexusForever.Network.World.Message.Model.GalacticArchive
     [Message(GameMessageOpcode.ClientGalacticArchiveUnlock)]
     public class ClientGalacticArchiveUnlock : IReadable
     {
-        public uint ArchiveArticleId { get; private set; }
+        public ushort ArchiveArticleId { get; private set; }
 
         public void Read(GamePacketReader reader)
         {
-            ArchiveArticleId = reader.ReadUInt();
+            ArchiveArticleId = reader.ReadUShort(14u);
         }
     }
 }

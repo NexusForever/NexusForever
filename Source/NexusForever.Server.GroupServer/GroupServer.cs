@@ -74,7 +74,6 @@ namespace NexusForever.Server.GroupServer
                         hb.Configuration.GetSection("API:Character")
                         .Get<APIConfig>());
 
-                    sc.AddNetworkInternal();
                     sc.AddTransient<OutboxMessagePublisher>();
 
                     sc.AddNetworkInternalBroker(

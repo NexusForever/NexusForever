@@ -6,7 +6,7 @@ using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Session;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Story;
 
 namespace NexusForever.Game.Quest
 {
@@ -76,7 +76,7 @@ namespace NexusForever.Game.Quest
         {
             session.EnqueueMessageEncrypted(new ServerCommunicatorMessage
             {
-                CommunicatorId = (ushort)entry.Id
+                CommunicatorMessagesId = (ushort)entry.Id
             });
         }
     }

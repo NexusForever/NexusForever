@@ -3,6 +3,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Creature;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Loot.Distribute;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
@@ -24,8 +25,9 @@ namespace NexusForever.Game.Entity
             IMovementManager movementManager,
             IEntitySummonFactory entitySummonFactory,
             IStatUpdateManager<IUnitEntity> statUpdateManager,
-            ISpellFactory spellFactory)
-            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
+            ISpellFactory spellFactory,
+            ILootDistributor lootDistributor)
+            : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory, lootDistributor)
         {
             statUpdateManager.Initialise(this);
         }
@@ -38,7 +40,7 @@ namespace NexusForever.Game.Entity
 
             if (model.EntityVendor != null)
             {
-                CreateFlags |= EntityCreateFlag.Vendor;
+                CreateFlags |= EntityCreateFlag.HasInteractionPrereq;
                 VendorInfo = new VendorInfo(model);
             }
         }

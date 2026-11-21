@@ -277,7 +277,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
         private void OnPhaseGoToAirlock()
         {
-            publicEvent.ActivateObjective(PublicEventObjective.GoToAirlock, mapInstance.PlayerCount);
+            publicEvent.ActivateObjective(PublicEventObjective.GoToAirlock, mapInstance.PlayerManager.GetPlayerCount());
 
             var triggerEntity = publicEvent.CreateEntity<IWorldLocationVolumeGridTriggerEntity>();
             triggerEntity.Initialise(50278, 8242);
@@ -289,7 +289,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             publicEvent.ActivateObjective(PublicEventObjective.OpenMedbay);
             publicEvent.ActivateObjective(PublicEventObjective.DownloadCrewLogs);
 
-            foreach (IPlayer player in mapInstance.GetPlayers())
+            foreach (IPlayer player in mapInstance.PlayerManager)
                 player.TeleportToLocal(new Vector3(53.180374f, -852.86273f, -91.41684f));
 
             var triggerEntity = mapInstance.GetEntity<IWorldLocationVolumeGridTriggerEntity>(gatherRingTriggerGuid);
@@ -307,7 +307,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
             
             BroadcastCommunicatorMessage(CommunicatorMessage.CaptainWeir3);
 
-            foreach (IPlayer player in mapInstance.GetPlayers())
+            foreach (IPlayer player in mapInstance.PlayerManager)
                 player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<IEvilFromTheEtherOnOpenMedbay>());
 
             foreach (uint guid in ravenousRefugeeGuids)
@@ -337,7 +337,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
         private void OnPhaseGoToPrimaryPowerPlant()
         {
-            publicEvent.ActivateObjective(PublicEventObjective.GoToPrimaryPowerPlant, mapInstance.PlayerCount);
+            publicEvent.ActivateObjective(PublicEventObjective.GoToPrimaryPowerPlant, mapInstance.PlayerManager.GetPlayerCount());
         }
 
         private void OnPhaseKillSecurityChiefKondovich()
@@ -378,7 +378,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         {
             publicEvent.ActivateObjective(PublicEventObjective.DefeatEthericOrganisms);
 
-            foreach (IPlayer player in mapInstance.GetPlayers())
+            foreach (IPlayer player in mapInstance.PlayerManager)
                 player.CinematicManager.QueueCinematic(cinematicFactory.CreateCinematic<IEvilFromTheEtherOnEthericOrganisms>());
         }
 
@@ -407,7 +407,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
         private void OnPhaseTeleportToUpperDeck()
         {
-            publicEvent.ActivateObjective(PublicEventObjective.TeleportToUpperDeck, mapInstance.PlayerCount);
+            publicEvent.ActivateObjective(PublicEventObjective.TeleportToUpperDeck, mapInstance.PlayerManager.GetPlayerCount());
 
             var triggerEntity = publicEvent.CreateEntity<IGridTriggerEntity>();
             triggerEntity.Initialise(8242, 3f);
@@ -418,7 +418,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
         private void OnPhaseGatherInBridgeAccessHall()
         {
-            publicEvent.ActivateObjective(PublicEventObjective.GatherInBridgeAccessHall, mapInstance.PlayerCount);
+            publicEvent.ActivateObjective(PublicEventObjective.GatherInBridgeAccessHall, mapInstance.PlayerManager.GetPlayerCount());
 
             IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(upperDeckDoor1Guid);
             door?.OpenDoor();
@@ -441,7 +441,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
 
         private void OnPhaseGatherOnTheShadesBridge()
         {
-            publicEvent.ActivateObjective(PublicEventObjective.GatherOnTheShadesBridge, mapInstance.PlayerCount);
+            publicEvent.ActivateObjective(PublicEventObjective.GatherOnTheShadesBridge, mapInstance.PlayerManager.GetPlayerCount());
 
             IDoorEntity door = mapInstance.GetEntity<IDoorEntity>(upperDeckDoor2Guid);
             door?.OpenDoor();
@@ -508,7 +508,7 @@ namespace NexusForever.Script.Instance.Expedition.EvilFromTheEther
         private void BroadcastCommunicatorMessage(CommunicatorMessage message)
         {
             ICommunicatorMessage communicatorMessage = globalQuestManager.GetCommunicatorMessage(message);
-            foreach (IPlayer player in mapInstance.GetPlayers())
+            foreach (IPlayer player in mapInstance.PlayerManager)
                 communicatorMessage?.Send(player.Session);
         }
 

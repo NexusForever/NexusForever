@@ -17,7 +17,7 @@ namespace NexusForever.Database.World.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -89,6 +89,29 @@ namespace NexusForever.Database.World.Migrations
                     b.ToTable("disable", (string)null);
                 });
 
+            modelBuilder.Entity("NexusForever.Database.World.Model.EntityEmoteModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("id");
+
+                    b.Property<ushort>("EmoteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0)
+                        .HasColumnName("emoteId");
+
+                    b.HasKey("Id", "EmoteId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("entity_emote", (string)null);
+                });
+
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityEventModel", b =>
                 {
                     b.Property<uint>("Id")
@@ -118,6 +141,31 @@ namespace NexusForever.Database.World.Migrations
                         .IsUnique();
 
                     b.ToTable("entity_event", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.EntityLootModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<ulong>("LootGroupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("lootGroupId");
+
+                    b.Property<string>("Comment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(200)")
+                        .HasDefaultValue("")
+                        .HasColumnName("comment");
+
+                    b.HasKey("Id", "LootGroupId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("LootGroupId");
+
+                    b.ToTable("entity_loot", (string)null);
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityModel", b =>
@@ -477,6 +525,139 @@ namespace NexusForever.Database.World.Migrations
                     b.ToTable("entity_vendor", (string)null);
                 });
 
+            modelBuilder.Entity("NexusForever.Database.World.Model.ItemLootModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("id");
+
+                    b.Property<ulong>("LootGroupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("lootGroupId");
+
+                    b.Property<string>("Comment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(200)")
+                        .HasDefaultValue("")
+                        .HasColumnName("comment");
+
+                    b.HasKey("Id", "LootGroupId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("LootGroupId");
+
+                    b.ToTable("item_loot", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.LootGroupModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<string>("Comment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(200)")
+                        .HasDefaultValue("")
+                        .HasColumnName("comment");
+
+                    b.Property<uint>("Condition")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("condition");
+
+                    b.Property<byte>("ConditionType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("conditionType");
+
+                    b.Property<uint>("MaxCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("maxCount");
+
+                    b.Property<uint>("MinCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("minCount");
+
+                    b.Property<ulong?>("ParentId")
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasColumnName("parentId");
+
+                    b.Property<float>("Probability")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(100f)
+                        .HasColumnName("probability");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("loot_group", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.LootItemModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<byte>("Type")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasDefaultValue((byte)0)
+                        .HasColumnName("type");
+
+                    b.Property<uint>("StaticId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("staticId");
+
+                    b.Property<string>("Comment")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(200)")
+                        .HasDefaultValue("")
+                        .HasColumnName("comment");
+
+                    b.Property<uint>("MaxCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("maxCount");
+
+                    b.Property<uint>("MinCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(10) unsigned")
+                        .HasDefaultValue(0u)
+                        .HasColumnName("minCount");
+
+                    b.Property<float>("Probability")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(100f)
+                        .HasColumnName("probability");
+
+                    b.HasKey("Id", "Type", "StaticId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("loot_item", (string)null);
+                });
+
             modelBuilder.Entity("NexusForever.Database.World.Model.MapEntranceModel", b =>
                 {
                     b.Property<uint>("MapId")
@@ -826,6 +1007,18 @@ namespace NexusForever.Database.World.Migrations
                     b.ToTable("version", (string)null);
                 });
 
+            modelBuilder.Entity("NexusForever.Database.World.Model.EntityEmoteModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
+                        .WithOne("EntityEmote")
+                        .HasForeignKey("NexusForever.Database.World.Model.EntityEmoteModel", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__entity_emote_id__entity_id");
+
+                    b.Navigation("Entity");
+                });
+
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityEventModel", b =>
                 {
                     b.HasOne("NexusForever.Database.World.Model.EntityModel", "Entity")
@@ -836,6 +1029,17 @@ namespace NexusForever.Database.World.Migrations
                         .HasConstraintName("FK__entity_event_id__entity_id");
 
                     b.Navigation("Entity");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.EntityLootModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.LootGroupModel", "LootGroup")
+                        .WithMany()
+                        .HasForeignKey("LootGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LootGroup");
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityPropertyModel", b =>
@@ -860,7 +1064,6 @@ namespace NexusForever.Database.World.Migrations
                         .HasConstraintName("FK__entity_script_id__entity_id");
 
                     b.Navigation("Entity");
-                });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntitySplineModel", b =>
                 {
@@ -920,6 +1123,39 @@ namespace NexusForever.Database.World.Migrations
                         .HasConstraintName("FK__entity_vendor_id__entity_id");
 
                     b.Navigation("Entity");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.ItemLootModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.LootGroupModel", "LootGroup")
+                        .WithMany()
+                        .HasForeignKey("LootGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LootGroup");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.LootGroupModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.LootGroupModel", "Parent")
+                        .WithMany("ChildGroup")
+                        .HasForeignKey("ParentId")
+                        .HasConstraintName("FK__loot_group_parentId__loot_group_id");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.LootItemModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.LootGroupModel", "LootGroup")
+                        .WithMany("Item")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__loot_item_id__loot_group_id");
+
+                    b.Navigation("LootGroup");
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreOfferGroupCategoryModel", b =>
@@ -983,6 +1219,8 @@ namespace NexusForever.Database.World.Migrations
 
             modelBuilder.Entity("NexusForever.Database.World.Model.EntityModel", b =>
                 {
+                    b.Navigation("EntityEmote");
+
                     b.Navigation("EntityEvent");
 
                     b.Navigation("EntityProperty");
@@ -998,6 +1236,13 @@ namespace NexusForever.Database.World.Migrations
                     b.Navigation("EntityVendorCategory");
 
                     b.Navigation("EntityVendorItem");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.LootGroupModel", b =>
+                {
+                    b.Navigation("ChildGroup");
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("NexusForever.Database.World.Model.StoreCategoryModel", b =>
@@ -1019,6 +1264,7 @@ namespace NexusForever.Database.World.Migrations
                     b.Navigation("StoreOfferItemPrice");
                 });
 #pragma warning restore 612, 618
+            });
         }
     }
 }

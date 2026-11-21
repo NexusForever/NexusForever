@@ -9,7 +9,7 @@ using NexusForever.Game.Abstract.Spell.Validator;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
-using NexusForever.Network.World.Message.Model;
+using NexusForever.Network.World.Message.Model.Spell;
 using NexusForever.Shared.Game;
 
 namespace NexusForever.Game.Spell.Type
@@ -166,14 +166,14 @@ namespace NexusForever.Game.Spell.Type
             if (unitIds.Count == 0)
                 return;
 
-            var serverSpellBuffsApply = new ServerSpellBuffsApply();
+            var serverSpellBuffsApply = new ServerSpellBuffsUpdate();
             foreach (uint unitId in unitIds)
             {
-                serverSpellBuffsApply.spellTargets.Add(new ServerSpellBuffsApply.SpellTarget
+                serverSpellBuffsApply.Buffs.Add(new ServerSpellBuffsUpdate.BuffInfo
                 {
                     ServerUniqueId = CastingId,
-                    TargetId       = unitId,
-                    InstanceCount  = 1 // TODO: If something stacks, we may need to grab this from the target unit
+                    TargetUnitId   = unitId,
+                    BuffCount      = 1 // TODO: If something stacks, we may need to grab this from the target unit
                 });
             }
 
@@ -186,10 +186,10 @@ namespace NexusForever.Game.Spell.Type
             if (!Parameters.SpellInfo.BaseInfo.HasIcon)
                 throw new InvalidOperationException();
 
-            Caster.EnqueueToVisible(new ServerSpellBuffRemove
+            Caster.EnqueueToVisible(new ServerSpellBuffRemoveSingle
             {
-                CastingId = CastingId,
-                CasterId  = unitId
+                ServerUniqueId = CastingId,
+                TargetUnitId   = unitId
             }, true);
         }
     }

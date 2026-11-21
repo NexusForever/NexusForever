@@ -1,6 +1,6 @@
 ﻿using NexusForever.Game.Abstract.Guild;
 using NexusForever.Game.Guild;
-using NexusForever.Game.Static.Account;
+using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Guild;
 using NexusForever.GameTable;

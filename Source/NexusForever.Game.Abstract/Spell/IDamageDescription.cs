@@ -1,10 +1,10 @@
 ﻿using NexusForever.Game.Static.Spell;
 using NexusForever.Network.Message;
-using NexusForever.Network.World.Message.Model.Shared;
+using NexusForever.Network.World.Message.Model.Spell;
 
 namespace NexusForever.Game.Abstract.Spell
 {
-    public interface IDamageDescription : INetworkBuildable<DamageDescription>
+    public interface IDamageDescription : INetworkBuildable<SpellEffectResult>
     {
         uint RawDamage { get; set; }
         uint RawScaledDamage { get; set; }

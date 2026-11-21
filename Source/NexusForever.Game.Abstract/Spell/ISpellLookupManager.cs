@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Static.Entity;
+﻿using NexusForever.Game.Static.Entity.Movement;
 
 namespace NexusForever.Game.Abstract.Spell
 {

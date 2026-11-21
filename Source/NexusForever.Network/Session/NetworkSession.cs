@@ -93,13 +93,16 @@ namespace NexusForever.Network.Session
             {
                 EndPoint remoteEndPoint = socket.RemoteEndPoint;
                 socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
 
                 log.Trace($"Client {Id} disconnected. {remoteEndPoint}");
             }
             catch (Exception e)
             {
                 log.Error(e, $"An exception occured for client {Id} during socket close!");
+            }
+            finally
+            {
+                socket.Close();
             }
 
             disconnectState = DisconnectState.Complete;

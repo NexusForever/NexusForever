@@ -2,8 +2,10 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Entity.Stat;
+using NexusForever.Game.Abstract.Loot.Distribute;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Script;
 
 namespace NexusForever.Game.Entity
 {
@@ -14,16 +16,36 @@ namespace NexusForever.Game.Entity
     {
         #region Dependency Injection
 
+        private readonly ILootDistributor lootDistributor;
+
         public CreatureEntity(
             IMovementManager movementManager,
             IEntitySummonFactory entitySummonFactory,
             IStatUpdateManager statUpdateManager,
-            ISpellFactory spellFactory)
+            ISpellFactory spellFactory,
+            ILootDistributor lootDistributor)
             : base(movementManager, entitySummonFactory, statUpdateManager, spellFactory)
         {
+            this.lootDistributor = lootDistributor;
         }
 
         #endregion
+
+        /// <summary>
+        /// Initialise <see cref="IScriptCollection"/> for <see cref="ICreatureEntity"/>.
+        /// </summary>
+        protected override void InitialiseScriptCollection(List<string> names)
+        {
+            scriptCollection = ScriptManager.Instance.InitialiseOwnedCollection<ICreatureEntity>(this);
+            ScriptManager.Instance.InitialiseEntityScripts<ICreatureEntity>(scriptCollection, this, names);
+        }
+
+        protected override void GenerateRewards(IUnitEntity killer)
+        {
+            base.GenerateRewards(killer);
+
+            lootDistributor.Distribute(this);
+        }
 
         /// <summary>
         /// Set target to supplied <see cref="IUnitEntity"/>.

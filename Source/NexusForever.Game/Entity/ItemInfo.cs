@@ -1,9 +1,10 @@
-﻿using NexusForever.Game.Abstract.Entity;
+﻿using System.Collections.Immutable;
+using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Item;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;
-using System.Collections.Immutable;
 
 namespace NexusForever.Game.Entity
 {
@@ -19,6 +20,8 @@ namespace NexusForever.Game.Entity
         public ItemStatEntry StatEntry { get; }
         public ItemQualityEntry QualityEntry { get; }
         public SecondaryItemFlags SecondaryItemFlags { get; }
+
+        public Quality Quality => (Quality)Entry.ItemQualityId;
 
         public float ItemPower { get; private set; }
         public ImmutableDictionary<Property, float> Properties { get; private set; }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NexusForever.WorldServer.Network.Internal.Handler.Chat;
+using NexusForever.WorldServer.Network.Internal.Handler.Friendship;
 using NexusForever.WorldServer.Network.Internal.Handler.Group;
 using NexusForever.WorldServer.Network.Internal.Handler.Player;
+using NexusForever.WorldServer.Network.Internal.Handler.Who;
 using Rebus.Config;
 
 namespace NexusForever.WorldServer.Network.Internal.Handler
@@ -21,7 +23,33 @@ namespace NexusForever.WorldServer.Network.Internal.Handler
             sc.AddRebusHandler<ChatWhisperFailedHandler>();
             sc.AddRebusHandler<ChatWhisperTextHandler>();
 
+            sc.AddRebusHandler<FriendshipAccountInviteListHandler>();
+            sc.AddRebusHandler<FriendshipAccountInviteRemovedHandler>();
+            sc.AddRebusHandler<FriendshipAccountLastOnlineUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountLevelUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountListHandler>();
+            sc.AddRebusHandler<FriendshipAccountLocationsUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountNicknameUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountNoteUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountPersonalStatusUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountPresenceUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountStatusUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAccountRemovedHandler>();
+            sc.AddRebusHandler<FriendshipAccountUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipAddedHandler>();
+            sc.AddRebusHandler<FriendshipInviteListHandler>();
+            sc.AddRebusHandler<FriendshipInviteRemovedHandler>();
+            sc.AddRebusHandler<FriendshipLastOnlineUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipLevelUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipListHandler>();
+            sc.AddRebusHandler<FriendshipLocationsUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipNoteUpdatedHandler>();
+            sc.AddRebusHandler<FriendshipRemovedHandler>();
+            sc.AddRebusHandler<FriendshipResultHandler>();
+            sc.AddRebusHandler<FriendshipTypeUpdatedHandler>();
+
             sc.AddRebusHandler<GroupActionResultHandler>();
+            sc.AddRebusHandler<GroupDisbandedHandler>();
             sc.AddRebusHandler<GroupFlagsUpdatedHandler>();
             sc.AddRebusHandler<GroupLootRulesUpdatedHandler>();
             sc.AddRebusHandler<GroupMarkerUpdatedHandler>();
@@ -42,6 +70,9 @@ namespace NexusForever.WorldServer.Network.Internal.Handler
             sc.AddRebusHandler<GroupReadyCheckStartedHandler>();
 
             sc.AddRebusHandler<PlayerGroupAssociationUpdatedHandler>();
+            sc.AddRebusHandler<PlayerInfoResponseHandler>();
+
+            sc.AddRebusHandler<WhoResponseHandler>();
 
             return sc;
         }

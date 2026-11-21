@@ -9,7 +9,7 @@ namespace NexusForever.Game.Entity
         public required ItemSlot Slot { get; init; }
         public required ushort? DisplayId { get; set; }
         public ushort ColourSetId { get; set; }
-        public int DyeData { get; set; }
+        public uint DyeData { get; set; }
         
         public NetworkItemVisual Build()
         {
