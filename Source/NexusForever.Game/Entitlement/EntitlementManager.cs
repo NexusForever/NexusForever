@@ -23,10 +23,6 @@ namespace NexusForever.Game.Entitlement
             if (value > entry.MaxCount)
                 return false;
 
-            EntitlementFlags entitlementFlags = (EntitlementFlags)entry.Flags;
-            if (entitlementFlags.HasFlag(EntitlementFlags.Disabled))
-                return false;
-
             EntitlementType entitlementType = (EntitlementType)entry.Id;
             if (GetEntitlement(entitlementType)?.Amount + value > entry.MaxCount)
                 return false;

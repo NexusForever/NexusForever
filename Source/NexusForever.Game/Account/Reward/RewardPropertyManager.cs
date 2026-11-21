@@ -56,9 +56,6 @@ namespace NexusForever.Game.Account.Reward
                 // Should we set the Entitlement to match? This is only necessary for things like Bank Slots (4 for Signature, 2 for Basic), Auction Slots, and Commodity Slots.
                 // Do we know if you subscribed, then unsubscribed, that you would keep those Bank Slots? Did they get greyed out and unusable?
                 EntitlementFlags entitlementFlags = (EntitlementFlags)entitlementEntry.Flags;
-                if (entitlementFlags.HasFlag(EntitlementFlags.Disabled))
-                    return 0f;
-
                 if (entitlementFlags.HasFlag(EntitlementFlags.Character))
                     return player?.EntitlementManager.GetEntitlement((EntitlementType)modifierEntry.EntitlementIdModifierCount)?.Amount ?? 0u;
 

@@ -27,6 +27,7 @@ namespace NexusForever.Game.Entity
             : base(entry, value)
         {
             this.player = player;
+            saveMask |= SaveMask.Create;
         }
 
         public void Save(CharacterContext context)
