@@ -37,13 +37,13 @@
     <PackageVersion Include="Nexus.Archive" Version="1.0.1" />
     <PackageVersion Include="NLog" Version="6.1.4" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.4" />
-	<PackageVersion Include="OpenTelemetry" Version="1.14.0" />
-	<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
-	<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
-	<PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
-	<PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.14.0-beta.2" />
-	<PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
-	<PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.14.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.14.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.14.0-beta.2" />
     <PackageVersion Include="Quartz" Version="4.7.3" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.18.2" />
     <PackageVersion Include="Rebus" Version="8.10.0" />
