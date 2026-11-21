@@ -21,7 +21,7 @@ namespace NexusForever.Game.Prerequisite.Check
 
         #endregion
 
-        public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
             if (value == 0 && objectId == 0)
                 return false;
@@ -29,9 +29,9 @@ namespace NexusForever.Game.Prerequisite.Check
             switch (comparison)
             {
                 case PrerequisiteComparison.Equal:
-                    return player.HasSpell(s => s.Spell4Id == value, out ISpell equalSpell);
+                    return subject.HasSpell(s => s.Spell4Id == value, out ISpell equalSpell);
                 case PrerequisiteComparison.NotEqual:
-                    return !player.HasSpell(s => s.Spell4Id == value, out ISpell notEqualSpell);
+                    return !subject.HasSpell(s => s.Spell4Id == value, out ISpell notEqualSpell);
                 default:
                     log.LogWarning($"Unhandled PrerequisiteComparison {comparison} for {PrerequisiteType.UnderSpell}!");
                     return false;

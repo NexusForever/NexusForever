@@ -20,8 +20,11 @@ namespace NexusForever.Game.Prerequisite.Check
 
         #endregion
 
-        public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
+        public bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
+            if (subject is not IPlayer player)
+                return false;
+
             switch (comparison)
             {
                 case PrerequisiteComparison.Equal:

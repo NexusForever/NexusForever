@@ -15,9 +15,9 @@ namespace NexusForever.Game.Abstract.Spell.Info
         SpellCoolDownEntry GlobalCooldown { get; }
         Spell4StackGroupEntry StackGroup { get; }
         PrerequisiteEntry CasterCastPrerequisite { get; }
-        PrerequisiteEntry TargetCastPrerequisites { get; }
-        PrerequisiteEntry CasterPersistencePrerequisites { get; }
-        PrerequisiteEntry TargetPersistencePrerequisites { get; }
+        PrerequisiteEntry TargetCastPrerequisite { get; }
+        PrerequisiteEntry CasterPersistencePrerequisite { get; }
+        PrerequisiteEntry TargetPersistencePrerequisite { get; }
         List<PrerequisiteEntry> PrerequisiteRunners { get; }
 
         List<TelegraphDamageEntry> Telegraphs { get; }

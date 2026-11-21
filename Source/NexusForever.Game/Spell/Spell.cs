@@ -303,33 +303,32 @@ namespace NexusForever.Game.Spell
 
         private CastResult CheckPrerequisites()
         {
-            // TODO: Remove below line and evaluate PreReq's for Non-Player Entities
-            if (Caster is not IPlayer player)
-                return CastResult.Ok;
+            IUnitEntity target = GetExplicitTarget();
 
             // Runners override the Caster Check, allowing the Caster to Cast the spell due to this Prerequisite being met
-            if (Parameters.SpellInfo.CasterCastPrerequisite != null && !CheckRunnerOverride(player))
+            if (Parameters.SpellInfo.CasterCastPrerequisite != null && !CheckRunnerOverride(Caster))
             {
-                var parameters = new PrerequisiteParameters
+                var prerequisiteParameters = new PrerequisiteParameters
                 {
-                    TaxiNode = Parameters.TaxiNode,
+                    Target   = target,
+                    TaxiNode = Parameters.TaxiNode
                 };
-                if (!PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.CasterCastPrerequisite.Id, parameters))
-                    return parameters.CastResult != null ? parameters.CastResult.Value : CastResult.PrereqCasterCast;
+                if (!PrerequisiteManager.Instance.Meets(Caster, Parameters.SpellInfo.CasterCastPrerequisite.Id, prerequisiteParameters))
+                    return prerequisiteParameters.CastResult ?? CastResult.PrereqCasterCast;
             }
 
-            // not sure if this should be for explicit and/or implicit targets
-            if (Parameters.SpellInfo.TargetCastPrerequisites != null)
+            if (Parameters.SpellInfo.TargetCastPrerequisite != null)
             {
-            }
+                if (target == null)
+                    return CastResult.PrereqTargetCast;
 
-            // this probably isn't the correct place, name implies this should be constantly checked
-            if (Parameters.SpellInfo.CasterPersistencePrerequisites != null)
-            {
-            }
-
-            if (Parameters.SpellInfo.TargetPersistencePrerequisites != null)
-            {
+                var prerequisiteParameters = new PrerequisiteParameters
+                {
+                    Target   = Caster,
+                    TaxiNode = Parameters.TaxiNode
+                };
+                if (!PrerequisiteManager.Instance.Meets(target, Parameters.SpellInfo.TargetCastPrerequisite.Id, prerequisiteParameters))
+                    return prerequisiteParameters.CastResult ?? CastResult.PrereqTargetCast;
             }
 
             return CastResult.Ok;
@@ -338,10 +337,10 @@ namespace NexusForever.Game.Spell
         /// <summary>
         /// Returns whether the Caster is in a state where they can ignore Resource or other constraints.
         /// </summary>
-        private bool CheckRunnerOverride(IPlayer player)
+        private bool CheckRunnerOverride(IUnitEntity subject)
         {
             foreach (PrerequisiteEntry runnerPrereq in Parameters.SpellInfo.PrerequisiteRunners)
-                if (PrerequisiteManager.Instance.Meets(player, runnerPrereq.Id))
+                if (PrerequisiteManager.Instance.Meets(subject, runnerPrereq.Id))
                     return true;
 
             return false;
@@ -517,20 +516,23 @@ namespace NexusForever.Game.Spell
             }
         }
 
+        private IUnitEntity GetExplicitTarget()
+        {
+            if (Parameters.PrimaryTargetId == 0)
+                return Caster;
+
+            return Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
+        }
+
         protected virtual void SelectTargets(ISpellExecutionContext executionContext)
         {
             // Add Caster Entity with the appropriate SpellEffectTargetFlags.
             executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.Caster, Caster);
 
             // Add Targeted Entity with the appropriate SpellEffectTargetFlags.
-            if (Parameters.PrimaryTargetId > 0)
-            {
-                IUnitEntity explicitTargetEntity = Caster.GetVisible<IUnitEntity>(Parameters.PrimaryTargetId);
-                if (explicitTargetEntity != null)
-                    executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, explicitTargetEntity);
-            }
-            else
-                executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, Caster);
+            IUnitEntity explicitTarget = GetExplicitTarget();
+            if (explicitTarget != null)
+                executionContext.TargetCollection.AddTarget(SpellEffectTargetFlags.ExplicitTarget, explicitTarget);
 
             // TODO: this might not be entirely correct, research this more...
             if (Parameters.SpellInfo.BaseInfo.TargetMechanics.TargetType
@@ -576,13 +578,6 @@ namespace NexusForever.Game.Spell
             if (disableManager.IsDisabled(DisableType.SpellEffect, spell4EffectsEntry.Id))
                 return false;
 
-            if (Caster is IPlayer player)
-            {
-                // Ensure caster can apply this effect
-                if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0 && !PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply))
-                    return false;
-            }
-
             if (delayedEffects.TryGetValue(spell4EffectsEntry, out UpdateTimer updateTimer)
                 && !updateTimer.HasElapsed)
                 return false;
@@ -603,7 +598,7 @@ namespace NexusForever.Game.Spell
 
             foreach (ISpellTarget spellTarget in executionContext.TargetCollection.GetTargets(spell4EffectsEntry.TargetFlags))
             {
-                if (!CheckEffectApplyPrerequisites(spell4EffectsEntry, spellTarget.Entity, spellTarget.Flags))
+                if (!CheckEffectApplyPrerequisites(spell4EffectsEntry, spellTarget.Entity))
                     continue;
 
                 ISpellTargetInfo spellTargetInfo =
@@ -620,32 +615,17 @@ namespace NexusForever.Game.Spell
             }
         }
 
-        private bool CheckEffectApplyPrerequisites(Spell4EffectsEntry spell4EffectsEntry, IUnitEntity unit, SpellEffectTargetFlags targetFlags)
+        private bool CheckEffectApplyPrerequisites(Spell4EffectsEntry spell4EffectsEntry, IUnitEntity target)
         {
-            bool effectCanApply = true;
+            if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0
+                && !PrerequisiteManager.Instance.Meets(Caster, spell4EffectsEntry.PrerequisiteIdCasterApply, target))
+                return false;
 
-            // TODO: Possibly update Prereq Manager to handle other Units
-            if (unit is not IPlayer player)
-                return true;
+            if (spell4EffectsEntry.PrerequisiteIdTargetApply > 0
+                && !PrerequisiteManager.Instance.Meets(target, spell4EffectsEntry.PrerequisiteIdTargetApply, Caster))
+                return false;
 
-            if ((targetFlags & SpellEffectTargetFlags.Caster) != 0)
-            {
-                // TODO
-                if (spell4EffectsEntry.PrerequisiteIdCasterApply > 0)
-                {
-                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdCasterApply);
-                }
-            }
-
-            if (effectCanApply && (targetFlags & SpellEffectTargetFlags.Caster) == 0)
-            {
-                if (spell4EffectsEntry.PrerequisiteIdTargetApply > 0)
-                {
-                    effectCanApply = PrerequisiteManager.Instance.Meets(player, spell4EffectsEntry.PrerequisiteIdTargetApply);
-                }
-            }
-
-            return effectCanApply;
+            return true;
         }
 
         public bool IsMovingInterrupted()
@@ -881,25 +861,49 @@ namespace NexusForever.Game.Spell
 
         private void CheckPersistance(double lastTick)
         {
-            if (Caster is not IPlayer player)
-                return;
-
-            if (Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence == 0 && Parameters.SpellInfo.Entry.PrerequisiteIdTargetPersistence == 0)
+            if (Parameters.SpellInfo.CasterPersistencePrerequisite == null
+                && Parameters.SpellInfo.TargetPersistencePrerequisite == null)
                 return;
 
             persistCheck.Update(lastTick);
-            if (persistCheck.HasElapsed)
+            if (!persistCheck.HasElapsed)
+                return;
+
+            persistCheck.Reset();
+
+            IUnitEntity target = GetExplicitTarget();
+            if (Parameters.SpellInfo.CasterPersistencePrerequisite != null)
             {
-                var parameters = new PrerequisiteParameters
+                var prerequisiteParameters = new PrerequisiteParameters
                 {
-                    TaxiNode = Parameters.TaxiNode,
+                    Target   = target,
+                    TaxiNode = Parameters.TaxiNode
                 };
-                if (Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence > 0 && !PrerequisiteManager.Instance.Meets(player, Parameters.SpellInfo.Entry.PrerequisiteIdCasterPersistence, parameters))
+                if (!PrerequisiteManager.Instance.Meets(Caster, Parameters.SpellInfo.CasterPersistencePrerequisite.Id, prerequisiteParameters))
+                {
                     Finish();
+                    return;
+                }
+            }
 
-                // TODO: Check if target can still persist
+            if (Parameters.SpellInfo.TargetPersistencePrerequisite != null)
+            {
+                if (target == null)
+                {
+                    Finish();
+                    return;
+                }
 
-                persistCheck.Reset();
+                var prerequisiteParameters = new PrerequisiteParameters
+                {
+                    Target   = Caster,
+                    TaxiNode = Parameters.TaxiNode
+                };
+                if (!PrerequisiteManager.Instance.Meets(target, Parameters.SpellInfo.TargetPersistencePrerequisite.Id, prerequisiteParameters))
+                {
+                    Finish();
+                    return;
+                }
             }
         }
 

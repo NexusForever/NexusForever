@@ -5,6 +5,6 @@ namespace NexusForever.Game.Abstract.Prerequisite
 {
     public interface IPrerequisiteCheck
     {
-        bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters);
+        bool Meets(IUnitEntity subject, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters);
     }
 }
