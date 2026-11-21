@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -78,8 +79,10 @@ namespace NexusForever.StsServer.Network
             }
         }
 
-        protected override uint OnData(byte[] data)
+        protected override SequencePosition OnData(in ReadOnlySequence<byte> buffer)
         {
+            // STS packets require in-place decryption, so we materialise the sequence into a byte[]
+            byte[] data = buffer.ToArray();
             clientEncryption?.Decrypt(data);
 
             using (var stream = new MemoryStream(data))
@@ -100,7 +103,7 @@ namespace NexusForever.StsServer.Network
                 }
             }
 
-            return 0u;
+            return buffer.End;
         }
 
         public override void Update(double lastTick)
