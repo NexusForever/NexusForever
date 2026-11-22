@@ -7,7 +7,7 @@ using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Achievement;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format.NexusForever.Map;
 
 namespace NexusForever.Game.Map
 {

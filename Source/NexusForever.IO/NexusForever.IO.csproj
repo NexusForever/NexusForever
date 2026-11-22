@@ -6,4 +6,13 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Format\Wavefront\" />
+    <Folder Include="Format\Wildstar\I3\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NexusForever.Shared\NexusForever.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

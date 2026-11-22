@@ -2,7 +2,7 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format.NexusForever.Map;
 using NLog;
 
 namespace NexusForever.Game.Map

@@ -16,7 +16,7 @@ using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Map;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format.NexusForever.Map;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Static;
 using NexusForever.Script;

@@ -2,7 +2,7 @@
 using NexusForever.Game.Configuration.Model;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format.NexusForever.Map;
 using NexusForever.Shared;
 using NexusForever.Shared.Configuration;
 using NLog;

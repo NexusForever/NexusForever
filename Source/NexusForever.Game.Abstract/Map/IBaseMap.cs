@@ -4,7 +4,7 @@ using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Static.Entity;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format.NexusForever.Map;
 using NexusForever.Network.Message;
 
 namespace NexusForever.Game.Abstract.Map

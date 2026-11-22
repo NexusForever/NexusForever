@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Nexus.Archive;
 using NexusForever.GameTable.Model;
-using NexusForever.IO;
-using NexusForever.IO.Area;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format;
+using NexusForever.IO.Format.NexusForever.Map;
+using NexusForever.IO.Format.WildStar.Area;
 using NexusForever.MapGenerator.GameTable;
 using NexusForever.Shared;
 using NLog;
@@ -121,18 +122,22 @@ namespace NexusForever.MapGenerator
             log.Info($"Processing {map.Asset} grid {gridX},{gridY}...");
 
             using (Stream stream = ArchiveManager.Instance.MainArchive.OpenFileStream(grid))
+            using (BinaryReader reader = new BinaryReader(stream))
             {
                 try
                 {
                     var mapFileGrid = new WritableMapFileGrid(gridX, gridY);
-                    var areaFile = new AreaFile(stream);
-                    foreach (IReadable areaChunk in areaFile.Chunks)
+
+                    var areaFile = new AreaFile();
+                    areaFile.Read(reader);
+
+                    foreach (IBinaryReadable areaChunk in areaFile.Chunks)
                     {
                         switch (areaChunk)
                         {
-                            case Chnk chnk:
+                            case CellChunk chnk:
                             {
-                                foreach (ChnkCell cell in chnk.Cells.Where(c => c != null))
+                                foreach (Cell cell in chnk.Cells.Where(c => c != null))
                                     mapFileGrid.AddCell(new WritableMapFileCell(cell));
                                 break;
                             }

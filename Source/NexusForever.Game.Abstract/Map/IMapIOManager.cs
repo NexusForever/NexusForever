@@ -1,4 +1,4 @@
-﻿using NexusForever.IO.Map;
+﻿using NexusForever.IO.Format.NexusForever.Map;
 
 namespace NexusForever.Game.Abstract.Map
 {

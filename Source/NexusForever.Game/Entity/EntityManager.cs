@@ -10,7 +10,7 @@ using NexusForever.Game.Map;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format.NexusForever.Map;
 using NexusForever.Shared;
 using NLog;
 

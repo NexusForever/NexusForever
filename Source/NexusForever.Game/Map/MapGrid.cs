@@ -4,7 +4,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Static.Map;
-using NexusForever.IO.Map;
+using NexusForever.IO.Format.NexusForever.Map;
 using NexusForever.Shared.Configuration;
 using NexusForever.Shared.Game;
 using NLog;
