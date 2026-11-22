@@ -5,6 +5,7 @@
         public static uint Size => 112u;
 
         public ushort ModelSequenceId { get; set; }
+        public ushort FallbackModelSequenceId { get; set; }
         public uint Start { get;set; }
         public uint End { get;set; }
 
@@ -15,7 +16,7 @@
             reader.ReadUInt16(); // 1
             reader.ReadUInt16();
             reader.ReadUInt16(); // 100
-            reader.ReadUInt16(); //fallback
+            FallbackModelSequenceId = reader.ReadUInt16();
             Start = reader.ReadUInt32();
             End = reader.ReadUInt32();
 

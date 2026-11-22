@@ -15,6 +15,15 @@ namespace NexusForever.IO
             return new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
         }
 
+        public static Matrix4x4 ReadMatrix4x4(this BinaryReader reader)
+        {
+            return new Matrix4x4(
+                reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+                reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+                reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(),
+                reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        }
+
         public static string ReadWCString(this BinaryReader reader)
         {
             using var sreader = new BinaryReader(reader.BaseStream, Encoding.Unicode, true);

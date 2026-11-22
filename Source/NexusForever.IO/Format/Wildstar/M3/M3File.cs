@@ -13,7 +13,7 @@ namespace NexusForever.IO.Format.WildStar.M3
 
         public PointerReadableArray<Animation> Animation { get; } = new();
 
-        public TrackUShortArray Unknown20 { get; } = new();
+        public TrackByteArray Unknown20 { get; } = new(); // low confidence in this value size, more checking needed
         public TrackByteArray Unknown38 { get; } = new();
         public TrackByteArray Unknown50 { get; } = new();
         public TrackByteArray Unknown68 { get; } = new();
@@ -27,23 +27,23 @@ namespace NexusForever.IO.Format.WildStar.M3
 
         public PointerReadableArray<UnknownF0> UnknownF0 { get; } = new();
 
-        public TrackUShortArray Unknown100 { get; } = new();
-        public TrackUShortArray Unknown118 { get; } = new();
+        public TrackUIntArray Unknown100 { get; } = new(); // low confidence in this value size, more checking needed
+        public TrackUIntArray Unknown118 { get; } = new(); // low confidence in this value size, more checking needed
         public TrackByteArray Unknown130 { get; } = new();
         public TrackByteArray Unknown148 { get; } = new();
         public TrackUShortArray Unknown160 { get; } = new();
         public float Unknown178 { get; set; }
 
-        public PointerReadableArray<Unknown180> Unknown180 { get; } = new();
+        public PointerReadableArray<Bone> Bones { get; } = new();
 
         public PointerUShortArray Unknown190 { get; } = new();
         public PointerUShortArray Unknown1A0 { get; } = new();
-        public PointerUShortArray Unknown1B0 { get; } = new();
-        public PointerReadableArray<Unknown1C0> Unknown1C0 { get; } = new();
+        public PointerUShortArray BoneMap { get; } = new();
+        public PointerReadableArray<Texture> Textures { get; } = new();
         public PointerUShortArray Unknown1D0 { get; } = new();
         public PointerReadableArray<Unknown1E0> Unknown1E0 { get; } = new();
-        public PointerReadableArray<Unknown1F0> Unknown1F0 { get; } = new();
-        public PointerUIntArray Unknown200 { get; } = new();
+        public PointerReadableArray<Material> Materials { get; } = new();
+        public PointerReadableArray<MeshGroup> MeshGroups { get; } = new();
         public PointerUShortArray Unknown210 { get; } = new();
 
         public PointerReadableArray<Unknown220> Unknown220 { get; } = new();
@@ -52,9 +52,9 @@ namespace NexusForever.IO.Format.WildStar.M3
 
         public PointerReadableArray<Geometry> Geometries { get; } = new();
 
-        public PointerUShortArray Unknown260 { get; } = new();
+        public PointerUIntArray Unknown260 { get; } = new(); // low confidence in this value size, more checking needed
         public PointerUShortArray Unknown270 { get; } = new();
-        public PointerUShortArray Unknown280 { get; } = new();
+        public PointerULongArray Unknown280 { get; } = new(); // low confidence in this value size, more checking needed
         public TrackUShortArray Unknown290 { get; } = new();
         public PointerReadableArray<Unknown2A8> Unknown2A8 { get; } = new();
         public PointerReadableArray<Unknown2B8> Unknown2B8 { get; } = new();
@@ -63,15 +63,15 @@ namespace NexusForever.IO.Format.WildStar.M3
         public PointerULongArray Unknown2E8 { get; } = new();
         public PointerReadableArray<Unknown2F8> Unknown2F8 { get; } = new();
         public PointerReadableArray<Unknown308> Unknown308 { get; } = new();
-        public PointerReadableArray<Unknown318> Unknown318 { get; } = new();
+        public PointerReadableArray<Light> Lights { get; } = new(); // low confidence in this name, more checking needed
         public PointerReadableArray<Unknown328> Unknown328 { get; } = new();
         public PointerUShortArray Unknown338 { get; } = new();
         public ulong Unknown348 { get; set; }
         public TrackUIntArray Unknown350 { get; } = new();
         public ulong Unknown368 { get; set; }
         public TrackUIntArray Unknown370 { get; } = new();
-        public float Unknown380 { get; set; }
-        public float Unknown384 { get; set; }
+        public float Unknown388 { get; set; }
+        public float Unknown38C { get; set; }
 
         public Bounds Bounds390 { get; } = new();
         public Bounds Bounds3D0 { get; } = new();
@@ -94,8 +94,8 @@ namespace NexusForever.IO.Format.WildStar.M3
         public PointerReadableArray<Unknown570> Unknown570 { get; } = new();
         public long Unknown580 { get; set; }
         public PointerReadableArray<Unknown588> Unknown588 { get; } = new();
-        public PointerReadableArray<Unknown598> Unknown598 { get; } = new();
-        public PointerUShortArray Unknown5A0 { get; } = new();
+        public PointerReadableArray<CustomBoneRange> CustomBoneRanges { get; } = new();
+        public PointerUShortArray CustomBoneRangeMap { get; } = new();
         public TrackUShortArray Unknown5C0 { get; } = new();
         public float Unknown5D8 { get; set; }
         public float Unknown5E0 { get; set; }
@@ -146,16 +146,16 @@ namespace NexusForever.IO.Format.WildStar.M3
             Unknown178 = reader.ReadSingle();
             reader.BaseStream.Position += 4; // padding
 
-            Unknown180.Read(reader, DataOffset);
+            Bones.Read(reader, DataOffset);
             
             Unknown190.Read(reader, DataOffset);
             Unknown1A0.Read(reader, DataOffset);
-            Unknown1B0.Read(reader, DataOffset);
-            Unknown1C0.Read(reader, DataOffset);
+            BoneMap.Read(reader, DataOffset);
+            Textures.Read(reader, DataOffset);
             Unknown1D0.Read(reader, DataOffset);
             Unknown1E0.Read(reader, DataOffset);
-            Unknown1F0.Read(reader, DataOffset);
-            Unknown200.Read(reader, DataOffset);
+            Materials.Read(reader, DataOffset);
+            MeshGroups.Read(reader, DataOffset);
             Unknown210.Read(reader, DataOffset);
             
             Unknown220.Read(reader, DataOffset);
@@ -175,15 +175,15 @@ namespace NexusForever.IO.Format.WildStar.M3
             Unknown2E8.Read(reader, DataOffset);
             Unknown2F8.Read(reader, DataOffset);
             Unknown308.Read(reader, DataOffset);
-            Unknown318.Read(reader, DataOffset);
+            Lights.Read(reader, DataOffset);
             Unknown328.Read(reader, DataOffset);
             Unknown338.Read(reader, DataOffset);
             Unknown348 = reader.ReadUInt64();
             Unknown350.Read(reader, DataOffset);
             Unknown368 = reader.ReadUInt64();
             Unknown370.Read(reader, DataOffset);
-            Unknown380 = reader.ReadSingle();
-            Unknown384 = reader.ReadSingle();
+            Unknown388 = reader.ReadSingle();
+            Unknown38C = reader.ReadSingle();
 
             Bounds390.Read(reader);
             reader.BaseStream.Position += 8; // padding
@@ -220,8 +220,8 @@ namespace NexusForever.IO.Format.WildStar.M3
             Unknown580 = reader.ReadInt64();
 
             Unknown588.Read(reader, DataOffset);
-            Unknown598.Read(reader, DataOffset);
-            Unknown5A0.Read(reader, DataOffset);
+            CustomBoneRanges.Read(reader, DataOffset);
+            CustomBoneRangeMap.Read(reader, DataOffset);
 
             reader.BaseStream.Position += 8; // padding
 
