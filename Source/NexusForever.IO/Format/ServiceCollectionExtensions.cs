@@ -22,6 +22,8 @@ namespace NexusForever.IO.Format
         public static IServiceCollection AddFile<T>(this IServiceCollection sc) where T : class
         {
             sc.AddTransient<T>();
+            sc.AddSingleton<IFactory<T>, Factory<T>>();
+
             sc.AddTransientFactory<IFile<T>, File<T>>();
             return sc;
         }

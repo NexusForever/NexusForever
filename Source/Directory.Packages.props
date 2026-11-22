@@ -31,6 +31,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="11.0.0" />
     <PackageVersion Include="Microting.EntityFrameworkCore.MySql" Version="10.0.14" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />

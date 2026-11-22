@@ -2,7 +2,7 @@
 
 namespace NexusForever.IO.Format.Wildstar.DGN.Dressing
 {
-    public class DNGDressingFile : IBinaryReadable
+    public class DGNDressingFile : IBinaryReadable
     {
         // client hard codes this length
         public static uint DataOffset => 48u;

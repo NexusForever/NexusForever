@@ -27,8 +27,8 @@ namespace NexusForever.IO.Format.WildStar
             sc.AddFile<DNGFile>();
             sc.AddTransient<IFileReader<DNGFile>, FileBinaryReader<DNGFile>>();
 
-            sc.AddFile<DNGDressingFile>();
-            sc.AddTransient<IFileReader<DNGDressingFile>, FileBinaryReader<DNGDressingFile>>();
+            sc.AddFile<DGNDressingFile>();
+            sc.AddTransient<IFileReader<DGNDressingFile>, FileBinaryReader<DGNDressingFile>>();
         }
     }
 }

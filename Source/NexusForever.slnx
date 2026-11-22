@@ -2,6 +2,7 @@
   <Folder Name="/Client/">
     <Project Path="NexusForever.ClientConnector/NexusForever.ClientConnector.csproj" />
     <Project Path="NexusForever.MapGenerator/NexusForever.MapGenerator.csproj" />
+    <Project Path="NexusForever.Tool.Extractor/NexusForever.Tool.Extractor.csproj" />
   </Folder>
   <Folder Name="/Server/">
     <Project Path="NexusForever.API.Account.Client/NexusForever.API.Account.Client.csproj" Id="69bcadba-c65c-49b1-ba3b-8a0b124de854" />

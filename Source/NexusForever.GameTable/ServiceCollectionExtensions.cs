@@ -18,5 +18,16 @@ namespace NexusForever.GameTable
 
             sc.AddSingletonLegacy<IGameTableManager, GameTableManager>();
         }
+
+        public static void AddGameTable(this IServiceCollection sc, Action<GameTableConfig> configuration)
+        {
+            sc.AddGameTableText();
+
+            sc.AddOptions<GameTableConfig>()
+                .Configure(configuration)
+                .ValidateOnStart();
+
+            sc.AddSingletonLegacy<IGameTableManager, GameTableManager>();
+        }
     }
 }
