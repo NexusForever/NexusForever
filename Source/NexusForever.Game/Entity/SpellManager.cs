@@ -141,7 +141,9 @@ namespace NexusForever.Game.Entity
             for (uint i = 0; i <= maxGlobalSpellCooldownEnum; i++)
                 globalSpellCooldowns.Add(i, 0d);
 
-            GrantSpells();
+            // the action sets do not exist yet, so the gated rows cannot be evaluated here;
+            // SendInitialPackets does that once the player is built
+            GrantSpells(evaluatePrerequisites: false);
 
             // before the action sets are built: their point budget reads it.
             bonusAmpPower = model.BonusAmpPower;
@@ -166,16 +168,36 @@ namespace NexusForever.Game.Entity
             innateIndex     = model.InnateIndex;
         }
 
-        public void GrantSpells()
+        public void GrantSpells(bool evaluatePrerequisites = true)
         {
             // TODO: TEMPORARY, this should eventually be used on level up
             foreach (SpellLevelEntry spellLevel in GameTableManager.Instance.SpellLevel.Entries
                 .Where(s => s.ClassId == (byte)player.Class && s.CharacterLevel <= player.Level)
                 .OrderBy(s => s.CharacterLevel))
             {
-                //FIXME
+                // A SpellLevel row can carry a prerequisite that decides whether the ability is
+                // granted at all; the AMP unlocked abilities are gated this way (prerequisite type
+                // 227, "this Eldan augmentation is selected in the active spec").
+                // Still not handled: the rows gated behind the Primal Matrix, prerequisite type 292
+                // and the type 11 rows that chain to it. No check exists for type 292, so
+                // CanEvaluate rejects those rows and they stay blocked, without the warning that
+                // evaluating them would log on every pass.
+                // TODO: a spell granted through a prerequisite is never taken away again. When the
+                // AMP that unlocked it is deselected, or the player switches to a spec that does not
+                // have it, the ability stays in the spellbook. Whether retail removed it or only hid
+                // it is unverified, and so is the message the client expects for a removal, so
+                // nothing is removed for now.
                 if (spellLevel.PrerequisiteId > 0)
-                    continue;
+                {
+                    if (!evaluatePrerequisites)
+                        continue;
+
+                    if (!PrerequisiteManager.Instance.CanEvaluate(spellLevel.PrerequisiteId))
+                        continue;
+
+                    if (!PrerequisiteManager.Instance.Meets(player, spellLevel.PrerequisiteId))
+                        continue;
+                }
 
                 Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevel.Spell4Id);
                 if (spell4Entry == null)
@@ -598,6 +620,10 @@ namespace NexusForever.Game.Entity
 
             GetActionSet(ActiveActionSet).CastAmps();
 
+            // the new spec's AMP selection is in place, so a SpellLevel row gated behind one of its
+            // AMPs can be granted now
+            GrantSpells();
+
             return SpecError.Ok;
         }
 
@@ -823,6 +849,10 @@ namespace NexusForever.Game.Entity
 
         public void SendInitialPackets()
         {
+            // the gated rows the constructor left alone can be evaluated now, and this has to run
+            // before the ability items and the ability list go out below
+            GrantSpells();
+
             SendServerAbilities();
             SendServerAbilityList();
             SendServerAbilityPoints();

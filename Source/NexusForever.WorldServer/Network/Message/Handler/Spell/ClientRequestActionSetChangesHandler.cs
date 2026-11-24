@@ -55,6 +55,11 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
                     foreach (ushort id in newAmps)
                         actionSet.AddAmp(id);
 
+                    // after the whole new selection is in place, so a SpellLevel row gated behind
+                    // one of these AMPs sees it. A no-op when this is not the active spec, which is
+                    // the only one the AMP prerequisite reads.
+                    session.Player.SpellManager.GrantSpells();
+
                     session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
                 }
             }

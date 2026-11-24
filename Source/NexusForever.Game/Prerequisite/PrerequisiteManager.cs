@@ -11,6 +11,8 @@ namespace NexusForever.Game.Prerequisite
 {
     public class PrerequisiteManager : Singleton<PrerequisiteManager>, IPrerequisiteManager
     {
+        private const uint MaxChainDepth = 4;
+
         #region Dependency Injection
 
         private readonly ILogger<PrerequisiteManager> log;
@@ -60,6 +62,42 @@ namespace NexusForever.Game.Prerequisite
                     log.LogTrace($"Unhandled EvaluationMode {entry.Flags}");
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Returns if the supplied prerequisite, and anything it chains to, can be evaluated.
+        /// </summary>
+        public bool CanEvaluate(uint prerequisiteId)
+        {
+            return CanEvaluate(prerequisiteId, 0u);
+        }
+
+        private bool CanEvaluate(uint prerequisiteId, uint depth)
+        {
+            // guards against a prerequisite chain that points back at itself
+            if (depth > MaxChainDepth)
+                return false;
+
+            PrerequisiteEntry entry = gameTableManager.Prerequisite.GetEntry(prerequisiteId);
+            if (entry == null)
+                return false;
+
+            for (int i = 0; i < entry.PrerequisiteTypeId.Length; i++)
+            {
+                PrerequisiteType type = entry.PrerequisiteTypeId[i];
+                if (type == PrerequisiteType.None)
+                    continue;
+
+                if (serviceProvider.GetKeyedService<IPrerequisiteCheck>(type) == null)
+                    return false;
+
+                // OtherPrerequisite has a check, but it only defers to the prerequisite named by its
+                // object id, so that one has to be evaluable too
+                if (type == PrerequisiteType.OtherPrerequisite && !CanEvaluate(entry.ObjectId[i], depth + 1u))
+                    return false;
+            }
+
+            return true;
         }
 
         private bool MeetsEvaluateAnd(IPlayer player, uint prerequisiteId, PrerequisiteEntry entry, IPrerequisiteParameters parameters)

@@ -17,7 +17,10 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         byte InnateIndex { get; set; }
 
-        void GrantSpells();
+        /// <summary>
+        /// Grant every spell the character's class and level entitle it to.
+        /// </summary>
+        void GrantSpells(bool evaluatePrerequisites = true);
 
         /// <summary>
         /// Returns <see cref="ICharacterSpell"/> for an existing spell.
