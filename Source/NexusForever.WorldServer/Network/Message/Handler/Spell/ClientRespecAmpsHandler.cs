@@ -13,6 +13,10 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Spell
 
             IActionSet actionSet = session.Player.SpellManager.GetActionSet(requestAmpReset.SpecIndex);
             actionSet.RemoveAmp(requestAmpReset.RespecType, requestAmpReset.Value);
+
+            // a deselected AMP locks the SpellLevel rows it gated, in this spec only
+            session.Player.SpellManager.RefreshGatedSpells();
+
             session.EnqueueMessageEncrypted(actionSet.BuildServerAmpList());
         }
     }

@@ -109,6 +109,9 @@ namespace NexusForever.Game.Entity
 
         private readonly IActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
 
+        private readonly Dictionary<uint /*spell4BaseId*/, uint /*prerequisiteId*/> gatedSpells = new();
+        private readonly Dictionary<uint /*spell4BaseId*/, bool[] /*unlocked per action set*/> sentGateStates = new();
+
         private readonly HashSet<ushort> unlockedInlaidEldanAugmentations = new();
         private readonly List<ushort> unlockedInlaidEldanAugmentationsToSave = new();
 
@@ -175,33 +178,24 @@ namespace NexusForever.Game.Entity
                 .Where(s => s.ClassId == (byte)player.Class && s.CharacterLevel <= player.Level)
                 .OrderBy(s => s.CharacterLevel))
             {
-                // A SpellLevel row can carry a prerequisite that decides whether the ability is
-                // granted at all; the AMP unlocked abilities are gated this way (prerequisite type
-                // 227, "this Eldan augmentation is selected in the active spec").
-                // Still not handled: the rows gated behind the Primal Matrix, prerequisite type 292
-                // and the type 11 rows that chain to it. No check exists for type 292, so
-                // CanEvaluate rejects those rows and they stay blocked, without the warning that
-                // evaluating them would log on every pass.
-                // TODO: a spell granted through a prerequisite is never taken away again. When the
-                // AMP that unlocked it is deselected, or the player switches to a spec that does not
-                // have it, the ability stays in the spellbook. Whether retail removed it or only hid
-                // it is unverified, and so is the message the client expects for a removal, so
-                // nothing is removed for now.
-                if (spellLevel.PrerequisiteId > 0)
-                {
-                    if (!evaluatePrerequisites)
-                        continue;
-
-                    if (!PrerequisiteManager.Instance.CanEvaluate(spellLevel.PrerequisiteId))
-                        continue;
-
-                    if (!PrerequisiteManager.Instance.Meets(player, spellLevel.PrerequisiteId))
-                        continue;
-                }
-
                 Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevel.Spell4Id);
                 if (spell4Entry == null)
                     continue;
+
+                if (spellLevel.PrerequisiteId > 0)
+                {
+                    // the rows gated behind the Primal Matrix use types with no check, which would
+                    // log an unhandled type warning on every pass; they stay blocked instead
+                    if (!PrerequisiteManager.Instance.CanEvaluate(spellLevel.PrerequisiteId))
+                        continue;
+
+                    gatedSpells[spell4Entry.Spell4BaseIdBaseSpell] = spellLevel.PrerequisiteId;
+
+                    // the spellbook entry is shared by every action set, so one that meets the gate
+                    // is enough to grant it; the lock state is then per action set
+                    if (!evaluatePrerequisites || !MeetsGateInAnyActionSet(spellLevel.PrerequisiteId))
+                        continue;
+                }
 
                 if (GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
@@ -241,6 +235,96 @@ namespace NexusForever.Game.Entity
                 if (GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
             }
+        }
+
+        private bool MeetsGateInAnyActionSet(uint prerequisiteId)
+        {
+            for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+                if (MeetsGateInActionSet(prerequisiteId, i))
+                    return true;
+
+            return false;
+        }
+
+        private bool IsUnlockedInActionSet(uint spell4BaseId, byte specIndex)
+        {
+            if (!gatedSpells.TryGetValue(spell4BaseId, out uint prerequisiteId))
+                return true;
+
+            return MeetsGateInActionSet(prerequisiteId, specIndex);
+        }
+
+        private bool MeetsGateInActionSet(uint prerequisiteId, byte specIndex)
+        {
+            return PrerequisiteManager.Instance.Meets(player, prerequisiteId, new PrerequisiteParameters
+            {
+                ActionSetIndex = specIndex
+            });
+        }
+
+        private byte GetAchievedTier(uint spell4BaseId, byte specIndex, ICharacterSpell spell)
+        {
+            return actionSets[specIndex].GetShortcut(ShortcutType.SpellbookItem, spell4BaseId)?.Tier ?? spell.Tier;
+        }
+
+        private void RecordGateState(uint spell4BaseId)
+        {
+            if (!gatedSpells.ContainsKey(spell4BaseId))
+                return;
+
+            var sent = new bool[ActionSet.MaxActionSets];
+            for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+                sent[i] = IsUnlockedInActionSet(spell4BaseId, i);
+
+            sentGateStates[spell4BaseId] = sent;
+        }
+
+        /// <summary>
+        /// Re-evaluate the prerequisite gated spells and send the client the lock state of any that changed.
+        /// </summary>
+        public void RefreshGatedSpells()
+        {
+            GrantSpells();
+
+            if (player.IsLoading)
+                return;
+
+            var serverAbilities = new ServerAbilities();
+
+            foreach ((uint spell4BaseId, uint prerequisiteId) in gatedSpells)
+            {
+                ICharacterSpell spell = GetSpell(spell4BaseId);
+                if (spell == null)
+                    continue;
+
+                // the client evaluates the gate itself when it first builds the entry, so a spell it
+                // has not been told about yet gets every action set rather than only the changes
+                bool known = sentGateStates.TryGetValue(spell4BaseId, out bool[] sent);
+                if (!known)
+                {
+                    sent = new bool[ActionSet.MaxActionSets];
+                    sentGateStates.Add(spell4BaseId, sent);
+                }
+
+                for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+                {
+                    bool unlocked = MeetsGateInActionSet(prerequisiteId, i);
+                    if (known && unlocked == sent[i])
+                        continue;
+
+                    sent[i] = unlocked;
+
+                    serverAbilities.Spells.Add(new ServerAbilities.Spell
+                    {
+                        Spell4BaseId      = spell4BaseId,
+                        TierIndexAchieved = unlocked ? GetAchievedTier(spell4BaseId, i, spell) : (byte)0,
+                        SpecIndex         = i
+                    });
+                }
+            }
+
+            if (serverAbilities.Spells.Count > 0)
+                player.Session.EnqueueMessageEncrypted(serverAbilities);
         }
 
         public void Update(double lastTick)
@@ -620,10 +704,6 @@ namespace NexusForever.Game.Entity
 
             GetActionSet(ActiveActionSet).CastAmps();
 
-            // the new spec's AMP selection is in place, so a SpellLevel row gated behind one of its
-            // AMPs can be granted now
-            GrantSpells();
-
             return SpecError.Ok;
         }
 
@@ -904,11 +984,10 @@ namespace NexusForever.Game.Entity
 
                 for (byte i = 0; i < ActionSet.MaxActionSets; i++)
                 {
-                    IActionSetShortcut shortcut = actionSets[i].GetShortcut(ShortcutType.SpellbookItem, spell4BaseId);
                     serverAbilities.Spells.Add(new ServerAbilities.Spell
                     {
                         Spell4BaseId      = spell4BaseId,
-                        TierIndexAchieved = shortcut?.Tier ?? spell.Tier,
+                        TierIndexAchieved = IsUnlockedInActionSet(spell4BaseId, i) ? GetAchievedTier(spell4BaseId, i, spell) : (byte)0,
                         SpecIndex         = i
                     });
 
@@ -916,6 +995,8 @@ namespace NexusForever.Game.Entity
                     if (spellBaseInfo.SpellType.Id != 5)
                         break;
                 }
+
+                RecordGateState(spell4BaseId);
             }
 
             player.Session.EnqueueMessageEncrypted(serverAbilities);

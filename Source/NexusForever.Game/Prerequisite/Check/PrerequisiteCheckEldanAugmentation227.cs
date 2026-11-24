@@ -7,7 +7,7 @@ using NexusForever.Game.Static.Prerequisite;
 namespace NexusForever.Game.Prerequisite.Check
 {
     /// <summary>
-    /// Is the <see cref="PrerequisiteEntry"/> object id an Eldan augmentation selected in the active spec?
+    /// Is the <see cref="PrerequisiteEntry"/> object id an Eldan augmentation selected in the supplied action set, else the active one?
     /// </summary>
     [PrerequisiteCheck(PrerequisiteType.EldanAugmentation227)]
     public class PrerequisiteCheckEldanAugmentation227 : IPrerequisiteCheck
@@ -26,7 +26,7 @@ namespace NexusForever.Game.Prerequisite.Check
 
         public bool Meets(IPlayer player, PrerequisiteComparison comparison, uint value, uint objectId, IPrerequisiteParameters parameters)
         {
-            IActionSet actionSet = player.SpellManager.GetActionSet(player.SpellManager.ActiveActionSet);
+            IActionSet actionSet = player.SpellManager.GetActionSet(parameters.ActionSetIndex ?? player.SpellManager.ActiveActionSet);
             bool selected = actionSet.GetAmp((ushort)objectId) != null;
 
             switch (comparison)

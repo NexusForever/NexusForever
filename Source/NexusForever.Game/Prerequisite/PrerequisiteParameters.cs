@@ -9,5 +9,6 @@ namespace NexusForever.Game.Prerequisite
         public CastResult? CastResult { get; set; }
         public IUnitEntity Target { get; set; }
         public ushort? TaxiNode { get; set; }
+        public byte? ActionSetIndex { get; set; }
     }
 }

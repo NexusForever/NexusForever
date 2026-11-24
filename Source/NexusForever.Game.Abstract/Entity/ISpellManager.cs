@@ -23,6 +23,11 @@ namespace NexusForever.Game.Abstract.Entity
         void GrantSpells(bool evaluatePrerequisites = true);
 
         /// <summary>
+        /// Re-evaluate the prerequisite gated spells and send the client the lock state of any that changed.
+        /// </summary>
+        void RefreshGatedSpells();
+
+        /// <summary>
         /// Returns <see cref="ICharacterSpell"/> for an existing spell.
         /// </summary>
         ICharacterSpell GetSpell(uint spell4BaseId);
