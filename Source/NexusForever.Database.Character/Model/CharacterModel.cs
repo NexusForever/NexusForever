@@ -30,6 +30,7 @@ namespace NexusForever.Database.Character.Model
         public sbyte InputKeySet { get; set; }
         public byte ActiveSpec { get; set; }
         public byte InnateIndex { get; set; }
+        public short BonusAmpPower { get; set; }
         public uint TimePlayedTotal { get; set; }
         public uint TimePlayedLevel { get; set; }
         public DateTime? DeleteTime { get; set; }
@@ -50,6 +51,7 @@ namespace NexusForever.Database.Character.Model
         public ICollection<CharacterCurrencyModel> Currency { get; set; } = new HashSet<CharacterCurrencyModel>();
         public ICollection<CharacterCustomisationModel> Customisation { get; set; } = new HashSet<CharacterCustomisationModel>();
         public ICollection<CharacterDatacubeModel> Datacube { get; set; } = new HashSet<CharacterDatacubeModel>();
+        public ICollection<CharacterEldanAugmentationUnlockModel> EldanAugmentationUnlock { get; set; } = new HashSet<CharacterEldanAugmentationUnlockModel>();
         public ICollection<CharacterEntitlementModel> Entitlement { get; set; } = new HashSet<CharacterEntitlementModel>();
         public ICollection<CharacterKeybindingModel> Keybinding { get; set; } = new HashSet<CharacterKeybindingModel>();
         public ICollection<CharacterMailModel> Mail { get; set; } = new HashSet<CharacterMailModel>();

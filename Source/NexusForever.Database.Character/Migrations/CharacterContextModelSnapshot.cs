@@ -17,7 +17,7 @@ namespace NexusForever.Database.Character.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -736,6 +736,26 @@ namespace NexusForever.Database.Character.Migrations
                     b.ToTable("character_datacube", (string)null);
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterEldanAugmentationUnlockModel", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint(20) unsigned")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("id");
+
+                    b.Property<ushort>("EldanAugmentationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasDefaultValue((ushort)0)
+                        .HasColumnName("eldanAugmentationId");
+
+                    b.HasKey("Id", "EldanAugmentationId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("character_eldan_augmentation_unlock", (string)null);
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterEntitlementModel", b =>
                 {
                     b.Property<ulong>("Id")
@@ -1021,6 +1041,12 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnType("tinyint(3) unsigned")
                         .HasDefaultValue((byte)0)
                         .HasColumnName("activeSpec");
+
+                    b.Property<short>("BonusAmpPower")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint(6)")
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("bonusAmpPower");
 
                     b.Property<byte>("Class")
                         .ValueGeneratedOnAdd()
@@ -2601,6 +2627,18 @@ namespace NexusForever.Database.Character.Migrations
                     b.Navigation("Character");
                 });
 
+            modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterEldanAugmentationUnlockModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
+                        .WithMany("EldanAugmentationUnlock")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__character_eldan_augmentation_unlock_id__character_id");
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("NexusForever.Database.Character.Model.CharacterEntitlementModel", b =>
                 {
                     b.HasOne("NexusForever.Database.Character.Model.CharacterModel", "Character")
@@ -2933,6 +2971,8 @@ namespace NexusForever.Database.Character.Migrations
                     b.Navigation("Customisation");
 
                     b.Navigation("Datacube");
+
+                    b.Navigation("EldanAugmentationUnlock");
 
                     b.Navigation("Entitlement");
 

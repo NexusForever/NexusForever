@@ -14,10 +14,25 @@ namespace NexusForever.Game.Spell.Type
 
         #region Dependency Injection
 
-        private readonly ILogger<SpellNormal> log;
+        private readonly ILogger log;
 
         public SpellNormal(
             ILogger<SpellNormal> log,
+            ISpellTargetInfoCollection spellTargetInfoCollection,
+            IGlobalSpellManager globalSpellManager,
+            ICastResultValidatorManager castResultValidatorManager,
+            IDisableManager disableManager)
+            : this((ILogger)log, spellTargetInfoCollection, globalSpellManager, castResultValidatorManager, disableManager)
+        {
+        }
+
+        /// <summary>
+        /// Constructor for derived cast methods that share the normal cast timeline, so that they keep
+        /// their own logger category. Not public, so dependency injection always picks the constructor
+        /// above when resolving <see cref="SpellNormal"/> itself.
+        /// </summary>
+        protected SpellNormal(
+            ILogger log,
             ISpellTargetInfoCollection spellTargetInfoCollection,
             IGlobalSpellManager globalSpellManager,
             ICastResultValidatorManager castResultValidatorManager,

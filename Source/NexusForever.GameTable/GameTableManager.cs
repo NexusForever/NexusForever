@@ -196,6 +196,7 @@ namespace NexusForever.GameTable
 
         [GameData]
         public GameTable<EldanAugmentationEntry> EldanAugmentation { get; private set; }
+        [GameData]
         public GameTable<EldanAugmentationCategoryEntry> EldanAugmentationCategory { get; private set; }
         public GameTable<EmoteSequenceTransitionEntry> EmoteSequenceTransition { get; private set; }
 

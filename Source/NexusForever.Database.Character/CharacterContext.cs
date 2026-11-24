@@ -19,6 +19,7 @@ namespace NexusForever.Database.Character
         public DbSet<CharacterCurrencyModel> CharacterCurrency { get; set; }
         public DbSet<CharacterCustomisationModel> CharacterCustomisation { get; set; }
         public DbSet<CharacterDatacubeModel> CharacterDatacube { get; set; }
+        public DbSet<CharacterEldanAugmentationUnlockModel> CharacterEldanAugmentationUnlock { get; set; }
         public DbSet<CharacterEntitlementModel> CharacterEntitlement { get; set; }
         public DbSet<CharacterKeybindingModel> CharacterKeybinding { get; set; }
         public DbSet<CharacterMailModel> CharacterMail { get; set; }
@@ -97,6 +98,15 @@ namespace NexusForever.Database.Character
                 entity.Property(e => e.ActiveSpec)
                     .HasColumnName("activeSpec")
                     .HasColumnType("tinyint(3) unsigned")
+                    .HasDefaultValue(0);
+
+                // the client reads the AMP bonus power as a signed int16 and compares it unsigned, so a
+                // negative value fails the <10 gate of Prerequisite 28557 and locks further grants out.
+                // The column is signed to match the wire field; the server never stores a value
+                // outside 0..10.
+                entity.Property(e => e.BonusAmpPower)
+                    .HasColumnName("bonusAmpPower")
+                    .HasColumnType("smallint(6)")
                     .HasDefaultValue(0);
 
                 entity.Property(e => e.Class)
@@ -304,6 +314,29 @@ namespace NexusForever.Database.Character
                     .WithMany(p => p.ActionSetAmp)
                     .HasForeignKey(d => d.Id)
                     .HasConstraintName("FK__character_action_set_amp_id__character_id");
+            });
+
+            modelBuilder.Entity<CharacterEldanAugmentationUnlockModel>(entity =>
+            {
+                entity.ToTable("character_eldan_augmentation_unlock");
+
+                entity.HasKey(e => new { e.Id, e.EldanAugmentationId })
+                    .HasName("PRIMARY");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("bigint(20) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.EldanAugmentationId)
+                    .HasColumnName("eldanAugmentationId")
+                    .HasColumnType("smallint(5) unsigned")
+                    .HasDefaultValue(0);
+
+                entity.HasOne(d => d.Character)
+                    .WithMany(p => p.EldanAugmentationUnlock)
+                    .HasForeignKey(d => d.Id)
+                    .HasConstraintName("FK__character_eldan_augmentation_unlock_id__character_id");
             });
 
             modelBuilder.Entity<CharacterActionSetShortcutModel>(entity =>

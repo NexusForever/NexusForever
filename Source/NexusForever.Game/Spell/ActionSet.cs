@@ -29,13 +29,72 @@ namespace NexusForever.Game.Spell
         public const byte MaxTierPoints  = 42;
         public const byte MaxActionSets  = 4;
         public const byte MaxActionCount = 48;
-        public const byte MaxAmpPoints   = 45 + 10; // 10 are bonus unlocked
         public const byte MaxTier        = 9;
+
+        /// <summary>
+        /// <see cref="GameFormulaEntry"/> id holding the AMP point budget constants.
+        /// </summary>
+        /// <remarks>
+        /// Row 942 carries dataint0 = 10 (the level below which no AMP point is granted),
+        /// dataint01 = 7 (the flat base) and datafloat0 = 1.0 (points per level above the floor).
+        /// The client falls back to immediates compiled into its own code when the row is missing,
+        /// and two of those disagree with the shipped row (flat base 4, tier weight 0.5), and the
+        /// type-225 prerequisite handler falls back to a floor of 6 against the shipped 10; so the
+        /// row is the authority and the fallbacks below only mirror the shipped values.
+        /// </remarks>
+        public const uint AmpPointGameFormulaId = 942u;
+
+        private const uint  fallbackAmpPointLevelFloor = 10u;
+        private const uint  fallbackAmpPointFlatBase   = 7u;
+        private const float fallbackAmpPointPerLevel   = 1.0f;
+
+        /// <summary>
+        /// The level below which no AMP point is granted.
+        /// </summary>
+        /// <remarks>
+        /// The point budget and the <c>LevelGrantAmpPoints</c> prerequisite check both read the
+        /// floor here, so there is one fallback and not two.
+        /// </remarks>
+        public static uint AmpPointLevelFloor =>
+            GameTableManager.Instance.GameFormula.GetEntry(AmpPointGameFormulaId)?.Dataint0
+                ?? fallbackAmpPointLevelFloor;
 
         public ulong Owner { get; }
         public byte Index { get; }
         public byte TierPoints { get; private set; }
-        public byte AmpPoints { get; private set; }
+
+        /// <summary>
+        /// Total AMP points the <see cref="IActionSet"/> owner may spend.
+        /// </summary>
+        /// <remarks>
+        /// The client recomputes this from the player's level, the item granted bonus and the
+        /// Primal Matrix contribution every time any of the three changes, and stores no maximum of
+        /// its own; so neither do we. 0 below level 10, 7 at level 10, 47 at level 50.
+        /// </remarks>
+        public byte AmpPointLimit => CalculateAmpPointLimit(
+            player.Level, spellManager.BonusAmpPower, MatrixAmpPower);
+
+        /// <summary>
+        /// AMP points the <see cref="IActionSet"/> owner has left to spend.
+        /// </summary>
+        public byte AmpPoints
+        {
+            get
+            {
+                int remaining = AmpPointLimit - spentAmpPoints;
+                return remaining <= 0 ? (byte)0 : (byte)remaining;
+            }
+        }
+
+        /// <summary>
+        /// AMP points granted by the Primal Matrix.
+        /// </summary>
+        /// <remarks>
+        /// The client keeps this in a slot of its own, written only by the Primal Matrix update the
+        /// server sends. That feature does not exist here, so the contribution is 0; on shipped data
+        /// its maximum is 9.
+        /// </remarks>
+        public static uint MatrixAmpPower => 0u;
 
         /// <summary>
         /// Collection of <see cref="IActionSetShortcut"/> contained in the <see cref="IActionSet"/>.
@@ -50,17 +109,53 @@ namespace NexusForever.Game.Spell
         private readonly Dictionary<UILocation, IActionSetShortcut> actions = new();
         private readonly Dictionary<ushort, IActionSetAmp> amps = new();
 
+        private readonly IPlayer player;
+
+        // not player.SpellManager: the action sets are built from inside the ISpellManager
+        // constructor, before the player's own reference to it has been assigned.
+        private readonly ISpellManager spellManager;
+
+        private ushort spentAmpPoints;
+
         private ActionSetSaveMask saveMask;
 
         /// <summary>
         /// Create a new <see cref="IActionSet"/> with supplied index.
         /// </summary>
-        public ActionSet(byte index, IPlayer player)
+        public ActionSet(byte index, IPlayer player, ISpellManager spellManager)
         {
-            Owner      = player.CharacterId;
-            Index      = index;
-            TierPoints = MaxTierPoints;
-            AmpPoints  = MaxAmpPoints - 10;
+            Owner             = player.CharacterId;
+            Index             = index;
+            TierPoints        = MaxTierPoints;
+            this.player       = player;
+            this.spellManager = spellManager;
+        }
+
+        /// <summary>
+        /// Calculate the total spendable AMP points for the supplied level and bonuses.
+        /// </summary>
+        /// <remarks>
+        /// The client's own formula, with the <see cref="AmpPointGameFormulaId"/> constants:
+        /// level below the floor gives 0, otherwise (int)((level - floor) * perLevel) + matrix +
+        /// bonus + flat base. The truncation is toward zero, as the client's cvttss2si is.
+        /// </remarks>
+        public static byte CalculateAmpPointLimit(uint level, short bonusPower, uint matrixPower)
+        {
+            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(AmpPointGameFormulaId);
+
+            uint  levelFloor = AmpPointLevelFloor;
+            uint  flatBase   = entry?.Dataint01 ?? fallbackAmpPointFlatBase;
+            float perLevel   = entry?.Datafloat0 ?? fallbackAmpPointPerLevel;
+
+            if (level < levelFloor)
+                return 0;
+
+            long total = (long)((level - levelFloor) * perLevel) + matrixPower + bonusPower + flatBase;
+
+            if (total <= 0L)
+                return 0;
+
+            return total > byte.MaxValue ? byte.MaxValue : (byte)total;
         }
 
         public void Save(CharacterContext context)
@@ -247,9 +342,12 @@ namespace NexusForever.Game.Spell
             if (amps.TryGetValue(id, out IActionSetAmp amp) && !amp.PendingDelete)
                 throw new InvalidOperationException($"Failed to add AMP {id}, location is already occupied!");
 
+            if (entry.PowerCost > AmpPoints)
+                throw new InvalidOperationException($"Failed to add AMP {id}, {entry.PowerCost} power exceeds the {AmpPoints} remaining of a {AmpPointLimit} point budget!");
+
             checked
             {
-                AmpPoints -= (byte)entry.PowerCost;
+                spentAmpPoints += (ushort)entry.PowerCost;
             }
 
             if (amp != null)
@@ -258,6 +356,8 @@ namespace NexusForever.Game.Spell
                 amps.Add(id, new ActionSetAmp(this, entry, true));
 
             saveMask |= ActionSetSaveMask.ActionSetAmps;
+
+            CastAmpSpell(entry);
 
             log.Trace($"Added AMP {id} to action set {Index}.");
         }
@@ -271,9 +371,18 @@ namespace NexusForever.Game.Spell
             if (entry == null)
                 throw new ArgumentException();
 
+            // the login path does not refuse a stored selection that no longer fits the budget - a
+            // character whose bonus power was reduced would otherwise fail to load. AmpPoints floors
+            // at 0 until the owner respecs.
             checked
             {
-                AmpPoints -= (byte)entry.PowerCost;
+                spentAmpPoints += (ushort)entry.PowerCost;
+            }
+
+            if (spentAmpPoints > AmpPointLimit)
+            {
+                log.Warn($"Action set {Index} of character {Owner} has {spentAmpPoints} AMP power " +
+                    $"spent against a {AmpPointLimit} point budget.");
             }
 
             amps.Add(model.AmpId, new ActionSetAmp(this, entry, false));
@@ -318,7 +427,7 @@ namespace NexusForever.Game.Spell
 
             checked
             {
-                AmpPoints += (byte)amp.Entry.PowerCost;
+                spentAmpPoints -= (ushort)Math.Min(spentAmpPoints, amp.Entry.PowerCost);
             }
 
             if (amp.PendingCreate)
@@ -329,7 +438,56 @@ namespace NexusForever.Game.Spell
                 saveMask |= ActionSetSaveMask.ActionSetAmps;
             }
 
+            FinishAmpSpell(amp.Entry);
+
             log.Trace($"Removed AMP {amp.Entry.Id} from action set {Index}.");
+        }
+
+        /// <summary>
+        /// Cast the spell of every <see cref="IActionSetAmp"/> in the <see cref="IActionSet"/>.
+        /// </summary>
+        public void CastAmps()
+        {
+            foreach (IActionSetAmp amp in Amps)
+                CastAmpSpell(amp.Entry);
+        }
+
+        /// <summary>
+        /// Finish the spell of every <see cref="IActionSetAmp"/> in the <see cref="IActionSet"/>.
+        /// </summary>
+        public void FinishAmps()
+        {
+            foreach (IActionSetAmp amp in Amps)
+                FinishAmpSpell(amp.Entry);
+        }
+
+        /// <summary>
+        /// Cast the <see cref="EldanAugmentationEntry"/> spell, in the shape of a class passive.
+        /// </summary>
+        private void CastAmpSpell(EldanAugmentationEntry entry)
+        {
+            if (entry.Spell4IdAugment == 0u)
+                return;
+
+            if (player.HasSpell(entry.Spell4IdAugment, out ISpell _))
+                return;
+
+            player.CastSpell(entry.Spell4IdAugment, new SpellParameters
+            {
+                UserInitiatedSpellCast = false
+            });
+        }
+
+        /// <summary>
+        /// Finish the <see cref="EldanAugmentationEntry"/> spell, if it is running.
+        /// </summary>
+        private void FinishAmpSpell(EldanAugmentationEntry entry)
+        {
+            if (entry.Spell4IdAugment == 0u)
+                return;
+
+            if (player.HasSpell(entry.Spell4IdAugment, out ISpell spell))
+                spell.Finish();
         }
 
         /// <summary>

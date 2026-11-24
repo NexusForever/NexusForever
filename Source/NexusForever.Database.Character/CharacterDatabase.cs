@@ -133,6 +133,7 @@ namespace NexusForever.Database.Character
                 .Include(c => c.Spell)
                 .Include(c => c.ActionSetShortcut)
                 .Include(c => c.ActionSetAmp)
+                .Include(c => c.EldanAugmentationUnlock)
                 .Include(c => c.Datacube)
                 .Include(c => c.Mail)
                     .ThenInclude(c => c.Attachment)

@@ -17,7 +17,15 @@ namespace NexusForever.Game.Abstract.Entity
         /// </summary>
         byte InnateIndex { get; set; }
 
-        void GrantSpells();
+        /// <summary>
+        /// Grant every spell the character's class and level entitle it to.
+        /// </summary>
+        void GrantSpells(bool evaluatePrerequisites = true);
+
+        /// <summary>
+        /// Re-evaluate the prerequisite gated spells and send the client the lock state of any that changed.
+        /// </summary>
+        void RefreshGatedSpells();
 
         /// <summary>
         /// Returns <see cref="ICharacterSpell"/> for an existing spell.
@@ -91,6 +99,41 @@ namespace NexusForever.Game.Abstract.Entity
         /// Update active <see cref="IActionSet"/> with supplied index, returned <see cref="SpecError"/> is sent to the client.
         /// </summary>
         SpecError SetActiveActionSet(byte value);
+
+        /// <summary>
+        /// Validate the supplied AMP ids against the <see cref="IActionSet"/> at supplied index.
+        /// </summary>
+        LimitedActionSetResult ValidateAmps(byte specIndex, IEnumerable<ushort> newAmps);
+
+        /// <summary>
+        /// AMP points granted to this character by <c>AMP Power Upgrade</c> items, 0..10.
+        /// </summary>
+        short BonusAmpPower { get; }
+
+        /// <summary>
+        /// Grant supplied amount of bonus AMP power, clamped to the range the client accepts.
+        /// </summary>
+        void GrantBonusAmpPower(int amount);
+
+        /// <summary>
+        /// Send the item granted bonus AMP power to the client.
+        /// </summary>
+        void SendAmpPowerUpdate();
+
+        /// <summary>
+        /// Returns if the supplied Eldan augmentation id is an unlocked inlaid augmentation.
+        /// </summary>
+        bool HasUnlockedInlaidEldanAugmentation(ushort eldanAugmentationId);
+
+        /// <summary>
+        /// Unlock the inlaid Eldan augmentation with supplied id.
+        /// </summary>
+        void UnlockInlaidEldanAugmentation(ushort eldanAugmentationId);
+
+        /// <summary>
+        /// Send the complete unlocked inlaid augmentation set to the client.
+        /// </summary>
+        void SendUnlockedInlaidEldanAugmentations();
 
         /// <summary>
         /// Set the supplied spell as the spell to Continuously Cast when GCD expires. Should only be called by a <see cref="ICharacterSpell"/>.

@@ -70,7 +70,11 @@ namespace NexusForever.Network.World.Message.Model
         public uint ElderPoints { get; set; }
         public uint DailyElderPoints { get; set; }
         public byte SpecIndex { get; set; }
-        public ushort BonusPower { get; set; }
+        /// <summary>
+        /// AMP points granted by <c>AMP Power Upgrade</c> items, 0..10. Signed, and never negative:
+        /// see <see cref="Abilities.ServerAmpPowerUpdate.BonusPower"/>.
+        /// </summary>
+        public short BonusPower { get; set; }
         public uint UnknownA0 { get; set; }
         public Faction FactionData { get; set; }
         public List<Pet> Pets { get; } = new();
@@ -100,7 +104,7 @@ namespace NexusForever.Network.World.Message.Model
             writer.Write(ElderPoints);
             writer.Write(DailyElderPoints);
             writer.Write(SpecIndex, 3u);
-            writer.Write(BonusPower);
+            writer.Write((ushort)BonusPower);
             writer.Write(UnknownA0);
 
             FactionData.Write(writer);

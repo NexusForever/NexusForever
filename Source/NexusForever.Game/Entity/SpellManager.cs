@@ -31,7 +31,8 @@ namespace NexusForever.Game.Entity
         {
             None            = 0x0000,
             ActiveActionSet = 0x0001,
-            Innate          = 0x0002
+            Innate          = 0x0002,
+            BonusAmpPower   = 0x0004
         }
 
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
@@ -61,6 +62,42 @@ namespace NexusForever.Game.Entity
         }
         private byte innateIndex;
 
+        /// <summary>
+        /// AMP points granted to this character by <c>AMP Power Upgrade</c> items.
+        /// </summary>
+        /// <remarks>
+        /// The client's own bonus power slot, fed only by <see cref="ServerAmpPowerUpdate"/> and by
+        /// the same field of <see cref="ServerPlayerCreate"/>. It is signed on the wire but the
+        /// client compares it unsigned, so a negative value fails the cap gate instead of passing
+        /// it; the setter keeps it inside 0..<see cref="MaxBonusAmpPower"/>.
+        /// </remarks>
+        public short BonusAmpPower
+        {
+            get => bonusAmpPower;
+            private set
+            {
+                bonusAmpPower = value;
+                saveMask |= SpellManagerSaveMask.BonusAmpPower;
+            }
+        }
+        private short bonusAmpPower;
+
+        /// <summary>
+        /// The size of the client's own unlocked inlaid augmentation array.
+        /// </summary>
+        public const byte MaxUnlockedInlaidEldanAugmentations = 54;
+
+        /// <summary>
+        /// Highest bonus power an <c>AMP Power Upgrade</c> item may grant a character.
+        /// </summary>
+        /// <remarks>
+        /// <c>Prerequisite</c> 28557, the cast gate of the only spell that grants it, is a type 237
+        /// (<c>BonusPower</c>) check with comparison id 5, which the client
+        /// evaluates as a strict <c>&lt;</c> against its value of 10. So the 11th grant is refused
+        /// and the accumulator stops at 10.
+        /// </remarks>
+        public const short MaxBonusAmpPower = 10;
+
         private readonly IPlayer player;
         private ICharacterSpell continuousSpell;
 
@@ -71,6 +108,12 @@ namespace NexusForever.Game.Entity
         private uint maxGlobalSpellCooldownEnum = 3; // TODO: Read value from GameTables?
 
         private readonly IActionSet[] actionSets = new ActionSet[ActionSet.MaxActionSets];
+
+        private readonly Dictionary<uint /*spell4BaseId*/, uint /*prerequisiteId*/> gatedSpells = new();
+        private readonly Dictionary<uint /*spell4BaseId*/, bool[] /*unlocked per action set*/> sentGateStates = new();
+
+        private readonly HashSet<ushort> unlockedInlaidEldanAugmentations = new();
+        private readonly List<ushort> unlockedInlaidEldanAugmentationsToSave = new();
 
         private SpellManagerSaveMask saveMask;
 
@@ -101,11 +144,16 @@ namespace NexusForever.Game.Entity
             for (uint i = 0; i <= maxGlobalSpellCooldownEnum; i++)
                 globalSpellCooldowns.Add(i, 0d);
 
-            GrantSpells();
+            // the action sets do not exist yet, so the gated rows cannot be evaluated here;
+            // SendInitialPackets does that once the player is built
+            GrantSpells(evaluatePrerequisites: false);
+
+            // before the action sets are built: their point budget reads it.
+            bonusAmpPower = model.BonusAmpPower;
 
             for (byte i = 0; i < ActionSet.MaxActionSets; i++)
             {
-                actionSets[i] = new ActionSet(i, player);
+                actionSets[i] = new ActionSet(i, player, this);
 
                 foreach (CharacterActionSetShortcutModel shortcutModel in model.ActionSetShortcut
                     .Where(c => c.SpecIndex == i))
@@ -116,24 +164,38 @@ namespace NexusForever.Game.Entity
                     actionSets[i].AddAmp(ampModel);
             }
 
+            foreach (CharacterEldanAugmentationUnlockModel unlockModel in model.EldanAugmentationUnlock)
+                unlockedInlaidEldanAugmentations.Add(unlockModel.EldanAugmentationId);
+
             activeActionSet = model.ActiveSpec;
             innateIndex     = model.InnateIndex;
         }
 
-        public void GrantSpells()
+        public void GrantSpells(bool evaluatePrerequisites = true)
         {
             // TODO: TEMPORARY, this should eventually be used on level up
             foreach (SpellLevelEntry spellLevel in GameTableManager.Instance.SpellLevel.Entries
                 .Where(s => s.ClassId == (byte)player.Class && s.CharacterLevel <= player.Level)
                 .OrderBy(s => s.CharacterLevel))
             {
-                //FIXME
-                if (spellLevel.PrerequisiteId > 0)
-                    continue;
-
                 Spell4Entry spell4Entry = GameTableManager.Instance.Spell4.GetEntry(spellLevel.Spell4Id);
                 if (spell4Entry == null)
                     continue;
+
+                if (spellLevel.PrerequisiteId > 0)
+                {
+                    // the rows gated behind the Primal Matrix use types with no check, which would
+                    // log an unhandled type warning on every pass; they stay blocked instead
+                    if (!PrerequisiteManager.Instance.CanEvaluate(spellLevel.PrerequisiteId))
+                        continue;
+
+                    gatedSpells[spell4Entry.Spell4BaseIdBaseSpell] = spellLevel.PrerequisiteId;
+
+                    // the spellbook entry is shared by every action set, so one that meets the gate
+                    // is enough to grant it; the lock state is then per action set
+                    if (!evaluatePrerequisites || !MeetsGateInAnyActionSet(spellLevel.PrerequisiteId))
+                        continue;
+                }
 
                 if (GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
@@ -173,6 +235,96 @@ namespace NexusForever.Game.Entity
                 if (GetSpell(spell4Entry.Spell4BaseIdBaseSpell) == null)
                     AddSpell(spell4Entry.Spell4BaseIdBaseSpell);
             }
+        }
+
+        private bool MeetsGateInAnyActionSet(uint prerequisiteId)
+        {
+            for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+                if (MeetsGateInActionSet(prerequisiteId, i))
+                    return true;
+
+            return false;
+        }
+
+        private bool IsUnlockedInActionSet(uint spell4BaseId, byte specIndex)
+        {
+            if (!gatedSpells.TryGetValue(spell4BaseId, out uint prerequisiteId))
+                return true;
+
+            return MeetsGateInActionSet(prerequisiteId, specIndex);
+        }
+
+        private bool MeetsGateInActionSet(uint prerequisiteId, byte specIndex)
+        {
+            return PrerequisiteManager.Instance.Meets(player, prerequisiteId, new PrerequisiteParameters
+            {
+                ActionSetIndex = specIndex
+            });
+        }
+
+        private byte GetAchievedTier(uint spell4BaseId, byte specIndex, ICharacterSpell spell)
+        {
+            return actionSets[specIndex].GetShortcut(ShortcutType.SpellbookItem, spell4BaseId)?.Tier ?? spell.Tier;
+        }
+
+        private void RecordGateState(uint spell4BaseId)
+        {
+            if (!gatedSpells.ContainsKey(spell4BaseId))
+                return;
+
+            var sent = new bool[ActionSet.MaxActionSets];
+            for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+                sent[i] = IsUnlockedInActionSet(spell4BaseId, i);
+
+            sentGateStates[spell4BaseId] = sent;
+        }
+
+        /// <summary>
+        /// Re-evaluate the prerequisite gated spells and send the client the lock state of any that changed.
+        /// </summary>
+        public void RefreshGatedSpells()
+        {
+            GrantSpells();
+
+            if (player.IsLoading)
+                return;
+
+            var serverAbilities = new ServerAbilities();
+
+            foreach ((uint spell4BaseId, uint prerequisiteId) in gatedSpells)
+            {
+                ICharacterSpell spell = GetSpell(spell4BaseId);
+                if (spell == null)
+                    continue;
+
+                // the client evaluates the gate itself when it first builds the entry, so a spell it
+                // has not been told about yet gets every action set rather than only the changes
+                bool known = sentGateStates.TryGetValue(spell4BaseId, out bool[] sent);
+                if (!known)
+                {
+                    sent = new bool[ActionSet.MaxActionSets];
+                    sentGateStates.Add(spell4BaseId, sent);
+                }
+
+                for (byte i = 0; i < ActionSet.MaxActionSets; i++)
+                {
+                    bool unlocked = MeetsGateInActionSet(prerequisiteId, i);
+                    if (known && unlocked == sent[i])
+                        continue;
+
+                    sent[i] = unlocked;
+
+                    serverAbilities.Spells.Add(new ServerAbilities.Spell
+                    {
+                        Spell4BaseId      = spell4BaseId,
+                        TierIndexAchieved = unlocked ? GetAchievedTier(spell4BaseId, i, spell) : (byte)0,
+                        SpecIndex         = i
+                    });
+                }
+            }
+
+            if (serverAbilities.Spells.Count > 0)
+                player.Session.EnqueueMessageEncrypted(serverAbilities);
         }
 
         public void Update(double lastTick)
@@ -237,6 +389,12 @@ namespace NexusForever.Game.Entity
                     entity.Property(p => p.InnateIndex).IsModified = true;
                 }
 
+                if ((saveMask & SpellManagerSaveMask.BonusAmpPower) != 0)
+                {
+                    character.BonusAmpPower = BonusAmpPower;
+                    entity.Property(p => p.BonusAmpPower).IsModified = true;
+                }
+
                 saveMask = SpellManagerSaveMask.None;
             }
 
@@ -245,6 +403,17 @@ namespace NexusForever.Game.Entity
 
             foreach (IActionSet actionSet in actionSets)
                 actionSet.Save(context);
+
+            foreach (ushort eldanAugmentationId in unlockedInlaidEldanAugmentationsToSave)
+            {
+                context.Add(new CharacterEldanAugmentationUnlockModel
+                {
+                    Id                  = player.CharacterId,
+                    EldanAugmentationId = eldanAugmentationId
+                });
+            }
+
+            unlockedInlaidEldanAugmentationsToSave.Clear();
         }
 
         /// <summary>
@@ -529,8 +698,176 @@ namespace NexusForever.Game.Entity
 
             // TODO: handle other errors
 
+            GetActionSet(ActiveActionSet).FinishAmps();
+
             ActiveActionSet = value;
+
+            GetActionSet(ActiveActionSet).CastAmps();
+
             return SpecError.Ok;
+        }
+
+        /// <summary>
+        /// Returns if the supplied <see cref="EldanAugmentationEntry"/> id is an unlocked inlaid augmentation.
+        /// </summary>
+        public bool HasUnlockedInlaidEldanAugmentation(ushort eldanAugmentationId)
+        {
+            return unlockedInlaidEldanAugmentations.Contains(eldanAugmentationId);
+        }
+
+        /// <summary>
+        /// Unlock the inlaid <see cref="EldanAugmentationEntry"/> with supplied id.
+        /// </summary>
+        public void UnlockInlaidEldanAugmentation(ushort eldanAugmentationId)
+        {
+            if (unlockedInlaidEldanAugmentations.Contains(eldanAugmentationId))
+                return;
+
+            // the client allocates a fixed 54 entry array for this list and would read past it, so the set
+            // must never grow beyond that. 237 augmentations are unlock targets in the shipped data.
+            if (unlockedInlaidEldanAugmentations.Count >= MaxUnlockedInlaidEldanAugmentations)
+            {
+                log.Warn($"Failed to unlock inlaid eldan augmentation {eldanAugmentationId} for character " +
+                    $"{player.CharacterId}, the set is already at its {MaxUnlockedInlaidEldanAugmentations} entry limit.");
+                return;
+            }
+
+            unlockedInlaidEldanAugmentations.Add(eldanAugmentationId);
+            unlockedInlaidEldanAugmentationsToSave.Add(eldanAugmentationId);
+
+            SendUnlockedInlaidEldanAugmentations();
+        }
+
+        /// <summary>
+        /// Send the complete unlocked inlaid augmentation set; the client replaces its own wholesale.
+        /// </summary>
+        public void SendUnlockedInlaidEldanAugmentations()
+        {
+            player.Session.EnqueueMessageEncrypted(new ServerUnlockedInlaidEldanAugmentations
+            {
+                EldanAugmentations = unlockedInlaidEldanAugmentations.ToList()
+            });
+        }
+
+        /// <summary>
+        /// Grant supplied amount of bonus AMP power, clamped to 0..<see cref="MaxBonusAmpPower"/>.
+        /// </summary>
+        /// <remarks>
+        /// The cap itself is enforced before the cast, by <c>Prerequisite</c> 28557 on the granting
+        /// spell; this clamp only makes sure no route can push the accumulator outside the range the
+        /// client's unsigned comparison relies on.
+        /// </remarks>
+        public void GrantBonusAmpPower(int amount)
+        {
+            int granted = BonusAmpPower + amount;
+
+            if (granted < 0)
+                granted = 0;
+            else if (granted > MaxBonusAmpPower)
+                granted = MaxBonusAmpPower;
+
+            if (granted == BonusAmpPower)
+                return;
+
+            BonusAmpPower = (short)granted;
+
+            SendAmpPowerUpdate();
+
+            log.Trace($"Character {player.CharacterId} bonus AMP power is now {BonusAmpPower}.");
+        }
+
+        /// <summary>
+        /// Send the item granted bonus AMP power; the client recomputes its point total from it.
+        /// </summary>
+        public void SendAmpPowerUpdate()
+        {
+            player.Session.EnqueueMessageEncrypted(new ServerAmpPowerUpdate
+            {
+                BonusPower = BonusAmpPower
+            });
+        }
+
+        /// <summary>
+        /// Validate the supplied AMP ids against the <see cref="IActionSet"/> at supplied index.
+        /// </summary>
+        /// <remarks>
+        /// Mirrors the order the client's own AMP configuration validator uses, so that a commit the client
+        /// considered legal is not refused here and the other way round. <paramref name="newAmps"/> are the ids
+        /// being added; the tier and series rules are evaluated over the resulting selection.
+        /// </remarks>
+        public LimitedActionSetResult ValidateAmps(byte specIndex, IEnumerable<ushort> newAmps)
+        {
+            if (player.InCombat)
+                return LimitedActionSetResult.InCombat;
+
+            IActionSet actionSet = GetActionSet(specIndex);
+
+            var added = new List<EldanAugmentationEntry>();
+            uint powerCost = 0u;
+
+            foreach (ushort id in newAmps)
+            {
+                EldanAugmentationEntry entry = GameTableManager.Instance.EldanAugmentation.GetEntry(id);
+                if (entry == null)
+                    return LimitedActionSetResult.EldanAugmentationInvalidId;
+
+                if (actionSet.GetAmp(id) != null || added.Any(e => e.Id == id))
+                    continue;
+
+                powerCost += entry.PowerCost;
+                if (powerCost > actionSet.AmpPoints)
+                    return LimitedActionSetResult.EldanAugmentationNotEnoughPower;
+
+                if (entry.ClassId != (uint)player.Class)
+                    return LimitedActionSetResult.UnknownClassId;
+
+                // the client gates an augmentation on the unlocked inlaid set when, and only when, it carries
+                // an Item2IdUnlock.
+                if (entry.Item2IdUnlock != 0u && !HasUnlockedInlaidEldanAugmentation((ushort)entry.Id))
+                    return LimitedActionSetResult.EldanAugmentationLockedInlaid;
+
+                if (GameTableManager.Instance.EldanAugmentationCategory.GetEntry(entry.EldanAugmentationCategoryId) == null)
+                    return LimitedActionSetResult.EldanAugmentationInvalidCategoryId;
+
+                if (entry.CategoryTier > 2u)
+                    return LimitedActionSetResult.EldanAugmentationInvalidCategoryTier;
+
+                added.Add(entry);
+            }
+
+            List<EldanAugmentationEntry> selection = actionSet.Amps
+                .Select(a => a.Entry)
+                .Concat(added)
+                .ToList();
+
+            // every augmentation a selected augmentation requires must itself be selected.
+            foreach (EldanAugmentationEntry entry in selection)
+            {
+                if (entry.EldanAugmentationIdRequired == 0u)
+                    continue;
+
+                if (!selection.Any(e => e.Id == entry.EldanAugmentationIdRequired))
+                    return LimitedActionSetResult.EldanAugmentationInvalidSeries;
+            }
+
+            // a tier is only open once enough power has been spent on lower tiers of the same category.
+            foreach (EldanAugmentationEntry entry in selection.Where(e => e.CategoryTier > 0u))
+            {
+                EldanAugmentationCategoryEntry category = GameTableManager.Instance.EldanAugmentationCategory
+                    .GetEntry(entry.EldanAugmentationCategoryId);
+
+                uint required = entry.CategoryTier == 1u ? category.Tier2CostAmount00 : category.Tier3CostAmount00;
+
+                uint spent = (uint)selection
+                    .Where(e => e.EldanAugmentationCategoryId == entry.EldanAugmentationCategoryId
+                        && e.CategoryTier < entry.CategoryTier)
+                    .Sum(e => e.PowerCost);
+
+                if (spent < required)
+                    return LimitedActionSetResult.EldanAugmentationLockedCategoryTier;
+            }
+
+            return LimitedActionSetResult.Ok;
         }
 
         /// <summary>
@@ -592,6 +929,10 @@ namespace NexusForever.Game.Entity
 
         public void SendInitialPackets()
         {
+            // the gated rows the constructor left alone can be evaluated now, and this has to run
+            // before the ability items and the ability list go out below
+            GrantSpells();
+
             SendServerAbilities();
             SendServerAbilityList();
             SendServerAbilityPoints();
@@ -600,6 +941,8 @@ namespace NexusForever.Game.Entity
             SendServerPlayerInnate();
             // TODO: Cast Innate Spells
             CastClassPassives();
+            SendUnlockedInlaidEldanAugmentations();
+            GetActionSet(ActiveActionSet).CastAmps();
 
             player.Session.EnqueueMessageEncrypted(new ServerCooldownList
             {
@@ -641,11 +984,10 @@ namespace NexusForever.Game.Entity
 
                 for (byte i = 0; i < ActionSet.MaxActionSets; i++)
                 {
-                    IActionSetShortcut shortcut = actionSets[i].GetShortcut(ShortcutType.SpellbookItem, spell4BaseId);
                     serverAbilities.Spells.Add(new ServerAbilities.Spell
                     {
                         Spell4BaseId      = spell4BaseId,
-                        TierIndexAchieved = shortcut?.Tier ?? spell.Tier,
+                        TierIndexAchieved = IsUnlockedInActionSet(spell4BaseId, i) ? GetAchievedTier(spell4BaseId, i, spell) : (byte)0,
                         SpecIndex         = i
                     });
 
@@ -653,6 +995,8 @@ namespace NexusForever.Game.Entity
                     if (spellBaseInfo.SpellType.Id != 5)
                         break;
                 }
+
+                RecordGateState(spell4BaseId);
             }
 
             player.Session.EnqueueMessageEncrypted(serverAbilities);
