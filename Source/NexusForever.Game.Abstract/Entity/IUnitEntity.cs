@@ -109,6 +109,15 @@ namespace NexusForever.Game.Abstract.Entity
         void CastSpell(ISpellParameters parameters);
 
         /// <summary>
+        /// Tell the client that a cast it is waiting on was refused.
+        /// </summary>
+        /// <remarks>
+        /// A no-op when <paramref name="clientSpellCastUniqueId"/> is 0: that is a cast the server
+        /// started itself, and a refusal carrying 0 matches no pending cast on the client.
+        /// </remarks>
+        void SendSpellCastResult(uint clientSpellCastUniqueId, uint spell4Id, CastResult castResult);
+
+        /// <summary>
         /// Cancel any <see cref="ISpell"/>'s that are interrupted by movement.
         /// </summary>
         void CancelSpellsOnMove();

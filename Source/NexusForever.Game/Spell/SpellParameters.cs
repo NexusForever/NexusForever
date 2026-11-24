@@ -2,6 +2,7 @@
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Info;
 using NexusForever.Network.World.Entity;
+using NexusForever.Network.World.Message.Model.Shared;
 
 namespace NexusForever.Game.Spell
 {
@@ -13,6 +14,7 @@ namespace NexusForever.Game.Spell
         public ISpellInfo RootSpellInfo { get; set; }
         public bool UserInitiatedSpellCast { get; set; } = true;
         public uint PrimaryTargetId { get; set; }
+        public uint ClientSpellCastUniqueId { get; set; }
         public Position TargetPosition { get; set; }
         public uint PositionalUnitId { get; set; }
         public ushort? TaxiNode { get; set; }
@@ -24,5 +26,7 @@ namespace NexusForever.Game.Spell
         public Action<ISpellParameters> CompleteAction { get; set; }
         public int CastTimeOverride { get; set; } = -1;
         public double CooldownOverride { get; set; } = 0d;
+        public ItemLocation ConsumeItemLocation { get; set; }
+        public ulong ConsumeItemGuid { get; set; }
     }
 }
