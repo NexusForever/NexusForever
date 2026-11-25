@@ -1101,6 +1101,10 @@ namespace NexusForever.Game.Entity
 
             SetControl(null);
 
+            // the platform belongs to the old map
+            if (PlatformGuid != null)
+                SetPlatform(null);
+
             IMapPosition source = null;
             if (Map != null)
             {
@@ -1167,6 +1171,10 @@ namespace NexusForever.Game.Entity
         private void OnTeleportToLocal(Vector3 position)
         {
             SetControl(null);
+
+            // while on a platform the client takes the position as an offset from it
+            if (PlatformGuid != null)
+                SetPlatform(null);
 
             MovementManager.SetPosition(position, false);
             MovementManager.BroadcastNetworkEntityCommands();
@@ -1354,8 +1362,9 @@ namespace NexusForever.Game.Entity
             if (PlatformGuid == null)
                 return;
 
-            IVehicleEntity vehicle = GetVisible<IVehicleEntity>(PlatformGuid.Value);
-            vehicle?.PassengerRemove(this);
+            // the platform can also be an entity the player stands on, which isn't a vehicle
+            if (GetVisible<IGridEntity>(PlatformGuid.Value) is IVehicleEntity vehicle)
+                vehicle.PassengerRemove(this);
         }
 
         /// <summary>

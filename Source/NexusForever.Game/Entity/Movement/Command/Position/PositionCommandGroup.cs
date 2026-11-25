@@ -86,7 +86,16 @@ namespace NexusForever.Game.Entity.Movement.Command.Position
             {
                 IWorldEntity platformEntity = movementManager.Owner.Map.GetEntity<IWorldEntity>(platformUnitId.Value);
                 if (platformEntity != null)
-                    position += platformEntity.Position;
+                {
+                    // the position is relative to the platform, in its own turned frame
+                    float yaw = platformEntity.Rotation.X;
+                    float sin = MathF.Sin(yaw);
+                    float cos = MathF.Cos(yaw);
+                    position = new Vector3(
+                        position.X * cos + position.Z * sin,
+                        position.Y,
+                        -position.X * sin + position.Z * cos) + platformEntity.Position;
+                }
             }
 
             if (lastPosition == position)
