@@ -3,6 +3,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
+using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -96,11 +97,13 @@ namespace NexusForever.Game.Entity
             if (!currencies.TryGetValue((CurrencyType)currencyEntry.Id, out ICurrency currency))
                 currency = CurrencyCreate(currencyEntry);
 
-            amount += currency.Amount;
-            if (currency.Entry.CapAmount > 0)
-                amount = Math.Min(amount, currency.Entry.CapAmount);
+            ulong previousBalance = currency.Amount;
+            ulong cap = currency.Entry.CapAmount > 0 ? currency.Entry.CapAmount : ulong.MaxValue;
+            ulong balance = previousBalance >= cap ? cap : previousBalance + Math.Min(amount, cap - previousBalance);
 
-            CurrencyAmountUpdate(currency, amount, isLoot);
+            CurrencyAmountUpdate(currency, balance, isLoot && balance >= previousBalance);
+            if (balance > previousBalance)
+                player.QuestManager?.ObjectiveUpdate(QuestObjectiveType.EarnCurrency, currencyEntry.Id, (uint)Math.Min(balance - previousBalance, uint.MaxValue));
         }
 
         private ICurrency CurrencyCreate(CurrencyTypeEntry currencyEntry)

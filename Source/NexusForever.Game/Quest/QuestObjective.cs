@@ -163,7 +163,7 @@ namespace NexusForever.Game.Quest
             if (IsDynamic())
                 update = (uint)(((float)update / ObjectiveInfo.Entry.Count) * 1000f);
 
-            Progress = Math.Min(progress + update, GetMaxValue());
+            Progress = (uint)Math.Min((ulong)progress + update, GetMaxValue());
         }
 
        
