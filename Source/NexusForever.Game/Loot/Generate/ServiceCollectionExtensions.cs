@@ -20,6 +20,7 @@ namespace NexusForever.Game.Loot.Generate
 
             sc.AddSingleton<ILootGenerationConditionManager, LootGenerationConditionManager>();
             sc.AddKeyedTransient<ILootGenerationCondition, ClassLootGenerationCondition>(LootConditionType.IsClass);
+            sc.AddKeyedTransient<ILootGenerationCondition, QuestNotCompleteLootGenerationCondition>(LootConditionType.QuestNotComplete);
         }
     }
 }
