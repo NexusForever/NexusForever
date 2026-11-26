@@ -363,6 +363,9 @@ namespace NexusForever.Game.Entity
             quest.InitialiseTimer();
 
             log.Trace($"Accepted new quest {info.Entry.Id}.");
+
+            if (quest.State == QuestState.Accepted && info.Objectives.IsEmpty)
+                quest.State = QuestState.Achieved;
         }
 
         private void QuestRemove(IQuest quest)
