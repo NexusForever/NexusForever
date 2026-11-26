@@ -1,5 +1,6 @@
 ﻿using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Game.Quest;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {
@@ -11,6 +12,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
                 session.Player.Unsit();
 
             session.Player.Emote(emote.EmoteId);
+
+            if (!emote.Silent)
+                AngelPilgrimage.RecordEmote(session.Player, emote.EmoteId, emote.Targeted ? emote.TargetUnitId : null);
 
             session.Player.EnqueueToVisible(new ServerEmote
             {
