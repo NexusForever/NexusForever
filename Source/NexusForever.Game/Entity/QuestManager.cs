@@ -143,7 +143,7 @@ namespace NexusForever.Game.Entity
                     {
                         QuestId    = q.Id,
                         State      = q.State,
-                        Flags      = q.Flags,
+                        Flags      = GetInitialQuestFlags(q),
                         QuestTimeElapsed      = q.Timer ?? 0u,
                         Objectives = q.Select(o => new ServerQuestInit.QuestActive.Objective
                         {
@@ -152,6 +152,20 @@ namespace NexusForever.Game.Entity
                         }).ToList()
                     }).ToList()
             });
+        }
+
+        private static QuestStateFlags GetInitialQuestFlags(IQuest quest)
+        {
+            const QuestStateFlags completionMask = QuestStateFlags.Objective0Complete | QuestStateFlags.Objective1Complete
+                | QuestStateFlags.Objective2Complete | QuestStateFlags.Objective3Complete
+                | QuestStateFlags.Objective4Complete | QuestStateFlags.Objective5Complete;
+
+            QuestStateFlags flags = quest.Flags & ~completionMask;
+            foreach (IQuestObjective objective in quest)
+                if (objective.Index < 6 && objective.IsComplete())
+                    flags |= (QuestStateFlags)((uint)QuestStateFlags.Objective0Complete << objective.Index);
+
+            return flags;
         }
 
         /// <summary>
