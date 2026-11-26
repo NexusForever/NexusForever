@@ -28,7 +28,8 @@ namespace NexusForever.Game.Spell
             var damageCalculator = factory.Resolve();
             damageCalculator.CalculateDamage(spell.Caster, target, spell, info);
 
-            target.TakeDamage(spell.Caster, info.Damage);
+            if (info.Damage is { } damage)
+                target.TakeDamage(spell.Caster, damage);
         }
 
         [SpellEffectHandler(SpellEffectType.Resurrect)]
