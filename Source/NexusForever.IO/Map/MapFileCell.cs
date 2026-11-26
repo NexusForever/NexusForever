@@ -118,7 +118,7 @@ namespace NexusForever.IO.Map
         /// </summary>
         public float? GetTerrainHeight(Vector3 vector)
         {
-            if ((flags & Flags.Zone) == 0)
+            if ((flags & Flags.Height) == 0)
                 return null;
 
             float trueX = vector.X + MapDefines.WorldGridOrigin * MapDefines.GridSize;
