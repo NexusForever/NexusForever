@@ -422,6 +422,10 @@ namespace NexusForever.Game.Entity
             if (quest == null || quest.PendingDelete)
                 throw new QuestException($"Player {player.CharacterId} tried to abandon quest {questId} which they don't have!");
 
+            // A retry can arrive after an abandoned quest has returned to the offers.
+            if (quest.State is QuestState.Mentioned or QuestState.Ignored)
+                return;
+
             if (!quest.CanAbandon())
                 throw new QuestException($"Player {player.CharacterId} tried to abandon quest {questId} which can't be abandoned!");
 
@@ -624,15 +628,18 @@ namespace NexusForever.Game.Entity
             if (questInfo == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
 
-            IQuest quest = GetQuest((ushort)questInfo.Entry.Id);
+            IQuest quest = GetQuest(questId);
+            QuestState nextState = ignored ? QuestState.Ignored : QuestState.Mentioned;
             if (quest == null)
-                quest = new Quest.Quest(player, questInfo); // Add quest so we can set it to ignored.
-            else
-                QuestRemove(quest); // Removes from quest log. Might not be the cleanest way to do this?
+            {
+                quest = new Quest.Quest(player, questInfo);
+                inactiveQuests.Add(questId, quest);
+            }
+            else if (quest.PendingDelete || quest.State is not (QuestState.Mentioned or QuestState.Ignored))
+                return;
 
-            quest.State = ignored ? QuestState.Ignored : QuestState.Mentioned;
-
-            inactiveQuests.Add(questId, quest);
+            if (quest.State != nextState)
+                quest.State = nextState;
         }
 
         /// <summary>

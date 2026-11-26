@@ -115,8 +115,16 @@ namespace NexusForever.Game.Quest
             timer  = model.Timer;
             reset  = model.Reset;
 
-            if (timer != null)
-                questTimer = new UpdateTimer(timer.Value);
+            if (timer is uint remaining && Info.Entry.MaxTimeAllowedMS != 0u &&
+                state is QuestState.Accepted or QuestState.Achieved)
+            {
+                // The saved value is in milliseconds. UpdateTimer ticks in seconds.
+                uint restored = Math.Min(remaining, Info.Entry.MaxTimeAllowedMS);
+                if (restored != remaining)
+                    Timer = restored;
+
+                questTimer = new UpdateTimer(TimeSpan.FromMilliseconds(restored));
+            }
 
             foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
