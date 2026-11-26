@@ -118,8 +118,15 @@ namespace NexusForever.Game.Quest
             if (timer != null)
                 questTimer = new UpdateTimer(timer.Value);
 
-            foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
-                objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
+            // The login packet sends objective progress in implicit slot order.
+            var savedObjectives = model.QuestObjective.ToDictionary(objective => objective.Index);
+            for (byte index = 0; index < info.Objectives.Count; index++)
+            {
+                IQuestObjectiveInfo objectiveInfo = info.Objectives[index];
+                objectives.Add(savedObjectives.TryGetValue(index, out CharacterQuestObjectiveModel saved)
+                    ? new QuestObjective(player, info, objectiveInfo, saved)
+                    : new QuestObjective(player, info, objectiveInfo, index));
+            }
 
             scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
         }
@@ -165,6 +172,7 @@ namespace NexusForever.Game.Quest
 
         public void Save(CharacterContext context)
         {
+            bool pendingDelete = PendingDelete;
             if (saveMask != QuestSaveMask.None)
             {
                 if ((saveMask & QuestSaveMask.Create) != 0)
@@ -226,8 +234,9 @@ namespace NexusForever.Game.Quest
                 saveMask = QuestSaveMask.None;
             }
 
-            foreach (IQuestObjective objective in objectives)
-                objective.Save(context);
+            if (!pendingDelete)
+                foreach (IQuestObjective objective in objectives)
+                    objective.Save(context);
         }
 
         public void Update(double lastTick)
