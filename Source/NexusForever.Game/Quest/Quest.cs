@@ -115,6 +115,13 @@ namespace NexusForever.Game.Quest
             timer  = model.Timer;
             reset  = model.Reset;
 
+            // Dialogue-only quests may have been saved as accepted by the old quest-add path.
+            if (state == QuestState.Accepted && info.Objectives.IsEmpty)
+            {
+                state = QuestState.Achieved;
+                saveMask |= QuestSaveMask.State;
+            }
+
             if (timer != null)
                 questTimer = new UpdateTimer(timer.Value);
 
