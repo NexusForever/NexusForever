@@ -6,6 +6,8 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
+using NexusForever.GameTable;
+using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
 using NexusForever.Script.Template;
@@ -305,7 +307,7 @@ namespace NexusForever.Game.Quest
 
             // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (IQuestObjective objective in objectives
-                .Where(o => o.ObjectiveInfo.Entry.Type == (uint)type && o.ObjectiveInfo.Entry.Data == data)
+                .Where(o => o.ObjectiveInfo.Entry.Type == (uint)type && MatchesObjectiveData(type, o.ObjectiveInfo.Entry.Data, data))
                 .OrderByDescending(o => o.Index))
             {
                 if (objective.IsComplete())
@@ -366,6 +368,20 @@ namespace NexusForever.Game.Quest
 
             if (objectives.All(o => o.IsComplete()))
                 State = QuestState.Achieved;
+        }
+
+        private static bool MatchesObjectiveData(QuestObjectiveType type, uint requiredData, uint data)
+        {
+            if (type != QuestObjectiveType.KillCreature2)
+                return requiredData == data;
+
+            GameTable<Creature2DifficultyEntry> difficulties = GameTableManager.Instance.Creature2Difficulty;
+            Creature2DifficultyEntry required = difficulties.GetEntry(requiredData);
+            Creature2DifficultyEntry actual = difficulties.GetEntry(data);
+
+            // Low ranks are stored as signed values in the unsigned table field.
+            return required != null && actual != null
+                && unchecked((int)actual.RankValue) >= unchecked((int)required.RankValue);
         }
 
         private bool CanUpdateObjective(IQuestObjective objective)
