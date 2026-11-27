@@ -6,7 +6,7 @@ namespace NexusForever.Network.World.Message.Model.Spell
     public class ClientSpellClientSideInteraction : IReadable
     {
         public uint ServerUniqueId { get; private set; }
-        public byte CSIResponse { get; private set; } // value of 2 or 0
+        public byte CSIResponse { get; private set; } // 0 = failed, 1 = succeeded, 2 = cancelled
         public uint Spell4IdBaseIdBaseSpell { get; private set; } // Is actually spell4IdBaseIdBaseSpell from spell plus 1, see spell4 tbl
 
         public void Read(GamePacketReader reader)
