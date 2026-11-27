@@ -47,6 +47,7 @@
             "GridActionThreshold": 100,
             "GridActionMaxRetry": 5,
             "GridUnloadTimer": 3600,
+            "StaticCreatureRespawnSeconds": 30,
             "MaxInstances": 10
         },
         "RealmId": 1,
