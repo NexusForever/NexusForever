@@ -3,15 +3,16 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.GameTable;
 
 namespace NexusForever.Game.Quest
 {
     internal static class StarfallCapital
     {
-        private sealed record Capital(Faction Faction, uint Contact, ushort Celebration, uint Firework, uint Goal, uint TargetGroup);
+        private sealed record Capital(Faction Faction, uint Contact, ushort Celebration, uint Goal, uint TargetGroup);
 
-        private static readonly Capital Illium = new(Faction.Dominion, 73057, 10496, 73279, 21204, 14307);
-        private static readonly Capital Thayd = new(Faction.Exile, 73058, 10534, 74800, 21362, 14395);
+        private static readonly Capital Illium = new(Faction.Dominion, 73057, 10496, 21204, 14307);
+        private static readonly Capital Thayd = new(Faction.Exile, 73058, 10534, 21362, 14395);
 
         private static Capital GetCapital(uint world) => world switch
         {
@@ -19,6 +20,10 @@ namespace NexusForever.Game.Quest
             51u => Thayd,
             _ => null
         };
+
+        private static bool IsFirework(Capital capital, uint creatureId) =>
+            creatureId != 0u &&
+            GameTableManager.Instance.TargetGroup.GetEntry(capital.TargetGroup)?.DataEntries.Contains(creatureId) == true;
 
         internal static bool OwnsQuest(uint id) => id is 10496u or (>= 10502u and <= 10506u) or (>= 10534u and <= 10539u);
 
@@ -52,7 +57,7 @@ namespace NexusForever.Game.Quest
         {
             if (entity is not IWorldEntity { EntityId: > 0u, Map.Entry.Id: var world } actor ||
                 GetCapital(world) is not { } capital ||
-                (actor.CreatureId != capital.Contact && actor.CreatureId != capital.Firework))
+                (actor.CreatureId != capital.Contact && !IsFirework(capital, actor.CreatureId)))
                 return true;
 
             return player.Faction1 == capital.Faction &&
@@ -63,7 +68,7 @@ namespace NexusForever.Game.Quest
         internal static void ActivateFirework(IPlayer player, ISimpleEntity actor)
         {
             if (actor is not { EntityId: > 0u, Map.Entry.Id: var world, QuestChecklistIdx: < 5 } ||
-                GetCapital(world) is not { } capital || actor.CreatureId != capital.Firework ||
+                GetCapital(world) is not { } capital || !IsFirework(capital, actor.CreatureId) ||
                 player.Faction1 != capital.Faction || !player.InWorld || player.IsLoading || !player.IsAlive ||
                 !ReferenceEquals(player.Map, actor.Map) || Vector3.DistanceSquared(player.Position, actor.Position) > 4f)
                 return;
