@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network;
@@ -29,6 +30,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             IWorldEntity entity = player.GetVisible<IWorldEntity>(activateUnitCast.UnitId);
             if (entity == null)
                 throw new InvalidPacketValueException();
+
+            if (EverstarPassage.TryBegin(player, entity))
+                return;
 
             if (!QuestCsiInteraction.TryBegin(player, entity, CompleteActivation))
                 CompleteActivation(player, entity);
