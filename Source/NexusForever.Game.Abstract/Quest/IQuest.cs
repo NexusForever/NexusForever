@@ -17,6 +17,11 @@ namespace NexusForever.Game.Abstract.Quest
         void InitialiseTimer();
 
         /// <summary>
+        /// Grant credit for completed, non-repeatable quests required by this quest.
+        /// </summary>
+        void RefreshCompletedQuestObjectives();
+
+        /// <summary>
         /// Returns if <see cref="IQuest"/> can be deleted.
         /// </summary>
         bool CanDelete();

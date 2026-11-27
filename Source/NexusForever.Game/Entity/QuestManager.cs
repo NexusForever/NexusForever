@@ -152,6 +152,10 @@ namespace NexusForever.Game.Entity
                         }).ToList()
                     }).ToList()
             });
+
+            // Send recovered progress after the client has received the quest log.
+            foreach (IQuest quest in activeQuests.Values.ToArray())
+                quest.RefreshCompletedQuestObjectives();
         }
 
         /// <summary>
@@ -361,6 +365,7 @@ namespace NexusForever.Game.Entity
             activeQuests.Add((ushort)info.Entry.Id, quest);
 
             quest.InitialiseTimer();
+            quest.RefreshCompletedQuestObjectives();
 
             log.Trace($"Accepted new quest {info.Entry.Id}.");
         }
@@ -565,6 +570,13 @@ namespace NexusForever.Game.Entity
             completedQuests.Add(questId, quest);
 
             player.AchievementManager.CheckAchievements(player, AchievementType.QuestComplete, questId);
+
+            if (questInfo.Entry.QuestRepeatPeriodEnum == 0u)
+            {
+                // Objective scripts may change the active quest collection.
+                foreach (IQuest activeQuest in activeQuests.Values.ToArray())
+                    activeQuest.RefreshCompletedQuestObjectives();
+            }
         }
 
         private void RewardQuest(IQuestInfo info, ushort reward)
