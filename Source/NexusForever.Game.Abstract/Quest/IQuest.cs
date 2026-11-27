@@ -17,6 +17,11 @@ namespace NexusForever.Game.Abstract.Quest
         void InitialiseTimer();
 
         /// <summary>
+        /// Reconcile direct item goals with the items currently held in inventory.
+        /// </summary>
+        void RefreshCollectedItems();
+
+        /// <summary>
         /// Returns if <see cref="IQuest"/> can be deleted.
         /// </summary>
         bool CanDelete();

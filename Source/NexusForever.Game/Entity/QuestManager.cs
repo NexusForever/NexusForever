@@ -361,6 +361,7 @@ namespace NexusForever.Game.Entity
             activeQuests.Add((ushort)info.Entry.Id, quest);
 
             quest.InitialiseTimer();
+            quest.RefreshCollectedItems();
 
             log.Trace($"Accepted new quest {info.Entry.Id}.");
         }
@@ -523,6 +524,7 @@ namespace NexusForever.Game.Entity
                 quest.State = QuestState.Achieved;
             }
 
+            quest.RefreshCollectedItems();
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
 
