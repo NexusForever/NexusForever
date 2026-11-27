@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Numerics;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
+using NexusForever.Game.Static.Reputation;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
 
@@ -52,6 +54,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 case InteractionType.Vendor: // Handle Vendor
                     HandleVendor(session, entity);
                     break;
+                case InteractionType.ContractBoard:
+                    OpenContractBoard(session, entity);
+                    break;
                 case InteractionType.Mail: // "MailboxActivate"
                     var mailboxEntity = session.Player.Map.GetEntity<IMailboxEntity>(entityInteraction.UnitId);
                     break;
@@ -79,13 +84,25 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
                 case InteractionType.CityDirections: // "CityDirectionsList"
                 case InteractionType.CREDDExchange: // "ToggleCREDDExchangeWindow"
                 case InteractionType.CommunityRegistrar: // "CommunityRegistrarOpen"
-                case InteractionType.ContractBoard: // "ContractBoardOpen"
                 case InteractionType.Barber: // "BarberOpen"
                 case InteractionType.MasterCraftsman: // "MasterCraftsmanOpen"
                 default:
                     log.LogWarning($"Received unhandled interaction event {entityInteraction.Type} from Entity {entityInteraction.UnitId}");
                     break;
             }
+        }
+
+        private static void OpenContractBoard(IWorldSession session, IWorldEntity entity)
+        {
+            if (entity is not { EntityId: > 0, Map: { } map, CreatureEntry.QuestIdGiven: { } quests } ||
+                entity is INonPlayerEntity { IsAlive: false } || !quests.Any(questId => questId != 0u))
+                return;
+
+            IPlayer player = session.Player;
+            if (player.InWorld && ReferenceEquals(player.Map, map)
+                && entity.GetDispositionTo(player.Faction1) is Disposition.Neutral or Disposition.Friendly
+                && Vector3.DistanceSquared(player.Position, entity.Position) <= 25f)
+                session.EnqueueMessageEncrypted(new ServerDialogStart { DialogUnitId = entity.Guid });
         }
 
         private void HandleVendor(IWorldSession session, IWorldEntity worldEntity)
