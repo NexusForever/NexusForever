@@ -58,6 +58,8 @@ using NexusForever.Shared.Game.Events;
 using NLog;
 using Path = NexusForever.Game.Static.PlayerPath.Path;
 
+using NexusForever.Game.Spell;
+
 namespace NexusForever.Game.Entity
 {
     public class Player : UnitEntity, IPlayer
@@ -639,6 +641,8 @@ namespace NexusForever.Game.Entity
             SendCharacterFlagsUpdated();
 
             base.OnAddToMap(map, guid, vector);
+            if (ArkshipDepartures.RecordArrival(this))
+                saveMask |= PlayerSaveMask.Location;
 
             // resummon vanity pet if it existed before teleport
             if (pendingTeleport?.VanityPetId != null)
@@ -1065,6 +1069,7 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void OnTeleportToFailed(GenericError error)
         {
+            ArkshipDepartures.Cancel(this);
             if (Map != null)
             {
                 SendGenericError(error);

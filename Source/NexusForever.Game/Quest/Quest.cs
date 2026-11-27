@@ -5,6 +5,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
@@ -327,7 +328,7 @@ namespace NexusForever.Game.Quest
             if (RequiredObjectivesComplete())
                 CompleteOptionalObjectives();
 
-            if (objectives.All(o => o.IsComplete()))
+            if (objectives.All(ObjectiveSatisfied))
                 State = QuestState.Achieved;
         }
 
@@ -364,16 +365,20 @@ namespace NexusForever.Game.Quest
             if (RequiredObjectivesComplete())
                 CompleteOptionalObjectives();
 
-            if (objectives.All(o => o.IsComplete()))
+            if (objectives.All(ObjectiveSatisfied))
                 State = QuestState.Achieved;
         }
+
+        private bool ObjectiveSatisfied(IQuestObjective objective) =>
+            objective.IsComplete() || (objective.ObjectiveInfo.IsOptional() &&
+                ArkshipDepartures.PreserveOptionalObjective(Id, objective.ObjectiveInfo.Id));
 
         private bool CanUpdateObjective(IQuestObjective objective)
         {
             if (objective.ObjectiveInfo.IsSequential())
             {
                 for (int i = 0; i < objective.Index; i++)
-                    if (!objectives[i].IsComplete())
+                    if (!ObjectiveSatisfied(objectives[i]))
                         return false;
             }
 
@@ -391,7 +396,7 @@ namespace NexusForever.Game.Quest
         private void CompleteOptionalObjectives()
         {
             foreach (IQuestObjective objective in objectives
-                .Where(o => o.ObjectiveInfo.IsOptional() && !o.IsComplete()))
+                .Where(o => o.ObjectiveInfo.IsOptional() && !ObjectiveSatisfied(o)))
             {
                 objective.Complete();
                 SendQuestObjectiveUpdate(objective);

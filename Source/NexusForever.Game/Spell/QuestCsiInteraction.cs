@@ -76,7 +76,7 @@ namespace NexusForever.Game.Spell
             if (selected.Spell != null && selected.Base.CastMethod != ClientSideInteractionCastMethod)
                 return false;
 
-            if (selected.Spell == null || !CanInteract(player, target))
+            if (selected.Spell == null || !CanInteract(player, target) || !ArkshipDepartures.CanBegin(player, target))
                 return true;
 
             if (player.GetActiveSpell(cast => cast.IsCasting && cast is Spell { Interaction: not null }) is Spell pending)
@@ -94,16 +94,19 @@ namespace NexusForever.Game.Spell
             ISpellInfo info = GlobalSpellManager.Instance.GetSpellBaseInfo(selected.Base.Id)
                 ?.GetSpellInfo((byte)selected.Spell.TierIndex);
             // Other spells can have effects requiring their own server implementation.
-            if (info?.Entry.Id != selected.Spell.Id || info.Effects.Count != 1 ||
-                info.Effects[0].EffectType != SpellEffectType.Activate ||
-                info.Effects[0].TargetFlags != (uint)SpellEffectTargetFlags.Target)
+            if (info?.Entry.Id != selected.Spell.Id)
+                return true;
+
+            Spell4EffectsEntry[] effects = info.Effects.Where(effect => !ArkshipDepartures.IsSupportingEffect(target, effect)).ToArray();
+            if (effects.Length != 1 || effects[0].EffectType != SpellEffectType.Activate ||
+                effects[0].TargetFlags != (uint)SpellEffectTargetFlags.Target)
                 return true;
 
             player.CastSpell(new SpellParameters
             {
                 SpellInfo = info,
                 UserInitiatedSpellCast = true,
-                Interaction = new QuestCsiInteraction(player, target, selected.Prerequisite, descriptor, info.Effects[0], activate)
+                Interaction = new QuestCsiInteraction(player, target, selected.Prerequisite, descriptor, effects[0], activate)
             });
             return true;
         }
@@ -118,10 +121,13 @@ namespace NexusForever.Game.Spell
         internal bool IsCurrent(IPlayer owner) =>
             ReferenceEquals(owner, player) && ReferenceEquals(player.Map, map) &&
             Target.Guid == targetGuid && Target.CreatureId == creatureId &&
-            CanInteract(player, Target) && Meets(player, prerequisite);
+            CanInteract(player, Target) && Meets(player, prerequisite) && ArkshipDepartures.CanBegin(player, Target);
 
         internal void Complete()
         {
+            if (ArkshipDepartures.Complete(player, Target, ActivateEffect.SpellId))
+                return;
+
             activate(player, Target);
             player.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, creatureId, 1u);
         }
@@ -129,7 +135,7 @@ namespace NexusForever.Game.Spell
         private static bool Meets(IPlayer player, uint id) =>
             id == 0u || PrerequisiteManager.Instance.Meets(player, id);
 
-        private static bool CanInteract(IPlayer player, IWorldEntity target)
+        internal static bool CanInteract(IPlayer player, IWorldEntity target)
         {
             if (!player.IsAlive || player.IsLoading || player.Map == null ||
                 !ReferenceEquals(player.Map, target.Map) || target.Guid == 0u ||
