@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.Message;
@@ -31,6 +33,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
         public void HandleMessage(IWorldSession session, ClientEntityInteract entityInteraction)
         {
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.UnitId);
+            bool talk = entityInteraction.Type == InteractionType.TalkTo;
+            if ((talk && (LegacyDestinyBriefing.TryUse(session.Player, entity) || LegacyDestinyBoarding.TryUse(session.Player, entity))) ||
+                !LegacyDestinyBriefing.AllowsTalk(session.Player, entity, talk) ||
+                !LegacyDestinyBoarding.AllowsTalk(session.Player, entity, talk))
+                return;
+
             if (entity != null)
             {
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
@@ -43,6 +51,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             {
                 case InteractionType.TalkTo: // Quest NPC
                 {
+                    if (session.Player.QuestManager is QuestManager quests)
+                        quests.OfferShadeEveStarter(entity);
+
                     session.EnqueueMessageEncrypted(new ServerDialogStart
                     {
                         DialogUnitId = entityInteraction.UnitId
