@@ -170,6 +170,13 @@ namespace NexusForever.Game.Entity
             return GetQuest(questId)?.State;
         }
 
+        public bool HasCompletedObjective(ushort questId, uint objectiveId)
+        {
+            IQuest quest = GetQuest(questId, GetQuestFlags.Active | GetQuestFlags.Completed);
+            return quest is { PendingDelete: false, State: QuestState.Accepted or QuestState.Achieved or QuestState.Completed }
+                && quest.Any(goal => goal.ObjectiveInfo.Id == objectiveId && goal.IsComplete());
+        }
+
         private IQuest GetQuest(ushort questId, GetQuestFlags flags = GetQuestFlags.All)
         {
             if ((flags & GetQuestFlags.Active) != 0
