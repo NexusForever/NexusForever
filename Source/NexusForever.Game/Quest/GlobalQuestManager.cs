@@ -35,7 +35,7 @@ namespace NexusForever.Game.Quest
         {
             Stopwatch sw = Stopwatch.StartNew();
 
-            CalculateResetTimes(); 
+            CalculateResetTimes(DateTime.UtcNow);
             InitialiseQuestInfo();
             InitialiseQuestRelations();
 
@@ -46,16 +46,14 @@ namespace NexusForever.Game.Quest
             log.Info($"Cached {questInfoStore.Count} quests in {sw.ElapsedMilliseconds}ms.");
         }
 
-        private void CalculateResetTimes()
+        private void CalculateResetTimes(DateTime now)
         {
-            DateTime now = DateTime.UtcNow;
-            var resetTime = new DateTime(now.Year, now.Month, now.Day, 10, 0, 0);
+            DateTime todayAtReset = now.Date.AddHours(10);
+            NextDailyReset = todayAtReset > now ? todayAtReset : todayAtReset.AddDays(1);
 
-            // calculate daily reset (every day 10AM UTC)
-            NextDailyReset = resetTime.AddDays(1);
-
-            // calculate weekly reset (every tuesday 10AM UTC)
-            NextWeeklyReset = resetTime.AddDays((DayOfWeek.Tuesday - now.DayOfWeek + 7) % 7);
+            int daysToTuesday = (DayOfWeek.Tuesday - now.DayOfWeek + 7) % 7;
+            DateTime tuesdayAtReset = todayAtReset.AddDays(daysToTuesday);
+            NextWeeklyReset = tuesdayAtReset > now ? tuesdayAtReset : tuesdayAtReset.AddDays(7);
         }
 
         private void InitialiseQuestInfo()
@@ -154,11 +152,8 @@ namespace NexusForever.Game.Quest
         public void Update(double lastTick)
         {
             DateTime now = DateTime.UtcNow;
-            if (NextDailyReset <= now)
-                NextDailyReset = NextDailyReset.AddDays(1);
-
-            if (NextWeeklyReset <= now)
-                NextWeeklyReset = NextWeeklyReset.AddDays(7);
+            if (NextDailyReset <= now || NextWeeklyReset <= now)
+                CalculateResetTimes(now);
         }
 
         /// <summary>
