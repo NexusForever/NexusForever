@@ -1,6 +1,8 @@
 ﻿using NexusForever.Database.Character;
+using System.Numerics;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
@@ -32,6 +34,8 @@ namespace NexusForever.Game.Entity
         }
 
         private readonly IPlayer player;
+        private readonly TimeProvider timeProvider;
+        private (IBaseMap Map, QuestState? State, bool Available)? shadePlantVisibility;
 
         private readonly Dictionary<ushort, IQuest> completedQuests = new();
         private readonly Dictionary<ushort, IQuest> inactiveQuests = new();
@@ -41,8 +45,14 @@ namespace NexusForever.Game.Entity
         /// Create a new <see cref="IQuestManager"/> from existing <see cref="CharacterModel"/> database model.
         /// </summary>
         public QuestManager(IPlayer owner, CharacterModel model)
+            : this(owner, model, TimeProvider.System)
+        {
+        }
+
+        internal QuestManager(IPlayer owner, CharacterModel model, TimeProvider timeProvider)
         {
             player = owner;
+            this.timeProvider = timeProvider;
 
             foreach (CharacterQuestModel questModel in model.Quest)
             {
@@ -104,6 +114,8 @@ namespace NexusForever.Game.Entity
 
         public void Update(double lastTick)
         {
+            RefreshShadePlantActors();
+            ShadeEvePlants.Gather(player, activeQuests);
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
             {
@@ -277,6 +289,10 @@ namespace NexusForever.Game.Entity
                     throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without quest giver!");
             }
 
+            if (ShadeEvePlants.HandlesQuest(info.Entry.Id) &&
+                (item != null || !ShadeEvePlants.CanVisitContact(player, (ushort)info.Entry.Id)))
+                throw new QuestException("Accept this Shade's Eve quest from its nearby capital contact.");
+
             // server doesn't send an error message for prerequisites since the client does the exact same checks
             // it's assumed that a player could never get here without cheating in some way
             if (!MeetsPrerequisites(info))
@@ -285,8 +301,38 @@ namespace NexusForever.Game.Entity
             QuestAdd(info);
         }
 
+        private void RefreshShadePlantActors()
+        {
+            if (player is not Player viewer || player.IsLoading || player.Map is not { } map ||
+                ShadeEvePlants.FindQuest(map.Entry.Id) is not ushort id)
+            {
+                shadePlantVisibility = null;
+                return;
+            }
+
+            var current = (map, GetQuestState(id), CanSeeShadePlantQuest(id));
+            if (shadePlantVisibility == current)
+                return;
+
+            shadePlantVisibility = current;
+            viewer.RefreshShadePlantActors();
+        }
+
+        internal bool CanSeeShadePlantQuest(ushort questId)
+        {
+            IQuest quest = GetQuest(questId);
+            if (quest is { PendingDelete: false, State: QuestState.Accepted or QuestState.Achieved })
+                return true;
+
+            DateTime now = timeProvider.GetUtcNow().UtcDateTime;
+            return !(quest?.Reset > now) && ShadeEveQuestSeason.CanAccept(questId, now);
+        }
+
         private bool MeetsPrerequisites(IQuestInfo info)
         {
+            if (!ShadeEveQuestSeason.CanAccept(info.Entry.Id, timeProvider.GetUtcNow().UtcDateTime))
+                return false;
+
             if (info.Entry.QuestPlayerFactionEnum == 0u && player.Faction1 != Faction.Exile)
                 return false;
             if (info.Entry.QuestPlayerFactionEnum == 1u && player.Faction1 != Faction.Dominion)
@@ -328,11 +374,47 @@ namespace NexusForever.Game.Entity
             return true;
         }
 
+        public void OfferShadeEveStarter(IWorldEntity contact)
+        {
+            if (contact is not INonPlayerEntity { EntityId: > 0u, IsAlive: true } ||
+                !player.InWorld || player.IsLoading || !player.IsAlive || player.Map != contact.Map ||
+                Vector3.DistanceSquared(player.Position, contact.Position) > 36f)
+                return;
+
+            (ushort questId, uint itemId, uint markerId) = (contact.CreatureId, player.Faction1) switch
+            {
+                (65407u, Faction.Exile) => ((ushort)9760, 49483u, 47315u),
+                (65406u, Faction.Dominion) => ((ushort)9761, 49484u, 47289u),
+                _ => ((ushort)0, 0u, 0u)
+            };
+            if (questId == 0 || GetQuestState(questId) is not (null or QuestState.Unknown or QuestState.Mentioned or QuestState.Abandoned) ||
+                DisableManager.Instance.IsDisabled(DisableType.Quest, questId) ||
+                GameTableManager.Instance.WorldLocation2.GetEntry(markerId) is not { } marker ||
+                contact.Map?.Entry?.Id != marker.WorldId || contact.Zone?.Id != marker.WorldZoneId ||
+                Vector3.DistanceSquared(contact.Position, new Vector3(marker.Position0, marker.Position1, marker.Position2)) > 1f ||
+                GlobalQuestManager.Instance.GetQuestInfo(questId) is not { } info || !MeetsPrerequisites(info))
+                return;
+
+            IInventory inventory = player.Inventory;
+            if (inventory.HasItemCount(itemId, 1u) || inventory.Any(bag =>
+                bag.Location == InventoryLocation.PlayerBank && bag.Any(item => item.Id == itemId)) ||
+                ItemManager.Instance.GetItemInfo(itemId) is not { } starter || starter.Entry.Quest2IdActivation != questId)
+                return;
+
+            if (inventory.IsInventoryFull(InventoryLocation.Inventory))
+                player.SendGenericError(GenericError.ItemInventoryFull);
+            else
+                inventory.ItemCreate(InventoryLocation.Inventory, starter, 1u, ItemUpdateReason.Loot);
+        }
+
         /// <summary>
         /// Add a quest from supplied <see cref="IQuestInfo"/>, skipping any prerequisites checks.
         /// </summary>
         public void QuestAdd(IQuestInfo info)
         {
+            if (!ShadeEveQuestSeason.CanAccept(info.Entry.Id, timeProvider.GetUtcNow().UtcDateTime))
+                return;
+
             // make sure player has room for all pushed items
             if (player.Inventory.GetInventorySlotsRemaining(InventoryLocation.Inventory)
                 < info.Entry.PushedItemIds.Count(i => i != 0u))
@@ -361,6 +443,8 @@ namespace NexusForever.Game.Entity
             activeQuests.Add((ushort)info.Entry.Id, quest);
 
             quest.InitialiseTimer();
+            if (ShadeEveQuestSeason.IsIntroductoryQuest(info.Entry.Id) && info.Objectives.IsEmpty)
+                quest.State = QuestState.Achieved;
 
             log.Trace($"Accepted new quest {info.Entry.Id}.");
         }
@@ -388,7 +472,11 @@ namespace NexusForever.Game.Entity
 
             // reset previous objective progress
             foreach (IQuestObjective objective in quest)
+            {
                 objective.Progress = 0u;
+                if (objective is QuestObjective tracked)
+                    tracked.ClearChecklist();
+            }
         }
 
         /// <summary>
@@ -443,7 +531,11 @@ namespace NexusForever.Game.Entity
             }
 
             foreach (IQuestObjective objective in quest)
+            {
                 objective.Progress = 0u;
+                if (objective is QuestObjective tracked)
+                    tracked.ClearChecklist();
+            }
 
             if (quest.Info.IsQuestMentioned)
             {
@@ -525,6 +617,9 @@ namespace NexusForever.Game.Entity
 
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
+
+            if (ShadeEvePlants.HandlesQuest(questId) && (communicator || !ShadeEvePlants.CanVisitContact(player, questId)))
+                throw new QuestException("Report this Shade's Eve quest to its nearby capital contact.");
 
             if (communicator)
             {
