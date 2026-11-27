@@ -41,8 +41,9 @@ namespace NexusForever.Server.Character.Game.Character
                 if (apiModel == null)
                     return null;
 
-                databaseModel = apiModel.ToDatabaseCharacter();
-                _repository.AddCharacter(databaseModel);
+                databaseModel = await _repository.GetOrInsertCharacterAsync(apiModel.ToDatabaseCharacter());
+                if (databaseModel == null)
+                    return null;
             }
 
             var character = _serviceProvider.GetRequiredService<Character>();
