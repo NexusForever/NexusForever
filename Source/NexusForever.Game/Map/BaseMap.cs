@@ -9,6 +9,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
 using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Configuration.Model;
+using NexusForever.Game.Entity;
 using NexusForever.Game.Map.Instance;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Map;
@@ -99,6 +100,7 @@ namespace NexusForever.Game.Map
         public virtual void Update(double lastTick)
         {
             ProcessGridActions();
+            LootManager.Update(lastTick);
             UpdateGrids(lastTick);
 
             scriptCollection?.Invoke<IUpdate>(s => s.Update(lastTick));
@@ -148,10 +150,15 @@ namespace NexusForever.Game.Map
                         break;
                     }
                     case GridActionRelocate actionRelocate:
-                        RelocateEntity(actionRelocate.Entity, actionRelocate.Vector);
+                        if (ReferenceEquals(actionRelocate.Entity.Map, this))
+                            RelocateEntity(actionRelocate.Entity, actionRelocate.Vector);
                         break;
                     case GridActionRemove actionRemove:
-                        RemoveEntity(actionRemove.Entity);
+                        if (ReferenceEquals(actionRemove.Entity.Map, this))
+                            RemoveEntity(actionRemove.Entity);
+                        break;
+                    case GridActionRespawn actionRespawn:
+                        RespawnCreature((NonPlayerEntity)actionRespawn.Entity, actionRespawn.Spawn);
                         break;
                 }
             }
@@ -159,6 +166,37 @@ namespace NexusForever.Game.Map
             // new actions are added to the queue after processing so they are processed starting next update
             foreach (IGridAction action in newActions)
                 pendingActions.Enqueue(action);
+        }
+
+        internal void EnqueueCreatureRespawn(NonPlayerEntity corpse, EntityModel spawn)
+        {
+            pendingActions.Enqueue(new GridActionRespawn { Entity = corpse, Spawn = spawn });
+        }
+
+        private void RespawnCreature(NonPlayerEntity corpse, EntityModel spawn)
+        {
+            if (!corpse.ConsumeRespawnRequest() || !ReferenceEquals(corpse.Map, this) || corpse.IsAlive
+                || GetGrid(corpse.Position) is not { UnloadStatus: null })
+                return;
+
+            var originalPosition = new Vector3(spawn.X, spawn.Y, spawn.Z);
+            IWorldEntity replacement = null;
+            if (GetGrid(originalPosition) is { UnloadStatus: null }
+                && !entities.Values.OfType<INonPlayerEntity>()
+                    .Any(creature => creature.EntityId == spawn.Id && !ReferenceEquals(creature, corpse)))
+            {
+                replacement = CreateStaticWorldEntity(spawn);
+                replacement.Initialise(spawn);
+                replacement.OnEnqueueAddToMap();
+
+                // Allocate the replacement GUID while the corpse still owns its original GUID.
+                AddEntity(replacement, originalPosition);
+            }
+
+            // A grid that is absent or unloading will create its own spawn when it next activates.
+            corpse.OnEnqueueRemoveFromMap();
+            RemoveEntity(corpse);
+            corpse.Dispose();
         }
 
         private void UpdateGrids(double lastTick)
@@ -417,11 +455,18 @@ namespace NexusForever.Game.Map
             SpawnGrid(gridX, gridZ);
         }
 
+        private IWorldEntity CreateStaticWorldEntity(EntityModel model)
+        {
+            return MurkmireWildlifeEntity.Matches(model)
+                ? entityFactory.CreateEntity<MurkmireWildlifeEntity>()
+                : entityFactory.CreateWorldEntity(model.Type);
+        }
+
         protected virtual void SpawnGrid(uint gridX, uint gridZ)
         {
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
-                IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
+                IWorldEntity entity = CreateStaticWorldEntity(model);
                 entity.Initialise(model);
 
                 var position = new MapPosition

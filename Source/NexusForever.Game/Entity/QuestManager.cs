@@ -1,4 +1,5 @@
-﻿using NexusForever.Database.Character;
+﻿using System.Numerics;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
@@ -260,6 +261,9 @@ namespace NexusForever.Game.Entity
                     throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which hasn't reset yet!");
             }
 
+            if (!CanVisitMurkmireHuntContact(info.Entry.Id))
+                throw new QuestException($"Player {player.CharacterId} tried to start Murkmire quest {info.Entry.Id} away from the quest giver!");
+
             if (item != null)
             {
                 if (info.Entry.Id != item.Info.Entry.Quest2IdActivation)
@@ -283,6 +287,24 @@ namespace NexusForever.Game.Entity
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without meeting the prerequisites!");
 
             QuestAdd(info);
+        }
+
+        private bool CanVisitMurkmireHuntContact(uint questId)
+        {
+            (uint creature, uint area) = questId switch
+            {
+                8237u => (41414u, 954u),
+                8239u => (41419u, 955u),
+                _ => (0u, 0u)
+            };
+            if (creature == 0u)
+                return true;
+
+            const float interactionRange = 6f;
+            return player.Map?.Entry.Id == 51u && player.GetVisibleCreature<INonPlayerEntity>(creature)
+                .Any(contact => contact.IsAlive && ReferenceEquals(contact.Map, player.Map) &&
+                    contact.Zone?.Id == area &&
+                    Vector3.DistanceSquared(contact.Position, player.Position) <= interactionRange * interactionRange);
         }
 
         private bool MeetsPrerequisites(IQuestInfo info)
@@ -525,6 +547,9 @@ namespace NexusForever.Game.Entity
 
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
+
+            if (!CanVisitMurkmireHuntContact(questId))
+                throw new QuestException($"Player {player.CharacterId} tried to turn in Murkmire quest {questId} away from the quest receiver!");
 
             if (communicator)
             {

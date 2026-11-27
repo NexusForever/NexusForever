@@ -1,4 +1,4 @@
-﻿using NexusForever.Shared.Configuration;
+using NexusForever.Shared.Configuration;
 
 namespace NexusForever.Game.Configuration.Model
 {
@@ -13,5 +13,10 @@ namespace NexusForever.Game.Configuration.Model
         public uint? GridActionMaxRetry { get; set; } = 5u;
         public double? GridUnloadTimer { get; set; } = 600u;
         public uint? MaxInstances { get; set; } = 10u;
+
+        /// <summary>
+        /// Minimum delay before a persistent open-world creature respawns. Zero disables respawning.
+        /// </summary>
+        public double StaticCreatureRespawnSeconds { get; set; } = 30d;
     }
 }
