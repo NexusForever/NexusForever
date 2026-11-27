@@ -4,6 +4,7 @@ using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
+using NexusForever.Game.Spell;
 using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Quest
@@ -152,6 +153,9 @@ namespace NexusForever.Game.Quest
 
         private uint GetMaxValue()
         {
+            if (SnowblowerSuit.UsesMachineChecklist(QuestInfo.Entry.Id, ObjectiveInfo.Id))
+                return SnowblowerSuit.ChecklistMask;
+
             return IsDynamic() ? 1000u : ObjectiveInfo.Entry.Count;
         }
 
@@ -160,6 +164,12 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(uint update)
         {
+            if (SnowblowerSuit.UsesMachineChecklist(QuestInfo.Entry.Id, ObjectiveInfo.Id))
+            {
+                Progress = (Progress | update) & SnowblowerSuit.ChecklistMask;
+                return;
+            }
+
             if (IsDynamic())
                 update = (uint)(((float)update / ObjectiveInfo.Entry.Count) * 1000f);
 

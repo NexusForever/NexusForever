@@ -258,7 +258,12 @@ namespace NexusForever.Game.Spell
                     player.SpellManager.SetSpellCooldown(Parameters.SpellInfo.Entry.Id, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
 
             SelectTargets();
-            if (Interaction == null)
+            if (Parameters is SpellParameters { Snowblower: { } snowblower })
+            {
+                if (snowblower.Charge() is { } hit)
+                    targets.Add(hit);
+            }
+            else if (Interaction == null)
                 ExecuteEffects();
             CostSpell();
 

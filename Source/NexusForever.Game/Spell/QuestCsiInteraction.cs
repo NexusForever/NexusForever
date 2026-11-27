@@ -79,6 +79,10 @@ namespace NexusForever.Game.Spell
             if (selected.Spell == null || !CanInteract(player, target))
                 return true;
 
+            bool snowblower = SnowblowerSuit.IsSuit(target);
+            if (snowblower && !SnowblowerSuit.AllowsCsi(player, target))
+                return true;
+
             if (player.GetActiveSpell(cast => cast.IsCasting && cast is Spell { Interaction: not null }) is Spell pending)
             {
                 if (pending.Interaction.IsCurrent(player))
@@ -94,9 +98,10 @@ namespace NexusForever.Game.Spell
             ISpellInfo info = GlobalSpellManager.Instance.GetSpellBaseInfo(selected.Base.Id)
                 ?.GetSpellInfo((byte)selected.Spell.TierIndex);
             // Other spells can have effects requiring their own server implementation.
-            if (info?.Entry.Id != selected.Spell.Id || info.Effects.Count != 1 ||
-                info.Effects[0].EffectType != SpellEffectType.Activate ||
-                info.Effects[0].TargetFlags != (uint)SpellEffectTargetFlags.Target)
+            if (info?.Entry.Id != selected.Spell.Id ||
+                (snowblower ? !SnowblowerSuit.ValidateEquipEffects(target, info) :
+                    info.Effects.Count != 1 || info.Effects[0].EffectType != SpellEffectType.Activate ||
+                    info.Effects[0].TargetFlags != (uint)SpellEffectTargetFlags.Target))
                 return true;
 
             player.CastSpell(new SpellParameters
@@ -118,10 +123,16 @@ namespace NexusForever.Game.Spell
         internal bool IsCurrent(IPlayer owner) =>
             ReferenceEquals(owner, player) && ReferenceEquals(player.Map, map) &&
             Target.Guid == targetGuid && Target.CreatureId == creatureId &&
-            CanInteract(player, Target) && Meets(player, prerequisite);
+            CanInteract(player, Target) && Meets(player, prerequisite) &&
+            (!SnowblowerSuit.IsSuit(Target) || SnowblowerSuit.AllowsCsi(player, Target));
 
         internal void Complete()
         {
+            if (SnowblowerSuit.IsSuit(Target))
+            {
+                SnowblowerSuit.CompleteEquip(player, Target, ActivateEffect.SpellId);
+                return;
+            }
             activate(player, Target);
             player.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, creatureId, 1u);
         }
@@ -129,7 +140,7 @@ namespace NexusForever.Game.Spell
         private static bool Meets(IPlayer player, uint id) =>
             id == 0u || PrerequisiteManager.Instance.Meets(player, id);
 
-        private static bool CanInteract(IPlayer player, IWorldEntity target)
+        internal static bool CanInteract(IPlayer player, IWorldEntity target)
         {
             if (!player.IsAlive || player.IsLoading || player.Map == null ||
                 !ReferenceEquals(player.Map, target.Map) || target.Guid == 0u ||
