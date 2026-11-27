@@ -1,4 +1,4 @@
-﻿using NexusForever.Game.Abstract.Map;
+using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Configuration.Model;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -79,8 +79,8 @@ namespace NexusForever.Game.Map
             using FileStream stream = File.OpenRead(filePath);
             using var reader = new BinaryReader(stream);
             var mapFile = new MapFile();
-            mapFiles.Add(assetPath, mapFile);
             mapFile.Read(reader);
+            mapFiles.Add(assetPath, mapFile);
 
             log.Trace($"Initialised base map file for asset {assetPath}.");
             return mapFile;
