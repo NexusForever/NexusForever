@@ -98,6 +98,8 @@ namespace NexusForever.Game.Quest
 
         private readonly IPlayer player;
         private readonly List<IQuestObjective> objectives = new();
+        private readonly IQuestObjective[] completedQuestObjectives;
+        private bool refreshingCompletedQuestObjectives;
 
         private UpdateTimer questTimer;
 
@@ -121,6 +123,7 @@ namespace NexusForever.Game.Quest
             foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
 
+            completedQuestObjectives = GetCompletedQuestObjectives();
             scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
         }
 
@@ -141,6 +144,7 @@ namespace NexusForever.Game.Quest
 
             saveMask = QuestSaveMask.Create;
 
+            completedQuestObjectives = GetCompletedQuestObjectives();
             scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
         }
 
@@ -323,12 +327,7 @@ namespace NexusForever.Game.Quest
                 scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
             }
 
-            // TODO: Should you be able to complete optional objectives after required are completed?
-            if (RequiredObjectivesComplete())
-                CompleteOptionalObjectives();
-
-            if (objectives.All(o => o.IsComplete()))
-                State = QuestState.Achieved;
+            UpdateAchievementState();
         }
 
         /// <summary>
@@ -359,6 +358,59 @@ namespace NexusForever.Game.Quest
                 SendQuestObjectiveUpdate(objective);
 
             scriptCollection?.Invoke<IQuestScript>(s => s.OnObjectiveUpdate(objective));
+
+            UpdateAchievementState();
+        }
+
+        private IQuestObjective[] GetCompletedQuestObjectives()
+        {
+            if (Info.Entry.QuestRepeatPeriodEnum != 0u)
+                return [];
+
+            return objectives
+                .Where(objective =>
+                    objective.ObjectiveInfo.Type == QuestObjectiveType.CompleteQuest &&
+                    objective.ObjectiveInfo.Entry.Count == 1u &&
+                    objective.ObjectiveInfo.Entry.Data != Id &&
+                    objective.ObjectiveInfo.Entry.Data is > 0u and <= ushort.MaxValue &&
+                    GlobalQuestManager.Instance.GetQuestInfo((ushort)objective.ObjectiveInfo.Entry.Data)
+                        is { Entry.QuestRepeatPeriodEnum: 0u })
+                .OrderBy(objective => objective.Index)
+                .ToArray();
+        }
+
+        /// <inheritdoc />
+        public void RefreshCompletedQuestObjectives()
+        {
+            if (completedQuestObjectives.Length == 0 || refreshingCompletedQuestObjectives ||
+                PendingDelete || State != QuestState.Accepted)
+                return;
+
+            refreshingCompletedQuestObjectives = true;
+            try
+            {
+                foreach (IQuestObjective objective in completedQuestObjectives)
+                {
+                    if (PendingDelete || State != QuestState.Accepted)
+                        break;
+
+                    if (!objective.IsComplete() && CanUpdateObjective(objective) &&
+                        player.QuestManager.GetQuestState((ushort)objective.ObjectiveInfo.Entry.Data) == QuestState.Completed)
+                        ObjectiveUpdate(objective.ObjectiveInfo.Id, 1u);
+                }
+            }
+            finally
+            {
+                refreshingCompletedQuestObjectives = false;
+            }
+        }
+
+        private void UpdateAchievementState()
+        {
+            QuestState previousState = State;
+            RefreshCompletedQuestObjectives();
+            if (PendingDelete || State != previousState)
+                return;
 
             // TODO: Should you be able to complete optional objectives after required are completed?
             if (RequiredObjectivesComplete())
