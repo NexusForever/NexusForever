@@ -246,19 +246,8 @@ namespace NexusForever.Game.Entity
 
         private void QuestAdd(IQuestInfo info, IQuest quest, IItem item)
         {
-            if (quest?.State is QuestState.Accepted or QuestState.Achieved)
-                throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which is already in progress!");
-
-            // if quest has already been completed make sure it's repeatable and the reset period has elapsed
-            if (quest?.State == QuestState.Completed)
-            {
-                if (info.Entry.QuestRepeatPeriodEnum == 0u)
-                    throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which they have already completed!");
-
-                DateTime? resetTime = GetQuest((ushort)info.Entry.Id, GetQuestFlags.Completed).Reset;
-                if (DateTime.UtcNow < resetTime)
-                    throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which hasn't reset yet!");
-            }
+            if (GetQuestStartStateError(info, quest) is { } stateError)
+                throw new QuestException(stateError);
 
             if (item != null)
             {
@@ -283,6 +272,35 @@ namespace NexusForever.Game.Entity
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without meeting the prerequisites!");
 
             QuestAdd(info);
+        }
+
+        /// <summary>
+        /// Returns whether the quest is available to this player before checking the source of the offer.
+        /// </summary>
+        public bool CanStartQuest(ushort questId)
+        {
+            IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            return info != null && !DisableManager.Instance.IsDisabled(DisableType.Quest, questId) &&
+                GetQuestStartStateError(info, GetQuest(questId)) == null && MeetsPrerequisites(info);
+        }
+
+        private string GetQuestStartStateError(IQuestInfo info, IQuest quest)
+        {
+            if (quest?.State is QuestState.Accepted or QuestState.Achieved)
+                return $"Player {player.CharacterId} tried to start quest {info.Entry.Id} which is already in progress!";
+
+            // if quest has already been completed make sure it's repeatable and the reset period has elapsed
+            if (quest?.State == QuestState.Completed)
+            {
+                if (info.Entry.QuestRepeatPeriodEnum == 0u)
+                    return $"Player {player.CharacterId} tried to start quest {info.Entry.Id} which they have already completed!";
+
+                DateTime? resetTime = GetQuest((ushort)info.Entry.Id, GetQuestFlags.Completed).Reset;
+                if (DateTime.UtcNow < resetTime)
+                    return $"Player {player.CharacterId} tried to start quest {info.Entry.Id} which hasn't reset yet!";
+            }
+
+            return null;
         }
 
         private bool MeetsPrerequisites(IQuestInfo info)
@@ -310,6 +328,11 @@ namespace NexusForever.Game.Entity
                     return false;
             }
 
+            if (HasProgressForExcludedQuest(info.Entry.QuestIdExclusionPreq0) ||
+                HasProgressForExcludedQuest(info.Entry.QuestIdExclusionPreq1) ||
+                HasProgressForExcludedQuest(info.Entry.QuestIdExclusionPreq2))
+                return false;
+
             if (info.Entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId))
                 return false;
 
@@ -326,6 +349,12 @@ namespace NexusForever.Game.Entity
             }
 
             return true;
+        }
+
+        private bool HasProgressForExcludedQuest(uint questId)
+        {
+            return questId is > 0u and <= ushort.MaxValue &&
+                GetQuestState((ushort)questId) is QuestState.Accepted or QuestState.Achieved or QuestState.Completed;
         }
 
         /// <summary>

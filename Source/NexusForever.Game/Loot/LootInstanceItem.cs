@@ -2,10 +2,12 @@
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Loot.Generate;
+using NexusForever.Game.Loot.Generate.Condition;
 using NexusForever.Game.Static.AccountInventory;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Loot;
 using NexusForever.Game.Static.Quest;
+using NexusForever.GameTable;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Loot;
 using NexusForever.Network.World.Message.Static;
@@ -34,6 +36,7 @@ namespace NexusForever.Game.Loot
         private Dictionary<Identity, ILootInstanceItemRoll> rollActions;
 
         private HashSet<Identity> masterLooters;
+        private bool isQuestStarter;
 
         #region Dependency Injection
 
@@ -57,6 +60,7 @@ namespace NexusForever.Game.Loot
             StaticId = lootBuilderItem.StaticId;
             Type     = lootBuilderItem.Type;
             Count    = lootBuilderItem.Count;
+            isQuestStarter = lootBuilderItem.IsQuestStarter;
 
             foreach (Identity looter in lootBuilderItem.Looters)
                 looters.Add(looter);
@@ -289,7 +293,7 @@ namespace NexusForever.Game.Loot
             if (!looters.Contains(player.Identity))
                 return;
 
-            if (!CanLoot)
+            if (!CanLoot || !CanClaimQuestStarter(player))
                 return;
 
             EnqueueMessageToLooters(new ServerLootGrant
@@ -392,6 +396,21 @@ namespace NexusForever.Game.Loot
             // TODO: send mail to offline player with loot item attached
 
             Delivered = true;
+        }
+
+        private bool CanClaimQuestStarter(IPlayer player)
+        {
+            if (!isQuestStarter)
+                return true;
+
+            if (!QuestStarterLootGenerationCondition.CanReceive(player, StaticId, GameTableManager.Instance))
+                return false;
+
+            if (player.Inventory.GetInventorySlotsRemaining(InventoryLocation.Inventory) != 0u)
+                return true;
+
+            player.SendGenericError(GenericError.ItemInventoryFull);
+            return false;
         }
 
         public NetworkLootItem Build()

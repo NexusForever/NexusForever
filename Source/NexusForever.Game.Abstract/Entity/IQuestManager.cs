@@ -35,6 +35,11 @@ namespace NexusForever.Game.Abstract.Entity
         void QuestAdd(ushort questId, IItem item);
 
         /// <summary>
+        /// Returns whether the quest is available to this player before checking the source of the offer.
+        /// </summary>
+        bool CanStartQuest(ushort questId);
+
+        /// <summary>
         /// Add a quest from supplied <see cref="IQuestInfo"/>, skipping any prerequisites checks.
         /// </summary>
         void QuestAdd(IQuestInfo info);
