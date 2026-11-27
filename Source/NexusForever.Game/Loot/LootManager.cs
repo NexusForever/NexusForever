@@ -44,7 +44,7 @@ namespace NexusForever.Game.Loot
         /// </summary>
         public void Update(double lastTick)
         {
-            foreach (List<ILootInstance> entityLootInstances in lootInstances.Values)
+            foreach ((uint ownerGuid, List<ILootInstance> entityLootInstances) in lootInstances)
             {
                 // reverse list iteration so we can remove expired elements
                 for (int i = entityLootInstances.Count - 1; i >= 0; i--)
@@ -57,6 +57,9 @@ namespace NexusForever.Game.Loot
                         entityLootInstances.RemoveAt(i);
                     }
                 }
+
+                if (entityLootInstances.Count == 0)
+                    lootInstances.Remove(ownerGuid);
             }
         }
 
