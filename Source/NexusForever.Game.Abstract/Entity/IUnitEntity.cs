@@ -71,6 +71,11 @@ namespace NexusForever.Game.Abstract.Entity
         void CancelSpellCast(uint castingId);
 
         /// <summary>
+        /// Return an active spell owned by this unit that matches the supplied condition.
+        /// </summary>
+        ISpell GetActiveSpell(Func<ISpell, bool> predicate);
+
+        /// <summary>
         /// Determine if this <see cref="IUnitEntity"/> can attack supplied <see cref="IUnitEntity"/>.
         /// </summary>
         bool CanAttack(IUnitEntity target);
