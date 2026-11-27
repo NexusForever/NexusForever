@@ -362,7 +362,35 @@ namespace NexusForever.Game.Entity
 
             quest.InitialiseTimer();
 
+            if (quest.State == QuestState.Accepted && player.Map != null && player.Zone is { Id: > 0u } zone &&
+                info.Objectives.Any(objective => objective.Type == QuestObjectiveType.EnterZone))
+                CreditCurrentZone(quest, zone);
+
             log.Trace($"Accepted new quest {info.Entry.Id}.");
+        }
+
+        private static void CreditCurrentZone(IQuest quest, WorldZoneEntry currentZone)
+        {
+            var zones = new HashSet<uint>();
+            for (WorldZoneEntry zone = currentZone; zone is { Id: > 0u }; zone = GameTableManager.Instance.WorldZone.GetEntry(zone.ParentZoneId))
+            {
+                if (!zones.Add(zone.Id))
+                {
+                    // A cycle cannot establish which ancestors contain the player's zone.
+                    zones = [currentZone.Id];
+                    break;
+                }
+
+                if (zone.ParentZoneId == 0u)
+                    break;
+            }
+
+            // The same acceptance cannot unlock and credit a later sequential objective.
+            foreach (IQuestObjective objective in quest
+                .Where(objective => objective.ObjectiveInfo.Type == QuestObjectiveType.EnterZone &&
+                    zones.Contains(objective.ObjectiveInfo.Entry.Data))
+                .OrderByDescending(objective => objective.Index))
+                quest.ObjectiveUpdate(objective.ObjectiveInfo.Id, 1u);
         }
 
         private void QuestRemove(IQuest quest)
