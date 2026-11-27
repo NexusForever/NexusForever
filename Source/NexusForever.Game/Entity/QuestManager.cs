@@ -9,6 +9,7 @@ using NexusForever.Game.Static.Achievement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.Game.Static.Reward;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.World.Message.Model;
@@ -313,19 +314,23 @@ namespace NexusForever.Game.Entity
             if (info.Entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId))
                 return false;
 
-            if (!info.IsContract())
+            return HasQuestSlot(info.IsContract());
+        }
+
+        private bool HasQuestSlot(bool isContract)
+        {
+            int occupied = activeQuests.Values.Count(quest =>
+                (quest.State is QuestState.Accepted or QuestState.Achieved) && quest.Info.IsContract() == isContract);
+
+            if (isContract)
             {
-                GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(655);
-                // client also hard codes 40 if entry doesn't exist
-                if (activeQuests.Count > (entry?.Dataint0 ?? 40u))
-                    return false;
-            }
-            else
-            {
-                // TODO: contracts use reward property for max slots, RewardProperty.ActiveContractSlots
+                float? limit = player.Account?.RewardPropertyManager
+                    ?.GetRewardProperty(RewardPropertyType.ActiveContractSlots)?.GetValue(0u);
+                return !limit.HasValue || occupied < limit.Value;
             }
 
-            return true;
+            GameFormulaEntry entry = GameTableManager.Instance.GameFormula.GetEntry(655);
+            return occupied < (entry?.Dataint0 ?? 40u);
         }
 
         /// <summary>
