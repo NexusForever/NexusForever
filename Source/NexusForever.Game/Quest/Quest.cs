@@ -5,6 +5,7 @@ using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
+using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.World.Message.Model;
 using NexusForever.Script;
@@ -98,6 +99,8 @@ namespace NexusForever.Game.Quest
 
         private readonly IPlayer player;
         private readonly List<IQuestObjective> objectives = new();
+        private readonly IQuestObjective[] inventoryObjectives;
+        private readonly UpdateTimer inventoryObjectiveTimer;
 
         private UpdateTimer questTimer;
 
@@ -121,6 +124,8 @@ namespace NexusForever.Game.Quest
             foreach (CharacterQuestObjectiveModel objectiveModel in model.QuestObjective)
                 objectives.Add(new QuestObjective(player, info, info.Objectives[objectiveModel.Index], objectiveModel));
 
+            inventoryObjectives = GetInventoryObjectives();
+            inventoryObjectiveTimer = inventoryObjectives.Length == 0 ? null : new UpdateTimer(1d);
             scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
         }
 
@@ -141,6 +146,8 @@ namespace NexusForever.Game.Quest
 
             saveMask = QuestSaveMask.Create;
 
+            inventoryObjectives = GetInventoryObjectives();
+            inventoryObjectiveTimer = inventoryObjectives.Length == 0 ? null : new UpdateTimer(1d);
             scriptCollection = ScriptManager.Instance.InitialiseOwnedScripts<IQuest>(this, info.Entry.Id);
         }
 
@@ -246,6 +253,78 @@ namespace NexusForever.Game.Quest
                     questTimer = null;
                 }
             }
+
+            if (inventoryObjectiveTimer != null)
+            {
+                inventoryObjectiveTimer.Update(lastTick);
+                if (inventoryObjectiveTimer.HasElapsed)
+                {
+                    inventoryObjectiveTimer.Reset();
+                    RefreshCollectedItems();
+                }
+            }
+        }
+
+        private IQuestObjective[] GetInventoryObjectives()
+        {
+            // Some collection goals use script-specific data rather than an Item2 identifier.
+            return objectives.Where(objective => objective.ObjectiveInfo.Type == QuestObjectiveType.CollectItem
+                && objective.ObjectiveInfo.Entry.Data != 0u
+                && ItemManager.Instance.GetItemInfo(objective.ObjectiveInfo.Entry.Data) != null)
+                .OrderBy(objective => objective.Index)
+                .ToArray();
+        }
+
+        public void RefreshCollectedItems()
+        {
+            if (inventoryObjectives.Length == 0 || PendingDelete || State is not (QuestState.Accepted or QuestState.Achieved))
+                return;
+
+            IBag inventory = player.Inventory.FirstOrDefault(bag => bag.Location == InventoryLocation.Inventory);
+            if (inventory == null)
+                return;
+
+            List<IQuestObjective> changed = null;
+            foreach (IQuestObjective objective in inventoryObjectives)
+            {
+                if (State == QuestState.Achieved && objective.ObjectiveInfo.IsOptional())
+                    continue;
+
+                uint target = objective.ObjectiveInfo.Entry.Count;
+                uint remaining = target;
+                if (CanUpdateObjective(objective))
+                {
+                    foreach (IItem item in inventory.Where(item => item.Id == objective.ObjectiveInfo.Entry.Data))
+                    {
+                        remaining -= Math.Min(remaining, item.StackCount);
+                        if (remaining == 0u)
+                            break;
+                    }
+                }
+
+                uint collected = target - remaining;
+                if (objective.Progress == collected)
+                    continue;
+
+                objective.Progress = collected;
+                SendQuestObjectiveUpdate(objective);
+                (changed ??= new List<IQuestObjective>()).Add(objective);
+            }
+
+            if (RequiredObjectivesComplete())
+            {
+                if (State == QuestState.Accepted)
+                {
+                    CompleteOptionalObjectives();
+                    State = QuestState.Achieved;
+                }
+            }
+            else if (State == QuestState.Achieved)
+                State = QuestState.Accepted;
+
+            if (changed != null)
+                foreach (IQuestObjective objective in changed)
+                    scriptCollection?.Invoke<IQuestScript>(script => script.OnObjectiveUpdate(objective));
         }
 
         /// <summary>
