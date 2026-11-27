@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Static.Quest;
@@ -27,6 +27,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(activateUnitCast.UnitId);
             if (entity == null)
                 throw new InvalidPacketValueException();
+
+            if (DustrunnerBlackBox.TryOpen(session, entity))
+                return;
 
             // TODO: sanity check for range etc.
 
