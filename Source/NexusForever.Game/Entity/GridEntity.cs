@@ -197,7 +197,12 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual bool CanSeeEntity(IGridEntity entity)
         {
-            return true;
+            if (this is not IPlayer viewer || entity is not GridEntity { scriptCollection: { } scripts })
+                return true;
+
+            bool visible = true;
+            scripts.Invoke<IEntityVisibilityScript>(script => visible = visible && script.CanBeSeenBy(viewer));
+            return visible;
         }
 
         /// <summary>

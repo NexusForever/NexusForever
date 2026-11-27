@@ -4,6 +4,8 @@ using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
+using NexusForever.Script;
+using NexusForever.Script.Template;
 
 namespace NexusForever.Game.Entity
 {
@@ -26,6 +28,7 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(model);
             QuestChecklistIdx = model.QuestChecklistIdx;
+            scriptCollection = ScriptManager.Instance.InitialiseEntityScripts<ISimpleEntity>(this);
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -48,6 +51,8 @@ namespace NexusForever.Game.Entity
                 else
                     activator.DatacubeManager.SendDatacube(datacube);
             }
+
+            InvokeScriptCollection<IWorldEntityScript>(script => script.OnActivate(activator));
         }
 
         public override void OnActivateCast(IPlayer activator)
@@ -79,6 +84,7 @@ namespace NexusForever.Game.Entity
             }
 
             //TODO: cast "116,Generic Quest Spell - Activating - Activate - Tier 1" by 0x07FD
+            InvokeScriptCollection<IWorldEntityScript>(script => script.OnActivateCast(activator));
         }
     }
 }
