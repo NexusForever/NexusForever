@@ -1,4 +1,4 @@
-﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
@@ -104,6 +104,8 @@ namespace NexusForever.Game.Entity
 
         public void Update(double lastTick)
         {
+            DeadGone.CheckTrace(player, GetQuest(DeadGone.QuestId, GetQuestFlags.Active));
+
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
             {
@@ -230,6 +232,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void QuestAdd(ushort questId, IItem item)
         {
+            if (questId == DeadGone.QuestId && (item != null || !DeadGone.CanAccept(player)))
+                throw new QuestException($"Player {player.CharacterId} must discover the Fatalis Fields stoneform.");
+
             IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
             if (info == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
@@ -502,6 +507,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void QuestComplete(ushort questId, ushort reward, bool communicator)
         {
+            if (questId == DeadGone.QuestId && (communicator || !DeadGone.CanTurnIn(player)))
+                throw new QuestException($"Player {player.CharacterId} must visit the Aft Compartment cage.");
+
             IQuestInfo questInfo = GlobalQuestManager.Instance.GetQuestInfo(questId);
             if (questInfo == null)
                 throw new ArgumentException($"Invalid quest {questId}!");
