@@ -1,4 +1,4 @@
-﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
@@ -32,6 +32,8 @@ namespace NexusForever.Game.Entity
         }
 
         private readonly IPlayer player;
+
+        private ulong? sentPeriodicSeed;
 
         private readonly Dictionary<ushort, IQuest> completedQuests = new();
         private readonly Dictionary<ushort, IQuest> inactiveQuests = new();
@@ -104,6 +106,16 @@ namespace NexusForever.Game.Entity
 
         public void Update(double lastTick)
         {
+            if (sentPeriodicSeed is ulong previousSeed && !player.IsLoading && player.Session.CanProcessIncomingPackets)
+            {
+                ulong seed = PeriodicSideQuestOffers.Seed(DateTime.UtcNow);
+                if (seed != previousSeed)
+                {
+                    player.Session.EnqueueMessageEncrypted(new ServerQuestPeriodicReset { DailyRandomSeed = seed });
+                    sentPeriodicSeed = seed;
+                }
+            }
+
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
             {
@@ -124,8 +136,11 @@ namespace NexusForever.Game.Entity
         public void SendInitialPackets()
         {
             DateTime now = DateTime.UtcNow;
+            ulong seed = PeriodicSideQuestOffers.Seed(now);
+            sentPeriodicSeed = seed;
             player.Session.EnqueueMessageEncrypted(new ServerQuestInit
             {
+                DailyRandomSeed = seed,
                 Completed = completedQuests.Values
                     .Select(q => new ServerQuestInit.QuestComplete
                     {
@@ -259,6 +274,10 @@ namespace NexusForever.Game.Entity
                 if (DateTime.UtcNow < resetTime)
                     throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which hasn't reset yet!");
             }
+
+            if (item == null &&
+                !PeriodicSideQuestOffers.IsOffered(info.Entry, sentPeriodicSeed ?? PeriodicSideQuestOffers.Seed(DateTime.UtcNow)))
+                throw new QuestException($"Quest {info.Entry.Id} is not in the current periodic offer.");
 
             if (item != null)
             {

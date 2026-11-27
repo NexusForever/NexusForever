@@ -422,8 +422,11 @@ namespace NexusForever.GameTable
         public GameTable<PathSoldierEventWaveEntry> PathSoldierEventWave { get; private set; }
         public GameTable<PathSoldierSWATEntry> PathSoldierSWAT { get; private set; }
         public GameTable<PathSoldierTowerDefenseEntry> PathSoldierTowerDefense { get; private set; }
+        [GameData]
         public GameTable<PeriodicQuestGroupEntry> PeriodicQuestGroup { get; private set; }
+        [GameData]
         public GameTable<PeriodicQuestSetEntry> PeriodicQuestSet { get; private set; }
+        [GameData]
         public GameTable<PeriodicQuestSetCategoryEntry> PeriodicQuestSetCategory { get; private set; }
 
         [GameData]
