@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Achievement;
 using NexusForever.Game.Static.Entity;
@@ -279,6 +280,10 @@ namespace NexusForever.Game.Entity
 
             // server doesn't send an error message for prerequisites since the client does the exact same checks
             // it's assumed that a player could never get here without cheating in some way
+            if (SnowblowerSuit.OwnsQuest(info.Entry.Id) &&
+                (!SnowblowerSuit.IsOpen(DateTime.UtcNow) || !SnowblowerSuit.AtContact(player, info.Entry.Id) || item != null))
+                throw new QuestException($"Player {player.CharacterId} tried to start an unavailable Snowblower Stoppage quest.");
+
             if (!MeetsPrerequisites(info))
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without meeting the prerequisites!");
 
@@ -525,6 +530,9 @@ namespace NexusForever.Game.Entity
 
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
+
+            if (SnowblowerSuit.OwnsQuest(questId) && (communicator || !SnowblowerSuit.AtContact(player, questId)))
+                throw new QuestException($"Player {player.CharacterId} tried to complete Snowblower Stoppage away from its contact.");
 
             if (communicator)
             {

@@ -25,6 +25,7 @@ using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
 using NexusForever.Game.Reputation;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
@@ -391,6 +392,7 @@ namespace NexusForever.Game.Entity
             SpellManager.Update(lastTick);
             CostumeManager.Update(lastTick);
             QuestManager.Update(lastTick);
+            SnowblowerSuit.Update(this);
 
             relocationTimer.Update(lastTick);
             if (relocationTimer.HasElapsed)
@@ -670,6 +672,9 @@ namespace NexusForever.Game.Entity
             }).FireAndForgetAsync();
         }
 
+        public override bool CanSeeEntity(IGridEntity entity) =>
+            base.CanSeeEntity(entity) && SnowblowerSuit.CanSeeActor(this, entity);
+
         public override void OnRelocate(Vector3 vector)
         {
             base.OnRelocate(vector);
@@ -903,6 +908,7 @@ namespace NexusForever.Game.Entity
 
         private void Logout()
         {
+            SnowblowerSuit.Clear(this);
             OnLogout();
             Cleanup();
         }
