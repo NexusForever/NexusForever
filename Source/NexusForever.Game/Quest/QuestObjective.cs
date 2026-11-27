@@ -16,7 +16,8 @@ namespace NexusForever.Game.Quest
             None     = 0x00,
             Create   = 0x01,
             Progress = 0x02,
-            Timer    = 0x04
+            Timer    = 0x04,
+            Checklist = 0x08
         }
 
         public IQuestInfo QuestInfo { get; }
@@ -47,6 +48,7 @@ namespace NexusForever.Game.Quest
         }
 
         private uint? timer;
+        private uint? checklist;
 
         private QuestObjectiveSaveMask saveMask;
 
@@ -64,6 +66,7 @@ namespace NexusForever.Game.Quest
             Index         = model.Index;
             progress      = model.Progress;
             timer         = model.Timer;
+            checklist     = model.Checklist;
         }
 
         /// <summary>
@@ -97,7 +100,8 @@ namespace NexusForever.Game.Quest
                     Id       = player.CharacterId,
                     QuestId  = (ushort)QuestInfo.Entry.Id,
                     Index    = Index,
-                    Progress = Progress
+                    Progress = Progress,
+                    Checklist = checklist
                 });
             }
             else
@@ -116,6 +120,12 @@ namespace NexusForever.Game.Quest
                     entity.Property(p => p.Progress).IsModified = true;
                 }
 
+                if ((saveMask & QuestObjectiveSaveMask.Checklist) != 0)
+                {
+                    model.Checklist = checklist;
+                    entity.Property(p => p.Checklist).IsModified = true;
+                }
+
                 if ((saveMask & QuestObjectiveSaveMask.Timer) != 0)
                 {
                     // TODO
@@ -123,6 +133,27 @@ namespace NexusForever.Game.Quest
             }
 
             saveMask = QuestObjectiveSaveMask.None;
+        }
+
+        internal bool HasChecklist(uint bit) => (checklist.GetValueOrDefault() & bit) != 0;
+
+        internal bool TryMarkChecklist(uint bit)
+        {
+            if (bit == 0 || HasChecklist(bit))
+                return false;
+
+            checklist = checklist.GetValueOrDefault() | bit;
+            saveMask |= QuestObjectiveSaveMask.Checklist;
+            return true;
+        }
+
+        internal void ClearChecklist()
+        {
+            if (!checklist.HasValue)
+                return;
+
+            checklist = null;
+            saveMask |= QuestObjectiveSaveMask.Checklist;
         }
 
         public void Update(double lastTick)

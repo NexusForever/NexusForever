@@ -1,4 +1,5 @@
 ﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Spell;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Spell;
@@ -15,7 +16,8 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 
             // TODO: sanity check for range etc.
 
-            entity.OnActivate(session.Player);
+            if (!QuestCsiInteraction.TryBeginHaunting(session.Player, entity))
+                entity.OnActivate(session.Player);
         }
     }
 }

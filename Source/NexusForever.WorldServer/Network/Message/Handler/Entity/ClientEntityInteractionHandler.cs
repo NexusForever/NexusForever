@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.Message;
@@ -43,6 +44,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             {
                 case InteractionType.TalkTo: // Quest NPC
                 {
+                    if (session.Player.QuestManager is QuestManager quests)
+                        quests.OfferShadeEveStarter(entity);
+
                     session.EnqueueMessageEncrypted(new ServerDialogStart
                     {
                         DialogUnitId = entityInteraction.UnitId

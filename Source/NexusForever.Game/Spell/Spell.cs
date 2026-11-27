@@ -27,6 +27,8 @@ namespace NexusForever.Game.Spell
         public bool IsFinished => status == SpellStatus.Finished;
 
         public IUnitEntity Caster { get; }
+        internal QuestCsiInteraction Interaction => (Parameters as SpellParameters)?.Interaction;
+        internal Quest.ShadeCapitalActivities.ShadeProjectile ShadeProjectile => (Parameters as SpellParameters)?.ShadeProjectile;
 
         private SpellStatus status;
 
@@ -88,6 +90,8 @@ namespace NexusForever.Game.Spell
             if (result != CastResult.Ok)
             {
                 SendSpellCastResult(result);
+                if (Interaction != null)
+                    status = SpellStatus.Finished;
                 return;
             }
 
@@ -103,7 +107,10 @@ namespace NexusForever.Game.Spell
             SendSpellStart();
 
             // enqueue spell to be executed after cast time
-            events.EnqueueEvent(new SpellEvent(Parameters.SpellInfo.Entry.CastTime / 1000d, Execute));
+            if (Interaction is { } interaction)
+                events.EnqueueEvent(new SpellEvent(interaction.TimeoutSeconds, () => CancelCast(CastResult.ClientSideInteractionFail)));
+            else
+                events.EnqueueEvent(new SpellEvent(Parameters.SpellInfo.Entry.CastTime / 1000d, Execute));
             status = SpellStatus.Casting;
 
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
@@ -202,7 +209,11 @@ namespace NexusForever.Game.Spell
         public void CancelCast(CastResult result)
         {
             if (status != SpellStatus.Casting)
+            {
+                if (Interaction != null)
+                    return;
                 throw new InvalidOperationException();
+            }
 
             if (Caster is IPlayer player && !player.IsLoading)
             {
@@ -220,6 +231,24 @@ namespace NexusForever.Game.Spell
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} cast was cancelled.");
         }
 
+        internal void ResolveInteraction(IPlayer player, byte response)
+        {
+            if (status != SpellStatus.Casting || Interaction is not { } interaction ||
+                !ReferenceEquals(Caster, player) || response > 2u)
+                return;
+
+            // The client reports the puzzle result for the server-owned cast.
+            if (response != 1u || !interaction.IsCurrent(player))
+            {
+                CancelCast(CastResult.ClientSideInteractionFail);
+                return;
+            }
+
+            events.CancelEvents();
+            Execute();
+            interaction.Complete();
+        }
+
         private void Execute()
         {
             status = SpellStatus.Executing;
@@ -230,10 +259,20 @@ namespace NexusForever.Game.Spell
                     player.SpellManager.SetSpellCooldown(Parameters.SpellInfo.Entry.Id, Parameters.SpellInfo.Entry.SpellCoolDown / 1000d);
 
             SelectTargets();
-            ExecuteEffects();
+            SpellTargetInfo shadeHit = null;
+            if (ShadeProjectile is { } projectile)
+            {
+                shadeHit = projectile.Resolve();
+                if (shadeHit != null)
+                    targets.Add(shadeHit);
+            }
+            else if (Interaction == null)
+                ExecuteEffects();
             CostSpell();
 
             SendSpellGo();
+            if (shadeHit != null)
+                ShadeProjectile.HideHitTarget();
         }
 
         private void CostSpell()
@@ -293,7 +332,7 @@ namespace NexusForever.Game.Spell
         public bool IsMovingInterrupted()
         {
             // TODO: implement correctly
-            return Parameters.SpellInfo.Entry.CastTime > 0;
+            return Interaction == null && Parameters.SpellInfo.Entry.CastTime > 0;
         }
 
         private void SendSpellCastResult(CastResult castResult)
@@ -319,11 +358,12 @@ namespace NexusForever.Game.Spell
             {
                 ServerUniqueId         = CastingId,
                 CasterId               = Caster.Guid,
-                PrimaryTargetId        = Caster.Guid,
+                PrimaryTargetId        = Interaction is { Target: { } target } &&
+                    Quest.ShadeEveHauntings.RecognizesTarget(target) ? target.Guid : ShadeProjectile?.TargetId ?? Caster.Guid,
                 Spell4Id               = Parameters.SpellInfo.Entry.Id,
                 RootSpell4Id           = Parameters.RootSpellInfo?.Entry.Id ?? 0,
                 ParentSpell4Id         = Parameters.ParentSpellInfo?.Entry.Id ?? 0,
-                FieldPosition          = new Position(Caster.Position),
+                FieldPosition          = new Position(ShadeProjectile?.Destination ?? Caster.Position),
                 Yaw                    = Caster.Rotation.X,
                 UserInitiatedSpellCast = Parameters.UserInitiatedSpellCast,
                 InitialPositionData    = new List<ServerSpellStart.InitialPosition>(),
@@ -383,9 +423,29 @@ namespace NexusForever.Game.Spell
             var serverSpellGo = new ServerSpellGo
             {
                 ServerUniqueId     = CastingId,
-                PrimaryDestination = new Position(Caster.Position),
+                PrimaryDestination = new Position(ShadeProjectile?.Destination ?? Caster.Position),
                 Phase              = -1
             };
+
+            if (Interaction is { } interaction)
+            {
+                serverSpellGo.TargetInfoData.Add(new TargetInfo
+                {
+                    UnitId = interaction.Target.Guid,
+                    TargetFlags = 1,
+                    InstanceCount = 1,
+                    CombatResult = CombatResult.Hit,
+                    EffectInfoData =
+                    [
+                        new EffectInfo
+                        {
+                            Spell4EffectId = interaction.ActivateEffect.Id,
+                            EffectUniqueId = GlobalSpellManager.Instance.NextEffectId,
+                            TimeRemaining = -1
+                        }
+                    ]
+                });
+            }
 
             foreach (ISpellTargetInfo targetInfo in targets
                 .Where(t => t.Effects.Count > 0))

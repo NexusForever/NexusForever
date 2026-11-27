@@ -7,6 +7,7 @@
         public byte Index { get; set; }
         public uint Progress { get; set; }
         public uint? Timer { get; set; }
+        public uint? Checklist { get; set; }
 
         public CharacterQuestModel Quest { get; set; }
     }
