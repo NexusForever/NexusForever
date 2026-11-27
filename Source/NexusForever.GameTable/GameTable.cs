@@ -159,6 +159,7 @@ namespace NexusForever.GameTable
             int stringTableSize = (int)(header.TotalRecordSize - header.RecordSize * header.RecordCount);
             using (var stringTable = new StringTable(reader.ReadBytes(stringTableSize)))
             {
+                FieldInfo[] typeFields = attributeCache.Keys.ToArray();
                 for (int i = 0; i < (int)header.RecordCount; i++)
                 {
                     long recordStartPosition = headerSize + (long)header.RecordOffset + (long)header.RecordSize * i;
@@ -168,7 +169,6 @@ namespace NexusForever.GameTable
                     var entry = new T();
 
                     int fieldIndex = 0;
-                    FieldInfo[] typeFields = attributeCache.Keys.ToArray();
                     foreach (FieldInfo modelField in typeFields)
                     {
                         GameTableFieldArrayAttribute attribute = attributeCache[modelField];
