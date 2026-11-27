@@ -246,6 +246,8 @@ namespace NexusForever.Game.Entity
 
         private void QuestAdd(IQuestInfo info, IQuest quest, IItem item)
         {
+            if (!LegacyDestinyBriefing.AllowsAccept(player, (ushort)info.Entry.Id, item != null))
+                throw new QuestException($"Player {player.CharacterId} tried to accept a Destiny quest without the appropriate guide!");
             if (quest?.State is QuestState.Accepted or QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which is already in progress!");
 
@@ -300,11 +302,14 @@ namespace NexusForever.Game.Entity
 
             if (!info.PrerequisiteQuests.IsEmpty)
             {
+                bool PrerequisiteMet(Quest2Entry quest) => GetQuestState((ushort)quest.Id) == QuestState.Completed ||
+                    LegacyDestinyBriefing.ReplacesPrerequisite(player, (ushort)info.Entry.Id, (ushort)quest.Id);
+
                 bool preReqQuestsCompleted;
                 if ((info.Entry.PrerequisiteFlags & 1) != 0u)
-                    preReqQuestsCompleted = info.PrerequisiteQuests.Any(q => GetQuestState((ushort)q.Id) == QuestState.Completed);
+                    preReqQuestsCompleted = info.PrerequisiteQuests.Any(PrerequisiteMet);
                 else
-                    preReqQuestsCompleted = info.PrerequisiteQuests.All(q => GetQuestState((ushort)q.Id) == QuestState.Completed);
+                    preReqQuestsCompleted = info.PrerequisiteQuests.All(PrerequisiteMet);
 
                 if (!preReqQuestsCompleted)
                     return false;
@@ -502,6 +507,8 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void QuestComplete(ushort questId, ushort reward, bool communicator)
         {
+            if (!LegacyDestinyBriefing.AllowsReport(player, questId, communicator))
+                throw new QuestException($"Player {player.CharacterId} tried to complete a Destiny quest without the appropriate guide!");
             IQuestInfo questInfo = GlobalQuestManager.Instance.GetQuestInfo(questId);
             if (questInfo == null)
                 throw new ArgumentException($"Invalid quest {questId}!");

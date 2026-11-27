@@ -34,6 +34,7 @@ using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.RBAC;
 using NexusForever.Game.Static.Reputation;
 using NexusForever.Game.Static.Spell;
+using NexusForever.Game.Quest;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.Network.Internal;
@@ -676,6 +677,7 @@ namespace NexusForever.Game.Entity
             saveMask |= PlayerSaveMask.Location;
 
             ZoneMapManager.OnRelocate(vector);
+            LegacyDestinyBriefing.RecordArrival(this);
 
             if (!relocationTimer.IsTicking)
                 relocationTimer.Resume();
@@ -1102,6 +1104,7 @@ namespace NexusForever.Game.Entity
 
             pendingTeleport = null;
             IsLoading = false;
+            LegacyDestinyBriefing.RecordArrival(this);
         }
 
         /// <summary>

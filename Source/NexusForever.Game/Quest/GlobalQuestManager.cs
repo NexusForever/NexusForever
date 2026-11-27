@@ -93,6 +93,12 @@ namespace NexusForever.Game.Quest
                 }
             }
 
+            foreach ((ushort quest, uint giver, uint receiver) in LegacyDestinyBriefing.Relations())
+            {
+                questGivers.TryAdd(quest, [giver]);
+                questReceivers.TryAdd(quest, [receiver]);
+            }
+
             questGiverStore = questGivers.ToImmutableDictionary(k => k.Key, v => v.Value.ToImmutableList());
             questReceiverStore = questReceivers.ToImmutableDictionary(k => k.Key, v => v.Value.ToImmutableList());
         }
