@@ -292,6 +292,15 @@ namespace NexusForever.Game.Quest
             return State is QuestState.Accepted or QuestState.Achieved or QuestState.Completed;
         }
 
+        public bool IsObjectiveActive(uint index)
+        {
+            if (PendingDelete || State != QuestState.Accepted)
+                return false;
+
+            IQuestObjective objective = objectives.FirstOrDefault(o => o.Index == index);
+            return objective != null && !objective.IsComplete() && CanUpdateObjective(objective);
+        }
+
         /// <summary>
         /// Update any <see cref="IQuestObjective"/>'s with supplied <see cref="QuestObjectiveType"/> and data with progress.
         /// </summary>
@@ -370,15 +379,9 @@ namespace NexusForever.Game.Quest
 
         private bool CanUpdateObjective(IQuestObjective objective)
         {
-            if (objective.ObjectiveInfo.IsSequential())
-            {
-                for (int i = 0; i < objective.Index; i++)
-                    if (!objectives[i].IsComplete())
-                        return false;
-            }
-
             // TODO: client also checks objective flags 1 and 8 in the same function
-            return true;
+            return !objective.ObjectiveInfo.IsSequential() ||
+                objectives.Count(previous => previous.Index < objective.Index && previous.IsComplete()) == objective.Index;
         }
 
         private bool RequiredObjectivesComplete()

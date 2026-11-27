@@ -19,6 +19,7 @@ namespace NexusForever.Game.Loot.Generate
             sc.AddTransientFactory<ILootBuilderItem, LootBuilderItem>();
 
             sc.AddSingleton<ILootGenerationConditionManager, LootGenerationConditionManager>();
+            sc.AddKeyedTransient<ILootGenerationCondition, QuestObjectiveLootGenerationCondition>(LootConditionType.QuestObjectiveActive);
             sc.AddKeyedTransient<ILootGenerationCondition, ClassLootGenerationCondition>(LootConditionType.IsClass);
         }
     }

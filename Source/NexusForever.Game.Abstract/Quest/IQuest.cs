@@ -27,6 +27,11 @@ namespace NexusForever.Game.Abstract.Quest
         bool CanAbandon();
 
         /// <summary>
+        /// Returns whether the objective in the given slot can currently advance.
+        /// </summary>
+        bool IsObjectiveActive(uint index);
+
+        /// <summary>
         /// Returns if <see cref="IQuest"/> can be shared with another <see cref="IPlayer"/>.
         /// </summary>
         bool CanShare();
