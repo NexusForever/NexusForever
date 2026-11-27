@@ -18,6 +18,7 @@ namespace NexusForever.Game.Loot.Generate
         #region Dependency Injection
 
         private readonly IFactory<ILootBuilderItem> lootGeneratorItemFactory;
+        private bool isQuestStarter;
 
         public LootItem(
             IFactory<ILootBuilderItem> lootGeneratorItemFactory)
@@ -31,8 +32,10 @@ namespace NexusForever.Game.Loot.Generate
         /// Initiaise <see cref="ILootItem"/> from specified model.
         /// </summary>
         /// <param name="lootItemModel">The model containing data for this loot item.</param>
-        public void Initialise(LootItemModel lootItemModel)
+        /// <param name="isQuestStarter">Whether to recheck eligibility when the quest item is claimed.</param>
+        public void Initialise(LootItemModel lootItemModel, bool isQuestStarter = false)
         {
+            this.isQuestStarter = isQuestStarter;
             Type        = lootItemModel.Type;
             StaticId    = lootItemModel.StaticId;
             Probability = lootItemModel.Probability;
@@ -64,6 +67,7 @@ namespace NexusForever.Game.Loot.Generate
 
             ILootBuilderItem lootBuilderItem = lootGeneratorItemFactory.Resolve();
             lootBuilderItem.Initialise(Type, StaticId, count, looters);
+            lootBuilderItem.IsQuestStarter = isQuestStarter;
             lootBuilder.AddLoot(lootBuilderItem);
         }
     }

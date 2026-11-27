@@ -177,6 +177,12 @@ namespace NexusForever.Game.Loot
                 if (lootInstanceItem.Type != LootItemType.StaticItem)
                     continue;
 
+                if (lootBuilderItem.IsQuestStarter)
+                {
+                    lootInstanceItem.SetLootable();
+                    continue;
+                }
+
                 IItemInfo itemInfo = itemManager.GetItemInfo(lootInstanceItem.StaticId);
                 if (itemInfo == null)
                     continue;

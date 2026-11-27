@@ -13,6 +13,7 @@ namespace NexusForever.Game.Abstract.Loot.Generate
         /// Initiaise <see cref="ILootItem"/> from specified model.
         /// </summary>
         /// <param name="lootItemModel">The model containing data for this loot item.</param>
-        void Initialise(LootItemModel lootItemModel);
+        /// <param name="isQuestStarter">Whether to recheck eligibility when the quest item is claimed.</param>
+        void Initialise(LootItemModel lootItemModel, bool isQuestStarter = false);
     }
 }

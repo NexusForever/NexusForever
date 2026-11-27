@@ -9,6 +9,7 @@ namespace NexusForever.Game.Loot.Generate
         public LootItemType Type { get; private set; }
         public uint StaticId { get; private set; }
         public uint Count { get; private set; }
+        public bool IsQuestStarter { get; set; }
         public List<Identity> Looters { get; private set; } = [];
 
         /// <summary>

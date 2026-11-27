@@ -63,7 +63,9 @@ namespace NexusForever.Game.Loot.Generate
             foreach (LootItemModel lootItemModel in lootGroupModel.Item)
             {
                 ILootItem lootItem = lootItemFactory.Resolve();
-                lootItem.Initialise(lootItemModel);
+                bool questStarter = ConditionType == LootConditionType.QuestStarterEligible &&
+                    lootItemModel.Type == LootItemType.StaticItem && lootItemModel.StaticId == Condition;
+                lootItem.Initialise(lootItemModel, questStarter);
                 lootGenerators.Add(lootItem);
             }
         }

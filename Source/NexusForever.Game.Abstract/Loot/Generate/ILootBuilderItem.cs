@@ -8,6 +8,7 @@ namespace NexusForever.Game.Abstract.Loot.Generate
         uint StaticId { get; }
         uint Count { get; }
         List<Identity> Looters { get; }
+        bool IsQuestStarter { get; set; }
 
         /// <summary>
         /// Initialise <see cref="ILootBuilderItem"/>.

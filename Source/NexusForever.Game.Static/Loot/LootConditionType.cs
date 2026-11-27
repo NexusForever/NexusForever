@@ -3,6 +3,7 @@
     public enum LootConditionType
     {
         None                    = 0,
+        QuestStarterEligible    = 10,
         IsClass                 = 1,
         IsRace                  = 2,
         IsLevel                 = 3,
