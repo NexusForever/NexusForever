@@ -83,12 +83,13 @@ namespace NexusForever.Game.Loot.Generate
         /// </summary>
         /// <param name="id">The identifier of the entity to generate loot for.</param>
         /// <param name="players">The players eligible to receive the generated loot.</param>
+        /// <param name="source">The creature that supplied the loot, when present.</param>
         /// <returns>
         /// An <see cref="ILootBuilder"/> containing the generated loot, or <see langword="null"/> if loot generation failed.
         /// </returns>
-        public ILootBuilder GenerateEntityLoot(uint id, List<IPlayer> players)
+        public ILootBuilder GenerateEntityLoot(uint id, List<IPlayer> players, IUnitEntity source = null)
         {
-            return GenerateLoot(id, entityLoot, players);
+            return GenerateLoot(id, entityLoot, players, source);
         }
 
         /// <summary>
@@ -103,14 +104,14 @@ namespace NexusForever.Game.Loot.Generate
             return GenerateLoot(id, itemLoot, players);
         }
 
-        private ILootBuilder GenerateLoot(uint id, Dictionary<uint, List<ILootGroup>> storage, IEnumerable<IPlayer> players)
+        private ILootBuilder GenerateLoot(uint id, Dictionary<uint, List<ILootGroup>> storage, IEnumerable<IPlayer> players, IUnitEntity source = null)
         {
             if (!storage.TryGetValue(id, out List<ILootGroup> lootGroups))
                 return null;
 
             ILootBuilder builder = lootBuilderFactory.Resolve();
             foreach (ILootGroup lootGroup in lootGroups)
-                lootGroup.GenerateLoot(builder, players);
+                lootGroup.GenerateLoot(builder, players, source);
 
             return builder;
         }

@@ -123,7 +123,7 @@ namespace NexusForever.Game.Loot
         /// <param name="lootedEntity">The entity that was looted.</param>
         public void GenerateLoot(IPlayer looter, IUnitEntity lootedEntity)
         {
-            ILootBuilder lootBuilder = lootGroupManager.GenerateEntityLoot(lootedEntity.CreatureId, [ looter ]);
+            ILootBuilder lootBuilder = lootGroupManager.GenerateEntityLoot(lootedEntity.CreatureId, [ looter ], lootedEntity);
             if (lootBuilder == null)
                 return;
 
@@ -159,7 +159,7 @@ namespace NexusForever.Game.Loot
                     players.Add(player);
             }
 
-            ILootBuilder lootBuilder = lootGroupManager.GenerateEntityLoot(lootedEntity.CreatureId, players);
+            ILootBuilder lootBuilder = lootGroupManager.GenerateEntityLoot(lootedEntity.CreatureId, players, lootedEntity);
             if (lootBuilder == null)
                 return;
 
@@ -174,6 +174,9 @@ namespace NexusForever.Game.Loot
             foreach (ILootBuilderItem lootBuilderItem in lootBuilder.GetItems())
             {
                 ILootInstanceItem lootInstanceItem = lootInstance.AddLootItem(lootBuilderItem);
+                if (lootInstanceItem.Type == LootItemType.VirtualItem)
+                    lootInstanceItem.SetLootable();
+
                 if (lootInstanceItem.Type != LootItemType.StaticItem)
                     continue;
 

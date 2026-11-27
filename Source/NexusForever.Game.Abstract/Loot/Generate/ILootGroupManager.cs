@@ -11,10 +11,11 @@ namespace NexusForever.Game.Abstract.Loot.Generate
         /// </summary>
         /// <param name="id">The identifier of the entity to generate loot for.</param>
         /// <param name="players">The players eligible to receive the generated loot.</param>
+        /// <param name="source">The creature that supplied the loot, when present.</param>
         /// <returns>
         /// An <see cref="ILootBuilder"/> containing the generated loot, or <see langword="null"/> if loot generation failed.
         /// </returns>
-        ILootBuilder GenerateEntityLoot(uint id, List<IPlayer> players);
+        ILootBuilder GenerateEntityLoot(uint id, List<IPlayer> players, IUnitEntity source = null);
 
         /// <summary>
         /// Generates loot for the specified item.
