@@ -16,6 +16,8 @@ namespace NexusForever.Game.Entity
 
         public IVendorInfo VendorInfo { get; private set; }
 
+        internal uint ShadePlantSlot { get; private set; }
+
         #region Dependency Injection
 
         public NonPlayerEntity(
@@ -30,6 +32,7 @@ namespace NexusForever.Game.Entity
         public override void Initialise(EntityModel model)
         {
             base.Initialise(model);
+            ShadePlantSlot = Quest.ShadeEvePlants.BindPlant(model);
 
             if (model.EntityVendor != null)
             {
