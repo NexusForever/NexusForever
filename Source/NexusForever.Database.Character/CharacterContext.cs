@@ -1392,6 +1392,10 @@ namespace NexusForever.Database.Character
                     .HasColumnType("int(10) unsigned")
                     .HasDefaultValue(null);
 
+                entity.Property(e => e.Checklist)
+                    .HasColumnName("checklist")
+                    .HasColumnType("int(10) unsigned");
+
                 entity.HasOne(d => d.Quest)
                     .WithMany(p => p.QuestObjective)
                     .HasForeignKey(d => new { d.Id, d.QuestId })

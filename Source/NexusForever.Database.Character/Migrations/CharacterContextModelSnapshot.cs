@@ -1361,6 +1361,10 @@ namespace NexusForever.Database.Character.Migrations
                         .HasColumnType("int(10) unsigned")
                         .HasColumnName("timer");
 
+                    b.Property<uint?>("Checklist")
+                        .HasColumnType("int(10) unsigned")
+                        .HasColumnName("checklist");
+
                     b.HasKey("Id", "QuestId", "Index")
                         .HasName("PRIMARY");
 

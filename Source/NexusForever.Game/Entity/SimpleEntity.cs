@@ -1,3 +1,4 @@
+using System.Numerics;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
@@ -12,6 +13,7 @@ namespace NexusForever.Game.Entity
         public override EntityType Type => EntityType.Simple;
 
         public byte QuestChecklistIdx { get; private set; }
+        internal uint MurkmireRecoverySlot { get; private set; }
 
         #region Dependency Injection
 
@@ -26,6 +28,7 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(model);
             QuestChecklistIdx = model.QuestChecklistIdx;
+            MurkmireRecoverySlot = Quest.MurkmireRecovery.BindSlot(model);
         }
 
         protected override IEntityModel BuildEntityModel()
@@ -33,7 +36,7 @@ namespace NexusForever.Game.Entity
             return new SimpleEntityModel
             {
                 CreatureId        = CreatureId,
-                QuestChecklistIdx = QuestChecklistIdx
+                QuestChecklistIdx = MurkmireRecoverySlot == 0u ? QuestChecklistIdx : (byte)BitOperations.TrailingZeroCount(MurkmireRecoverySlot)
             };
         }
 
