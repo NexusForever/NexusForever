@@ -4,6 +4,8 @@ using System.Numerics;
 using System.Text;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Entity;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Abstract.Loot;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
@@ -421,7 +423,9 @@ namespace NexusForever.Game.Map
         {
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
-                IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
+                IWorldEntity entity = CryoAwakening.IsTrainingBot(model)
+                    ? entityFactory.CreateEntity<CryoHoloBot>()
+                    : entityFactory.CreateWorldEntity(model.Type);
                 entity.Initialise(model);
 
                 var position = new MapPosition
