@@ -80,7 +80,13 @@ namespace NexusForever.Script.Instance
         /// </summary>
         public virtual void OnPvpMatchFinish(MatchWinner matchWinner, MatchEndReason matchEndReason)
         {
-            publicEvent.Finish(matchWinner == MatchWinner.Red ? PublicEventTeam.RedTeam_2 : PublicEventTeam.BlueTeam_2);
+            PublicEventTeam? winner = matchWinner switch
+            {
+                MatchWinner.Red  => PublicEventTeam.RedTeam_2,
+                MatchWinner.Blue => PublicEventTeam.BlueTeam_2,
+                _                => null
+            };
+            publicEvent.Finish(winner);
             publicSubEvent.Finish(PublicEventTeam.PublicTeam);
         }
     }
