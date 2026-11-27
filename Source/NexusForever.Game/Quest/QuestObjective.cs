@@ -150,9 +150,11 @@ namespace NexusForever.Game.Quest
             return progress >= GetMaxValue();
         }
 
+        private const uint DynamicMaxProgress = 1000u;
+
         private uint GetMaxValue()
         {
-            return IsDynamic() ? 1000u : ObjectiveInfo.Entry.Count;
+            return IsDynamic() ? DynamicMaxProgress : ObjectiveInfo.Entry.Count;
         }
 
         /// <summary>
@@ -160,10 +162,29 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(uint update)
         {
-            if (IsDynamic())
-                update = (uint)(((float)update / ObjectiveInfo.Entry.Count) * 1000f);
+            bool isDynamic = IsDynamic();
+            uint count = ObjectiveInfo.Entry.Count;
+            uint maxProgress = isDynamic ? DynamicMaxProgress : count;
+            if (update == 0u || progress >= maxProgress)
+                return;
 
-            Progress = Math.Min(progress + update, GetMaxValue());
+            ulong delta = update;
+            if (isDynamic)
+            {
+                if (count <= DynamicMaxProgress)
+                {
+                    // Recover the count from its rounded-down per-mille representation.
+                    ulong credited = ((ulong)progress * count + DynamicMaxProgress - 1u) / DynamicMaxProgress;
+                    ulong total = Math.Min(credited + update, count);
+                    Progress = (uint)(total * DynamicMaxProgress / count);
+                    return;
+                }
+
+                // The per-mille value cannot represent every count for larger objectives.
+                delta = (ulong)update * DynamicMaxProgress / count;
+            }
+
+            Progress = (uint)Math.Min(progress + delta, maxProgress);
         }
 
        
