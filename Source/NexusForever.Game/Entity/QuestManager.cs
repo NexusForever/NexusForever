@@ -115,6 +115,7 @@ namespace NexusForever.Game.Entity
         public void Update(double lastTick)
         {
             RefreshShadePlantActors();
+            RefreshMurkmireRecoveryActors();
             ShadeEvePlants.Gather(player, activeQuests);
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
@@ -293,12 +294,32 @@ namespace NexusForever.Game.Entity
                 (item != null || !ShadeEvePlants.CanVisitContact(player, (ushort)info.Entry.Id)))
                 throw new QuestException("Accept this Shade's Eve quest from its nearby capital contact.");
 
+            if (!MurkmireRecovery.CanVisitContact(player, info.Entry.Id))
+                throw new QuestException($"Player {player.CharacterId} tried to start Murkmire quest {info.Entry.Id} away from its giver!");
+
             // server doesn't send an error message for prerequisites since the client does the exact same checks
             // it's assumed that a player could never get here without cheating in some way
             if (!MeetsPrerequisites(info))
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without meeting the prerequisites!");
 
             QuestAdd(info);
+        }
+
+        private (object Map, QuestState?, QuestState?, QuestState?, QuestState?)? murkmireVisibility;
+
+        private void RefreshMurkmireRecoveryActors()
+        {
+            if (player is not Player viewer || player.IsLoading || player.Map is not { Entry.Id: MurkmireRecovery.World } map)
+            {
+                murkmireVisibility = null;
+                return;
+            }
+            var current = (map, GetQuestState(8240), GetQuestState(8241), GetQuestState(8246), GetQuestState(8247));
+            if (murkmireVisibility == current)
+                return;
+
+            murkmireVisibility = current;
+            viewer.RefreshMurkmireRecoveryActors();
         }
 
         private void RefreshShadePlantActors()
@@ -356,7 +377,8 @@ namespace NexusForever.Game.Entity
                     return false;
             }
 
-            if (info.Entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId))
+            if (info.Entry.PrerequisiteId != 0u && !(MurkmireRecovery.MeetsPeniaPrerequisite(player, info.Entry)
+                ?? PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId)))
                 return false;
 
             if (!info.IsContract())
@@ -620,6 +642,9 @@ namespace NexusForever.Game.Entity
 
             if (ShadeEvePlants.HandlesQuest(questId) && (communicator || !ShadeEvePlants.CanVisitContact(player, questId)))
                 throw new QuestException("Report this Shade's Eve quest to its nearby capital contact.");
+
+            if (!MurkmireRecovery.CanVisitContact(player, questId))
+                throw new QuestException($"Player {player.CharacterId} tried to complete Murkmire quest {questId} away from its receiver!");
 
             if (communicator)
             {

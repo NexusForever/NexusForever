@@ -826,8 +826,21 @@ namespace NexusForever.Game.Entity
             }
         }
 
+        internal void RefreshMurkmireRecoveryActors()
+        {
+            var check = new SearchCheckRange<IWorldEntity>(Position, Map.VisionRange);
+            foreach (IWorldEntity actor in Map.Search(Position, Map.VisionRange, check).Where(Quest.MurkmireRecovery.Tracks))
+            {
+                if (CanSeeEntity(actor))
+                    AddVisible(actor);
+                else if (GetVisible<IWorldEntity>(actor.Guid) != null)
+                    RemoveVisible(actor);
+            }
+        }
+
         public override bool CanSeeEntity(IGridEntity entity) =>
-            base.CanSeeEntity(entity) && Quest.ShadeEvePlants.CanSee(this, entity);
+            base.CanSeeEntity(entity) && Quest.ShadeEvePlants.CanSee(this, entity) &&
+            Quest.MurkmireRecovery.CanSee(this, entity);
 
         public override void AddVisible(IGridEntity entity)
         {

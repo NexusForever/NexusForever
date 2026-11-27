@@ -306,7 +306,8 @@ namespace NexusForever.Game.Quest
             // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (IQuestObjective objective in objectives
                 .Where(o => o.ObjectiveInfo.Entry.Type == (uint)type && o.ObjectiveInfo.Entry.Data == data &&
-                    !ShadeEvePlants.HandlesObjective(Id, o.ObjectiveInfo.Id))
+                    !ShadeEvePlants.HandlesObjective(Id, o.ObjectiveInfo.Id) &&
+                    !MurkmireRecovery.HandlesObjective(Id, o.ObjectiveInfo.Id))
                 .OrderByDescending(o => o.Index))
             {
                 if (objective.IsComplete())
@@ -369,7 +370,7 @@ namespace NexusForever.Game.Quest
                 State = QuestState.Achieved;
         }
 
-        private bool CanUpdateObjective(IQuestObjective objective)
+        internal bool CanUpdateObjective(IQuestObjective objective)
         {
             if (objective.ObjectiveInfo.IsSequential())
             {

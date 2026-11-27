@@ -22,6 +22,7 @@ namespace NexusForever.Game.Spell
         private static readonly ILogger log = LogManager.GetCurrentClassLogger();
 
         public ISpellParameters Parameters { get; }
+        internal Quest.MurkmireRecovery MurkmireUse => (Parameters as SpellParameters)?.MurkmireUse;
         public uint CastingId { get; }
         public bool IsCasting => status == SpellStatus.Casting;
         public bool IsFinished => status == SpellStatus.Finished;
@@ -103,7 +104,7 @@ namespace NexusForever.Game.Spell
             SendSpellStart();
 
             // enqueue spell to be executed after cast time
-            events.EnqueueEvent(new SpellEvent(Parameters.SpellInfo.Entry.CastTime / 1000d, Execute));
+            events.EnqueueEvent(new SpellEvent(MurkmireUse?.CastSeconds ?? Parameters.SpellInfo.Entry.CastTime / 1000d, Execute));
             status = SpellStatus.Casting;
 
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started casting.");
@@ -222,6 +223,12 @@ namespace NexusForever.Game.Spell
 
         private void Execute()
         {
+            if (MurkmireUse is { } use && !use.CanFinish())
+            {
+                CancelCast(CastResult.TargetRangeMax);
+                return;
+            }
+
             status = SpellStatus.Executing;
             log.Trace($"Spell {Parameters.SpellInfo.Entry.Id} has started executing.");
 
@@ -234,6 +241,7 @@ namespace NexusForever.Game.Spell
             CostSpell();
 
             SendSpellGo();
+            MurkmireUse?.Complete();
         }
 
         private void CostSpell()
@@ -272,6 +280,14 @@ namespace NexusForever.Game.Spell
                     .Where(t => (t.Flags & (SpellEffectTargetFlags)spell4EffectsEntry.TargetFlags) != 0)
                     .ToList();
 
+                if (MurkmireUse?.ActivationEffect == spell4EffectsEntry)
+                {
+                    uint activationEffectId = GlobalSpellManager.Instance.NextEffectId;
+                    foreach (SpellTargetInfo target in effectTargets)
+                        target.Effects.Add(new SpellTargetInfo.SpellTargetEffectInfo(activationEffectId, spell4EffectsEntry));
+                    continue;
+                }
+
                 SpellEffectDelegate handler = GlobalSpellManager.Instance.GetEffectHandler((SpellEffectType)spell4EffectsEntry.EffectType);
                 if (handler == null)
                     log.Warn($"Unhandled spell effect {(SpellEffectType)spell4EffectsEntry.EffectType}");
@@ -293,7 +309,7 @@ namespace NexusForever.Game.Spell
         public bool IsMovingInterrupted()
         {
             // TODO: implement correctly
-            return Parameters.SpellInfo.Entry.CastTime > 0;
+            return MurkmireUse != null || Parameters.SpellInfo.Entry.CastTime > 0;
         }
 
         private void SendSpellCastResult(CastResult castResult)
@@ -319,7 +335,7 @@ namespace NexusForever.Game.Spell
             {
                 ServerUniqueId         = CastingId,
                 CasterId               = Caster.Guid,
-                PrimaryTargetId        = Caster.Guid,
+                PrimaryTargetId        = MurkmireUse != null ? Parameters.PrimaryTargetId : Caster.Guid,
                 Spell4Id               = Parameters.SpellInfo.Entry.Id,
                 RootSpell4Id           = Parameters.RootSpellInfo?.Entry.Id ?? 0,
                 ParentSpell4Id         = Parameters.ParentSpellInfo?.Entry.Id ?? 0,

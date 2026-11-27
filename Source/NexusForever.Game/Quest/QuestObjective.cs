@@ -181,8 +181,15 @@ namespace NexusForever.Game.Quest
             return progress >= GetMaxValue();
         }
 
+        private bool IsMurkmirePipeChecklist() =>
+            QuestInfo.Entry.Id == 8246u && ObjectiveInfo.Id == 15038u &&
+            ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist && ObjectiveInfo.Entry.Count == 10u;
+
         private uint GetMaxValue()
         {
+            if (IsMurkmirePipeChecklist())
+                return (1u << (int)ObjectiveInfo.Entry.Count) - 1u;
+
             return IsDynamic() ? 1000u : ObjectiveInfo.Entry.Count;
         }
 
@@ -191,6 +198,12 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(uint update)
         {
+            if (IsMurkmirePipeChecklist())
+            {
+                Progress = (progress | update) & GetMaxValue();
+                return;
+            }
+
             if (IsDynamic())
                 update = (uint)(((float)update / ObjectiveInfo.Entry.Count) * 1000f);
 

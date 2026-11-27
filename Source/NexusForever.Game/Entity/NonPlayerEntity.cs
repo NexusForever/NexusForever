@@ -17,6 +17,7 @@ namespace NexusForever.Game.Entity
         public IVendorInfo VendorInfo { get; private set; }
 
         internal uint ShadePlantSlot { get; private set; }
+        internal uint MurkmireRecoverySlot { get; private set; }
 
         #region Dependency Injection
 
@@ -33,6 +34,7 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(model);
             ShadePlantSlot = Quest.ShadeEvePlants.BindPlant(model);
+            MurkmireRecoverySlot = Quest.MurkmireRecovery.BindSlot(model);
 
             if (model.EntityVendor != null)
             {
