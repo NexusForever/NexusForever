@@ -10,6 +10,7 @@
         IsMoreThanLevel         = 5,
         QuestIsComplete         = 6,
         QuestNotComplete        = 7,
-        QuestObjectiveActive    = 8
+        QuestObjectiveActive    = 8,
+        SourceWorldLocation     = 9
     }
 }
