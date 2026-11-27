@@ -105,6 +105,7 @@ namespace NexusForever.Game.Entity
         public void Update(double lastTick)
         {
             DeadGone.CheckTrace(player, GetQuest(DeadGone.QuestId, GetQuestFlags.Active));
+            ArcanusSilo.Update(player, GetQuest(ArcanusSilo.For(player.Faction1), GetQuestFlags.Active));
 
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
@@ -234,6 +235,9 @@ namespace NexusForever.Game.Entity
         {
             if (questId == DeadGone.QuestId && (item != null || !DeadGone.CanAccept(player)))
                 throw new QuestException($"Player {player.CharacterId} must discover the Fatalis Fields stoneform.");
+
+            if (ArcanusSilo.Handles(questId) && (item != null || !ArcanusSilo.CanAccept(player, questId)))
+                throw new QuestException($"Player {player.CharacterId} must visit the Arcanus research notes.");
 
             IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
             if (info == null)

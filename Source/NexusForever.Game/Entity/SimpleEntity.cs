@@ -43,7 +43,7 @@ namespace NexusForever.Game.Entity
 
         public override void OnActivate(IPlayer activator)
         {
-            if (TryOpenHalonDiscovery(activator) || DeadGone.TryOpen(activator, this))
+            if (TryOpenHalonDiscovery(activator) || DeadGone.TryOpen(activator, this) || ArcanusSilo.TryOpen(activator, this))
                 return;
 
             if (CreatureEntry.DatacubeId != 0u)
@@ -59,7 +59,7 @@ namespace NexusForever.Game.Entity
 
         public override void OnActivateCast(IPlayer activator)
         {
-            if (TryOpenHalonDiscovery(activator) || DeadGone.TryOpen(activator, this))
+            if (TryOpenHalonDiscovery(activator) || DeadGone.TryOpen(activator, this) || ArcanusSilo.TryOpen(activator, this))
                 return;
 
             uint progress = (uint)(1 << QuestChecklistIdx);
