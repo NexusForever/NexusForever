@@ -75,6 +75,11 @@ namespace NexusForever.Game.Abstract.Entity
         void ItemCreate(InventoryLocation location, IItemInfo info, uint count, ItemUpdateReason reason = ItemUpdateReason.NoReason, uint charges = 0);
 
         /// <summary>
+        /// Creates items until no additional space is available and returns the unplaced count.
+        /// </summary>
+        uint ItemCreateAvailable(InventoryLocation location, IItemInfo info, uint count, ItemUpdateReason reason, uint charges = 0);
+
+        /// <summary>
         /// Returns if <see cref="IItem"/> can be moved to supplied <see cref="ItemLocation"/>.
         /// </summary>
         GenericError? CanMoveItem(IItem item, ItemLocation location);

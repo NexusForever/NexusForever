@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
@@ -240,6 +240,13 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void ItemCreate(InventoryLocation location, IItemInfo info, uint count, ItemUpdateReason reason = ItemUpdateReason.NoReason, uint charges = 0)
         {
+            uint remaining = ItemCreateAvailable(location, info, count, reason, charges);
+            if (remaining != 0u)
+                player?.Session.EnqueueMessageEncrypted(new ServerItemError { ErrorCode = GenericError.ItemInventoryFull });
+        }
+
+        public uint ItemCreateAvailable(InventoryLocation location, IItemInfo info, uint count, ItemUpdateReason reason, uint charges = 0)
+        {
             if (info == null)
                 throw new ArgumentNullException();
 
@@ -255,12 +262,12 @@ namespace NexusForever.Game.Entity
                     if (count == 0u)
                         break;
 
-                    if (item.StackCount == info.Entry.MaxStackCount)
+                    if (item.StackCount >= info.Entry.MaxStackCount)
                         continue;
 
-                    uint newStackCount = Math.Min(item.StackCount + count, info.Entry.MaxStackCount);
-                    count -= newStackCount - item.StackCount;
-                    ItemStackCountUpdate(item, newStackCount, reason);
+                    uint added = Math.Min(count, info.Entry.MaxStackCount - item.StackCount);
+                    count -= added;
+                    ItemStackCountUpdate(item, item.StackCount + added, reason);
                 }
             }
 
@@ -269,20 +276,7 @@ namespace NexusForever.Game.Entity
             {
                 uint? bagIndex = location == InventoryLocation.Equipped ? bag.GetFirstAvailableBagIndex((ItemSlot)info.SlotEntry.Id) : bag.GetFirstAvailableBagIndex();
                 if (!bagIndex.HasValue)
-                {
-                    // If there is remaining count left, and this was created by SupplySatchelManager, then return the rest to the client.
-                    if (count > 0 && reason == ItemUpdateReason.ResourceConversion)
-                        player.SupplySatchelManager.AddAmount(new Item(characterId, info, count, charges), count);
-                    else
-                    {
-                        player.Session.EnqueueMessageEncrypted(new ServerItemError
-                        {
-                            ErrorCode = GenericError.ItemInventoryFull
-                        });
-                    }
-
-                    return;
-                }
+                    return count;
 
                 var item = new Item(characterId, info, Math.Min(count, info.IsStackable() ? info.Entry.MaxStackCount : 1), charges);
                 AddItem(item, location, bagIndex.Value);
@@ -301,6 +295,8 @@ namespace NexusForever.Game.Entity
 
                 count -= item.StackCount;
             }
+
+            return 0u;
         }
 
         /// <summary>
@@ -789,20 +785,22 @@ namespace NexusForever.Game.Entity
 
         public void ItemMoveToSupplySatchel(IItem item, uint amount)
         {
-            if (player.SupplySatchelManager.IsFull(item))
+            if (item?.Location != InventoryLocation.Inventory || amount == 0u || amount > item.StackCount
+                || GetItem(item.Guid) != item)
                 return;
 
-            uint amountRemaining = player.SupplySatchelManager.AddAmount(item, amount);
-            if (amountRemaining > 0)
-                ItemStackCountUpdate(item, item.StackCount - amount + amountRemaining);
-            else if (amount < item.StackCount)
-                ItemStackCountUpdate(item, item.StackCount - amount);
+            uint moved = amount - player.SupplySatchelManager.AddAmount(item, amount);
+            if (moved == 0u)
+                return;
+
+            if (moved < item.StackCount)
+                ItemStackCountUpdate(item, item.StackCount - moved, ItemUpdateReason.MaterialBagConversion);
             else
                 ItemDelete(new ItemLocation
-                    {
-                        Location = item.Location,
-                        BagIndex = item.BagIndex
-                    }, ItemUpdateReason.MaterialBagConversion);
+                {
+                    Location = item.Location,
+                    BagIndex = item.BagIndex
+                }, ItemUpdateReason.MaterialBagConversion);
         }
 
         private IBag GetBag(InventoryLocation location)
