@@ -10,6 +10,8 @@ namespace NexusForever.Game.Entity
 {
     public class XpManager : IXpManager
     {
+        private const uint MaximumLevel = 50;
+
         public uint TotalXp
         {
             get => totalXp;
@@ -42,6 +44,7 @@ namespace NexusForever.Game.Entity
         {
             this.player = player;
             totalXp = model.TotalXp;
+            restBonusXp = model.RestBonusXp;
 
             CalculateRestXpAtLogin(model);
         }
@@ -65,42 +68,28 @@ namespace NexusForever.Game.Entity
 
         private void CalculateRestXpAtLogin(CharacterModel model)
         {
-            // don't calculate rest xp for first login
-            if (model.LastOnline == null)
-                return;
-
-            float xpForLevel     = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level).MinXpForLevel;
-            float xpForNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
-
-            uint maximumBonusXp;
-            if (player.Level < 50)
-                maximumBonusXp = (uint)((xpForNextLevel - xpForLevel) * 1.5f);
-            else
-                maximumBonusXp = 0; // TODO: Calculate Elder Gem Rest Bonus XP
-
-            double xpPercentEarned;
-
-            // TODO: Calculate Rest Bonus XP earned since last login, properly.
-            // Data from this video was used in initial calculations: https://www.youtube.com/watch?v=xEMMd7CGg4s
-            // Video is out of date, but the assumption is the formulas are the same just modified more post-F2P.
-            double hoursSinceLogin = DateTime.UtcNow.Subtract((DateTime)model.LastOnline).TotalHours;
-            switch (model.WorldId)
+            if (player.Level >= MaximumLevel)
             {
-                case 1229:
-                    // TODO: Apply bonuses from decor or other things that increase rested XP gain.
-                    xpPercentEarned = hoursSinceLogin * 0.0024f;
-                    break;
-                // TODO: Add support for home cities, towns and sleeping bag (?!) gain rates.
-                default:
-                    xpPercentEarned = 0d;
-                    break;
+                if (RestBonusXp != 0)
+                    RestBonusXp = 0;
+                return;
             }
 
-            // TODO: Apply bonuses from spells as necessary
+            if (model.LastOnline is not DateTime lastOnline)
+                return;
 
-            uint bonusXpValue = Math.Clamp((uint)((xpForNextLevel - xpForLevel) * xpPercentEarned), 0, maximumBonusXp);
-            uint totalBonusXp = Math.Clamp(model.RestBonusXp + bonusXpValue, 0u, maximumBonusXp);
-            RestBonusXp = totalBonusXp;
+            var levels = GameTableManager.Instance.XpPerLevel;
+            uint xpForLevel = levels.GetEntry(player.Level).MinXpForLevel;
+            uint xpForNextLevel = levels.GetEntry(player.Level + 1).MinXpForLevel;
+            uint levelSpan = xpForNextLevel - xpForLevel;
+            uint maximumBonusXp = levelSpan + levelSpan / 2;
+
+            // Rest is currently accrued in housing. Other locations keep the already earned reserve.
+            double offlineHours = Math.Max(0d, (DateTime.UtcNow - lastOnline).TotalHours);
+            double earnedRest = model.WorldId == 1229 ? levelSpan * offlineHours * 0.0024d : 0d;
+            uint nextRest = (uint)Math.Min(maximumBonusXp, (ulong)RestBonusXp + (uint)Math.Min(earnedRest, maximumBonusXp));
+            if (nextRest != RestBonusXp)
+                RestBonusXp = nextRest;
         }
 
         /// <summary>
@@ -110,49 +99,40 @@ namespace NexusForever.Game.Entity
         /// <param name="reason"><see cref="ExpReason"/> for the experience grant</param>
         public void GrantXp(uint earnedXp, ExpReason reason = ExpReason.Cheat)
         {
-            // TODO: move to configuration option
-            const uint maxLevel = 50;
-
-            if (earnedXp < 1)
+            if (earnedXp == 0 || player.Level >= MaximumLevel)
                 return;
 
-            //if (!IsAlive)
-            //    return;
+            var levels = GameTableManager.Instance.XpPerLevel;
+            uint cap = levels.GetEntry(MaximumLevel).MinXpForLevel;
+            uint available = TotalXp < cap ? cap - TotalXp : 0;
+            uint appliedXp = Math.Min(earnedXp, available);
+            uint signatureXp = player.SignatureEnabled
+                ? Math.Min(appliedXp / 4, available - appliedXp) : 0u;
+            uint restXp = reason == ExpReason.KillCreature
+                ? Math.Min(RestBonusXp, Math.Min(appliedXp / 2, available - appliedXp - signatureXp)) : 0u;
+            uint gained = appliedXp + signatureXp + restXp;
 
-            if (player.Level >= maxLevel)
-                return;
-
-            // TODO: Apply XP bonuses from current spells or active events
-
-            // Signature XP rate was 25% extra. 
-            uint signatureXp = 0u;
-            if (player.SignatureEnabled)
-                signatureXp = (uint)(earnedXp * 0.25f); // TODO: Make rate configurable.
-
-            // Calculate Rest XP Bonus
-            uint restXp = 0u;
-            if (reason == ExpReason.KillCreature)
-                restXp = (uint)(earnedXp * 0.5f);
-
-            player.Session.EnqueueMessageEncrypted(new ServerExperienceGained
+            if (gained != 0)
             {
-                TotalXpGained     = earnedXp + signatureXp + restXp,
-                RestXpAmount      = restXp,
-                SignatureXpAmount = signatureXp,
-                Reason            = reason
-            });
-            
-            uint totalXp = TotalXp + earnedXp + signatureXp + restXp;
-
-            uint xpToNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
-            while (totalXp >= xpToNextLevel && player.Level < maxLevel) // WorldServer.Rules.MaxLevel)
-            {
-                GrantLevel((byte)(player.Level + 1));
-
-                xpToNextLevel = GameTableManager.Instance.XpPerLevel.GetEntry(player.Level + 1).MinXpForLevel;
+                player.Session.EnqueueMessageEncrypted(new ServerExperienceGained
+                {
+                    TotalXpGained     = gained,
+                    RestXpAmount      = restXp,
+                    SignatureXpAmount = signatureXp,
+                    Reason            = reason
+                });
             }
 
-            TotalXp += earnedXp + signatureXp + restXp;
+            uint updatedTotal = TotalXp + gained;
+            while (player.Level < MaximumLevel && updatedTotal >= levels.GetEntry(player.Level + 1).MinXpForLevel)
+                GrantLevel((byte)(player.Level + 1));
+
+            if (gained != 0)
+                TotalXp = updatedTotal;
+
+            uint remainingRest = player.Level == MaximumLevel ? 0 : RestBonusXp - restXp;
+            if (remainingRest != RestBonusXp)
+                RestBonusXp = remainingRest;
         }
 
         /// <summary>
