@@ -297,6 +297,8 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(QuestObjectiveType type, uint data, uint progress)
         {
+            if (WinterfestConversions.Owns(Id) && type == QuestObjectiveType.ActivateEntity && data == 72383u)
+                return;
             if (PendingDelete)
                 return;
 
@@ -353,7 +355,10 @@ namespace NexusForever.Game.Quest
                 return;
 
             uint oldProgress = objective.Progress;
-            objective.ObjectiveUpdate(progress);
+            if (WinterfestConversions.OwnsObjective(Id, id))
+                objective.Progress = (oldProgress | progress) & WinterfestConversions.ChecklistMask;
+            else
+                objective.ObjectiveUpdate(progress);
 
             if (objective.Progress != oldProgress)
                 SendQuestObjectiveUpdate(objective);
@@ -408,7 +413,7 @@ namespace NexusForever.Game.Quest
             {
                 QuestId   = Id,
                 QuestObjectiveIndex     = objective.Index,
-                Completed = objective.Progress
+                Completed = WinterfestConversions.ClientProgress(Id, objective)
             });
         }
 

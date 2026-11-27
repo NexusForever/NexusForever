@@ -2,6 +2,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Abstract.Spell.Event;
 using NexusForever.Game.Prerequisite;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Spell.Event;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable.Model;
@@ -231,6 +232,7 @@ namespace NexusForever.Game.Spell
 
             SelectTargets();
             ExecuteEffects();
+            WinterfestConversions.CompleteCast(this);
             CostSpell();
 
             SendSpellGo();

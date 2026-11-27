@@ -2,6 +2,7 @@ using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
 using NexusForever.Game.Abstract.Loot.Distribute;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Static.Entity;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -15,6 +16,7 @@ namespace NexusForever.Game.Entity
         public override EntityType Type => EntityType.NonPlayer;
 
         public IVendorInfo VendorInfo { get; private set; }
+        internal uint WinterfestConversionBit { get; private set; }
 
         #region Dependency Injection
 
@@ -30,6 +32,7 @@ namespace NexusForever.Game.Entity
         public override void Initialise(EntityModel model)
         {
             base.Initialise(model);
+            WinterfestConversionBit = WinterfestConversions.BindTarget(model);
 
             if (model.EntityVendor != null)
             {
