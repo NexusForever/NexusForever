@@ -1,4 +1,5 @@
-﻿using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Quest;
 using NexusForever.Network;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model.Spell;
@@ -12,6 +13,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(activateUnit.UnitId);
             if (entity == null)
                 throw new InvalidPacketValueException();
+
+            if (LegacyExileDeparture.TryActivate(session.Player, entity))
+                return;
 
             // TODO: sanity check for range etc.
 

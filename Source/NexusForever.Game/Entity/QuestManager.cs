@@ -1,4 +1,4 @@
-﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
@@ -104,6 +104,8 @@ namespace NexusForever.Game.Entity
 
         public void Update(double lastTick)
         {
+            LegacyExileDeparture.RecordArrival(player);
+
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
             {
@@ -246,6 +248,9 @@ namespace NexusForever.Game.Entity
 
         private void QuestAdd(IQuestInfo info, IQuest quest, IItem item)
         {
+            if (!LegacyExileDeparture.AllowsContact(player, (ushort)info.Entry.Id, report: false, byItem: item != null))
+                throw new QuestException("The historical Exile quest giver is unavailable.");
+
             if (quest?.State is QuestState.Accepted or QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which is already in progress!");
 
@@ -310,7 +315,8 @@ namespace NexusForever.Game.Entity
                     return false;
             }
 
-            if (info.Entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId))
+            if (info.Entry.PrerequisiteId != 0u && !PrerequisiteManager.Instance.Meets(player, info.Entry.PrerequisiteId) &&
+                !LegacyExileDeparture.AllowsDockPrerequisite(player, info))
                 return false;
 
             if (!info.IsContract())
@@ -525,6 +531,9 @@ namespace NexusForever.Game.Entity
 
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
+
+            if (!LegacyExileDeparture.AllowsContact(player, questId, report: true))
+                throw new QuestException("The historical Exile quest receiver is unavailable.");
 
             if (communicator)
             {
