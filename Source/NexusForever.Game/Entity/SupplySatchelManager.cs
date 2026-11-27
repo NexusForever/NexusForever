@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
@@ -13,14 +13,21 @@ namespace NexusForever.Game.Entity
 {
     public class SupplySatchelManager : ISupplySatchelManager
     {
+        private const int MaterialSlotCount = 512;
+        private const uint DefaultStackLimit = 100;
+
         private readonly IPlayer player;
-        private readonly uint maximumStackAmount = 100;
+        private readonly uint maximumStackAmount;
         private readonly Dictionary</* materialId */ushort, ITradeskillMaterial> tradeskillMaterials = new();
 
         public SupplySatchelManager(IPlayer owner, CharacterModel model)
         {
             player = owner;
-            maximumStackAmount = (uint)(owner.Account.RewardPropertyManager.GetRewardProperty(RewardPropertyType.TradeskillMatStackLimit)?.GetValue(0u) ?? 0f);
+            float configuredLimit = owner.Account.RewardPropertyManager.GetRewardProperty(RewardPropertyType.TradeskillMatStackLimit)
+                ?.GetValue(0u) ?? DefaultStackLimit;
+            maximumStackAmount = float.IsFinite(configuredLimit)
+                ? (uint)Math.Clamp(configuredLimit, 0f, ushort.MaxValue)
+                : DefaultStackLimit;
 
             foreach (CharacterTradeskillMaterialModel tradeskillMaterial in model.TradeskillMaterials)
                 tradeskillMaterials.Add(tradeskillMaterial.MaterialId, new TradeskillMaterial(tradeskillMaterial));
@@ -34,10 +41,11 @@ namespace NexusForever.Game.Entity
 
         public ushort[] BuildNetworkPacket()
         {
-            ushort[] tradeskillMaterialsCount = new ushort[512];
+            ushort[] tradeskillMaterialsCount = new ushort[MaterialSlotCount];
 
             foreach ((ushort materialId, ITradeskillMaterial material) in tradeskillMaterials)
-                tradeskillMaterialsCount[materialId] = material.Amount;
+                if (materialId < tradeskillMaterialsCount.Length)
+                    tradeskillMaterialsCount[materialId] = material.Amount;
 
             return tradeskillMaterialsCount;
         }
@@ -50,137 +58,85 @@ namespace NexusForever.Game.Entity
         /// </returns>
         public uint AddAmount(IItem item, uint amount)
         {
-            if (amount == 0)
-                throw new ArgumentException("amount must be more than 0.");
-
-            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Info.Entry.Id);
-            if (entry == null)
-                throw new InvalidOperationException("TradeskillMaterialEntry does not exist.");
-
-            ushort materialId = (ushort)entry.Id;
-            uint amountAdded = 0;
-            if (tradeskillMaterials.ContainsKey(materialId))
-                amountAdded = AddAmountToMaterial(materialId, amount);
-            else
-            {
-                tradeskillMaterials.Add(materialId, new TradeskillMaterial(player.CharacterId, materialId));
-                amountAdded = AddAmountToMaterial(materialId, amount);
-            }
-
-            return amountAdded;
+            TradeskillMaterialEntry entry = FindMaterial(item);
+            return entry == null ? amount : AddAmount((ushort)entry.Id, amount);
         }
 
         /// <summary>
-        /// Add the provided amount to the <see cref="ITradeskillMaterial"/> for the given Material ID
+        /// Adds material up to its current stack limit and returns any amount that did not fit.
         /// </summary>
-        /// <returns>
-        /// Returns the remainder that could not be added.
-        /// </returns>
         public uint AddAmount(ushort materialId, uint amount)
         {
-            if (amount == 0)
-                throw new ArgumentException("amount must be more than 0");
+            if (amount == 0u || maximumStackAmount == 0u || materialId >= MaterialSlotCount
+                || GameTableManager.Instance.TradeskillMaterial.GetEntry(materialId) is not { Item2IdStatRevolution: > 0u })
+                return amount;
 
-            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.GetEntry(materialId);
-            if (entry == null || entry.Item2IdStatRevolution == 0)
-                throw new InvalidOperationException("TradeskillMaterialEntry does not exist.");
-
-            uint amountAdded;
-            if (tradeskillMaterials.ContainsKey(materialId))
-                amountAdded = AddAmountToMaterial(materialId, amount);
-            else
-            {
-                tradeskillMaterials.Add(materialId, new TradeskillMaterial(player.CharacterId, materialId));
-                amountAdded = AddAmountToMaterial(materialId, amount);
-            }
-
-            return amountAdded;
-        }
-
-        private uint AddAmountToMaterial(ushort materialId, uint amount)
-        {
             if (!tradeskillMaterials.TryGetValue(materialId, out ITradeskillMaterial material))
-                throw new InvalidOperationException("Material not found in cache.");
-
-            uint amountAllowed = maximumStackAmount - material.Amount;
-            if (amountAllowed >= amount)
             {
-                material.Amount += (ushort)amount;
-                SendSupplySatchelStackUpdate(materialId);
-                return 0;
+                material = new TradeskillMaterial(player.CharacterId, materialId);
+                tradeskillMaterials.Add(materialId, material);
             }
 
-            material.Amount = (ushort)maximumStackAmount;
+            // A lower account limit does not invalidate materials already in the satchel.
+            if (material.Amount >= maximumStackAmount)
+                return amount;
+
+            uint added = Math.Min(amount, maximumStackAmount - material.Amount);
+            material.Amount += (ushort)added;
             SendSupplySatchelStackUpdate(materialId);
-            return amount - amountAllowed;
+            return amount - added;
         }
 
-        /// <summary>
-        /// Remove the provided amount to the <see cref="ITradeskillMaterial"/> that is associated with the provided <see cref="IItem"/>
-        /// </summary>
         public void RemoveAmount(IItem item, uint amount)
         {
-            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Info.Entry.Id);
-            if (entry == null)
-                throw new InvalidOperationException("TradeskillMaterialEntry does not exist.");
+            TradeskillMaterialEntry entry = FindMaterial(item);
+            if (entry == null || amount == 0u || !tradeskillMaterials.TryGetValue((ushort)entry.Id, out ITradeskillMaterial material)
+                || material.Amount < amount)
+                return;
 
-            ushort materialId = (ushort)entry.Id;
-            if (tradeskillMaterials.ContainsKey(materialId))
-            {
-                if (amount > tradeskillMaterials[materialId].Amount)
-                    return; // Swallow the issue for now.
-            }
-            else
-                tradeskillMaterials.Add(materialId, new TradeskillMaterial(player.CharacterId, materialId));
-
-            RemoveAmount(materialId, amount);
-        }
-
-        private void RemoveAmount(ushort materialId, uint amount)
-        {
-            if (amount > tradeskillMaterials[materialId].Amount)
-                throw new ArgumentOutOfRangeException(nameof(amount));
-
-            if (tradeskillMaterials[materialId].Amount >= amount)
-                tradeskillMaterials[materialId].Amount -= (ushort)amount;
-
-            SendSupplySatchelStackUpdate(materialId);
+            material.Amount -= (ushort)amount;
+            SendSupplySatchelStackUpdate((ushort)entry.Id);
         }
 
         /// <summary>
-        /// Moves the given amount of the given material to the player's <see cref="IInventory"/>
+        /// Moves the given material to the inventory and keeps any remainder in the satchel.
         /// </summary>
         public void MoveToInventory(ushort materialId, uint amount)
         {
-            if (amount > tradeskillMaterials[materialId].Amount)
-                throw new ArgumentOutOfRangeException(nameof(amount));
+            if (amount == 0u || materialId >= MaterialSlotCount || !tradeskillMaterials.TryGetValue(materialId, out ITradeskillMaterial material)
+                || material.Amount < amount || material.Entry is not { Item2IdStatRevolution: > 0u } entry)
+                return;
 
-            if (tradeskillMaterials.TryGetValue(materialId, out ITradeskillMaterial material))
+            IItemInfo item = ItemManager.Instance.GetItemInfo(entry.Item2IdStatRevolution);
+            if (item == null)
+                return;
+
+            uint remaining = player.Inventory.ItemCreateAvailable(InventoryLocation.Inventory, item, amount, ItemUpdateReason.ResourceConversion);
+            uint moved = amount - remaining;
+            if (moved == 0u)
             {
-                // Remove the amount first. The Inventory will replace what it couldn't create items for.
-                RemoveAmount(materialId, amount);
-                player.Inventory.ItemCreate(InventoryLocation.Inventory, material.Entry.Item2IdStatRevolution, amount, ItemUpdateReason.ResourceConversion);
+                player.SendGenericError(GenericError.ItemInventoryFull);
+                return;
             }
+
+            material.Amount -= (ushort)moved;
+            SendSupplySatchelStackUpdate(materialId);
         }
 
-        /// <summary>
-        /// Returns whether the <see cref="ITradeskillMaterial"/> associated with the given <see cref="IItem"/> is currently at its maximum amount
-        /// </summary>
         public bool IsFull(IItem item)
         {
-            TradeskillMaterialEntry entry = GameTableManager.Instance.TradeskillMaterial.Entries.SingleOrDefault(i => i.Item2IdStatRevolution == item.Info.Entry.Id);
-            if (entry == null)
-                throw new InvalidOperationException("TradeskillMaterialEntry does not exist.");
-
-            return IsFull((ushort)entry.Id);
+            TradeskillMaterialEntry entry = FindMaterial(item);
+            return entry != null && (maximumStackAmount == 0u
+                || (tradeskillMaterials.TryGetValue((ushort)entry.Id, out ITradeskillMaterial material) && material.Amount >= maximumStackAmount));
         }
 
-        private bool IsFull(ushort materialId)
+        private static TradeskillMaterialEntry FindMaterial(IItem item)
         {
-            if (tradeskillMaterials.TryGetValue(materialId, out ITradeskillMaterial material))
-                return material.Amount >= maximumStackAmount;
-            else
-                return false;
+            if (item?.Info?.Entry is not { Id: > 0u } entry)
+                return null;
+
+            return GameTableManager.Instance.TradeskillMaterial.Entries.FirstOrDefault(
+                material => material.Id < MaterialSlotCount && material.Item2IdStatRevolution == entry.Id);
         }
 
         /// <summary>
