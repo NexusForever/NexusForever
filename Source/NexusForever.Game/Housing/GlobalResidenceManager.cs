@@ -251,7 +251,7 @@ namespace NexusForever.Game.Housing
         /// </summary>
         public IResidence GetCommunityByOwner(Identity identity)
         {
-            return residenceOwnerCache.TryGetValue(identity, out Identity residenceId) ? GetResidence(residenceId) : null;
+            return communityOwnerCache.TryGetValue(identity, out Identity residenceId) ? GetResidence(residenceId) : null;
         }
 
         /// <summary>
@@ -290,6 +290,9 @@ namespace NexusForever.Game.Housing
                 throw new HousingException();
 
             WorldLocation2Entry locationEntry = GameTableManager.Instance.WorldLocation2.GetEntry(propertyEntry.WorldLocation2Id);
+            if (locationEntry == null)
+                throw new HousingException();
+
             return new ResidenceEntrance(locationEntry);
         }
 
@@ -298,12 +301,12 @@ namespace NexusForever.Game.Housing
         /// </summary>
         public void RegisterResidenceVists(IResidence residence, string name)
         {
-            visitableResidences.Add(residence.Identity, new PublicResidence
+            visitableResidences[residence.Identity] = new PublicResidence
             {
                 Identity    = residence.Identity,
                 Owner       = name,
                 Name        = residence.Name
-            });
+            };
         }
 
         /// <summary>
@@ -311,12 +314,12 @@ namespace NexusForever.Game.Housing
         /// </summary>
         public void RegisterCommunityVisits(IResidence residence, ICommunity community, string name)
         {
-            visitableCommunities.Add(residence.Identity, new PublicCommunity
+            visitableCommunities[residence.Identity] = new PublicCommunity
             {
                 GuildIdentity   = community.Identity,
                 Owner           = name,
                 Name            = community.Name
-            });
+            };
         }
 
         /// <summary>
