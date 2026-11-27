@@ -6,6 +6,7 @@ using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Static.Matching;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
@@ -14,6 +15,7 @@ using NexusForever.Network.Internal.Message.Match;
 using NexusForever.Network.Message;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
+using MatchType = NexusForever.Game.Static.Matching.MatchType;
 
 namespace NexusForever.Game.Matching.Match
 {
@@ -273,12 +275,15 @@ namespace NexusForever.Game.Matching.Match
         /// <summary>
         /// Finish the match.
         /// </summary>
-        public void MatchFinish()
+        public void MatchFinish(bool success = false)
         {
             if (Status != MatchStatus.InProgress)
                 return;
 
             Status = MatchStatus.Finished;
+            if (success)
+                RecordStarfallCompletion();
+
 
             GameFormulaEntry entry = gameTableManager.GameFormula.GetEntry(656);
             closeTimer = new UpdateTimer(TimeSpan.FromMilliseconds(entry?.Dataint0 ?? 300000));
@@ -286,6 +291,23 @@ namespace NexusForever.Game.Matching.Match
             map.OnMatchFinish();
 
             log.LogTrace($"Match {Guid} has finished, closing in {closeTimer.Duration} seconds.");
+        }
+
+        private void RecordStarfallCompletion()
+        {
+            uint activity = MatchingMap.GameTypeEntry.MatchTypeEnum switch
+            {
+                MatchType.Shiphand or MatchType.PrimeLevelExpedition or MatchType.ScaledPrimeLevelExpedition
+                    => StarfallActivityProgress.Expedition,
+                MatchType.PrimeLevelDungeon or MatchType.ScaledPrimeLevelDungeon
+                    => StarfallActivityProgress.PrimeDungeon,
+                _ => 0u
+            };
+            if (activity == 0u)
+                return;
+
+            foreach (IMatchTeamMember member in GetTeams().SelectMany(team => team.GetMembers()).Where(member => member.InMatch))
+                StarfallActivityProgress.RecordCompletion(playerManager.GetPlayer(member.Identity), map, activity);
         }
 
         /// <summary>

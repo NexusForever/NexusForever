@@ -41,7 +41,7 @@ namespace NexusForever.Script.Instance
             if (this.publicEvent != publicEvent)
                 return;
 
-            map.Match?.MatchFinish();
+            map.Match?.MatchFinish(success: publicEventTeam != null);
         }
 
         /// <summary>

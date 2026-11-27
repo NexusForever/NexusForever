@@ -2,8 +2,10 @@
 using NexusForever.Game.Abstract.Combat;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Combat;
+using NexusForever.Game.Matching.Match;
 using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Entity;
@@ -398,7 +400,12 @@ namespace NexusForever.Game.Entity
             else
                 newHealth -= amount;
 
-            Health = (uint)Math.Clamp(newHealth, 0u, MaxHealth);
+            uint effectiveHealth = (uint)Math.Clamp(newHealth, 0u, MaxHealth);
+            if (effectiveHealth != Health && source is IPlayer player && this is IPlayer other &&
+                Map is IContentPvpMapInstance { Match: PvpMatch match })
+                match.RecordStarfallCombat(player, other, type == DamageType.Heal);
+
+            Health = effectiveHealth;
 
             if (Health == 0)
                 OnDeath();

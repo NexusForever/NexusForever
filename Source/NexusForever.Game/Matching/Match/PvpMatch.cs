@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Map.Instance;
 using NexusForever.Game.Abstract.Matching;
 using NexusForever.Game.Abstract.Matching.Match;
 using NexusForever.Game.Abstract.Matching.Queue;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Static.Matching;
 using NexusForever.GameTable;
 using NexusForever.Network.Internal;
@@ -12,6 +13,7 @@ using NexusForever.Network.World.Message.Model;
 using NexusForever.Network.World.Message.Model.Shared;
 using NexusForever.Shared;
 using NexusForever.Shared.Game;
+using MatchType = NexusForever.Game.Static.Matching.MatchType;
 
 namespace NexusForever.Game.Matching.Match
 {
@@ -20,6 +22,8 @@ namespace NexusForever.Game.Matching.Match
         private PvpGameState state;
         private UpdateTimer stateTimer;
         private Action stateCallback;
+        private readonly IPlayerManager starfallPlayerManager;
+        private readonly HashSet<Abstract.Identity> starfallParticipants = [];
 
         // only deathpool stats are tracked in the match, other types are tracked in the public events
         // looks like this is legacy and arenas never got migrated to the new public event system
@@ -37,6 +41,7 @@ namespace NexusForever.Game.Matching.Match
             IInternalMessagePublisher messagePublisher)
             : base(log, matchManager, matchingDataManager, matchTeamFactory, gameTableManager, playerManager, messagePublisher)
         {
+            starfallPlayerManager = playerManager;
         }
 
         #endregion
@@ -190,6 +195,8 @@ namespace NexusForever.Game.Matching.Match
             if (Status != MatchStatus.InProgress)
                 return;
 
+            bool recordsStarfall = state == PvpGameState.InProgress &&
+                matchEndReason is MatchEndReason.Completed or MatchEndReason.TimeExpired && IsSupportedStarfallMatch();
             MatchFinish();
 
             SetState(PvpGameState.Finished);
@@ -202,6 +209,43 @@ namespace NexusForever.Game.Matching.Match
 
             if (map is IContentPvpMapInstance pvpMapInstance)
                 pvpMapInstance.OnPvpMatchFinish(matchWinner, matchEndReason);
+
+            if (recordsStarfall)
+            {
+                foreach (Abstract.Identity identity in starfallParticipants)
+                {
+                    IPlayer player = starfallPlayerManager.GetPlayer(identity);
+                    if (FindPresentTeam(player) != null)
+                        StarfallActivityProgress.RecordCompletion(player, map, StarfallActivityProgress.Pvp);
+                }
+            }
+        }
+
+        internal void RecordStarfallCombat(IPlayer player, IPlayer other, bool healing)
+        {
+            if (state != PvpGameState.InProgress || Status != MatchStatus.InProgress ||
+                !IsSupportedStarfallMatch() || player.Identity == other.Identity)
+                return;
+
+            IMatchTeam ownTeam = FindPresentTeam(player);
+            IMatchTeam otherTeam = FindPresentTeam(other);
+            if (ownTeam == null || otherTeam == null)
+                return;
+            if (healing ? ownTeam == otherTeam && starfallParticipants.Contains(other.Identity) : ownTeam != otherTeam)
+                starfallParticipants.Add(player.Identity);
+        }
+
+        private bool IsSupportedStarfallMatch() => MatchingMap?.GameTypeEntry is
+            { MatchTypeEnum: MatchType.BattleGround or MatchType.RatedBattleground or MatchType.Arena }
+            or { MatchTypeEnum: MatchType.OpenArena, Id: 39 or 40 or 41 or 49 or 50 or 51 };
+
+        private IMatchTeam FindPresentTeam(IPlayer player)
+        {
+            if (player == null || !player.InWorld || player.IsLoading || map == null || !ReferenceEquals(player.Map, map))
+                return null;
+
+            IMatchTeam team = GetTeam(player.Identity);
+            return team?.GetMember(player.Identity)?.InMatch == true ? team : null;
         }
     }
 }

@@ -1,6 +1,7 @@
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Entity.Movement;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Network.World.Entity;
 using NexusForever.Network.World.Entity.Model;
@@ -52,6 +53,7 @@ namespace NexusForever.Game.Entity
 
         public override void OnActivateCast(IPlayer activator)
         {
+            StarfallCapital.ActivateFirework(activator, this);
             uint progress = (uint)(1 << QuestChecklistIdx);
 
             if (CreatureEntry.DatacubeId != 0u)

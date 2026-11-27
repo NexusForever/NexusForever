@@ -60,7 +60,7 @@ namespace NexusForever.Game.Abstract.Matching.Match
         /// <summary>
         /// Finish the match.
         /// </summary>
-        void MatchFinish();
+        void MatchFinish(bool success = false);
 
         /// <summary>
         /// Teleport supplied character to the match.
