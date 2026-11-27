@@ -816,6 +816,8 @@ namespace NexusForever.Game.Entity
         public override void AddVisible(IGridEntity entity)
         {
             base.AddVisible(entity);
+            if (!visibleEntities.ContainsKey(entity.Guid))
+                return;
 
             if (entity is IWorldEntity worldEntity)
                 Session.EnqueueMessageEncrypted(worldEntity.BuildCreatePacket(IsLoading));
@@ -848,6 +850,9 @@ namespace NexusForever.Game.Entity
 
         public override void RemoveVisible(IGridEntity entity)
         {
+            if (!visibleEntities.ContainsKey(entity.Guid))
+                return;
+
             base.RemoveVisible(entity);
 
             if (entity is IWorldEntity && entity != this)
