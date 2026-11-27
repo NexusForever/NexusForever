@@ -1,6 +1,8 @@
-﻿using NexusForever.Database.Character;
+using Microsoft.Extensions.DependencyInjection;
+using NexusForever.Database.Character;
 using NexusForever.Database.Character.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
@@ -32,6 +34,7 @@ namespace NexusForever.Game.Entity
         }
 
         private readonly IPlayer player;
+        private readonly ISeasonalEventManager seasonalEvents;
 
         private readonly Dictionary<ushort, IQuest> completedQuests = new();
         private readonly Dictionary<ushort, IQuest> inactiveQuests = new();
@@ -43,6 +46,7 @@ namespace NexusForever.Game.Entity
         public QuestManager(IPlayer owner, CharacterModel model)
         {
             player = owner;
+            seasonalEvents = LegacyServiceProvider.Provider.GetRequiredService<ISeasonalEventManager>();
 
             foreach (CharacterQuestModel questModel in model.Quest)
             {
@@ -285,8 +289,27 @@ namespace NexusForever.Game.Entity
             QuestAdd(info);
         }
 
+        /// <summary>
+        /// Returns whether the quest can be offered based on its state and prerequisites.
+        /// </summary>
+        public bool CanAcceptQuest(ushort questId)
+        {
+            IQuestInfo info = GlobalQuestManager.Instance.GetQuestInfo(questId);
+            if (info == null || DisableManager.Instance.IsDisabled(DisableType.Quest, questId))
+                return false;
+
+            IQuest quest = GetQuest(questId);
+            return quest?.State is not (QuestState.Accepted or QuestState.Achieved) &&
+                (quest?.State != QuestState.Completed || info.Entry.QuestRepeatPeriodEnum != 0u &&
+                    (!quest.Reset.HasValue || DateTime.UtcNow >= quest.Reset.Value)) &&
+                MeetsPrerequisites(info);
+        }
+
         private bool MeetsPrerequisites(IQuestInfo info)
         {
+            if (!seasonalEvents.IsQuestAvailable(info.Entry.Id))
+                return false;
+
             if (info.Entry.QuestPlayerFactionEnum == 0u && player.Faction1 != Faction.Exile)
                 return false;
             if (info.Entry.QuestPlayerFactionEnum == 1u && player.Faction1 != Faction.Dominion)
@@ -333,6 +356,9 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public void QuestAdd(IQuestInfo info)
         {
+            if (!seasonalEvents.IsQuestAvailable(info.Entry.Id))
+                return;
+
             // make sure player has room for all pushed items
             if (player.Inventory.GetInventorySlotsRemaining(InventoryLocation.Inventory)
                 < info.Entry.PushedItemIds.Count(i => i != 0u))

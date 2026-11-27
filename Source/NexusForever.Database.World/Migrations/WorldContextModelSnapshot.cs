@@ -22,6 +22,59 @@ namespace NexusForever.Database.World.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("NexusForever.Database.World.Model.SeasonalEventModel", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedNever()
+                        .HasColumnType("int(10) unsigned")
+                        .HasColumnName("id");
+
+                    b.Property<ushort>("DurationHours")
+                        .HasColumnType("smallint(5) unsigned")
+                        .HasColumnName("durationHours");
+
+                    b.Property<byte>("StartDay")
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasColumnName("startDay");
+
+                    b.Property<byte>("StartHourUtc")
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasColumnName("startHourUtc");
+
+                    b.Property<byte>("StartMonth")
+                        .HasColumnType("tinyint(3) unsigned")
+                        .HasColumnName("startMonth");
+
+                    b.HasKey("Id").HasName("PRIMARY");
+
+                    b.ToTable("seasonal_event", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.SeasonalEventQuestModel", b =>
+                {
+                    b.Property<uint>("EventId").HasColumnType("int(10) unsigned").HasColumnName("eventId");
+
+                    b.Property<uint>("QuestId").HasColumnType("int(10) unsigned").HasColumnName("questId");
+
+                    b.HasKey("EventId", "QuestId").HasName("PRIMARY");
+
+                    b.ToTable("seasonal_event_quest", (string)null);
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.SeasonalEventEntityModel", b =>
+                {
+                    b.Property<uint>("EventId").HasColumnType("int(10) unsigned").HasColumnName("eventId");
+
+                    b.Property<uint>("EntityId").HasColumnType("int(10) unsigned").HasColumnName("entityId");
+
+                    b.HasKey("EventId", "EntityId").HasName("PRIMARY");
+
+                    b.HasIndex("EntityId").HasDatabaseName("IX_seasonal_event_entity_entityId");
+
+                    b.ToTable("seasonal_event_entity", (string)null);
+                });
+
+
             modelBuilder.Entity("NexusForever.Database.World.Model.DisableModel", b =>
                 {
                     b.Property<byte>("Type")
@@ -1148,6 +1201,40 @@ namespace NexusForever.Database.World.Migrations
 
                     b.Navigation("StoreOfferItemPrice");
                 });
+            modelBuilder.Entity("NexusForever.Database.World.Model.SeasonalEventQuestModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.SeasonalEventModel", null)
+                        .WithMany("Quests")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__seasonal_event_quest_eventId__seasonal_event_id");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.SeasonalEventEntityModel", b =>
+                {
+                    b.HasOne("NexusForever.Database.World.Model.SeasonalEventModel", null)
+                        .WithMany("Entities")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__seasonal_event_entity_eventId__seasonal_event_id");
+
+                    b.HasOne("NexusForever.Database.World.Model.EntityModel", null)
+                        .WithMany()
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK__seasonal_event_entity_entityId__entity_id");
+                });
+
+            modelBuilder.Entity("NexusForever.Database.World.Model.SeasonalEventModel", b =>
+                {
+                    b.Navigation("Entities");
+
+                    b.Navigation("Quests");
+                });
+
 #pragma warning restore 612, 618
         }
     }

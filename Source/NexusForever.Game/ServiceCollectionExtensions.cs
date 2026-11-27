@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NexusForever.Game.Abstract;
+using NexusForever.Game.Abstract.Event;
 using NexusForever.Game.Achievement;
 using NexusForever.Game.Character;
 using NexusForever.Game.Chat;
@@ -7,6 +9,7 @@ using NexusForever.Game.Cinematic;
 using NexusForever.Game.Combat;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
+using NexusForever.Game.Event;
 using NexusForever.Game.Group;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
@@ -45,6 +48,9 @@ namespace NexusForever.Game
             sc.AddGameCustomisation();
             sc.AddGameEntity();
             sc.AddGameEvent();
+            sc.TryAddSingleton(TimeProvider.System);
+            sc.AddSingleton<SeasonalEventManager>();
+            sc.AddSingleton<ISeasonalEventManager>(services => services.GetRequiredService<SeasonalEventManager>());
             sc.AddGameGroup();
             sc.AddGameGuild();
             sc.AddGameHousing();

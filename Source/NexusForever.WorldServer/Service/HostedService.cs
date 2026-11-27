@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NexusForever.Database;
 using NexusForever.Database.Configuration.Model;
+using NexusForever.Database.World;
 using NexusForever.Game;
 using NexusForever.Game.Abstract.Chat.Format;
 using NexusForever.Game.Abstract.Matching.Match;
@@ -15,6 +16,7 @@ using NexusForever.Game.Character;
 using NexusForever.Game.Cinematic;
 using NexusForever.Game.Customisation;
 using NexusForever.Game.Entity;
+using NexusForever.Game.Event;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
@@ -52,6 +54,7 @@ namespace NexusForever.WorldServer.Service
         private readonly IMatchingManager matchingManager;
         private readonly IMatchManager matchManager;
         private readonly IPublicEventTemplateManager publicEventManager;
+        private readonly SeasonalEventManager seasonalEventManager;
         private readonly IChatFormatManager chatFormatManager;
         private readonly IWorldManager worldManager;
 
@@ -65,6 +68,7 @@ namespace NexusForever.WorldServer.Service
             IMatchingManager matchingManager,
             IMatchManager matchManager,
             IPublicEventTemplateManager publicEventManager,
+            SeasonalEventManager seasonalEventManager,
             IChatFormatManager chatFormatManager,
             IWorldManager worldManager)
         {
@@ -79,6 +83,7 @@ namespace NexusForever.WorldServer.Service
             this.matchingManager    = matchingManager;
             this.matchManager       = matchManager;
             this.publicEventManager = publicEventManager;
+            this.seasonalEventManager = seasonalEventManager;
             this.chatFormatManager  = chatFormatManager;
             this.worldManager       = worldManager;
         }
@@ -108,6 +113,7 @@ namespace NexusForever.WorldServer.Service
 
             await GameTableManager.Instance.Initialise();
             publicEventManager.Initialise();
+            seasonalEventManager.Initialise(DatabaseManager.Instance.GetDatabase<WorldDatabase>().GetSeasonalEvents());
             MapIOManager.Instance.Initialise();
             SearchManager.Instance.Initialise();
             EntityManager.Instance.Initialise();

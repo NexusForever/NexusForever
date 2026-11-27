@@ -75,6 +75,17 @@ namespace NexusForever.Database.World
                 .ToImmutableList();
         }
 
+        public ImmutableList<SeasonalEventModel> GetSeasonalEvents()
+        {
+            using var context = new WorldContext(config);
+            return context.SeasonalEvent
+                .Include(season => season.Quests)
+                .Include(season => season.Entities)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .ToImmutableList();
+        }
+
         public ImmutableList<EntityModel> GetEntitiesWithoutArea()
         {
             using var context = new WorldContext(config);
