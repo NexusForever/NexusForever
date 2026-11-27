@@ -13,5 +13,6 @@ namespace NexusForever.Game.Spell
         public uint PrimaryTargetId { get; set; }
         public Position Position { get; set; }
         public ushort TaxiNode { get; set; }
+        internal Quest.QuestActorActivation QuestActorUse { get; set; }
     }
 }

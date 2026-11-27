@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network;
 using NexusForever.Network.Message;
@@ -27,6 +28,12 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(activateUnitCast.UnitId);
             if (entity == null)
                 throw new InvalidPacketValueException();
+
+            if (FarsideExpeditionSupplies.TryInteract(session.Player, entity))
+                return;
+
+            if (MurkmireRecovery.TryBeginUse(session.Player, entity))
+                return;
 
             // TODO: sanity check for range etc.
 
