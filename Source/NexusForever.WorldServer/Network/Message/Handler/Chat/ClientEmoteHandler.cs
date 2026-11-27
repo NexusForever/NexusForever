@@ -1,6 +1,8 @@
-﻿using NexusForever.Network.Message;
+using System.Linq;
+using NexusForever.Game.Abstract.Entity;
+using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
-using NexusForever.Game.Quest;
+using NexusForever.Script.Template;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Chat
 {
@@ -14,7 +16,19 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Chat
             session.Player.Emote(emote.EmoteId);
 
             if (!emote.Silent)
-                AngelPilgrimage.RecordEmote(session.Player, emote.EmoteId, emote.Targeted ? emote.TargetUnitId : null);
+            {
+                IPlayer player = session.Player;
+                if (emote.Targeted)
+                {
+                    player.GetVisible<IWorldEntity>(emote.TargetUnitId)
+                        ?.InvokeScriptCollection<IWorldEntityScript>(script => script.OnPlayerEmote(player, emote.EmoteId));
+                }
+                else
+                {
+                    foreach (IWorldEntity entity in player.GetVisible().OfType<IWorldEntity>().ToArray())
+                        entity.InvokeScriptCollection<IWorldEntityScript>(script => script.OnPlayerEmote(player, emote.EmoteId));
+                }
+            }
 
             session.Player.EnqueueToVisible(new ServerEmote
             {

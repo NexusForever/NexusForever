@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
-using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Network.Message;
 using NexusForever.Network.World.Message.Model;
+using NexusForever.Script.Template;
 
 namespace NexusForever.WorldServer.Network.Message.Handler.Entity
 {
@@ -44,8 +44,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             {
                 case InteractionType.TalkTo: // Quest NPC
                 {
-                    if (session.Player.QuestManager is QuestManager quests)
-                        quests.OfferShadeEveStarter(entity);
+                    entity?.InvokeScriptCollection<IWorldEntityScript>(script => script.OnPlayerInteract(session.Player));
 
                     session.EnqueueMessageEncrypted(new ServerDialogStart
                     {

@@ -11,6 +11,7 @@ namespace NexusForever.Database.World
     public class WorldContext : DbContext
     {
         public DbSet<DisableModel> Disable { get; set; }
+        public DbSet<SeasonalEventModel> SeasonalEvent { get; set; }
         public DbSet<EntityModel> Entity { get; set; }
         public DbSet<EntityEmoteModel> Emote { get; set; }
         public DbSet<EntityEventModel> EntityEvent { get; set; }
@@ -53,6 +54,42 @@ namespace NexusForever.Database.World
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<SeasonalEventModel>(entity =>
+            {
+                entity.ToTable("seasonal_event");
+                entity.HasKey(e => e.Id).HasName("PRIMARY");
+                entity.Property(e => e.Id).HasColumnName("id").HasColumnType("int(10) unsigned").ValueGeneratedNever();
+                entity.Property(e => e.StartMonth).HasColumnName("startMonth").HasColumnType("tinyint(3) unsigned");
+                entity.Property(e => e.StartDay).HasColumnName("startDay").HasColumnType("tinyint(3) unsigned");
+                entity.Property(e => e.StartHourUtc).HasColumnName("startHourUtc").HasColumnType("tinyint(3) unsigned");
+                entity.Property(e => e.DurationHours).HasColumnName("durationHours").HasColumnType("smallint(5) unsigned");
+
+                entity.HasMany(e => e.Quests).WithOne().HasForeignKey(e => e.EventId)
+                    .HasConstraintName("FK__seasonal_event_quest_eventId__seasonal_event_id");
+                entity.HasMany(e => e.Entities).WithOne().HasForeignKey(e => e.EventId)
+                    .HasConstraintName("FK__seasonal_event_entity_eventId__seasonal_event_id");
+            });
+
+            modelBuilder.Entity<SeasonalEventQuestModel>(entity =>
+            {
+                entity.ToTable("seasonal_event_quest");
+                entity.HasKey(e => new { e.EventId, e.QuestId }).HasName("PRIMARY");
+                entity.Property(e => e.EventId).HasColumnName("eventId").HasColumnType("int(10) unsigned");
+                entity.Property(e => e.QuestId).HasColumnName("questId").HasColumnType("int(10) unsigned");
+            });
+
+            modelBuilder.Entity<SeasonalEventEntityModel>(entity =>
+            {
+                entity.ToTable("seasonal_event_entity");
+                entity.HasKey(e => new { e.EventId, e.EntityId }).HasName("PRIMARY");
+                entity.Property(e => e.EventId).HasColumnName("eventId").HasColumnType("int(10) unsigned");
+                entity.Property(e => e.EntityId).HasColumnName("entityId").HasColumnType("int(10) unsigned");
+                entity.HasIndex(e => e.EntityId).HasDatabaseName("IX_seasonal_event_entity_entityId");
+                entity.HasOne<EntityModel>().WithMany().HasForeignKey(e => e.EntityId)
+                    .HasConstraintName("FK__seasonal_event_entity_entityId__entity_id");
+            });
+
+
             modelBuilder.Entity<DisableModel>(entity =>
             {
                 entity.ToTable("disable");

@@ -1,4 +1,4 @@
-﻿using NexusForever.Database.Character;
+using NexusForever.Database.Character;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Shared;
@@ -33,6 +33,11 @@ namespace NexusForever.Game.Abstract.Entity
         /// Add a quest from supplied id, optionally supplying <see cref="IItem"/> which was used to start the quest.
         /// </summary>
         void QuestAdd(ushort questId, IItem item);
+
+        /// <summary>
+        /// Returns whether the quest can be offered based on its state and prerequisites.
+        /// </summary>
+        bool CanAcceptQuest(ushort questId);
 
         /// <summary>
         /// Add a quest from supplied <see cref="IQuestInfo"/>, skipping any prerequisites checks.
