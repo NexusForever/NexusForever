@@ -7,6 +7,7 @@ using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Entity.Synchronisation;
 using NexusForever.Game.Map;
 using NexusForever.Game.Map.Search;
+using NexusForever.Game.Quest;
 using NexusForever.Script;
 using NexusForever.Script.Template;
 using NexusForever.Script.Template.Collection;
@@ -206,6 +207,8 @@ namespace NexusForever.Game.Entity
         public virtual void AddVisible(IGridEntity entity)
         {
             if (!CanSeeEntity(entity))
+                return;
+            if (this is IPlayer player && !StarfallCapital.CanSee(player, entity))
                 return;
 
             visibleEntities.Add(entity.Guid, entity);

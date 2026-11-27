@@ -297,6 +297,8 @@ namespace NexusForever.Game.Entity
                 return false;
             if (player.Level < info.Entry.PrerequisiteLevel)
                 return false;
+            if (!StarfallCapital.CanAccept(info.Entry.Id, DateTime.UtcNow))
+                return false;
 
             if (!info.PrerequisiteQuests.IsEmpty)
             {
@@ -340,6 +342,9 @@ namespace NexusForever.Game.Entity
                 player.SendGenericError(GenericError.ItemInventoryFull);
                 return;
             }
+
+            if (!StarfallCapital.CanAccept(info.Entry.Id, DateTime.UtcNow))
+                return;
 
             for (int i = 0; i < info.Entry.PushedItemIds.Length; i++)
             {
@@ -559,10 +564,17 @@ namespace NexusForever.Game.Entity
                 case QuestRepeatPeriod.Weekly:
                     quest.Reset = GlobalQuestManager.Instance.NextWeeklyReset;
                     break;
+                case QuestRepeatPeriod.Yearly when StarfallCapital.OwnsQuest(questId):
+                    quest.Reset = StarfallCapital.NextReset(DateTime.UtcNow);
+                    break;
             }
 
             activeQuests.Remove(questId);
             completedQuests.Add(questId, quest);
+
+            if (StarfallCapital.OwnsQuest(questId))
+                foreach (IQuest activeQuest in activeQuests.Values.Where(q => q.Id is 10502 or 10535 && q.State == QuestState.Accepted).ToArray())
+                    activeQuest.ObjectiveUpdate(QuestObjectiveType.CompleteQuest, questId, 1u);
 
             player.AchievementManager.CheckAchievements(player, AchievementType.QuestComplete, questId);
         }

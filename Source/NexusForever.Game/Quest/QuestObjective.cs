@@ -5,6 +5,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Static.Quest;
 using NexusForever.GameTable.Model;
+using System.Numerics;
 
 namespace NexusForever.Game.Quest
 {
@@ -147,8 +148,17 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public bool IsComplete()
         {
+            if (IsChecklist())
+                return BitOperations.PopCount(progress & ChecklistMask()) >= ObjectiveInfo.Entry.Count;
             return progress >= GetMaxValue();
         }
+
+        private bool IsChecklist() => ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist &&
+            ObjectiveInfo.Entry.Count <= 32u;
+
+        private uint ChecklistMask() => ObjectiveInfo.Entry.Count == 32u
+            ? uint.MaxValue
+            : (1u << (int)ObjectiveInfo.Entry.Count) - 1u;
 
         private uint GetMaxValue()
         {
@@ -160,6 +170,12 @@ namespace NexusForever.Game.Quest
         /// </summary>
         public void ObjectiveUpdate(uint update)
         {
+            if (IsChecklist())
+            {
+                Progress = (progress | update) & ChecklistMask();
+                return;
+            }
+
             if (IsDynamic())
                 update = (uint)(((float)update / ObjectiveInfo.Entry.Count) * 1000f);
 
@@ -169,7 +185,7 @@ namespace NexusForever.Game.Quest
        
         public void Complete()
         {
-            Progress = GetMaxValue();
+            Progress = IsChecklist() ? ChecklistMask() : GetMaxValue();
         }
     }
 }
