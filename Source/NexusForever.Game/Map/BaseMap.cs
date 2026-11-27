@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Text;
 using NexusForever.Database.World.Model;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Entity;
 using NexusForever.Game.Abstract.PublicEvent;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Map.Search;
@@ -412,7 +413,9 @@ namespace NexusForever.Game.Map
         {
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
-                IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
+                IWorldEntity entity = TutorialConstructEntity.Matches(model)
+                    ? entityFactory.CreateEntity<TutorialConstructEntity>()
+                    : entityFactory.CreateWorldEntity(model.Type);
                 entity.Initialise(model);
 
                 var position = new MapPosition

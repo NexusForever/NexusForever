@@ -412,7 +412,7 @@ namespace NexusForever.Game.Quest
             if (objective.ObjectiveInfo.IsSequential())
             {
                 for (int i = 0; i < objective.Index; i++)
-                    if (!objectives[i].IsComplete())
+                    if (!objectives[i].ObjectiveInfo.IsOptional() && !objectives[i].IsComplete())
                         return false;
             }
 

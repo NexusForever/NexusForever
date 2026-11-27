@@ -15,6 +15,7 @@ namespace NexusForever.Game.Entity
 
             sc.AddTransient<IEntityFactory, EntityFactory>();
             sc.AddTransient<INonPlayerEntity, NonPlayerEntity>();
+            sc.AddTransient<TutorialConstructEntity>();
             sc.AddTransient<IChestEntity, ChestEntity>();
             sc.AddTransient<IDestructibleEntity, DestructibleEntity>();
             sc.AddTransient<IVehicleEntity, VehicleEntity>();

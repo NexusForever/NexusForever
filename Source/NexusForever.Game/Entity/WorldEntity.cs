@@ -13,6 +13,7 @@ using NexusForever.Game.Spell;
 using NexusForever.Game.Static.Chat;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Reputation;
+using NexusForever.Game.Map;
 using NexusForever.GameTable;
 using NexusForever.GameTable.Model;
 using NexusForever.GameTable.Static;
@@ -279,6 +280,8 @@ namespace NexusForever.Game.Entity
         private void UpdateZone(Vector3 vector)
         {
             uint? worldAreaId = Map.File.GetWorldAreaId(vector);
+            if (worldAreaId is null or 0u && Map.Entry.Id == TutorialDockingBay.WorldId)
+                worldAreaId = TutorialDockingBay.GetZoneId(vector, GameTableManager.Instance);
             if (worldAreaId.HasValue && Zone?.Id != worldAreaId)
             {
                 Zone = GameTableManager.Instance.WorldZone.GetEntry(worldAreaId.Value);

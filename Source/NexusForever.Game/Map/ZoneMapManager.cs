@@ -107,7 +107,7 @@ namespace NexusForever.Game.Map
                 player.AchievementManager.CheckAchievements(player, AchievementType.MapComplete, currentZoneMap);
         }
 
-        private static ZoneMapCoordinate Points2ZoneMapCoordinate(Vector3 position)
+        internal static ZoneMapCoordinate Points2ZoneMapCoordinate(Vector3 position)
         {
             float a = (ZoneMapBoundary + position.Z) / 27.712812f + 1f;
             float b = (ZoneMapBoundary + position.X) / 32f + 0.5f;

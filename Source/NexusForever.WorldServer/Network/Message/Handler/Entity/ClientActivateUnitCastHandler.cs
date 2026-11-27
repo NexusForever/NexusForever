@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using NexusForever.Game.Map;
+using NexusForever.GameTable;
+using System.Linq;
 using System.Numerics;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
@@ -28,6 +30,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(activateUnitCast.UnitId);
             if (entity == null)
                 throw new InvalidPacketValueException();
+
+            if (TutorialConstructProjector.TryActivate(session.Player, entity, GameTableManager.Instance))
+                return;
 
             // TODO: sanity check for range etc.
 
