@@ -12,6 +12,7 @@ namespace NexusForever.Game.Entity
         public override EntityType Type => EntityType.Simple;
 
         public byte QuestChecklistIdx { get; private set; }
+        internal uint ShadeCapitalSlot { get; private set; }
 
         #region Dependency Injection
 
@@ -26,6 +27,7 @@ namespace NexusForever.Game.Entity
         {
             base.Initialise(model);
             QuestChecklistIdx = model.QuestChecklistIdx;
+            ShadeCapitalSlot = Quest.ShadeCapitalActivities.BindSlot(model);
         }
 
         protected override IEntityModel BuildEntityModel()

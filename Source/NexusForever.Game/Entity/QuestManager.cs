@@ -35,7 +35,8 @@ namespace NexusForever.Game.Entity
 
         private readonly IPlayer player;
         private readonly TimeProvider timeProvider;
-        private (IBaseMap Map, QuestState? State, bool Available)? shadePlantVisibility;
+        private (IBaseMap Map, (QuestState? State, bool Available) Plants, (QuestState?, bool) Hauntings,
+            (QuestState?, bool) Bonfires, (QuestState?, bool) Hooligans)? shadePlantVisibility;
 
         private readonly Dictionary<ushort, IQuest> completedQuests = new();
         private readonly Dictionary<ushort, IQuest> inactiveQuests = new();
@@ -116,6 +117,7 @@ namespace NexusForever.Game.Entity
         {
             RefreshShadePlantActors();
             ShadeEvePlants.Gather(player, activeQuests);
+            ShadeCapitalActivities.SyncActiveShortcuts(player, activeQuests);
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
             {
@@ -293,6 +295,14 @@ namespace NexusForever.Game.Entity
                 (item != null || !ShadeEvePlants.CanVisitContact(player, (ushort)info.Entry.Id)))
                 throw new QuestException("Accept this Shade's Eve quest from its nearby capital contact.");
 
+            if (ShadeEveHauntings.HandlesQuest(info.Entry.Id) &&
+                (item != null || !ShadeEveHauntings.CanVisitContact(player, (ushort)info.Entry.Id)))
+                throw new QuestException("Accept this Shade's Eve quest from its nearby capital contact.");
+
+            if (ShadeCapitalActivities.Owns(info.Entry.Id) &&
+                (item != null || !ShadeCapitalActivities.CanVisitContact(player, (ushort)info.Entry.Id)))
+                throw new QuestException("Accept this Shade's Eve quest from its nearby capital contact.");
+
             // server doesn't send an error message for prerequisites since the client does the exact same checks
             // it's assumed that a player could never get here without cheating in some way
             if (!MeetsPrerequisites(info))
@@ -304,13 +314,19 @@ namespace NexusForever.Game.Entity
         private void RefreshShadePlantActors()
         {
             if (player is not Player viewer || player.IsLoading || player.Map is not { } map ||
-                ShadeEvePlants.FindQuest(map.Entry.Id) is not ushort id)
+                ShadeEvePlants.FindQuest(map.Entry.Id) is not ushort plantQuest ||
+                ShadeEveHauntings.FindQuest(map.Entry.Id) is not ushort hauntQuest)
             {
                 shadePlantVisibility = null;
                 return;
             }
 
-            var current = (map, GetQuestState(id), CanSeeShadePlantQuest(id));
+            // Refresh when the journal state or contact availability changes.
+            var (bonfires, hooligans) = ShadeCapitalActivities.FindQuests(map.Entry.Id);
+            var current = (map, Visibility(plantQuest), Visibility(hauntQuest), Visibility(bonfires), Visibility(hooligans));
+
+            (QuestState?, bool) Visibility(ushort questId) =>
+                (GetQuestState(questId), CanSeeShadePlantQuest(questId));
             if (shadePlantVisibility == current)
                 return;
 
@@ -443,6 +459,8 @@ namespace NexusForever.Game.Entity
             activeQuests.Add((ushort)info.Entry.Id, quest);
 
             quest.InitialiseTimer();
+            if (ShadeCapitalActivities.Owns(quest.Id))
+                ShadeCapitalActivities.SyncShortcut(player, quest);
             if (ShadeEveQuestSeason.IsIntroductoryQuest(info.Entry.Id) && info.Objectives.IsEmpty)
                 quest.State = QuestState.Achieved;
 
@@ -618,7 +636,9 @@ namespace NexusForever.Game.Entity
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
 
-            if (ShadeEvePlants.HandlesQuest(questId) && (communicator || !ShadeEvePlants.CanVisitContact(player, questId)))
+            if ((ShadeEvePlants.HandlesQuest(questId) && (communicator || !ShadeEvePlants.CanVisitContact(player, questId))) ||
+                (ShadeEveHauntings.HandlesQuest(questId) && (communicator || !ShadeEveHauntings.CanVisitContact(player, questId))) ||
+                (ShadeCapitalActivities.Owns(questId) && (communicator || !ShadeCapitalActivities.CanVisitContact(player, questId))))
                 throw new QuestException("Report this Shade's Eve quest to its nearby capital contact.");
 
             if (communicator)

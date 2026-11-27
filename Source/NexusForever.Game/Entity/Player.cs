@@ -817,7 +817,8 @@ namespace NexusForever.Game.Entity
         internal void RefreshShadePlantActors()
         {
             var check = new SearchCheckRange<IWorldEntity>(Position, Map.VisionRange);
-            foreach (IWorldEntity actor in Map.Search(Position, Map.VisionRange, check).Where(Quest.ShadeEvePlants.Tracks))
+            foreach (IWorldEntity actor in Map.Search(Position, Map.VisionRange, check).Where(entity => Quest.ShadeEvePlants.Tracks(entity) || Quest.ShadeEveHauntings.Tracks(entity) ||
+                    Quest.ShadeCapitalActivities.IsSeasonalActor(entity)))
             {
                 if (CanSeeEntity(actor))
                     AddVisible(actor);
@@ -827,7 +828,8 @@ namespace NexusForever.Game.Entity
         }
 
         public override bool CanSeeEntity(IGridEntity entity) =>
-            base.CanSeeEntity(entity) && Quest.ShadeEvePlants.CanSee(this, entity);
+            base.CanSeeEntity(entity) && Quest.ShadeEvePlants.CanSee(this, entity) && Quest.ShadeEveHauntings.CanSee(this, entity) &&
+            Quest.ShadeCapitalActivities.CanSeeActor(this, entity);
 
         public override void AddVisible(IGridEntity entity)
         {

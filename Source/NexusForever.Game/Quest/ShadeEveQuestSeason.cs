@@ -8,7 +8,8 @@ namespace NexusForever.Game.Quest
 
         internal static bool CanAccept(uint questId, DateTime now)
         {
-            if (questId is not (9688u or 9689u or 9760u or 9761u) && !ShadeEvePlants.HandlesQuest(questId))
+            if (questId is not (9688u or 9689u or 9760u or 9761u) && !ShadeEvePlants.HandlesQuest(questId) &&
+                !ShadeEveHauntings.HandlesQuest(questId) && !ShadeCapitalActivities.Owns(questId))
                 return true;
 
             var start = new DateTime(now.Year, 10, 19, ResetHourUtc, 0, 0, DateTimeKind.Utc);

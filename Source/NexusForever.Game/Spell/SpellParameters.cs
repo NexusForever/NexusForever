@@ -14,5 +14,6 @@ namespace NexusForever.Game.Spell
         public Position Position { get; set; }
         public ushort TaxiNode { get; set; }
         internal QuestCsiInteraction Interaction { get; init; }
+        internal Quest.ShadeCapitalActivities.ShadeProjectile ShadeProjectile { get; init; }
     }
 }
