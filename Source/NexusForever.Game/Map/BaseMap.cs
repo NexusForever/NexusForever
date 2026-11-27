@@ -185,7 +185,7 @@ namespace NexusForever.Game.Map
                 && !entities.Values.OfType<INonPlayerEntity>()
                     .Any(creature => creature.EntityId == spawn.Id && !ReferenceEquals(creature, corpse)))
             {
-                replacement = entityFactory.CreateWorldEntity(spawn.Type);
+                replacement = CreateStaticWorldEntity(spawn);
                 replacement.Initialise(spawn);
                 replacement.OnEnqueueAddToMap();
 
@@ -455,11 +455,18 @@ namespace NexusForever.Game.Map
             SpawnGrid(gridX, gridZ);
         }
 
+        private IWorldEntity CreateStaticWorldEntity(EntityModel model)
+        {
+            return MurkmireWildlifeEntity.Matches(model)
+                ? entityFactory.CreateEntity<MurkmireWildlifeEntity>()
+                : entityFactory.CreateWorldEntity(model.Type);
+        }
+
         protected virtual void SpawnGrid(uint gridX, uint gridZ)
         {
             foreach (EntityModel model in entityCache.GetEntities(gridX, gridZ))
             {
-                IWorldEntity entity = entityFactory.CreateWorldEntity(model.Type);
+                IWorldEntity entity = CreateStaticWorldEntity(model);
                 entity.Initialise(model);
 
                 var position = new MapPosition
