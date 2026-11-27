@@ -14,7 +14,7 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             if (entity == null)
                 throw new InvalidPacketValueException();
 
-            if (LegacyDestinyBriefing.TryUse(session.Player, entity))
+            if (LegacyDestinyBriefing.TryUse(session.Player, entity) || LegacyDestinyBoarding.TryUse(session.Player, entity))
                 return;
 
             // TODO: sanity check for range etc.

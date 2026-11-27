@@ -130,6 +130,7 @@ namespace NexusForever.Game.Quest
 
         internal static void RecordArrival(IPlayer player)
         {
+            LegacyDestinyBoarding.RecordArrival(player);
             if (!Dominion(player) || player.Map?.Entry.Id != Destiny ||
                 Vector3.DistanceSquared(player.Position, Terminal.Position) > 25f ||
                 Active(player, Embarkation) is not { } quest ||

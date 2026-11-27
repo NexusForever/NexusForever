@@ -34,8 +34,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
         {
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.UnitId);
             bool talk = entityInteraction.Type == InteractionType.TalkTo;
-            if ((talk && LegacyDestinyBriefing.TryUse(session.Player, entity)) ||
-                !LegacyDestinyBriefing.AllowsTalk(session.Player, entity, talk))
+            if ((talk && (LegacyDestinyBriefing.TryUse(session.Player, entity) || LegacyDestinyBoarding.TryUse(session.Player, entity))) ||
+                !LegacyDestinyBriefing.AllowsTalk(session.Player, entity, talk) ||
+                !LegacyDestinyBoarding.AllowsTalk(session.Player, entity, talk))
                 return;
 
             if (entity != null)

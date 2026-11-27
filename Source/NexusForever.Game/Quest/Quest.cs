@@ -306,6 +306,7 @@ namespace NexusForever.Game.Quest
             // Order in reverse Index so that sequential steps don't completed by the same action
             foreach (IQuestObjective objective in objectives
                 .Where(o => o.ObjectiveInfo.Entry.Type == (uint)type && o.ObjectiveInfo.Entry.Data == data &&
+                    !LegacyDestinyBoarding.OwnsFlight(Id, o.ObjectiveInfo.Id) &&
                     !ShadeEvePlants.HandlesObjective(Id, o.ObjectiveInfo.Id))
                 .OrderByDescending(o => o.Index))
             {
@@ -328,7 +329,7 @@ namespace NexusForever.Game.Quest
             if (RequiredObjectivesComplete())
                 CompleteOptionalObjectives();
 
-            if (objectives.All(o => o.IsComplete()))
+            if (objectives.All(o => o.IsComplete() || LegacyDestinyBoarding.OwnsOptional(Id, o.ObjectiveInfo.Id)))
                 State = QuestState.Achieved;
         }
 
@@ -365,7 +366,7 @@ namespace NexusForever.Game.Quest
             if (RequiredObjectivesComplete())
                 CompleteOptionalObjectives();
 
-            if (objectives.All(o => o.IsComplete()))
+            if (objectives.All(o => o.IsComplete() || LegacyDestinyBoarding.OwnsOptional(Id, o.ObjectiveInfo.Id)))
                 State = QuestState.Achieved;
         }
 
@@ -374,7 +375,7 @@ namespace NexusForever.Game.Quest
             if (objective.ObjectiveInfo.IsSequential())
             {
                 for (int i = 0; i < objective.Index; i++)
-                    if (!objectives[i].IsComplete())
+                    if (!objectives[i].IsComplete() && !LegacyDestinyBoarding.OwnsOptional(Id, objectives[i].ObjectiveInfo.Id))
                         return false;
             }
 
@@ -392,7 +393,7 @@ namespace NexusForever.Game.Quest
         private void CompleteOptionalObjectives()
         {
             foreach (IQuestObjective objective in objectives
-                .Where(o => o.ObjectiveInfo.IsOptional() && !o.IsComplete()))
+                .Where(o => o.ObjectiveInfo.IsOptional() && !o.IsComplete() && !LegacyDestinyBoarding.OwnsOptional(Id, o.ObjectiveInfo.Id)))
             {
                 objective.Complete();
                 SendQuestObjectiveUpdate(objective);
