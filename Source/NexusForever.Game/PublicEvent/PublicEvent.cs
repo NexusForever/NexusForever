@@ -441,9 +441,9 @@ namespace NexusForever.Game.PublicEvent
             if (winnerTeam.HasValue)
                 winner = GetTeam(winnerTeam.Value);
 
-            Map.OnPublicEventFinish(this, winner);
-
+            // Finishing the match in the callback can reenter this event.
             IsFinalised = true;
+            Map.OnPublicEventFinish(this, winner);
 
             log.LogTrace($"Public event {Guid} has finished.");
         }
