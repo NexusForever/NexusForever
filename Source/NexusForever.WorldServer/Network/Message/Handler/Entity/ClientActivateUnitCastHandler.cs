@@ -28,6 +28,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             if (entity == null)
                 throw new InvalidPacketValueException();
 
+            if (MuseumInteraction.TryActivate(session, entity))
+                return;
+
             // TODO: sanity check for range etc.
 
             session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);

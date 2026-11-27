@@ -31,6 +31,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
         public void HandleMessage(IWorldSession session, ClientEntityInteract entityInteraction)
         {
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.UnitId);
+            if (entityInteraction.Type == InteractionType.TalkTo && MuseumInteraction.TryActivate(session, entity))
+                return;
+
             if (entity != null)
             {
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);
