@@ -4,6 +4,7 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Quest;
 using NexusForever.Game.Prerequisite;
 using NexusForever.Game.Quest;
+using NexusForever.Game.Spell;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Achievement;
 using NexusForever.Game.Static.Entity;
@@ -525,6 +526,9 @@ namespace NexusForever.Game.Entity
 
             if (quest.State != QuestState.Achieved)
                 throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} which wasn't complete!");
+
+            if (!ArkshipDepartures.CanReport(player, quest, communicator))
+                throw new QuestException($"Quest {questId} must be reported at the confirmed destination.");
 
             if (communicator)
             {
