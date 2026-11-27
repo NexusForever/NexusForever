@@ -294,6 +294,10 @@ namespace NexusForever.Game.Entity
                 (item != null || !ShadeEvePlants.CanVisitContact(player, (ushort)info.Entry.Id)))
                 throw new QuestException("Accept this Shade's Eve quest from its nearby capital contact.");
 
+            if (FarsideExpeditionSupplies.HandlesQuest(info.Entry.Id) &&
+                (item != null || !FarsideExpeditionSupplies.CanVisitContact(player, (ushort)info.Entry.Id, turnIn: false)))
+                throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} away from the expedition cache!");
+
             if (!MurkmireRecovery.CanVisitContact(player, info.Entry.Id))
                 throw new QuestException($"Player {player.CharacterId} tried to start Murkmire quest {info.Entry.Id} away from its giver!");
 
@@ -468,6 +472,9 @@ namespace NexusForever.Game.Entity
             if (ShadeEveQuestSeason.IsIntroductoryQuest(info.Entry.Id) && info.Objectives.IsEmpty)
                 quest.State = QuestState.Achieved;
 
+            if (FarsideExpeditionSupplies.HandlesQuest(info.Entry.Id) && player is Player viewer)
+                viewer.RefreshFarsideCrates();
+
             log.Trace($"Accepted new quest {info.Entry.Id}.");
         }
 
@@ -499,6 +506,9 @@ namespace NexusForever.Game.Entity
                 if (objective is QuestObjective tracked)
                     tracked.ClearChecklist();
             }
+
+            if (FarsideExpeditionSupplies.HandlesQuest(quest.Id) && player is Player viewer)
+                viewer.RefreshFarsideCrates();
         }
 
         /// <summary>
@@ -558,6 +568,9 @@ namespace NexusForever.Game.Entity
                 if (objective is QuestObjective tracked)
                     tracked.ClearChecklist();
             }
+
+            if (FarsideExpeditionSupplies.HandlesQuest(quest.Id) && player is Player viewer)
+                viewer.RefreshFarsideCrates();
 
             if (quest.Info.IsQuestMentioned)
             {
@@ -642,6 +655,10 @@ namespace NexusForever.Game.Entity
 
             if (ShadeEvePlants.HandlesQuest(questId) && (communicator || !ShadeEvePlants.CanVisitContact(player, questId)))
                 throw new QuestException("Report this Shade's Eve quest to its nearby capital contact.");
+
+            if (FarsideExpeditionSupplies.HandlesQuest(questId) &&
+                (communicator || !FarsideExpeditionSupplies.CanVisitContact(player, questId, turnIn: true)))
+                throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} away from the expedition contact!");
 
             if (!MurkmireRecovery.CanVisitContact(player, questId))
                 throw new QuestException($"Player {player.CharacterId} tried to complete Murkmire quest {questId} away from its receiver!");

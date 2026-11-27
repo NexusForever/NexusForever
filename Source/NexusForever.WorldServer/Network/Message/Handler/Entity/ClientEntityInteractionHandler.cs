@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using NexusForever.Game.Abstract;
 using NexusForever.Game.Abstract.Entity;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Entity;
 using NexusForever.Game.Static.Entity;
 using NexusForever.Game.Static.Quest;
@@ -32,6 +33,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
         public void HandleMessage(IWorldSession session, ClientEntityInteract entityInteraction)
         {
             IWorldEntity entity = session.Player.GetVisible<IWorldEntity>(entityInteraction.UnitId);
+            if (entity != null && FarsideExpeditionSupplies.TryInteract(session.Player, entity))
+                return;
+
             if (entity != null)
             {
                 session.Player.QuestManager.ObjectiveUpdate(QuestObjectiveType.ActivateEntity, entity.CreatureId, 1u);

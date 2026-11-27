@@ -307,7 +307,8 @@ namespace NexusForever.Game.Quest
             foreach (IQuestObjective objective in objectives
                 .Where(o => o.ObjectiveInfo.Entry.Type == (uint)type && o.ObjectiveInfo.Entry.Data == data &&
                     !ShadeEvePlants.HandlesObjective(Id, o.ObjectiveInfo.Id) &&
-                    !MurkmireRecovery.HandlesObjective(Id, o.ObjectiveInfo.Id))
+                    !MurkmireRecovery.HandlesObjective(Id, o.ObjectiveInfo.Id) &&
+                    !FarsideExpeditionSupplies.HandlesObjective(Id, o.ObjectiveInfo.Id))
                 .OrderByDescending(o => o.Index))
             {
                 if (objective.IsComplete())

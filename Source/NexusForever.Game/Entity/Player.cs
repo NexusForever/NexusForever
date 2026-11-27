@@ -838,9 +838,24 @@ namespace NexusForever.Game.Entity
             }
         }
 
+        internal void RefreshFarsideCrates()
+        {
+            if (IsLoading || Map is not { Entry.Id: Quest.FarsideExpeditionSupplies.World } map)
+                return;
+
+            var check = new SearchCheckRange<IWorldEntity>(Position, map.VisionRange);
+            foreach (IWorldEntity actor in map.Search(Position, map.VisionRange, check).Where(Quest.FarsideExpeditionSupplies.TracksCrate))
+            {
+                if (CanSeeEntity(actor))
+                    AddVisible(actor);
+                else if (GetVisible<IWorldEntity>(actor.Guid) != null)
+                    RemoveVisible(actor);
+            }
+        }
+
         public override bool CanSeeEntity(IGridEntity entity) =>
             base.CanSeeEntity(entity) && Quest.ShadeEvePlants.CanSee(this, entity) &&
-            Quest.MurkmireRecovery.CanSee(this, entity);
+            Quest.MurkmireRecovery.CanSee(this, entity) && Quest.FarsideExpeditionSupplies.CanSee(this, entity);
 
         public override void AddVisible(IGridEntity entity)
         {

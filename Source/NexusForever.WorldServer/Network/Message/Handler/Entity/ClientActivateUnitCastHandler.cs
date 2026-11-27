@@ -29,6 +29,9 @@ namespace NexusForever.WorldServer.Network.Message.Handler.Entity
             if (entity == null)
                 throw new InvalidPacketValueException();
 
+            if (FarsideExpeditionSupplies.TryInteract(session.Player, entity))
+                return;
+
             if (MurkmireRecovery.TryBeginUse(session.Player, entity))
                 return;
 
