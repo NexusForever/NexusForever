@@ -3,6 +3,8 @@ using NexusForever.Game.Abstract.Entity;
 using NexusForever.Game.Abstract.Map;
 using NexusForever.Game.Abstract.Spell;
 using NexusForever.Game.Prerequisite;
+using NexusForever.Game.Quest;
+using NexusForever.Game.Static.Prerequisite;
 using NexusForever.Game.Static.Quest;
 using NexusForever.Game.Static.Spell;
 using NexusForever.GameTable;
@@ -25,9 +27,11 @@ namespace NexusForever.Game.Spell
         private readonly uint creatureId;
         private readonly uint prerequisite;
         private readonly Action<IPlayer, IWorldEntity> activate;
+        private readonly Func<bool> stillEligible;
 
         private QuestCsiInteraction(IPlayer player, IWorldEntity target, uint prerequisite,
-            ClientSideInteractionEntry descriptor, Spell4EffectsEntry activateEffect, Action<IPlayer, IWorldEntity> activate)
+            ClientSideInteractionEntry descriptor, Spell4EffectsEntry activateEffect, Action<IPlayer, IWorldEntity> activate,
+            Func<bool> stillEligible = null)
         {
             this.player = player;
             map = player.Map;
@@ -36,6 +40,7 @@ namespace NexusForever.Game.Spell
             creatureId = target.CreatureId;
             this.prerequisite = prerequisite;
             this.activate = activate;
+            this.stillEligible = stillEligible;
             ActivateEffect = activateEffect;
             // Give the reply time to arrive after the client's configured puzzle timer.
             TimeoutSeconds = descriptor.Duration is 0u or uint.MaxValue ? 300d : descriptor.Duration / 1000d + 5d;
@@ -46,6 +51,9 @@ namespace NexusForever.Game.Spell
         /// </summary>
         public static bool TryBegin(IPlayer player, IWorldEntity target, Action<IPlayer, IWorldEntity> activate)
         {
+            if (TryBeginTavern(player, target))
+                return true;
+
             if (target.CreatureEntry is not { } creature)
                 return false;
 
@@ -108,6 +116,52 @@ namespace NexusForever.Game.Spell
             return true;
         }
 
+        public static bool TryBeginTavern(IPlayer player, IWorldEntity target)
+        {
+            if (!BorellianTavern.IsMug(target))
+                return false;
+            var (quest, goal, spellId, csi, effectId, bit) = BorellianTavern.PrepareCsi(player, target);
+            if (goal == null || target.CreatureEntry.Spell4IdActivate00 != spellId ||
+                player.GetActiveSpell(cast => cast.IsCasting && cast is Spell { Interaction: not null }) != null)
+                return true;
+
+            var tables = GameTableManager.Instance;
+            if (tables.Spell4.GetEntry(spellId) is not { TierIndex: > 0u and <= byte.MaxValue } row ||
+                tables.Spell4Base.GetEntry(row.Spell4BaseIdBaseSpell) is not { CastMethod: ClientSideInteractionCastMethod } baseSpell ||
+                baseSpell.ClientSideInteractionId != csi || tables.ClientSideInteraction.GetEntry(csi) is not { } descriptor ||
+                tables.Spell4Effects.GetEntry(effectId) is not { } effect || effect.SpellId != spellId)
+                return true;
+
+            if (effect.EffectType != SpellEffectType.QuestAdvanceObjective || effect.DataBits00 != quest.Id ||
+                  effect.DataBits01 != goal.Index || effect.DataBits02 != 1u ||
+                  effect.TargetFlags != (uint)SpellEffectTargetFlags.Caster || effect.DelayTime != 0u || effect.PhaseFlags != 1u ||
+                  tables.Prerequisite.GetEntry(effect.PrerequisiteIdCasterApply) is not { Flags: EvaluationMode.EvaluateAND } rule ||
+                  rule.PrerequisiteTypeId[0] != PrerequisiteType.IsObjectiveActive ||
+                  rule.PrerequisiteComparisonId[0] != PrerequisiteComparison.Equal ||
+                  rule.ObjectId[0] != quest.Id || rule.Value[0] != goal.Index ||
+                  rule.PrerequisiteTypeId.Skip(1).Any(type => type != PrerequisiteType.None))
+                return true;
+
+            var spell = GlobalSpellManager.Instance.GetSpellBaseInfo(baseSpell.Id)?.GetSpellInfo((byte)row.TierIndex);
+            if (spell?.Entry.Id != spellId)
+                return true;
+
+            bool SameRound()
+            {
+                var current = BorellianTavern.PrepareCsi(player, target);
+                return ReferenceEquals(current.Quest, quest) && ReferenceEquals(current.Goal, goal) && current.Bit == bit;
+            }
+
+            player.CastSpell(new SpellParameters
+            {
+                SpellInfo = spell,
+                UserInitiatedSpellCast = true,
+                Interaction = new QuestCsiInteraction(player, target, 0u, descriptor, effect,
+                    BorellianTavern.CompleteCsi, SameRound)
+            });
+            return true;
+        }
+
         public static void Resolve(IPlayer player, uint castingId, byte response)
         {
             if (player?.GetActiveSpell(cast => cast.CastingId == castingId && cast.IsCasting) is Spell spell &&
@@ -118,18 +172,19 @@ namespace NexusForever.Game.Spell
         internal bool IsCurrent(IPlayer owner) =>
             ReferenceEquals(owner, player) && ReferenceEquals(player.Map, map) &&
             Target.Guid == targetGuid && Target.CreatureId == creatureId &&
-            CanInteract(player, Target) && Meets(player, prerequisite);
+            CanInteract(player, Target) && Meets(player, prerequisite) && (stillEligible?.Invoke() ?? true);
 
         internal void Complete()
         {
             activate(player, Target);
-            player.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, creatureId, 1u);
+            if (!BorellianTavern.IsMug(Target))
+                player.QuestManager.ObjectiveUpdate(QuestObjectiveType.SucceedCSI, creatureId, 1u);
         }
 
         private static bool Meets(IPlayer player, uint id) =>
             id == 0u || PrerequisiteManager.Instance.Meets(player, id);
 
-        private static bool CanInteract(IPlayer player, IWorldEntity target)
+        internal static bool CanInteract(IPlayer player, IWorldEntity target)
         {
             if (!player.IsAlive || player.IsLoading || player.Map == null ||
                 !ReferenceEquals(player.Map, target.Map) || target.Guid == 0u ||

@@ -115,6 +115,8 @@ namespace NexusForever.Game.Entity
         public void Update(double lastTick)
         {
             RefreshShadePlantActors();
+            RefreshBorellianTavernActors();
+            BorellianTavern.Update(player, lastTick);
             ShadeEvePlants.Gather(player, activeQuests);
             var botchedQuests = new List<IQuest>();
             foreach (IQuest quest in activeQuests.Values)
@@ -293,12 +295,32 @@ namespace NexusForever.Game.Entity
                 (item != null || !ShadeEvePlants.CanVisitContact(player, (ushort)info.Entry.Id)))
                 throw new QuestException("Accept this Shade's Eve quest from its nearby capital contact.");
 
+            if (BorellianTavern.HandlesQuest(info.Entry.Id) && (item != null || !BorellianTavern.AllowsContact(player, info.Entry.Id)))
+                throw new QuestException("Accept this Borellian tavern quest from its nearby patron.");
+
             // server doesn't send an error message for prerequisites since the client does the exact same checks
             // it's assumed that a player could never get here without cheating in some way
             if (!MeetsPrerequisites(info))
                 throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} without meeting the prerequisites!");
 
             QuestAdd(info);
+        }
+
+        private (object Map, QuestState?, QuestState?)? borellianVisibility;
+
+        private void RefreshBorellianTavernActors()
+        {
+            if (player is not Player viewer || player.IsLoading || player.Map is not { Entry.Id: BorellianTavern.World } map)
+            {
+                borellianVisibility = null;
+                return;
+            }
+            var current = (map, GetQuestState(6251), GetQuestState(6535));
+            if (borellianVisibility == current)
+                return;
+
+            borellianVisibility = current;
+            viewer.RefreshBorellianTavernActors();
         }
 
         private void RefreshShadePlantActors()
@@ -620,6 +642,9 @@ namespace NexusForever.Game.Entity
 
             if (ShadeEvePlants.HandlesQuest(questId) && (communicator || !ShadeEvePlants.CanVisitContact(player, questId)))
                 throw new QuestException("Report this Shade's Eve quest to its nearby capital contact.");
+
+            if (BorellianTavern.HandlesQuest(questId) && (communicator || !BorellianTavern.AllowsContact(player, questId)))
+                throw new QuestException("Complete this Borellian tavern quest at its nearby patron.");
 
             if (communicator)
             {
