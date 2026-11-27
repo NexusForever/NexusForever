@@ -24,6 +24,7 @@ using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
+using NexusForever.Game.Map.Search;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Chat;
@@ -813,8 +814,39 @@ namespace NexusForever.Game.Entity
             base.OnRemoveFromMap();
         }
 
+        internal void RefreshShadePlantActors()
+        {
+            var check = new SearchCheckRange<IWorldEntity>(Position, Map.VisionRange);
+            foreach (IWorldEntity actor in Map.Search(Position, Map.VisionRange, check).Where(Quest.ShadeEvePlants.Tracks))
+            {
+                if (CanSeeEntity(actor))
+                    AddVisible(actor);
+                else if (GetVisible<IWorldEntity>(actor.Guid) != null)
+                    RemoveVisible(actor);
+            }
+        }
+
+        internal void RefreshMurkmireRecoveryActors()
+        {
+            var check = new SearchCheckRange<IWorldEntity>(Position, Map.VisionRange);
+            foreach (IWorldEntity actor in Map.Search(Position, Map.VisionRange, check).Where(Quest.MurkmireRecovery.Tracks))
+            {
+                if (CanSeeEntity(actor))
+                    AddVisible(actor);
+                else if (GetVisible<IWorldEntity>(actor.Guid) != null)
+                    RemoveVisible(actor);
+            }
+        }
+
+        public override bool CanSeeEntity(IGridEntity entity) =>
+            base.CanSeeEntity(entity) && Quest.ShadeEvePlants.CanSee(this, entity) &&
+            Quest.MurkmireRecovery.CanSee(this, entity);
+
         public override void AddVisible(IGridEntity entity)
         {
+            if (!CanSeeEntity(entity) || GetVisible<IGridEntity>(entity.Guid) != null)
+                return;
+
             base.AddVisible(entity);
 
             if (entity is IWorldEntity worldEntity)
