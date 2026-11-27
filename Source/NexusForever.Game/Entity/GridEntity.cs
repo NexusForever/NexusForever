@@ -205,10 +205,8 @@ namespace NexusForever.Game.Entity
         /// </summary>
         public virtual void AddVisible(IGridEntity entity)
         {
-            if (!CanSeeEntity(entity))
+            if (!CanSeeEntity(entity) || !visibleEntities.TryAdd(entity.Guid, entity))
                 return;
-
-            visibleEntities.Add(entity.Guid, entity);
 
             scriptCollection?.Invoke<IGridEntityScript>(s => s.OnAddVisibleEntity(entity));
 
