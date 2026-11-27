@@ -61,20 +61,22 @@ namespace NexusForever.Game.Map
 
         private void ProcessPending()
         {
-            if (pendingAdds.Count == 0)
+            if (pendingAdds.IsEmpty)
                 return;
 
             var sw = Stopwatch.StartNew();
+            int processed = 0;
 
             while (pendingAdds.TryDequeue(out PendingAdd pending))
             {
+                processed++;
                 IMap map = CreateMap(pending.MapPosition.Info.Entry);
 
                 GenericError? result = map.CanEnter(pending.Player, pending.MapPosition);
                 if (result.HasValue)
                 {
                     pending.Player.OnTeleportToFailed(result.Value);
-                    return;
+                    continue;
                 }
 
                 map.EnqueueAdd(pending.Player, pending.MapPosition);
@@ -82,7 +84,7 @@ namespace NexusForever.Game.Map
 
             sw.Stop();
             if (sw.ElapsedMilliseconds > 10)
-                log.Warn($"{pendingAdds.Count} pending add(s) took {sw.ElapsedMilliseconds}ms to process!");
+                log.Warn($"{processed} pending add(s) took {sw.ElapsedMilliseconds}ms to process!");
         }
 
         private void UpdateMaps(double lastTick)
