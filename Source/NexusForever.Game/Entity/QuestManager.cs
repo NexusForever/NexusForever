@@ -119,6 +119,7 @@ namespace NexusForever.Game.Entity
 
                 log.Trace($"Failed to complete quest {quest.Id} before the timer expired!");
             }
+            WinterfestConversions.UpdateShortcut(player);
         }
 
         public void SendInitialPackets()
@@ -147,7 +148,7 @@ namespace NexusForever.Game.Entity
                         QuestTimeElapsed      = q.Timer ?? 0u,
                         Objectives = q.Select(o => new ServerQuestInit.QuestActive.Objective
                         {
-                            Progress = o.Progress,
+                            Progress = WinterfestConversions.ClientProgress(q.Id, o),
                             TimeElapsed    = 0u
                         }).ToList()
                     }).ToList()
@@ -259,6 +260,10 @@ namespace NexusForever.Game.Entity
                 if (DateTime.UtcNow < resetTime)
                     throw new QuestException($"Player {player.CharacterId} tried to start quest {info.Entry.Id} which hasn't reset yet!");
             }
+
+            if (WinterfestConversions.Owns(info.Entry.Id) &&
+                (!WinterfestConversions.IsOpen(DateTime.UtcNow) || item != null || !WinterfestConversions.AtContact(player, info.Entry.Id)))
+                throw new QuestException($"Player {player.CharacterId} tried to start an unavailable Winterfest quest.");
 
             if (item != null)
             {
@@ -538,6 +543,9 @@ namespace NexusForever.Game.Entity
                 if (!GlobalQuestManager.Instance.GetQuestReceivers(questId).Any(c => player.GetVisibleCreature<WorldEntity>(c).Any()))
                     throw new QuestException($"Player {player.CharacterId} tried to complete quest {questId} without any quest receiver!");
             }
+
+            if (WinterfestConversions.Owns(questId) && (communicator || !WinterfestConversions.AtContact(player, questId)))
+                throw new QuestException($"Player {player.CharacterId} tried to complete a Winterfest quest away from its contact.");
 
             // reclaim any quest specific items
             for (int i = 0; i < quest.Info.Entry.PushedItemIds.Length; i++)

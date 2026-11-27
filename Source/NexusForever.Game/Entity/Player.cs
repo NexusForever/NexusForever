@@ -24,6 +24,7 @@ using NexusForever.Game.Configuration.Model;
 using NexusForever.Game.Guild;
 using NexusForever.Game.Housing;
 using NexusForever.Game.Map;
+using NexusForever.Game.Quest;
 using NexusForever.Game.Reputation;
 using NexusForever.Game.Static;
 using NexusForever.Game.Static.Chat;
@@ -669,6 +670,9 @@ namespace NexusForever.Game.Entity
                 WorldId     = Map.Entry.Id
             }).FireAndForgetAsync();
         }
+
+        public override bool CanSeeEntity(IGridEntity entity) =>
+            base.CanSeeEntity(entity) && WinterfestConversions.CanSee(this, entity);
 
         public override void OnRelocate(Vector3 vector)
         {

@@ -152,6 +152,9 @@ namespace NexusForever.Game.Quest
 
         private uint GetMaxValue()
         {
+            if (WinterfestConversions.OwnsObjective(QuestInfo.Entry.Id, ObjectiveInfo.Id))
+                return WinterfestConversions.ChecklistMask;
+
             return IsDynamic() ? 1000u : ObjectiveInfo.Entry.Count;
         }
 
