@@ -355,6 +355,8 @@ namespace NexusForever.Game.Map.Instance
             if (entry == null)
                 throw new InvalidPacketValueException();
 
+            ValidateDecorUpdate(update);
+
             if (entry.CostCurrencyTypeId != 0u && entry.Cost != 0u)
             {
                 /*if (!player.CurrencyManager.CanAfford((byte)entry.CostCurrencyTypeId, entry.Cost))
@@ -371,22 +373,10 @@ namespace NexusForever.Game.Map.Instance
             decor.PlotIndex = update.PlotIndex;
 
             if (update.ColourShiftId != decor.ColourShiftId)
-            {
-                if (update.ColourShiftId != 0u)
-                {
-                    ColorShiftEntry colourEntry = gameTableManager.ColorShift.GetEntry(update.ColourShiftId);
-                    if (colourEntry == null)
-                        throw new InvalidPacketValueException();
-                }
-
                 decor.ColourShiftId = update.ColourShiftId;
-            }
 
             if (update.DecorType != DecorType.Crate)
             {
-                if (update.Scale < 0f)
-                    throw new InvalidPacketValueException();
-
                 // new decor is being placed directly in the world
                 decor.Position = update.Position;
                 decor.Rotation = update.Rotation;
@@ -420,43 +410,20 @@ namespace NexusForever.Game.Map.Instance
             HousingResult result = GetResult();
             if (result == HousingResult.Success)
             {
-                if (update.PlotIndex != decor.PlotIndex)
-                {
-                    decor.PlotIndex = update.PlotIndex;
-                }
+                ValidateDecorUpdate(update, decor.ColourShiftId);
 
                 if (update.ColourShiftId != decor.ColourShiftId)
-                {
-                    if (update.ColourShiftId != 0u)
-                    {
-                        ColorShiftEntry colourEntry = gameTableManager.ColorShift.GetEntry(update.ColourShiftId);
-                        if (colourEntry == null)
-                            throw new InvalidPacketValueException();
-                    }
-
                     decor.ColourShiftId = update.ColourShiftId;
-                }
 
-                if (decor.Type == DecorType.Crate)
-                {
-                    if (decor.Entry.Creature2IdActiveProp != 0u)
-                    {
-                        // TODO: used for decor that have an associated entity
-                    }
-
-                    // crate->world
-                    decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale, update.PlotIndex);
-                }
+                if (update.DecorType == DecorType.Crate)
+                    decor.Crate();
                 else
                 {
-                    if (update.DecorType == DecorType.Crate)
-                        decor.Crate();
-                    else
-                    {
-                        // world->world
-                        decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale, update.PlotIndex);
+                    bool wasInCrate = decor.Type == DecorType.Crate;
+                    // TODO: spawn associated entities for active props moved out of the crate.
+                    decor.Move(update.DecorType, update.Position, update.Rotation, update.Scale, update.PlotIndex);
+                    if (!wasInCrate)
                         decor.DecorParentId = update.ParentDecorId;
-                    }
                 }
             }
             else
@@ -477,6 +444,24 @@ namespace NexusForever.Game.Map.Instance
                     decor.Build()
                 }
             });
+        }
+
+        private void ValidateDecorUpdate(DecorInfo update, ushort currentColourShift = 0)
+        {
+            if (update.ColourShiftId != currentColourShift && update.ColourShiftId != 0u
+                && gameTableManager.ColorShift.GetEntry(update.ColourShiftId) == null)
+                throw new InvalidPacketValueException();
+
+            if (update.DecorType == DecorType.Crate)
+                return;
+
+            Vector3 position = update.Position;
+            Quaternion rotation = update.Rotation;
+            if (!float.IsFinite(update.Scale) || update.Scale < 0f
+                || !float.IsFinite(position.X) || !float.IsFinite(position.Y) || !float.IsFinite(position.Z)
+                || !float.IsFinite(rotation.X) || !float.IsFinite(rotation.Y)
+                || !float.IsFinite(rotation.Z) || !float.IsFinite(rotation.W))
+                throw new InvalidPacketValueException();
         }
 
         private void DecorDelete(IResidence residence, DecorInfo update)
