@@ -15,7 +15,7 @@ using NexusForever.GameTable.Model;
 
 namespace NexusForever.Game.Quest
 {
-    public sealed class MurkmireRecovery
+    public sealed class MurkmireRecovery : QuestActorActivation
     {
         internal const ushort World = 51;
         private const uint Cocoon = 42664;
@@ -56,9 +56,10 @@ namespace NexusForever.Game.Quest
             ActivationEffect = effect;
         }
 
-        internal Spell4EffectsEntry ActivationEffect { get; }
+        internal override IWorldEntity Target => target;
+        internal override Spell4EffectsEntry ActivationEffect { get; }
 
-        internal double CastSeconds => UseTime / 1000d;
+        internal override double CastSeconds => UseTime / 1000d;
 
         internal static bool CanVisitContact(IPlayer player, uint quest)
         {
@@ -125,7 +126,7 @@ namespace NexusForever.Game.Quest
                 return false;
 
             if (!InRange(player, target) ||
-                player is UnitEntity unit && unit.GetActiveSpell(spell => spell.IsCasting && spell is Spell.Spell { MurkmireUse: not null }) != null)
+                player is UnitEntity unit && unit.GetActiveSpell(spell => spell.IsCasting && spell is Spell.Spell { QuestActorUse: not null }) != null)
                 return true;
 
             var (quest, objective, bit) = FindObjective(player, target);
@@ -146,12 +147,12 @@ namespace NexusForever.Game.Quest
                 SpellInfo = spellInfo,
                 UserInitiatedSpellCast = true,
                 PrimaryTargetId = target.Guid,
-                MurkmireUse = new MurkmireRecovery(player, target, quest, objective, bit, activation)
+                QuestActorUse = new MurkmireRecovery(player, target, quest, objective, bit, activation)
             });
             return true;
         }
 
-        internal bool CanFinish()
+        internal override bool CanFinish()
         {
             if (target.Guid != targetGuid || !InRange(player, target))
                 return false;
@@ -160,7 +161,7 @@ namespace NexusForever.Game.Quest
             return ReferenceEquals(currentQuest, quest) && ReferenceEquals(currentObjective, objective) && currentBit == bit;
         }
 
-        internal void Complete()
+        internal override void Complete()
         {
             if (objective.ObjectiveInfo.Type == QuestObjectiveType.ActivateTargetGroupChecklist)
                 quest.ObjectiveUpdate(objective.ObjectiveInfo.Id, bit);
